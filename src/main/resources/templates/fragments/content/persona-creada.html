@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div th:fragment="content">
+
+        <div class="confirmation-card"
+            style="max-width: 500px; margin: 4rem auto; text-align: center; background: white; padding: 3rem; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid #E2E8F0;">
+            <div class="success-icon"
+                style="background:#ECFDF5; width:80px; height:80px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem auto;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+                    stroke="#10B981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            </div>
+
+            <h1 th:text="#{persona.success.title}"
+                style="font-size: 1.5rem; font-weight: 800; color: #1E293B; margin-bottom: 0.5rem;">¡Creado!</h1>
+            <p th:text="#{persona.success.message}" style="color: #64748B; margin-bottom: 2rem;">Datos guardados.</p>
+
+            <div style="display:grid; gap:10px;">
+                <a th:href="@{/web/personas}" class="btn btn-primary" style="justify-content:center; width:100%;">
+                    <i data-lucide="list"></i>
+                    <span th:text="#{generic.link.view-list}">Ver lista</span>
+                </a>
+                <a th:href="@{/web/personas/nuevo}" class="btn btn-secondary"
+                    style="justify-content:center; width:100%;">
+                    <i data-lucide="plus"></i>
+                    <span th:text="#{generic.link.create}">Crear otro</span>
+                </a>
+            </div>
+        </div>
+    
+
+    </div>
+</body>
+</html>
+
+
+
+

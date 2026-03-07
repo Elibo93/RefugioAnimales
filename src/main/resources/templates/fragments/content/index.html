@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <div th:fragment="content">
+
+        <section class="welcome-section">
+            <h1 class="welcome-title"><span th:text="#{home.hello}">Hola,</span> <span class="text-primary">Admin</span>
+                👋
+            </h1>
+            <p class="welcome-subtitle" th:text="#{home.welcome.text}">Bienvenido al sistema de gestión académica.</p>
+        </section>
+
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-icon icon-purple"><i data-lucide="users"></i></div>
+                <h3 class="card-title" th:text="#{stats.total.students}">personas</h3>
+                <span class="stat-value" th:text="${personas != null ? #lists.size(personas) : 0}">0</span>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-green"><i data-lucide="dog"></i></div>
+                <h3 class="card-title" th:text="#{stats.active.workshops}">animales</h3>
+                <span class="stat-value" th:text="${animales != null ? #lists.size(animales) : 0}">0</span>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-orange"><i data-lucide="heart-pulse"></i></div>
+                <h3 class="card-title" th:text="#{stats.new.registrations}">adopciones Mes</h3>
+                <span class="stat-value text-primary">+5</span>
+            </div>
+        </div>
+
+        <section class="page-header">
+            <h2 class="page-title" style="margin-bottom:1.5rem;" th:text="#{home.quick.actions}">Accesos Directos</h2>
+        </section>
+
+
+        <div class="dashboard-grid">
+
+
+            <a th:href="@{/web/personas}" class="card">
+                <div class="card-icon icon-blue">
+                    <i data-lucide="users"></i>
+                </div>
+                <h3 class="card-title" th:text="#{menu.students.card.title}">personas</h3>
+                <p class="card-desc" th:text="#{menu.students.card.desc}">Gestión de adoptantes y contactos.</p>
+                <div class="card-footer">
+                    <span th:text="#{generic.btn.access}">Acceder</span>
+                    <i data-lucide="arrow-right" style="width:16px;"></i>
+                </div>
+            </a>
+
+
+            <a th:href="@{/web/voluntarios}" class="card">
+                <div class="card-icon icon-green">
+                    <i data-lucide="heart"></i>
+                </div>
+                <h3 class="card-title" th:text="#{menu.professors.card.title}">voluntarios</h3>
+                <p class="card-desc" th:text="#{menu.professors.card.desc}">Equipo de voluntarios y cuidadores.</p>
+                <div class="card-footer">
+                    <span th:text="#{generic.btn.access}">Acceder</span>
+                    <i data-lucide="arrow-right" style="width:16px;"></i>
+                </div>
+            </a>
+
+
+            <a th:href="@{/web/animales}" class="card">
+                <div class="card-icon icon-orange">
+                    <i data-lucide="dog"></i>
+                </div>
+                <h3 class="card-title" th:text="#{menu.workshops.card.title}">animales</h3>
+                <p class="card-desc" th:text="#{menu.workshops.card.desc}">Listado de animales y su estado.</p>
+                <div class="card-footer">
+                    <span th:text="#{generic.btn.access}">Acceder</span>
+                    <i data-lucide="arrow-right" style="width:16px;"></i>
+                </div>
+            </a>
+
+
+            <a th:href="@{/web/adopciones}" class="card">
+                <div class="card-icon icon-purple">
+                    <i data-lucide="clipboard-check"></i>
+                </div>
+                <h3 class="card-title" th:text="#{menu.enrollments.card.title}">adopciones</h3>
+                <p class="card-desc" th:text="#{menu.enrollments.card.desc}">Procesos de adopción en curso.</p>
+                <div class="card-footer">
+                    <span th:text="#{generic.btn.access}">Acceder</span>
+                    <i data-lucide="arrow-right" style="width:16px;"></i>
+                </div>
+            </a>
+
+        </div>
+
+
+
+    </div>
+</body>
+
+</html>
+
+

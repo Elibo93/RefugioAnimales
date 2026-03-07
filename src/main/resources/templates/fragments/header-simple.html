@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+
+
+<header th:fragment="headerSimple(backUrl)" class="app-header">
+    <div class="header-container">
+        <div class="header-left">
+            <a th:href="@{${backUrl}}" class="back-link" title="Volver">
+                <i data-lucide="arrow-left" class="back-arrow" style="width:20px;"></i>
+            </a>
+            <img th:src="@{/images/logo-Refugio.png}" class="app-logo">
+            <div class="app-brand">
+                <span class="app-name" th:text="#{app.name}">Refugio</span>
+                <span class="app-subtitle" th:text="#{app.subtitle}">Gestión</span>
+            </div>
+        </div>
+    </div>
+</header>
+
+</html>
+
+
+
+

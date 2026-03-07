@@ -1,0 +1,39 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_refugio
+    restart: always
+    # Fuerza al servidor a usar UTF-8
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_DATABASE: refugio_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8090:8080"
+
+  refugio-animales:
+    image: elisabethbargallo/refugio-animales:v1
+    container_name: refugio-animales-container
+    restart: always
+    ports:
+      - "8443:8443"
+    depends_on:
+      - db
+    environment:
+      # 1. Base de datos con comillas y parámetros extra
+      SPRING_DATASOURCE_URL: "jdbc:mysql://db:3306/artia_db?allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci"
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
+      # 2. Asegurar que los scripts SQL de inicio se lean bien
+      SPRING_SQL_INIT_ENCODING: UTF-8
+
+      # 3. Forzar respuesta HTTP en UTF-8
+      SERVER_SERVLET_ENCODING_CHARSET: UTF-8
+      SERVER_SERVLET_ENCODING_FORCE: true

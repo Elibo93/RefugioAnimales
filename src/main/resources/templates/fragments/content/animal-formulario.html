@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div th:fragment="content">
+
+        <div class="page-header" style="text-align:center;">
+            <h1 class="page-title" th:text="#{workshop.form.title}">Crear animal</h1>
+            <p style="color:var(--text-muted); margin-top:0.5rem;">Configure los detalles del nuevo animal</p>
+        </div>
+
+        <div class="card" style="max-width:800px; margin:0 auto;">
+            <form th:action="@{/web/animales/nuevo}" method="post" th:object="${animal}">
+                <div class="form-grid">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label th:text="#{workshop.field.name}">Nombre del animal</label>
+                        <input type="text" name="nombre" th:field="*{nombre}" required
+                            placeholder="Ej: Pintura al óleo">
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label th:text="#{workshop.field.professor}">voluntario Responsable</label>
+                        <select name="idvoluntario" required>
+                            <option value="" disabled selected th:text="#{form.select.professor}">Seleccione un
+                                voluntario...
+                            </option>
+                            <option th:each="p : ${voluntarios}" th:value="${p.id.value}"
+                                th:text="${p.nombre} + ' ' + ${p.apellido} + ' (' + ${p.especialidad} + ')'">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label th:text="#{workshop.field.description}">Descripción</label>
+                        <textarea name="descripcion" th:field="*{descripcion}" required
+                            placeholder="Breve descripción del contenido"
+                            style="width:100%; min-height:80px; padding:0.75rem; border:1px solid var(--border); border-radius:8px; font-family:inherit;"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label th:text="#{workshop.field.start_time}">Hora Inicio</label>
+                        <input type="time" name="horaInicio" th:field="*{horaInicio}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label th:text="#{workshop.field.end_time}">Hora Fin</label>
+                        <input type="time" name="horaFin" th:field="*{horaFin}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label th:text="#{workshop.field.capacity}">Aforo Máximo</label>
+                        <input type="number" name="aforoMaximo" th:field="*{aforoMaximo}" required min="1" max="100">
+                    </div>
+                </div>
+
+                <div class="modal-actions" style="margin-top:2rem;">
+                    <a th:href="@{/web/animales}" class="btn btn-secondary" style="justify-content:center;"
+                        th:text="#{generic.btn.cancel}">Cancelar</a>
+                    <button type="submit" class="btn btn-primary" style="justify-content:center;"
+                        th:text="#{generic.btn.save}">Guardar animal</button>
+                </div>
+            </form>
+        </div>
+    
+
+    </div>
+</body>
+</html>
+
+
+
+

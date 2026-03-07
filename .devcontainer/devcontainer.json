@@ -1,0 +1,58 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/debian
+{
+	"name": "alpine",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "julparper/alpine_node_mvn_git_jdk:v2",
+	 "forwardPorts": [8080],
+	 //"features": {
+        //"ghcr.io/devcontainers/features/java:1": {},
+        //"ghcr.io/devcontainers-extra/features/maven-sdkman:2": {}
+    //},
+	/*"features": { //repositorio de features: https://containers.dev/features
+		"ghcr.io/davzucky/devcontainers-features-wolfi/bash:1": {}
+		//,"ghcr.io/devcontainers/features/java:1": {} //java
+		//,"ghcr.io/roul/devcontainer-features/mise-java:1": {} //maven
+		//,"ghcr.io/devcontainers/features/git:1": {} //git
+	},*/
+
+	//Montamos las claves ssh para que estén disponibles en el contenedor
+    "mounts": [
+    // En Windows el env HOME puede no estar definido; usar USERPROFILE para obtener C:\Users\<user>
+    "source=${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
+    ],
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+		"extensions": [
+			"vmware.vscode-spring-boot",
+			"Oracle.oracle-java",
+			"vscjava.vscode-java-pack",
+			"shd101wyy.markdown-preview-enhanced",
+			"yzhang.markdown-all-in-one",
+			"bierner.markdown-mermaid",
+			"jebbs.plantuml",
+			"Mebrahtom.plantumlpreviewer",
+			"VMware.vscode-spring-cli",
+			"vscjava.vscode-spring-boot-dashboard",
+			"mhutchie.git-graph",
+			"Postman.postman-for-vscode",
+			"vscode-icons-team.vscode-icons",
+			"LalithK90.thymeleaf-html5-snippets",
+			"vscjava.vscode-lombok",
+			"juhahinkula.thymeleaf",
+			"vmware.vscode-spring-boot"
+		]
+		}
+	}
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}

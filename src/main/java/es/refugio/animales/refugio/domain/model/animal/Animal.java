@@ -1,0 +1,22 @@
+package es.refugio.animales.refugio.domain.model.animal;
+
+import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+@Builder
+public class Animal {
+
+    private AnimalId id;
+    private String nombre;
+    private String especie;
+    private String raza;
+    private String sexo;
+    private String chipId;
+    private String estado;
+    private LocalDateTime createdAt;
+
+}
