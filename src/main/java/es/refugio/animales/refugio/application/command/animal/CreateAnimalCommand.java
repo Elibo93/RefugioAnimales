@@ -6,5 +6,7 @@ public record CreateAnimalCommand(
         String raza,
         String sexo,
         String chipId,
-        String estado) {
+        String estado,
+        String notas
+        ) {
 }

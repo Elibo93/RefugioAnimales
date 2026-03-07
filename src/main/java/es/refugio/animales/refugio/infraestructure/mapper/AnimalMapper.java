@@ -20,7 +20,8 @@ public class AnimalMapper {
                 request.raza(),
                 request.sexo(),
                 request.chipId(),
-                request.estado());
+                request.estado(),
+                request.notas());
     }
 
     public static EditAnimalCommand toEditCommand(AnimalId id, AnimalRequest request) {
@@ -31,7 +32,8 @@ public class AnimalMapper {
                 request.raza(),
                 request.sexo(),
                 request.chipId(),
-                request.estado());
+                request.estado(),
+                request.notas());
     }
 
     public static AnimalResponse toResponse(Animal animal) {

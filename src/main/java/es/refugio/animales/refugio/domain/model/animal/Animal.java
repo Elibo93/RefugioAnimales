@@ -17,6 +17,7 @@ public class Animal {
     private String sexo;
     private String chipId;
     private String estado;
+    private String notas;
     private LocalDateTime createdAt;
 
 }

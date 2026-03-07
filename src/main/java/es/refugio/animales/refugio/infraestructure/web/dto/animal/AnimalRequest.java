@@ -8,7 +8,8 @@ public record AnimalRequest(
         String raza,
         String sexo,
         String chipId,
-        String estado) {
+        String estado,
+        String notas) {
 
     public AnimalRequest(Animal t) {
         this(
@@ -17,6 +18,7 @@ public record AnimalRequest(
                 t.getRaza(),
                 t.getSexo(),
                 t.getChipId(),
-                t.getEstado());
+                t.getEstado(),
+                t.getNotas());
     }
 }

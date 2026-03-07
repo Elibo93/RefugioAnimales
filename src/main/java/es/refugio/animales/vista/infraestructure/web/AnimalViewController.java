@@ -70,11 +70,13 @@ public class AnimalViewController {
             @RequestParam String raza,
             @RequestParam String sexo,
             @RequestParam String chipId,
+            @RequestParam(required = false) String notas,
             @RequestParam String estado,
+            
             RedirectAttributes redirectAttributes) {
 
         createAnimalService.createAnimal(
-                new CreateAnimalCommand(nombre, especie, raza, sexo, chipId, estado));
+                new CreateAnimalCommand(nombre, especie, raza, sexo, chipId, estado, notas));
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",

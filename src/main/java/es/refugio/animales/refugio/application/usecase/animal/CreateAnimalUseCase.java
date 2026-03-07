@@ -19,6 +19,7 @@ public class CreateAnimalUseCase {
                 .sexo(comando.sexo())
                 .chipId(comando.chipId())
                 .estado(comando.estado())
+                .notas(comando.notas())
                 .createdAt(java.time.LocalDateTime.now())
                 .build();
 

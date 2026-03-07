@@ -20,6 +20,7 @@ public class EditAnimalUseCase {
                     t.setSexo(command.sexo());
                     t.setChipId(command.chipId());
                     t.setEstado(command.estado());
+                    t.setNotas(command.notas());
                     return animalRepository.save(t);
                 })
                 .orElseThrow(() -> new AnimalNotFoundException(command.id().getValue()));

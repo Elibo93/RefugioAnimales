@@ -10,7 +10,7 @@ public enum ModelAttribute {
     Animal_LIST("animales"),
     Adopcion_LIST("adopciones"),
 
-    AULA_CREATIVA("Aula Creativa"),
+    REFUGIO_ANIMALES("Refugio de Animales"),
 
     SINGLE_Persona("Persona"),
     SINGLE_Voluntario("Voluntario"),
