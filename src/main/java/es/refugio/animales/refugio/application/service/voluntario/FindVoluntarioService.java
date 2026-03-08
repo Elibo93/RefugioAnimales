@@ -17,6 +17,10 @@ public class FindVoluntarioService {
     public List<Voluntario> findAll() {
         return findVoluntarioUseCase.findAll();
     }
+
+    public Voluntario findById(es.refugio.animales.refugio.domain.model.voluntario.VoluntarioId id) {
+        return findVoluntarioUseCase.findById(id);
+    }
 }
 
 

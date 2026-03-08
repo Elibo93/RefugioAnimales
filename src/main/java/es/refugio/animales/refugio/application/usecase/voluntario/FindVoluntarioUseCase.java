@@ -21,6 +21,11 @@ public class FindVoluntarioUseCase {
 
         return voluntarios;
     }
+
+    public Voluntario findById(es.refugio.animales.refugio.domain.model.voluntario.VoluntarioId id) {
+        return voluntarioRepository.getById(id)
+                .orElseThrow(() -> new VoluntarioNotFoundException());
+    }
 }
 
 

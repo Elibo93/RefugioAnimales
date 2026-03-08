@@ -2,6 +2,9 @@ package es.refugio.animales.refugio.infraestructure.db.jpa.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -33,7 +36,8 @@ public class AdopcionEntity {
      * Lado propietario: columna Persona_id en adopciones
      */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_Persona", nullable = false)
+    @JoinColumn(name = "id_persona", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private PersonaEntity persona;
 
     /**
@@ -41,7 +45,8 @@ public class AdopcionEntity {
      * Lado propietario: columna Animal_id en adopciones
      */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_Animal", nullable = false)
+    @JoinColumn(name = "id_animal", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private AnimalEntity animal;
 
     @Column(name = "created_at", nullable = false)

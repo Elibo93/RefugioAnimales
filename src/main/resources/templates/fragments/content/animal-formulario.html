@@ -7,14 +7,14 @@
 <div th:fragment="content">
 
     <div class="page-header" style="text-align:center;">
-        <h1 class="page-title">Crear animal</h1>
-        <p style="color:var(--text-muted); margin-top:0.5rem;">
-            Configure los detalles del nuevo animal
+        <h1 class="page-title" th:text="${animal.id == null ? 'Crear animal' : 'Editar animal'}">Crear animal</h1>
+        <p style="color:var(--text-muted); margin-top:0.5rem;" th:text="${animal.id == null ? 'Configure los detalles del nuevo animal' : 'Modifique los datos del animal'}">
+            Configure los detalles del animal
         </p>
     </div>
 
     <div class="card" style="max-width:800px; margin:0 auto;">
-        <form th:action="@{/web/animales/nuevo}" method="post" th:object="${animal}">
+        <form th:action="@{${animal.id == null ? '/web/animales/nuevo' : '/web/animales/' + animal.id.value + '/editar'}}" method="post" th:object="${animal}">
 
             <div class="form-grid">
 

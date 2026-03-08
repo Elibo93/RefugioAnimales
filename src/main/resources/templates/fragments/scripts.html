@@ -6,6 +6,15 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script th:src="@{/js/scripts.js}"></script>
+    <script>
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            var csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+            var csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            if (evt.detail.verb !== "get") {
+                evt.detail.headers[csrfHeader] = csrfToken;
+            }
+        });
+    </script>
 </div>
 
 </html>

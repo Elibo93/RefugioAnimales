@@ -1,0 +1,22 @@
+<div th:fragment="content" style="max-width: 400px; margin: 40px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <h2 style="text-align: center; margin-bottom: 20px;">Registro de Usuario</h2>
+    
+    <form th:action="@{/registro}" th:object="${registroDto}" method="post" style="display: flex; flex-direction: column; gap: 15px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+            <label style="font-weight: 600;">Email:</label>
+            <input type="email" th:field="*{email}" required style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;" />
+            <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" style="color: #dc2626; font-size: 0.85rem;"></span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+            <label style="font-weight: 600;">Contraseña:</label>
+            <input type="password" th:field="*{password}" required style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;" />
+            <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" style="color: #dc2626; font-size: 0.85rem;"></span>
+        </div>
+        
+        <button type="submit" style="background-color: #10b981; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; font-weight: 600; text-transform: uppercase;">Registrarme</button>
+    </form>
+    
+    <div style="text-align: center; margin-top: 15px;">
+        <a th:href="@{/login}" style="color: #4f46e5; text-decoration: none;">Volver al login</a>
+    </div>
+</div>

@@ -7,6 +7,7 @@ public interface WebRoutes {
     public static final String HOME = "/web/home";
     public static final String personas_BASE = "/web/personas";
     public static final String personas_NUEVO = "/web/personas/nuevo";
+    public static final String personas_EDITAR = "/web/personas/{id}/editar";
     public static final String personas_PDF = "/web/personas/pdf";
     public static final String personas_ELIMINAR = "/web/personas/{id}/borrar";
     public static final String voluntarios_BASE = "/web/voluntarios";
@@ -16,10 +17,12 @@ public interface WebRoutes {
     public static final String voluntarios_ELIMINAR = "/web/voluntarios/{id}/borrar";
     public static final String animales_BASE = "/web/animales";
     public static final String animales_NUEVO = "/web/animales/nuevo";
+    public static final String animales_EDITAR = "/web/animales/{id}/editar";
     public static final String animales_PDF = "/web/animales/pdf";
     public static final String animales_ELIMINAR = "/web/animales/{id}/borrar";
     public static final String adopciones_BASE = "/web/adopciones";
     public static final String adopciones_NUEVA = "/web/adopciones/nueva";
+    public static final String adopciones_EDITAR = "/web/adopciones/{id}/editar";
     public static final String adopciones_ELIMINAR = "/web/adopciones/{id}/borrar";
     public static final String adopciones_PDF = "/web/adopciones/pdf";
 }

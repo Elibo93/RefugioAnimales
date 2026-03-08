@@ -7,21 +7,21 @@
     <div th:fragment="content">
 
         <div class="page-header" style="text-align:center;">
-            <h1 class="page-title" th:text="#{professor.form.title}">Registrar voluntario</h1>
-            <p style="color:var(--text-muted); margin-top:0.5rem;">Añada un nuevo docente al equipo</p>
+            <h1 class="page-title" th:text="${voluntario.id == null ? 'Registrar voluntario' : 'Editar voluntario'}">Registrar voluntario</h1>
+            <p style="color:var(--text-muted); margin-top:0.5rem;" th:text="${voluntario.id == null ? 'Añada un nuevo voluntario al equipo' : 'Edite la información del voluntario'}">Añada un nuevo voluntario al equipo</p>
         </div>
 
         <div class="card" style="max-width:800px; margin:0 auto;">
-            <form th:action="@{/web/voluntarios/nuevo}" method="post" th:object="${voluntario}">
+            <form th:action="@{${voluntario.id == null ? '/web/voluntarios/nuevo' : '/web/voluntarios/' + voluntario.id.value + '/editar'}}" method="post" th:object="${voluntario}">
                 <div class="form-grid">
                     <div class="form-group">
                         <label th:text="#{professor.field.name}">Nombre</label>
-                        <input type="text" name="nombre" th:field="*{nombre}" required placeholder="Ej: María">
+                        <input type="text" name="nombre" th:field="*{nombre}" required placeholder="Ej: María" th:readonly="${voluntario.id != null}">
                     </div>
 
                     <div class="form-group">
                         <label th:text="#{professor.field.surname}">Apellido</label>
-                        <input type="text" name="apellido" th:field="*{apellido}" required placeholder="Ej: García">
+                        <input type="text" name="apellido" th:field="*{apellido}" required placeholder="Ej: García" th:readonly="${voluntario.id != null}">
                     </div>
 
                     <div class="form-group">
@@ -46,7 +46,7 @@
                     <a th:href="@{/web/voluntarios}" class="btn btn-secondary" style="justify-content:center;"
                         th:text="#{generic.btn.cancel}">Cancelar</a>
                     <button type="submit" class="btn btn-primary" style="justify-content:center;"
-                        th:text="#{generic.btn.save}">Guardar voluntario</button>
+                        th:text="${voluntario.id == null ? 'Guardar voluntario' : 'Actualizar voluntario'}">Guardar voluntario</button>
                 </div>
             </form>
         </div>

@@ -59,6 +59,14 @@ public class VoluntarioViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
+    @GetMapping(WebRoutes.voluntarios_EDITAR)
+    public String editarFormulario(@PathVariable Integer id, Model model) {
+        Voluntario voluntario = findVoluntarioService.findById(new VoluntarioId(id));
+        model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), voluntario);
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_FORM.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
     @PostMapping(WebRoutes.voluntarios_NUEVO)
     public String crearVoluntario(@RequestParam String nombre,
             @RequestParam String apellido,

@@ -13,13 +13,13 @@
         </div>
 
         <div class="card" style="max-width:800px; margin:0 auto;">
-            <form th:action="@{/web/personas/nuevo}" th:object="${persona}" method="POST">
+            <form th:action="@{${persona.id == null ? '/web/personas/nuevo' : '/web/personas/' + persona.id.value + '/editar'}}" th:object="${persona}" method="POST">
                 <div class="form-grid">
                     <div class="form-group">
                         <label th:text="#{persona.field.dni}">DNI</label>
                         <div style="position:relative;">
                             <input type="text" th:field="*{dni}" th:placeholder="#{persona.placeholder.dni}" required
-                                style="padding-left:2.5rem;">
+                                style="padding-left:2.5rem;" th:readonly="${persona.id != null}">
                             <i data-lucide="id-card"
                                 style="position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); width:18px; color:var(--text-muted);"></i>
                         </div>
@@ -29,12 +29,12 @@
 
                     <div class="form-group">
                         <label th:text="#{persona.field.name}">Nombre</label>
-                        <input type="text" th:field="*{nombre}" required placeholder="Ej: Juan">
+                        <input type="text" th:field="*{nombre}" required placeholder="Ej: Juan" th:readonly="${persona.id != null}">
                     </div>
 
                     <div class="form-group">
                         <label th:text="#{persona.field.surname}">Apellidos</label>
-                        <input type="text" th:field="*{apellido}" required placeholder="Ej: Pérez García">
+                        <input type="text" th:field="*{apellido}" required placeholder="Ej: Pérez García" th:readonly="${persona.id != null}">
                     </div>
 
                     <div class="form-group">
@@ -49,7 +49,7 @@
 
                     <div class="form-group">
                         <label th:text="#{persona.field.birthdate}">Fecha Nac</label>
-                        <input type="date" th:field="*{fechaNacimiento}">
+                        <input type="date" th:field="*{fechaNacimiento}" th:readonly="${persona.id != null}">
                     </div>
                 </div>
 

@@ -24,8 +24,10 @@ import es.refugio.animales.refugio.domain.model.animal.AnimalId;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import es.refugio.animales.refugio.application.command.animal.CreateAnimalCommand;
+import es.refugio.animales.refugio.application.command.animal.EditAnimalCommand;
 import es.refugio.animales.refugio.application.service.voluntario.FindVoluntarioService;
 import es.refugio.animales.refugio.application.service.animal.CreateAnimalService;
+import es.refugio.animales.refugio.application.service.animal.EditAnimalService;
 import es.refugio.animales.refugio.application.service.animal.FindAnimalService;
 import es.refugio.animales.refugio.domain.model.animal.Animal;
 import es.refugio.animales.vista.infraestructure.web.constants.WebRoutes;
@@ -41,6 +43,7 @@ public class AnimalViewController {
     private final FindAnimalService findAnimalService;
     private final CreateAnimalService createAnimalService;
     private final DeleteAnimalService deleteAnimalService;
+    private final EditAnimalService editAnimalService;
     private final FindVoluntarioService findVoluntarioService;
 
     private final TemplateEngine templateEngine;
@@ -81,6 +84,36 @@ public class AnimalViewController {
         redirectAttributes.addFlashAttribute(
                 "successMessage",
                 "Animal creado correctamente");
+
+        return "redirect:" + WebRoutes.animales_BASE;
+    }
+
+    @GetMapping(WebRoutes.animales_EDITAR)
+    public String editarFormulario(@PathVariable Integer id, Model model) {
+        Animal animal = findAnimalService.findById(new AnimalId(id));
+        model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
+        model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), findVoluntarioService.findAll());
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Animal_FORM.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    @PostMapping(WebRoutes.animales_EDITAR)
+    public String procesarEdicion(@PathVariable Integer id,
+            @RequestParam String nombre,
+            @RequestParam String especie,
+            @RequestParam String raza,
+            @RequestParam String sexo,
+            @RequestParam String chipId,
+            @RequestParam(required = false) String notas,
+            @RequestParam String estado,
+            RedirectAttributes redirectAttributes) {
+
+        editAnimalService.update(
+                new EditAnimalCommand(new AnimalId(id), nombre, especie, raza, sexo, chipId, estado, notas));
+
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Animal editado correctamente");
 
         return "redirect:" + WebRoutes.animales_BASE;
     }

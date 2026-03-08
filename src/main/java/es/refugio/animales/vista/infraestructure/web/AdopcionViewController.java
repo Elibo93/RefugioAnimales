@@ -21,9 +21,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.refugio.animales.refugio.application.command.adopcion.CreateAdopcionCommand;
+import es.refugio.animales.refugio.application.command.adopcion.EditAdopcionCommand;
 import es.refugio.animales.refugio.application.service.persona.FindPersonaService;
 import es.refugio.animales.refugio.application.service.adopcion.CreateAdopcionService;
 import es.refugio.animales.refugio.application.service.adopcion.DeleteAdopcionService;
+import es.refugio.animales.refugio.application.service.adopcion.EditAdopcionService;
 import es.refugio.animales.refugio.application.service.adopcion.FindAdopcionService;
 import es.refugio.animales.refugio.application.service.animal.FindAnimalService;
 import es.refugio.animales.refugio.domain.model.persona.Persona;
@@ -45,6 +47,7 @@ public class AdopcionViewController {
         private final FindAdopcionService findAdopcionService;
         private final CreateAdopcionService createAdopcionService;
         private final DeleteAdopcionService deleteAdopcionService;
+        private final EditAdopcionService editAdopcionService;
         private final FindPersonaService findPersonaService;
         private final FindAnimalService findAnimalService;
 
@@ -130,6 +133,33 @@ public class AdopcionViewController {
                 redirectAttributes.addFlashAttribute(
                                 "successMessage",
                                 "Adopcion creada correctamente");
+
+                return "redirect:" + WebRoutes.adopciones_BASE;
+        }
+
+        @GetMapping(WebRoutes.adopciones_EDITAR)
+        public String editarFormulario(@PathVariable Integer id, Model model) {
+                Adopcion adopcion = findAdopcionService.findById(new AdopcionId(id));
+                model.addAttribute(ModelAttribute.SINGLE_Adopcion.getName(), adopcion);
+                model.addAttribute(ModelAttribute.Persona_LIST.getName(), findPersonaService.findAll());
+                model.addAttribute(ModelAttribute.Animal_LIST.getName(), findAnimalService.findAll());
+                model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
+                                FragmentoContenido.Adopcion_FORM.getPath());
+                return ThymTemplates.MAIN_LAYOUT.getPath();
+        }
+
+        @PostMapping(WebRoutes.adopciones_EDITAR)
+        public String procesarEdicion(@PathVariable Integer id,
+                        @RequestParam Integer idPersona,
+                        @RequestParam Integer idAnimal,
+                        RedirectAttributes redirectAttributes) {
+
+                editAdopcionService.update(
+                                new EditAdopcionCommand(new AdopcionId(id), new PersonaId(idPersona), new AnimalId(idAnimal)));
+
+                redirectAttributes.addFlashAttribute(
+                                "successMessage",
+                                "Adopcion editada correctamente");
 
                 return "redirect:" + WebRoutes.adopciones_BASE;
         }

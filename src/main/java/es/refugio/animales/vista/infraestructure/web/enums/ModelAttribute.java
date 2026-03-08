@@ -10,12 +10,12 @@ public enum ModelAttribute {
     Animal_LIST("animales"),
     Adopcion_LIST("adopciones"),
 
-    REFUGIO_ANIMALES("Refugio de Animales"),
+    REFUGIO_ANIMALES("refugio de animales"),
 
-    SINGLE_Persona("Persona"),
-    SINGLE_Voluntario("Voluntario"),
-    SINGLE_Animal("Animal"),
-    SINGLE_Adopcion("Adopcion"),
+    SINGLE_Persona("persona"),
+    SINGLE_Voluntario("voluntario"),
+    SINGLE_Animal("animal"),
+    SINGLE_Adopcion("adopcion"),
 
     FRAGMENTO_CONTENIDO("content"),
 
@@ -32,19 +32,3 @@ public enum ModelAttribute {
         return this.name;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
