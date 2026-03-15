@@ -7,8 +7,8 @@
 <div th:fragment="content">
 
     <div class="page-header" style="text-align:center;">
-        <h1 class="page-title" th:text="${animal.id == null ? 'Crear animal' : 'Editar animal'}">Crear animal</h1>
-        <p style="color:var(--text-muted); margin-top:0.5rem;" th:text="${animal.id == null ? 'Configure los detalles del nuevo animal' : 'Modifique los datos del animal'}">
+        <h1 class="page-title" th:text="${animal.id == null ? #messages.msg('workshop.form.title') : #messages.msg('workshop.modal.edit.title')}">Crear animal</h1>
+        <p style="color:var(--text-muted); margin-top:0.5rem;" th:text="${animal.id == null ? #messages.msg('animal.form.subtitle.create') : #messages.msg('animal.form.subtitle.edit')}">
             Configure los detalles del animal
         </p>
     </div>
@@ -19,55 +19,55 @@
             <div class="form-grid">
 
                 <div class="form-group">
-                    <label>Nombre</label>
+                    <label th:text="#{workshop.field.name}">Nombre</label>
                     <input type="text" th:field="*{nombre}" required>
                 </div>
 
                 <div class="form-group">
-                    <label>Especie</label>
+                    <label th:text="#{animal.field.species}">Especie</label>
                     <input type="text" th:field="*{especie}" required>
                 </div>
 
                 <div class="form-group">
-                    <label>Raza</label>
+                    <label th:text="#{animal.field.breed}">Raza</label>
                     <input type="text" th:field="*{raza}">
                 </div>
 
                 <div class="form-group">
-                    <label>Sexo</label>
+                    <label th:text="#{animal.field.sex}">Sexo</label>
                     <select th:field="*{sexo}">
-                        <option value="Macho">Macho</option>
-                        <option value="Hembra">Hembra</option>
+                        <option value="Macho" th:text="#{animal.sex.male}">Macho</option>
+                        <option value="Hembra" th:text="#{animal.sex.female}">Hembra</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label>Chip ID</label>
+                    <label th:text="#{animal.field.chip}">Chip ID</label>
                     <input type="text" th:field="*{chipId}">
                 </div>
 
                 <div class="form-group">
-                    <label>Estado</label>
+                    <label th:text="#{animal.field.status}">Estado</label>
                     <select th:field="*{estado}">
-                        <option value="Disponible">Disponible</option>
-                        <option value="Adoptado">Adoptado</option>
-                        <option value="En tratamiento">En tratamiento</option>
+                        <option value="Disponible" th:text="#{animal.status.available}">Disponible</option>
+                        <option value="Adoptado" th:text="#{animal.status.adopted}">Adoptado</option>
+                        <option value="En tratamiento" th:text="#{animal.status.treatment}">En tratamiento</option>
                     </select>
                 </div>
 
                 <div class="form-group" style="grid-column:1/-1;">
-                    <label>Notas</label>
+                    <label th:text="#{animal.field.notes}">Notas</label>
                     <textarea th:field="*{notas}"></textarea>
                 </div>
 
             </div>
 
             <div class="modal-actions" style="margin-top:2rem;">
-                <a th:href="@{/web/animales}" class="btn btn-secondary">
+                <a th:href="@{/web/animales}" class="btn btn-secondary" th:text="#{generic.btn.cancel}">
                     Cancelar
                 </a>
 
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary" th:text="#{generic.btn.save}">
                     Guardar animal
                 </button>
             </div>

@@ -27,7 +27,7 @@ services:
       - db
     environment:
       # 1. Base de datos con comillas y parámetros extra
-      SPRING_DATASOURCE_URL: "jdbc:mysql://db:3306/artia_db?allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://db:3306/refugio_db?allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci"
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
 

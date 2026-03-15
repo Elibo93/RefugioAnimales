@@ -27,7 +27,7 @@
                 </div>
                 <!-- Guest section directly below if not authenticated -->
                 <div class="dropdown-trigger user-profile" sec:authorize="!isAuthenticated()">
-                    <a th:href="@{/login}" style="color:inherit;text-decoration:none;font-weight:bold;">Iniciar Sesión</a>
+                    <a th:href="@{/login}" style="color:inherit;text-decoration:none;font-weight:bold;" th:text="#{auth.login.title}">Iniciar Sesión</a>
                 </div>
                 
                 <div class="dropdown-menu" sec:authorize="isAuthenticated()">
@@ -51,7 +51,7 @@
                     <form th:action="@{/logout}" method="post" style="margin: 0; padding: 0;">
                         <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left; cursor: pointer; padding: 12px 16px;">
                             <i data-lucide="log-out"></i>
-                            <span>Cerrar Sesión</span>
+                            <span th:text="#{header.logout}">Cerrar Sesión</span>
                         </button>
                     </form>
                 </div>

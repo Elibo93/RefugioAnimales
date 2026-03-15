@@ -63,7 +63,7 @@
             <div th:if="${#lists.isEmpty(voluntarios)}"
                 style="text-align:center; padding:3rem; color:var(--text-muted);">
                 <i data-lucide="inbox" style="width:48px; height:48px; margin-bottom:1rem; opacity:0.5;"></i>
-                <p>No hay voluntarios registrados.</p>
+                <p th:text="#{voluntario.list.empty}">No hay voluntarios registrados.</p>
             </div>
         </div>
 

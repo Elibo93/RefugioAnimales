@@ -7,8 +7,8 @@
     <div th:fragment="content">
 
         <div class="page-header" style="text-align:center;">
-            <h1 class="page-title" th:text="${voluntario.id == null ? 'Registrar voluntario' : 'Editar voluntario'}">Registrar voluntario</h1>
-            <p style="color:var(--text-muted); margin-top:0.5rem;" th:text="${voluntario.id == null ? 'Añada un nuevo voluntario al equipo' : 'Edite la información del voluntario'}">Añada un nuevo voluntario al equipo</p>
+            <h1 class="page-title" th:text="${voluntario.id == null ? #messages.msg('professor.form.title') : #messages.msg('professor.modal.edit.title')}">Registrar voluntario</h1>
+            <p style="color:var(--text-muted); margin-top:0.5rem;" th:text="${voluntario.id == null ? #messages.msg('voluntario.form.subtitle.create') : #messages.msg('voluntario.form.subtitle.edit')}">Añada un nuevo voluntario al equipo</p>
         </div>
 
         <div class="card" style="max-width:800px; margin:0 auto;">
@@ -16,29 +16,29 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label th:text="#{professor.field.name}">Nombre</label>
-                        <input type="text" name="nombre" th:field="*{nombre}" required placeholder="Ej: María" th:readonly="${voluntario.id != null}">
+                        <input type="text" name="nombre" th:field="*{nombre}" required th:attr="placeholder=#{persona.placeholder.name}" th:readonly="${voluntario.id != null}">
                     </div>
 
                     <div class="form-group">
                         <label th:text="#{professor.field.surname}">Apellido</label>
-                        <input type="text" name="apellido" th:field="*{apellido}" required placeholder="Ej: García" th:readonly="${voluntario.id != null}">
+                        <input type="text" name="apellido" th:field="*{apellido}" required th:attr="placeholder=#{persona.placeholder.surname}" th:readonly="${voluntario.id != null}">
                     </div>
 
                     <div class="form-group">
                         <label th:text="#{professor.field.specialty}">Especialidad</label>
                         <input type="text" name="especialidad" th:field="*{especialidad}" required
-                            placeholder="Ej: Piano">
+                            placeholder="Ej: Veterinaria">
                     </div>
 
                     <div class="form-group">
                         <label th:text="#{professor.field.email}">Email</label>
                         <input type="email" name="email" th:field="*{email}" required
-                            placeholder="maria@RefugioAnimales.local">
+                            th:attr="placeholder=#{persona.placeholder.email}">
                     </div>
 
                     <div class="form-group">
                         <label th:text="#{professor.field.phone}">Teléfono</label>
-                        <input type="text" name="telefono" th:field="*{telefono}" placeholder="+34 600...">
+                        <input type="text" name="telefono" th:field="*{telefono}" th:attr="placeholder=#{persona.placeholder.phone}">
                     </div>
                 </div>
 
@@ -46,7 +46,7 @@
                     <a th:href="@{/web/voluntarios}" class="btn btn-secondary" style="justify-content:center;"
                         th:text="#{generic.btn.cancel}">Cancelar</a>
                     <button type="submit" class="btn btn-primary" style="justify-content:center;"
-                        th:text="${voluntario.id == null ? 'Guardar voluntario' : 'Actualizar voluntario'}">Guardar voluntario</button>
+                        th:text="#{generic.btn.save}">Guardar</button>
                 </div>
             </form>
         </div>

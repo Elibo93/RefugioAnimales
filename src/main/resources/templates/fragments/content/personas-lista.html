@@ -63,7 +63,7 @@
 
             <div th:if="${#lists.isEmpty(personas)}" style="text-align:center; padding:3rem; color:var(--text-muted);">
                 <i data-lucide="inbox" style="width:48px; height:48px; margin-bottom:1rem; opacity:0.5;"></i>
-                <p>No hay personas registrados.</p>
+                <p th:text="#{persona.list.empty}">No hay personas registradas.</p>
             </div>
         </div>
 

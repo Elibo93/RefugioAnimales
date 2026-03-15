@@ -7,8 +7,8 @@
     <div th:fragment="content">
 
         <div class="page-header" style="text-align:center;">
-            <h1 class="page-title" th:text="${adopcion.id == null ? 'Registrar Adopción' : 'Editar Adopción'}">Registrar Inscripción</h1>
-            <p style="color:var(--text-muted); margin-top:0.5rem;" th:text="${adopcion.id == null ? 'Asocie una persona a un animal' : 'Modifique la asociación'}">Asocie un persona a un animal</p>
+            <h1 class="page-title" th:text="${adopcion.id == null ? #messages.msg('enrollment.modal.create.title') : #messages.msg('enrollment.modal.edit.title')}">Registrar Adopción</h1>
+            <p style="color:var(--text-muted); margin-top:0.5rem;" th:text="${adopcion.id == null ? #messages.msg('adopcion.form.subtitle.create') : #messages.msg('adopcion.form.subtitle.edit')}">Asocie una persona a un animal</p>
         </div>
 
         <div class="card" style="max-width:600px; margin:0 auto;">
@@ -43,7 +43,7 @@
                     <a th:href="@{/web/adopciones}" class="btn btn-secondary" style="justify-content:center;"
                         th:text="#{generic.btn.cancel}">Cancelar</a>
                     <button type="submit" class="btn btn-primary" style="justify-content:center;"
-                        th:text="#{generic.btn.save}">Guardar Inscripción</button>
+                        th:text="#{generic.btn.save}">Guardar</button>
                 </div>
             </form>
         </div>

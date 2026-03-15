@@ -44,15 +44,15 @@
 </head>
 
 <body>
-    <h1 th:text="#{persona.list.title}">Listado de personas</h1>
+    <h1 th:text="#{pdf.personas.title}">Listado de personas</h1>
     <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Apellidos</th>
-                <th>DNI</th>
-                <th>Email</th>
+                <th th:text="#{pdf.column.id}">ID</th>
+                <th th:text="#{pdf.column.name}">Nombre</th>
+                <th th:text="#{pdf.column.surname}">Apellidos</th>
+                <th th:text="#{persona.table.header.dni}">DNI</th>
+                <th th:text="#{pdf.column.email}">Email</th>
             </tr>
         </thead>
         <tbody>

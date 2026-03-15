@@ -50,18 +50,22 @@
             <tr>
                 <th th:text="#{pdf.column.id}">ID</th>
                 <th th:text="#{pdf.column.name}">Nombre</th>
-                <th th:text="#{pdf.column.schedule}">Horario</th>
-                <th th:text="#{pdf.column.capacity}">Aforo</th>
-                <th th:text="#{pdf.column.description}">Descripción</th>
+                <th th:text="#{pdf.column.species}">Especie</th>
+                <th th:text="#{pdf.column.breed}">Raza</th>
+                <th th:text="#{pdf.column.sex}">Sexo</th>
+                <th th:text="#{pdf.column.chip}">Chip ID</th>
+                <th th:text="#{pdf.column.status}">Estado</th>
             </tr>
         </thead>
         <tbody>
             <tr th:each="t : ${animales}">
                 <td th:text="${t.id.value}"></td>
                 <td th:text="${t.nombre}"></td>
-                <td><span th:text="${t.horaInicio}"></span> - <span th:text="${t.horaFin}"></span></td>
-                <td th:text="${t.aforoMaximo}"></td>
-                <td th:text="${t.descripcion}"></td>
+                <td th:text="${t.especie}"></td>
+                <td th:text="${t.raza}"></td>
+                <td th:text="${t.sexo}"></td>
+                <td th:text="${t.chipId}"></td>
+                <td th:text="${t.estado}"></td>
             </tr>
         </tbody>
     </table>
