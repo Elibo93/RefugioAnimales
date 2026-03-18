@@ -6,29 +6,10 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class DeleteAdopcionUseCase {
-    public final AdopcionRepository adopcionRepository;
+
+    private final AdopcionRepository adopcionRepository;
 
     public void delete(AdopcionId id) {
         adopcionRepository.deleteById(id);
     }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

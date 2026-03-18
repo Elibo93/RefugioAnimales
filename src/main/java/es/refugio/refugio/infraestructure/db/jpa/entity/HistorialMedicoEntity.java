@@ -40,4 +40,10 @@ public class HistorialMedicoEntity {
     @Column(name = "descripcion", nullable = false, length = 1000)
     private String descripcion;
 
+    @Column(name = "tratamiento", length = 1000)
+    private String tratamiento;
+
+    @Column(name = "veterinario")
+    private String veterinario;
+
 }

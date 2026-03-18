@@ -15,4 +15,6 @@ public class HistorialMedico {
     private AnimalId animalId;
     private LocalDateTime fecha;
     private String descripcion;
+    private String tratamiento;
+    private String veterinario;
 }

@@ -1,38 +1,19 @@
 package es.refugio.refugio.infraestructure.db.jpa.repository.adopcion;
 
 import java.util.List;
-
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
 import es.refugio.refugio.infraestructure.db.jpa.entity.AdopcionEntity;
 
 @Repository
 public interface AdopcionEntityJpaRepository extends JpaRepository<AdopcionEntity, Integer> {
 
-    // Buscar adopciones por Persona
-    public List<AdopcionEntity> findByPersonaId(Integer idPersona);
+    List<AdopcionEntity> findByAnimalId(Integer animalId);
 
-    // Buscar adopciones por Animal
-    public List<AdopcionEntity> findByAnimalId(Integer idAnimal);
+    List<AdopcionEntity> findByAdoptanteId(Integer adoptanteId);
 
-    // // Evitar duplicados (Persona ya inscrito en un Animal)
-    // public AdopcionEntity findByIdPersonaAndIdAnimal(Integer idPersona, Integer
-    // idAnimal);
+    Optional<AdopcionEntity> findByAdoptanteIdAndAnimalId(Integer adoptanteId, Integer animalId);
+
+    boolean existsByAdoptanteIdAndAnimalId(Integer adoptanteId, Integer animalId);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

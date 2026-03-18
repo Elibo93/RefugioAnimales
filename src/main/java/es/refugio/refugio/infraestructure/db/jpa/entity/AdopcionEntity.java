@@ -5,8 +5,12 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,24 +36,23 @@ public class AdopcionEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    /**
-     * Persona (FK)
-     * Lado propietario: columna Persona_id en adopciones
-     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_persona", nullable = false)
+    @JoinColumn(name = "adoptante_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private UsuarioEntity persona;
+    private AdoptanteEntity adoptante;
 
-    /**
-     * Animal (FK)
-     * Lado propietario: columna id_animal en adopciones
-     */
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_animal", nullable = false, unique = true)
+    @JoinColumn(name = "animal_id", nullable = false, unique = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private AnimalEntity animal;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "fecha_adopcion", nullable = false)
+    private LocalDateTime fechaAdopcion;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado", nullable = false)
+    private EstadoAdopcion estado;
+
+    @Column(name = "contrato", length = 500)
+    private String contrato;
 }

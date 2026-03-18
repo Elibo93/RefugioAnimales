@@ -19,7 +19,7 @@ public class CreateUsuarioUseCase {
                 .email(comando.email())
                 .contraseña(comando.contraseña())
                 .telefono(comando.telefono())
-                .rol(Rol.valueOf(comando.rol().toUpperCase()))
+                .rol(comando.rol())
                 .createdAt(LocalDateTime.now())
                 .build();
 

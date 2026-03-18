@@ -1,0 +1,65 @@
+package es.refugio.refugio.infraestructure.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import es.refugio.refugio.application.service.solicitud_adopcion.CreateSolicitudAdopcionService;
+import es.refugio.refugio.application.service.solicitud_adopcion.DeleteSolicitudAdopcionService;
+import es.refugio.refugio.application.service.solicitud_adopcion.EditSolicitudAdopcionService;
+import es.refugio.refugio.application.service.solicitud_adopcion.FindSolicitudAdopcionService;
+import es.refugio.refugio.application.usecase.solicitud_adopcion.CreateSolicitudAdopcionUseCase;
+import es.refugio.refugio.application.usecase.solicitud_adopcion.DeleteSolicitudAdopcionUseCase;
+import es.refugio.refugio.application.usecase.solicitud_adopcion.EditSolicitudAdopcionUseCase;
+import es.refugio.refugio.application.usecase.solicitud_adopcion.FindSolicitudAdopcionUseCase;
+import es.refugio.refugio.domain.repository.SolicitudAdopcionRepository;
+import es.refugio.refugio.infraestructure.db.jpa.repository.solicitud_adopcion.SolicitudAdopcionEntityJpaRepository;
+import es.refugio.refugio.infraestructure.db.jpa.repository.solicitud_adopcion.SolicitudAdopcionJpaRepositoryImpl;
+
+@Configuration
+public class SolicitudAdopcionConfig {
+
+    @Bean
+    public SolicitudAdopcionRepository solicitudAdopcionRepository(SolicitudAdopcionEntityJpaRepository jpaRepository) {
+        return new SolicitudAdopcionJpaRepositoryImpl(jpaRepository);
+    }
+
+    @Bean
+    public CreateSolicitudAdopcionUseCase createSolicitudAdopcionUseCase(SolicitudAdopcionRepository repository) {
+        return new CreateSolicitudAdopcionUseCase(repository);
+    }
+
+    @Bean
+    public CreateSolicitudAdopcionService createSolicitudAdopcionService(CreateSolicitudAdopcionUseCase useCase) {
+        return new CreateSolicitudAdopcionService(useCase);
+    }
+
+    @Bean
+    public EditSolicitudAdopcionUseCase editSolicitudAdopcionUseCase(SolicitudAdopcionRepository repository) {
+        return new EditSolicitudAdopcionUseCase(repository);
+    }
+
+    @Bean
+    public EditSolicitudAdopcionService editSolicitudAdopcionService(EditSolicitudAdopcionUseCase useCase) {
+        return new EditSolicitudAdopcionService(useCase);
+    }
+
+    @Bean
+    public FindSolicitudAdopcionUseCase findSolicitudAdopcionUseCase(SolicitudAdopcionRepository repository) {
+        return new FindSolicitudAdopcionUseCase(repository);
+    }
+
+    @Bean
+    public FindSolicitudAdopcionService findSolicitudAdopcionService(FindSolicitudAdopcionUseCase useCase) {
+        return new FindSolicitudAdopcionService(useCase);
+    }
+
+    @Bean
+    public DeleteSolicitudAdopcionUseCase deleteSolicitudAdopcionUseCase(SolicitudAdopcionRepository repository) {
+        return new DeleteSolicitudAdopcionUseCase(repository);
+    }
+
+    @Bean
+    public DeleteSolicitudAdopcionService deleteSolicitudAdopcionService(DeleteSolicitudAdopcionUseCase useCase) {
+        return new DeleteSolicitudAdopcionService(useCase);
+    }
+}

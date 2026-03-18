@@ -1,47 +1,31 @@
 package es.refugio.refugio.application.service.adopcion;
 
 import java.util.List;
-
-import org.springframework.stereotype.Service;
-
 import es.refugio.refugio.application.usecase.adopcion.FindAdopcionUseCase;
+import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
+import es.refugio.refugio.domain.model.animal.AnimalId;
 import es.refugio.refugio.domain.model.adopcion.Adopcion;
 import es.refugio.refugio.domain.model.adopcion.AdopcionId;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@Service
 public class FindAdopcionService {
 
-    private final FindAdopcionUseCase findAdopcionUseCase;
+    private final FindAdopcionUseCase useCase;
 
     public List<Adopcion> findAll() {
-        return findAdopcionUseCase.findAll();
+        return useCase.findAll();
     }
 
     public Adopcion findById(AdopcionId id) {
-        return findAdopcionUseCase.findById(id);
+        return useCase.findById(id);
     }
 
-    public List<Adopcion> findByCriteria(Integer PersonaId, Integer AnimalId) {
-        return findAdopcionUseCase.findByCriteria(PersonaId, AnimalId);
+    public List<Adopcion> findByAnimalId(AnimalId animalId) {
+        return useCase.findByAnimalId(animalId);
     }
 
+    public List<Adopcion> findByAdoptanteId(AdoptanteId adoptanteId) {
+        return useCase.findByAdoptanteId(adoptanteId);
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

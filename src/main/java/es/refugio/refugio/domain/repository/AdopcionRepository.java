@@ -1,36 +1,21 @@
 package es.refugio.refugio.domain.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import es.refugio.common.domain.repository.CRUDRepository;
 import es.refugio.refugio.domain.model.adopcion.Adopcion;
 import es.refugio.refugio.domain.model.adopcion.AdopcionId;
+import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
+import es.refugio.refugio.domain.model.animal.AnimalId;
 
 public interface AdopcionRepository extends CRUDRepository<Adopcion, AdopcionId> {
 
-    List<Adopcion> getByPersonaId(Integer PersonaId);
+    List<Adopcion> getByAdoptanteId(AdoptanteId adoptanteId);
 
-    List<Adopcion> getByAnimalId(Integer AnimalId);
+    List<Adopcion> getByAnimalId(AnimalId animalId);
 
-    // Optional<Adopcion> getByPersonaAndAnimal(PersonaId personaId, AnimalId
-    // AnimalId);
+    Optional<Adopcion> getByAdoptanteAndAnimal(AdoptanteId adoptanteId, AnimalId animalId);
 
-    // boolean existsByPersonaAndAnimal(PersonaId personaId, AnimalId AnimalId);
-
+    boolean existsByAdoptanteAndAnimal(AdoptanteId adoptanteId, AnimalId animalId);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

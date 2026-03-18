@@ -6,8 +6,9 @@ import java.util.Map;
 
 import es.refugio.refugio.domain.model.adopcion.Adopcion;
 import es.refugio.refugio.domain.model.adopcion.AdopcionId;
+import es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion;
+import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.domain.model.animal.AnimalId;
-import es.refugio.refugio.domain.model.usuario.UsuarioId;
 
 public class AdopcionFactory {
 
@@ -16,51 +17,56 @@ public class AdopcionFactory {
                 Map<AdopcionId, Adopcion> datos = new LinkedHashMap<>();
 
                 datos.put(new AdopcionId(1),
-                                new Adopcion(
-                                                new AdopcionId(1),
-                                                new UsuarioId(1),
-                                                new AnimalId(10),
-                                                LocalDateTime.of(2025, 1, 10, 10, 0)
-
-                                ));
+                                Adopcion.builder()
+                                                .id(new AdopcionId(1))
+                                                .adoptanteId(new AdoptanteId(1))
+                                                .animalId(new AnimalId(10))
+                                                .fechaAdopcion(LocalDateTime.of(2025, 1, 10, 10, 0))
+                                                .estado(EstadoAdopcion.COMPLETADA)
+                                                .contrato("contrato_luna.pdf")
+                                                .build());
 
                 datos.put(new AdopcionId(2),
-                                new Adopcion(
-                                                new AdopcionId(2),
-                                                new UsuarioId(2),
-                                                new AnimalId(10),
-                                                LocalDateTime.of(2025, 1, 11, 11, 30)
-
-                                ));
+                                Adopcion.builder()
+                                                .id(new AdopcionId(2))
+                                                .adoptanteId(new AdoptanteId(2))
+                                                .animalId(new AnimalId(10))
+                                                .fechaAdopcion(LocalDateTime.of(2025, 1, 11, 11, 30))
+                                                .estado(EstadoAdopcion.EN_PROCESO)
+                                                .contrato("contrato_max.pdf")
+                                                .build());
 
                 datos.put(new AdopcionId(3),
-                                new Adopcion(
-                                                new AdopcionId(3),
-                                                new UsuarioId(3),
-                                                new AnimalId(11),
-                                                LocalDateTime.of(2025, 1, 12, 9, 45)
-
-                                ));
+                                Adopcion.builder()
+                                                .id(new AdopcionId(3))
+                                                .adoptanteId(new AdoptanteId(3))
+                                                .animalId(new AnimalId(11))
+                                                .fechaAdopcion(LocalDateTime.of(2025, 1, 12, 9, 45))
+                                                .estado(EstadoAdopcion.COMPLETADA)
+                                                .contrato("contrato_misu.pdf")
+                                                .build());
 
                 datos.put(new AdopcionId(4),
-                                new Adopcion(
-                                                new AdopcionId(4),
-                                                new UsuarioId(4),
-                                                new AnimalId(12),
-                                                LocalDateTime.of(2025, 1, 15, 17, 0)
-
-                                ));
+                                Adopcion.builder()
+                                                .id(new AdopcionId(4))
+                                                .adoptanteId(new AdoptanteId(4))
+                                                .animalId(new AnimalId(12))
+                                                .fechaAdopcion(LocalDateTime.of(2025, 1, 15, 17, 0))
+                                                .estado(EstadoAdopcion.CANCELADA)
+                                                .contrato(null)
+                                                .build());
 
                 return datos;
         }
 
         public static Adopcion create() {
-
-                return new Adopcion(
-                                new AdopcionId(99),
-                                new UsuarioId(99),
-                                new AnimalId(99),
-                                LocalDateTime.now());
-
+                return Adopcion.builder()
+                                .id(new AdopcionId(99))
+                                .adoptanteId(new AdoptanteId(99))
+                                .animalId(new AnimalId(99))
+                                .fechaAdopcion(LocalDateTime.now())
+                                .estado(EstadoAdopcion.EN_PROCESO)
+                                .contrato("pendiente.pdf")
+                                .build();
         }
 }

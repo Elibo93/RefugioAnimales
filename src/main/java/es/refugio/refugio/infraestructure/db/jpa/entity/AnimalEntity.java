@@ -80,4 +80,7 @@ public class AnimalEntity {
 
     @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HistorialMedicoEntity> historialMedico;
+
+    @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SolicitudAdopcionEntity> solicitudesAdopcion;
 }

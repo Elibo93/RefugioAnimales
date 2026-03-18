@@ -1,13 +1,15 @@
 package es.refugio.refugio.infraestructure.db.repository.mock.adopcion;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import es.refugio.refugio.domain.model.adopcion.Adopcion;
 import es.refugio.refugio.domain.model.adopcion.AdopcionId;
+import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
+import es.refugio.refugio.domain.model.animal.AnimalId;
 import es.refugio.refugio.domain.repository.AdopcionRepository;
 
 public class AdopcionRepositoryMockImpl implements AdopcionRepository {
@@ -16,28 +18,18 @@ public class AdopcionRepositoryMockImpl implements AdopcionRepository {
 
     @Override
     public Adopcion save(Adopcion i) {
-
-        // Crear
-        if (i.getId() == null)
+        if (i.getId() == null) {
             i.setId(new AdopcionId(obtenerSiguienteId()));
-
+        }
         adopciones.put(i.getId(), i);
-
         return i;
     }
 
     private int obtenerSiguienteId() {
-        AdopcionId ultimo = null;
-
-        if (!adopciones.isEmpty()) {
-            Collection<Adopcion> lista = adopciones.values();
-
-            for (Adopcion p : lista) {
-                ultimo = p.getId();
-            }
-        }
-
-        return (ultimo != null ? ultimo.getValue() + 1 : 1);
+        return adopciones.keySet().stream()
+                .mapToInt(AdopcionId::getValue)
+                .max()
+                .orElse(0) + 1;
     }
 
     @Override
@@ -55,98 +47,30 @@ public class AdopcionRepositoryMockImpl implements AdopcionRepository {
         adopciones.remove(id);
     }
 
-    // @Override
-    // public List<Adopcion> getByPersonaId(PersonaId personaId) {
-    // List<Adopcion> result = new ArrayList<>();
-
-    // for (Adopcion i : adopciones.values()) {
-    // if (i.getPersonaId().equals(PersonaId)) {
-    // result.add(i);
-    // }
-    // }
-
-    // return result;
-    // }
-
-    // @Override
-    // public List<Adopcion> getByAnimalId(AnimalId animalId) {
-    // List<Adopcion> result = new ArrayList<>();
-
-    // for (Adopcion i : adopciones.values()) {
-    // if (i.getAnimalId().equals(AnimalId)) {
-    // result.add(i);
-    // }
-    // }
-
-    // return result;
-    // }
-
-    // @Override
-    // public Optional<Adopcion> getByPersonaAndAnimal(PersonaId personaId, AnimalId
-    // AnimalId) {
-
-    // for (Adopcion i : adopciones.values()) {
-    // if (i.getPersonaId().equals(PersonaId) &&
-    // i.getAnimalId().equals(AnimalId)) {
-    // return Optional.of(i);
-    // }
-    // }
-
-    // return Optional.empty();
-    // }
-
-    // @Override
-    // public boolean existsByPersonaAndAnimal(PersonaId personaId, AnimalId AnimalId)
-    // {
-
-    // for (Adopcion i : adopciones.values()) {
-    // if (i.getPersonaId().equals(PersonaId) &&
-    // i.getAnimalId().equals(AnimalId)) {
-    // return true;
-    // }
-    // }
-
-    // return false;
-    // }
     @Override
-    public List<Adopcion> getByPersonaId(Integer PersonaId) {
-        List<Adopcion> result = new ArrayList<>();
-
-        for (Adopcion i : adopciones.values()) {
-            if (i.getUsuarioId().getValue().equals(PersonaId)) {
-                result.add(i);
-            }
-        }
-
-        return result;
+    public List<Adopcion> getByAdoptanteId(AdoptanteId adoptanteId) {
+        return adopciones.values().stream()
+                .filter(a -> a.getAdoptanteId().equals(adoptanteId))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Adopcion> getByAnimalId(Integer AnimalId) {
-        List<Adopcion> result = new ArrayList<>();
+    public List<Adopcion> getByAnimalId(AnimalId animalId) {
+        return adopciones.values().stream()
+                .filter(a -> a.getAnimalId().equals(animalId))
+                .collect(Collectors.toList());
+    }
 
-        for (Adopcion i : adopciones.values()) {
-            if (i.getAnimalId().getValue().equals(AnimalId)) {
-                result.add(i);
-            }
-        }
+    @Override
+    public Optional<Adopcion> getByAdoptanteAndAnimal(AdoptanteId adoptanteId, AnimalId animalId) {
+        return adopciones.values().stream()
+                .filter(a -> a.getAdoptanteId().equals(adoptanteId) && a.getAnimalId().equals(animalId))
+                .findFirst();
+    }
 
-        return result;
+    @Override
+    public boolean existsByAdoptanteAndAnimal(AdoptanteId adoptanteId, AnimalId animalId) {
+        return adopciones.values().stream()
+                .anyMatch(a -> a.getAdoptanteId().equals(adoptanteId) && a.getAnimalId().equals(animalId));
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

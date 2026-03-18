@@ -14,76 +14,52 @@ import es.refugio.refugio.application.usecase.adopcion.FindAdopcionUseCase;
 import es.refugio.refugio.domain.repository.AdopcionRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.adopcion.AdopcionEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.adopcion.AdopcionJpaRepositoryImpl;
-import lombok.RequiredArgsConstructor;
 
 @Configuration
-@RequiredArgsConstructor
 public class AdopcionConfig {
 
-    private final AdopcionEntityJpaRepository AdopcionRepository;
-
-    // Creo por configuración la instalacia que me interesa de AdopcionRepository (desde jpa)
     @Bean
-    public AdopcionRepository adopcionRepository() {
-        return new AdopcionJpaRepositoryImpl(AdopcionRepository);
-    }
-    // POST
-    @Bean
-    public CreateAdopcionUseCase createAdopcionUseCase() {
-        return new CreateAdopcionUseCase(adopcionRepository());
+    public AdopcionRepository adopcionRepository(AdopcionEntityJpaRepository jpaRepository) {
+        return new AdopcionJpaRepositoryImpl(jpaRepository);
     }
 
     @Bean
-    public CreateAdopcionService createAdopcionService() {
-        return new CreateAdopcionService(createAdopcionUseCase());
-    }
-
-    // GET
-    @Bean
-    public FindAdopcionUseCase findAdopcionUseCase() {
-        return new FindAdopcionUseCase(adopcionRepository());
+    public CreateAdopcionUseCase createAdopcionUseCase(AdopcionRepository repository) {
+        return new CreateAdopcionUseCase(repository);
     }
 
     @Bean
-    public FindAdopcionService findAdopcionService() {
-        return new FindAdopcionService(findAdopcionUseCase());
-    }
-
-    // DELETE
-    @Bean
-    public DeleteAdopcionUseCase deleteAdopcionUseCase() {
-        return new DeleteAdopcionUseCase(adopcionRepository());
+    public CreateAdopcionService createAdopcionService(CreateAdopcionUseCase useCase) {
+        return new CreateAdopcionService(useCase);
     }
 
     @Bean
-    public DeleteAdopcionService deleteAdopcionService() {
-        return new DeleteAdopcionService(deleteAdopcionUseCase());
-    }
-
-    // PUT
-    @Bean
-    public EditAdopcionUseCase editAdopcionUseCase() {
-        return new EditAdopcionUseCase(adopcionRepository());
+    public EditAdopcionUseCase editAdopcionUseCase(AdopcionRepository repository) {
+        return new EditAdopcionUseCase(repository);
     }
 
     @Bean
-    public EditAdopcionService editAdopcionService() {
-        return new EditAdopcionService(editAdopcionUseCase());
+    public EditAdopcionService editAdopcionService(EditAdopcionUseCase useCase) {
+        return new EditAdopcionService(useCase);
+    }
+
+    @Bean
+    public FindAdopcionUseCase findAdopcionUseCase(AdopcionRepository repository) {
+        return new FindAdopcionUseCase(repository);
+    }
+
+    @Bean
+    public FindAdopcionService findAdopcionService(FindAdopcionUseCase useCase) {
+        return new FindAdopcionService(useCase);
+    }
+
+    @Bean
+    public DeleteAdopcionUseCase deleteAdopcionUseCase(AdopcionRepository repository) {
+        return new DeleteAdopcionUseCase(repository);
+    }
+
+    @Bean
+    public DeleteAdopcionService deleteAdopcionService(DeleteAdopcionUseCase useCase) {
+        return new DeleteAdopcionService(useCase);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

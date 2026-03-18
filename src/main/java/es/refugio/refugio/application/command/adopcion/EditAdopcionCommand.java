@@ -1,18 +1,14 @@
 package es.refugio.refugio.application.command.adopcion;
 
+import java.time.LocalDateTime;
 import es.refugio.refugio.domain.model.adopcion.AdopcionId;
-import es.refugio.refugio.domain.model.animal.AnimalId;
-import es.refugio.refugio.domain.model.usuario.UsuarioId;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 
-@Getter
-@AllArgsConstructor
-@Accessors(fluent = true)
-public class EditAdopcionCommand {
-    private AdopcionId id;
-    private UsuarioId usuarioId;
-    private AnimalId animalId;
-
+public record EditAdopcionCommand(
+        AdopcionId id,
+        Integer animalId,
+        Integer adoptanteId,
+        LocalDateTime fechaAdopcion,
+        String estado,
+        String contrato
+) {
 }

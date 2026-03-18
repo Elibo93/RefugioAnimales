@@ -1,8 +1,9 @@
 package es.refugio.refugio.application.usecase.adopcion;
 
 import java.util.List;
-
 import es.refugio.refugio.domain.error.AdopcionNotFoundException;
+import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
+import es.refugio.refugio.domain.model.animal.AnimalId;
 import es.refugio.refugio.domain.model.adopcion.Adopcion;
 import es.refugio.refugio.domain.model.adopcion.AdopcionId;
 import es.refugio.refugio.domain.repository.AdopcionRepository;
@@ -15,34 +16,22 @@ public class FindAdopcionUseCase {
 
     public List<Adopcion> findAll() {
         List<Adopcion> adopciones = adopcionRepository.getAll();
-
-        if (adopciones.isEmpty())
+        if (adopciones.isEmpty()) {
             throw new AdopcionNotFoundException();
-
+        }
         return adopciones;
     }
 
     public Adopcion findById(AdopcionId id) {
-        return adopcionRepository.getById(id).orElseThrow(() -> new AdopcionNotFoundException(id.getValue()));
+        return adopcionRepository.getById(id)
+                .orElseThrow(() -> new AdopcionNotFoundException(id.getValue()));
     }
 
-    public List<Adopcion> findByCriteria(Integer PersonaId, Integer AnimalId) {
-        if (PersonaId != null && AnimalId != null) {
-            // Intersección
-            List<Adopcion> porPersona = adopcionRepository.getByPersonaId(PersonaId);
-            return porPersona.stream()
-                    .filter(i -> i.getAnimalId().getValue().equals(AnimalId))
-                    .collect(java.util.stream.Collectors.toList());
-        }
+    public List<Adopcion> findByAnimalId(AnimalId animalId) {
+        return adopcionRepository.getByAnimalId(animalId);
+    }
 
-        if (PersonaId != null) {
-            return adopcionRepository.getByPersonaId(PersonaId);
-        }
-
-        if (AnimalId != null) {
-            return adopcionRepository.getByAnimalId(AnimalId);
-        }
-
-        return findAll();
+    public List<Adopcion> findByAdoptanteId(AdoptanteId adoptanteId) {
+        return adopcionRepository.getByAdoptanteId(adoptanteId);
     }
 }
