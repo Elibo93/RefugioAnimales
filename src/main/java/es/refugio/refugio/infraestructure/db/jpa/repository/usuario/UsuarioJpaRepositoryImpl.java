@@ -9,16 +9,18 @@ import es.refugio.refugio.domain.repository.UsuarioRepository;
 import es.refugio.refugio.infraestructure.db.jpa.entity.UsuarioEntity;
 import es.refugio.refugio.infraestructure.mapper.UsuarioMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
+@Repository
 public class UsuarioJpaRepositoryImpl implements UsuarioRepository {
+
     private final UsuarioEntityJpaRepository repository;
 
     @Override
     public Usuario save(Usuario t) {
-
-        UsuarioEntity prod = UsuarioMapper.toEntity(t);
-        return UsuarioMapper.toDomain(repository.save(prod));
+        UsuarioEntity usuarioEntity = UsuarioMapper.toEntity(t);
+        return UsuarioMapper.toDomain(repository.save(usuarioEntity));
     }
 
     @Override
@@ -28,13 +30,8 @@ public class UsuarioJpaRepositoryImpl implements UsuarioRepository {
 
     @Override
     public Optional<Usuario> getById(UsuarioId id) {
-        Optional<UsuarioEntity> pe = repository.findById(id.getValue());
-
-        if (pe.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(UsuarioMapper.toDomain(pe.get()));
+        return repository.findById(id.getValue())
+                .map(UsuarioMapper::toDomain);
     }
 
     @Override
@@ -43,11 +40,8 @@ public class UsuarioJpaRepositoryImpl implements UsuarioRepository {
     }
 
     @Override
-    public Optional<Usuario> getByName(String name) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getByName'");
+    public Optional<Usuario> getByEmail(String email) {
+        return repository.findByEmail(email)
+                .map(UsuarioMapper::toDomain);
     }
-    // Hereda automáticamente métodos como: save(), findById(), findAll(), delete(),
-    // etc.
-
 }

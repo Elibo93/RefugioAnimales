@@ -6,10 +6,10 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class DeleteUsuarioUseCase {
-    public final UsuarioRepository personaRepository;
+
+    private final UsuarioRepository usuarioRepository;
 
     public void delete(UsuarioId id) {
-        personaRepository.deleteById(id);
+        usuarioRepository.deleteById(id);
     }
-
 }

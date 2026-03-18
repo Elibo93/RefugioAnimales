@@ -68,7 +68,6 @@ public class AdoptanteController {
     public AdoptanteResponse editAdoptante(
             @PathVariable int id,
             @Valid @RequestBody AdoptanteRequest request) {
-        // Usamos el ID de la URL y el cuerpo del request para crear el EditCommand
         EditAdoptanteCommand command = AdoptanteMapper.toEditCommand(new AdoptanteId(id), request);
         Adoptante adoptante = editService.update(command);
         return AdoptanteMapper.toResponse(adoptante);

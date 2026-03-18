@@ -10,10 +10,9 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class DeleteUsuarioService {
 
-    private final DeleteUsuarioUseCase deletePersonaUseCase;
+    private final DeleteUsuarioUseCase deleteUsuarioUseCase;
 
     public void delete(UsuarioId id) {
-        deletePersonaUseCase.delete(id);
+        deleteUsuarioUseCase.delete(id);
     }
-
 }

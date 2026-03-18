@@ -16,9 +16,9 @@ public class EditAdoptanteUseCase {
                 .map(t -> {
                     t.setDni(command.dni());
                     t.setDireccion(command.direccion());
+                    t.setFechaNacimiento(command.fechaNacimiento());
                     t.setEstadoValidacion(command.estadoValidacion());
-                    // El usuarioId no se suele cambiar una vez creado, 
-                    // por eso no lo incluimos aquí.
+                    
                     return adoptanteRepository.save(t);
                 })
                 .orElseThrow(() -> new AdoptanteNotFoundException(command.id().getValue()));

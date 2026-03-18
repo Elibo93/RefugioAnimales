@@ -36,70 +36,69 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("api/v1/personas")
+@RequestMapping("api/v1/usuarios")
 @RequiredArgsConstructor
 public class UsuarioController {
-    private final CreateUsuarioService createPersonaService;
-    private final FindUsuarioService findPersonaService;
-    private final DeleteUsuarioService deletePersonaService;
-    private final EditUsuarioService editPersonaService;
 
-    @Operation(summary = "Crea un Persona", description = "Crea un Persona dados sus datos")
+    private final CreateUsuarioService createUsuarioService;
+    private final FindUsuarioService findUsuarioService;
+    private final DeleteUsuarioService deleteUsuarioService;
+    private final EditUsuarioService editUsuarioService;
+
+    @Operation(summary = "Crea un Usuario", description = "Registra un nuevo usuario con sus credenciales y rol")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Persona creado correctamente"),
-            @ApiResponse(responseCode = "400", description = "Datos introducidos inválidos")
+            @ApiResponse(responseCode = "201", description = "Usuario creado correctamente"),
+            @ApiResponse(responseCode = "400", description = "Datos de registro inválidos")
     })
     @PostMapping
-    public ResponseEntity<UsuarioResponse> createPersona(
-            @jakarta.validation.Valid @RequestBody UsuarioRequest PersonaRequest) {
-        CreateUsuarioCommand comando = UsuarioMapper.toCommand(PersonaRequest);
-        Usuario persona = createPersonaService.createPersona(comando);
-        return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioMapper.toResponse(persona));
+    public ResponseEntity<UsuarioResponse> createUsuario(
+            @jakarta.validation.Valid @RequestBody UsuarioRequest usuarioRequest) {
+        CreateUsuarioCommand comando = UsuarioMapper.toCommand(usuarioRequest);
+        Usuario usuario = createUsuarioService.createUsuario(comando);
+        return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioMapper.toResponse(usuario));
     }
 
-    @Operation(summary = "Obtiene el listado de personas", description = "Busca en la base de datos todos los personas y sus detalles")
+    @Operation(summary = "Obtiene el listado de usuarios", description = "Retorna todos los usuarios registrados")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Listado de personas generado"),
-            @ApiResponse(responseCode = "404", description = "No hay personas en la base de datos")
+            @ApiResponse(responseCode = "200", description = "Listado generado con éxito"),
+            @ApiResponse(responseCode = "404", description = "No existen usuarios registrados")
     })
     @GetMapping
     public List<UsuarioResponse> getAll() {
-
-        return findPersonaService.findAll()
+        return findUsuarioService.findAll()
                 .stream()
                 .map(UsuarioMapper::toResponse)
                 .toList();
-
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioResponse> findPersonaById(@PathVariable int id) {
-        Usuario persona = findPersonaService.findById(new UsuarioId(id));
-        return ResponseEntity.ok(UsuarioMapper.toResponse(persona));
+    public ResponseEntity<UsuarioResponse> findUsuarioById(@PathVariable int id) {
+        Usuario usuario = findUsuarioService.findById(new UsuarioId(id));
+        return ResponseEntity.ok(UsuarioMapper.toResponse(usuario));
     }
 
-    @Operation(summary = "Elimina un Persona", description = "Elimina un Persona de la base de datos dado un id")
+    @Operation(summary = "Elimina un Usuario", description = "Elimina de forma permanente la cuenta de un usuario")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Sin cuerpo, Persona eliminado correctamente"),
-            @ApiResponse(responseCode = "404", description = "Persona no encontrado")
+            @ApiResponse(responseCode = "204", description = "Usuario eliminado"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletePersona(@PathVariable int id) {
-        deletePersonaService.delete(new UsuarioId(id));
+    public ResponseEntity<?> deleteUsuario(@PathVariable int id) {
+        deleteUsuarioService.delete(new UsuarioId(id));
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Edita un Persona", description = "Edita los datos de un Persona dado su id")
+    @Operation(summary = "Edita un Usuario", description = "Actualiza los datos básicos o el rol de un usuario")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Persona editado correctamente"),
-            @ApiResponse(responseCode = "400", description = "Datos introducidos inválidos")
+            @ApiResponse(responseCode = "200", description = "Usuario actualizado"),
+            @ApiResponse(responseCode = "400", description = "Datos de actualización inválidos")
     })
     @PutMapping("/{id}")
-    public UsuarioResponse editPersona(@PathVariable int id,
-            @jakarta.validation.Valid @RequestBody UsuarioRequest PersonaRequest) {
-        EditUsuarioCommand comando = UsuarioMapper.toCommand(id, PersonaRequest);
-        Usuario persona = editPersonaService.update(comando);
-        return UsuarioMapper.toResponse(persona);
+    public UsuarioResponse editUsuario(@PathVariable int id,
+            @jakarta.validation.Valid @RequestBody UsuarioRequest usuarioRequest) {
+        EditUsuarioCommand comando = UsuarioMapper.toCommand(id, usuarioRequest);
+        Usuario usuario = editUsuarioService.update(comando);
+        return UsuarioMapper.toResponse(usuario);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -113,5 +112,4 @@ public class UsuarioController {
         });
         return errors;
     }
-
 }

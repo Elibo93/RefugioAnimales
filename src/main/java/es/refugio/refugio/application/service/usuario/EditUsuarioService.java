@@ -10,11 +10,12 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class EditUsuarioService {
-  private final EditUsuarioUseCase editPersonaUseCase;
 
-  public Usuario update(EditUsuarioCommand comando) {
-    Usuario persona = editPersonaUseCase.update(comando);
-    return persona;
-  }
+    // Cambiamos editPersonaUseCase por editUsuarioUseCase
+    private final EditUsuarioUseCase editUsuarioUseCase;
 
+    public Usuario update(EditUsuarioCommand comando) {
+        // Cambiamos la variable local persona por usuario
+        return editUsuarioUseCase.update(comando);
+    }
 }

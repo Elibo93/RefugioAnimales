@@ -8,17 +8,19 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class EditUsuarioUseCase {
-    private final UsuarioRepository personaRepository;
+    
+    private final UsuarioRepository usuarioRepository;
 
     public Usuario update(EditUsuarioCommand command) {
-        return personaRepository.getById(command.id())
-                .map(p -> { // Actualizamos los atributos del objeto
-
-                    p.setEmail(command.email());
-                    return personaRepository.save(p);
+        return usuarioRepository.getById(command.id())
+                .map(u -> { 
+                    u.setNombre(command.nombre());
+                    u.setApellido(command.apellido());
+                    u.setEmail(command.email());
+                    u.setTelefono(command.telefono());
+                    
+                    return usuarioRepository.save(u);
                 })
-                .orElseThrow(() -> new UsuarioNotFoundException(command.id().getValue())); // Lo cambiamos
-
+                .orElseThrow(() -> new UsuarioNotFoundException(command.id().getValue()));
     }
-
 }

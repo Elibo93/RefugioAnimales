@@ -1,42 +1,28 @@
 package es.refugio.refugio.infraestructure.web.dto.usuario;
 
 import java.time.LocalDateTime;
-
+import es.refugio.auth.domain.Rol;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record UsuarioResponse(
-        @Schema(description = "ID único del producto", example = "23") int id,
+        @Schema(description = "ID único del usuario", example = "23") 
+        int id,
 
-        @Schema(description = "Número del DNI del Persona", example = "12345678A") String dni,
+        @Schema(description = "Nombre del usuario", example = "Juan") 
+        String nombre,
 
-        @Schema(description = "Nombre del Persona", example = "Juan") String nombre,
+        @Schema(description = "Apellido del usuario", example = "Rodriguez") 
+        String apellido,
 
-        @Schema(description = "Apellido del Persona", example = "Rodriguez") String apellido,
+        @Schema(description = "Email de acceso", example = "usuario@email.com") 
+        String email,
 
-        @Schema(description = "Email del Persona", example = "Persona@email.com") String email,
+        @Schema(description = "Número de teléfono", example = "123456789") 
+        String telefono,
 
-        @Schema(description = "Número de teléfono del Persona", example = "123456789") String telefono,
+        @Schema(description = "Rol asignado en el sistema", example = "ROLE_ADOPTANTE") 
+        Rol rol,
 
-        @Schema(description = "Dirección del Persona", example = "C/ El Pinar 34") String direccion,
-
-        @Schema(description = "Fecha de nacimiento del Persona", example = "26/05/1993") String fechaNacimiento,
-
-        @Schema(description = "Fecha de creación del Persona", example = "03/02/2026") LocalDateTime createdAt) {
-
+        @Schema(description = "Fecha de registro en la plataforma") 
+        LocalDateTime createdAt) {
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

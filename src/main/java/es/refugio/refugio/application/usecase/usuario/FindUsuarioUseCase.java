@@ -10,19 +10,21 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class FindUsuarioUseCase {
-    private final UsuarioRepository personaRepository;
+
+    private final UsuarioRepository usuarioRepository;
 
     public List<Usuario> findAll() {
-        List<Usuario> personas = personaRepository.getAll();
+        List<Usuario> usuarios = usuarioRepository.getAll();
 
-        if (personas.isEmpty())
+        if (usuarios.isEmpty()) {
             throw new UsuarioNotFoundException();
+        }
 
-        return personas;
+        return usuarios;
     }
 
     public Usuario findById(UsuarioId id) {
-        return personaRepository.getById(id).orElseThrow(() -> new UsuarioNotFoundException());
+        return usuarioRepository.getById(id)
+                .orElseThrow(() -> new UsuarioNotFoundException(id.getValue()));
     }
-
 }

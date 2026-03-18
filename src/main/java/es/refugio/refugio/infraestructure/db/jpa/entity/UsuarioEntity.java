@@ -1,38 +1,31 @@
 package es.refugio.refugio.infraestructure.db.jpa.entity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-
-import jakarta.persistence.CascadeType;
+import es.refugio.auth.domain.Rol;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "personas")
+@Table(name = "usuarios")
 public class UsuarioEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @Column(nullable = false, length = 9)
-    private String dni;
 
     @Column(nullable = false, length = 255)
     private String nombre;
@@ -40,24 +33,20 @@ public class UsuarioEntity {
     @Column(nullable = false, length = 255)
     private String apellido;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
+
+    @Column(nullable = false, length = 255)
+    private String contraseña;
 
     @Column(length = 20)
     private String telefono;
 
-    @Column(length = 500)
-    private String direccion;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private Rol rol;
 
-    @Column(name = "fecha_nacimiento", length = 20)
-    private String fechaNacimiento;
-
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private List<AdopcionEntity> adopciones;
 
 }

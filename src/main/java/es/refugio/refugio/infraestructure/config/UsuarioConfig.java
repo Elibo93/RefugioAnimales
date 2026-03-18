@@ -20,55 +20,50 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UsuarioConfig {
 
-    private final UsuarioEntityJpaRepository PersonaRepository;
+    private final UsuarioEntityJpaRepository usuarioEntityJpaRepository;
 
     @Bean
-    public UsuarioRepository personaRepository() {
-        return new UsuarioJpaRepositoryImpl(PersonaRepository);
-    }
-
-    // POST
-    @Bean
-    public CreateUsuarioUseCase createPersonaUseCase() {
-        return new CreateUsuarioUseCase(personaRepository());
+    public UsuarioRepository usuarioRepository() {
+        return new UsuarioJpaRepositoryImpl(usuarioEntityJpaRepository);
     }
 
     @Bean
-    public CreateUsuarioService createPersonaService() {
-        return new CreateUsuarioService(createPersonaUseCase());
-    }
-
-    // GET
-    @Bean
-    public FindUsuarioUseCase findPersonaUseCase() {
-        return new FindUsuarioUseCase(personaRepository());
+    public CreateUsuarioUseCase createUsuarioUseCase() {
+        return new CreateUsuarioUseCase(usuarioRepository());
     }
 
     @Bean
-    public FindUsuarioService findPersonaService() {
-        return new FindUsuarioService(findPersonaUseCase());
-    }
-
-    // DELETE
-
-    @Bean
-    public DeleteUsuarioUseCase deletePersonaUseCase() {
-        return new DeleteUsuarioUseCase(personaRepository());
+    public CreateUsuarioService createUsuarioService() {
+        return new CreateUsuarioService(createUsuarioUseCase());
     }
 
     @Bean
-    public DeleteUsuarioService deletePersonaService() {
-        return new DeleteUsuarioService(deletePersonaUseCase());
-    }
-
-    // PUT
-    @Bean
-    public EditUsuarioUseCase editPersonaUseCase() {
-        return new EditUsuarioUseCase(personaRepository());
+    public FindUsuarioUseCase findUsuarioUseCase() {
+        return new FindUsuarioUseCase(usuarioRepository());
     }
 
     @Bean
-    public EditUsuarioService editPersonaService() {
-        return new EditUsuarioService(editPersonaUseCase());
+    public FindUsuarioService findUsuarioService() {
+        return new FindUsuarioService(findUsuarioUseCase());
+    }
+
+    @Bean
+    public DeleteUsuarioUseCase deleteUsuarioUseCase() {
+        return new DeleteUsuarioUseCase(usuarioRepository());
+    }
+
+    @Bean
+    public DeleteUsuarioService deleteUsuarioService() {
+        return new DeleteUsuarioService(deleteUsuarioUseCase());
+    }
+
+    @Bean
+    public EditUsuarioUseCase editUsuarioUseCase() {
+        return new EditUsuarioUseCase(usuarioRepository());
+    }
+
+    @Bean
+    public EditUsuarioService editUsuarioService() {
+        return new EditUsuarioService(editUsuarioUseCase());
     }
 }

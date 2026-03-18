@@ -1,7 +1,7 @@
 package es.refugio.refugio.domain.model.usuario;
 
 import java.time.LocalDateTime;
-
+import es.refugio.auth.domain.Rol;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,15 +13,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Usuario {
 
-	// Atributos
-	private UsuarioId id;
-	private String dni;
-	private String nombre;
-	private String apellido;
-	private String email;
-	private String telefono;
-	private String direccion;
-	private String fechaNacimiento;
-	private LocalDateTime createdAt;
+    private UsuarioId id;
+    private String nombre;
+    private String apellido;
+    private String email;
+    private String contraseña;
+    private String telefono;
+    private Rol rol;
+    private LocalDateTime createdAt;
 
 }

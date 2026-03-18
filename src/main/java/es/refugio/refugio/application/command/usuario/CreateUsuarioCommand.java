@@ -8,12 +8,10 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @Accessors(fluent = true)
 public class CreateUsuarioCommand {
-    private String dni;
     private String nombre;
     private String apellido;
     private String email;
-    private String telefono;
-    private String direccion;
-    private String fechaNacimiento;
-
+    private String contraseña; 
+    private String telefono;   
+    private String rol;
 }

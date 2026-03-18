@@ -4,8 +4,7 @@ import es.refugio.common.domain.error.EntityNotFoundException;
 
 public class UsuarioNotFoundException extends EntityNotFoundException {
 
-    // Atributos
-    public static final String ENTIDAD = "Persona";
+    public static final String ENTIDAD = "Usuario";
 
     public UsuarioNotFoundException() {
         super(ENTIDAD);
@@ -16,20 +15,3 @@ public class UsuarioNotFoundException extends EntityNotFoundException {
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

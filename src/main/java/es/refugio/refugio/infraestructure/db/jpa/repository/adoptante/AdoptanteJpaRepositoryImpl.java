@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import es.refugio.refugio.domain.model.adoptante.Adoptante;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
+import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.repository.AdoptanteRepository;
 import es.refugio.refugio.infraestructure.db.jpa.entity.AdoptanteEntity;
 import es.refugio.refugio.infraestructure.mapper.AdoptanteMapper;
@@ -12,39 +13,42 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
-@Component // Importante para que Spring lo encuentre como implementación de la interfaz de dominio
+@Component
 public class AdoptanteJpaRepositoryImpl implements AdoptanteRepository {
 
     private final AdoptanteEntityJpaRepository repository;
 
     @Override
     public Adoptante save(Adoptante t) {
-        // Transformamos de Dominio a Entidad JPA
         AdoptanteEntity adoptanteEntity = AdoptanteMapper.toEntity(t);
-        // Guardamos y transformamos de vuelta a Dominio
         return AdoptanteMapper.toDomain(repository.save(adoptanteEntity));
     }
 
     @Override
     public List<Adoptante> getAll() {
-        // Recuperamos todas las entidades y las mapeamos a la lista de dominio
         return AdoptanteMapper.toDomain(repository.findAll());
     }
 
     @Override
     public Optional<Adoptante> getById(AdoptanteId id) {
-        // Buscamos por el valor primitivo del ID tipado
-        Optional<AdoptanteEntity> te = repository.findById(id.getValue());
-
-        if (te.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(AdoptanteMapper.toDomain(te.get()));
+        return repository.findById(id.getValue())
+                .map(AdoptanteMapper::toDomain);
     }
 
     @Override
     public void deleteById(AdoptanteId id) {
         repository.deleteById(id.getValue());
+    }
+
+    @Override
+    public Optional<Adoptante> getByDni(String dni) {
+        return repository.findByDni(dni)
+                .map(AdoptanteMapper::toDomain);
+    }
+
+    @Override
+    public Optional<Adoptante> getByUsuarioId(UsuarioId usuarioId) {
+        return repository.findByUsuarioId(usuarioId.getValue())
+                .map(AdoptanteMapper::toDomain);
     }
 }

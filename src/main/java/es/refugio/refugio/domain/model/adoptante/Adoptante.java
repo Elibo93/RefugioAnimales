@@ -17,6 +17,7 @@ public class Adoptante {
     private String dni;
     private String nombre;
     private String direccion;
+    private String fechaNacimiento;
     private String estadoValidacion; // "PENDIENTE", "APROBADO", "RECHAZADO"
     // Relaciones (IDs de las entidades relacionadas)
     private LocalDateTime fechaRegistro;

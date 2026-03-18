@@ -1,7 +1,6 @@
 package es.refugio.refugio.application.service.usuario;
 
 import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 import es.refugio.refugio.application.usecase.usuario.FindUsuarioUseCase;
@@ -13,13 +12,13 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class FindUsuarioService {
 
-    private final FindUsuarioUseCase findPersonaUseCase;
+    private final FindUsuarioUseCase findUsuarioUseCase;
 
     public List<Usuario> findAll() {
-        return findPersonaUseCase.findAll();
+        return findUsuarioUseCase.findAll();
     }
 
     public Usuario findById(UsuarioId id) {
-        return findPersonaUseCase.findById(id);
+        return findUsuarioUseCase.findById(id);
     }
 }

@@ -15,50 +15,46 @@ public class UsuarioMapper {
 
     public static CreateUsuarioCommand toCommand(UsuarioRequest req) {
         return new CreateUsuarioCommand(
-                req.dni(),
                 req.nombre(),
                 req.apellido(),
                 req.email(),
+                req.contraseña(),
                 req.telefono(),
-                req.direccion(),
-                req.fechaNacimiento()
-
+                req.rol()
         );
     }
 
     public static EditUsuarioCommand toCommand(int id, UsuarioRequest req) {
         return new EditUsuarioCommand(
                 new UsuarioId(id),
+                req.nombre(),
+                req.apellido(),
                 req.email(),
                 req.telefono(),
-                req.direccion()
-
+                req.rol()
         );
     }
 
-    public static UsuarioResponse toResponse(Usuario persona) {
+    public static UsuarioResponse toResponse(Usuario usuario) {
         return new UsuarioResponse(
-                persona.getId() != null ? persona.getId().getValue() : 0,
-                persona.getDni(),
-                persona.getNombre(),
-                persona.getApellido(),
-                persona.getEmail(),
-                persona.getTelefono(),
-                persona.getDireccion(),
-                persona.getFechaNacimiento(),
-                persona.getCreatedAt());
+                usuario.getId() != null ? usuario.getId().getValue() : 0,
+                usuario.getNombre(),
+                usuario.getApellido(),
+                usuario.getEmail(),
+                usuario.getTelefono(),
+                usuario.getRol(),
+                usuario.getCreatedAt());
     }
 
     public static UsuarioEntity toEntity(Usuario a) {
         return UsuarioEntity.builder()
                 .id(a.getId() != null ? a.getId().getValue() : null)
-                .dni(a.getDni())
                 .nombre(a.getNombre())
                 .apellido(a.getApellido())
                 .email(a.getEmail())
+                .contraseña(a.getContraseña())
                 .telefono(a.getTelefono())
-                .direccion(a.getDireccion())
-                .fechaNacimiento(a.getFechaNacimiento())
+                .rol(a.getRol())
                 .createdAt(a.getCreatedAt())
                 .build();
     }
@@ -66,13 +62,12 @@ public class UsuarioMapper {
     public static Usuario toDomain(UsuarioEntity e) {
         return Usuario.builder()
                 .id(e.getId() != null ? new UsuarioId(e.getId()) : null)
-                .dni(e.getDni())
                 .nombre(e.getNombre())
                 .apellido(e.getApellido())
                 .email(e.getEmail())
+                .contraseña(e.getContraseña())
                 .telefono(e.getTelefono())
-                .direccion(e.getDireccion())
-                .fechaNacimiento(e.getFechaNacimiento())
+                .rol(e.getRol())
                 .createdAt(e.getCreatedAt())
                 .build();
     }

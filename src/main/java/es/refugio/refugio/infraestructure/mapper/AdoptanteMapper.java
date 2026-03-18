@@ -18,7 +18,8 @@ public class AdoptanteMapper {
         return new CreateAdoptanteCommand(
                 request.usuarioId(),
                 request.dni(),
-                request.direccion());
+                request.direccion(),
+                request.fechaNacimiento());
     }
 
     public static EditAdoptanteCommand toEditCommand(AdoptanteId id, AdoptanteRequest request) {
@@ -26,6 +27,7 @@ public class AdoptanteMapper {
                 id,
                 request.dni(),
                 request.direccion(),
+                request.fechaNacimiento(),
                 request.estadoValidacion());
     }
 
@@ -35,18 +37,17 @@ public class AdoptanteMapper {
                 adoptante.getUsuarioId(),
                 adoptante.getDni(),
                 adoptante.getDireccion(),
+                adoptante.getFechaNacimiento(),
                 adoptante.getEstadoValidacion(),
                 adoptante.getFechaRegistro());
     }
 
     public static AdoptanteEntity toEntity(Adoptante t) {
-        // Para la entidad, necesitamos el objeto UsuarioEntity
-        // Normalmente el repositorio de infraestructura se encarga de setear el objeto completo,
-        // pero aquí dejamos la estructura lista.
         return AdoptanteEntity.builder()
                 .id(t.getId() != null ? t.getId().getValue() : null)
                 .dni(t.getDni())
                 .direccion(t.getDireccion())
+                .fechaNacimiento(t.getFechaNacimiento())
                 .estadoValidacion(t.getEstadoValidacion())
                 .fechaRegistro(t.getFechaRegistro())
                 .usuario(UsuarioEntity.builder().id(t.getUsuarioId()).build())
@@ -59,6 +60,7 @@ public class AdoptanteMapper {
                 .usuarioId(e.getUsuario() != null ? e.getUsuario().getId() : null)
                 .dni(e.getDni())
                 .direccion(e.getDireccion())
+                .fechaNacimiento(e.getFechaNacimiento())
                 .estadoValidacion(e.getEstadoValidacion())
                 .fechaRegistro(e.getFechaRegistro())
                 .build();

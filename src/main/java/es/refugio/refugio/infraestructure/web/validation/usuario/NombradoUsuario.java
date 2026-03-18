@@ -14,33 +14,11 @@ import jakarta.validation.Payload;
 @Constraint(validatedBy = NombradoUsuarioValidator.class)
 @Documented
 public @interface NombradoUsuario {
-     // Definimos el mensaje por defecto
-    String message() default "{es.etg.daw.dawes.java.rest.restfull.personas.infraestructure.web.validation.NombradoPersona}";
 
-    // Permite agrupar validaciones. Es útil cuando quieres validar solo un
-    // subconjunto de reglas
-    // (por ejemplo, validar un Persona para "Creación" vs. para "Actualización").
-    // El valor por defecto es para todos los casos.
+    String message() default "{es.refugio.refugio.infraestructure.web.validation.NombradoUsuario}";
+
     Class<?>[] groups() default {};
 
-    // Una propiedad avanzada que permite definir metadatos o códigos de error
-    // específicos al resultado de la validación.
     Class<? extends Payload>[] payload() default {};
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

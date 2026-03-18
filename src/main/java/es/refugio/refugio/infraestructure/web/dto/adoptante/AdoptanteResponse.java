@@ -7,6 +7,7 @@ public record AdoptanteResponse(
         Integer usuarioId,
         String dni,
         String direccion,
+        String fechaNacimiento,
         String estadoValidacion,
         LocalDateTime fechaRegistro) {
 }

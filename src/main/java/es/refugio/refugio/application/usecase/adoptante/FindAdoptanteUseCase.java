@@ -1,7 +1,6 @@
 package es.refugio.refugio.application.usecase.adoptante;
 
 import java.util.List;
-
 import es.refugio.refugio.domain.error.AdoptanteNotFoundException;
 import es.refugio.refugio.domain.model.adoptante.Adoptante;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
@@ -17,7 +16,6 @@ public class FindAdoptanteUseCase {
         List<Adoptante> adoptantes = adoptanteRepository.getAll();
 
         if (adoptantes.isEmpty()) {
-            // Lanza la excepción genérica "Adoptante no encontrado"
             throw new AdoptanteNotFoundException();
         }
         return adoptantes;
