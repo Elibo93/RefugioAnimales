@@ -1,0 +1,85 @@
+package es.refugio.refugio.infraestructure.mapper;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import es.refugio.refugio.application.command.usuario.CreateUsuarioCommand;
+import es.refugio.refugio.application.command.usuario.EditUsuarioCommand;
+import es.refugio.refugio.domain.model.usuario.Usuario;
+import es.refugio.refugio.domain.model.usuario.UsuarioId;
+import es.refugio.refugio.infraestructure.db.jpa.entity.UsuarioEntity;
+import es.refugio.refugio.infraestructure.web.dto.usuario.UsuarioRequest;
+import es.refugio.refugio.infraestructure.web.dto.usuario.UsuarioResponse;
+
+public class UsuarioMapper {
+
+    public static CreateUsuarioCommand toCommand(UsuarioRequest req) {
+        return new CreateUsuarioCommand(
+                req.dni(),
+                req.nombre(),
+                req.apellido(),
+                req.email(),
+                req.telefono(),
+                req.direccion(),
+                req.fechaNacimiento()
+
+        );
+    }
+
+    public static EditUsuarioCommand toCommand(int id, UsuarioRequest req) {
+        return new EditUsuarioCommand(
+                new UsuarioId(id),
+                req.email(),
+                req.telefono(),
+                req.direccion()
+
+        );
+    }
+
+    public static UsuarioResponse toResponse(Usuario persona) {
+        return new UsuarioResponse(
+                persona.getId() != null ? persona.getId().getValue() : 0,
+                persona.getDni(),
+                persona.getNombre(),
+                persona.getApellido(),
+                persona.getEmail(),
+                persona.getTelefono(),
+                persona.getDireccion(),
+                persona.getFechaNacimiento(),
+                persona.getCreatedAt());
+    }
+
+    public static UsuarioEntity toEntity(Usuario a) {
+        return UsuarioEntity.builder()
+                .id(a.getId() != null ? a.getId().getValue() : null)
+                .dni(a.getDni())
+                .nombre(a.getNombre())
+                .apellido(a.getApellido())
+                .email(a.getEmail())
+                .telefono(a.getTelefono())
+                .direccion(a.getDireccion())
+                .fechaNacimiento(a.getFechaNacimiento())
+                .createdAt(a.getCreatedAt())
+                .build();
+    }
+
+    public static Usuario toDomain(UsuarioEntity e) {
+        return Usuario.builder()
+                .id(e.getId() != null ? new UsuarioId(e.getId()) : null)
+                .dni(e.getDni())
+                .nombre(e.getNombre())
+                .apellido(e.getApellido())
+                .email(e.getEmail())
+                .telefono(e.getTelefono())
+                .direccion(e.getDireccion())
+                .fechaNacimiento(e.getFechaNacimiento())
+                .createdAt(e.getCreatedAt())
+                .build();
+    }
+
+    public static List<Usuario> toDomain(List<UsuarioEntity> lista) {
+        return lista.stream()
+                .map(UsuarioMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+}
