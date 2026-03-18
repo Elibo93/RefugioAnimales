@@ -1,7 +1,6 @@
 package es.refugio.refugio.application.usecase.animal;
 
 import java.util.List;
-
 import es.refugio.refugio.domain.error.AnimalNotFoundException;
 import es.refugio.refugio.domain.model.animal.Animal;
 import es.refugio.refugio.domain.model.animal.AnimalId;
@@ -23,23 +22,7 @@ public class FindAnimalUseCase {
     }
 
     public Animal findById(AnimalId id) {
-        return animalRepository.getById(id).orElseThrow(() -> new AnimalNotFoundException());
+        return animalRepository.getById(id)
+                .orElseThrow(() -> new AnimalNotFoundException(id.getValue()));
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

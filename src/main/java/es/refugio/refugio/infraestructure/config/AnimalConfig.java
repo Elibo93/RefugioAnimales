@@ -20,16 +20,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AnimalConfig {
 
-    private final AnimalEntityJpaRepository AnimalRepository;
+    private final AnimalEntityJpaRepository jpaRepository;
 
-    // Creo por configuración la instalacia que me interesa del productoRepository
-    // (desde jpa)
     @Bean
     public AnimalRepository animalRepository() {
-        return new AnimalJpaRepositoryImpl(AnimalRepository);
+        return new AnimalJpaRepositoryImpl(jpaRepository);
     }
 
-    // POST
     @Bean
     public CreateAnimalUseCase createAnimalUseCase() {
         return new CreateAnimalUseCase(animalRepository());
@@ -40,7 +37,6 @@ public class AnimalConfig {
         return new CreateAnimalService(createAnimalUseCase());
     }
 
-    // GET
     @Bean
     public FindAnimalUseCase findAnimalUseCase() {
         return new FindAnimalUseCase(animalRepository());
@@ -71,19 +67,3 @@ public class AnimalConfig {
         return new EditAnimalService(editAnimalUseCase());
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

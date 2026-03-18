@@ -1,7 +1,6 @@
 package es.refugio.refugio.application.service.animal;
 
 import org.springframework.stereotype.Service;
-
 import es.refugio.refugio.application.usecase.animal.DeleteAnimalUseCase;
 import es.refugio.refugio.domain.model.animal.AnimalId;
 import lombok.RequiredArgsConstructor;
@@ -16,20 +15,3 @@ public class DeleteAnimalService {
         deleteAnimalUseCase.delete(id);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,7 +1,6 @@
 package es.refugio.refugio.application.service.animal;
 
 import org.springframework.stereotype.Service;
-
 import es.refugio.refugio.application.command.animal.EditAnimalCommand;
 import es.refugio.refugio.application.usecase.animal.EditAnimalUseCase;
 import es.refugio.refugio.domain.model.animal.Animal;
@@ -17,20 +16,3 @@ public class EditAnimalService {
         return editAnimalUseCase.update(command);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

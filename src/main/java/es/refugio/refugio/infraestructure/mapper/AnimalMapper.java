@@ -13,64 +13,74 @@ import es.refugio.refugio.infraestructure.web.dto.animal.AnimalResponse;
 
 public class AnimalMapper {
 
-    public static CreateAnimalCommand toCommand(AnimalRequest request) {
+    public static CreateAnimalCommand toCommand(AnimalRequest req) {
         return new CreateAnimalCommand(
-                request.nombre(),
-                request.especie(),
-                request.raza(),
-                request.sexo(),
-                request.chipId(),
-                request.estado(),
-                request.edad(),
-                request.tamano(),
-                request.descripcion(),
-                request.foto());
+                req.nombre(),
+                req.especie(),
+                req.especiePersonalizada(),
+                req.raza(),
+                req.sexo(),
+                req.chipId(),
+                req.estado(),
+                req.edad(),
+                req.tamano(),
+                req.descripcion(),
+                req.foto(),
+                req.fechaIngreso()
+        );
     }
 
-    public static EditAnimalCommand toEditCommand(AnimalId id, AnimalRequest request) {
+    public static EditAnimalCommand toCommand(int id, AnimalRequest req) {
         return new EditAnimalCommand(
-                id,
-                request.nombre(),
-                request.especie(),
-                request.raza(),
-                request.sexo(),
-                request.chipId(),
-                request.estado(),
-                request.edad(),
-                request.tamano(),
-                request.descripcion(),
-                request.foto());
+                new AnimalId(id),
+                req.nombre(),
+                req.especie(),
+                req.especiePersonalizada(),
+                req.raza(),
+                req.sexo(),
+                req.chipId(),
+                req.estado(),
+                req.edad(),
+                req.tamano(),
+                req.descripcion(),
+                req.foto(),
+                req.fechaIngreso()
+        );
     }
 
-    public static AnimalResponse toResponse(Animal animal) {
+    public static AnimalResponse toResponse(Animal a) {
         return new AnimalResponse(
-                animal.getId() != null ? animal.getId().getValue() : 0,
-                animal.getNombre(),
-                animal.getEspecie(),
-                animal.getRaza(),
-                animal.getSexo(),
-                animal.getChipId(),
-                animal.getEstado(),
-                animal.getEdad(),
-                animal.getTamano(),
-                animal.getDescripcion(),
-                animal.getFoto(),
-                animal.getFechaIngreso());
+                a.getId() != null ? a.getId().getValue() : 0,
+                a.getNombre(),
+                a.getEspecie() != null ? a.getEspecie().name() : null,
+                a.getEspeciePersonalizada(),
+                a.getRaza(),
+                a.getSexo() != null ? a.getSexo().name() : null,
+                a.getChipId(),
+                a.getEstado() != null ? a.getEstado().name() : null,
+                a.getEdad(),
+                a.getTamano() != null ? a.getTamano().name() : null,
+                a.getDescripcion(),
+                a.getFoto(),
+                a.getFechaIngreso()
+        );
     }
 
-    public static AnimalEntity toEntity(Animal t) {
+    public static AnimalEntity toEntity(Animal a) {
         return AnimalEntity.builder()
-                .id(t.getId() != null ? t.getId().getValue() : null)
-                .nombre(t.getNombre())
-                .especie(t.getEspecie())
-                .raza(t.getRaza())
-                .sexo(t.getSexo())
-                .chipId(t.getChipId())
-                .edad(t.getEdad())
-                .tamano(t.getTamano())
-                .descripcion(t.getDescripcion())
-                .foto(t.getFoto())
-                .fechaIngreso(t.getFechaIngreso())
+                .id(a.getId() != null ? a.getId().getValue() : null)
+                .nombre(a.getNombre())
+                .especie(a.getEspecie())
+                .especiePersonalizada(a.getEspeciePersonalizada())
+                .raza(a.getRaza())
+                .sexo(a.getSexo())
+                .chipId(a.getChipId())
+                .estado(a.getEstado())
+                .edad(a.getEdad())
+                .tamano(a.getTamano())
+                .descripcion(a.getDescripcion())
+                .foto(a.getFoto())
+                .fechaIngreso(a.getFechaIngreso())
                 .build();
     }
 
@@ -79,9 +89,11 @@ public class AnimalMapper {
                 .id(e.getId() != null ? new AnimalId(e.getId()) : null)
                 .nombre(e.getNombre())
                 .especie(e.getEspecie())
+                .especiePersonalizada(e.getEspeciePersonalizada())
                 .raza(e.getRaza())
                 .sexo(e.getSexo())
                 .chipId(e.getChipId())
+                .estado(e.getEstado())
                 .edad(e.getEdad())
                 .tamano(e.getTamano())
                 .descripcion(e.getDescripcion())

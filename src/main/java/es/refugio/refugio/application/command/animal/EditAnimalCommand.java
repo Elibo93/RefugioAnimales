@@ -1,11 +1,13 @@
 package es.refugio.refugio.application.command.animal;
 
+import java.time.LocalDate;
 import es.refugio.refugio.domain.model.animal.AnimalId;
 
 public record EditAnimalCommand(
         AnimalId id,
         String nombre,
         String especie,
+        String especiePersonalizada,
         String raza,
         String sexo,
         String chipId,
@@ -13,5 +15,7 @@ public record EditAnimalCommand(
         Integer edad,
         String tamano,
         String descripcion,
-        String foto) {
+        String foto,
+        LocalDate fechaIngreso
+) {
 }

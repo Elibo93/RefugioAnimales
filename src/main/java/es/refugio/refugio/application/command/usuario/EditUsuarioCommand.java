@@ -1,5 +1,6 @@
 package es.refugio.refugio.application.command.usuario;
 
+import es.refugio.auth.domain.Rol;
 import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,4 +16,5 @@ public class EditUsuarioCommand {
     private String apellido;
     private String email;
     private String telefono;
+    private Rol rol;
 }

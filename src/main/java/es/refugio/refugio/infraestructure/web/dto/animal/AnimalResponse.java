@@ -1,9 +1,12 @@
 package es.refugio.refugio.infraestructure.web.dto.animal;
 
+import java.time.LocalDateTime;
+
 public record AnimalResponse(
         int id,
         String nombre,
         String especie,
+        String especiePersonalizada,
         String raza,
         String sexo,
         String chipId,
@@ -12,6 +15,6 @@ public record AnimalResponse(
         String tamano,
         String descripcion,
         String foto,
-        java.time.LocalDateTime fechaIngreso) {
-
+        LocalDateTime fechaIngreso
+) {
 }

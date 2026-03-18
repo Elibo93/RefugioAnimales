@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import es.refugio.refugio.domain.model.adoptante.Adoptante;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
+import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.repository.AdoptanteRepository;
 
 public class AdoptanteRepositoryMockImpl implements AdoptanteRepository {
@@ -49,6 +50,20 @@ public class AdoptanteRepositoryMockImpl implements AdoptanteRepository {
     @Override
     public void deleteById(AdoptanteId id) {
         adoptantes.remove(id);
+    }
+
+    @Override
+    public Optional<Adoptante> getByDni(String dni) {
+        return adoptantes.values().stream()
+                .filter(a -> a.getDni().equalsIgnoreCase(dni))
+                .findFirst();
+    }
+
+    @Override
+    public Optional<Adoptante> getByUsuarioId(UsuarioId usuarioId) {
+        return adoptantes.values().stream()
+                .filter(a -> a.getUsuarioId().equals(usuarioId))
+                .findFirst();
     }
 
     // Métodos específicos útiles para el dominio de Adoptante

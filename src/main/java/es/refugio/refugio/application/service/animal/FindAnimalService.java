@@ -1,9 +1,7 @@
 package es.refugio.refugio.application.service.animal;
 
 import java.util.List;
-
 import org.springframework.stereotype.Service;
-
 import es.refugio.refugio.application.usecase.animal.FindAnimalUseCase;
 import es.refugio.refugio.domain.model.animal.Animal;
 import es.refugio.refugio.domain.model.animal.AnimalId;
@@ -23,20 +21,3 @@ public class FindAnimalService {
         return findAnimalUseCase.findById(id);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import es.refugio.refugio.domain.model.animal.Animal;
 import es.refugio.refugio.domain.model.animal.AnimalId;
+import es.refugio.refugio.domain.model.animal.enums.Especie;
+import es.refugio.refugio.domain.model.animal.enums.EstadoAnimal;
 import es.refugio.refugio.domain.repository.AnimalRepository;
 import es.refugio.refugio.infraestructure.db.jpa.entity.AnimalEntity;
 import es.refugio.refugio.infraestructure.mapper.AnimalMapper;
@@ -13,10 +15,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AnimalJpaRepositoryImpl implements AnimalRepository {
 
-    // Atributos
     private final AnimalEntityJpaRepository repository;
 
-    // Implementacion de metodos
     @Override
     public Animal save(Animal t) {
         AnimalEntity animalEntity = AnimalMapper.toEntity(t);
@@ -30,17 +30,28 @@ public class AnimalJpaRepositoryImpl implements AnimalRepository {
 
     @Override
     public Optional<Animal> getById(AnimalId id) {
-        Optional<AnimalEntity> te = repository.findById(id.getValue());
-
-        if (te.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(AnimalMapper.toDomain(te.get()));
+        return repository.findById(id.getValue())
+                .map(AnimalMapper::toDomain);
     }
 
     @Override
     public void deleteById(AnimalId id) {
         repository.deleteById(id.getValue());
+    }
+
+    @Override
+    public Optional<Animal> getByChipId(String chipId) {
+        return repository.findByChipId(chipId)
+                .map(AnimalMapper::toDomain);
+    }
+
+    @Override
+    public List<Animal> getByEstado(EstadoAnimal estado) {
+        return AnimalMapper.toDomain(repository.findByEstado(estado));
+    }
+
+    @Override
+    public List<Animal> getByEspecie(Especie especie) {
+        return AnimalMapper.toDomain(repository.findByEspecie(especie));
     }
 }

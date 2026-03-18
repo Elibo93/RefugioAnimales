@@ -1,5 +1,6 @@
 package es.refugio.refugio.application.command.usuario;
 
+import es.refugio.auth.domain.Rol;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -13,5 +14,5 @@ public class CreateUsuarioCommand {
     private String email;
     private String contraseña; 
     private String telefono;   
-    private String rol;
+    private Rol rol;
 }
