@@ -9,7 +9,10 @@ public record AnimalRequest(
         String sexo,
         String chipId,
         String estado,
-        String notas) {
+        Integer edad,
+        String tamano,
+        String descripcion,
+        String foto) {
 
     public AnimalRequest(Animal t) {
         this(
@@ -19,6 +22,9 @@ public record AnimalRequest(
                 t.getSexo(),
                 t.getChipId(),
                 t.getEstado(),
-                t.getNotas());
+                t.getEdad(),
+                t.getTamano(),
+                t.getDescripcion(),
+                t.getFoto());
     }
 }

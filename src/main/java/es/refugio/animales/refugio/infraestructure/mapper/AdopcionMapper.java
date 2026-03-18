@@ -5,10 +5,10 @@ import java.util.stream.Collectors;
 
 import es.refugio.animales.refugio.application.command.adopcion.CreateAdopcionCommand;
 import es.refugio.animales.refugio.application.command.adopcion.EditAdopcionCommand;
-import es.refugio.animales.refugio.domain.model.persona.PersonaId;
 import es.refugio.animales.refugio.domain.model.adopcion.Adopcion;
 import es.refugio.animales.refugio.domain.model.adopcion.AdopcionId;
 import es.refugio.animales.refugio.domain.model.animal.AnimalId;
+import es.refugio.animales.refugio.domain.model.usuario.PersonaId;
 import es.refugio.animales.refugio.infraestructure.db.jpa.entity.PersonaEntity;
 import es.refugio.animales.refugio.infraestructure.db.jpa.entity.AdopcionEntity;
 import es.refugio.animales.refugio.infraestructure.db.jpa.entity.AnimalEntity;

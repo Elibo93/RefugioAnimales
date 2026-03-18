@@ -3,7 +3,7 @@ package es.refugio.animales.refugio.application.service.persona;
 import org.springframework.stereotype.Service;
 
 import es.refugio.animales.refugio.application.usecase.persona.DeletePersonaUseCase;
-import es.refugio.animales.refugio.domain.model.persona.PersonaId;
+import es.refugio.animales.refugio.domain.model.usuario.PersonaId;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

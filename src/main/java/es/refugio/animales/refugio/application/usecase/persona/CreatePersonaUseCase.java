@@ -2,8 +2,8 @@ package es.refugio.animales.refugio.application.usecase.persona;
 
 import java.time.LocalDateTime;
 
-import es.refugio.animales.refugio.application.command.persona.CreatePersonaCommand;
-import es.refugio.animales.refugio.domain.model.persona.Persona;
+import es.refugio.animales.refugio.application.command.usuario.CreatePersonaCommand;
+import es.refugio.animales.refugio.domain.model.usuario.Persona;
 import es.refugio.animales.refugio.domain.repository.PersonaRepository;
 import lombok.AllArgsConstructor;
 

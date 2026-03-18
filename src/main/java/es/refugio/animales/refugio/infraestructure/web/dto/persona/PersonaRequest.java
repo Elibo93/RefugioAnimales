@@ -1,6 +1,6 @@
 package es.refugio.animales.refugio.infraestructure.web.dto.persona;
 
-import es.refugio.animales.refugio.domain.model.persona.Persona;
+import es.refugio.animales.refugio.domain.model.usuario.Persona;
 import es.refugio.animales.refugio.infraestructure.web.validation.persona.NombradoPersona;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -20,9 +20,6 @@ public record PersonaRequest(
 
         String fechaNacimiento
 
-
-    
-
 ) {
 
     // Constructor de conveniencia para crear un request desde el dominio
@@ -37,19 +34,3 @@ public record PersonaRequest(
                 p.getFechaNacimiento());
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

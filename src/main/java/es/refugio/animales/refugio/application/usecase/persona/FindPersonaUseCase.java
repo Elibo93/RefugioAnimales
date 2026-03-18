@@ -3,8 +3,8 @@ package es.refugio.animales.refugio.application.usecase.persona;
 import java.util.List;
 
 import es.refugio.animales.refugio.domain.error.PersonaNotFoundException;
-import es.refugio.animales.refugio.domain.model.persona.Persona;
-import es.refugio.animales.refugio.domain.model.persona.PersonaId;
+import es.refugio.animales.refugio.domain.model.usuario.Persona;
+import es.refugio.animales.refugio.domain.model.usuario.PersonaId;
 import es.refugio.animales.refugio.domain.repository.PersonaRepository;
 import lombok.RequiredArgsConstructor;
 

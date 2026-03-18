@@ -22,8 +22,11 @@ public class AnimalFactory {
                         .sexo("Hembra")
                         .chipId("CHIP001")
                         .estado("Disponible")
-                        .notas("Muy tranquila")
-                        .createdAt(LocalDateTime.now())
+                        .edad(3)
+                        .tamano("Mediano")
+                        .descripcion("Muy tranquila")
+                        .foto("http://example.com/luna.jpg")
+                        .fechaIngreso(LocalDateTime.now())
                         .build());
 
         datos.put(new AnimalId(11),
@@ -35,8 +38,11 @@ public class AnimalFactory {
                         .sexo("Macho")
                         .chipId("CHIP002")
                         .estado("Disponible")
-                        .notas("Activo y juguetón")
-                        .createdAt(LocalDateTime.now())
+                        .edad(5)
+                        .tamano("Grande")
+                        .descripcion("Activo y juguetón")
+                        .foto("http://example.com/max.jpg")
+                        .fechaIngreso(LocalDateTime.now())
                         .build());
 
         datos.put(new AnimalId(12),
@@ -48,8 +54,11 @@ public class AnimalFactory {
                         .sexo("Hembra")
                         .chipId("CHIP003")
                         .estado("Adoptado")
-                        .notas("Muy cariñosa")
-                        .createdAt(LocalDateTime.now())
+                        .edad(2)
+                        .tamano("Pequeño")
+                        .descripcion("Muy cariñosa")
+                        .foto("http://example.com/misu.jpg")
+                        .fechaIngreso(LocalDateTime.now())
                         .build());
 
         return datos;
@@ -65,8 +74,11 @@ public class AnimalFactory {
                 .sexo("Macho")
                 .chipId("CHIP999")
                 .estado("Disponible")
-                .notas("Animal de prueba")
-                .createdAt(LocalDateTime.now())
+                .edad(1)
+                .tamano("Pequeño")
+                .descripcion("Animal de prueba")
+                .foto("http://example.com/nuevo.jpg")
+                .fechaIngreso(LocalDateTime.now())
                 .build();
     }
 }

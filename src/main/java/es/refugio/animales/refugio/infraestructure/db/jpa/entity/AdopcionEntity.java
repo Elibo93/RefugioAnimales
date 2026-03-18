@@ -13,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,10 +43,10 @@ public class AdopcionEntity {
 
     /**
      * Animal (FK)
-     * Lado propietario: columna Animal_id en adopciones
+     * Lado propietario: columna id_animal en adopciones
      */
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_animal", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_animal", nullable = false, unique = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private AnimalEntity animal;
 

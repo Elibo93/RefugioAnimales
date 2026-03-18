@@ -8,6 +8,10 @@ public record AnimalResponse(
         String sexo,
         String chipId,
         String estado,
-        java.time.LocalDateTime createdAt) {
+        Integer edad,
+        String tamano,
+        String descripcion,
+        String foto,
+        java.time.LocalDateTime fechaIngreso) {
 
 }

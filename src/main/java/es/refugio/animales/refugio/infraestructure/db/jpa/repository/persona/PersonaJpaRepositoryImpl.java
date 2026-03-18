@@ -3,8 +3,8 @@ package es.refugio.animales.refugio.infraestructure.db.jpa.repository.persona;
 import java.util.List;
 import java.util.Optional;
 
-import es.refugio.animales.refugio.domain.model.persona.Persona;
-import es.refugio.animales.refugio.domain.model.persona.PersonaId;
+import es.refugio.animales.refugio.domain.model.usuario.Persona;
+import es.refugio.animales.refugio.domain.model.usuario.PersonaId;
 import es.refugio.animales.refugio.domain.repository.PersonaRepository;
 import es.refugio.animales.refugio.infraestructure.db.jpa.entity.PersonaEntity;
 import es.refugio.animales.refugio.infraestructure.mapper.PersonaMapper;

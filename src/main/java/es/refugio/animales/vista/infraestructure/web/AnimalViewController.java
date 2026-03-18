@@ -73,13 +73,16 @@ public class AnimalViewController {
             @RequestParam String raza,
             @RequestParam String sexo,
             @RequestParam String chipId,
-            @RequestParam(required = false) String notas,
             @RequestParam String estado,
+            @RequestParam(required = false) Integer edad,
+            @RequestParam(required = false) String tamano,
+            @RequestParam(required = false) String descripcion,
+            @RequestParam(required = false) String foto,
             
             RedirectAttributes redirectAttributes) {
 
         createAnimalService.createAnimal(
-                new CreateAnimalCommand(nombre, especie, raza, sexo, chipId, estado, notas));
+                new CreateAnimalCommand(nombre, especie, raza, sexo, chipId, estado, edad, tamano, descripcion, foto));
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",
@@ -104,12 +107,15 @@ public class AnimalViewController {
             @RequestParam String raza,
             @RequestParam String sexo,
             @RequestParam String chipId,
-            @RequestParam(required = false) String notas,
             @RequestParam String estado,
+            @RequestParam(required = false) Integer edad,
+            @RequestParam(required = false) String tamano,
+            @RequestParam(required = false) String descripcion,
+            @RequestParam(required = false) String foto,
             RedirectAttributes redirectAttributes) {
 
         editAnimalService.update(
-                new EditAnimalCommand(new AnimalId(id), nombre, especie, raza, sexo, chipId, estado, notas));
+                new EditAnimalCommand(new AnimalId(id), nombre, especie, raza, sexo, chipId, estado, edad, tamano, descripcion, foto));
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",

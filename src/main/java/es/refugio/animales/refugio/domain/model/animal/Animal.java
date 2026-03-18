@@ -16,8 +16,11 @@ public class Animal {
     private String raza;
     private String sexo;
     private String chipId;
+    private Integer edad;
+    private String tamano;
     private String estado;
-    private String notas;
-    private LocalDateTime createdAt;
+    private String descripcion;
+    private String foto;
+    private LocalDateTime fechaIngreso;
 
 }

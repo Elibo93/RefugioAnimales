@@ -29,8 +29,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import es.refugio.animales.refugio.domain.model.persona.Persona;
-import es.refugio.animales.refugio.domain.model.persona.PersonaId;
+import es.refugio.animales.refugio.domain.model.usuario.Persona;
+import es.refugio.animales.refugio.domain.model.usuario.PersonaId;
 import es.refugio.animales.refugio.infraestructure.db.repository.mock.persona.PersonaFactory;
 import es.refugio.animales.refugio.infraestructure.web.dto.persona.PersonaRequest;
 import es.refugio.animales.refugio.infraestructure.web.dto.persona.PersonaResponse;

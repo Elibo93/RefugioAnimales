@@ -1,4 +1,4 @@
-package es.refugio.animales.refugio.domain.model.persona;
+package es.refugio.animales.refugio.domain.model.usuario;
 
 import java.time.LocalDateTime;
 
@@ -25,20 +25,3 @@ public class Persona {
 	private LocalDateTime createdAt;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

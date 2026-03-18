@@ -55,9 +55,24 @@
                     </select>
                 </div>
 
+                <div class="form-group">
+                    <label th:text="#{animal.field.age}">Edad</label>
+                    <input type="number" th:field="*{edad}">
+                </div>
+
+                <div class="form-group">
+                    <label th:text="#{animal.field.size}">Tamaño</label>
+                    <input type="text" th:field="*{tamano}">
+                </div>
+
                 <div class="form-group" style="grid-column:1/-1;">
-                    <label th:text="#{animal.field.notes}">Notas</label>
-                    <textarea th:field="*{notas}"></textarea>
+                    <label th:text="#{animal.field.foto}">URL Foto</label>
+                    <input type="text" th:field="*{foto}">
+                </div>
+
+                <div class="form-group" style="grid-column:1/-1;">
+                    <label th:text="#{animal.field.description}">Descripción</label>
+                    <textarea th:field="*{descripcion}"></textarea>
                 </div>
 
             </div>

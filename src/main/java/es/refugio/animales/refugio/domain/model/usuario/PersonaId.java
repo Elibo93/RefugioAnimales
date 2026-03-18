@@ -1,4 +1,4 @@
-package es.refugio.animales.refugio.domain.model.persona;
+package es.refugio.animales.refugio.domain.model.usuario;
 
 import es.refugio.animales.common.domain.model.Identificador;
 
@@ -9,20 +9,3 @@ public class PersonaId extends Identificador {
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

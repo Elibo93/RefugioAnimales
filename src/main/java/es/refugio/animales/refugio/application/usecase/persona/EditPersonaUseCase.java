@@ -1,8 +1,8 @@
 package es.refugio.animales.refugio.application.usecase.persona;
 
-import es.refugio.animales.refugio.application.command.persona.EditPersonaCommand;
+import es.refugio.animales.refugio.application.command.usuario.EditPersonaCommand;
 import es.refugio.animales.refugio.domain.error.PersonaNotFoundException;
-import es.refugio.animales.refugio.domain.model.persona.Persona;
+import es.refugio.animales.refugio.domain.model.usuario.Persona;
 import es.refugio.animales.refugio.domain.repository.PersonaRepository;
 import lombok.AllArgsConstructor;
 

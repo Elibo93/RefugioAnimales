@@ -28,12 +28,12 @@ import es.refugio.animales.refugio.application.service.adopcion.DeleteAdopcionSe
 import es.refugio.animales.refugio.application.service.adopcion.EditAdopcionService;
 import es.refugio.animales.refugio.application.service.adopcion.FindAdopcionService;
 import es.refugio.animales.refugio.application.service.animal.FindAnimalService;
-import es.refugio.animales.refugio.domain.model.persona.Persona;
-import es.refugio.animales.refugio.domain.model.persona.PersonaId;
 import es.refugio.animales.refugio.domain.model.adopcion.Adopcion;
 import es.refugio.animales.refugio.domain.model.adopcion.AdopcionId;
 import es.refugio.animales.refugio.domain.model.animal.Animal;
 import es.refugio.animales.refugio.domain.model.animal.AnimalId;
+import es.refugio.animales.refugio.domain.model.usuario.Persona;
+import es.refugio.animales.refugio.domain.model.usuario.PersonaId;
 import es.refugio.animales.vista.infraestructure.web.constants.WebRoutes;
 import es.refugio.animales.vista.infraestructure.web.enums.ModelAttribute;
 import es.refugio.animales.vista.infraestructure.web.enums.ThymTemplates;
@@ -155,7 +155,8 @@ public class AdopcionViewController {
                         RedirectAttributes redirectAttributes) {
 
                 editAdopcionService.update(
-                                new EditAdopcionCommand(new AdopcionId(id), new PersonaId(idPersona), new AnimalId(idAnimal)));
+                                new EditAdopcionCommand(new AdopcionId(id), new PersonaId(idPersona),
+                                                new AnimalId(idAnimal)));
 
                 redirectAttributes.addFlashAttribute(
                                 "successMessage",

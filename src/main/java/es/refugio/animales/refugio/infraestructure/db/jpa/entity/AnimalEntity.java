@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.List;
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import es.refugio.animales.refugio.infraestructure.db.jpa.entity.historial_medico.HistorialMedicoEntity;
 
 @Entity
 @Data
@@ -45,9 +47,24 @@ public class AnimalEntity {
     @Column(name = "estado", nullable = false, length = 255)
     private String estado;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "edad")
+    private Integer edad;
+
+    @Column(name = "tamano", length = 50)
+    private String tamano;
+
+    @Column(name = "descripcion", length = 1000)
+    private String descripcion;
+
+    @Column(name = "foto", length = 255)
+    private String foto;
+
+    @Column(name = "fecha_ingreso", nullable = false)
+    private LocalDateTime fechaIngreso;
+
+    @OneToOne(mappedBy = "animal", cascade = CascadeType.ALL, orphanRemoval = true)
+    private AdopcionEntity adopcion;
 
     @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AdopcionEntity> adopciones;
+    private List<HistorialMedicoEntity> historialMedico;
 }

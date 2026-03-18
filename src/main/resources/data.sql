@@ -34,17 +34,17 @@ VALUES
 -- ANIMALES (10)
 -- =====================================================
 INSERT INTO animales
-(nombre, especie, raza, sexo, chip_id, estado, created_at) VALUES
-('Luna', 'Perro', 'Labrador', 'Hembra', 'CHIP001', 'Disponible', NOW()),
-('Simba', 'Gato', 'Común', 'Macho', 'CHIP002', 'Disponible', NOW()),
-('Rex', 'Perro', 'Pastor Alemán', 'Macho', 'CHIP003', 'En Tratamiento', NOW()),
-('Bella', 'Perro', 'Galgo', 'Hembra', 'CHIP004', 'Disponible', NOW()),
-('Nala', 'Gato', 'Siamés', 'Hembra', 'CHIP005', 'Adoptado', NOW()),
-('Thor', 'Perro', 'Husky', 'Macho', 'CHIP006', 'Disponible', NOW()),
-('Milo', 'Gato', 'Europeo', 'Macho', 'CHIP007', 'Disponible', NOW()),
-('Kira', 'Perro', 'Border Collie', 'Hembra', 'CHIP008', 'Disponible', NOW()),
-('Coco', 'Gato', 'Persa', 'Hembra', 'CHIP009', 'En Tratamiento', NOW()),
-('Rocky', 'Perro', 'Boxer', 'Macho', 'CHIP010', 'Disponible', NOW());
+(nombre, especie, raza, sexo, chip_id, estado, edad, tamano, descripcion, foto, fecha_ingreso) VALUES
+('Luna', 'Perro', 'Labrador', 'Hembra', 'CHIP001', 'Disponible', 3, 'Mediano', 'Perrita juiciosa', 'http://example.com/foto1.jpg', NOW()),
+('Simba', 'Gato', 'Común', 'Macho', 'CHIP002', 'Disponible', 2, 'Pequeño', 'Gato dormilon', 'http://example.com/foto2.jpg', NOW()),
+('Rex', 'Perro', 'Pastor Alemán', 'Macho', 'CHIP003', 'En Tratamiento', 5, 'Grande', 'Buen guardian', 'http://example.com/foto3.jpg', NOW()),
+('Bella', 'Perro', 'Galgo', 'Hembra', 'CHIP004', 'Disponible', 4, 'Grande', 'Corre muy rapido', 'http://example.com/foto4.jpg', NOW()),
+('Nala', 'Gato', 'Siamés', 'Hembra', 'CHIP005', 'Adoptado', 1, 'Pequeño', 'Muy curiosa', 'http://example.com/foto5.jpg', NOW()),
+('Thor', 'Perro', 'Husky', 'Macho', 'CHIP006', 'Disponible', 3, 'Grande', 'Le encanta la nieve', 'http://example.com/foto6.jpg', NOW()),
+('Milo', 'Gato', 'Europeo', 'Macho', 'CHIP007', 'Disponible', 4, 'Mediano', 'Le gusta cazar ratones', 'http://example.com/foto7.jpg', NOW()),
+('Kira', 'Perro', 'Border Collie', 'Hembra', 'CHIP008', 'Disponible', 2, 'Mediano', 'Muy inteligente', 'http://example.com/foto8.jpg', NOW()),
+('Coco', 'Gato', 'Persa', 'Hembra', 'CHIP009', 'En Tratamiento', 5, 'Pequeño', 'Requiere cuidado de pelaje', 'http://example.com/foto9.jpg', NOW()),
+('Rocky', 'Perro', 'Boxer', 'Macho', 'CHIP010', 'Disponible', 4, 'Grande', 'Muy fuerte y leal', 'http://example.com/foto10.jpg', NOW());
 
 
 -- =====================================================

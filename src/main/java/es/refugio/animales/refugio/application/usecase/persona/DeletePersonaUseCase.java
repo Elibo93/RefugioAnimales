@@ -1,6 +1,6 @@
 package es.refugio.animales.refugio.application.usecase.persona;
 
-import es.refugio.animales.refugio.domain.model.persona.PersonaId;
+import es.refugio.animales.refugio.domain.model.usuario.PersonaId;
 import es.refugio.animales.refugio.domain.repository.PersonaRepository;
 import lombok.RequiredArgsConstructor;
 

@@ -1,5 +1,6 @@
-package es.refugio.animales.refugio.application.command.persona;
+package es.refugio.animales.refugio.application.command.usuario;
 
+import es.refugio.animales.refugio.domain.model.usuario.PersonaId;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -7,13 +8,11 @@ import lombok.experimental.Accessors;
 @Getter
 @AllArgsConstructor
 @Accessors(fluent = true)
-public class CreatePersonaCommand {
-    private String dni;
-    private String nombre;
-    private String apellido;
+public class EditPersonaCommand {
+
+    private PersonaId id;
     private String email;
     private String telefono;
     private String direccion;
-    private String fechaNacimiento;
 
 }

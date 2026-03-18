@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import es.refugio.animales.refugio.domain.model.persona.Persona;
-import es.refugio.animales.refugio.domain.model.persona.PersonaId;
+import es.refugio.animales.refugio.domain.model.usuario.Persona;
+import es.refugio.animales.refugio.domain.model.usuario.PersonaId;
 
 public class PersonaFactory {
 
@@ -78,19 +78,3 @@ public class PersonaFactory {
                                 LocalDateTime.now());
         }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

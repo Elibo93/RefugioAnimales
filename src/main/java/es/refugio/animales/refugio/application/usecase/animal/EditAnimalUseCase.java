@@ -19,8 +19,10 @@ public class EditAnimalUseCase {
                     t.setRaza(command.raza());
                     t.setSexo(command.sexo());
                     t.setChipId(command.chipId());
-                    t.setEstado(command.estado());
-                    t.setNotas(command.notas());
+                    t.setEdad(command.edad());
+                    t.setTamano(command.tamano());
+                    t.setDescripcion(command.descripcion());
+                    t.setFoto(command.foto());
                     return animalRepository.save(t);
                 })
                 .orElseThrow(() -> new AnimalNotFoundException(command.id().getValue()));

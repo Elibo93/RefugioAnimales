@@ -4,38 +4,45 @@
   <img src="/img/actores_refugio.png" width="550">
 </p>
 
-Este apartado define cómo interactúan los diferentes perfiles con el sistema del refugio. Aunque la lógica es modular, la experiencia se personaliza según el actor.
+Este apartado define cómo interactúan los diferentes perfiles con el sistema del refugio. La lógica del sistema se apoya en las entidades principales del modelo de datos, adaptando la experiencia según el tipo de usuario.
 
 ---
 
 #### Adoptante (Público)
-Usuario externo que busca integrar un nuevo miembro en su familia.
-* Consultar el **catálogo de animales**.
-* Filtrar por **especie/edad/necesidades**.
-* Enviar **solicitudes de adopción**.
-* Seguimiento de sus **trámites activos**.
+Usuario externo registrado en el sistema con rol de adoptante.
+
+* Consultar el **catálogo de animales** (Entidad: Animal).
+* Filtrar por **características** como especie, edad o estado.
+* Enviar **solicitudes de adopción** (Entidad: SolicitudAdopcion).
+* Consultar el estado de sus **solicitudes** (pendiente, aprobada, rechazada).
+* Visualizar sus **adopciones realizadas** (Entidad: Adopcion).
 
 ---
 
 #### Voluntario (Operativo)
-Usuario interno encargado del día a día de los animales.
-* Ver la **lista de animales asignados**.
-* Registrar **tareas de cuidado** (paseos, alimentación).
-* Notificar **incidencias de salud** o comportamiento.
-* Consultar **calendario de turnos**.
+Usuario interno con rol de voluntario encargado del cuidado de los animales.
+
+* Consultar la **lista de animales** del refugio (Entidad: Animal).
+* Registrar información relevante sobre el estado del animal.
+* Añadir entradas al **historial médico** (Entidad: HistorialMedico).
+* Colaborar en el seguimiento del estado general de los animales.
 
 ---
 
 #### Administración (Gestión)
-Usuario con visión global y capacidad de decisión.
-* Gestión de **altas y bajas** de animales y voluntarios.
-* Validación y firma de **contratos de adopción**.
-* Acceso a **estadísticas de ocupación** y éxito de adopciones.
-* Gestión de la **base de datos de personas** vinculadas.
+Usuario con rol administrador, responsable de la gestión global del sistema.
+
+* Gestión completa de **animales** (altas, bajas, modificaciones) (Entidad: Animal).
+* Gestión de **usuarios** (Entidad: Usuario).
+* Validación de **adoptantes** (Entidad: Adoptante).
+* Gestión y revisión de **solicitudes de adopción** (Entidad: SolicitudAdopcion).
+* Formalización de **adopciones** (Entidad: Adopcion).
+* Control del **historial médico** de los animales (Entidad: HistorialMedico).
+* Registro y seguimiento de **donaciones** (Entidad: Donacion).
 
 ---
 
-Todos los accesos están protegidos por **Spring Security**, asegurando que un adoptante no pueda acceder a datos sensibles de voluntarios ni a historiales médicos restringidos.
+Todos los accesos están protegidos mediante **Spring Security**, garantizando el control de acceso basado en roles (ADMIN, VOLUNTARIO, ADOPTANTE). De este modo, se asegura que cada usuario solo pueda interactuar con la información correspondiente a su perfil.
 
 ---
 

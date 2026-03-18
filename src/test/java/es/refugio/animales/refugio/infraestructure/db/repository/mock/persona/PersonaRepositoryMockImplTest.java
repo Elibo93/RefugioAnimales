@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import es.refugio.animales.refugio.domain.model.persona.Persona;
+import es.refugio.animales.refugio.domain.model.usuario.Persona;
 import es.refugio.animales.refugio.domain.repository.PersonaRepository;
 
 public class PersonaRepositoryMockImplTest {

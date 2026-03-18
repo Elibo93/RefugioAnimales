@@ -2,9 +2,9 @@ package es.refugio.animales.refugio.application.service.persona;
 
 import org.springframework.stereotype.Service;
 
-import es.refugio.animales.refugio.application.command.persona.CreatePersonaCommand;
+import es.refugio.animales.refugio.application.command.usuario.CreatePersonaCommand;
 import es.refugio.animales.refugio.application.usecase.persona.CreatePersonaUseCase;
-import es.refugio.animales.refugio.domain.model.persona.Persona;
+import es.refugio.animales.refugio.domain.model.usuario.Persona;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

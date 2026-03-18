@@ -17,15 +17,14 @@ import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import jakarta.servlet.http.HttpServletRequest;
-
-import es.refugio.animales.refugio.application.command.persona.CreatePersonaCommand;
-import es.refugio.animales.refugio.application.command.persona.EditPersonaCommand;
+import es.refugio.animales.refugio.application.command.usuario.CreatePersonaCommand;
+import es.refugio.animales.refugio.application.command.usuario.EditPersonaCommand;
 import es.refugio.animales.refugio.application.service.persona.CreatePersonaService;
 import es.refugio.animales.refugio.application.service.persona.DeletePersonaService;
 import es.refugio.animales.refugio.application.service.persona.EditPersonaService;
 import es.refugio.animales.refugio.application.service.persona.FindPersonaService;
-import es.refugio.animales.refugio.domain.model.persona.Persona;
-import es.refugio.animales.refugio.domain.model.persona.PersonaId;
+import es.refugio.animales.refugio.domain.model.usuario.Persona;
+import es.refugio.animales.refugio.domain.model.usuario.PersonaId;
 import es.refugio.animales.vista.infraestructure.web.constants.WebRoutes;
 import es.refugio.animales.vista.infraestructure.web.enums.ModelAttribute;
 import es.refugio.animales.vista.infraestructure.web.enums.ThymTemplates;

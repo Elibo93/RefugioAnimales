@@ -3,10 +3,10 @@ package es.refugio.animales.refugio.infraestructure.mapper;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import es.refugio.animales.refugio.application.command.persona.CreatePersonaCommand;
-import es.refugio.animales.refugio.application.command.persona.EditPersonaCommand;
-import es.refugio.animales.refugio.domain.model.persona.Persona;
-import es.refugio.animales.refugio.domain.model.persona.PersonaId;
+import es.refugio.animales.refugio.application.command.usuario.CreatePersonaCommand;
+import es.refugio.animales.refugio.application.command.usuario.EditPersonaCommand;
+import es.refugio.animales.refugio.domain.model.usuario.Persona;
+import es.refugio.animales.refugio.domain.model.usuario.PersonaId;
 import es.refugio.animales.refugio.infraestructure.db.jpa.entity.PersonaEntity;
 import es.refugio.animales.refugio.infraestructure.web.dto.persona.PersonaRequest;
 import es.refugio.animales.refugio.infraestructure.web.dto.persona.PersonaResponse;

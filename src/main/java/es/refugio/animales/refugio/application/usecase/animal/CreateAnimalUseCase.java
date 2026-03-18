@@ -18,9 +18,11 @@ public class CreateAnimalUseCase {
                 .raza(comando.raza())
                 .sexo(comando.sexo())
                 .chipId(comando.chipId())
-                .estado(comando.estado())
-                .notas(comando.notas())
-                .createdAt(java.time.LocalDateTime.now())
+                .edad(comando.edad())
+                .tamano(comando.tamano())
+                .descripcion(comando.descripcion())
+                .foto(comando.foto())
+                .fechaIngreso(java.time.LocalDateTime.now())
                 .build();
 
         return animalRepository.save(animal);

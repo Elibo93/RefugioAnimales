@@ -21,7 +21,10 @@ public class AnimalMapper {
                 request.sexo(),
                 request.chipId(),
                 request.estado(),
-                request.notas());
+                request.edad(),
+                request.tamano(),
+                request.descripcion(),
+                request.foto());
     }
 
     public static EditAnimalCommand toEditCommand(AnimalId id, AnimalRequest request) {
@@ -33,7 +36,10 @@ public class AnimalMapper {
                 request.sexo(),
                 request.chipId(),
                 request.estado(),
-                request.notas());
+                request.edad(),
+                request.tamano(),
+                request.descripcion(),
+                request.foto());
     }
 
     public static AnimalResponse toResponse(Animal animal) {
@@ -45,7 +51,11 @@ public class AnimalMapper {
                 animal.getSexo(),
                 animal.getChipId(),
                 animal.getEstado(),
-                animal.getCreatedAt());
+                animal.getEdad(),
+                animal.getTamano(),
+                animal.getDescripcion(),
+                animal.getFoto(),
+                animal.getFechaIngreso());
     }
 
     public static AnimalEntity toEntity(Animal t) {
@@ -56,8 +66,11 @@ public class AnimalMapper {
                 .raza(t.getRaza())
                 .sexo(t.getSexo())
                 .chipId(t.getChipId())
-                .estado(t.getEstado())
-                .createdAt(t.getCreatedAt())
+                .edad(t.getEdad())
+                .tamano(t.getTamano())
+                .descripcion(t.getDescripcion())
+                .foto(t.getFoto())
+                .fechaIngreso(t.getFechaIngreso())
                 .build();
     }
 
@@ -69,8 +82,11 @@ public class AnimalMapper {
                 .raza(e.getRaza())
                 .sexo(e.getSexo())
                 .chipId(e.getChipId())
-                .estado(e.getEstado())
-                .createdAt(e.getCreatedAt())
+                .edad(e.getEdad())
+                .tamano(e.getTamano())
+                .descripcion(e.getDescripcion())
+                .foto(e.getFoto())
+                .fechaIngreso(e.getFechaIngreso())
                 .build();
     }
 

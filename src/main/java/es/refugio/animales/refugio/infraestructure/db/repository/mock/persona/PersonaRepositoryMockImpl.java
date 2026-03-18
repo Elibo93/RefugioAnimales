@@ -8,8 +8,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 
-import es.refugio.animales.refugio.domain.model.persona.Persona;
-import es.refugio.animales.refugio.domain.model.persona.PersonaId;
+import es.refugio.animales.refugio.domain.model.usuario.Persona;
+import es.refugio.animales.refugio.domain.model.usuario.PersonaId;
 import es.refugio.animales.refugio.domain.repository.PersonaRepository;
 
 @Repository
@@ -63,19 +63,3 @@ public class PersonaRepositoryMockImpl implements PersonaRepository {
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

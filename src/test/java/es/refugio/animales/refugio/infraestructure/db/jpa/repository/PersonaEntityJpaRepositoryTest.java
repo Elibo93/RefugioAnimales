@@ -9,11 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import es.refugio.animales.refugio.domain.model.usuario.Persona;
 import es.refugio.animales.refugio.infraestructure.db.jpa.repository.persona.PersonaEntityJpaRepository;
 import es.refugio.animales.refugio.infraestructure.db.repository.mock.persona.PersonaFactory;
 import es.refugio.animales.refugio.infraestructure.mapper.PersonaMapper;
-
-import es.refugio.animales.refugio.domain.model.persona.Persona;
 
 @DataJpaTest(showSql = true)
 

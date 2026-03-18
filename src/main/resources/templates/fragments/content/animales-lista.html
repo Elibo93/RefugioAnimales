@@ -34,10 +34,10 @@
                     <th th:text="#{workshop.table.header.name}">Nombre</th>
                     <th th:text="#{animal.field.species}">Especie</th>
                     <th th:text="#{animal.field.breed}">Raza</th>
-                    <th th:text="#{animal.field.sex}">Sexo</th>
-                    <th th:text="#{animal.field.chip}">Chip</th>
+                    <th th:text="#{animal.field.age}">Edad</th>
+                    <th th:text="#{animal.field.size}">Tamaño</th>
                     <th th:text="#{animal.field.status}">Estado</th>
-                    <th th:text="#{animal.field.notes}">Notas</th>
+                    <th th:text="#{animal.field.description}">Descripción</th>
                     <th th:text="#{workshop.table.header.action}">Acción</th>
                 </tr>
             </thead>
@@ -57,9 +57,9 @@
 
                     <td th:text="${a.raza}">Labrador</td>
 
-                    <td th:text="${a.sexo}">Hembra</td>
+                    <td th:text="${a.edad}">3</td>
 
-                    <td th:text="${a.chipId}">CHIP001</td>
+                    <td th:text="${a.tamano}">Mediano</td>
 
                     <td>
                         <span class="badge-soon"
@@ -69,7 +69,7 @@
                         </span>
                     </td>
 
-                    <td th:text="${a.notas}" style="color:var(--text-muted);font-size:0.9rem;">
+                    <td th:text="${a.descripcion}" style="color:var(--text-muted);font-size:0.9rem;">
                         Muy tranquila
                     </td>
 

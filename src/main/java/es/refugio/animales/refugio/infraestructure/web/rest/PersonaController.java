@@ -19,14 +19,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import es.refugio.animales.refugio.application.command.persona.CreatePersonaCommand;
-import es.refugio.animales.refugio.application.command.persona.EditPersonaCommand;
+import es.refugio.animales.refugio.application.command.usuario.CreatePersonaCommand;
+import es.refugio.animales.refugio.application.command.usuario.EditPersonaCommand;
 import es.refugio.animales.refugio.application.service.persona.CreatePersonaService;
 import es.refugio.animales.refugio.application.service.persona.DeletePersonaService;
 import es.refugio.animales.refugio.application.service.persona.EditPersonaService;
 import es.refugio.animales.refugio.application.service.persona.FindPersonaService;
-import es.refugio.animales.refugio.domain.model.persona.Persona;
-import es.refugio.animales.refugio.domain.model.persona.PersonaId;
+import es.refugio.animales.refugio.domain.model.usuario.Persona;
+import es.refugio.animales.refugio.domain.model.usuario.PersonaId;
 import es.refugio.animales.refugio.infraestructure.mapper.PersonaMapper;
 import es.refugio.animales.refugio.infraestructure.web.dto.persona.PersonaRequest;
 import es.refugio.animales.refugio.infraestructure.web.dto.persona.PersonaResponse;
