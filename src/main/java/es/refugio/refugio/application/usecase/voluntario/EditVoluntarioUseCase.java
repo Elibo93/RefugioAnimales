@@ -2,41 +2,23 @@ package es.refugio.refugio.application.usecase.voluntario;
 
 import es.refugio.refugio.application.command.voluntario.EditVoluntarioCommand;
 import es.refugio.refugio.domain.error.VoluntarioNotFoundException;
+import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
 import es.refugio.refugio.domain.repository.VoluntarioRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class EditVoluntarioUseCase {
 
-    // Atributos
     private final VoluntarioRepository voluntarioRepository;
 
     public Voluntario update(EditVoluntarioCommand command) {
         return voluntarioRepository.getById(command.id())
-                .map(p -> { // ACtualizamos los atributos del objeto
-                    p.setEspecialidad(command.especialidad());
-                    p.setEmail(command.email());
-                    p.setTelefono(command.telefono());
-                    return voluntarioRepository.save(p);
+                .map(voluntario -> {
+                    voluntario.setUsuarioId(new UsuarioId(command.usuarioId()));
+                    voluntario.setDisponibilidad(command.disponibilidad());
+                    return voluntarioRepository.save(voluntario);
                 })
                 .orElseThrow(() -> new VoluntarioNotFoundException(command.id().getValue()));
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

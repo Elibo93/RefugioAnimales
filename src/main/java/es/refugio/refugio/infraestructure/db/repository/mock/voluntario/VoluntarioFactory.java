@@ -1,96 +1,39 @@
 package es.refugio.refugio.infraestructure.db.repository.mock.voluntario;
 
-import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
 import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
 
 public class VoluntarioFactory {
 
-    public static final Map<VoluntarioId, Voluntario> getDemoData(){
+    public static Map<VoluntarioId, Voluntario> create() {
         Map<VoluntarioId, Voluntario> datos = new LinkedHashMap<>();
 
-        datos.put(
-            new VoluntarioId(1),
-            new Voluntario(
-                new VoluntarioId(1),
-                "Laura",
-                "García",
-                "Dibujo",
-                "laura.garcia@refugio.com", 
-                "612345678",
-                LocalDateTime.now()
-            )
-        );
+        datos.put(new VoluntarioId(1),
+                Voluntario.builder()
+                        .id(new VoluntarioId(1))
+                        .usuarioId(new UsuarioId(1))
+                        .disponibilidad("Lunes a Viernes")
+                        .build());
 
-        datos.put(
-            new VoluntarioId(2),
-            new Voluntario(
-                new VoluntarioId(2),
-                "Miguel",
-                "Fernández",
-                "Música",
-                "miguel.fernandez@refugio.com",
-                "622334455",
-                LocalDateTime.now()
-            )
-        );
-
-        datos.put(
-            new VoluntarioId(3),
-            new Voluntario(
-                new VoluntarioId(3),
-                "Sara",
-                "López",
-                "Teatro",
-                "sara.lopez@refugio.com",
-                "633221144",
-                LocalDateTime.now()
-            )
-        );
-
-        datos.put(
-            new VoluntarioId(4),
-            new Voluntario(
-                new VoluntarioId(4),
-                "Álvaro",
-                "Martínez",
-                "Pintura",
-                "alvaro.martinez@refugio.com",
-                "644556677",
-                LocalDateTime.now()
-            )
-        );
+        datos.put(new VoluntarioId(2),
+                Voluntario.builder()
+                        .id(new VoluntarioId(2))
+                        .usuarioId(new UsuarioId(2))
+                        .disponibilidad("Fines de semana")
+                        .build());
 
         return datos;
     }
 
-    public static Voluntario create() {
-        return new Voluntario(
-                new VoluntarioId(5),
-                "Andrés",
-                "Carmelo",
-                "Diseño",
-                "andres.carmelo@refugio.com",
-                "654256672",
-                LocalDateTime.now());
+    public static Voluntario createSingle() {
+        return Voluntario.builder()
+                .id(new VoluntarioId(99))
+                .usuarioId(new UsuarioId(99))
+                .disponibilidad("Tardes")
+                .build();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

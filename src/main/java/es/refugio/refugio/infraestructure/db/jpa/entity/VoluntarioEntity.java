@@ -1,13 +1,7 @@
 package es.refugio.refugio.infraestructure.db.jpa.entity;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,38 +19,23 @@ public class VoluntarioEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, length = 255)
-    private String nombre;
+    @Column(name = "disponibilidad", nullable = false, length = 500)
+    private String disponibilidad;
 
-    @Column(nullable = false, length = 255)
-    private String apellido;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false, unique = true)
+    private UsuarioEntity usuario;
 
-    @Column(nullable = false, length = 50)
-    private String especialidad;
+    @ManyToMany(mappedBy = "voluntarios")
+    private java.util.List<TareaEntity> tareas;
 
-    @Column(nullable = false, length = 255)
-    private String email;
-
-    @Column(nullable = false, length = 20)
-    private String telefono;
-
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @PrePersist
+    protected void onCreate() {
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

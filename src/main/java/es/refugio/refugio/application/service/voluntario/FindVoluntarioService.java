@@ -1,41 +1,26 @@
 package es.refugio.refugio.application.service.voluntario;
 
 import java.util.List;
-
-import org.springframework.stereotype.Service;
-
 import es.refugio.refugio.application.usecase.voluntario.FindVoluntarioUseCase;
+import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
+import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@Service
 public class FindVoluntarioService {
 
-    private final FindVoluntarioUseCase findVoluntarioUseCase;
+    private final FindVoluntarioUseCase useCase;
 
     public List<Voluntario> findAll() {
-        return findVoluntarioUseCase.findAll();
+        return useCase.findAll();
     }
 
-    public Voluntario findById(es.refugio.refugio.domain.model.voluntario.VoluntarioId id) {
-        return findVoluntarioUseCase.findById(id);
+    public Voluntario findById(VoluntarioId id) {
+        return useCase.findById(id);
+    }
+
+    public Voluntario findByUsuarioId(UsuarioId usuarioId) {
+        return useCase.findByUsuarioId(usuarioId);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

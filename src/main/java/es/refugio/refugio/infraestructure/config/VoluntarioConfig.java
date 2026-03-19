@@ -14,78 +14,52 @@ import es.refugio.refugio.application.usecase.voluntario.FindVoluntarioUseCase;
 import es.refugio.refugio.domain.repository.VoluntarioRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.voluntario.VoluntarioEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.voluntario.VoluntarioJpaRepositoryImpl;
-import lombok.RequiredArgsConstructor;
 
 @Configuration
-@RequiredArgsConstructor
 public class VoluntarioConfig {
 
-    private final VoluntarioEntityJpaRepository VoluntarioRepository;
-
-    // Creo por configuración la instalacia que me interesa del productoRepository
-    // (desde jpa)
     @Bean
-    public VoluntarioRepository voluntarioRepository() {
-        return new VoluntarioJpaRepositoryImpl(VoluntarioRepository);
-    }
-
-    // POST
-    @Bean
-    public CreateVoluntarioUseCase createVoluntarioUseCase() {
-        return new CreateVoluntarioUseCase(voluntarioRepository());
+    public VoluntarioRepository voluntarioRepository(VoluntarioEntityJpaRepository jpaRepository) {
+        return new VoluntarioJpaRepositoryImpl(jpaRepository);
     }
 
     @Bean
-    public CreateVoluntarioService createVoluntarioService() {
-        return new CreateVoluntarioService(createVoluntarioUseCase());
-    }
-
-    // GET
-    @Bean
-    public FindVoluntarioUseCase findVoluntarioUseCase() {
-        return new FindVoluntarioUseCase(voluntarioRepository());
+    public CreateVoluntarioUseCase createVoluntarioUseCase(VoluntarioRepository repository) {
+        return new CreateVoluntarioUseCase(repository);
     }
 
     @Bean
-    public FindVoluntarioService findVoluntarioService() {
-        return new FindVoluntarioService(findVoluntarioUseCase());
-    }
-
-    // DELETE
-
-    @Bean
-    public DeleteVoluntarioUseCase deleteVoluntarioUseCase() {
-        return new DeleteVoluntarioUseCase(voluntarioRepository());
+    public CreateVoluntarioService createVoluntarioService(CreateVoluntarioUseCase useCase) {
+        return new CreateVoluntarioService(useCase);
     }
 
     @Bean
-    public DeleteVoluntarioService deleteVoluntarioService() {
-        return new DeleteVoluntarioService(deleteVoluntarioUseCase());
-    }
-
-    // PUT
-    @Bean
-    public EditVoluntarioUseCase editVoluntarioUseCase() {
-        return new EditVoluntarioUseCase(voluntarioRepository());
+    public EditVoluntarioUseCase editVoluntarioUseCase(VoluntarioRepository repository) {
+        return new EditVoluntarioUseCase(repository);
     }
 
     @Bean
-    public EditVoluntarioService editVoluntarioService() {
-        return new EditVoluntarioService(editVoluntarioUseCase());
+    public EditVoluntarioService editVoluntarioService(EditVoluntarioUseCase useCase) {
+        return new EditVoluntarioService(useCase);
+    }
+
+    @Bean
+    public FindVoluntarioUseCase findVoluntarioUseCase(VoluntarioRepository repository) {
+        return new FindVoluntarioUseCase(repository);
+    }
+
+    @Bean
+    public FindVoluntarioService findVoluntarioService(FindVoluntarioUseCase useCase) {
+        return new FindVoluntarioService(useCase);
+    }
+
+    @Bean
+    public DeleteVoluntarioUseCase deleteVoluntarioUseCase(VoluntarioRepository repository) {
+        return new DeleteVoluntarioUseCase(repository);
+    }
+
+    @Bean
+    public DeleteVoluntarioService deleteVoluntarioService(DeleteVoluntarioUseCase useCase) {
+        return new DeleteVoluntarioService(useCase);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
