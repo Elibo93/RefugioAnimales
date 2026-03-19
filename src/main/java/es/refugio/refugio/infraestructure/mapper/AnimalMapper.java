@@ -25,27 +25,19 @@ public class AnimalMapper {
                 req.edad(),
                 req.tamano(),
                 req.descripcion(),
-                req.foto(),
-                req.fechaIngreso()
-        );
+                req.foto());
     }
 
     public static EditAnimalCommand toCommand(int id, AnimalRequest req) {
         return new EditAnimalCommand(
                 new AnimalId(id),
                 req.nombre(),
-                req.especie(),
-                req.especiePersonalizada(),
-                req.raza(),
-                req.sexo(),
                 req.chipId(),
                 req.estado(),
                 req.edad(),
                 req.tamano(),
                 req.descripcion(),
-                req.foto(),
-                req.fechaIngreso()
-        );
+                req.foto());
     }
 
     public static AnimalResponse toResponse(Animal a) {
@@ -62,8 +54,7 @@ public class AnimalMapper {
                 a.getTamano() != null ? a.getTamano().name() : null,
                 a.getDescripcion(),
                 a.getFoto(),
-                a.getFechaIngreso()
-        );
+                a.getFechaIngreso());
     }
 
     public static AnimalEntity toEntity(Animal a) {

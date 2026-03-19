@@ -4,9 +4,9 @@ import es.refugio.refugio.application.command.adopcion.CreateAdopcionCommand;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.domain.model.animal.AnimalId;
 import es.refugio.refugio.domain.model.adopcion.Adopcion;
-import es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion;
 import es.refugio.refugio.domain.repository.AdopcionRepository;
 import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 public class CreateAdopcionUseCase {
@@ -14,16 +14,14 @@ public class CreateAdopcionUseCase {
     private final AdopcionRepository adopcionRepository;
 
     public Adopcion create(CreateAdopcionCommand command) {
-        EstadoAdopcion estadoEnum = EstadoAdopcion.valueOf(command.estado().toUpperCase());
-        
         Adopcion adopcion = Adopcion.builder()
-                .animalId(new AnimalId(command.animalId()))
                 .adoptanteId(new AdoptanteId(command.adoptanteId()))
-                .fechaAdopcion(command.fechaAdopcion())
-                .estado(estadoEnum)
+                .animalId(new AnimalId(command.animalId()))
+                .fechaAdopcion(LocalDateTime.now())
+                .estado(command.estado())
                 .contrato(command.contrato())
                 .build();
-                
+
         return adopcionRepository.save(adopcion);
     }
 }

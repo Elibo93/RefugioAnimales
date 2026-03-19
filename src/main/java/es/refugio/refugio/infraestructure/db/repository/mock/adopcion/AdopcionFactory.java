@@ -32,7 +32,7 @@ public class AdopcionFactory {
                                                 .adoptanteId(new AdoptanteId(2))
                                                 .animalId(new AnimalId(10))
                                                 .fechaAdopcion(LocalDateTime.of(2025, 1, 11, 11, 30))
-                                                .estado(EstadoAdopcion.EN_PROCESO)
+                                                .estado(EstadoAdopcion.EN_PERIODO_ADAPTACION)
                                                 .contrato("contrato_max.pdf")
                                                 .build());
 
@@ -65,7 +65,7 @@ public class AdopcionFactory {
                                 .adoptanteId(new AdoptanteId(99))
                                 .animalId(new AnimalId(99))
                                 .fechaAdopcion(LocalDateTime.now())
-                                .estado(EstadoAdopcion.EN_PROCESO)
+                                .estado(EstadoAdopcion.EN_PERIODO_ADAPTACION)
                                 .contrato("pendiente.pdf")
                                 .build();
         }

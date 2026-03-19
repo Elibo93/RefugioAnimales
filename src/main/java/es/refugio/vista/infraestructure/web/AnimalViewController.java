@@ -69,6 +69,7 @@ public class AnimalViewController {
     @PostMapping(WebRoutes.animales_NUEVO)
     public String crearAnimal(@RequestParam String nombre,
             @RequestParam String especie,
+            @RequestParam(required = false) String especiePersonalizada,
             @RequestParam String raza,
             @RequestParam String sexo,
             @RequestParam String chipId,
@@ -77,11 +78,11 @@ public class AnimalViewController {
             @RequestParam(required = false) String tamano,
             @RequestParam(required = false) String descripcion,
             @RequestParam(required = false) String foto,
-            
             RedirectAttributes redirectAttributes) {
 
         createAnimalService.createAnimal(
-                new CreateAnimalCommand(nombre, especie, raza, sexo, chipId, estado, edad, tamano, descripcion, foto));
+                new CreateAnimalCommand(nombre, especie, especiePersonalizada, raza, sexo, chipId, estado, edad, tamano,
+                        descripcion, foto));
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",
@@ -102,9 +103,6 @@ public class AnimalViewController {
     @PostMapping(WebRoutes.animales_EDITAR)
     public String procesarEdicion(@PathVariable Integer id,
             @RequestParam String nombre,
-            @RequestParam String especie,
-            @RequestParam String raza,
-            @RequestParam String sexo,
             @RequestParam String chipId,
             @RequestParam String estado,
             @RequestParam(required = false) Integer edad,
@@ -114,7 +112,8 @@ public class AnimalViewController {
             RedirectAttributes redirectAttributes) {
 
         editAnimalService.update(
-                new EditAnimalCommand(new AnimalId(id), nombre, especie, raza, sexo, chipId, estado, edad, tamano, descripcion, foto));
+                new EditAnimalCommand(new AnimalId(id), nombre, chipId, estado, edad, tamano,
+                        descripcion, foto));
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",

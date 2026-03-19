@@ -1,12 +1,10 @@
 package es.refugio.refugio.application.command.adopcion;
 
-import java.time.LocalDateTime;
+import es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion;
 
 public record CreateAdopcionCommand(
-        Integer animalId,
-        Integer adoptanteId,
-        LocalDateTime fechaAdopcion,
-        String estado,
-        String contrato
-) {
+                Integer adoptanteId,
+                Integer animalId,
+                EstadoAdopcion estado,
+                String contrato) {
 }

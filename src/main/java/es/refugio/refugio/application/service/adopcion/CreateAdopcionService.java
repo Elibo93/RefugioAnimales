@@ -10,7 +10,7 @@ public class CreateAdopcionService {
 
     private final CreateAdopcionUseCase useCase;
 
-    public Adopcion create(CreateAdopcionCommand command) {
+    public Adopcion createAdopcion(CreateAdopcionCommand command) {
         return useCase.create(command);
     }
 }

@@ -34,4 +34,8 @@ public class FindAdopcionUseCase {
     public List<Adopcion> findByAdoptanteId(AdoptanteId adoptanteId) {
         return adopcionRepository.getByAdoptanteId(adoptanteId);
     }
+
+    public List<Adopcion> findByCriteria(AdoptanteId adoptanteId, AnimalId animalId) {
+        return adopcionRepository.findByCriteria(adoptanteId, animalId);
+    }
 }

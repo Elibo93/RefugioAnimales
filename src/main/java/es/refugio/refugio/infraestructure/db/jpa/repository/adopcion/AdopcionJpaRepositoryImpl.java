@@ -59,4 +59,19 @@ public class AdopcionJpaRepositoryImpl implements AdopcionRepository {
     public boolean existsByAdoptanteAndAnimal(AdoptanteId adoptanteId, AnimalId animalId) {
         return jpaRepository.existsByAdoptanteIdAndAnimalId(adoptanteId.getValue(), animalId.getValue());
     }
+
+    @Override
+    public List<Adopcion> findByCriteria(AdoptanteId adoptanteId, AnimalId animalId) {
+        if (adoptanteId != null && animalId != null) {
+            return jpaRepository.findByAdoptanteIdAndAnimalId(adoptanteId.getValue(), animalId.getValue())
+                    .map(e -> List.of(AdopcionMapper.toDomain(e)))
+                    .orElseGet(List::of);
+        } else if (adoptanteId != null) {
+            return AdopcionMapper.toDomain(jpaRepository.findByAdoptanteId(adoptanteId.getValue()));
+        } else if (animalId != null) {
+            return AdopcionMapper.toDomain(jpaRepository.findByAnimalId(animalId.getValue()));
+        } else {
+            return AdopcionMapper.toDomain(jpaRepository.findAll());
+        }
+    }
 }

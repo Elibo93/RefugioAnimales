@@ -17,7 +17,7 @@ public class CreateAnimalUseCase {
 
     public Animal create(CreateAnimalCommand comando) {
         Especie especieEnum = Especie.valueOf(comando.especie().toUpperCase());
-        
+
         Animal animal = Animal.builder()
                 .nombre(comando.nombre())
                 .especie(especieEnum)

@@ -16,6 +16,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
+import es.refugio.auth.domain.Rol;
 import jakarta.servlet.http.HttpServletRequest;
 import es.refugio.refugio.application.command.usuario.CreateUsuarioCommand;
 import es.refugio.refugio.application.command.usuario.EditUsuarioCommand;
@@ -34,18 +35,18 @@ import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequiredArgsConstructor
-public class PersonaViewController {
+public class UsuarioViewController {
 
-    private final FindUsuarioService findPersonaService;
-    private final CreateUsuarioService createPersonaService;
-    private final DeleteUsuarioService deletePersonaService;
-    private final EditUsuarioService editPersonaService;
+    private final FindUsuarioService findUsuarioService;
+    private final CreateUsuarioService createUsuarioService;
+    private final DeleteUsuarioService deleteUsuarioService;
+    private final EditUsuarioService editUsuarioService;
 
     private final TemplateEngine templateEngine;
 
     @GetMapping(WebRoutes.personas_BASE)
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
-        model.addAttribute(ModelAttribute.Persona_LIST.getName(), findPersonaService.findAll());
+        model.addAttribute(ModelAttribute.Persona_LIST.getName(), findUsuarioService.findAll());
         if (successMessage != null) {
             model.addAttribute("successMessage", successMessage);
         }
@@ -63,17 +64,15 @@ public class PersonaViewController {
     }
 
     @PostMapping(WebRoutes.personas_NUEVO)
-    public String crearPersona(@RequestParam String dni,
-            @RequestParam String nombre,
+    public String crearPersona(@RequestParam String nombre,
             @RequestParam String apellido,
             @RequestParam String email,
             @RequestParam String telefono,
-            @RequestParam String direccion,
-            @RequestParam String fechaNacimiento,
+            @RequestParam String contrasena,
             Model model) {
 
-        createPersonaService.createPersona(
-                new CreateUsuarioCommand(dni, nombre, apellido, email, telefono, direccion, fechaNacimiento));
+        createUsuarioService.createUsuario(
+                new CreateUsuarioCommand(nombre, apellido, email, contrasena, telefono, Rol.ROLE_PUBLICO));
 
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_CREATED.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -81,7 +80,7 @@ public class PersonaViewController {
 
     @GetMapping(WebRoutes.personas_EDITAR)
     public String editarFormulario(@PathVariable Integer id, Model model) {
-        Usuario persona = findPersonaService.findById(new UsuarioId(id));
+        Usuario persona = findUsuarioService.findById(new UsuarioId(id));
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), persona);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -91,11 +90,14 @@ public class PersonaViewController {
     public String procesarEdicion(@PathVariable Integer id,
             @RequestParam String email,
             @RequestParam String telefono,
-            @RequestParam String direccion,
             RedirectAttributes redirectAttributes) {
 
-        editPersonaService.update(
-                new EditUsuarioCommand(new UsuarioId(id), email, telefono, direccion));
+        // Obtenemos el usuario existente para mantener su nombre, apellido y rol
+        Usuario usuario = findUsuarioService.findById(new UsuarioId(id));
+
+        editUsuarioService.update(
+                new EditUsuarioCommand(new UsuarioId(id), usuario.getNombre(), usuario.getApellido(), email, telefono,
+                        usuario.getRol()));
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",
@@ -109,7 +111,7 @@ public class PersonaViewController {
     public ResponseEntity<String> borrar(@PathVariable Integer id, RedirectAttributes redirectAttributes,
             HttpServletRequest request) {
 
-        deletePersonaService.delete(new UsuarioId(id));
+        deleteUsuarioService.delete(new UsuarioId(id));
 
         if ("true".equals(request.getHeader("HX-Request"))) {
             return ResponseEntity.ok("");
@@ -126,7 +128,7 @@ public class PersonaViewController {
 
     @GetMapping(WebRoutes.personas_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
-        List<Usuario> personas = findPersonaService.findAll();
+        List<Usuario> personas = findUsuarioService.findAll();
         Context context = new Context();
         context.setVariable("personas", personas);
         String htmlContent = templateEngine.process(ThymTemplates.Persona_LIST_PDF.getPath(), context);

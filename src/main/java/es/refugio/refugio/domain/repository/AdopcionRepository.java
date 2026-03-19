@@ -18,4 +18,6 @@ public interface AdopcionRepository extends CRUDRepository<Adopcion, AdopcionId>
     Optional<Adopcion> getByAdoptanteAndAnimal(AdoptanteId adoptanteId, AnimalId animalId);
 
     boolean existsByAdoptanteAndAnimal(AdoptanteId adoptanteId, AnimalId animalId);
+
+    List<Adopcion> findByCriteria(AdoptanteId adoptanteId, AnimalId animalId);
 }

@@ -26,14 +26,16 @@ import es.refugio.refugio.application.service.adopcion.CreateAdopcionService;
 import es.refugio.refugio.application.service.adopcion.DeleteAdopcionService;
 import es.refugio.refugio.application.service.adopcion.EditAdopcionService;
 import es.refugio.refugio.application.service.adopcion.FindAdopcionService;
+import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.application.service.animal.FindAnimalService;
 import es.refugio.refugio.application.service.usuario.FindUsuarioService;
 import es.refugio.refugio.domain.model.adopcion.Adopcion;
 import es.refugio.refugio.domain.model.adopcion.AdopcionId;
+import es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion;
 import es.refugio.refugio.domain.model.animal.Animal;
 import es.refugio.refugio.domain.model.animal.AnimalId;
 import es.refugio.refugio.domain.model.usuario.Usuario;
-import es.refugio.refugio.domain.model.usuario.UsuarioId;
+
 import es.refugio.vista.infraestructure.web.constants.WebRoutes;
 import es.refugio.vista.infraestructure.web.enums.FragmentoContenido;
 import es.refugio.vista.infraestructure.web.enums.ModelAttribute;
@@ -86,7 +88,9 @@ public class AdopcionViewController {
                         @RequestParam(required = false) Integer animalId,
                         @RequestParam(required = false) String successMessage) {
 
-                List<Adopcion> adopciones = findAdopcionService.findByCriteria(personaId, animalId);
+                AdoptanteId idAdopt = (personaId != null) ? new AdoptanteId(personaId) : null;
+                AnimalId idAnim = (animalId != null) ? new AnimalId(animalId) : null;
+                List<Adopcion> adopciones = findAdopcionService.findByCriteria(idAdopt, idAnim);
                 model.addAttribute(ModelAttribute.Adopcion_LIST.getName(), adopciones);
                 model.addAttribute("selectedPersonaId", personaId);
                 model.addAttribute("selectedAnimalId", animalId);
@@ -117,6 +121,7 @@ public class AdopcionViewController {
                 model.addAttribute(ModelAttribute.SINGLE_Adopcion.getName(), Adopcion.builder().build());
                 model.addAttribute(ModelAttribute.Persona_LIST.getName(), findPersonaService.findAll());
                 model.addAttribute(ModelAttribute.Animal_LIST.getName(), findAnimalService.findAll());
+                model.addAttribute("estadosAdopcion", EstadoAdopcion.values());
                 model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
                                 FragmentoContenido.Adopcion_FORM.getPath());
                 return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -125,10 +130,12 @@ public class AdopcionViewController {
         @PostMapping(WebRoutes.adopciones_NUEVA)
         public String crearAdopcion(@RequestParam Integer idPersona,
                         @RequestParam Integer idAnimal,
+                        @RequestParam String estado,
                         RedirectAttributes redirectAttributes) {
 
                 createAdopcionService.createAdopcion(
-                                new CreateAdopcionCommand(new UsuarioId(idPersona), new AnimalId(idAnimal)));
+                                new CreateAdopcionCommand(idPersona, idAnimal, EstadoAdopcion.valueOf(estado),
+                                                "Contrato pendiente"));
 
                 redirectAttributes.addFlashAttribute(
                                 "successMessage",
@@ -143,6 +150,7 @@ public class AdopcionViewController {
                 model.addAttribute(ModelAttribute.SINGLE_Adopcion.getName(), adopcion);
                 model.addAttribute(ModelAttribute.Persona_LIST.getName(), findPersonaService.findAll());
                 model.addAttribute(ModelAttribute.Animal_LIST.getName(), findAnimalService.findAll());
+                model.addAttribute("estadosAdopcion", EstadoAdopcion.values());
                 model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
                                 FragmentoContenido.Adopcion_FORM.getPath());
                 return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -152,11 +160,15 @@ public class AdopcionViewController {
         public String procesarEdicion(@PathVariable Integer id,
                         @RequestParam Integer idPersona,
                         @RequestParam Integer idAnimal,
+                        @RequestParam String estado,
                         RedirectAttributes redirectAttributes) {
 
+                Adopcion adopcionExistente = findAdopcionService.findById(new AdopcionId(id));
+
                 editAdopcionService.update(
-                                new EditAdopcionCommand(new AdopcionId(id), new UsuarioId(idPersona),
-                                                new AnimalId(idAnimal)));
+                                new EditAdopcionCommand(new AdopcionId(id), idAnimal, idPersona,
+                                                adopcionExistente.getFechaAdopcion(), estado,
+                                                adopcionExistente.getContrato()));
 
                 redirectAttributes.addFlashAttribute(
                                 "successMessage",

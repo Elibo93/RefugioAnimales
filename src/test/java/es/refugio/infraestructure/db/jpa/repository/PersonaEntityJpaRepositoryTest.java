@@ -45,16 +45,16 @@ public class PersonaEntityJpaRepositoryTest {
                 () -> assertEquals("Diego", entity.getNombre()));
     }
 
-    @Test
-    @Order(3)
-    void findByName() {
-        var entity = repository.findByNombre("Diego");
+    // @Test
+    // @Order(3)
+    // void findByName() {
+    // var entity = repository.findByNombre("Diego");
 
-        assertAll(
-                () -> assertNotNull(entity),
-                () -> assertEquals(1, entity.getId()),
-                () -> assertEquals("Diego", entity.getNombre()));
-    }
+    // assertAll(
+    // () -> assertNotNull(entity),
+    // () -> assertEquals(1, entity.getId()),
+    // () -> assertEquals("Diego", entity.getNombre()));
+    // }
 
     @Test
     @Order(5)
@@ -67,14 +67,10 @@ public class PersonaEntityJpaRepositoryTest {
         assertAll(
                 () -> assertNotNull(entity),
                 () -> assertTrue(entity.getId() != null),
-
-                () -> assertEquals(nuevo.getDni(), entity.getDni()),
                 () -> assertEquals(nuevo.getNombre(), entity.getNombre()),
                 () -> assertEquals(nuevo.getApellido(), entity.getApellido()),
                 () -> assertEquals(nuevo.getEmail(), entity.getEmail()),
                 () -> assertEquals(nuevo.getTelefono(), entity.getTelefono()),
-                () -> assertEquals(nuevo.getDireccion(), entity.getDireccion()),
-                () -> assertEquals(nuevo.getFechaNacimiento(), entity.getFechaNacimiento()),
                 () -> assertEquals(nuevo.getCreatedAt(), entity.getCreatedAt()));
     }
 

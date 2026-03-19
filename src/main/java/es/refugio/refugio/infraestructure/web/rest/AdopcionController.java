@@ -49,13 +49,13 @@ public class AdopcionController {
     @PostMapping
     public ResponseEntity<AdopcionResponse> createAdopcion(@Valid @RequestBody AdopcionRequest request) {
         CreateAdopcionCommand command = AdopcionMapper.toCommand(request);
-        Adopcion adopcion = createAdopcionService.create(command);
+        Adopcion adopcion = createAdopcionService.createAdopcion(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(AdopcionMapper.toResponse(adopcion));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<AdopcionResponse> updateAdopcion(@PathVariable Integer id,
-                                                           @Valid @RequestBody AdopcionRequest request) {
+            @Valid @RequestBody AdopcionRequest request) {
         EditAdopcionCommand command = AdopcionMapper.toCommand(id, request);
         Adopcion adopcion = editAdopcionService.update(command);
         return ResponseEntity.ok(AdopcionMapper.toResponse(adopcion));

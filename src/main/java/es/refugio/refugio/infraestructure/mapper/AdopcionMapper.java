@@ -9,6 +9,7 @@ import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.domain.model.animal.AnimalId;
 import es.refugio.refugio.domain.model.adopcion.Adopcion;
 import es.refugio.refugio.domain.model.adopcion.AdopcionId;
+import es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion;
 import es.refugio.refugio.infraestructure.db.jpa.entity.AdoptanteEntity;
 import es.refugio.refugio.infraestructure.db.jpa.entity.AnimalEntity;
 import es.refugio.refugio.infraestructure.db.jpa.entity.AdopcionEntity;
@@ -19,12 +20,10 @@ public class AdopcionMapper {
 
     public static CreateAdopcionCommand toCommand(AdopcionRequest req) {
         return new CreateAdopcionCommand(
-                req.animalId(),
                 req.adoptanteId(),
-                req.fechaAdopcion(),
-                req.estado(),
-                req.contrato()
-        );
+                req.animalId(),
+                EstadoAdopcion.valueOf(req.estado()),
+                req.contrato());
     }
 
     public static EditAdopcionCommand toCommand(int id, AdopcionRequest req) {
@@ -34,8 +33,7 @@ public class AdopcionMapper {
                 req.adoptanteId(),
                 req.fechaAdopcion(),
                 req.estado(),
-                req.contrato()
-        );
+                req.contrato());
     }
 
     public static AdopcionResponse toResponse(Adopcion a) {
@@ -45,8 +43,7 @@ public class AdopcionMapper {
                 a.getAdoptanteId() != null ? a.getAdoptanteId().getValue() : null,
                 a.getFechaAdopcion(),
                 a.getEstado() != null ? a.getEstado().name() : null,
-                a.getContrato()
-        );
+                a.getContrato());
     }
 
     public static AdopcionEntity toEntity(Adopcion a) {

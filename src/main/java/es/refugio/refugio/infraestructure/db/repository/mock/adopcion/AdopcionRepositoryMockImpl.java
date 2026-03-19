@@ -73,4 +73,16 @@ public class AdopcionRepositoryMockImpl implements AdopcionRepository {
         return adopciones.values().stream()
                 .anyMatch(a -> a.getAdoptanteId().equals(adoptanteId) && a.getAnimalId().equals(animalId));
     }
+
+    @Override
+    public List<Adopcion> findByCriteria(AdoptanteId adoptanteId, AnimalId animalId) {
+        if (adoptanteId != null && animalId != null) {
+            return getByAdoptanteAndAnimal(adoptanteId, animalId).map(List::of).orElseGet(List::of);
+        } else if (adoptanteId != null) {
+            return getByAdoptanteId(adoptanteId);
+        } else if (animalId != null) {
+            return getByAnimalId(animalId);
+        }
+        return getAll();
+    }
 }
