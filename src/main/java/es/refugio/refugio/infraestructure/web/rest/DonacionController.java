@@ -27,10 +27,15 @@ import es.refugio.refugio.infraestructure.web.dto.donacion.DonacionRequest;
 import es.refugio.refugio.infraestructure.web.dto.donacion.DonacionResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("api/v1/donaciones")
 @RequiredArgsConstructor
+@Tag(name = "Donaciones", description = "Registro y gestión de donaciones al refugio")
 public class DonacionController {
 
     private final CreateDonacionService createDonacionService;
@@ -38,6 +43,8 @@ public class DonacionController {
     private final EditDonacionService editDonacionService;
     private final DeleteDonacionService deleteDonacionService;
 
+    @Operation(summary = "Registrar donación")
+    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Donación registrada"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<DonacionResponse> create(@Valid @RequestBody DonacionRequest request) {
         CreateDonacionCommand command = DonacionMapper.toCommand(request);
@@ -45,6 +52,7 @@ public class DonacionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(DonacionMapper.toResponse(donacion));
     }
 
+    @Operation(summary = "Actualizar donación")
     @PutMapping("/{id}")
     public ResponseEntity<DonacionResponse> update(@PathVariable Integer id, @Valid @RequestBody DonacionRequest request) {
         EditDonacionCommand command = DonacionMapper.toCommand(id, request);
@@ -52,21 +60,26 @@ public class DonacionController {
         return ResponseEntity.ok(DonacionMapper.toResponse(donacion));
     }
 
+    @Operation(summary = "Listar donaciones")
     @GetMapping
     public List<DonacionResponse> findAll() {
         return DonacionMapper.toResponse(findDonacionService.findAll());
     }
 
+    @Operation(summary = "Obtener donación por ID")
     @GetMapping("/{id}")
     public DonacionResponse findById(@PathVariable Integer id) {
         return DonacionMapper.toResponse(findDonacionService.findById(new DonacionId(id)));
     }
 
+    @Operation(summary = "Donaciones por usuario", description = "Retorna las donaciones de un usuario concreto")
     @GetMapping("/usuario/{usuarioId}")
     public List<DonacionResponse> findByUsuarioId(@PathVariable Integer usuarioId) {
         return DonacionMapper.toResponse(findDonacionService.findByUsuarioId(new UsuarioId(usuarioId)));
     }
 
+    @Operation(summary = "Eliminar donación")
+    @ApiResponse(responseCode = "204", description = "Donación eliminada")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         deleteDonacionService.delete(new DonacionId(id));

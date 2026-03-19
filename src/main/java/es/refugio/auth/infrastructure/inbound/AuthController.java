@@ -11,14 +11,17 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import es.refugio.auth.application.dto.RegistroDto;
-import es.refugio.auth.domain.UserEntity;
 import es.refugio.auth.infrastructure.repository.UserRepository;
+import es.refugio.refugio.infraestructure.db.jpa.repository.usuario.UsuarioEntityJpaRepository;
+import es.refugio.refugio.infraestructure.db.jpa.entity.UsuarioEntity;
+import java.time.LocalDateTime;
 
 @Controller
 @RequiredArgsConstructor
 public class AuthController {
 
     private final UserRepository userRepository;
+    private final UsuarioEntityJpaRepository usuarioEntityJpaRepository;
     private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/login")
@@ -49,13 +52,16 @@ public class AuthController {
             return "main-layout";
         }
 
-        UserEntity newUser = UserEntity.builder()
+        UsuarioEntity newUser = UsuarioEntity.builder()
+                .nombre("Nuevo")
+                .apellido("Usuario")
                 .email(registroDto.getEmail())
-                .password(passwordEncoder.encode(registroDto.getPassword()))
+                .contraseña(passwordEncoder.encode(registroDto.getPassword()))
                 .rol(registroDto.getRol())
+                .createdAt(LocalDateTime.now())
                 .build();
 
-        userRepository.save(newUser);
+        usuarioEntityJpaRepository.save(newUser);
 
         return "redirect:/login?registroExitoso";
     }

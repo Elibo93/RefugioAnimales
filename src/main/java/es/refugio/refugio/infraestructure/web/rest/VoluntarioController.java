@@ -28,10 +28,15 @@ import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("api/v1/voluntarios")
 @RequiredArgsConstructor
+@Tag(name = "Voluntarios", description = "Gestión de voluntarios del refugio")
 public class VoluntarioController {
 
     private final CreateVoluntarioService createVoluntarioService;
@@ -39,6 +44,8 @@ public class VoluntarioController {
     private final EditVoluntarioService editVoluntarioService;
     private final DeleteVoluntarioService deleteVoluntarioService;
 
+    @Operation(summary = "Crear voluntario", description = "Registra un nuevo voluntario vinculado a un usuario")
+    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Voluntario creado"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<VoluntarioResponse> create(@Valid @RequestBody VoluntarioRequest request) {
         CreateVoluntarioCommand command = VoluntarioMapper.toCommand(request);
@@ -46,6 +53,8 @@ public class VoluntarioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(VoluntarioMapper.toResponse(voluntario));
     }
 
+    @Operation(summary = "Actualizar voluntario")
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Voluntario actualizado"), @ApiResponse(responseCode = "404", description = "No encontrado") })
     @PutMapping("/{id}")
     public ResponseEntity<VoluntarioResponse> update(@PathVariable Integer id,
             @Valid @RequestBody VoluntarioRequest request) {
@@ -54,21 +63,27 @@ public class VoluntarioController {
         return ResponseEntity.ok(VoluntarioMapper.toResponse(voluntario));
     }
 
+    @Operation(summary = "Listar voluntarios")
+    @ApiResponse(responseCode = "200", description = "Listado retornado")
     @GetMapping
     public List<VoluntarioResponse> findAll() {
         return VoluntarioMapper.toResponse(findVoluntarioService.findAll());
     }
 
+    @Operation(summary = "Obtener voluntario por ID")
     @GetMapping("/{id}")
     public VoluntarioResponse findById(@PathVariable Integer id) {
         return VoluntarioMapper.toResponse(findVoluntarioService.findById(new VoluntarioId(id)));
     }
 
+    @Operation(summary = "Voluntario por usuario", description = "Retorna el voluntario asociado a un usuario")
     @GetMapping("/usuario/{usuarioId}")
     public VoluntarioResponse findByUsuarioId(@PathVariable Integer usuarioId) {
         return VoluntarioMapper.toResponse(findVoluntarioService.findByUsuarioId(new UsuarioId(usuarioId)));
     }
 
+    @Operation(summary = "Eliminar voluntario")
+    @ApiResponse(responseCode = "204", description = "Voluntario eliminado")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         deleteVoluntarioService.delete(new VoluntarioId(id));

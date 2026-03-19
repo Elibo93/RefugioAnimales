@@ -1,58 +1,97 @@
 -- =====================================================
--- PERSONAS / ADOPTANTES (10)
+-- USUARIOS (10)
+-- Roles: ROLE_ADMIN, ROLE_VOLUNTARIO, ROLE_ADOPTANTE
 -- =====================================================
-INSERT INTO personas
-(dni, nombre, apellido, email, telefono, direccion, fecha_nacimiento, created_at) VALUES
-('12345678A', 'Diego', 'Romero', 'diego.romero@local', '600000001', 'C/ Sol 1, Madrid', '2001-03-10', NOW()),
-('23456789B', 'Lucía', 'Martínez', 'lucia.martinez@local', '600000002', 'C/ Luna 2, Sevilla', '2003-07-22', NOW()),
-('34567890C', 'Mario', 'Gómez', 'mario.gomez@local', '600000003', 'C/ Norte 5, Valencia', '1998-11-15', NOW()),
-('45678901D', 'Laura', 'Sánchez', 'laura.sanchez@local', '600000004', 'C/ Sur 8, Málaga', '2000-02-03', NOW()),
-('56789012E', 'Pablo', 'Díaz', 'pablo.diaz@local', '600000005', 'Av. Mar 12, Cádiz', '1997-06-18', NOW()),
-('67890123F', 'Sara', 'Moreno', 'sara.moreno@local', '600000006', 'C/ Prado 9, Madrid', '2002-09-25', NOW()),
-('78901234G', 'Alberto', 'Ruiz', 'alberto.ruiz@local', '600000007', 'C/ Río 7, Zaragoza', '1999-04-11', NOW()),
-('89012345H', 'Clara', 'Navarro', 'clara.navarro@local', '600000008', 'C/ Sierra 14, Granada', '2001-12-30', NOW()),
-('90123456J', 'David', 'Torres', 'david.torres@local', '600000009', 'C/ Parque 3, Bilbao', '1996-01-20', NOW()),
-('01234567K', 'Irene', 'Castro', 'irene.castro@local', '600000010', 'C/ Jardín 6, Madrid', '2004-05-09', NOW());
-
+INSERT IGNORE INTO usuarios (nombre, apellido, email, contrasena, telefono, rol, created_at) VALUES
+('Laura', 'García', 'laura.garcia@refugio.local', 'password', '600000001', 'ROLE_VOLUNTARIO', NOW()),
+('Carlos', 'Martín', 'carlos.martin@refugio.local', 'password', '600000002', 'ROLE_VOLUNTARIO', NOW()),
+('Marta', 'López', 'marta.lopez@refugio.local', 'password', '600000003', 'ROLE_VOLUNTARIO', NOW()),
+('Diego', 'Romero', 'diego.romero@local', 'password', '600000004', 'ROLE_ADOPTANTE', NOW()),
+('Lucía', 'Martínez', 'lucia.martinez@local', 'password', '600000005', 'ROLE_ADOPTANTE', NOW()),
+('Mario', 'Gómez', 'mario.gomez@local', 'password', '600000006', 'ROLE_ADOPTANTE', NOW()),
+('Sara', 'Nadal', 'sara.nadal@local', 'password', '600000007', 'ROLE_ADOPTANTE', NOW()),
+('Pablo', 'Díaz', 'pablo.diaz@local', 'password', '600000008', 'ROLE_ADOPTANTE', NOW()),
+('David', 'Torres', 'david.torres@local', 'password', '600000009', 'ROLE_ADOPTANTE', NOW());
 
 -- =====================================================
--- VOLUNTARIOS (7)
+-- ADOPTANTES (6) - Vinculados a los usuarios 5 al 10
 -- =====================================================
-INSERT INTO voluntarios
-(nombre, apellido, especialidad, email, telefono, created_at)
-VALUES
-('Lucía', 'García', 'Cuidado de felinos', 'lucia.garcia@refugio.local', '+34600111222', NOW()),
-('Carlos', 'Martín', 'Comportamiento canino', 'carlos.martin@refugio.local', '+34600222333', NOW()),
-('Marta', 'López', 'Auxiliar veterinaria', 'marta.lopez@refugio.local', '+34600333444', NOW()),
-('Javier', 'Ruiz', 'Rescate y transporte', 'javier.ruiz@refugio.local', '+34600444555', NOW()),
-('Ana', 'Santos', 'Gestión de adopciones', 'ana.santos@refugio.local', '+34600555666', NOW()),
-('Pedro', 'Gil', 'Entrenamiento básico', 'pedro.gil@refugio.local', '+34600666777', NOW()),
-('Elena', 'Vega', 'Cuidados veterinarios', 'elena.vega@refugio.local', '+34600777888', NOW());
+INSERT IGNORE INTO adoptantes (dni, direccion, fecha_nacimiento, estado_validacion, fecha_registro, usuario_id) VALUES
+('12345678A', 'C/ Sol 1, Madrid', '2001-03-10', 'Aprobado', NOW(), 5),
+('23456789B', 'C/ Luna 2, Sevilla', '2003-07-22', 'Aprobado', NOW(), 6),
+('34567890C', 'C/ Norte 5, Valencia', '1998-11-15', 'Pendiente', NOW(), 7),
+('45678901D', 'C/ Sur 8, Málaga', '2000-02-03', 'Aprobado', NOW(), 8),
+('56789012E', 'Av. Mar 12, Cádiz', '1997-06-18', 'Aprobado', NOW(), 9),
+('67890123F', 'C/ Parque 3, Bilbao', '1996-01-20', 'Pendiente', NOW(), 10);
 
+-- =====================================================
+-- VOLUNTARIOS (3) - Vinculados a los usuarios 2, 3, 4
+-- =====================================================
+INSERT IGNORE INTO voluntarios (disponibilidad, created_at, usuario_id) VALUES
+('Tardes y fines de semana', NOW(), 2),
+('Mañanas de Lunes a Viernes', NOW(), 3),
+('Fines de semana completos', NOW(), 4);
 
 -- =====================================================
 -- ANIMALES (10)
 -- =====================================================
-INSERT INTO animales
-(nombre, especie, raza, sexo, chip_id, estado, edad, tamano, descripcion, foto, fecha_ingreso) VALUES
-('Luna', 'Perro', 'Labrador', 'Hembra', 'CHIP001', 'Disponible', 3, 'Mediano', 'Perrita juiciosa', 'http://example.com/foto1.jpg', NOW()),
-('Simba', 'Gato', 'Común', 'Macho', 'CHIP002', 'Disponible', 2, 'Pequeño', 'Gato dormilon', 'http://example.com/foto2.jpg', NOW()),
-('Rex', 'Perro', 'Pastor Alemán', 'Macho', 'CHIP003', 'En Tratamiento', 5, 'Grande', 'Buen guardian', 'http://example.com/foto3.jpg', NOW()),
-('Bella', 'Perro', 'Galgo', 'Hembra', 'CHIP004', 'Disponible', 4, 'Grande', 'Corre muy rapido', 'http://example.com/foto4.jpg', NOW()),
-('Nala', 'Gato', 'Siamés', 'Hembra', 'CHIP005', 'Adoptado', 1, 'Pequeño', 'Muy curiosa', 'http://example.com/foto5.jpg', NOW()),
-('Thor', 'Perro', 'Husky', 'Macho', 'CHIP006', 'Disponible', 3, 'Grande', 'Le encanta la nieve', 'http://example.com/foto6.jpg', NOW()),
-('Milo', 'Gato', 'Europeo', 'Macho', 'CHIP007', 'Disponible', 4, 'Mediano', 'Le gusta cazar ratones', 'http://example.com/foto7.jpg', NOW()),
-('Kira', 'Perro', 'Border Collie', 'Hembra', 'CHIP008', 'Disponible', 2, 'Mediano', 'Muy inteligente', 'http://example.com/foto8.jpg', NOW()),
-('Coco', 'Gato', 'Persa', 'Hembra', 'CHIP009', 'En Tratamiento', 5, 'Pequeño', 'Requiere cuidado de pelaje', 'http://example.com/foto9.jpg', NOW()),
-('Rocky', 'Perro', 'Boxer', 'Macho', 'CHIP010', 'Disponible', 4, 'Grande', 'Muy fuerte y leal', 'http://example.com/foto10.jpg', NOW());
-
+INSERT IGNORE INTO animales (nombre, especie, especie_personalizada, raza, sexo, chip_id, estado, edad, tamano, descripcion, foto, fecha_ingreso) VALUES
+('Luna', 'PERRO', NULL, 'Labrador', 'HEMBRA', 'CHIP001', 'DISPONIBLE', 3, 'MEDIANO', 'Perrita muy cariñosa', 'http://example.com/foto1.jpg', NOW()),
+('Simba', 'GATO', NULL, 'Común Europeo', 'MACHO', 'CHIP002', 'DISPONIBLE', 2, 'PEQUEÑO', 'Gato dormilon', 'http://example.com/foto2.jpg', NOW()),
+('Rex', 'PERRO', NULL, 'Pastor Alemán', 'MACHO', 'CHIP003', 'EN_TRATAMIENTO', 5, 'GRANDE', 'Buen guardian, pero necesita medicación', 'http://example.com/foto3.jpg', NOW()),
+('Bella', 'PERRO', NULL, 'Galgo', 'HEMBRA', 'CHIP004', 'DISPONIBLE', 4, 'GRANDE', 'Corre muy rápido', 'http://example.com/foto4.jpg', NOW()),
+('Nala', 'GATO', NULL, 'Siamés', 'HEMBRA', 'CHIP005', 'ADOPTADO', 1, 'PEQUEÑO', 'Muy curiosa e inteligente', 'http://example.com/foto5.jpg', NOW()),
+('Thor', 'PERRO', NULL, 'Husky', 'MACHO', 'CHIP006', 'DISPONIBLE', 3, 'GRANDE', 'Le encanta la nieve y jugar', 'http://example.com/foto6.jpg', NOW()),
+('Milo', 'GATO', NULL, 'Persa', 'MACHO', 'CHIP007', 'DISPONIBLE', 4, 'MEDIANO', 'Tranquilo y mimoso', 'http://example.com/foto7.jpg', NOW()),
+('Kira', 'PERRO', NULL, 'Border Collie', 'HEMBRA', 'CHIP008', 'RESERVADO', 2, 'MEDIANO', 'Muy inteligente y activa', 'http://example.com/foto8.jpg', NOW()),
+('Coco', 'OTRO', 'Conejo', 'Belier', 'HEMBRA', 'CHIP009', 'DISPONIBLE', 1, 'PEQUEÑO', 'Le encantan las zanahorias', 'http://example.com/foto9.jpg', NOW()),
+('Rocky', 'PERRO', NULL, 'Boxer', 'MACHO', 'CHIP010', 'EN_TRATAMIENTO', 6, 'GRANDE', 'Fuerte pero con problemas articulares', 'http://example.com/foto10.jpg', NOW());
 
 -- =====================================================
--- ADOPCIONES
+-- ADOPCIONES (1)
+-- Animal 5 (Nala) está ADOPTADO. Lo adopta el Adoptante 1 (Diego)
 -- =====================================================
-INSERT INTO adopciones (id_persona, id_animal, created_at) VALUES
-(1, 1, NOW()),
-(2, 2, NOW()),
-(3, 6, NOW()),
-(4, 7, NOW()),
-(5, 8, NOW());
+INSERT IGNORE INTO adopciones (adoptante_id, animal_id, fecha_adopcion, estado, contrato) VALUES
+(1, 5, NOW(), 'COMPLETADA', 'Contrato de adopción Nala firmado correctamente.');
+
+-- =====================================================
+-- DONACIONES (3)
+-- Vinculadas a los usuarios que donan
+-- =====================================================
+INSERT IGNORE INTO donaciones (usuario_id, tipo, cantidad, fecha, descripcion) VALUES
+(5, 'DINERO', 50.00, NOW(), 'Donación mensual de apoyo monetario'),
+(2, 'COMIDA', 20.00, NOW(), 'Sacos de pienso canino y latas de gato'),
+(6, 'MEDICINAS', 15.50, NOW(), 'Desparasitantes externos e internos');
+
+-- =====================================================
+-- HISTORIAL MÉDICO (3)
+-- =====================================================
+INSERT IGNORE INTO historial_medicos (id_animal, fecha, descripcion, tratamiento, veterinario) VALUES
+(3, NOW(), 'Revisión por cojera pata trasera', 'Reposo y antiinflamatorios', 'Dr. Gómez'),
+(10, NOW(), 'Problemas articulares detectados', 'Medicación diaria articular', 'Dra. Silva'),
+(1, NOW(), 'Vacunación anual', 'Vacuna polivalente y rabia', 'Dr. Gómez');
+
+-- =====================================================
+-- SOLICITUDES DE ADOPCIÓN (2)
+-- =====================================================
+INSERT IGNORE INTO solicitudes_adopcion (animal_id, adoptante_id, fecha, estado, comentario) VALUES
+(8, 2, NOW(), 'APROBADA', 'Parece una familia ideal para Kira, el Border Collie'),
+(1, 3, NOW(), 'PENDIENTE', 'Esperando para entrevista personal con el adoptante para Luna');
+
+-- =====================================================
+-- TAREAS (3)
+-- =====================================================
+INSERT IGNORE INTO tareas (descripcion, fecha, estado) VALUES
+('Pasear a los perros grandes (Thor y Rocky)', NOW(), 'PENDIENTE'),
+('Limpieza profunda de jaulas de gatitos', NOW(), 'COMPLETADA'),
+('Administración de medicamentos a Rex y Rocky', NOW(), 'EN_PROCESO');
+
+-- =====================================================
+-- VOLUNTARIOS_TAREAS (Join Table N:M)
+-- Relaciona las Tareas con los Voluntarios asignados
+-- =====================================================
+INSERT IGNORE INTO voluntarios_tareas (tarea_id, voluntario_id) VALUES
+(1, 1),
+(1, 2),
+(2, 3),
+(3, 1);

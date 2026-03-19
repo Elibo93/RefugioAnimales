@@ -35,10 +35,15 @@ import es.refugio.refugio.infraestructure.web.dto.adopcion.AdopcionResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("api/v1/adopciones")
 @RequiredArgsConstructor
+@Tag(name = "Adopciones", description = "Gestión de adopciones de animales")
 public class AdopcionController {
 
     private final CreateAdopcionService createAdopcionService;
@@ -46,6 +51,8 @@ public class AdopcionController {
     private final EditAdopcionService editAdopcionService;
     private final DeleteAdopcionService deleteAdopcionService;
 
+    @Operation(summary = "Registrar adopción", description = "Crea una nueva adopción vinculando adoptante y animal")
+    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Adopción registrada"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<AdopcionResponse> createAdopcion(@Valid @RequestBody AdopcionRequest request) {
         CreateAdopcionCommand command = AdopcionMapper.toCommand(request);
@@ -53,6 +60,8 @@ public class AdopcionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(AdopcionMapper.toResponse(adopcion));
     }
 
+    @Operation(summary = "Actualizar adopción")
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Adopción actualizada"), @ApiResponse(responseCode = "404", description = "No encontrada") })
     @PutMapping("/{id}")
     public ResponseEntity<AdopcionResponse> updateAdopcion(@PathVariable Integer id,
             @Valid @RequestBody AdopcionRequest request) {
@@ -61,6 +70,7 @@ public class AdopcionController {
         return ResponseEntity.ok(AdopcionMapper.toResponse(adopcion));
     }
 
+    @Operation(summary = "Listar adopciones", description = "Retorna todas las adopciones registradas")
     @GetMapping
     public List<AdopcionResponse> getAll() {
         return findAdopcionService.findAll()
@@ -69,23 +79,28 @@ public class AdopcionController {
                 .toList();
     }
 
+    @Operation(summary = "Obtener adopción por ID")
     @GetMapping("/{id}")
     public AdopcionResponse getAdopcionById(@PathVariable Integer id) {
         return AdopcionMapper.toResponse(findAdopcionService.findById(new AdopcionId(id)));
     }
 
+    @Operation(summary = "Adopciones por animal", description = "Retorna adopciones asociadas a un animal concreto")
     @GetMapping("/animal/{animalId}")
     public List<AdopcionResponse> getAdopcionByAnimalId(@PathVariable Integer animalId) {
         List<Adopcion> adopciones = findAdopcionService.findByAnimalId(new AnimalId(animalId));
         return AdopcionMapper.toResponse(adopciones);
     }
 
+    @Operation(summary = "Adopciones por adoptante", description = "Retorna adopciones de un adoptante concreto")
     @GetMapping("/adoptante/{adoptanteId}")
     public List<AdopcionResponse> getAdopcionByAdoptanteId(@PathVariable Integer adoptanteId) {
         List<Adopcion> adopciones = findAdopcionService.findByAdoptanteId(new AdoptanteId(adoptanteId));
         return AdopcionMapper.toResponse(adopciones);
     }
 
+    @Operation(summary = "Eliminar adopción")
+    @ApiResponse(responseCode = "204", description = "Adopción eliminada")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAdopcion(@PathVariable Integer id) {
         deleteAdopcionService.delete(new AdopcionId(id));

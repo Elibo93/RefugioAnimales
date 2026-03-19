@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import es.refugio.auth.domain.UserEntity;
+import es.refugio.auth.domain.AuthCredentialEntity;
 import es.refugio.auth.infrastructure.repository.UserRepository;
 
 import java.util.Collections;
@@ -21,7 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        UserEntity user = userRepository.findByEmail(email)
+        AuthCredentialEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
 
         return new User(

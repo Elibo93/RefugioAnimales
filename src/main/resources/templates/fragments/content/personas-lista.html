@@ -29,7 +29,7 @@
                         <th th:text="#{persona.table.header.id}">ID</th>
                         <th th:text="#{persona.table.header.name}">Nombre</th>
                         <th th:text="#{persona.table.header.apellido}">Apellido</th>
-                        <th th:text="#{persona.table.header.dni}">DNI</th>
+                        <th th:text="#{persona.table.header.rol}">Rol</th>
                         <th th:text="#{persona.table.header.email}">Email</th>
                         <th th:text="#{persona.table.header.telefono}">Tlf</th>
                         <th th:text="#{persona.table.header.action}">Acción</th>
@@ -37,13 +37,13 @@
                 </thead>
                 <tbody id="tabla-personas-body">
                     <tr th:each="a : ${personas}" th:id="'row-' + ${a.id.value}"
-                        th:attr="data-id=${a.id.value}, data-email=${a.email}, data-tlf=${a.telefono}, data-dir=${a.direccion}">
+                        th:attr="data-id=${a.id.value}, data-email=${a.email}, data-tlf=${a.telefono}">
 
                         <td th:text="${a.id.value}">1</td>
                         <td style="font-weight:600; color:var(--text-main);" th:text="${a.nombre}">Juan</td>
                         <td th:text="${a.apellido}">Pérez</td>
                         <td><span class="badge-soon" style="background:#F1F5F9; color:#64748B;"
-                                th:text="${a.dni}">12345678A</span></td>
+                                th:text="${a.rol}">ROLE_ADMIN</span></td>
                         <td class="col-email" th:text="${a.email}">juan@mail.com</td>
                         <td class="col-tlf" th:text="${a.telefono}">600...</td>
                         <td style="display:flex; gap:8px;">

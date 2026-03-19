@@ -9,6 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import es.refugio.refugio.application.command.adoptante.CreateAdoptanteCommand;
 import es.refugio.refugio.application.command.adoptante.EditAdoptanteCommand;
@@ -27,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("api/v1/adoptantes")
 @RequiredArgsConstructor
+@Tag(name = "Adoptantes", description = "Gestión de adoptantes del refugio")
 public class AdoptanteController {
 
     private final CreateAdoptanteService createService;
@@ -34,6 +39,8 @@ public class AdoptanteController {
     private final DeleteAdoptanteService deleteService;
     private final EditAdoptanteService editService;
 
+    @Operation(summary = "Crear adoptante", description = "Registra un nuevo adoptante vinculado a un usuario")
+    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Adoptante creado"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<AdoptanteResponse> createAdoptante(@Valid @RequestBody AdoptanteRequest request) {
         CreateAdoptanteCommand command = AdoptanteMapper.toCommand(request);
@@ -44,6 +51,8 @@ public class AdoptanteController {
                 .body(AdoptanteMapper.toResponse(adoptante));
     }
 
+    @Operation(summary = "Listar adoptantes")
+    @ApiResponse(responseCode = "200", description = "Listado obtenido")
     @GetMapping
     public List<AdoptanteResponse> getAll() {
         return findService.findAll()
@@ -52,18 +61,24 @@ public class AdoptanteController {
                 .toList();
     }
 
+    @Operation(summary = "Obtener adoptante por ID")
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Adoptante encontrado"), @ApiResponse(responseCode = "404", description = "No encontrado") })
     @GetMapping("/{id}")
     public AdoptanteResponse getById(@PathVariable int id) {
         Adoptante adoptante = findService.findById(new AdoptanteId(id));
         return AdoptanteMapper.toResponse(adoptante);
     }
 
+    @Operation(summary = "Eliminar adoptante")
+    @ApiResponse(responseCode = "204", description = "Adoptante eliminado")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable int id) {
         deleteService.delete(new AdoptanteId(id));
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Editar adoptante")
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Adoptante actualizado"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PutMapping("/{id}")
     public AdoptanteResponse editAdoptante(
             @PathVariable int id,

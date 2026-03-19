@@ -17,25 +17,25 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/web/home", "/animales/catalogo", "/login", "/registro", "/css/**", "/js/**", "/img/**", "/images/**", "/webjars/**", "/api/hora").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/voluntarios/**").hasAnyRole("ADMIN", "VOLUNTARIO")
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/adopciones/**").permitAll()
-                .requestMatchers("/adopciones/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .loginProcessingUrl("/login-post")
-                .defaultSuccessUrl("/web/home", true)
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/web/home")
-                .permitAll()
-            );
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/web/home", "/animales/catalogo", "/login", "/registro", "/css/**",
+                                "/js/**", "/img/**", "/images/**", "/webjars/**", "/api/hora", "/favicon.ico",
+                                "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs", "/v3/api-docs/**")
+                        .permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/voluntarios/**").hasAnyRole("ADMIN", "VOLUNTARIO")
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/adopciones/**").permitAll()
+                        .requestMatchers("/adopciones/**").hasRole("ADMIN")
+                        .anyRequest().authenticated())
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login-post")
+                        .defaultSuccessUrl("/web/home", true)
+                        .permitAll())
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/web/home")
+                        .permitAll());
 
         return http.build();
     }

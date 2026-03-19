@@ -27,7 +27,8 @@ public class HomeViewController {
 
     @GetMapping
     public String home(Model model) {
-        model.addAttribute(ModelAttribute.Persona_LIST.getName(), findPersonaService.findAll());
+        model.addAttribute(ModelAttribute.Persona_LIST.getName(),
+                findPersonaService.findAll());
         model.addAttribute(ModelAttribute.Animal_LIST.getName(), findAnimalService.findAll());
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), findVoluntarioService.findAll());
         model.addAttribute(ModelAttribute.Adopcion_LIST.getName(), findAdopcionService.findAll());

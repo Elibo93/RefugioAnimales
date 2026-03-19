@@ -8,22 +8,22 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 
 @Entity
-@Table(name = "users")
+@Table(name = "usuarios")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserEntity {
+public class AuthCredentialEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name="contrasena", nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)

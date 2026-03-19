@@ -33,10 +33,15 @@ import es.refugio.refugio.infraestructure.web.dto.animal.AnimalResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("api/v1/animales")
 @RequiredArgsConstructor
+@Tag(name = "Animales", description = "Gestión de animales del refugio")
 public class AnimalController {
 
     private final CreateAnimalService createAnimalService;
@@ -44,6 +49,8 @@ public class AnimalController {
     private final EditAnimalService editAnimalService;
     private final DeleteAnimalService deleteAnimalService;
 
+    @Operation(summary = "Crear animal", description = "Registra un nuevo animal en el refugio")
+    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Animal creado"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<AnimalResponse> createAnimal(@Valid @RequestBody AnimalRequest request) {
         CreateAnimalCommand comando = AnimalMapper.toCommand(request);
@@ -51,6 +58,8 @@ public class AnimalController {
         return ResponseEntity.status(HttpStatus.CREATED).body(AnimalMapper.toResponse(animal));
     }
 
+    @Operation(summary = "Actualizar animal", description = "Modifica los datos de un animal existente")
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Animal actualizado"), @ApiResponse(responseCode = "404", description = "Animal no encontrado") })
     @PutMapping("/{id}")
     public ResponseEntity<AnimalResponse> updateAnimal(@PathVariable Integer id,
                                                      @Valid @RequestBody AnimalRequest request) {
@@ -59,6 +68,8 @@ public class AnimalController {
         return ResponseEntity.ok(AnimalMapper.toResponse(animal));
     }
 
+    @Operation(summary = "Listar animales", description = "Retorna todos los animales registrados")
+    @ApiResponse(responseCode = "200", description = "Listado obtenido")
     @GetMapping
     public List<AnimalResponse> getAll() {
         return findAnimalService.findAll()
@@ -67,11 +78,15 @@ public class AnimalController {
                 .toList();
     }
 
+    @Operation(summary = "Obtener animal por ID")
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Animal encontrado"), @ApiResponse(responseCode = "404", description = "Animal no encontrado") })
     @GetMapping("/{id}")
     public AnimalResponse getAnimalById(@PathVariable Integer id) {
         return AnimalMapper.toResponse(findAnimalService.findById(new AnimalId(id)));
     }
 
+    @Operation(summary = "Eliminar animal")
+    @ApiResponses({ @ApiResponse(responseCode = "204", description = "Animal eliminado"), @ApiResponse(responseCode = "404", description = "Animal no encontrado") })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAnimal(@PathVariable Integer id) {
         deleteAnimalService.delete(new AnimalId(id));

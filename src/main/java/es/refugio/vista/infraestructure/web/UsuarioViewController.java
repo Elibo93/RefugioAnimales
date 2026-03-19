@@ -88,6 +88,8 @@ public class UsuarioViewController {
 
     @PostMapping(WebRoutes.personas_EDITAR)
     public String procesarEdicion(@PathVariable Integer id,
+            @RequestParam String nombre,
+            @RequestParam String apellido,
             @RequestParam String email,
             @RequestParam String telefono,
             RedirectAttributes redirectAttributes) {
@@ -96,7 +98,7 @@ public class UsuarioViewController {
         Usuario usuario = findUsuarioService.findById(new UsuarioId(id));
 
         editUsuarioService.update(
-                new EditUsuarioCommand(new UsuarioId(id), usuario.getNombre(), usuario.getApellido(), email, telefono,
+                new EditUsuarioCommand(new UsuarioId(id), nombre, apellido, email, telefono,
                         usuario.getRol()));
 
         redirectAttributes.addFlashAttribute(

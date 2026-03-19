@@ -35,10 +35,15 @@ import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.SolicitudAd
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("api/v1/solicitudes-adopcion")
 @RequiredArgsConstructor
+@Tag(name = "Solicitudes de Adopción", description = "Gestión de solicitudes de adopción")
 public class SolicitudAdopcionController {
 
     private final CreateSolicitudAdopcionService createSolicitudAdopcionService;
@@ -46,6 +51,8 @@ public class SolicitudAdopcionController {
     private final EditSolicitudAdopcionService editSolicitudAdopcionService;
     private final DeleteSolicitudAdopcionService deleteSolicitudAdopcionService;
 
+    @Operation(summary = "Crear solicitud de adopción")
+    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Solicitud creada"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<SolicitudAdopcionResponse> createSolicitudAdopcion(@Valid @RequestBody SolicitudAdopcionRequest request) {
         CreateSolicitudAdopcionCommand command = SolicitudAdopcionMapper.toCommand(request);
@@ -53,6 +60,7 @@ public class SolicitudAdopcionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(SolicitudAdopcionMapper.toResponse(solicitud));
     }
 
+    @Operation(summary = "Actualizar solicitud de adopción")
     @PutMapping("/{id}")
     public ResponseEntity<SolicitudAdopcionResponse> updateSolicitudAdopcion(@PathVariable Integer id,
                                                                              @Valid @RequestBody SolicitudAdopcionRequest request) {
@@ -61,6 +69,7 @@ public class SolicitudAdopcionController {
         return ResponseEntity.ok(SolicitudAdopcionMapper.toResponse(solicitud));
     }
 
+    @Operation(summary = "Listar solicitudes")
     @GetMapping
     public List<SolicitudAdopcionResponse> getAll() {
         return findSolicitudAdopcionService.findAll()
@@ -69,23 +78,28 @@ public class SolicitudAdopcionController {
                 .toList();
     }
 
+    @Operation(summary = "Obtener solicitud por ID")
     @GetMapping("/{id}")
     public SolicitudAdopcionResponse getSolicitudAdopcionById(@PathVariable Integer id) {
         return SolicitudAdopcionMapper.toResponse(findSolicitudAdopcionService.findById(new SolicitudAdopcionId(id)));
     }
 
+    @Operation(summary = "Solicitudes por animal")
     @GetMapping("/animal/{animalId}")
     public List<SolicitudAdopcionResponse> getSolicitudAdopcionByAnimalId(@PathVariable Integer animalId) {
         List<SolicitudAdopcion> solicitudes = findSolicitudAdopcionService.findByAnimalId(new AnimalId(animalId));
         return SolicitudAdopcionMapper.toResponse(solicitudes);
     }
 
+    @Operation(summary = "Solicitudes por adoptante")
     @GetMapping("/adoptante/{adoptanteId}")
     public List<SolicitudAdopcionResponse> getSolicitudAdopcionByAdoptanteId(@PathVariable Integer adoptanteId) {
         List<SolicitudAdopcion> solicitudes = findSolicitudAdopcionService.findByAdoptanteId(new AdoptanteId(adoptanteId));
         return SolicitudAdopcionMapper.toResponse(solicitudes);
     }
 
+    @Operation(summary = "Eliminar solicitud")
+    @ApiResponse(responseCode = "204", description = "Solicitud eliminada")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSolicitudAdopcion(@PathVariable Integer id) {
         deleteSolicitudAdopcionService.delete(new SolicitudAdopcionId(id));

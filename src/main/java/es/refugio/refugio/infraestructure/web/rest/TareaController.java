@@ -27,10 +27,15 @@ import es.refugio.refugio.infraestructure.web.dto.tarea.TareaResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("api/v1/tareas")
 @RequiredArgsConstructor
+@Tag(name = "Tareas", description = "Gestión de tareas asignadas a los voluntarios")
 public class TareaController {
 
     private final CreateTareaService createTareaService;
@@ -38,6 +43,8 @@ public class TareaController {
     private final EditTareaService editTareaService;
     private final DeleteTareaService deleteTareaService;
 
+    @Operation(summary = "Crear tarea")
+    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Tarea creada"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<TareaResponse> create(@Valid @RequestBody TareaRequest request) {
         CreateTareaCommand command = TareaMapper.toCommand(request);
@@ -45,6 +52,8 @@ public class TareaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(TareaMapper.toResponse(tarea));
     }
 
+    @Operation(summary = "Actualizar tarea")
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Tarea actualizada"), @ApiResponse(responseCode = "404", description = "No encontrada") })
     @PutMapping("/{id}")
     public ResponseEntity<TareaResponse> update(@PathVariable Integer id, @Valid @RequestBody TareaRequest request) {
         EditTareaCommand command = TareaMapper.toCommand(id, request);
@@ -52,16 +61,20 @@ public class TareaController {
         return ResponseEntity.ok(TareaMapper.toResponse(tarea));
     }
 
+    @Operation(summary = "Listar tareas")
     @GetMapping
     public List<TareaResponse> findAll() {
         return TareaMapper.toResponse(findTareaService.findAll());
     }
 
+    @Operation(summary = "Obtener tarea por ID")
     @GetMapping("/{id}")
     public TareaResponse findById(@PathVariable Integer id) {
         return TareaMapper.toResponse(findTareaService.findById(new TareaId(id)));
     }
 
+    @Operation(summary = "Eliminar tarea")
+    @ApiResponse(responseCode = "204", description = "Tarea eliminada")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         deleteTareaService.delete(new TareaId(id));

@@ -14,13 +14,7 @@ public class FindUsuarioUseCase {
     private final UsuarioRepository usuarioRepository;
 
     public List<Usuario> findAll() {
-        List<Usuario> usuarios = usuarioRepository.getAll();
-
-        if (usuarios.isEmpty()) {
-            throw new UsuarioNotFoundException();
-        }
-
-        return usuarios;
+        return usuarioRepository.getAll();
     }
 
     public Usuario findById(UsuarioId id) {

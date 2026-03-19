@@ -2,6 +2,8 @@ package es.refugio.vista.infraestructure.web;
 
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -54,7 +56,13 @@ public class VoluntarioViewController {
 
     @GetMapping(WebRoutes.voluntarios_BASE)
     public String listar(Model model) {
-        model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), findVoluntarioService.findAll());
+        List<Voluntario> voluntarios = findVoluntarioService.findAll();
+        // Mapa usuarioId -> Usuario para lookup en la plantilla
+        Map<Integer, Usuario> usuariosMap = voluntarios.stream()
+                .map(v -> findUsuarioService.findById(v.getUsuarioId()))
+                .collect(Collectors.toMap(u -> u.getId().getValue(), u -> u, (a, b) -> a));
+        model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), voluntarios);
+        model.addAttribute("usuariosMap", usuariosMap);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }

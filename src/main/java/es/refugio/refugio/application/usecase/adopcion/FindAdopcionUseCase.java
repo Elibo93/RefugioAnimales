@@ -15,11 +15,7 @@ public class FindAdopcionUseCase {
     private final AdopcionRepository adopcionRepository;
 
     public List<Adopcion> findAll() {
-        List<Adopcion> adopciones = adopcionRepository.getAll();
-        if (adopciones.isEmpty()) {
-            throw new AdopcionNotFoundException();
-        }
-        return adopciones;
+        return adopcionRepository.getAll();
     }
 
     public Adopcion findById(AdopcionId id) {

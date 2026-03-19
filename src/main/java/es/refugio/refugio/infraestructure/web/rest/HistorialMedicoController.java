@@ -34,10 +34,15 @@ import es.refugio.refugio.infraestructure.web.dto.historial_medico.HistorialMedi
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("api/v1/historial-medico")
 @RequiredArgsConstructor
+@Tag(name = "Historial Médico", description = "Registro del historial médico de los animales")
 public class HistorialMedicoController {
 
     private final CreateHistorialMedicoService createHistorialMedicoService;
@@ -45,6 +50,8 @@ public class HistorialMedicoController {
     private final EditHistorialMedicoService editHistorialMedicoService;
     private final DeleteHistorialMedicoService deleteHistorialMedicoService;
 
+    @Operation(summary = "Crear registro médico")
+    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Registro creado"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<HistorialMedicoResponse> createHistorialMedico(@Valid @RequestBody HistorialMedicoRequest request) {
         CreateHistorialMedicoCommand command = HistorialMedicoMapper.toCommand(request);
@@ -52,6 +59,7 @@ public class HistorialMedicoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(HistorialMedicoMapper.toResponse(historialMedico));
     }
 
+    @Operation(summary = "Actualizar registro médico")
     @PutMapping("/{id}")
     public ResponseEntity<HistorialMedicoResponse> updateHistorialMedico(@PathVariable Integer id,
                                                                          @Valid @RequestBody HistorialMedicoRequest request) {
@@ -60,6 +68,7 @@ public class HistorialMedicoController {
         return ResponseEntity.ok(HistorialMedicoMapper.toResponse(historialMedico));
     }
 
+    @Operation(summary = "Listar historial médico")
     @GetMapping
     public List<HistorialMedicoResponse> getAll() {
         return findHistorialMedicoService.findAll()
@@ -68,17 +77,21 @@ public class HistorialMedicoController {
                 .toList();
     }
 
+    @Operation(summary = "Obtener registro médico por ID")
     @GetMapping("/{id}")
     public HistorialMedicoResponse getHistorialMedicoById(@PathVariable Integer id) {
         return HistorialMedicoMapper.toResponse(findHistorialMedicoService.findById(new HistorialMedicoId(id)));
     }
 
+    @Operation(summary = "Historial médico por animal", description = "Retorna todos los registros médicos de un animal concreto")
     @GetMapping("/animal/{animalId}")
     public List<HistorialMedicoResponse> getHistorialMedicoByAnimalId(@PathVariable Integer animalId) {
         List<HistorialMedico> historiales = findHistorialMedicoService.findByAnimalId(new AnimalId(animalId));
         return HistorialMedicoMapper.toResponse(historiales);
     }
 
+    @Operation(summary = "Eliminar registro médico")
+    @ApiResponse(responseCode = "204", description = "Registro eliminado")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteHistorialMedico(@PathVariable Integer id) {
         deleteHistorialMedicoService.delete(new HistorialMedicoId(id));

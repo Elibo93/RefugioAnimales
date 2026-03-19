@@ -3,7 +3,7 @@ package es.refugio;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages = "es.refugio.animales")
+@SpringBootApplication(scanBasePackages = "es.refugio")
 public class RefugioAnimalesApplication {
 
 	public static void main(String[] args) {
@@ -11,20 +11,3 @@ public class RefugioAnimalesApplication {
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

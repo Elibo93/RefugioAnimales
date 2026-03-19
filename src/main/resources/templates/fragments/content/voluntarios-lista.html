@@ -29,7 +29,7 @@
                         <th th:text="#{professor.table.header.id}">ID</th>
                         <th th:text="#{professor.table.header.name}">Nombre</th>
                         <th th:text="#{professor.table.header.surname}">Apellido</th>
-                        <th th:text="#{professor.table.header.specialty}">Especialidad</th>
+                        <th th:text="#{voluntario.table.header.disponibilidad}">Disponibilidad</th>
                         <th th:text="#{professor.table.header.email}">Email</th>
                         <th th:text="#{professor.table.header.phone}">Tlf</th>
                         <th th:text="#{professor.table.header.action}">Acción</th>
@@ -37,15 +37,16 @@
                 </thead>
                 <tbody>
                     <tr th:each="p : ${voluntarios}" th:id="'row-' + ${p.id.value}"
-                        th:attr="data-id=${p.id.value}, data-nombre=${p.nombre}, data-apellido=${p.apellido}, data-esp=${p.especialidad}, data-email=${p.email}, data-tlf=${p.telefono}">
+                        th:with="u=${usuariosMap[p.usuarioId.value]}"
+                        th:attr="data-id=${p.id.value}, data-nombre=${u?.nombre}, data-apellido=${u?.apellido}, data-disp=${p.disponibilidad}, data-email=${u?.email}, data-tlf=${u?.telefono}">
 
                         <td th:text="${p.id.value}">1</td>
-                        <td style="font-weight: 600; color: var(--text-main);" th:text="${p.nombre}">Juan</td>
-                        <td th:text="${p.apellido}">Pérez</td>
+                        <td style="font-weight: 600; color: var(--text-main);" th:text="${u?.nombre}">Juan</td>
+                        <td th:text="${u?.apellido}">Pérez</td>
                         <td><span class="badge-soon" style="background:#F3E8FF; color:#9333EA;"
-                                th:text="${p.especialidad}">Música</span></td>
-                        <td th:text="${p.email}">juan@mail.com</td>
-                        <td th:text="${p.telefono}">600...</td>
+                                th:text="${p.disponibilidad}">Tarde</span></td>
+                        <td th:text="${u?.email}">juan@mail.com</td>
+                        <td th:text="${u?.telefono}">600...</td>
                         <td style="display:flex; gap:8px;">
                             <button class="btn-icon trigger-modal"><i data-lucide="edit-2"
                                     style="width:16px;"></i></button>
@@ -123,7 +124,7 @@
                     document.getElementById('editId').value = id;
                     document.getElementById('editNombre').value = tr.dataset.nombre;
                     document.getElementById('editApellido').value = tr.dataset.apellido;
-                    document.getElementById('editEspecialidad').value = tr.dataset.esp;
+                    document.getElementById('editEspecialidad').value = tr.dataset.disp;
                     document.getElementById('editEmail').value = tr.dataset.email;
                     document.getElementById('editTlf').value = tr.dataset.tlf;
 
