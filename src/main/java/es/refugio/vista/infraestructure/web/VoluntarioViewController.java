@@ -20,12 +20,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import es.refugio.refugio.application.command.usuario.EditUsuarioCommand;
 import es.refugio.refugio.application.command.voluntario.CreateVoluntarioCommand;
 import es.refugio.refugio.application.command.voluntario.EditVoluntarioCommand;
 import es.refugio.refugio.application.service.voluntario.CreateVoluntarioService;
 import es.refugio.refugio.application.service.voluntario.DeleteVoluntarioService;
 import es.refugio.refugio.application.service.voluntario.EditVoluntarioService;
 import es.refugio.refugio.application.service.voluntario.FindVoluntarioService;
+import es.refugio.refugio.application.service.usuario.EditUsuarioService;
+import es.refugio.refugio.application.service.usuario.FindUsuarioService;
+import es.refugio.refugio.domain.model.usuario.Usuario;
+import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
 import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
 import es.refugio.vista.infraestructure.web.constants.WebRoutes;
@@ -42,6 +47,8 @@ public class VoluntarioViewController {
     private final CreateVoluntarioService createVoluntarioService;
     private final DeleteVoluntarioService deleteVoluntarioService;
     private final EditVoluntarioService editVoluntarioService;
+    private final FindUsuarioService findUsuarioService;
+    private final EditUsuarioService editUsuarioService;
 
     private final TemplateEngine templateEngine;
 
@@ -68,35 +75,48 @@ public class VoluntarioViewController {
     }
 
     @PostMapping(WebRoutes.voluntarios_NUEVO)
-    public String crearVoluntario(@RequestParam String nombre,
-            @RequestParam String apellido,
-            @RequestParam String especialidad,
-            @RequestParam String email,
-            @RequestParam String telefono,
+    public String crearVoluntario(
+            @RequestParam Integer idUsuario,
+            @RequestParam String disponibilidad,
             RedirectAttributes redirectAttributes) {
 
+        // Solo le pasamos el ID del Usuario y los datos exclusivos del voluntario
         createVoluntarioService.createVoluntario(
-                new CreateVoluntarioCommand(nombre, apellido, especialidad, email, telefono));
+                new CreateVoluntarioCommand(new UsuarioId(idUsuario), disponibilidad));
 
-        redirectAttributes.addFlashAttribute(
-                "successMessage",
-                "Voluntario creado correctamente");
-
+        redirectAttributes.addFlashAttribute("successMessage", "Voluntario creado correctamente");
         return "redirect:" + WebRoutes.voluntarios_BASE;
     }
 
     @PostMapping(WebRoutes.voluntarios_EDITAR)
     public String editarVoluntario(@PathVariable Integer id,
-            @RequestParam String especialidad,
+            @RequestParam String disponibilidad,
             @RequestParam String email,
             @RequestParam String telefono,
             RedirectAttributes redirectAttributes) {
-        editVoluntarioService.update(
-                new EditVoluntarioCommand(new VoluntarioId(id), especialidad, email, telefono));
 
-        redirectAttributes.addFlashAttribute(
-                "successMessage",
-                "Voluntario editado correctamente");
+        // 1. Buscamos el voluntario que estamos editando
+        Voluntario voluntarioExistente = findVoluntarioService.findById(new VoluntarioId(id));
+
+        // 2. Buscamos su Usuario en la base de datos (para no borrarle el nombre sin
+        // querer)
+        Usuario usuarioExistente = findUsuarioService.findById(voluntarioExistente.getUsuarioId());
+
+        // 3. Actualizamos los datos personales en la tabla Usuario
+        editUsuarioService.update(new EditUsuarioCommand(
+                usuarioExistente.getId(),
+                usuarioExistente.getNombre(), // Mantenemos el que tenía
+                usuarioExistente.getApellido(), // Mantenemos el que tenía
+                email, // <--- NUEVO EMAIL
+                telefono, // <--- NUEVO TELEFONO
+                usuarioExistente.getRol() // Mantenemos su rol
+        ));
+
+        // 4. Actualizamos sus datos específicos en la tabla Voluntario
+        editVoluntarioService.update(
+                new EditVoluntarioCommand(new VoluntarioId(id), disponibilidad));
+
+        redirectAttributes.addFlashAttribute("successMessage", "Voluntario editado correctamente");
 
         return "redirect:" + WebRoutes.voluntarios_BASE;
     }

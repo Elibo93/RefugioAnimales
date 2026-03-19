@@ -1,7 +1,8 @@
 package es.refugio.refugio.domain.model.voluntario;
 
-import java.time.LocalDateTime;
-
+import java.util.List;
+import es.refugio.refugio.domain.model.tarea.TareaId;
+import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,30 +11,8 @@ import lombok.Data;
 @AllArgsConstructor
 @Builder
 public class Voluntario {
-
-	// Atributos
-	private VoluntarioId id;
-	private String nombre;
-	private String apellido;
-	private String especialidad;
-	private String email;
-	private String telefono;
-	private LocalDateTime createdAt;
+    private VoluntarioId id;
+    private UsuarioId usuarioId;
+    private String disponibilidad;
+    private List<TareaId> tareas;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

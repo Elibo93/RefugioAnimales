@@ -1,0 +1,70 @@
+package es.refugio.refugio.infraestructure.web.rest;
+
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import es.refugio.refugio.application.command.tarea.CreateTareaCommand;
+import es.refugio.refugio.application.command.tarea.EditTareaCommand;
+import es.refugio.refugio.application.service.tarea.CreateTareaService;
+import es.refugio.refugio.application.service.tarea.DeleteTareaService;
+import es.refugio.refugio.application.service.tarea.EditTareaService;
+import es.refugio.refugio.application.service.tarea.FindTareaService;
+import es.refugio.refugio.domain.model.tarea.Tarea;
+import es.refugio.refugio.domain.model.tarea.TareaId;
+import es.refugio.refugio.infraestructure.mapper.TareaMapper;
+import es.refugio.refugio.infraestructure.web.dto.tarea.TareaRequest;
+import es.refugio.refugio.infraestructure.web.dto.tarea.TareaResponse;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("api/v1/tareas")
+@RequiredArgsConstructor
+public class TareaController {
+
+    private final CreateTareaService createTareaService;
+    private final FindTareaService findTareaService;
+    private final EditTareaService editTareaService;
+    private final DeleteTareaService deleteTareaService;
+
+    @PostMapping
+    public ResponseEntity<TareaResponse> create(@Valid @RequestBody TareaRequest request) {
+        CreateTareaCommand command = TareaMapper.toCommand(request);
+        Tarea tarea = createTareaService.create(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(TareaMapper.toResponse(tarea));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TareaResponse> update(@PathVariable Integer id, @Valid @RequestBody TareaRequest request) {
+        EditTareaCommand command = TareaMapper.toCommand(id, request);
+        Tarea tarea = editTareaService.update(command);
+        return ResponseEntity.ok(TareaMapper.toResponse(tarea));
+    }
+
+    @GetMapping
+    public List<TareaResponse> findAll() {
+        return TareaMapper.toResponse(findTareaService.findAll());
+    }
+
+    @GetMapping("/{id}")
+    public TareaResponse findById(@PathVariable Integer id) {
+        return TareaMapper.toResponse(findTareaService.findById(new TareaId(id)));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        deleteTareaService.delete(new TareaId(id));
+        return ResponseEntity.noContent().build();
+    }
+}

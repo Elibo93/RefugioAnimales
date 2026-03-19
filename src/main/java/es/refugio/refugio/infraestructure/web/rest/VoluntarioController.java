@@ -19,11 +19,13 @@ import es.refugio.refugio.application.service.voluntario.CreateVoluntarioService
 import es.refugio.refugio.application.service.voluntario.DeleteVoluntarioService;
 import es.refugio.refugio.application.service.voluntario.EditVoluntarioService;
 import es.refugio.refugio.application.service.voluntario.FindVoluntarioService;
+import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
 import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
 import es.refugio.refugio.infraestructure.mapper.VoluntarioMapper;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioRequest;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioResponse;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -34,37 +36,41 @@ public class VoluntarioController {
 
     private final CreateVoluntarioService createVoluntarioService;
     private final FindVoluntarioService findVoluntarioService;
-    private final DeleteVoluntarioService deleteVoluntarioService;
     private final EditVoluntarioService editVoluntarioService;
+    private final DeleteVoluntarioService deleteVoluntarioService;
 
     @PostMapping
-    public ResponseEntity<VoluntarioResponse> createVoluntario(
-            @Valid @RequestBody VoluntarioRequest VoluntarioRequest) {
-        CreateVoluntarioCommand comando = VoluntarioMapper.toCommand(VoluntarioRequest);
-        Voluntario voluntario = createVoluntarioService.createVoluntario(comando);
+    public ResponseEntity<VoluntarioResponse> create(@Valid @RequestBody VoluntarioRequest request) {
+        CreateVoluntarioCommand command = VoluntarioMapper.toCommand(request);
+        Voluntario voluntario = createVoluntarioService.createVoluntario(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(VoluntarioMapper.toResponse(voluntario));
     }
 
-    @GetMapping
-    public List<VoluntarioResponse> getAll() {
-
-        return findVoluntarioService.findAll()
-                .stream()
-                .map(VoluntarioMapper::toResponse)
-                .toList();
-
+    @PutMapping("/{id}")
+    public ResponseEntity<VoluntarioResponse> update(@PathVariable Integer id,
+            @Valid @RequestBody VoluntarioRequest request) {
+        EditVoluntarioCommand command = VoluntarioMapper.toCommand(id, request);
+        Voluntario voluntario = editVoluntarioService.update(command);
+        return ResponseEntity.ok(VoluntarioMapper.toResponse(voluntario));
     }
 
-    @PutMapping("/{id}")
-    public VoluntarioResponse editVoluntario(@PathVariable int id,
-            @Valid @RequestBody VoluntarioRequest VoluntarioRequest) {
-        EditVoluntarioCommand comando = VoluntarioMapper.toCommand(id, VoluntarioRequest);
-        Voluntario voluntario = editVoluntarioService.update(comando);
-        return VoluntarioMapper.toResponse(voluntario);
+    @GetMapping
+    public List<VoluntarioResponse> findAll() {
+        return VoluntarioMapper.toResponse(findVoluntarioService.findAll());
+    }
+
+    @GetMapping("/{id}")
+    public VoluntarioResponse findById(@PathVariable Integer id) {
+        return VoluntarioMapper.toResponse(findVoluntarioService.findById(new VoluntarioId(id)));
+    }
+
+    @GetMapping("/usuario/{usuarioId}")
+    public VoluntarioResponse findByUsuarioId(@PathVariable Integer usuarioId) {
+        return VoluntarioMapper.toResponse(findVoluntarioService.findByUsuarioId(new UsuarioId(usuarioId)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteVoluntario(@PathVariable int id) {
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
         deleteVoluntarioService.delete(new VoluntarioId(id));
         return ResponseEntity.noContent().build();
     }

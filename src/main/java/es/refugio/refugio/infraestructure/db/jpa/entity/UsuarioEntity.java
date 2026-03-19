@@ -1,6 +1,7 @@
 package es.refugio.refugio.infraestructure.db.jpa.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import es.refugio.auth.domain.Rol;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -48,5 +49,8 @@ public class UsuarioEntity {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @jakarta.persistence.OneToMany(mappedBy = "usuario", cascade = jakarta.persistence.CascadeType.ALL, fetch = jakarta.persistence.FetchType.LAZY)
+    private List<DonacionEntity> donaciones;
 
 }

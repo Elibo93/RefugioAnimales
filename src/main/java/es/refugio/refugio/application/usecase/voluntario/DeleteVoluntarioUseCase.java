@@ -7,28 +7,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DeleteVoluntarioUseCase {
 
-    // Atributos
     private final VoluntarioRepository voluntarioRepository;
 
     public void delete(VoluntarioId id) {
         voluntarioRepository.deleteById(id);
     }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

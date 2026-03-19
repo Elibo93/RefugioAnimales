@@ -1,36 +1,8 @@
 package es.refugio.refugio.application.command.voluntario;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.experimental.Accessors;
+import es.refugio.refugio.domain.model.usuario.UsuarioId;
 
-@Getter
-@AllArgsConstructor
-@Accessors(fluent = true)
-public class CreateVoluntarioCommand {
-
-    // Atributos
-    private String nombre;
-    private String apellido;
-    private String especialidad;
-    private String email;
-    private String telefono;
-
+public record CreateVoluntarioCommand(
+                UsuarioId usuarioId,
+                String disponibilidad) {
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

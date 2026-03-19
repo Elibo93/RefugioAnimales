@@ -1,47 +1,21 @@
 package es.refugio.refugio.application.usecase.voluntario;
 
-import java.time.LocalDateTime;
-
 import es.refugio.refugio.application.command.voluntario.CreateVoluntarioCommand;
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
 import es.refugio.refugio.domain.repository.VoluntarioRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CreateVoluntarioUseCase {
 
-    // Atributos
     private final VoluntarioRepository voluntarioRepository;
 
-    // Metodo para crear un Voluntario
-    public Voluntario create(CreateVoluntarioCommand comando) {
-
+    public Voluntario create(CreateVoluntarioCommand command) {
         Voluntario voluntario = Voluntario.builder()
-                .nombre(comando.nombre())
-                .apellido(comando.apellido())
-                .especialidad(comando.especialidad())
-                .email(comando.email())
-                .telefono(comando.telefono())
-                .createdAt(LocalDateTime.now()).build();
+                .usuarioId(command.usuarioId())
+                .disponibilidad(command.disponibilidad())
+                .build();
 
         return voluntarioRepository.save(voluntario);
-
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

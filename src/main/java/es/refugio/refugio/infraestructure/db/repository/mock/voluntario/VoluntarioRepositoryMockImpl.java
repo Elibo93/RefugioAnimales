@@ -1,50 +1,34 @@
 package es.refugio.refugio.infraestructure.db.repository.mock.voluntario;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Repository;
-
+import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
 import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
 import es.refugio.refugio.domain.repository.VoluntarioRepository;
 
-@Repository
 public class VoluntarioRepositoryMockImpl implements VoluntarioRepository {
 
-    private final Map<VoluntarioId, Voluntario> voluntarios = VoluntarioFactory.getDemoData();
+    private final Map<VoluntarioId, Voluntario> voluntarios = VoluntarioFactory.create();
 
     @Override
-    public Voluntario save(Voluntario p) {
-        // CREATE → si no tiene ID, generar uno nuevo
-        if (p.getId() == null) {
-            p.setId(new VoluntarioId(obtenerSiguienteId()));
+    public Voluntario save(Voluntario v) {
+        if (v.getId() == null) {
+            v.setId(new VoluntarioId(obtenerSiguienteId()));
         }
-
-        voluntarios.put(p.getId(), p);
-        return p;
+        voluntarios.put(v.getId(), v);
+        return v;
     }
 
-    private int obtenerSiguienteId() {
-        VoluntarioId ultimo = null;
-
-        if (!voluntarios.isEmpty()) {
-            Collection<Voluntario> lista = voluntarios.values();
-
-            for (Voluntario prof : lista) {
-                ultimo = prof.getId();
-            }
-        }
-
-        return (ultimo == null) ? 1 : ultimo.getValue() + 1;
-    }
-
-    @Override
-    public List<Voluntario> getAll() {
-        return new ArrayList<>(voluntarios.values());
+    private Integer obtenerSiguienteId() {
+        return voluntarios.keySet().stream()
+                .mapToInt(VoluntarioId::getValue)
+                .max()
+                .orElse(0) + 1;
     }
 
     @Override
@@ -53,33 +37,19 @@ public class VoluntarioRepositoryMockImpl implements VoluntarioRepository {
     }
 
     @Override
+    public List<Voluntario> getAll() {
+        return new ArrayList<>(voluntarios.values());
+    }
+
+    @Override
     public void deleteById(VoluntarioId id) {
         voluntarios.remove(id);
     }
 
     @Override
-    public Optional<Voluntario> getByName(String nombre) {
-        return voluntarios.values()
-                .stream()
-                .filter(p -> p.getNombre().equalsIgnoreCase(nombre))
+    public Optional<Voluntario> findByUsuarioId(UsuarioId usuarioId) {
+        return voluntarios.values().stream()
+                .filter(v -> v.getUsuarioId().equals(usuarioId))
                 .findFirst();
     }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
