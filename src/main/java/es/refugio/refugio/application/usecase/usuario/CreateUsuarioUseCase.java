@@ -1,7 +1,6 @@
 package es.refugio.refugio.application.usecase.usuario;
 
 import java.time.LocalDateTime;
-import es.refugio.auth.domain.Rol;
 import es.refugio.refugio.application.command.usuario.CreateUsuarioCommand;
 import es.refugio.refugio.domain.model.usuario.Usuario;
 import es.refugio.refugio.domain.repository.UsuarioRepository;
