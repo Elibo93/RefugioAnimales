@@ -23,7 +23,7 @@ public class AuthCredentialEntity {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(name="contrasena", nullable = false)
+    @Column(name = "contrasena", nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)

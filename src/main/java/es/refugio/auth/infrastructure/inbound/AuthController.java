@@ -39,8 +39,8 @@ public class AuthController {
 
     @PostMapping("/registro")
     public String procesarRegistro(@Valid @ModelAttribute("registroDto") RegistroDto registroDto,
-                                   BindingResult result,
-                                   Model model) {
+            BindingResult result,
+            Model model) {
         if (result.hasErrors()) {
             model.addAttribute("content", "fragments/content/registro");
             return "main-layout";
@@ -56,7 +56,7 @@ public class AuthController {
                 .nombre("Nuevo")
                 .apellido("Usuario")
                 .email(registroDto.getEmail())
-                .contraseña(passwordEncoder.encode(registroDto.getPassword()))
+                .contrasena(passwordEncoder.encode(registroDto.getPassword()))
                 .rol(registroDto.getRol())
                 .createdAt(LocalDateTime.now())
                 .build();

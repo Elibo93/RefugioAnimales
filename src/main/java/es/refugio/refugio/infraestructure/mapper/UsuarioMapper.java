@@ -18,10 +18,9 @@ public class UsuarioMapper {
                 req.nombre(),
                 req.apellido(),
                 req.email(),
-                req.contraseña(),
+                req.contrasena(),
                 req.telefono(),
-                req.rol()
-        );
+                req.rol());
     }
 
     public static EditUsuarioCommand toCommand(int id, UsuarioRequest req) {
@@ -31,8 +30,7 @@ public class UsuarioMapper {
                 req.apellido(),
                 req.email(),
                 req.telefono(),
-                req.rol()
-        );
+                req.rol());
     }
 
     public static UsuarioResponse toResponse(Usuario usuario) {
@@ -52,7 +50,7 @@ public class UsuarioMapper {
                 .nombre(a.getNombre())
                 .apellido(a.getApellido())
                 .email(a.getEmail())
-                .contraseña(a.getContraseña())
+                .contrasena(a.getContrasena())
                 .telefono(a.getTelefono())
                 .rol(a.getRol())
                 .createdAt(a.getCreatedAt())
@@ -65,7 +63,7 @@ public class UsuarioMapper {
                 .nombre(e.getNombre())
                 .apellido(e.getApellido())
                 .email(e.getEmail())
-                .contraseña(e.getContraseña())
+                .contrasena(e.getContrasena())
                 .telefono(e.getTelefono())
                 .rol(e.getRol())
                 .createdAt(e.getCreatedAt())

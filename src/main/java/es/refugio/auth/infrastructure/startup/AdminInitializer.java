@@ -27,7 +27,7 @@ public class AdminInitializer implements CommandLineRunner {
                     .nombre("Admin")
                     .apellido("Sistema")
                     .email("admin@refugio.es")
-                    .contraseña(passwordEncoder.encode("admin123"))
+                    .contrasena(passwordEncoder.encode("admin123"))
                     .rol(Rol.ROLE_ADMIN)
                     .createdAt(LocalDateTime.now())
                     .build();

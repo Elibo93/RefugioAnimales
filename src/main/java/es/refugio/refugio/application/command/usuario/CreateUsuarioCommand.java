@@ -12,7 +12,7 @@ public class CreateUsuarioCommand {
     private String nombre;
     private String apellido;
     private String email;
-    private String contraseña; 
-    private String telefono;   
+    private String contrasena;
+    private String telefono;
     private Rol rol;
 }

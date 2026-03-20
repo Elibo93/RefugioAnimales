@@ -17,7 +17,7 @@ public class CreateUsuarioUseCase {
                 .nombre(comando.nombre())
                 .apellido(comando.apellido())
                 .email(comando.email())
-                .contraseña(comando.contraseña())
+                .contrasena(comando.contrasena())
                 .telefono(comando.telefono())
                 .rol(comando.rol())
                 .createdAt(LocalDateTime.now())

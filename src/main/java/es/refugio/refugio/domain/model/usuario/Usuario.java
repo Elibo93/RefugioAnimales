@@ -17,7 +17,7 @@ public class Usuario {
     private String nombre;
     private String apellido;
     private String email;
-    private String contraseña;
+    private String contrasena;
     private String telefono;
     private Rol rol;
     private LocalDateTime createdAt;

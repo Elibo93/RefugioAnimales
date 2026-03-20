@@ -1,27 +1,36 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
+
 <head>
     <meta charset="UTF-8">
 </head>
+
 <body>
     <div th:fragment="content">
 
         <div class="page-header" style="text-align:center;">
-            <h1 class="page-title" th:text="${persona.id == null ? #messages.msg('persona.form.title') : #messages.msg('persona.modal.edit.title')}">Crear persona</h1>
-            <p style="color:var(--text-muted); margin-top:0.5rem;" th:text="#{persona.form.subtitle}">Complete la información para registrar una nueva persona</p>
+            <h1 class="page-title"
+                th:text="${persona.id == null ? #messages.msg('persona.form.title') : #messages.msg('persona.modal.edit.title')}">
+                Crear persona</h1>
+            <p style="color:var(--text-muted); margin-top:0.5rem;" th:text="#{persona.form.subtitle}">Complete la
+                información para registrar una nueva persona</p>
         </div>
 
         <div class="card" style="max-width:800px; margin:0 auto;">
-            <form th:action="@{${persona.id == null ? '/web/personas/nuevo' : '/web/personas/' + persona.id.value + '/editar'}}" th:object="${persona}" method="POST">
+            <form
+                th:action="@{${persona.id == null ? '/web/personas/nuevo' : '/web/personas/' + persona.id.value + '/editar'}}"
+                th:object="${persona}" method="POST">
                 <div class="form-grid">
                     <div class="form-group">
                         <label th:text="#{persona.field.name}">Nombre</label>
-                        <input type="text" th:field="*{nombre}" required th:attr="placeholder=#{persona.placeholder.name}" th:readonly="${persona.id != null}">
+                        <input type="text" th:field="*{nombre}" required
+                            th:attr="placeholder=#{persona.placeholder.name}" th:readonly="${persona.id != null}">
                     </div>
 
                     <div class="form-group">
                         <label th:text="#{persona.field.surname}">Apellidos</label>
-                        <input type="text" th:field="*{apellido}" required th:attr="placeholder=#{persona.placeholder.surname}" th:readonly="${persona.id != null}">
+                        <input type="text" th:field="*{apellido}" required
+                            th:attr="placeholder=#{persona.placeholder.surname}" th:readonly="${persona.id != null}">
                     </div>
 
                     <div class="form-group">
@@ -31,7 +40,7 @@
 
                     <div class="form-group" th:if="${persona.id == null}">
                         <label>Contraseña</label>
-                        <input type="password" name="contrasena" required placeholder="Escriba su contraseña">
+                        <input type="password" name="contraseña" required placeholder="Escriba su contraseña">
                     </div>
 
                     <div class="form-group">
@@ -48,12 +57,9 @@
                 </div>
             </form>
         </div>
-    
+
 
     </div>
 </body>
+
 </html>
-
-
-
-

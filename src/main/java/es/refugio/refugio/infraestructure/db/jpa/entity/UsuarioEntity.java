@@ -38,7 +38,7 @@ public class UsuarioEntity {
     private String email;
 
     @Column(name = "contrasena", nullable = false, length = 255)
-    private String contraseña;
+    private String contrasena;
 
     @Column(length = 20)
     private String telefono;
