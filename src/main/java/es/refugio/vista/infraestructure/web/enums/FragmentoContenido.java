@@ -15,6 +15,18 @@ public enum FragmentoContenido {
     Adopcion_LIST("fragments/content/adopciones-lista"),
     Adopcion_FORM("fragments/content/adopcion-formulario"),
 
+    Donacion_LIST("fragments/content/donaciones-lista"),
+    Donacion_FORM("fragments/content/donacion-formulario"),
+
+    Historial_LIST("fragments/content/historiales-medicos-lista"),
+    Historial_FORM("fragments/content/historial-medico-formulario"),
+
+    Solicitud_LIST("fragments/content/solicitudes-adopcion-lista"),
+    Solicitud_FORM("fragments/content/solicitud-adopcion-formulario"),
+
+    Tarea_LIST("fragments/content/tareas-lista"),
+    Tarea_FORM("fragments/content/tarea-formulario"),
+
     HOME_VIEW("fragments/content/index");
 
     private final String path;

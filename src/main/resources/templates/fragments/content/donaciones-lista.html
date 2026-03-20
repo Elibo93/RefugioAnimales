@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:fragment="content">
+    <div class="table-wrapper">
+        <div class="actions-bar">
+            <span class="user-name page" th:text="#{donacion.list.title}">Donaciones</span>
+            <div style="display:flex; gap:10px;">
+                <a class="btn btn-secondary" th:href="@{/web/donaciones/pdf}" target="_blank" th:text="#{generic.link.export.pdf}">
+                    Exportar PDF
+                </a>
+                <a class="btn btn-primary" th:href="@{/web/donaciones/nueva}">
+                    <i data-lucide="plus" style="width:18px;"></i>
+                    <span th:text="#{generic.link.create}">+ Registrar donación</span>
+                </a>
+            </div>
+        </div>
+        <table id="tabladonaciones">
+            <thead>
+                <tr>
+                    <th th:text="#{persona.table.header.id}">ID</th>
+                    <th th:text="#{donacion.table.header.usuario}">Donante</th>
+                    <th th:text="#{donacion.table.header.tipo}">Tipo</th>
+                    <th th:text="#{donacion.table.header.cantidad}">Cantidad</th>
+                    <th th:text="#{donacion.table.header.fecha}">Fecha</th>
+                    <th th:text="#{workshop.table.header.action}">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="d : ${donaciones}" th:id="'row-' + ${d.id.value}">
+                    <td th:text="${d.id.value}">1</td>
+                    <td style="font-weight:600;color:var(--primary);" th:text="${d.usuarioId.value}">Usuario</td>
+                    <td th:text="${d.tipo}">DINERO</td>
+                    <td th:text="${d.cantidad}">100.0</td>
+                    <td th:text="${#temporals.format(d.fecha, 'dd/MM/yyyy HH:mm')}">01/01/2024</td>
+                    <td style="display:flex; gap:8px;">
+                        <a class="btn-icon" th:href="@{/web/donaciones/{id}/editar(id=${d.id.value})}">
+                           <i data-lucide="edit-2" style="width:16px;"></i>
+                        </a>
+                        <button class="btn-icon delete" hx-post th:hx-post="@{/web/donaciones/{id}/borrar(id=${d.id.value})}"
+                                hx-target th:hx-target="'#row-' + ${d.id.value}" hx-swap="outerHTML swap:0.3s"
+                                hx-confirm="¿Eliminar donación?">
+                            <i data-lucide="trash-2" style="width:16px;"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div th:if="${#lists.isEmpty(donaciones)}" style="text-align:center;padding:3rem;color:var(--text-muted);">
+             <i data-lucide="inbox" style="width:48px; height:48px; margin-bottom:1rem; opacity:0.5;"></i>
+            <p th:text="#{donacion.list.empty}">No hay donaciones registradas.</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

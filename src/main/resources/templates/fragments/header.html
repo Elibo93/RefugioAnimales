@@ -4,7 +4,7 @@
 
 
 
-<header th:fragment="header(currentPage, showBack)" class="app-header">
+<header th:fragment="header(currentPage, showBack)" class="app-header" th:classappend="${!showBack} ? 'hero-header' : ''">
     <div class="header-container">
         <div class="header-left">
             <a th:if="${showBack}" th:href="@{/web/home}" class="back-link" title="Volver">
@@ -46,6 +46,22 @@
                     <a th:href="@{/web/adopciones}" class="dropdown-item">
                         <i data-lucide="clipboard-check"></i>
                         <span th:text="#{menu.enrollments.card.title}">adopciones</span>
+                    </a>
+                    <a th:href="@{/web/solicitudes}" class="dropdown-item">
+                        <i data-lucide="file-text"></i>
+                        <span th:text="#{solicitud.list.title}">solicitudes</span>
+                    </a>
+                    <a th:href="@{/web/donaciones}" class="dropdown-item">
+                        <i data-lucide="coins"></i>
+                        <span th:text="#{donacion.list.title}">donaciones</span>
+                    </a>
+                    <a th:href="@{/web/historiales}" class="dropdown-item">
+                        <i data-lucide="stethoscope"></i>
+                        <span th:text="#{historial.list.title}">historiales</span>
+                    </a>
+                    <a th:href="@{/web/tareas}" class="dropdown-item">
+                        <i data-lucide="check-square"></i>
+                        <span th:text="#{tarea.list.title}">tareas</span>
                     </a>
                     
                     <form th:action="@{/logout}" method="post" style="margin: 0; padding: 0;">

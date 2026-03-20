@@ -35,4 +35,32 @@ public interface WebRoutes {
     public static final String adopciones_EDITAR = "/web/adopciones/{id}/editar";
     public static final String adopciones_ELIMINAR = "/web/adopciones/{id}/borrar";
     public static final String adopciones_PDF = "/web/adopciones/pdf";
+
+    // DONACIONES
+    public static final String donaciones_BASE = "/web/donaciones";
+    public static final String donaciones_NUEVA = "/web/donaciones/nueva";
+    public static final String donaciones_EDITAR = "/web/donaciones/{id}/editar";
+    public static final String donaciones_ELIMINAR = "/web/donaciones/{id}/borrar";
+    public static final String donaciones_PDF = "/web/donaciones/pdf";
+
+    // HISTORIAL MÉDICO
+    public static final String historiales_BASE = "/web/historiales";
+    public static final String historiales_NUEVO = "/web/historiales/nuevo";
+    public static final String historiales_EDITAR = "/web/historiales/{id}/editar";
+    public static final String historiales_ELIMINAR = "/web/historiales/{id}/borrar";
+    public static final String historiales_PDF = "/web/historiales/pdf";
+
+    // SOLICITUDES ADOPCIÓN
+    public static final String solicitudes_BASE = "/web/solicitudes";
+    public static final String solicitudes_NUEVA = "/web/solicitudes/nueva";
+    public static final String solicitudes_EDITAR = "/web/solicitudes/{id}/editar";
+    public static final String solicitudes_ELIMINAR = "/web/solicitudes/{id}/borrar";
+    public static final String solicitudes_PDF = "/web/solicitudes/pdf";
+
+    // TAREAS
+    public static final String tareas_BASE = "/web/tareas";
+    public static final String tareas_NUEVA = "/web/tareas/nueva";
+    public static final String tareas_EDITAR = "/web/tareas/{id}/editar";
+    public static final String tareas_ELIMINAR = "/web/tareas/{id}/borrar";
+    public static final String tareas_PDF = "/web/tareas/pdf";
 }

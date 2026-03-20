@@ -23,6 +23,22 @@ public enum ThymTemplates {
     Adopcion_LIST_PDF("pdf/adopciones-lista"),
     Adopcion_FORM("Adopcion-formulario"),
 
+    Donacion_LIST("donaciones-lista"),
+    Donacion_LIST_PDF("pdf/donaciones-lista"),
+    Donacion_FORM("Donacion-formulario"),
+
+    Historial_LIST("historiales-medicos-lista"),
+    Historial_LIST_PDF("pdf/historiales-medicos-lista"),
+    Historial_FORM("Historial-formulario"),
+
+    Solicitud_LIST("solicitudes-adopcion-lista"),
+    Solicitud_LIST_PDF("pdf/solicitudes-adopcion-lista"),
+    Solicitud_FORM("Solicitud-formulario"),
+
+    Tarea_LIST("tareas-lista"),
+    Tarea_LIST_PDF("pdf/tareas-lista"),
+    Tarea_FORM("Tarea-formulario"),
+
     HOME_VIEW("index"),
     MAIN_LAYOUT("main-layout"),
     ERROR_GENERIC("error/error-general");

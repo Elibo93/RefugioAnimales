@@ -85,21 +85,35 @@ body {
    2. HEADER & NAV
 ===================== */
 .app-header {
-    background: white;
-    border-bottom: 1px solid var(--border);
+    background-image: url('../images/cabeceraIndex.png');
+    background-size: cover;
+    background-position: center;
     position: sticky;
     top: 0;
     z-index: 50;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow);
+    border-bottom: 3px solid var(--primary);
+    transition: all 0.3s ease;
+}
+
+.app-header.hero-header {
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
 }
 
 .header-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 1rem 1.5rem;
+    padding: 1.5rem 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
 }
 
 .header-left {

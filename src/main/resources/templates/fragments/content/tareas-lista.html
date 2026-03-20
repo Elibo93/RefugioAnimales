@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:fragment="content">
+    <div class="table-wrapper">
+        <div class="actions-bar">
+            <span class="user-name page" th:text="#{tarea.list.title}">Tareas</span>
+            <div style="display:flex; gap:10px;">
+                <a class="btn btn-secondary" th:href="@{/web/tareas/pdf}" target="_blank" th:text="#{generic.link.export.pdf}">
+                    Exportar PDF
+                </a>
+                <a class="btn btn-primary" th:href="@{/web/tareas/nueva}">
+                    <i data-lucide="plus" style="width:18px;"></i>
+                    <span th:text="#{generic.link.create}">+ Nueva tarea</span>
+                </a>
+            </div>
+        </div>
+        <table id="tablatareas">
+            <thead>
+                <tr>
+                    <th th:text="#{persona.table.header.id}">ID</th>
+                    <th th:text="#{tarea.table.header.descripcion}">Descripción</th>
+                    <th th:text="#{tarea.table.header.estado}">Estado</th>
+                    <th th:text="#{tarea.table.header.fecha}">Fecha</th>
+                    <th th:text="#{workshop.table.header.action}">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="t : ${tareas}" th:id="'row-' + ${t.id.value}">
+                    <td th:text="${t.id.value}">1</td>
+                    <td style="font-weight:600;color:var(--primary);" th:text="${t.descripcion}">Descripción</td>
+                    <td>
+                        <span class="badge-soon" th:classappend="${t.estado.name() == 'COMPLETADA' ? 'success' : (t.estado.name() == 'CANCELADA' ? 'danger' : 'warning')}"
+                              th:text="${t.estado}">PENDIENTE</span>
+                    </td>
+                    <td th:text="${#temporals.format(t.fecha, 'dd/MM/yyyy')}">01/01/2024</td>
+                    <td style="display:flex; gap:8px;">
+                        <a class="btn-icon" th:href="@{/web/tareas/{id}/editar(id=${t.id.value})}">
+                           <i data-lucide="edit-2" style="width:16px;"></i>
+                        </a>
+                        <button class="btn-icon delete" hx-post th:hx-post="@{/web/tareas/{id}/borrar(id=${t.id.value})}"
+                                hx-target th:hx-target="'#row-' + ${t.id.value}" hx-swap="outerHTML swap:0.3s"
+                                hx-confirm="¿Eliminar tarea?">
+                            <i data-lucide="trash-2" style="width:16px;"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div th:if="${#lists.isEmpty(tareas)}" style="text-align:center;padding:3rem;color:var(--text-muted);">
+             <i data-lucide="inbox" style="width:48px; height:48px; margin-bottom:1rem; opacity:0.5;"></i>
+            <p th:text="#{tarea.list.empty}">No hay tareas registradas.</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
