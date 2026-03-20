@@ -9,7 +9,7 @@
     --primary: #15803d;
     --primary-hover: #166534;
     --primary-light: #f0fdf4;
-    
+
     /* Tierra / Madera - Acento */
     --secondary: #92400e;
     --secondary-hover: #78350f;
@@ -25,7 +25,8 @@
     --text-main: #27272a;
     --text-muted: #71717a;
     --border: #e4e4e7;
-    --bg-body: #fafaf9; /* Warm stone */
+    --bg-body: #fafaf9;
+    /* Warm stone */
 
     /* Sombras Elevadas */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -84,36 +85,41 @@ body {
 /* =====================
    2. HEADER & NAV
 ===================== */
-.app-header {
+.app-header-wrapper {
+    position: relative;
+    z-index: 50;
+}
+
+.header-banner {
     background-image: url('../images/cabeceraIndex.png');
     background-size: cover;
     background-position: center;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    box-shadow: var(--shadow);
-    border-bottom: 3px solid var(--primary);
+    height: 80px;
+    /* Tamaño compacto por defecto */
     transition: all 0.3s ease;
 }
 
-.app-header.hero-header {
-    height: 300px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: stretch;
+.header-banner.hero-header {
+    height: 200px;
+    /* Tamaño Hero en home */
 }
 
 .header-container {
-    max-width: 1200px;
-    margin: 0 auto;
     padding: 1.5rem 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 3rem);
+    max-width: 1200px;
+    z-index: 1000;
 }
 
 .header-left {
@@ -759,4 +765,3 @@ tbody tr:hover {
         opacity: 1;
     }
 }
-
