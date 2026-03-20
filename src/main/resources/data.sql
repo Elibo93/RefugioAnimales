@@ -3,15 +3,15 @@
 -- Roles: ROLE_ADMIN, ROLE_VOLUNTARIO, ROLE_ADOPTANTE
 -- =====================================================
 INSERT IGNORE INTO usuarios (nombre, apellido, email, contrasena, telefono, rol, created_at) VALUES
-('Laura', 'García', 'laura.garcia@refugio.local', 'password', '600000001', 'ROLE_VOLUNTARIO', NOW()),
-('Carlos', 'Martín', 'carlos.martin@refugio.local', 'password', '600000002', 'ROLE_VOLUNTARIO', NOW()),
-('Marta', 'López', 'marta.lopez@refugio.local', 'password', '600000003', 'ROLE_VOLUNTARIO', NOW()),
-('Diego', 'Romero', 'diego.romero@local', 'password', '600000004', 'ROLE_ADOPTANTE', NOW()),
-('Lucía', 'Martínez', 'lucia.martinez@local', 'password', '600000005', 'ROLE_ADOPTANTE', NOW()),
-('Mario', 'Gómez', 'mario.gomez@local', 'password', '600000006', 'ROLE_ADOPTANTE', NOW()),
-('Sara', 'Nadal', 'sara.nadal@local', 'password', '600000007', 'ROLE_ADOPTANTE', NOW()),
-('Pablo', 'Díaz', 'pablo.diaz@local', 'password', '600000008', 'ROLE_ADOPTANTE', NOW()),
-('David', 'Torres', 'david.torres@local', 'password', '600000009', 'ROLE_ADOPTANTE', NOW());
+('Laura', 'García', 'laura.garcia@refugio.local', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '600000001', 'ROLE_VOLUNTARIO', NOW()),
+('Carlos', 'Martín', 'carlos.martin@refugio.local', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '600000002', 'ROLE_VOLUNTARIO', NOW()),
+('Marta', 'López', 'marta.lopez@refugio.local', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '600000003', 'ROLE_VOLUNTARIO', NOW()),
+('Diego', 'Romero', 'diego.romero@local', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '600000004', 'ROLE_ADOPTANTE', NOW()),
+('Lucía', 'Martínez', 'lucia.martinez@local', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '600000005', 'ROLE_ADOPTANTE', NOW()),
+('Mario', 'Gómez', 'mario.gomez@local', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '600000006', 'ROLE_ADOPTANTE', NOW()),
+('Sara', 'Nadal', 'sara.nadal@local', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '600000007', 'ROLE_ADOPTANTE', NOW()),
+('Pablo', 'Díaz', 'pablo.diaz@local', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '600000008', 'ROLE_ADOPTANTE', NOW()),
+('David', 'Torres', 'david.torres@local', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '600000009', 'ROLE_ADOPTANTE', NOW());
 
 -- =====================================================
 -- ADOPTANTES (6) - Vinculados a los usuarios 5 al 10

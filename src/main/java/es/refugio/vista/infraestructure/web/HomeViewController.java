@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping(WebRoutes.HOME)
+@RequestMapping({WebRoutes.HOME, "/"})
 public class HomeViewController {
 
     private final FindUsuarioService findPersonaService;

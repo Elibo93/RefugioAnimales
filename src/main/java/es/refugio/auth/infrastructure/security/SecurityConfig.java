@@ -24,7 +24,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/error", "/web/home", "/login", "/registro", "/css/**",
-                                "/js/**", "/img/**", "/images/**", "/webjars/**", "/api/hora", "/favicon.ico",
+                                "/js/**", "/img/**", "/images/**", "/webjars/**", "/favicon.ico",
                                 "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs", "/v3/api-docs/**")
                         .permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/animales/**").permitAll()
