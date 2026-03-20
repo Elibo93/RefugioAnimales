@@ -14,13 +14,13 @@
                 <div style="display:flex; gap:10px; align-items: center;">
                     <form id="filterForm" th:action="@{/web/adopciones}" method="get"
                         style="display:flex; gap:10px; margin:0;">
-                        <select name="personaId" class="filter-select" hx-get th:hx-get="@{/web/adopciones}"
+                        <select name="adoptanteId" class="filter-select" hx-get th:hx-get="@{/web/adopciones}"
                             hx-target="#tabla-adopciones-body" hx-select="#tabla-adopciones-body"
                             hx-swap="outerHTML" hx-include="#filterForm">
                             <option value="" th:text="#{enrollment.filter.student.all}">Todo personas</option>
-                            <option th:each="a : ${listapersonas}" th:value="${a.id.value}"
-                                th:text="${a.nombre} + ' ' + ${a.apellido}"
-                                th:selected="${a.id.value == selectedpersonaId}">persona</option>
+                            <option th:each="a : ${listaadoptantes}" th:value="${a.id.value}"
+                                th:text="${personasMap[a.usuarioId] != null ? personasMap[a.usuarioId].nombre + ' ' + personasMap[a.usuarioId].apellido : 'Desconocido'}"
+                                th:selected="${a.id.value == selectedAdoptanteId}">adoptante</option>
                         </select>
                         <select name="animalId" class="filter-select" hx-get th:hx-get="@{/web/adopciones}"
                             hx-target="#tabla-adopciones-body" hx-select="#tabla-adopciones-body"
@@ -53,14 +53,14 @@
                 </thead>
                 <tbody id="tabla-adopciones-body">
                     <tr th:each="i : ${adopciones}" th:id="'row-' + ${i.id.value}"
-                        th:attr="data-id=${i.id.value}, data-persona-id=${i.personaId.value}, data-persona-name=${personas[i.personaId.value].nombre + ' ' + personas[i.personaId.value].apellido}, data-animal=${i.animalId.value}">
+                        th:attr="data-id=${i.id.value}, data-adoptante-id=${i.adoptanteId.value}, data-adoptante-name=${adoptanteNombres[i.adoptanteId.value] ?: 'Desconocido'}, data-animal=${i.animalId.value}">
                         <td th:text="${i.id.value}">1</td>
                         <td style="font-weight:600; color:var(--text-main);"
-                            th:text="${personas[i.personaId.value].nombre + ' ' + personas[i.personaId.value].apellido}">
+                            th:text="${adoptanteNombres[i.adoptanteId.value] ?: 'Desconocido'}">
                             Juan Pérez</td>
                         <td style="color:var(--primary); font-weight:500;"
                             th:text="${animales[i.animalId.value].nombre}">Pintura</td>
-                        <td th:text="${#temporals.format(i.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2023</td>
+                        <td th:text="${#temporals.format(i.fechaAdopcion, 'dd/MM/yyyy HH:mm')}">01/01/2023</td>
                         <td style="display:flex; gap:8px;">
                             <a class="btn-icon" th:href="@{/web/adopciones/{id}/editar(id=${i.id.value})}">
                                 <i data-lucide="edit-2" style="width:16px;"></i>

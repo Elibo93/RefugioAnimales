@@ -26,6 +26,7 @@ import es.refugio.refugio.application.service.adopcion.CreateAdopcionService;
 import es.refugio.refugio.application.service.adopcion.DeleteAdopcionService;
 import es.refugio.refugio.application.service.adopcion.EditAdopcionService;
 import es.refugio.refugio.application.service.adopcion.FindAdopcionService;
+import es.refugio.refugio.application.service.adoptante.FindAdoptanteService;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.application.service.animal.FindAnimalService;
 import es.refugio.refugio.application.service.usuario.FindUsuarioService;
@@ -50,6 +51,7 @@ public class AdopcionViewController {
         private final CreateAdopcionService createAdopcionService;
         private final DeleteAdopcionService deleteAdopcionService;
         private final EditAdopcionService editAdopcionService;
+        private final FindAdoptanteService findAdoptanteService;
         private final FindUsuarioService findPersonaService;
         private final FindAnimalService findAnimalService;
 
@@ -84,28 +86,42 @@ public class AdopcionViewController {
 
         @GetMapping(WebRoutes.adopciones_BASE)
         public String listar(Model model,
-                        @RequestParam(required = false) Integer personaId,
+                        @RequestParam(required = false) Integer adoptanteId,
                         @RequestParam(required = false) Integer animalId,
                         @RequestParam(required = false) String successMessage) {
 
-                AdoptanteId idAdopt = (personaId != null) ? new AdoptanteId(personaId) : null;
+                AdoptanteId idAdopt = (adoptanteId != null) ? new AdoptanteId(adoptanteId) : null;
                 AnimalId idAnim = (animalId != null) ? new AnimalId(animalId) : null;
                 List<Adopcion> adopciones = findAdopcionService.findByCriteria(idAdopt, idAnim);
                 model.addAttribute(ModelAttribute.Adopcion_LIST.getName(), adopciones);
-                model.addAttribute("selectedPersonaId", personaId);
+                model.addAttribute("selectedAdoptanteId", adoptanteId);
                 model.addAttribute("selectedAnimalId", animalId);
+
+                // Mapa usuarioId → Usuario para poder resolver nombres
                 java.util.Map<Integer, Usuario> personasMap = findPersonaService
                                 .findAll().stream()
-                                .collect(java.util.stream.Collectors.toMap(a -> a.getId().getValue(), a -> a));
+                                .collect(java.util.stream.Collectors.toMap(
+                                                u -> u.getId().getValue(), u -> u));
+
+                // Mapa adoptanteId → nombre completo del usuario vinculado
+                java.util.Map<Integer, String> adoptanteNombres = findAdoptanteService
+                                .findAll().stream()
+                                .collect(java.util.stream.Collectors.toMap(
+                                                a -> a.getId().getValue(),
+                                                a -> {
+                                                    Usuario u = personasMap.get(a.getUsuarioId());
+                                                    return u != null ? u.getNombre() + " " + u.getApellido() : "Desconocido";
+                                                }));
 
                 java.util.Map<Integer, Animal> animalesMap = findAnimalService
                                 .findAll().stream()
                                 .collect(java.util.stream.Collectors.toMap(t -> t.getId().getValue(), t -> t));
 
-                model.addAttribute("personas", personasMap);
+                model.addAttribute("adoptanteNombres", adoptanteNombres);
                 model.addAttribute("animales", animalesMap);
-                model.addAttribute("listapersonas", findPersonaService.findAll());
+                model.addAttribute("listaadoptantes", findAdoptanteService.findAll());
                 model.addAttribute("listaanimales", findAnimalService.findAll());
+                model.addAttribute("personasMap", personasMap);
 
                 if (successMessage != null) {
                         model.addAttribute("successMessage", successMessage);

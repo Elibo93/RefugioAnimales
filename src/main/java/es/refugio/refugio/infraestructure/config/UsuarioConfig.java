@@ -2,6 +2,7 @@ package es.refugio.refugio.infraestructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import es.refugio.refugio.application.service.usuario.CreateUsuarioService;
 import es.refugio.refugio.application.service.usuario.DeleteUsuarioService;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class UsuarioConfig {
 
     private final UsuarioEntityJpaRepository usuarioEntityJpaRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Bean
     public UsuarioRepository usuarioRepository() {
@@ -29,7 +31,7 @@ public class UsuarioConfig {
 
     @Bean
     public CreateUsuarioUseCase createUsuarioUseCase() {
-        return new CreateUsuarioUseCase(usuarioRepository());
+        return new CreateUsuarioUseCase(usuarioRepository(), passwordEncoder);
     }
 
     @Bean

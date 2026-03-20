@@ -14,12 +14,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import es.refugio.refugio.application.command.adoptante.ApproveAdoptanteCommand;
 import es.refugio.refugio.application.command.adoptante.CreateAdoptanteCommand;
 import es.refugio.refugio.application.command.adoptante.EditAdoptanteCommand;
+import es.refugio.refugio.application.command.adoptante.RejectAdoptanteCommand;
+import es.refugio.refugio.application.service.adoptante.ApproveAdoptanteService;
 import es.refugio.refugio.application.service.adoptante.CreateAdoptanteService;
 import es.refugio.refugio.application.service.adoptante.DeleteAdoptanteService;
 import es.refugio.refugio.application.service.adoptante.EditAdoptanteService;
 import es.refugio.refugio.application.service.adoptante.FindAdoptanteService;
+import es.refugio.refugio.application.service.adoptante.RejectAdoptanteService;
 import es.refugio.refugio.domain.model.adoptante.Adoptante;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.infraestructure.mapper.AdoptanteMapper;
@@ -38,6 +42,8 @@ public class AdoptanteController {
     private final FindAdoptanteService findService;
     private final DeleteAdoptanteService deleteService;
     private final EditAdoptanteService editService;
+    private final ApproveAdoptanteService approveService;
+    private final RejectAdoptanteService rejectService;
 
     @Operation(summary = "Crear adoptante", description = "Registra un nuevo adoptante vinculado a un usuario")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Adoptante creado"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
@@ -85,6 +91,30 @@ public class AdoptanteController {
             @Valid @RequestBody AdoptanteRequest request) {
         EditAdoptanteCommand command = AdoptanteMapper.toEditCommand(new AdoptanteId(id), request);
         Adoptante adoptante = editService.update(command);
+        return AdoptanteMapper.toResponse(adoptante);
+    }
+
+    @Operation(summary = "Aprobar adoptante", description = "Cambia el estado de validación del adoptante a APROBADO")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Adoptante aprobado correctamente"),
+            @ApiResponse(responseCode = "404", description = "Adoptante no encontrado")
+    })
+    @PatchMapping("/{id}/approve")
+    public AdoptanteResponse approveAdoptante(@PathVariable int id) {
+        ApproveAdoptanteCommand command = new ApproveAdoptanteCommand(new AdoptanteId(id));
+        Adoptante adoptante = approveService.approve(command);
+        return AdoptanteMapper.toResponse(adoptante);
+    }
+
+    @Operation(summary = "Rechazar adoptante", description = "Cambia el estado de validación del adoptante a RECHAZADO")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Adoptante rechazado correctamente"),
+            @ApiResponse(responseCode = "404", description = "Adoptante no encontrado")
+    })
+    @PatchMapping("/{id}/reject")
+    public AdoptanteResponse rejectAdoptante(@PathVariable int id) {
+        RejectAdoptanteCommand command = new RejectAdoptanteCommand(new AdoptanteId(id));
+        Adoptante adoptante = rejectService.reject(command);
         return AdoptanteMapper.toResponse(adoptante);
     }
 
