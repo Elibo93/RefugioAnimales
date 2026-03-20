@@ -45,6 +45,7 @@
             <artifactId>thymeleaf-extras-springsecurity6</artifactId>
         </dependency>
 
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -96,17 +97,20 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
+
         <!-- Dependencias Thymeleaf-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
+
         <!-- Dependencia pdf-->
         <dependency>
             <groupId>org.xhtmlrenderer</groupId>
             <artifactId>flying-saucer-pdf-itext5</artifactId>
             <version>9.1.22</version>
         </dependency>
+        
         <!-- Source: https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -115,6 +119,13 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- Liquibase para migraciones de base de datos -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
+
+        <!-- Driver MySQL -->
         <dependency>
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
@@ -149,6 +160,23 @@
                         </exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+
+            <!-- Plugin Liquibase — permite ejecutar: mvn liquibase:diff, mvn liquibase:status, etc. -->
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <version>4.27.0</version>
+                <configuration>
+                    <propertyFile>src/main/resources/liquibase.properties</propertyFile>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.mysql</groupId>
+                        <artifactId>mysql-connector-j</artifactId>
+                        <version>8.3.0</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
