@@ -9,103 +9,95 @@
 
 <div th:fragment="content">
 
-    <div class="table-wrapper">
+    <div class="actions-bar">
+        <h2 class="page-title" th:text="#{enrollment.filter.workshop.all}">Animales</h2>
 
-        <div class="actions-bar">
-            <span class="user-name page" th:text="#{enrollment.filter.workshop.all}">Animales</span>
+        <div style="display:flex; gap:10px;" sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')">
+            <a class="btn btn-secondary" th:href="@{/web/animales/pdf}" target="_blank" th:text="#{generic.link.export.pdf}">
+                Exportar PDF
+            </a>
 
-            <div style="display:flex; gap:10px;">
-                <a class="btn btn-secondary" th:href="@{/web/animales/pdf}" target="_blank" th:text="#{generic.link.export.pdf}">
-                    Exportar PDF
-                </a>
+            <a class="btn btn-primary" th:href="@{/web/animales/nuevo}">
+                <i data-lucide="plus" style="width:18px;"></i>
+                <span th:text="#{generic.link.create}">+ Nuevo animal</span>
+            </a>
+        </div>
+    </div>
 
-                <a class="btn btn-primary" th:href="@{/web/animales/nuevo}">
-                    <i data-lucide="plus" style="width:18px;"></i>
-                    <span th:text="#{generic.link.create}">+ Nuevo animal</span>
-                </a>
+    <div class="animal-grid" id="animal-grid">
+        <div th:each="a : ${animales}" 
+             class="animal-card" 
+             th:id="'card-' + ${a.id.value}">
+            
+            <div class="animal-image-wrapper">
+                <img th:if="${a.foto}" th:src="${a.foto}" class="animal-image" alt="Animal">
+                <img th:unless="${a.foto}" src="/images/placeholder-animal.png" class="animal-image" alt="Animal">
+                <span class="animal-status-badge" th:text="${a.estado}">Disponible</span>
+            </div>
+
+            <div class="animal-info">
+                <div class="animal-header">
+                    <h3 class="animal-name" th:text="${a.nombre}">Luna</h3>
+                </div>
+
+                <div class="animal-meta">
+                    <div class="meta-item">
+                        <i data-lucide="info" style="width:14px;"></i>
+                        <span th:text="${a.especie}">Perro</span>
+                    </div>
+                    <div class="meta-item">
+                        <i data-lucide="tag" style="width:14px;"></i>
+                        <span th:text="${a.raza}">Labrador</span>
+                    </div>
+                    <div class="meta-item">
+                        <i data-lucide="calendar" style="width:14px;"></i>
+                        <span th:text="${a.edad} + ' años'">3 años</span>
+                    </div>
+                </div>
+
+                <p class="animal-description" th:text="${a.descripcion}">Muy tranquila y cariñosa.</p>
+
+                <div class="animal-actions">
+                    <!-- Botón para Público/Adoptante -->
+                    <div sec:authorize="hasRole('PUBLICO')">
+                        <button class="btn-adopt"
+                                th:attr="hx-get=@{/web/adoptantes/modal-convertir(animalId=${a.id.value})}"
+                                hx-target="#modal-host"
+                                hx-trigger="click">
+                            <i data-lucide="heart" style="width:18px; fill: currentColor;"></i>
+                            !Adopta a este compañero!
+                        </button>
+                    </div>
+
+                    <div sec:authorize="hasRole('ADOPTANTE')">
+                        <a th:href="@{/web/solicitudes/nueva(animalId=${a.id.value})}" class="btn-adopt">
+                            <i data-lucide="heart" style="width:18px; fill: currentColor;"></i>
+                            !Adopta a este compañero!
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Acciones Admin (Sutiles en hover) -->
+                <div class="admin-actions" sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')">
+                    <a class="admin-btn" th:href="@{/web/animales/{id}/editar(id=${a.id.value})}">
+                        <i data-lucide="edit-2" style="width:16px;"></i>
+                    </a>
+                    <button class="admin-btn delete"
+                            th:attr="hx-post=@{/web/animales/{id}/borrar(id=${a.id.value})}, hx-target='#card-' + ${a.id.value}"
+                            hx-swap="outerHTML swap:0.3s"
+                            hx-confirm="¿Eliminar este animal del sistema?">
+                        <i data-lucide="trash-2" style="width:16px;"></i>
+                    </button>
+                </div>
             </div>
         </div>
+    </div>
 
-        <table id="tablaanimales">
-
-            <thead>
-                <tr>
-                    <th th:text="#{workshop.table.header.id}">ID</th>
-                    <th th:text="#{workshop.table.header.name}">Nombre</th>
-                    <th th:text="#{animal.field.species}">Especie</th>
-                    <th th:text="#{animal.field.breed}">Raza</th>
-                    <th th:text="#{animal.field.age}">Edad</th>
-                    <th th:text="#{animal.field.size}">Tamaño</th>
-                    <th th:text="#{animal.field.status}">Estado</th>
-                    <th th:text="#{animal.field.description}">Descripción</th>
-                    <th th:text="#{workshop.table.header.action}">Acción</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-                <tr th:each="a : ${animales}" th:id="'row-' + ${a.id.value}">
-
-                    <td th:text="${a.id.value}">1</td>
-
-                    <td style="font-weight:600;color:var(--primary);"
-                        th:text="${a.nombre}">
-                        Luna
-                    </td>
-
-                    <td th:text="${a.especie}">Perro</td>
-
-                    <td th:text="${a.raza}">Labrador</td>
-
-                    <td th:text="${a.edad}">3</td>
-
-                    <td th:text="${a.tamano}">Mediano</td>
-
-                    <td>
-                        <span class="badge-soon"
-                              style="background:#EFF6FF;color:var(--primary);font-weight:500;"
-                              th:text="${a.estado}">
-                            Disponible
-                        </span>
-                    </td>
-
-                    <td th:text="${a.descripcion}" style="color:var(--text-muted);font-size:0.9rem;">
-                        Muy tranquila
-                    </td>
-
-                    <td style="display:flex; gap:8px;">
-
-                        <a class="btn-icon"
-                           th:href="@{/web/animales/{id}/editar(id=${a.id.value})}">
-                           <i data-lucide="edit-2" style="width:16px;"></i>
-                        </a>
-
-                        <button class="btn-icon delete"
-                                hx-post
-                                th:hx-post="@{/web/animales/{id}/borrar(id=${a.id.value})}"
-                                hx-target
-                                th:hx-target="'#row-' + ${a.id.value}"
-                                hx-swap="outerHTML swap:0.3s"
-                                hx-confirm="¿Eliminar animal?">
-                            <i data-lucide="trash-2" style="width:16px;"></i>
-                        </button>
-
-                    </td>
-
-                </tr>
-
-            </tbody>
-
-        </table>
-
-        <div th:if="${#lists.isEmpty(animales)}"
-             style="text-align:center;padding:3rem;color:var(--text-muted);">
-
-             <i data-lucide="inbox" style="width:48px; height:48px; margin-bottom:1rem; opacity:0.5;"></i>
-            <p th:text="#{animal.list.empty}">No hay animales registrados.</p>
-
-        </div>
-
+    <!-- Empty State -->
+    <div th:if="${#lists.isEmpty(animales)}"
+         style="text-align:center;padding:5rem;color:var(--text-muted); grid-column:1/-1;">
+         <i data-lucide="dog" style="width:64px; height:64px; margin-bottom:1.5rem; opacity:0.3; display:block; margin: 0 auto;"></i>
+         <p th:text="#{animal.list.empty}">No hay compañeros peludos esperando por ahora.</p>
     </div>
 
 </div>

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import es.refugio.refugio.application.command.animal.CreateAnimalCommand;
 import es.refugio.refugio.application.command.animal.EditAnimalCommand;
@@ -52,6 +53,7 @@ public class AnimalController {
     @Operation(summary = "Crear animal", description = "Registra un nuevo animal en el refugio")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Animal creado"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AnimalResponse> createAnimal(@Valid @RequestBody AnimalRequest request) {
         CreateAnimalCommand comando = AnimalMapper.toCommand(request);
         Animal animal = createAnimalService.createAnimal(comando);
@@ -61,6 +63,7 @@ public class AnimalController {
     @Operation(summary = "Actualizar animal", description = "Modifica los datos de un animal existente")
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "Animal actualizado"), @ApiResponse(responseCode = "404", description = "Animal no encontrado") })
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public ResponseEntity<AnimalResponse> updateAnimal(@PathVariable Integer id,
                                                      @Valid @RequestBody AnimalRequest request) {
         EditAnimalCommand comando = AnimalMapper.toCommand(id, request);
@@ -88,6 +91,7 @@ public class AnimalController {
     @Operation(summary = "Eliminar animal")
     @ApiResponses({ @ApiResponse(responseCode = "204", description = "Animal eliminado"), @ApiResponse(responseCode = "404", description = "Animal no encontrado") })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteAnimal(@PathVariable Integer id) {
         deleteAnimalService.delete(new AnimalId(id));
         return ResponseEntity.noContent().build();

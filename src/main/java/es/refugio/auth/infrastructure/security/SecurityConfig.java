@@ -15,6 +15,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
+@org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -22,10 +23,15 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/error", "/web/home", "/animales/catalogo", "/login", "/registro", "/css/**",
+                        .requestMatchers("/", "/error", "/web/home", "/login", "/registro", "/css/**",
                                 "/js/**", "/img/**", "/images/**", "/webjars/**", "/api/hora", "/favicon.ico",
                                 "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs", "/v3/api-docs/**")
                         .permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/animales/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/donaciones").permitAll()
+                        .requestMatchers("/api/v1/tareas/**", "/web/tareas/**").hasAnyRole("ADMIN", "VOLUNTARIO")
+                        .requestMatchers("/web/voluntarios/**", "/web/personas/**").hasRole("ADMIN")
+                        .requestMatchers("/web/historiales/**").hasAnyRole("ADMIN", "VOLUNTARIO")
                         .requestMatchers("/api/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/voluntarios/**").hasAnyRole("ADMIN", "VOLUNTARIO")

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="modal" class="modal-overlay" id="modal" onclick="if(event.target == this) this.remove()">
+    <div class="modal" onclick="event.stopPropagation()">
+        
+        <div style="text-align:center; margin-bottom: 2rem;">
+            <div style="background: var(--primary-light); color: var(--primary); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                <i data-lucide="heart" style="width: 32px; height: 32px; fill: currentColor;"></i>
+            </div>
+            <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">
+                ¡Casi listo para adoptar!
+            </h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">
+                Necesitamos completar tu perfil antes de procesar la solicitud.
+            </p>
+        </div>
+
+        <form th:attr="hx-post=@{/api/v1/adoptantes/convertir-y-solicitar}" 
+              hx-ext="json-enc"
+              hx-target="#modal-host" 
+              hx-swap="outerHTML"
+              onsubmit="setTimeout(() => { window.location.reload(); }, 2000)">
+            
+            <input type="hidden" name="animalId" th:value="${animalId}">
+
+            <div class="form-grid">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Nombre completo</label>
+                    <input type="text" th:value="${user.email}" disabled style="background: #f8fafc; cursor: not-allowed;">
+                    <small style="color: var(--text-muted); font-size: 0.8rem;">Los datos de tu cuenta se vincularán automáticamente.</small>
+                </div>
+
+                <div class="form-group">
+                    <label>DNI / NIE</label>
+                    <input type="text" name="dni" placeholder="Ej: 12345678X" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Fecha de Nacimiento</label>
+                    <input type="date" name="fechaNacimiento" required>
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Dirección completa</label>
+                    <input type="text" name="direccion" placeholder="Calle, número, piso, ciudad" required>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal').remove()">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    Confirmar y Solicitar
+                </button>
+            </div>
+        </form>
+
+        <script>
+            lucide.createIcons();
+        </script>
+    </div>
+</div>
+
+</body>
+</html>

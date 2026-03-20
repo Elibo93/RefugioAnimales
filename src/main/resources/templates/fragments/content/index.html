@@ -41,33 +41,6 @@
 
         <div class="dashboard-grid">
 
-
-            <a th:href="@{/web/personas}" class="card">
-                <div class="card-icon icon-blue">
-                    <i data-lucide="users"></i>
-                </div>
-                <h3 class="card-title" th:text="#{menu.students.card.title}">personas</h3>
-                <p class="card-desc" th:text="#{menu.students.card.desc}">Gestión de adoptantes y contactos.</p>
-                <div class="card-footer">
-                    <span th:text="#{generic.btn.access}">Acceder</span>
-                    <i data-lucide="arrow-right" style="width:16px;"></i>
-                </div>
-            </a>
-
-
-            <a th:href="@{/web/voluntarios}" class="card">
-                <div class="card-icon icon-green">
-                    <i data-lucide="heart"></i>
-                </div>
-                <h3 class="card-title" th:text="#{menu.professors.card.title}">voluntarios</h3>
-                <p class="card-desc" th:text="#{menu.professors.card.desc}">Equipo de voluntarios y cuidadores.</p>
-                <div class="card-footer">
-                    <span th:text="#{generic.btn.access}">Acceder</span>
-                    <i data-lucide="arrow-right" style="width:16px;"></i>
-                </div>
-            </a>
-
-
             <a th:href="@{/web/animales}" class="card">
                 <div class="card-icon icon-orange">
                     <i data-lucide="dog"></i>
@@ -80,30 +53,55 @@
                 </div>
             </a>
 
+            <div sec:authorize="hasRole('ADMIN')" style="display: contents;">
+                <a th:href="@{/web/personas}" class="card">
+                    <div class="card-icon icon-blue">
+                        <i data-lucide="users"></i>
+                    </div>
+                    <h3 class="card-title" th:text="#{menu.students.card.title}">personas</h3>
+                    <p class="card-desc" th:text="#{menu.students.card.desc}">Gestión de adoptantes y contactos.</p>
+                    <div class="card-footer">
+                        <span th:text="#{generic.btn.access}">Acceder</span>
+                        <i data-lucide="arrow-right" style="width:16px;"></i>
+                    </div>
+                </a>
 
-            <a th:href="@{/web/adopciones}" class="card">
-                <div class="card-icon icon-purple">
-                    <i data-lucide="clipboard-check"></i>
-                </div>
-                <h3 class="card-title" th:text="#{menu.enrollments.card.title}">adopciones</h3>
-                <p class="card-desc" th:text="#{menu.enrollments.card.desc}">Procesos de adopción en curso.</p>
-                <div class="card-footer">
-                    <span th:text="#{generic.btn.access}">Acceder</span>
-                    <i data-lucide="arrow-right" style="width:16px;"></i>
-                </div>
-            </a>
+                <a th:href="@{/web/voluntarios}" class="card">
+                    <div class="card-icon icon-green">
+                        <i data-lucide="heart"></i>
+                    </div>
+                    <h3 class="card-title" th:text="#{menu.professors.card.title}">voluntarios</h3>
+                    <p class="card-desc" th:text="#{menu.professors.card.desc}">Equipo de voluntarios y cuidadores.</p>
+                    <div class="card-footer">
+                        <span th:text="#{generic.btn.access}">Acceder</span>
+                        <i data-lucide="arrow-right" style="width:16px;"></i>
+                    </div>
+                </a>
 
-            <a th:href="@{/web/solicitudes}" class="card">
-                <div class="card-icon icon-blue" style="background: #E0F2FE; color: #0369A1;">
-                    <i data-lucide="file-text"></i>
-                </div>
-                <h3 class="card-title" th:text="#{menu.solicitudes.card.title}">solicitudes</h3>
-                <p class="card-desc" th:text="#{menu.solicitudes.card.desc}">Gestión de solicitudes de adopción.</p>
-                <div class="card-footer">
-                    <span th:text="#{generic.btn.access}">Acceder</span>
-                    <i data-lucide="arrow-right" style="width:16px;"></i>
-                </div>
-            </a>
+                <a th:href="@{/web/adopciones}" class="card">
+                    <div class="card-icon icon-purple">
+                        <i data-lucide="clipboard-check"></i>
+                    </div>
+                    <h3 class="card-title" th:text="#{menu.enrollments.card.title}">adopciones</h3>
+                    <p class="card-desc" th:text="#{menu.enrollments.card.desc}">Procesos de adopción en curso.</p>
+                    <div class="card-footer">
+                        <span th:text="#{generic.btn.access}">Acceder</span>
+                        <i data-lucide="arrow-right" style="width:16px;"></i>
+                    </div>
+                </a>
+
+                <a th:href="@{/web/solicitudes}" class="card">
+                    <div class="card-icon icon-blue" style="background: #E0F2FE; color: #0369A1;">
+                        <i data-lucide="file-text"></i>
+                    </div>
+                    <h3 class="card-title" th:text="#{menu.solicitudes.card.title}">solicitudes</h3>
+                    <p class="card-desc" th:text="#{menu.solicitudes.card.desc}">Gestión de solicitudes de adopción.</p>
+                    <div class="card-footer">
+                        <span th:text="#{generic.btn.access}">Acceder</span>
+                        <i data-lucide="arrow-right" style="width:16px;"></i>
+                    </div>
+                </a>
+            </div>
 
             <a th:href="@{/web/donaciones}" class="card">
                 <div class="card-icon icon-green" style="background: #DCFCE7; color: #15803D;">
@@ -117,29 +115,31 @@
                 </div>
             </a>
 
-            <a th:href="@{/web/historiales}" class="card">
-                <div class="card-icon icon-red" style="background: #FEE2E2; color: #991B1B;">
-                    <i data-lucide="stethoscope"></i>
-                </div>
-                <h3 class="card-title" th:text="#{menu.historial.card.title}">historial médico</h3>
-                <p class="card-desc" th:text="#{menu.historial.card.desc}">Fichas médicas de animales.</p>
-                <div class="card-footer">
-                    <span th:text="#{generic.btn.access}">Acceder</span>
-                    <i data-lucide="arrow-right" style="width:16px;"></i>
-                </div>
-            </a>
+            <div sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')" style="display: contents;">
+                <a th:href="@{/web/historiales}" class="card">
+                    <div class="card-icon icon-red" style="background: #FEE2E2; color: #991B1B;">
+                        <i data-lucide="stethoscope"></i>
+                    </div>
+                    <h3 class="card-title" th:text="#{menu.historial.card.title}">historial médico</h3>
+                    <p class="card-desc" th:text="#{menu.historial.card.desc}">Fichas médicas de animales.</p>
+                    <div class="card-footer">
+                        <span th:text="#{generic.btn.access}">Acceder</span>
+                        <i data-lucide="arrow-right" style="width:16px;"></i>
+                    </div>
+                </a>
 
-            <a th:href="@{/web/tareas}" class="card">
-                <div class="card-icon icon-yellow" style="background: #FEF3C7; color: #92400E;">
-                    <i data-lucide="check-square"></i>
-                </div>
-                <h3 class="card-title" th:text="#{menu.tareas.card.title}">tareas</h3>
-                <p class="card-desc" th:text="#{menu.tareas.card.desc}">Planificación de tareas.</p>
-                <div class="card-footer">
-                    <span th:text="#{generic.btn.access}">Acceder</span>
-                    <i data-lucide="arrow-right" style="width:16px;"></i>
-                </div>
-            </a>
+                <a th:href="@{/web/tareas}" class="card">
+                    <div class="card-icon icon-yellow" style="background: #FEF3C7; color: #92400E;">
+                        <i data-lucide="check-square"></i>
+                    </div>
+                    <h3 class="card-title" th:text="#{menu.tareas.card.title}">tareas</h3>
+                    <p class="card-desc" th:text="#{menu.tareas.card.desc}">Planificación de tareas.</p>
+                    <div class="card-footer">
+                        <span th:text="#{generic.btn.access}">Acceder</span>
+                        <i data-lucide="arrow-right" style="width:16px;"></i>
+                    </div>
+                </a>
+            </div>
 
         </div>
 
