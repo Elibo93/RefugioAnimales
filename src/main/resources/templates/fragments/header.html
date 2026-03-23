@@ -18,10 +18,14 @@
             <a th:if="${showBack}" th:href="@{/web/home}" class="back-link" title="Volver">
                 <i data-lucide="arrow-left" class="back-arrow" style="width:20px;"></i>
             </a>
-            <img th:src="@{/images/logo-Refugio.png}" class="app-logo">
-            <div class="app-brand">
-                <span class="app-name" th:text="#{app.name}">Refugio</span>
-                <span class="app-subtitle" th:text="#{app.subtitle}">Gestión</span>
+            
+            <!-- Brand Pill for visibility -->
+            <div class="app-brand-pill">
+                <img th:src="@{/images/logo-Refugio.png}" class="app-logo">
+                <div class="app-brand">
+                    <span class="app-name" th:text="#{app.name}">Refugio</span>
+                    <span class="app-subtitle" th:text="#{app.subtitle}">Gestión</span>
+                </div>
             </div>
         </div>
         <div class="header-right">

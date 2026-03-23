@@ -40,6 +40,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+import es.refugio.refugio.application.service.adoptante.CreateAdoptanteService;
+import es.refugio.refugio.application.command.adoptante.CreateAdoptanteCommand;
+import es.refugio.refugio.application.service.usuario.EditUsuarioService;
+import es.refugio.refugio.application.command.usuario.EditUsuarioCommand;
+import es.refugio.refugio.application.service.usuario.FindUsuarioService;
+import es.refugio.refugio.domain.model.usuario.Usuario;
+import es.refugio.refugio.domain.model.usuario.UsuarioId; // NUEVO
+import es.refugio.auth.domain.Rol;
+
 @Controller
 @RequiredArgsConstructor
 public class SolicitudAdopcionViewController {
@@ -50,16 +59,26 @@ public class SolicitudAdopcionViewController {
     private final EditSolicitudAdopcionService editSolicitudAdopcionService;
     private final FindAnimalService findAnimalService;
     private final FindAdoptanteService findAdoptanteService;
+    private final CreateAdoptanteService createAdoptanteService;
+    private final EditUsuarioService editUsuarioService;
+    private final FindUsuarioService findUsuarioService;
     private final UserRepository userRepository;
 
     private final TemplateEngine templateEngine;
 
     @GetMapping(WebRoutes.solicitudes_BASE)
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
-        model.addAttribute(ModelAttribute.Solicitud_LIST.getName(), findSolicitudAdopcionService.findAll());
+        try {
+            model.addAttribute(ModelAttribute.Solicitud_LIST.getName(), findSolicitudAdopcionService.findAll());
+        } catch (Exception e) {
+            model.addAttribute(ModelAttribute.Solicitud_LIST.getName(), List.of());
+        }
+        
         if (successMessage != null) {
             model.addAttribute("successMessage", successMessage);
         }
+        model.addAttribute("currentUri", WebRoutes.solicitudes_BASE);
+        model.addAttribute("showBack", false);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -72,22 +91,60 @@ public class SolicitudAdopcionViewController {
             builder.animalId(new AnimalId(animalId));
         }
 
-        // Si es un adoptante logueado, pre-seleccionamos su ID
+        // Si es un usuario logueado, intentamos pre-seleccionar o crear su perfil de adoptante
         if (authentication != null && authentication.isAuthenticated()) {
-            userRepository.findByEmail(authentication.getName()).ifPresent(user -> {
+            userRepository.findByEmail(authentication.getName()).ifPresent(userEntity -> {
                 try {
-                    Adoptante adoptante = findAdoptanteService.findByUsuarioId(user.getId());
-                    builder.adoptanteId(adoptante.getId());
-                } catch (Exception e) {
-                    // No es un adoptante o no tiene perfil aún
+                    // Intentamos buscarlo
+                    try {
+                        Adoptante adoptante = findAdoptanteService.findByUsuarioId(userEntity.getId());
+                        builder.adoptanteId(adoptante.getId());
+                    } catch (Exception e) {
+                        // Si no tiene perfil social de adoptante, lo creamos automáticamente para que el flujo sea fluido
+                        if (userEntity.getRol() == Rol.ROLE_PUBLICO || userEntity.getRol() == Rol.ROLE_ADOPTANTE) {
+                            // 1. Crear el perfil básico
+                            Adoptante newAdoptante = createAdoptanteService.createAdoptante(
+                                new CreateAdoptanteCommand(userEntity.getId(), "PENDIENTE", "PENDIENTE", ""));
+                            builder.adoptanteId(newAdoptante.getId());
+
+                            // 2. Si era rol PUBLICO, lo promocionamos a ADOPTANTE
+                            if (userEntity.getRol() == Rol.ROLE_PUBLICO) {
+                                Usuario usuarioDomain = findUsuarioService.findById(new UsuarioId(userEntity.getId()));
+                                editUsuarioService.update(new EditUsuarioCommand(
+                                    usuarioDomain.getId(),
+                                    usuarioDomain.getNombre(),
+                                    usuarioDomain.getApellido(),
+                                    usuarioDomain.getEmail(),
+                                    usuarioDomain.getTelefono() != null ? usuarioDomain.getTelefono() : "",
+                                    Rol.ROLE_ADOPTANTE
+                                ));
+                            }
+                        }
+                    }
+                } catch (Exception ex) {
+                    // Fallback silencioso para no romper la vista si falla algo en la conversion
                 }
             });
         }
 
         model.addAttribute(ModelAttribute.SINGLE_Solicitud.getName(), builder.build());
-        model.addAttribute("animales", findAnimalService.findAll());
-        model.addAttribute("adoptantes", findAdoptanteService.findAll());
+        
+        // Manejamos las listas con seguridad (pueden lanzar excepcion si estan vacias)
+        try {
+            model.addAttribute("animales", findAnimalService.findAll());
+        } catch (Exception e) {
+            model.addAttribute("animales", List.of());
+        }
+
+        try {
+            model.addAttribute("adoptantes", findAdoptanteService.findAll());
+        } catch (Exception e) {
+            model.addAttribute("adoptantes", List.of());
+        }
+
         model.addAttribute("estados", EstadoSolicitud.values());
+        model.addAttribute("currentUri", WebRoutes.solicitudes_NUEVA);
+        model.addAttribute("showBack", true);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }

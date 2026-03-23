@@ -21,4 +21,9 @@ public class FindUsuarioUseCase {
         return usuarioRepository.getById(id)
                 .orElseThrow(() -> new UsuarioNotFoundException(id.getValue()));
     }
+
+    public Usuario findByEmail(String email) {
+        return usuarioRepository.getByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
+    }
 }

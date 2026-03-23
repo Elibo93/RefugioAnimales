@@ -39,8 +39,8 @@
                 </div>
             </div>
 
-            <!-- Navigation Menu -->
-            <div class="sidebar-section" sec:authorize="isAuthenticated()">
+            <!-- Navigation Menu (Visible to all, items restricted below) -->
+            <div class="sidebar-section">
                 <h3 class="section-title">Navegación</h3>
                 <div class="sidebar-menu">
                     <a th:href="@{/web/home}" class="sidebar-item" th:classappend="${currentPage == 'home'} ? 'active' : ''">
@@ -55,15 +55,15 @@
                         <i data-lucide="users"></i>
                         <span th:text="#{menu.students.card.title}">Personas</span>
                     </a>
-                    <a th:href="@{/web/voluntarios}" class="sidebar-item" sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')">
+                    <a th:href="@{/web/voluntarios}" class="sidebar-item" sec:authorize="hasRole('ADMIN')">
                         <i data-lucide="heart"></i>
                         <span th:text="#{menu.professors.card.title}">Voluntarios</span>
                     </a>
-                    <a th:href="@{/web/adopciones}" class="sidebar-item">
+                    <a th:href="@{/web/adopciones}" class="sidebar-item" sec:authorize="hasRole('ADMIN')">
                         <i data-lucide="clipboard-check"></i>
                         <span th:text="#{menu.enrollments.card.title}">Adopciones</span>
                     </a>
-                    <a th:href="@{/web/solicitudes}" class="sidebar-item">
+                    <a th:href="@{/web/solicitudes}" class="sidebar-item" sec:authorize="hasRole('ADMIN')">
                         <i data-lucide="file-text"></i>
                         <span th:text="#{solicitud.list.title}">Solicitudes</span>
                     </a>
@@ -71,11 +71,11 @@
                         <i data-lucide="coins"></i>
                         <span th:text="#{donacion.list.title}">Donaciones</span>
                     </a>
-                    <a th:href="@{/web/historiales}" class="sidebar-item">
+                    <a th:href="@{/web/historiales}" class="sidebar-item" sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')">
                         <i data-lucide="stethoscope"></i>
                         <span th:text="#{historial.list.title}">Historiales</span>
                     </a>
-                    <a th:href="@{/web/tareas}" class="sidebar-item">
+                    <a th:href="@{/web/tareas}" class="sidebar-item" sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')">
                         <i data-lucide="check-square"></i>
                         <span th:text="#{tarea.list.title}">Tareas</span>
                     </a>

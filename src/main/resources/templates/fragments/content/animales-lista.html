@@ -75,9 +75,9 @@
 
                 <div class="animal-actions" th:if="${a.estado.toString() == 'DISPONIBLE' or a.estado.toString() == 'EN_TRATAMIENTO'}">
                     
-                    <!-- Si el usuario no está autenticado, redirigir a login -->
+                    <!-- Si el usuario no está autenticado, intentar ir a la solicitud (Spring los llevará al login y volverá aquí) -->
                     <div sec:authorize="!isAuthenticated()">
-                        <a th:href="@{/login}" class="btn-adopt">
+                        <a th:href="@{/web/solicitudes/nueva(animalId=${a.id.value})}" class="btn-adopt">
                             <i data-lucide="heart" style="width: 18px; height: 18px; margin-right: 0.5rem;"></i>
                             <span th:text="#{animal.button.adopt}">¡Adopta!</span>
                         </a>

@@ -7,144 +7,218 @@
 
 <body>
     <div th:fragment="content">
-
-        <section class="welcome-section">
-            <h1 class="welcome-title"><span th:text="#{home.hello}">Hola,</span> <span class="text-primary">Admin</span>
-                👋
-            </h1>
-            <p class="welcome-subtitle" th:text="#{home.welcome.text}">Bienvenido al sistema de gestión del refugio.</p>
-        </section>
-
-
-        <div class="dashboard-grid">
-            <div class="card">
-                <div class="card-icon icon-purple"><i data-lucide="users"></i></div>
-                <h3 class="card-title" th:text="#{stats.total.students}">personas</h3>
-                <span class="stat-value" th:text="${personas != null ? #lists.size(personas) : 0}">0</span>
-            </div>
-            <div class="card">
-                <div class="card-icon icon-green"><i data-lucide="dog"></i></div>
-                <h3 class="card-title" th:text="#{stats.active.workshops}">animales</h3>
-                <span class="stat-value" th:text="${animales != null ? #lists.size(animales) : 0}">0</span>
-            </div>
-            <div class="card">
-                <div class="card-icon icon-orange"><i data-lucide="heart-pulse"></i></div>
-                <h3 class="card-title" th:text="#{stats.new.registrations}">adopciones Mes</h3>
-                <span class="stat-value text-primary">+5</span>
-            </div>
-        </div>
-
-        <section class="page-header">
-            <h2 class="page-title" style="margin-bottom:1.5rem;" th:text="#{home.quick.actions}">Accesos Directos</h2>
-        </section>
-
-
-        <div class="dashboard-grid">
-
-            <a th:href="@{/web/animales}" class="card">
-                <div class="card-icon icon-orange">
-                    <i data-lucide="dog"></i>
-                </div>
-                <h3 class="card-title" th:text="#{menu.workshops.card.title}">animales</h3>
-                <p class="card-desc" th:text="#{menu.workshops.card.desc}">Listado de animales y su estado.</p>
-                <div class="card-footer">
-                    <span th:text="#{generic.btn.access}">Acceder</span>
-                    <i data-lucide="arrow-right" style="width:16px;"></i>
-                </div>
-            </a>
-
-            <div sec:authorize="hasRole('ADMIN')" style="display: contents;">
-                <a th:href="@{/web/personas}" class="card">
-                    <div class="card-icon icon-blue">
-                        <i data-lucide="users"></i>
-                    </div>
-                    <h3 class="card-title" th:text="#{menu.students.card.title}">personas</h3>
-                    <p class="card-desc" th:text="#{menu.students.card.desc}">Gestión de adoptantes y contactos.</p>
-                    <div class="card-footer">
-                        <span th:text="#{generic.btn.access}">Acceder</span>
-                        <i data-lucide="arrow-right" style="width:16px;"></i>
-                    </div>
-                </a>
-
-                <a th:href="@{/web/voluntarios}" class="card">
-                    <div class="card-icon icon-green">
+        <!-- 1. Hero Section -->
+        <section class="home-hero">
+            <div class="hero-overlay"></div>
+            <div class="hero-glass-card">
+                <h1 class="hero-title">No puedes comprar el amor, <br> pero puedes adoptarlo</h1>
+                <div class="hero-ctas">
+                    <a th:href="@{/web/animales}" class="btn-hero btn-hero-primary">
                         <i data-lucide="heart"></i>
-                    </div>
-                    <h3 class="card-title" th:text="#{menu.professors.card.title}">voluntarios</h3>
-                    <p class="card-desc" th:text="#{menu.professors.card.desc}">Equipo de voluntarios y cuidadores.</p>
-                    <div class="card-footer">
-                        <span th:text="#{generic.btn.access}">Acceder</span>
-                        <i data-lucide="arrow-right" style="width:16px;"></i>
-                    </div>
-                </a>
-
-                <a th:href="@{/web/adopciones}" class="card">
-                    <div class="card-icon icon-purple">
-                        <i data-lucide="clipboard-check"></i>
-                    </div>
-                    <h3 class="card-title" th:text="#{menu.enrollments.card.title}">adopciones</h3>
-                    <p class="card-desc" th:text="#{menu.enrollments.card.desc}">Procesos de adopción en curso.</p>
-                    <div class="card-footer">
-                        <span th:text="#{generic.btn.access}">Acceder</span>
-                        <i data-lucide="arrow-right" style="width:16px;"></i>
-                    </div>
-                </a>
-
-                <a th:href="@{/web/solicitudes}" class="card">
-                    <div class="card-icon icon-blue" style="background: #E0F2FE; color: #0369A1;">
-                        <i data-lucide="file-text"></i>
-                    </div>
-                    <h3 class="card-title" th:text="#{menu.solicitudes.card.title}">solicitudes</h3>
-                    <p class="card-desc" th:text="#{menu.solicitudes.card.desc}">Gestión de solicitudes de adopción.</p>
-                    <div class="card-footer">
-                        <span th:text="#{generic.btn.access}">Acceder</span>
-                        <i data-lucide="arrow-right" style="width:16px;"></i>
-                    </div>
-                </a>
-            </div>
-
-            <a th:href="@{/web/donaciones}" class="card">
-                <div class="card-icon icon-green" style="background: #DCFCE7; color: #15803D;">
-                    <i data-lucide="coins"></i>
+                        Conoce a nuestros amigos
+                    </a>
+                    <a th:href="@{/web/voluntarios/nuevo}" class="btn-hero btn-hero-secondary">
+                        <i data-lucide="users"></i>
+                        Quiero ser voluntario
+                    </a>
                 </div>
-                <h3 class="card-title" th:text="#{menu.donaciones.card.title}">donaciones</h3>
-                <p class="card-desc" th:text="#{menu.donaciones.card.desc}">Registro de donaciones.</p>
-                <div class="card-footer">
-                    <span th:text="#{generic.btn.access}">Acceder</span>
-                    <i data-lucide="arrow-right" style="width:16px;"></i>
-                </div>
-            </a>
-
-            <div sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')" style="display: contents;">
-                <a th:href="@{/web/historiales}" class="card">
-                    <div class="card-icon icon-red" style="background: #FEE2E2; color: #991B1B;">
-                        <i data-lucide="stethoscope"></i>
-                    </div>
-                    <h3 class="card-title" th:text="#{menu.historial.card.title}">historial médico</h3>
-                    <p class="card-desc" th:text="#{menu.historial.card.desc}">Fichas médicas de animales.</p>
-                    <div class="card-footer">
-                        <span th:text="#{generic.btn.access}">Acceder</span>
-                        <i data-lucide="arrow-right" style="width:16px;"></i>
-                    </div>
-                </a>
-
-                <a th:href="@{/web/tareas}" class="card">
-                    <div class="card-icon icon-yellow" style="background: #FEF3C7; color: #92400E;">
-                        <i data-lucide="check-square"></i>
-                    </div>
-                    <h3 class="card-title" th:text="#{menu.tareas.card.title}">tareas</h3>
-                    <p class="card-desc" th:text="#{menu.tareas.card.desc}">Planificación de tareas.</p>
-                    <div class="card-footer">
-                        <span th:text="#{generic.btn.access}">Acceder</span>
-                        <i data-lucide="arrow-right" style="width:16px;"></i>
-                    </div>
-                </a>
             </div>
+        </section>
 
+        <!-- 2. Buscador Rápido (Floating) -->
+        <div class="search-bar-floating">
+            <div class="search-field">
+                <label>Especie</label>
+                <select>
+                    <option>Cualquier especie</option>
+                    <option>Perro</option>
+                    <option>Gato</option>
+                </select>
+            </div>
+            <div style="width: 1px; height: 30px; background: var(--border);"></div>
+            <div class="search-field">
+                <label>Tamaño</label>
+                <select>
+                    <option>Cualquier tamaño</option>
+                    <option>Pequeño</option>
+                    <option>Mediano</option>
+                    <option>Grande</option>
+                </select>
+            </div>
+            <div style="width: 1px; height: 30px; background: var(--border);"></div>
+            <div class="search-field">
+                <label>Edad</label>
+                <select>
+                    <option>Cualquier edad</option>
+                    <option>Cachorro</option>
+                    <option>Adulto</option>
+                    <option>Senior</option>
+                </select>
+            </div>
+            <button class="btn-search">
+                <i data-lucide="search" style="color: white;"></i>
+            </button>
         </div>
 
+        <!-- 3. Contador de Impacto -->
+        <section id="impact" class="impact-container">
+            <div class="impact-item">
+                <span class="impact-icon">🏠</span>
+                <span class="impact-number">+500</span>
+                <span class="impact-label">Hogares encontrados</span>
+            </div>
+            <div class="impact-item">
+                <span class="impact-icon">🐾</span>
+                <span class="impact-number" th:text="${animales != null ? #lists.size(animales) : 42}">42</span>
+                <span class="impact-label">Esperando hoy</span>
+            </div>
+            <div class="impact-item">
+                <span class="impact-icon">❤️</span>
+                <span class="impact-number">120</span>
+                <span class="impact-label">Voluntarios activos</span>
+            </div>
+            <div class="impact-item">
+                <span class="impact-icon">🦴</span>
+                <span class="impact-number">2T</span>
+                <span class="impact-label">Comida donada este año</span>
+            </div>
+        </section>
 
+        <!-- 4. Favoritos de la Semana -->
+        <section class="page-header" style="text-align: center; margin-bottom: 3rem;">
+            <h2 class="page-title">Favoritos de la Semana</h2>
+            <p style="color: var(--text-muted);">Animales que buscan un hogar con urgencia</p>
+        </section>
 
+        <div class="animal-grid">
+            <!-- Mock Featured Animals (or use model data if filtered) -->
+            <div class="animal-card">
+                <div class="animal-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80" alt="Perro">
+                </div>
+                <div class="animal-content" style="padding: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <h3 style="font-size: 1.25rem; font-weight: 800;">Rocky ♂</h3>
+                        <span class="badge" style="background: var(--primary-light); color: var(--primary);">Cachorro</span>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                        <span class="badge" style="font-size: 0.75rem;">Tranquilo</span>
+                        <span class="badge" style="font-size: 0.75rem;">Apto para gatos</span>
+                    </div>
+                    <a th:href="@{/web/animales}" class="btn btn-primary" style="width: 100%; justify-content: center;">Adoptar</a>
+                </div>
+            </div>
+
+            <div class="animal-card">
+                <div class="animal-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80" alt="Gato">
+                </div>
+                <div class="animal-content" style="padding: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <h3 style="font-size: 1.25rem; font-weight: 800;">Luna ♀</h3>
+                        <span class="badge" style="background: #FEE2E2; color: #EF4444;">Adulto</span>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                        <span class="badge" style="font-size: 0.75rem;">Muy cariñosa</span>
+                    </div>
+                    <a th:href="@{/web/animales}" class="btn btn-primary" style="width: 100%; justify-content: center;">Adoptar</a>
+                </div>
+            </div>
+
+            <div class="animal-card">
+                <div class="animal-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&w=800&q=80" alt="Perro">
+                </div>
+                <div class="animal-content" style="padding: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <h3 style="font-size: 1.25rem; font-weight: 800;">Bella ♀</h3>
+                        <span class="badge" style="background: #FEF3C7; color: #D97706;">Senior</span>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                        <span class="badge" style="font-size: 0.75rem;">Necesita calma</span>
+                    </div>
+                    <a th:href="@{/web/animales}" class="btn btn-primary" style="width: 100%; justify-content: center;">Adoptar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Historias con Final Feliz -->
+        <section style="margin: 6rem 0;">
+            <div class="stories-header">
+                <h2 class="page-title">Historias con Final Feliz</h2>
+            </div>
+            <div id="story-carousel" class="story-carousel">
+                <div class="story-card active">
+                    <img src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=600&q=80" class="story-img" alt="Final Feliz">
+                    <div class="story-text">
+                        <p class="story-quote">"Luna llegó asustada y ahora es la reina del sofá. Gracias al refugio por unir nuestros caminos."</p>
+                        <p class="story-author">— Familia Pérez</p>
+                    </div>
+                </div>
+                <!-- Extra stories for carousel -->
+                <div class="story-card" style="display: none;">
+                    <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=600&q=80" class="story-img" alt="Final Feliz">
+                    <div class="story-text">
+                        <p class="story-quote">"Rocky ha encontrado su hogar definitivo. Nunca imaginamos que un perro senior daría tanta vida a nuestra casa."</p>
+                        <p class="story-author">— Juan y Marta</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Sección de Gestión (Shortcuts) -->
+        <div sec:authorize="isAuthenticated()">
+            <section class="page-header" style="margin-top: 6rem;">
+                <h2 class="page-title" style="margin-bottom:1.5rem;">Panel de Gestión</h2>
+            </section>
+
+            <div class="dashboard-grid" style="margin-bottom: 3rem;">
+                <a th:href="@{/web/animales}" class="card">
+                    <div class="card-icon icon-orange"><i data-lucide="dog"></i></div>
+                    <h3 class="card-title">Animales</h3>
+                    <p class="card-desc">Listado de animales y su estado.</p>
+                </a>
+
+                <div sec:authorize="hasRole('ADMIN')" style="display: contents;">
+                    <a th:href="@{/web/personas}" class="card">
+                        <div class="card-icon icon-blue"><i data-lucide="users"></i></div>
+                        <h3 class="card-title">Personas</h3>
+                        <p class="card-desc">Gestión de adoptantes y contactos.</p>
+                    </a>
+                    <a th:href="@{/web/voluntarios}" class="card">
+                        <div class="card-icon icon-green"><i data-lucide="heart"></i></div>
+                        <h3 class="card-title">Voluntarios</h3>
+                        <p class="card-desc">Equipo de voluntarios y cuidadores.</p>
+                    </a>
+                    <a th:href="@{/web/adopciones}" class="card">
+                        <div class="card-icon icon-purple"><i data-lucide="clipboard-check"></i></div>
+                        <h3 class="card-title">Adopciones</h3>
+                        <p class="card-desc">Procesos de adopción en curso.</p>
+                    </a>
+                    <a th:href="@{/web/solicitudes}" class="card">
+                        <div class="card-icon icon-blue" style="background: #E0F2FE; color: #0369A1;"><i data-lucide="file-text"></i></div>
+                        <h3 class="card-title">Solicitudes</h3>
+                        <p class="card-desc">Gestión de solicitudes de adopción.</p>
+                    </a>
+                </div>
+
+                <a th:href="@{/web/donaciones}" class="card">
+                    <div class="card-icon icon-green" style="background: #DCFCE7; color: #15803D;"><i data-lucide="coins"></i></div>
+                    <h3 class="card-title">Donaciones</h3>
+                    <p class="card-desc">Registro de donaciones.</p>
+                </a>
+
+                <div sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')" style="display: contents;">
+                    <a th:href="@{/web/historiales}" class="card">
+                        <div class="card-icon icon-red" style="background: #FEE2E2; color: #991B1B;"><i data-lucide="stethoscope"></i></div>
+                        <h3 class="card-title">Historial médico</h3>
+                    </a>
+                    <a th:href="@{/web/tareas}" class="card">
+                        <div class="card-icon icon-yellow" style="background: #FEF3C7; color: #92400E;"><i data-lucide="check-square"></i></div>
+                        <h3 class="card-title">Tareas</h3>
+                    </a>
+                </div>
+            </div>
     </div>
 </body>
 

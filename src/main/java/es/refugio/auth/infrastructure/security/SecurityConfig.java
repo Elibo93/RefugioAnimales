@@ -33,6 +33,7 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/web/animales/**", "/web/donaciones/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/web/donaciones/nueva").permitAll()
                         .requestMatchers("/api/v1/tareas/**", "/web/tareas/**").hasAnyRole("ADMIN", "VOLUNTARIO")
+                        .requestMatchers("/web/voluntarios/nuevo").permitAll()
                         .requestMatchers("/web/voluntarios/**", "/web/personas/**").hasRole("ADMIN")
                         .requestMatchers("/web/historiales/**").hasAnyRole("ADMIN", "VOLUNTARIO")
                         .requestMatchers("/api/**").authenticated()
@@ -44,7 +45,7 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login-post")
-                        .defaultSuccessUrl("/web/home", true)
+                        .defaultSuccessUrl("/web/home", false)
                         .permitAll())
                 .httpBasic(basic -> {
                 })

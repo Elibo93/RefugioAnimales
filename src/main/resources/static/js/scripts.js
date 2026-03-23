@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
     }
 
+    // Initialize carousel
+    initCarousel();
+
     // Auto-dismiss Toasts
     const toasts = document.querySelectorAll('.toast');
     if (toasts.length > 0) {
@@ -53,5 +56,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+function initCarousel() {
+    const carousel = document.getElementById('story-carousel');
+    if (!carousel) return;
+
+    const slides = carousel.querySelectorAll('.story-card');
+    if (slides.length <= 1) return;
+
+    let currentSlide = 0;
+
+    setInterval(() => {
+        slides[currentSlide].style.display = 'none';
+        slides[currentSlide].classList.remove('active');
+        
+        currentSlide = (currentSlide + 1) % slides.length;
+        
+        slides[currentSlide].style.display = 'flex';
+        slides[currentSlide].classList.add('active');
+    }, 5000);
+}
 
 
