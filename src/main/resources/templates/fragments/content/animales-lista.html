@@ -12,15 +12,31 @@
     <div class="actions-bar">
         <h2 class="page-title" th:text="#{enrollment.filter.workshop.all}">Animales</h2>
 
-        <div style="display:flex; gap:10px;" sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')">
-            <a class="btn btn-secondary" th:href="@{/web/animales/pdf}" target="_blank" th:text="#{generic.link.export.pdf}">
-                Exportar PDF
-            </a>
+        <div class="filters-container" style="display:flex; gap:15px; align-items:center;">
+            <select name="estado" 
+                    hx-get="/web/animales" 
+                    hx-target="#contenido-dinamico" 
+                    hx-push-url="true"
+                    hx-trigger="change"
+                    class="form-select"
+                    style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main); cursor: pointer;">
+                <option value="" th:selected="${selectedEstado == null}" th:text="#{animal.filter.all}">Todos los animales</option>
+                <option value="DISPONIBLE" th:selected="${#strings.toString(selectedEstado) == 'DISPONIBLE'}" th:text="#{animal.status.available}">Disponibles</option>
+                <option value="RESERVADO" th:selected="${#strings.toString(selectedEstado) == 'RESERVADO'}" th:text="#{animal.status.reserved}">Reservados</option>
+                <option value="EN_TRATAMIENTO" th:selected="${#strings.toString(selectedEstado) == 'EN_TRATAMIENTO'}" th:text="#{animal.status.treatment}">En tratamiento</option>
+                <option value="ADOPTADO" th:selected="${#strings.toString(selectedEstado) == 'ADOPTADO'}" th:text="#{animal.status.adopted}">Adoptados</option>
+            </select>
 
-            <a class="btn btn-primary" th:href="@{/web/animales/nuevo}">
-                <i data-lucide="plus" style="width:18px;"></i>
-                <span th:text="#{generic.link.create}">+ Nuevo animal</span>
-            </a>
+            <div style="display:flex; gap:10px;" sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')">
+                <a class="btn btn-secondary" th:href="@{/web/animales/pdf}" target="_blank" th:text="#{generic.link.export.pdf}">
+                    Exportar PDF
+                </a>
+
+                <a class="btn btn-primary" th:href="@{/web/animales/nuevo}">
+                    <i data-lucide="plus" style="width:18px;"></i>
+                    <span th:text="#{generic.link.create}">+ Nuevo animal</span>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -57,9 +73,17 @@
 
                 <p class="animal-description" th:text="${a.descripcion}">Muy tranquila y cariñosa.</p>
 
-                <div class="animal-actions">
-                    <!-- Botón para Público/Adoptante -->
-                    <div sec:authorize="hasRole('PUBLICO')">
+                <div class="animal-actions" th:if="${a.estado.toString() == 'DISPONIBLE' or a.estado.toString() == 'EN_TRATAMIENTO'}">
+                    <!-- Botón para ya Adoptantes -->
+                    <div sec:authorize="hasRole('ADOPTANTE')">
+                        <a th:href="@{/web/solicitudes/nueva(animalId=${a.id.value})}" class="btn-adopt">
+                            <i data-lucide="heart" style="width:18px; fill: currentColor;"></i>
+                            !Adopta a este compañero!
+                        </a>
+                    </div>
+
+                    <!-- Botón para otros roles (Público, Admin, Voluntario) para su flow correspondiente -->
+                    <div sec:authorize="!hasRole('ADOPTANTE')">
                         <button class="btn-adopt"
                                 th:attr="hx-get=@{/web/adoptantes/modal-convertir(animalId=${a.id.value})}"
                                 hx-target="#modal-host"
@@ -67,13 +91,6 @@
                             <i data-lucide="heart" style="width:18px; fill: currentColor;"></i>
                             !Adopta a este compañero!
                         </button>
-                    </div>
-
-                    <div sec:authorize="hasRole('ADOPTANTE')">
-                        <a th:href="@{/web/solicitudes/nueva(animalId=${a.id.value})}" class="btn-adopt">
-                            <i data-lucide="heart" style="width:18px; fill: currentColor;"></i>
-                            !Adopta a este compañero!
-                        </a>
                     </div>
                 </div>
 

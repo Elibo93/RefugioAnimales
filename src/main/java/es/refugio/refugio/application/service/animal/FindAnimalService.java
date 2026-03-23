@@ -20,4 +20,8 @@ public class FindAnimalService {
     public Animal findById(AnimalId id) {
         return findAnimalUseCase.findById(id);
     }
+
+    public List<Animal> findByStatus(es.refugio.refugio.domain.model.animal.enums.EstadoAnimal status) {
+        return findAnimalUseCase.findByEstado(status);
+    }
 }

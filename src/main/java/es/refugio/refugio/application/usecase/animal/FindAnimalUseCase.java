@@ -25,4 +25,8 @@ public class FindAnimalUseCase {
         return animalRepository.getById(id)
                 .orElseThrow(() -> new AnimalNotFoundException(id.getValue()));
     }
+
+    public List<Animal> findByEstado(es.refugio.refugio.domain.model.animal.enums.EstadoAnimal estado) {
+        return animalRepository.getByEstado(estado);
+    }
 }
