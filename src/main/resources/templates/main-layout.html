@@ -16,11 +16,8 @@
         </div>
     </main>
 
-    <div style="position: fixed; bottom: 20px; right: 20px; background: var(--bg-card, #fff); padding: 10px 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-weight: 600; font-size: 0.9rem; z-index: 1000; border: 1px solid var(--border-color, #e2e8f0);"
-        hx-get="/api/hora" hx-trigger="every 1s" hx-swap="innerHTML" th:text="#{generic.loading.time}">
-        Cargando hora...
-    </div>
 
+    <div id="modal-host"></div>
     <div th:replace="~{fragments/scripts :: scripts}"></div>
 
 </body>

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import es.refugio.refugio.application.command.tarea.CreateTareaCommand;
 import es.refugio.refugio.application.command.tarea.EditTareaCommand;
@@ -35,6 +36,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("api/v1/tareas")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
 @Tag(name = "Tareas", description = "Gestión de tareas asignadas a los voluntarios")
 public class TareaController {
 

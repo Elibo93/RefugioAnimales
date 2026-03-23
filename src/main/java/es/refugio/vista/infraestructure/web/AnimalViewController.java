@@ -29,6 +29,7 @@ import es.refugio.refugio.application.service.animal.FindAnimalService;
 import es.refugio.refugio.application.service.voluntario.FindVoluntarioService;
 import es.refugio.refugio.domain.model.animal.Animal;
 import es.refugio.refugio.domain.model.animal.AnimalId;
+import es.refugio.refugio.domain.model.animal.enums.EstadoAnimal;
 import es.refugio.vista.infraestructure.web.constants.WebRoutes;
 import es.refugio.vista.infraestructure.web.enums.FragmentoContenido;
 import es.refugio.vista.infraestructure.web.enums.ModelAttribute;
@@ -48,12 +49,30 @@ public class AnimalViewController {
     private final TemplateEngine templateEngine;
 
     @GetMapping(WebRoutes.animales_BASE)
-    public String listar(Model model, @RequestParam(required = false) String successMessage) {
-        model.addAttribute(ModelAttribute.Animal_LIST.getName(), findAnimalService.findAll());
+    public String listar(Model model, 
+                        @RequestParam(required = false) String successMessage,
+                        @RequestParam(required = false) EstadoAnimal estado,
+                        HttpServletRequest request) {
+        
+        List<Animal> animales;
+        if (estado != null) {
+            animales = findAnimalService.findByStatus(estado);
+        } else {
+            animales = findAnimalService.findAll();
+        }
+
+        model.addAttribute(ModelAttribute.Animal_LIST.getName(), animales);
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), findVoluntarioService.findAll());
+        model.addAttribute("selectedEstado", estado);
+        
         if (successMessage != null) {
             model.addAttribute("successMessage", successMessage);
         }
+
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Animal_LIST.getPath();
+        }
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Animal_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }

@@ -18,6 +18,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.AccessDeniedException;
+import es.refugio.auth.infrastructure.repository.UserRepository;
+import es.refugio.auth.domain.AuthCredentialEntity;
+import es.refugio.refugio.domain.model.adoptante.Adoptante;
+import es.refugio.refugio.application.service.adoptante.FindAdoptanteService;
 
 import es.refugio.refugio.application.command.adopcion.CreateAdopcionCommand;
 import es.refugio.refugio.application.command.adopcion.EditAdopcionCommand;
@@ -50,6 +57,8 @@ public class AdopcionController {
     private final FindAdopcionService findAdopcionService;
     private final EditAdopcionService editAdopcionService;
     private final DeleteAdopcionService deleteAdopcionService;
+    private final UserRepository userRepository;
+    private final FindAdoptanteService findAdoptanteService;
 
     @Operation(summary = "Registrar adopción", description = "Crea una nueva adopción vinculando adoptante y animal")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Adopción registrada"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
@@ -72,21 +81,44 @@ public class AdopcionController {
 
     @Operation(summary = "Listar adopciones", description = "Retorna todas las adopciones registradas")
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
     public List<AdopcionResponse> getAll() {
-        return findAdopcionService.findAll()
-                .stream()
+        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        boolean isStaff = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
+        
+        List<Adopcion> adopciones = findAdopcionService.findAll();
+        
+        if (!isStaff) {
+            AuthCredentialEntity user = userRepository.findByEmail(currentEmail)
+                    .orElseThrow(() -> new AccessDeniedException("Usuario no encontrado"));
+            Adoptante adoptante = findAdoptanteService.findAll().stream()
+                    .filter(a -> a.getUsuarioId().equals(user.getId()))
+                    .findFirst()
+                    .orElseThrow(() -> new AccessDeniedException("Adoptante no vinculado"));
+                    
+            adopciones = adopciones.stream()
+                    .filter(a -> a.getAdoptanteId().equals(adoptante.getId()))
+                    .toList();
+        }
+
+        return adopciones.stream()
                 .map(AdopcionMapper::toResponse)
                 .toList();
     }
 
     @Operation(summary = "Obtener adopción por ID")
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
     public AdopcionResponse getAdopcionById(@PathVariable Integer id) {
-        return AdopcionMapper.toResponse(findAdopcionService.findById(new AdopcionId(id)));
+        Adopcion adopcion = findAdopcionService.findById(new AdopcionId(id));
+        checkOwnership(adopcion.getAdoptanteId());
+        return AdopcionMapper.toResponse(adopcion);
     }
 
     @Operation(summary = "Adopciones por animal", description = "Retorna adopciones asociadas a un animal concreto")
     @GetMapping("/animal/{animalId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public List<AdopcionResponse> getAdopcionByAnimalId(@PathVariable Integer animalId) {
         List<Adopcion> adopciones = findAdopcionService.findByAnimalId(new AnimalId(animalId));
         return AdopcionMapper.toResponse(adopciones);
@@ -102,9 +134,26 @@ public class AdopcionController {
     @Operation(summary = "Eliminar adopción")
     @ApiResponse(responseCode = "204", description = "Adopción eliminada")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteAdopcion(@PathVariable Integer id) {
         deleteAdopcionService.delete(new AdopcionId(id));
         return ResponseEntity.noContent().build();
+    }
+
+    private void checkOwnership(AdoptanteId adoptanteId) {
+        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        boolean isStaff = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
+        
+        if (!isStaff) {
+            AuthCredentialEntity user = userRepository.findByEmail(currentEmail)
+                    .orElseThrow(() -> new AccessDeniedException("Usuario no encontrado"));
+            
+            Adoptante adoptante = findAdoptanteService.findById(adoptanteId);
+            if (!adoptante.getUsuarioId().equals(user.getId())) {
+                throw new AccessDeniedException("No tienes permiso para acceder a esta información.");
+            }
+        }
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

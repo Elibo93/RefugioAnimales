@@ -21,6 +21,10 @@ import es.refugio.refugio.application.command.solicitud_adopcion.CreateSolicitud
 import es.refugio.refugio.application.command.solicitud_adopcion.EditSolicitudAdopcionCommand;
 import es.refugio.refugio.application.service.adoptante.FindAdoptanteService;
 import es.refugio.refugio.application.service.animal.FindAnimalService;
+import es.refugio.refugio.domain.model.animal.AnimalId;
+import es.refugio.refugio.domain.model.adoptante.Adoptante;
+import es.refugio.auth.infrastructure.repository.UserRepository;
+import org.springframework.security.core.Authentication;
 import es.refugio.refugio.application.service.solicitud_adopcion.CreateSolicitudAdopcionService;
 import es.refugio.refugio.application.service.solicitud_adopcion.DeleteSolicitudAdopcionService;
 import es.refugio.refugio.application.service.solicitud_adopcion.EditSolicitudAdopcionService;
@@ -46,6 +50,7 @@ public class SolicitudAdopcionViewController {
     private final EditSolicitudAdopcionService editSolicitudAdopcionService;
     private final FindAnimalService findAnimalService;
     private final FindAdoptanteService findAdoptanteService;
+    private final UserRepository userRepository;
 
     private final TemplateEngine templateEngine;
 
@@ -60,8 +65,26 @@ public class SolicitudAdopcionViewController {
     }
 
     @GetMapping(WebRoutes.solicitudes_NUEVA)
-    public String formulario(Model model) {
-        model.addAttribute(ModelAttribute.SINGLE_Solicitud.getName(), SolicitudAdopcion.builder().fecha(LocalDateTime.now()).build());
+    public String formulario(Model model, @RequestParam(required = false) Integer animalId, Authentication authentication) {
+        SolicitudAdopcion.SolicitudAdopcionBuilder builder = SolicitudAdopcion.builder().fecha(LocalDateTime.now());
+        
+        if (animalId != null) {
+            builder.animalId(new AnimalId(animalId));
+        }
+
+        // Si es un adoptante logueado, pre-seleccionamos su ID
+        if (authentication != null && authentication.isAuthenticated()) {
+            userRepository.findByEmail(authentication.getName()).ifPresent(user -> {
+                try {
+                    Adoptante adoptante = findAdoptanteService.findByUsuarioId(user.getId());
+                    builder.adoptanteId(adoptante.getId());
+                } catch (Exception e) {
+                    // No es un adoptante o no tiene perfil aún
+                }
+            });
+        }
+
+        model.addAttribute(ModelAttribute.SINGLE_Solicitud.getName(), builder.build());
         model.addAttribute("animales", findAnimalService.findAll());
         model.addAttribute("adoptantes", findAdoptanteService.findAll());
         model.addAttribute("estados", EstadoSolicitud.values());

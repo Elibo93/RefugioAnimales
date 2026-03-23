@@ -1,6 +1,7 @@
 package es.refugio.refugio.application.service.adoptante;
 
 import java.util.List;
+import es.refugio.refugio.domain.model.usuario.UsuarioId;
 
 import org.springframework.stereotype.Service;
 
@@ -23,5 +24,9 @@ public class FindAdoptanteService {
     public Adoptante findById(AdoptanteId id) {
         // Busca un adoptante específico por su ID de dominio
         return findAdoptanteUseCase.findById(id);
+    }
+
+    public Adoptante findByUsuarioId(Integer usuarioId) {
+        return findAdoptanteUseCase.findByUsuarioId(new UsuarioId(usuarioId));
     }
 }

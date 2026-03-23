@@ -12,6 +12,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.AccessDeniedException;
+import es.refugio.auth.domain.AuthCredentialEntity;
+import es.refugio.auth.infrastructure.repository.UserRepository;
 
 import es.refugio.refugio.application.command.donacion.CreateDonacionCommand;
 import es.refugio.refugio.application.command.donacion.EditDonacionCommand;
@@ -42,11 +47,27 @@ public class DonacionController {
     private final FindDonacionService findDonacionService;
     private final EditDonacionService editDonacionService;
     private final DeleteDonacionService deleteDonacionService;
+    private final UserRepository userRepository;
 
     @Operation(summary = "Registrar donación")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Donación registrada"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<DonacionResponse> create(@Valid @RequestBody DonacionRequest request) {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAuthenticated = auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser");
+        
+        if (isAuthenticated) {
+            boolean isVolunteer = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_VOLUNTARIO"));
+            
+            if (isVolunteer) {
+                String tipo = request.tipo().toUpperCase();
+                if (!tipo.equals("COMIDA") && !tipo.equals("OTRO")) {
+                    throw new AccessDeniedException("Los voluntarios solo pueden registrar donaciones físicas (COMIDA o MATERIAL/OTRO).");
+                }
+            }
+        }
+
         CreateDonacionCommand command = DonacionMapper.toCommand(request);
         Donacion donacion = createDonacionService.create(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(DonacionMapper.toResponse(donacion));
@@ -62,8 +83,26 @@ public class DonacionController {
 
     @Operation(summary = "Listar donaciones")
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
     public List<DonacionResponse> findAll() {
-        return DonacionMapper.toResponse(findDonacionService.findAll());
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isStaff = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
+        
+        List<Donacion> donaciones = findDonacionService.findAll();
+        
+        if (!isStaff) {
+            String currentEmail = auth.getName();
+            AuthCredentialEntity user = userRepository.findByEmail(currentEmail)
+                    .orElseThrow(() -> new AccessDeniedException("Usuario no encontrado"));
+            Integer currentUserId = user.getId();
+            
+            donaciones = donaciones.stream()
+                    .filter(d -> d.getUsuarioId() != null && d.getUsuarioId().getValue().equals(currentUserId))
+                    .toList();
+        }
+        
+        return DonacionMapper.toResponse(donaciones);
     }
 
     @Operation(summary = "Obtener donación por ID")
@@ -74,13 +113,32 @@ public class DonacionController {
 
     @Operation(summary = "Donaciones por usuario", description = "Retorna las donaciones de un usuario concreto")
     @GetMapping("/usuario/{usuarioId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
     public List<DonacionResponse> findByUsuarioId(@PathVariable Integer usuarioId) {
+        checkUserOwnership(usuarioId);
         return DonacionMapper.toResponse(findDonacionService.findByUsuarioId(new UsuarioId(usuarioId)));
+    }
+
+    private void checkUserOwnership(Integer targetUsuarioId) {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isStaff = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
+        
+        if (!isStaff) {
+            String currentEmail = auth.getName();
+            AuthCredentialEntity user = userRepository.findByEmail(currentEmail)
+                    .orElseThrow(() -> new AccessDeniedException("Usuario no encontrado"));
+            
+            if (!targetUsuarioId.equals(user.getId())) {
+                throw new AccessDeniedException("No tienes permiso para ver estas donaciones.");
+            }
+        }
     }
 
     @Operation(summary = "Eliminar donación")
     @ApiResponse(responseCode = "204", description = "Donación eliminada")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         deleteDonacionService.delete(new DonacionId(id));
         return ResponseEntity.noContent().build();

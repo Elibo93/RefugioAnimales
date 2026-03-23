@@ -15,6 +15,9 @@ public interface WebRoutes {
     public static final String personas_PDF = "/web/personas/pdf";
     public static final String personas_ELIMINAR = "/web/personas/{id}/borrar";
 
+    // ADOPTANTES
+    public static final String adoptantes_MODAL_CONVERTIR = "/web/adoptantes/modal-convertir";
+
     // VOLUNTARIOS
     public static final String voluntarios_BASE = "/web/voluntarios";
     public static final String voluntarios_NUEVO = "/web/voluntarios/nuevo";

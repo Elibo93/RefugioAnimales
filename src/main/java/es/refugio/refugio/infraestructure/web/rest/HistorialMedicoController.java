@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import es.refugio.refugio.application.command.historial_medico.CreateHistorialMedicoCommand;
 import es.refugio.refugio.application.command.historial_medico.EditHistorialMedicoCommand;
@@ -53,6 +54,7 @@ public class HistorialMedicoController {
     @Operation(summary = "Crear registro médico")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Registro creado"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public ResponseEntity<HistorialMedicoResponse> createHistorialMedico(@Valid @RequestBody HistorialMedicoRequest request) {
         CreateHistorialMedicoCommand command = HistorialMedicoMapper.toCommand(request);
         HistorialMedico historialMedico = createHistorialMedicoService.create(command);
@@ -61,6 +63,7 @@ public class HistorialMedicoController {
 
     @Operation(summary = "Actualizar registro médico")
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public ResponseEntity<HistorialMedicoResponse> updateHistorialMedico(@PathVariable Integer id,
                                                                          @Valid @RequestBody HistorialMedicoRequest request) {
         EditHistorialMedicoCommand command = HistorialMedicoMapper.toCommand(id, request);
@@ -93,6 +96,7 @@ public class HistorialMedicoController {
     @Operation(summary = "Eliminar registro médico")
     @ApiResponse(responseCode = "204", description = "Registro eliminado")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public ResponseEntity<Void> deleteHistorialMedico(@PathVariable Integer id) {
         deleteHistorialMedicoService.delete(new HistorialMedicoId(id));
         return ResponseEntity.noContent().build();

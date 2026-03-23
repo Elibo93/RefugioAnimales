@@ -5,6 +5,7 @@
 <div th:fragment="scripts" th:remove="tag">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
     <script th:src="@{/js/scripts.js}"></script>
     <script>
         document.body.addEventListener('htmx:configRequest', function(evt) {
