@@ -74,23 +74,32 @@
                 <p class="animal-description" th:text="${a.descripcion}">Muy tranquila y cariñosa.</p>
 
                 <div class="animal-actions" th:if="${a.estado.toString() == 'DISPONIBLE' or a.estado.toString() == 'EN_TRATAMIENTO'}">
-                    <!-- Botón para ya Adoptantes -->
-                    <div sec:authorize="hasRole('ADOPTANTE')">
-                        <a th:href="@{/web/solicitudes/nueva(animalId=${a.id.value})}" class="btn-adopt">
-                            <i data-lucide="heart" style="width:18px; fill: currentColor;"></i>
-                            !Adopta a este compañero!
+                    
+                    <!-- Si el usuario no está autenticado, redirigir a login -->
+                    <div sec:authorize="!isAuthenticated()">
+                        <a th:href="@{/login}" class="btn-adopt">
+                            <i data-lucide="heart" style="width: 18px; height: 18px; margin-right: 0.5rem;"></i>
+                            <span th:text="#{animal.button.adopt}">¡Adopta!</span>
                         </a>
                     </div>
 
-                    <!-- Botón para otros roles (Público, Admin, Voluntario) para su flow correspondiente -->
-                    <div sec:authorize="!hasRole('ADOPTANTE')">
+                    <!-- Si el usuario está autenticado pero no es adoptante, mostrar modal de conversión -->
+                    <div sec:authorize="hasRole('ROLE_PUBLICO')">
                         <button class="btn-adopt"
                                 th:attr="hx-get=@{/web/adoptantes/modal-convertir(animalId=${a.id.value})}"
-                                hx-target="#modal-host"
-                                hx-trigger="click">
-                            <i data-lucide="heart" style="width:18px; fill: currentColor;"></i>
-                            !Adopta a este compañero!
+                                hx-target="#modal-host" 
+                                hx-swap="outerHTML">
+                            <i data-lucide="heart" style="width: 18px; height: 18px; margin-right: 0.5rem;"></i>
+                            <span th:text="#{animal.button.adopt}">¡Adopta!</span>
                         </button>
+                    </div>
+
+                    <!-- Si el usuario ya es adoptante, ir directo al formulario de solicitud -->
+                    <div sec:authorize="hasRole('ROLE_ADOPTANTE')">
+                        <a th:href="@{/web/solicitudes/nueva(animalId=${a.id.value})}" class="btn-adopt">
+                            <i data-lucide="heart" style="width: 18px; height: 18px; margin-right: 0.5rem;"></i>
+                            <span th:text="#{animal.button.adopt}">¡Adopta!</span>
+                        </a>
                     </div>
                 </div>
 

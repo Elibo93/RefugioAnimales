@@ -17,11 +17,10 @@
             </p>
         </div>
 
-        <form th:attr="hx-post=@{/api/v1/adoptantes/convertir-y-solicitar}" 
+        <form th:attr="hx-post=@{/web/adoptantes/convertir-y-solicitar}" 
               hx-ext="json-enc"
               hx-target="#modal-host" 
-              hx-swap="outerHTML"
-              onsubmit="setTimeout(() => { window.location.reload(); }, 2000)">
+              hx-swap="outerHTML">
             
             <input type="hidden" name="animalId" th:value="${animalId}">
 

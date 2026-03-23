@@ -5,38 +5,43 @@
 </head>
 <body>
 <div th:fragment="content">
-    <div class="table-wrapper">
-        <div class="actions-bar">
-            <span class="user-name page" th:text="#{donacion.list.title}">Donaciones</span>
+    <!-- Impact Section at the top -->
+    <div th:replace="~{fragments/content/donacion-impacto :: impact}"></div>
+
+    <!-- Integrated Donation Form -->
+    <div th:replace="~{fragments/content/donacion-formulario :: content}"></div>
+
+    <div class="table-wrapper glass-panel" style="margin-top: 4rem; padding: 3rem; border-radius: 24px;" sec:authorize="hasRole('ADMIN')">
+        <div class="actions-bar" style="background:transparent; border-bottom: none; padding-bottom: 2rem;">
+            <h2 style="font-size: 2rem; font-weight: 800; color: var(--text-main);" th:text="#{donacion.list.title}">Donaciones Recientes</h2>
             <div style="display:flex; gap:10px;">
-                <a class="btn btn-secondary" th:href="@{/web/donaciones/pdf}" target="_blank" th:text="#{generic.link.export.pdf}">
+                <a class="btn btn-secondary" th:href="@{/web/donaciones/pdf}" target="_blank" th:text="#{generic.link.export.pdf}" sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')">
                     Exportar PDF
-                </a>
-                <a class="btn btn-primary" th:href="@{/web/donaciones/nueva}">
-                    <i data-lucide="plus" style="width:18px;"></i>
-                    <span th:text="#{generic.link.create}">+ Registrar donación</span>
                 </a>
             </div>
         </div>
         <table id="tabladonaciones">
             <thead>
                 <tr>
-                    <th th:text="#{persona.table.header.id}">ID</th>
                     <th th:text="#{donacion.table.header.usuario}">Donante</th>
-                    <th th:text="#{donacion.table.header.tipo}">Tipo</th>
-                    <th th:text="#{donacion.table.header.cantidad}">Cantidad</th>
+                    <th th:text="#{donacion.field.tipo}">Tipo</th>
+                    <th th:text="#{donacion.field.cantidad}">Cantidad</th>
                     <th th:text="#{donacion.table.header.fecha}">Fecha</th>
-                    <th th:text="#{workshop.table.header.action}">Acción</th>
+                    <th th:text="#{donacion.field.descripcion}">Descripción</th>
+                    <th th:text="#{workshop.table.header.action}" sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')">Acción</th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:each="d : ${donaciones}" th:id="'row-' + ${d.id.value}">
-                    <td th:text="${d.id.value}">1</td>
-                    <td style="font-weight:600;color:var(--primary);" th:text="${d.usuarioId.value}">Usuario</td>
+                    <td style="font-weight:600;color:var(--primary);" 
+                        th:text="${d.usuarioId != null and usuarioMap != null ? usuarioMap.get(d.usuarioId.value) : (d.usuarioId != null ? d.usuarioId.value : 'Anónimo')}">
+                        Usuario
+                    </td>
                     <td th:text="${d.tipo}">DINERO</td>
                     <td th:text="${d.cantidad}">100.0</td>
                     <td th:text="${#temporals.format(d.fecha, 'dd/MM/yyyy HH:mm')}">01/01/2024</td>
-                    <td style="display:flex; gap:8px;">
+                    <td th:text="${d.descripcion}">Descripción</td>
+                    <td style="display:flex; gap:8px;" sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')">
                         <a class="btn-icon" th:href="@{/web/donaciones/{id}/editar(id=${d.id.value})}">
                            <i data-lucide="edit-2" style="width:16px;"></i>
                         </a>
@@ -54,6 +59,11 @@
             <p th:text="#{donacion.list.empty}">No hay donaciones registradas.</p>
         </div>
     </div>
+    <script th:inline="javascript">
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    </script>
 </div>
 </body>
 </html>

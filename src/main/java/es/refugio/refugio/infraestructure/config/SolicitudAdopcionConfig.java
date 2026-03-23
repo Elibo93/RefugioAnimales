@@ -11,6 +11,7 @@ import es.refugio.refugio.application.usecase.solicitud_adopcion.CreateSolicitud
 import es.refugio.refugio.application.usecase.solicitud_adopcion.DeleteSolicitudAdopcionUseCase;
 import es.refugio.refugio.application.usecase.solicitud_adopcion.EditSolicitudAdopcionUseCase;
 import es.refugio.refugio.application.usecase.solicitud_adopcion.FindSolicitudAdopcionUseCase;
+import es.refugio.refugio.domain.repository.AnimalRepository;
 import es.refugio.refugio.domain.repository.SolicitudAdopcionRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.solicitud_adopcion.SolicitudAdopcionEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.solicitud_adopcion.SolicitudAdopcionJpaRepositoryImpl;
@@ -24,8 +25,8 @@ public class SolicitudAdopcionConfig {
     }
 
     @Bean
-    public CreateSolicitudAdopcionUseCase createSolicitudAdopcionUseCase(SolicitudAdopcionRepository repository) {
-        return new CreateSolicitudAdopcionUseCase(repository);
+    public CreateSolicitudAdopcionUseCase createSolicitudAdopcionUseCase(SolicitudAdopcionRepository repository, AnimalRepository animalRepository) {
+        return new CreateSolicitudAdopcionUseCase(repository, animalRepository);
     }
 
     @Bean

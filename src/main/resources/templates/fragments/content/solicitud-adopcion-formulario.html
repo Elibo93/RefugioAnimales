@@ -15,7 +15,9 @@
                     <label th:text="#{solicitud.field.animal}">Animal</label>
                     <select name="animalId" required>
                         <option value="" th:text="#{form.select.workshop}">Seleccione un animal...</option>
-                        <option th:each="a : ${animales}" th:value="${a.id.value}" th:text="${a.nombre}" 
+                        <option th:each="a : ${animales}" 
+                                th:if="${a.estado.toString() == 'DISPONIBLE' or a.estado.toString() == 'EN_TRATAMIENTO' or (solicitud.animalId != null and a.id.value == solicitud.animalId.value)}"
+                                th:value="${a.id.value}" th:text="${a.nombre}" 
                                 th:selected="${solicitud.animalId != null and a.id.value == solicitud.animalId.value}"></option>
                     </select>
                 </div>

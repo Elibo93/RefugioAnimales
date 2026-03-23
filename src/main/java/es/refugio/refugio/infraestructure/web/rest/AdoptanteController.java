@@ -28,20 +28,12 @@ import es.refugio.refugio.application.service.adoptante.CreateAdoptanteService;
 import es.refugio.refugio.application.service.adoptante.DeleteAdoptanteService;
 import es.refugio.refugio.application.service.adoptante.EditAdoptanteService;
 import es.refugio.refugio.application.service.adoptante.FindAdoptanteService;
-<<<<<<< HEAD
 import es.refugio.refugio.application.service.adoptante.RejectAdoptanteService;
-=======
-import es.refugio.refugio.application.service.solicitud_adopcion.CreateSolicitudAdopcionService;
-import es.refugio.refugio.application.command.solicitud_adopcion.CreateSolicitudAdopcionCommand;
->>>>>>> 380f4699d5d6897e9ed826061cf20a5ae60ef685
 import es.refugio.refugio.domain.model.adoptante.Adoptante;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.infraestructure.mapper.AdoptanteMapper;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteRequest;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteResponse;
-import es.refugio.refugio.infraestructure.web.dto.adoptante.ConvertirAdoptanteRequest;
-import es.refugio.auth.domain.Rol;
-import java.time.LocalDateTime;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -55,16 +47,13 @@ public class AdoptanteController {
     private final FindAdoptanteService findService;
     private final DeleteAdoptanteService deleteService;
     private final EditAdoptanteService editService;
-<<<<<<< HEAD
     private final ApproveAdoptanteService approveService;
     private final RejectAdoptanteService rejectService;
-=======
-    private final CreateSolicitudAdopcionService solicitudService;
     private final UserRepository userRepository;
->>>>>>> 380f4699d5d6897e9ed826061cf20a5ae60ef685
 
     @Operation(summary = "Crear adoptante", description = "Registra un nuevo adoptante vinculado a un usuario")
-    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Adoptante creado"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
+    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Adoptante creado"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<AdoptanteResponse> createAdoptante(@Valid @RequestBody AdoptanteRequest request) {
         CreateAdoptanteCommand command = AdoptanteMapper.toCommand(request);
@@ -87,7 +76,8 @@ public class AdoptanteController {
     }
 
     @Operation(summary = "Obtener adoptante por ID")
-    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Adoptante encontrado"), @ApiResponse(responseCode = "404", description = "No encontrado") })
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Adoptante encontrado"),
+            @ApiResponse(responseCode = "404", description = "No encontrado") })
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
     public AdoptanteResponse getById(@PathVariable int id) {
@@ -106,7 +96,8 @@ public class AdoptanteController {
     }
 
     @Operation(summary = "Editar adoptante")
-    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Adoptante actualizado"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Adoptante actualizado"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
     public AdoptanteResponse editAdoptante(
@@ -114,13 +105,12 @@ public class AdoptanteController {
             @Valid @RequestBody AdoptanteRequest request) {
         Adoptante adoptanteExistente = findService.findById(new AdoptanteId(id));
         checkOwnership(adoptanteExistente);
-        
+
         EditAdoptanteCommand command = AdoptanteMapper.toEditCommand(new AdoptanteId(id), request);
         Adoptante adoptante = editService.update(command);
         return AdoptanteMapper.toResponse(adoptante);
     }
 
-<<<<<<< HEAD
     @Operation(summary = "Aprobar adoptante", description = "Cambia el estado de validación del adoptante a APROBADO")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Adoptante aprobado correctamente"),
@@ -143,53 +133,21 @@ public class AdoptanteController {
         RejectAdoptanteCommand command = new RejectAdoptanteCommand(new AdoptanteId(id));
         Adoptante adoptante = rejectService.reject(command);
         return AdoptanteMapper.toResponse(adoptante);
-=======
-    @Operation(summary = "Convertir usuario público a adoptante y crear solicitud", description = "Actualiza el rol del usuario, crea su perfil de adoptante y registra la solicitud de adopción automáticamente.")
-    @PostMapping("/convertir-y-solicitar")
-    @PreAuthorize("hasRole('PUBLICO')")
-    public ResponseEntity<String> convertirYSolicitar(@Valid @RequestBody ConvertirAdoptanteRequest request) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        AuthCredentialEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AccessDeniedException("Usuario no encontrado"));
-
-        // 1. Actualizar Rol
-        user.setRol(Rol.ROLE_ADOPTANTE);
-        userRepository.save(user);
-
-        // 2. Crear Perfil de Adoptante
-        Adoptante adoptante = createService.createAdoptante(new CreateAdoptanteCommand(
-                user.getId(),
-                request.getDni(),
-                request.getDireccion(),
-                request.getFechaNacimiento()
-        ));
-
-        // 3. Crear Solicitud de Adopción
-        solicitudService.create(new CreateSolicitudAdopcionCommand(
-                request.getAnimalId(),
-                adoptante.getId().getValue(),
-                LocalDateTime.now(),
-                "PENDIENTE",
-                "Solicitud automática tras conversión de perfil."
-        ));
-
-        return ResponseEntity.ok("Perfil actualizado y solicitud enviada correctamente.");
     }
 
     private void checkOwnership(Adoptante adoptante) {
         String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         boolean isStaff = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
-        
+
         if (!isStaff) {
             AuthCredentialEntity user = userRepository.findByEmail(currentEmail)
                     .orElseThrow(() -> new AccessDeniedException("Usuario no encontrado"));
-            
+
             if (!adoptante.getUsuarioId().equals(user.getId())) {
                 throw new AccessDeniedException("No tienes permiso para acceder a este perfil.");
             }
         }
->>>>>>> 380f4699d5d6897e9ed826061cf20a5ae60ef685
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

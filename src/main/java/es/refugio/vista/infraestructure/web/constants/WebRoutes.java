@@ -17,6 +17,7 @@ public interface WebRoutes {
 
     // ADOPTANTES
     public static final String adoptantes_MODAL_CONVERTIR = "/web/adoptantes/modal-convertir";
+    public static final String adoptantes_CONVERTIR_Y_SOLICITAR = "/web/adoptantes/convertir-y-solicitar";
 
     // VOLUNTARIOS
     public static final String voluntarios_BASE = "/web/voluntarios";
