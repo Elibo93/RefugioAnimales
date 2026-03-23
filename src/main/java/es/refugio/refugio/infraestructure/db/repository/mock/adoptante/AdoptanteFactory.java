@@ -7,6 +7,7 @@ import java.util.Map;
 
 import es.refugio.refugio.domain.model.adoptante.Adoptante;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
+import es.refugio.refugio.domain.model.adoptante.enums.EstadoValidacion;
 
 public class AdoptanteFactory {
 
@@ -19,7 +20,7 @@ public class AdoptanteFactory {
                         .usuarioId(1)
                         .dni("12345678A")
                         .direccion("Calle Falsa 123, Madrid")
-                        .estadoValidacion("aprobado")
+                        .estadoValidacion(EstadoValidacion.APROBADO)
                         .fechaRegistro(LocalDateTime.of(2025, 1, 10, 10, 0))
                         .solicitudesIds(new ArrayList<>())
                         .adopcionesIds(new ArrayList<>())
@@ -31,7 +32,7 @@ public class AdoptanteFactory {
                         .usuarioId(2)
                         .dni("87654321B")
                         .direccion("Avenida Siempre Viva 742, Barcelona")
-                        .estadoValidacion("pendiente")
+                        .estadoValidacion(EstadoValidacion.PENDIENTE)
                         .fechaRegistro(LocalDateTime.of(2025, 2, 11, 11, 30))
                         .solicitudesIds(new ArrayList<>())
                         .adopcionesIds(new ArrayList<>())
@@ -43,7 +44,7 @@ public class AdoptanteFactory {
                         .usuarioId(3)
                         .dni("44556677C")
                         .direccion("Plaza Mayor 1, Sevilla")
-                        .estadoValidacion("rechazado")
+                        .estadoValidacion(EstadoValidacion.RECHAZADO)
                         .fechaRegistro(LocalDateTime.of(2025, 2, 12, 0, 0))
                         .solicitudesIds(new ArrayList<>())
                         .adopcionesIds(new ArrayList<>())
@@ -58,7 +59,7 @@ public class AdoptanteFactory {
                 .usuarioId(99)
                 .dni("00000000Z")
                 .direccion("Dirección de prueba")
-                .estadoValidacion("pendiente")
+                .estadoValidacion(EstadoValidacion.PENDIENTE)
                 .fechaRegistro(LocalDateTime.now())
                 .solicitudesIds(new ArrayList<>())
                 .adopcionesIds(new ArrayList<>())

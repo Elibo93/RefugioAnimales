@@ -36,9 +36,16 @@ import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.domain.model.animal.AnimalId;
 import es.refugio.refugio.domain.model.solicitud_adopcion.SolicitudAdopcion;
 import es.refugio.refugio.domain.model.solicitud_adopcion.SolicitudAdopcionId;
+import es.refugio.refugio.infraestructure.mapper.AdopcionMapper;
 import es.refugio.refugio.infraestructure.mapper.SolicitudAdopcionMapper;
+import es.refugio.refugio.infraestructure.web.dto.adopcion.AdopcionResponse;
 import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.SolicitudAdopcionRequest;
 import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.SolicitudAdopcionResponse;
+
+
+
+import es.refugio.refugio.application.service.solicitud_adopcion.AprobarSolicitudAdopcionService;
+import es.refugio.refugio.application.service.solicitud_adopcion.RechazarSolicitudAdopcionService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -57,6 +64,8 @@ public class SolicitudAdopcionController {
     private final FindSolicitudAdopcionService findSolicitudAdopcionService;
     private final EditSolicitudAdopcionService editSolicitudAdopcionService;
     private final DeleteSolicitudAdopcionService deleteSolicitudAdopcionService;
+    private final AprobarSolicitudAdopcionService aprobarSolicitudAdopcionService;
+    private final RechazarSolicitudAdopcionService rechazarSolicitudAdopcionService;
     private final UserRepository userRepository;
     private final FindAdoptanteService findAdoptanteService;
 
@@ -87,6 +96,25 @@ public class SolicitudAdopcionController {
 
         EditSolicitudAdopcionCommand command = SolicitudAdopcionMapper.toCommand(id, request);
         SolicitudAdopcion solicitud = editSolicitudAdopcionService.update(command);
+        return ResponseEntity.ok(SolicitudAdopcionMapper.toResponse(solicitud));
+    }
+
+    @Operation(summary = "Aprobar solicitud de adopción", description = "Aprueba una solicitud pendiente, actualizando el animal a RESERVADO, el adoptante a APROBADO y creando la Adopción.")
+    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Solicitud aprobada y Adopción creada"), @ApiResponse(responseCode = "400", description = "Estado inválido") })
+    @PostMapping("/{id}/aprobar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
+    public ResponseEntity<AdopcionResponse> aprobarSolicitud(@PathVariable Integer id) {
+        var adopcion = aprobarSolicitudAdopcionService.aprobar(new SolicitudAdopcionId(id));
+        return ResponseEntity.status(HttpStatus.CREATED).body(AdopcionMapper.toResponse(adopcion));
+    }
+
+    @Operation(summary = "Rechazar solicitud de adopción", description = "Rechaza una solicitud pendiente, marcando a su vez al adoptante como RECHAZADO.")
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Solicitud rechazada"), @ApiResponse(responseCode = "400", description = "Estado inválido") })
+    @PostMapping("/{id}/rechazar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
+    public ResponseEntity<SolicitudAdopcionResponse> rechazarSolicitud(@PathVariable Integer id, @RequestBody(required = false) Map<String, String> body) {
+        String comentario = (body != null && body.containsKey("comentario")) ? body.get("comentario") : null;
+        var solicitud = rechazarSolicitudAdopcionService.rechazar(new SolicitudAdopcionId(id), comentario);
         return ResponseEntity.ok(SolicitudAdopcionMapper.toResponse(solicitud));
     }
 

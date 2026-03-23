@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import es.refugio.refugio.application.command.adoptante.CreateAdoptanteCommand;
 import es.refugio.refugio.domain.model.adoptante.Adoptante;
+import es.refugio.refugio.domain.model.adoptante.enums.EstadoValidacion;
 import es.refugio.refugio.domain.repository.AdoptanteRepository;
 
 @AllArgsConstructor
@@ -18,7 +19,8 @@ public class CreateAdoptanteUseCase {
                 .dni(comando.dni())
                 .direccion(comando.direccion())
                 .fechaNacimiento(comando.fechaNacimiento())
-                .estadoValidacion("PENDIENTE") 
+                .estadoValidacion(EstadoValidacion.PENDIENTE) 
+
                 .fechaRegistro(LocalDateTime.now())
                 .solicitudesIds(new ArrayList<>())
                 .adopcionesIds(new ArrayList<>())

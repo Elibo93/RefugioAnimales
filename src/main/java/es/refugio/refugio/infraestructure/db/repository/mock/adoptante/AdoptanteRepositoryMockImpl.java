@@ -77,7 +77,7 @@ public class AdoptanteRepositoryMockImpl implements AdoptanteRepository {
     public List<Adoptante> getByEstado(String estado) {
         List<Adoptante> result = new ArrayList<>();
         for (Adoptante a : adoptantes.values()) {
-            if (a.getEstadoValidacion().equalsIgnoreCase(estado)) {
+            if (a.getEstadoValidacion() != null && a.getEstadoValidacion().name().equalsIgnoreCase(estado)) {
                 result.add(a);
             }
         }

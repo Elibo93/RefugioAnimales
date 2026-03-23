@@ -15,6 +15,6 @@ public record AdoptanteRequest(
                 t.getDni(),
                 t.getDireccion(),
                 t.getFechaNacimiento(),
-                t.getEstadoValidacion());
+                t.getEstadoValidacion() != null ? t.getEstadoValidacion().name() : null);
     }
-}
+}

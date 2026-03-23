@@ -46,6 +46,11 @@ public class AdopcionEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private AnimalEntity animal;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "solicitud_adopcion_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    private SolicitudAdopcionEntity solicitudAdopcion;
+
     @Column(name = "fecha_adopcion", nullable = false)
     private LocalDateTime fechaAdopcion;
 

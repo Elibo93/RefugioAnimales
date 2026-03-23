@@ -16,6 +16,7 @@ public class Adopcion {
     private AdopcionId id;
     private AdoptanteId adoptanteId;
     private AnimalId animalId;
+    private Integer solicitudAdopcionId;
     private LocalDateTime fechaAdopcion;
     private EstadoAdopcion estado;
     private String contrato;

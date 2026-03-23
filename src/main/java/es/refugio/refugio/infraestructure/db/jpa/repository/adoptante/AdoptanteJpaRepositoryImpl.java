@@ -10,10 +10,8 @@ import es.refugio.refugio.domain.repository.AdoptanteRepository;
 import es.refugio.refugio.infraestructure.db.jpa.entity.AdoptanteEntity;
 import es.refugio.refugio.infraestructure.mapper.AdoptanteMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
-@Component
 public class AdoptanteJpaRepositoryImpl implements AdoptanteRepository {
 
     private final AdoptanteEntityJpaRepository repository;

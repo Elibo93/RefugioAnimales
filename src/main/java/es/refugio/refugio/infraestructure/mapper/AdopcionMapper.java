@@ -41,6 +41,7 @@ public class AdopcionMapper {
                 a.getId() != null ? a.getId().getValue() : null,
                 a.getAnimalId() != null ? a.getAnimalId().getValue() : null,
                 a.getAdoptanteId() != null ? a.getAdoptanteId().getValue() : null,
+                // Si tienes un Dto nuevo que soporte la solicitud, añadelo, si no el Request se queda igual
                 a.getFechaAdopcion(),
                 a.getEstado() != null ? a.getEstado().name() : null,
                 a.getContrato());
@@ -57,10 +58,18 @@ public class AdopcionMapper {
             adoptanteEntity = AdoptanteEntity.builder().id(a.getAdoptanteId().getValue()).build();
         }
 
+        es.refugio.refugio.infraestructure.db.jpa.entity.SolicitudAdopcionEntity solicitudEntity = null;
+        if (a.getSolicitudAdopcionId() != null) {
+            solicitudEntity = es.refugio.refugio.infraestructure.db.jpa.entity.SolicitudAdopcionEntity.builder()
+                .id(a.getSolicitudAdopcionId())
+                .build();
+        }
+
         return AdopcionEntity.builder()
                 .id(a.getId() != null ? a.getId().getValue() : null)
                 .animal(animalEntity)
                 .adoptante(adoptanteEntity)
+                .solicitudAdopcion(solicitudEntity)
                 .fechaAdopcion(a.getFechaAdopcion())
                 .estado(a.getEstado())
                 .contrato(a.getContrato())
@@ -72,6 +81,7 @@ public class AdopcionMapper {
                 .id(e.getId() != null ? new AdopcionId(e.getId()) : null)
                 .animalId(e.getAnimal() != null ? new AnimalId(e.getAnimal().getId()) : null)
                 .adoptanteId(e.getAdoptante() != null ? new AdoptanteId(e.getAdoptante().getId()) : null)
+                .solicitudAdopcionId(e.getSolicitudAdopcion() != null ? e.getSolicitudAdopcion().getId() : null)
                 .fechaAdopcion(e.getFechaAdopcion())
                 .estado(e.getEstado())
                 .contrato(e.getContrato())

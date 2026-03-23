@@ -95,11 +95,10 @@ public class SolicitudAdopcionViewController {
     @PostMapping(WebRoutes.solicitudes_NUEVA)
     public String crear(@RequestParam Integer animalId,
                         @RequestParam Integer adoptanteId,
-                        @RequestParam String estado,
                         @RequestParam String comentario,
                         RedirectAttributes redirectAttributes) {
 
-        createSolicitudAdopcionService.create(new CreateSolicitudAdopcionCommand(animalId, adoptanteId, LocalDateTime.now(), estado, comentario));
+        createSolicitudAdopcionService.create(new CreateSolicitudAdopcionCommand(animalId, adoptanteId, LocalDateTime.now(), comentario));
         redirectAttributes.addFlashAttribute("successMessage", "Solicitud de adopción registrada correctamente");
         return "redirect:" + WebRoutes.solicitudes_BASE;
     }

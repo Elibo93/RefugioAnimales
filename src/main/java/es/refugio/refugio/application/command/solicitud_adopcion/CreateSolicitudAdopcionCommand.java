@@ -6,7 +6,6 @@ public record CreateSolicitudAdopcionCommand(
         Integer animalId,
         Integer adoptanteId,
         LocalDateTime fecha,
-        String estado,
         String comentario
 ) {
 }

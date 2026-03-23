@@ -7,6 +7,8 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import es.refugio.refugio.domain.model.adoptante.enums.EstadoValidacion;
+
 @Data
 @AllArgsConstructor
 @Builder
@@ -18,7 +20,7 @@ public class Adoptante {
     private String nombre;
     private String direccion;
     private String fechaNacimiento;
-    private String estadoValidacion; // "PENDIENTE", "APROBADO", "RECHAZADO"
+    private EstadoValidacion estadoValidacion;
     // Relaciones (IDs de las entidades relacionadas)
     private LocalDateTime fechaRegistro;
     private List<Integer> solicitudesIds;

@@ -14,13 +14,12 @@ public class CreateSolicitudAdopcionUseCase {
     private final SolicitudAdopcionRepository solicitudAdopcionRepository;
 
     public SolicitudAdopcion create(CreateSolicitudAdopcionCommand command) {
-        EstadoSolicitud estadoEnum = EstadoSolicitud.valueOf(command.estado().toUpperCase());
         
         SolicitudAdopcion solicitud = SolicitudAdopcion.builder()
                 .animalId(new AnimalId(command.animalId()))
                 .adoptanteId(new AdoptanteId(command.adoptanteId()))
-                .fecha(command.fecha())
-                .estado(estadoEnum)
+                .fecha(command.fecha() != null ? command.fecha() : java.time.LocalDateTime.now())
+                .estado(EstadoSolicitud.PENDIENTE)
                 .comentario(command.comentario())
                 .build();
                 

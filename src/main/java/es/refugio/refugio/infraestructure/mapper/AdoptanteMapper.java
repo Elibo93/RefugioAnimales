@@ -7,6 +7,7 @@ import es.refugio.refugio.application.command.adoptante.CreateAdoptanteCommand;
 import es.refugio.refugio.application.command.adoptante.EditAdoptanteCommand;
 import es.refugio.refugio.domain.model.adoptante.Adoptante;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
+import es.refugio.refugio.domain.model.adoptante.enums.EstadoValidacion;
 import es.refugio.refugio.infraestructure.db.jpa.entity.AdoptanteEntity;
 import es.refugio.refugio.infraestructure.db.jpa.entity.UsuarioEntity;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteRequest;
@@ -38,7 +39,7 @@ public class AdoptanteMapper {
                 adoptante.getDni(),
                 adoptante.getDireccion(),
                 adoptante.getFechaNacimiento(),
-                adoptante.getEstadoValidacion(),
+                adoptante.getEstadoValidacion() != null ? adoptante.getEstadoValidacion().name() : null,
                 adoptante.getFechaRegistro());
     }
 
@@ -48,7 +49,7 @@ public class AdoptanteMapper {
                 .dni(t.getDni())
                 .direccion(t.getDireccion())
                 .fechaNacimiento(t.getFechaNacimiento())
-                .estadoValidacion(t.getEstadoValidacion())
+                .estadoValidacion(t.getEstadoValidacion() != null ? t.getEstadoValidacion().name() : null)
                 .fechaRegistro(t.getFechaRegistro())
                 .usuario(UsuarioEntity.builder().id(t.getUsuarioId()).build())
                 .build();
@@ -61,7 +62,7 @@ public class AdoptanteMapper {
                 .dni(e.getDni())
                 .direccion(e.getDireccion())
                 .fechaNacimiento(e.getFechaNacimiento())
-                .estadoValidacion(e.getEstadoValidacion())
+                .estadoValidacion(e.getEstadoValidacion() != null ? EstadoValidacion.valueOf(e.getEstadoValidacion().toUpperCase()) : null)
                 .fechaRegistro(e.getFechaRegistro())
                 .build();
     }
