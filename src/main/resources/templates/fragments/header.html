@@ -8,6 +8,13 @@
     <div class="header-banner" th:classappend="${!showBack} ? 'hero-header' : ''"></div>
     <div class="header-container">
         <div class="header-left">
+            <!-- Sidebar Toggle Button (Now on the left) -->
+            <button id="open-sidebar" class="sidebar-toggle-btn" title="Menú de usuario">
+                <i data-lucide="menu" sec:authorize="!isAuthenticated()"></i>
+                <i data-lucide="user" sec:authorize="isAuthenticated()"></i>
+                <i data-lucide="chevron-right" class="toggle-arrow"></i>
+            </button>
+
             <a th:if="${showBack}" th:href="@{/web/home}" class="back-link" title="Volver">
                 <i data-lucide="arrow-left" class="back-arrow" style="width:20px;"></i>
             </a>
@@ -18,13 +25,7 @@
             </div>
         </div>
         <div class="header-right">
-            <!-- Sidebar Toggle Button -->
-            <button id="open-sidebar" class="sidebar-toggle-btn" title="Menú de usuario">
-                <i data-lucide="user" sec:authorize="isAuthenticated()"></i>
-                <i data-lucide="menu" sec:authorize="!isAuthenticated()"></i>
-                <span class="user-name-header" sec:authorize="isAuthenticated()" sec:authentication="name">User</span>
-                <i data-lucide="chevron-left" class="toggle-arrow"></i>
-            </button>
+            <!-- empty for now or placeholders -->
         </div>
     </div>
 </header>

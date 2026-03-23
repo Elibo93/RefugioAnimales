@@ -86,19 +86,19 @@
             <div class="sidebar-section">
                 <h3 class="section-title">Idioma / Language</h3>
                 <div class="lang-selector-grid">
-                    <a th:href="@{${currentPageUri}(lang=es)}" class="lang-option" th:classappend="${#locale.language == 'es'} ? 'active' : ''">
+                    <a th:href="@{${currentPage}(lang=es)}" class="lang-option" th:classappend="${#locale.language == 'es'} ? 'active' : ''">
                         <span class="flag">🇪🇸</span>
                         <span>Español</span>
                     </a>
-                    <a th:href="@{${currentPageUri}(lang=en)}" class="lang-option" th:classappend="${#locale.language == 'en'} ? 'active' : ''">
+                    <a th:href="@{${currentPage}(lang=en)}" class="lang-option" th:classappend="${#locale.language == 'en'} ? 'active' : ''">
                         <span class="flag">🇬🇧</span>
                         <span>English</span>
                     </a>
-                    <a th:href="@{${currentPageUri}(lang=ar)}" class="lang-option" th:classappend="${#locale.language == 'ar'} ? 'active' : ''">
+                    <a th:href="@{${currentPage}(lang=ar)}" class="lang-option" th:classappend="${#locale.language == 'ar'} ? 'active' : ''">
                         <span class="flag">🇲🇦</span>
                         <span>العربية</span>
                     </a>
-                    <a th:href="@{${currentPageUri}(lang=it)}" class="lang-option" th:classappend="${#locale.language == 'it'} ? 'active' : ''">
+                    <a th:href="@{${currentPage}(lang=it)}" class="lang-option" th:classappend="${#locale.language == 'it'} ? 'active' : ''">
                         <span class="flag">🇮🇹</span>
                         <span>Italiano</span>
                     </a>
