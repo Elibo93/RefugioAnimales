@@ -1,0 +1,58 @@
+databaseChangeLog:
+  - changeSet:
+      id: 013-reseed-animals-complete
+      author: refugio
+      changes:
+        - sql:
+            dbms: mysql
+            sql: |
+              -- Re-insertar animales que falten y actualizar los existentes
+              INSERT INTO animales (id, nombre, especie, raza, sexo, chip_id, estado, edad, tamano, descripcion, foto, fecha_ingreso, peso, nivel_energia, urgencia)
+              VALUES 
+              (1, 'Luna', 'PERRO', 'Labrador', 'HEMBRA', 'CHIP001', 'DISPONIBLE', 3, 'MEDIANO', 'Perrita muy cariñosa', 'https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=800', NOW(), 25.5, 3, 0)
+              ON DUPLICATE KEY UPDATE foto=VALUES(foto), peso=VALUES(peso), nivel_energia=VALUES(nivel_energia), urgencia=VALUES(urgencia);
+
+              INSERT INTO animales (id, nombre, especie, raza, sexo, chip_id, estado, edad, tamano, descripcion, foto, fecha_ingreso, peso, nivel_energia, urgencia)
+              VALUES 
+              (2, 'Simba', 'GATO', 'Común Europeo', 'MACHO', 'CHIP002', 'DISPONIBLE', 2, 'PEQUEÑO', 'Gato dormilón', 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=800', NOW(), 4.2, 2, 0)
+              ON DUPLICATE KEY UPDATE foto=VALUES(foto), peso=VALUES(peso), nivel_energia=VALUES(nivel_energia), urgencia=VALUES(urgencia);
+
+              INSERT INTO animales (id, nombre, especie, raza, sexo, chip_id, estado, edad, tamano, descripcion, foto, fecha_ingreso, peso, nivel_energia, urgencia)
+              VALUES 
+              (3, 'Rex', 'PERRO', 'Pastor Alemán', 'MACHO', 'CHIP003', 'EN_TRATAMIENTO', 5, 'GRANDE', 'Buen guardián, pero necesita medicación', 'https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?q=80&w=800', NOW(), 32.0, 4, 1)
+              ON DUPLICATE KEY UPDATE foto=VALUES(foto), peso=VALUES(peso), nivel_energia=VALUES(nivel_energia), urgencia=VALUES(urgencia);
+
+              INSERT INTO animales (id, nombre, especie, raza, sexo, chip_id, estado, edad, tamano, descripcion, foto, fecha_ingreso, peso, nivel_energia, urgencia)
+              VALUES 
+              (4, 'Bella', 'PERRO', 'Galgo', 'HEMBRA', 'CHIP004', 'DISPONIBLE', 4, 'GRANDE', 'Corre muy rápido', 'https://images.unsplash.com/photo-1510771463146-e89e6e86560e?q=80&w=800', NOW(), 22.1, 5, 0)
+              ON DUPLICATE KEY UPDATE foto=VALUES(foto), peso=VALUES(peso), nivel_energia=VALUES(nivel_energia), urgencia=VALUES(urgencia);
+
+              INSERT INTO animales (id, nombre, especie, raza, sexo, chip_id, estado, edad, tamano, descripcion, foto, fecha_ingreso, peso, nivel_energia, urgencia)
+              VALUES 
+              (5, 'Nala', 'GATO', 'Siamés', 'HEMBRA', 'CHIP005', 'ADOPTADO', 1, 'PEQUEÑO', 'Muy curiosa e inteligente', 'https://images.unsplash.com/photo-1513245543132-31f507417b26?q=80&w=800', NOW(), 3.5, 3, 0)
+              ON DUPLICATE KEY UPDATE foto=VALUES(foto), peso=VALUES(peso), nivel_energia=VALUES(nivel_energia), urgencia=VALUES(urgencia);
+
+              INSERT INTO animales (id, nombre, especie, raza, sexo, chip_id, estado, edad, tamano, descripcion, foto, fecha_ingreso, peso, nivel_energia, urgencia)
+              VALUES 
+              (6, 'Thor', 'PERRO', 'Husky', 'MACHO', 'CHIP006', 'DISPONIBLE', 3, 'GRANDE', 'Le encanta la nieve y jugar', 'https://images.unsplash.com/photo-1537151625747-7ae8a03a4bc2?q=80&w=800', NOW(), 28.0, 5, 0)
+              ON DUPLICATE KEY UPDATE foto=VALUES(foto), peso=VALUES(peso), nivel_energia=VALUES(nivel_energia), urgencia=VALUES(urgencia);
+
+              INSERT INTO animales (id, nombre, especie, raza, sexo, chip_id, estado, edad, tamano, descripcion, foto, fecha_ingreso, peso, nivel_energia, urgencia)
+              VALUES 
+              (7, 'Milo', 'GATO', 'Persa', 'MACHO', 'CHIP007', 'DISPONIBLE', 4, 'MEDIANO', 'Tranquilo y mimoso', 'https://images.unsplash.com/photo-1557246565-8a3d3abfa5fc?q=80&w=800', NOW(), 5.8, 1, 0)
+              ON DUPLICATE KEY UPDATE foto=VALUES(foto), peso=VALUES(peso), nivel_energia=VALUES(nivel_energia), urgencia=VALUES(urgencia);
+
+              INSERT INTO animales (id, nombre, especie, raza, sexo, chip_id, estado, edad, tamano, descripcion, foto, fecha_ingreso, peso, nivel_energia, urgencia)
+              VALUES 
+              (8, 'Kira', 'PERRO', 'Border Collie', 'HEMBRA', 'CHIP008', 'RESERVADO', 2, 'MEDIANO', 'Muy inteligente y activa', 'https://images.unsplash.com/photo-1503256207526-0d5d80fa2f47?q=80&w=800', NOW(), 18.5, 5, 1)
+              ON DUPLICATE KEY UPDATE foto=VALUES(foto), peso=VALUES(peso), nivel_energia=VALUES(nivel_energia), urgencia=VALUES(urgencia);
+
+              INSERT INTO animales (id, nombre, especie, raza, sexo, chip_id, estado, edad, tamano, descripcion, foto, fecha_ingreso, peso, nivel_energia, urgencia)
+              VALUES 
+              (9, 'Coco', 'OTRO', 'Belier', 'HEMBRA', 'CHIP009', 'DISPONIBLE', 1, 'PEQUEÑO', 'Le encantan las zanahorias', 'https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?q=80&w=800', NOW(), 1.5, 2, 0)
+              ON DUPLICATE KEY UPDATE foto=VALUES(foto), peso=VALUES(peso), nivel_energia=VALUES(nivel_energia), urgencia=VALUES(urgencia);
+
+              INSERT INTO animales (id, nombre, especie, raza, sexo, chip_id, estado, edad, tamano, descripcion, foto, fecha_ingreso, peso, nivel_energia, urgencia)
+              VALUES 
+              (10, 'Rocky', 'PERRO', 'Boxer', 'MACHO', 'CHIP010', 'EN_TRATAMIENTO', 6, 'GRANDE', 'Fuerte pero con problemas articulares', 'https://images.unsplash.com/photo-1504595403659-9088ce801e29?q=80&w=800', NOW(), 23.0, 3, 0)
+              ON DUPLICATE KEY UPDATE foto=VALUES(foto), peso=VALUES(peso), nivel_energia=VALUES(nivel_energia), urgencia=VALUES(urgencia);

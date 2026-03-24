@@ -1,0 +1,90 @@
+databaseChangeLog:
+  - changeSet:
+      id: 012-update-animal-seed-data
+      author: refugio
+      changes:
+        # Luna
+        - update:
+            tableName: animales
+            columns:
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=800" }
+              - column: { name: peso, valueNumeric: 25.5 }
+              - column: { name: nivel_energia, valueNumeric: 3 }
+              - column: { name: urgencia, valueBoolean: false }
+            where: "id = 1"
+        # Simba
+        - update:
+            tableName: animales
+            columns:
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=800" }
+              - column: { name: peso, valueNumeric: 4.2 }
+              - column: { name: nivel_energia, valueNumeric: 2 }
+              - column: { name: urgencia, valueBoolean: false }
+            where: "id = 2"
+        # Rex
+        - update:
+            tableName: animales
+            columns:
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?q=80&w=800" }
+              - column: { name: peso, valueNumeric: 32.0 }
+              - column: { name: nivel_energia, valueNumeric: 4 }
+              - column: { name: urgencia, valueBoolean: true }
+            where: "id = 3"
+        # Bella
+        - update:
+            tableName: animales
+            columns:
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1510771463146-e89e6e86560e?q=80&w=800" }
+              - column: { name: peso, valueNumeric: 22.1 }
+              - column: { name: nivel_energia, valueNumeric: 5 }
+              - column: { name: urgencia, valueBoolean: false }
+            where: "id = 4"
+        # Nala
+        - update:
+            tableName: animales
+            columns:
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1513245543132-31f507417b26?q=80&w=800" }
+              - column: { name: peso, valueNumeric: 3.5 }
+              - column: { name: nivel_energia, valueNumeric: 3 }
+            where: "id = 5"
+        # Thor
+        - update:
+            tableName: animales
+            columns:
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1537151625747-7ae8a03a4bc2?q=80&w=800" }
+              - column: { name: peso, valueNumeric: 28.0 }
+              - column: { name: nivel_energia, valueNumeric: 5 }
+            where: "id = 6"
+        # Milo
+        - update:
+            tableName: animales
+            columns:
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1557246565-8a3d3abfa5fc?q=80&w=800" }
+              - column: { name: peso, valueNumeric: 5.8 }
+              - column: { name: nivel_energia, valueNumeric: 1 }
+            where: "id = 7"
+        # Kira
+        - update:
+            tableName: animales
+            columns:
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1503256207526-0d5d80fa2f47?q=80&w=800" }
+              - column: { name: peso, valueNumeric: 18.5 }
+              - column: { name: nivel_energia, valueNumeric: 5 }
+              - column: { name: urgencia, valueBoolean: true }
+            where: "id = 8"
+        # Coco
+        - update:
+            tableName: animales
+            columns:
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?q=80&w=800" }
+              - column: { name: peso, valueNumeric: 1.5 }
+              - column: { name: nivel_energia, valueNumeric: 2 }
+            where: "id = 9"
+        # Rocky
+        - update:
+            tableName: animales
+            columns:
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1504595403659-9088ce801e29?q=80&w=800" }
+              - column: { name: peso, valueNumeric: 23.0 }
+              - column: { name: nivel_energia, valueNumeric: 3 }
+            where: "id = 10"

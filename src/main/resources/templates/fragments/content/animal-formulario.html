@@ -65,6 +65,27 @@
                     <input type="text" th:field="*{tamano}">
                 </div>
 
+                <div class="form-group">
+                    <label>Peso (kg)</label>
+                    <input type="number" step="0.1" th:field="*{peso}">
+                </div>
+
+                <div class="form-group">
+                    <label>Nivel de Energía (1-5)</label>
+                    <select th:field="*{nivelEnergia}">
+                        <option value="1">1 - Muy Bajo</option>
+                        <option value="2">2 - Bajo</option>
+                        <option value="3">3 - Medio</option>
+                        <option value="4">4 - Alto</option>
+                        <option value="5">5 - Muy Alto</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px; padding-top: 1.5rem;">
+                    <input type="checkbox" th:field="*{urgencia}" style="width: auto;">
+                    <label style="margin: 0;">¿Es adopción urgente? 🔥</label>
+                </div>
+
                 <div class="form-group" style="grid-column:1/-1;">
                     <label th:text="#{animal.field.foto}">URL Foto</label>
                     <input type="text" th:field="*{foto}">

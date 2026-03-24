@@ -24,4 +24,8 @@ public class FindAnimalService {
     public List<Animal> findByStatus(es.refugio.refugio.domain.model.animal.enums.EstadoAnimal status) {
         return findAnimalUseCase.findByEstado(status);
     }
+
+    public List<Animal> findFiltered(String especie, String tamano, java.util.List<String> edad, String sexo, Boolean urgencia) {
+        return findAnimalUseCase.findFiltered(especie, tamano, edad, sexo, urgencia);
+    }
 }

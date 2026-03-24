@@ -15,4 +15,6 @@ public interface AnimalRepository extends CRUDRepository<Animal, AnimalId> {
     List<Animal> getByEstado(EstadoAnimal estado);
 
     List<Animal> getByEspecie(Especie especie);
+
+    List<Animal> findFiltered(String especie, String tamano, java.util.List<String> edad, String sexo, Boolean urgencia);
 }

@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 011-add-animal-fields
+      author: refugio
+      changes:
+        - addColumn:
+            tableName: animales
+            columns:
+              - column:
+                  name: peso
+                  type: DOUBLE
+              - column:
+                  name: nivel_energia
+                  type: INT
+              - column:
+                  name: urgencia
+                  type: BIT
+                  defaultValueBoolean: false

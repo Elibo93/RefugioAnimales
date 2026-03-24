@@ -15,9 +15,12 @@ public record AnimalRequest(
         String tamano,
         String descripcion,
         String foto,
-        LocalDate fechaIngreso
+        LocalDate fechaIngreso,
+        Double peso,
+        Integer nivelEnergia,
+        Boolean urgencia
 ) {
-
+    
     public AnimalRequest(Animal t) {
         this(
                 t.getNombre(),
@@ -31,7 +34,10 @@ public record AnimalRequest(
                 t.getTamano() != null ? t.getTamano().name() : null,
                 t.getDescripcion(),
                 t.getFoto(),
-                t.getFechaIngreso() != null ? t.getFechaIngreso().toLocalDate() : null
+                t.getFechaIngreso() != null ? t.getFechaIngreso().toLocalDate() : null,
+                t.getPeso(),
+                t.getNivelEnergia(),
+                t.getUrgencia()
         );
     }
 }

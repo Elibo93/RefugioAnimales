@@ -28,6 +28,9 @@ public class Animal {
     private EstadoAnimal estado;
     private String descripcion;
     private String foto;
+    private Double peso;
+    private Integer nivelEnergia;
+    private Boolean urgencia;
     private LocalDateTime fechaIngreso;
 
 }

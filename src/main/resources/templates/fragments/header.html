@@ -15,18 +15,18 @@
                 <i data-lucide="chevron-right" class="toggle-arrow"></i>
             </button>
 
-            <a th:if="${showBack}" th:href="@{/web/home}" class="back-link" title="Volver">
+            <a th:if="${showBack}" href="javascript:history.back()" class="back-link" title="Volver">
                 <i data-lucide="arrow-left" class="back-arrow" style="width:20px;"></i>
             </a>
             
             <!-- Brand Pill for visibility -->
-            <div class="app-brand-pill">
+            <a th:href="@{/web/home}" class="app-brand-pill" style="text-decoration: none; color: inherit;">
                 <img th:src="@{/images/logo-Refugio.png}" class="app-logo">
                 <div class="app-brand">
                     <span class="app-name" th:text="#{app.name}">Refugio</span>
                     <span class="app-subtitle" th:text="#{app.subtitle}">Gestión</span>
                 </div>
-            </div>
+            </a>
         </div>
         <div class="header-right">
             <!-- empty for now or placeholders -->

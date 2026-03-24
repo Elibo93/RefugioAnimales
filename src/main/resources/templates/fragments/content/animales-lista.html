@@ -8,124 +8,158 @@
 <body>
 
 <div th:fragment="content">
+    <div class="animal-catalog-layout">
+        <!-- Sidebar Filters -->
+        <aside class="filter-sidebar glass-card">
+            <form hx-get="/web/animales" hx-target="#contenido-dinamico" hx-trigger="change, input delay:300ms" hx-push-url="true">
+                <div class="filter-group">
+                    <span class="filter-label" th:text="#{animal.filter.species}">Especie</span>
+                    <select name="especie" class="form-select">
+                        <option value="" th:selected="${selectedEspecie == null or selectedEspecie == ''}" th:text="#{animal.filter.any}">Cualquiera</option>
+                        <option value="PERRO" th:selected="${selectedEspecie == 'PERRO'}" th:text="#{animal.species.dog}">Perro</option>
+                        <option value="GATO" th:selected="${selectedEspecie == 'GATO'}" th:text="#{animal.species.cat}">Gato</option>
+                    </select>
+                </div>
 
-    <div class="actions-bar">
-        <h2 class="page-title" th:text="#{enrollment.filter.workshop.all}">Animales</h2>
+                <div class="filter-group" style="margin-top: 1rem;">
+                    <span class="filter-label" th:text="#{animal.filter.size}">Tamaño</span>
+                    <select name="tamano" class="form-select">
+                        <option value="" th:selected="${selectedTamano == null or selectedTamano == ''}" th:text="#{animal.filter.any}">Cualquiera</option>
+                        <option value="PEQUEÑO" th:selected="${selectedTamano == 'PEQUEÑO'}" th:text="#{animal.size.small}">Pequeño</option>
+                        <option value="MEDIANO" th:selected="${selectedTamano == 'MEDIANO'}" th:text="#{animal.size.medium}">Mediano</option>
+                        <option value="GRANDE" th:selected="${selectedTamano == 'GRANDE'}" th:text="#{animal.size.large}">Grande</option>
+                    </select>
+                </div>
 
-        <div class="filters-container" style="display:flex; gap:15px; align-items:center;">
-            <select name="estado" 
-                    hx-get="/web/animales" 
-                    hx-target="#contenido-dinamico" 
-                    hx-push-url="true"
-                    hx-trigger="change"
-                    class="form-select"
-                    style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main); cursor: pointer;">
-                <option value="" th:selected="${selectedEstado == null}" th:text="#{animal.filter.all}">Todos los animales</option>
-                <option value="DISPONIBLE" th:selected="${#strings.toString(selectedEstado) == 'DISPONIBLE'}" th:text="#{animal.status.available}">Disponibles</option>
-                <option value="RESERVADO" th:selected="${#strings.toString(selectedEstado) == 'RESERVADO'}" th:text="#{animal.status.reserved}">Reservados</option>
-                <option value="EN_TRATAMIENTO" th:selected="${#strings.toString(selectedEstado) == 'EN_TRATAMIENTO'}" th:text="#{animal.status.treatment}">En tratamiento</option>
-                <option value="ADOPTADO" th:selected="${#strings.toString(selectedEstado) == 'ADOPTADO'}" th:text="#{animal.status.adopted}">Adoptados</option>
-            </select>
+                <div class="filter-group" style="margin-top: 1rem;">
+                    <span class="filter-label" th:text="#{animal.filter.age}">Edad</span>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label class="checkbox-container" style="font-size: 0.9rem;">
+                            <input type="checkbox" name="edad" value="cachorro" th:checked="${selectedEdad != null and selectedEdad.contains('cachorro')}"> 
+                            <span th:text="#{animal.age.puppy}">Cachorro</span>
+                        </label>
+                        <label class="checkbox-container" style="font-size: 0.9rem;">
+                            <input type="checkbox" name="edad" value="adulto" th:checked="${selectedEdad != null and selectedEdad.contains('adulto')}"> 
+                            <span th:text="#{animal.age.adult}">Adulto</span>
+                        </label>
+                        <label class="checkbox-container" style="font-size: 0.9rem;">
+                            <input type="checkbox" name="edad" value="senior" th:checked="${selectedEdad != null and selectedEdad.contains('senior')}"> 
+                            <span th:text="#{animal.age.senior}">Senior</span>
+                        </label>
+                    </div>
+                </div>
 
-            <div style="display:flex; gap:10px;" sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')">
-                <a class="btn btn-secondary" th:href="@{/web/animales/pdf}" target="_blank" th:text="#{generic.link.export.pdf}">
-                    Exportar PDF
+                <div class="filter-group" style="margin-top: 1rem;">
+                    <label class="checkbox-container" style="font-weight: 500;">
+                        <input type="checkbox" name="urgencia" value="true" th:checked="${selectedUrgencia == true}"> 
+                        <span th:text="#{animal.filter.urgency.only}">Solo urgentes 🔥</span>
+                    </label>
+                </div>
+            </form>
+
+            <div class="filter-group" style="margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2);">
+                <a class="btn btn-primary" th:href="@{/web/animales/nuevo}" sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')" style="width: 100%; justify-content: center;">
+                    <i data-lucide="plus"></i>
+                    <span th:text="#{generic.link.create}">Nuevo</span>
                 </a>
-
-                <a class="btn btn-primary" th:href="@{/web/animales/nuevo}">
-                    <i data-lucide="plus" style="width:18px;"></i>
-                    <span th:text="#{generic.link.create}">+ Nuevo animal</span>
+                <a class="btn btn-secondary" th:href="@{/web/animales/pdf}" target="_blank" style="width: 100%; justify-content: center; margin-top: 0.5rem;">
+                    <i data-lucide="download"></i>
+                    <span>PDF</span>
                 </a>
             </div>
+        </aside>
+
+        <!-- Main Content (Grid) -->
+        <div class="main-content-area" style="padding: 0; flex: 1;">
+            <div class="animals-grid" id="animal-grid">
+                <!-- Animal Card -->
+                <div th:each="a : ${animales}" class="animal-card-glass glass-card" th:id="'card-' + ${a.id.value}">
+                    <div class="card-img-container">
+                        <img th:src="${a.foto != null ? a.foto : '/images/placeholder-animal.png'}" alt="Animal">
+                        
+                        <!-- Status Badge -->
+                        <span class="status-badge" 
+                              th:classappend="${a.estado.toString() == 'DISPONIBLE' ? 'badge-available' : (a.estado.toString() == 'RESERVADO' ? 'badge-reserved' : 'badge-treatment')}"
+                              th:text="${a.estado}">
+                            Disponible
+                        </span>
+
+                        <!-- Hover Overlay -->
+                        <div class="card-info-overlay">
+                            <p style="font-size: 0.85rem; margin-bottom: 1rem;" th:text="${a.descripcion}">
+                                Una descripción breve del animal que se revela al pasar el ratón.
+                            </p>
+                            <button class="btn btn-primary" style="width: 100%; justify-content: center;"
+                                    th:attr="hx-get=@{/web/animales/{id}/detalle(id=${a.id.value})}"
+                                    hx-target="#modal-host" hx-swap="outerHTML">
+                                <i data-lucide="maximize-2"></i>
+                                <span th:text="#{animal.button.view.profile}">Conóceme</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card-body-glass">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 class="animal-name" th:text="${a.nombre}">Rocky</h3>
+                            <i th:data-lucide="${a.sexo.toString() == 'MACHO' ? 'mars' : 'venus'}" 
+                               th:style="${a.sexo.toString() == 'MACHO' ? 'color: #3B82F6' : 'color: #EC4899'}"></i>
+                        </div>
+
+                        <div class="quick-stats">
+                            <div class="stat-item">
+                                <i data-lucide="calendar"></i>
+                                <span th:text="${a.edad} + 'a'">2a</span>
+                                <span style="font-size: 0.6rem; opacity: 0.7;" th:text="#{animal.field.age}">Edad</span>
+                            </div>
+                            <div class="stat-item">
+                                <i data-lucide="weight"></i>
+                                <span th:text="${a.peso != null ? a.peso + 'kg' : '-'}">12kg</span>
+                                <span style="font-size: 0.6rem; opacity: 0.7;" th:text="#{animal.field.size}">Peso</span>
+                            </div>
+                            <div class="stat-item">
+                                <i data-lucide="zap"></i>
+                                <span th:text="${a.nivelEnergia != null ? a.nivelEnergia + '/5' : '-'}">4/5</span>
+                                <span style="font-size: 0.6rem; opacity: 0.7;" th:text="#{animal.field.energy}">Energía</span>
+                            </div>
+                        </div>
+
+                        <!-- Admin Actions (Mini) -->
+                        <div style="margin-top: auto; display: flex; gap: 0.5rem; justify-content: flex-end;" sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')">
+                            <a th:href="@{/web/animales/{id}/editar(id=${a.id.value})}" style="color: var(--text-muted); padding: 4px;">
+                                <i data-lucide="edit-2" style="width: 16px;"></i>
+                            </a>
+                            <button th:attr="hx-post=@{/web/animales/{id}/borrar(id=${a.id.value})}, hx-target='#card-' + ${a.id.value}" 
+                                    hx-swap="outerHTML swap:0.3s" hx-confirm="¿Eliminar?"
+                                    style="color: var(--danger); background: none; border: none; cursor: pointer; padding: 4px;">
+                                <i data-lucide="trash-2" style="width: 16px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(animales)}" class="glass-card" style="grid-column: 1/-1; padding: 5rem; text-align: center;">
+                    <i data-lucide="dog" style="width: 48px; height: 48px; opacity: 0.2; margin-bottom: 1rem;"></i>
+                    <p th:text="#{animal.list.empty}">No hay peludos hoy.</p>
+                </div>
+            </div>
+
+            <!-- Special Sections -->
+            <section class="special-section glass-card" th:if="${not #lists.isEmpty(animales)}">
+                <h2 style="font-weight: 800; margin-bottom: 2rem;">No te olvides de...</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <h4 style="color: var(--secondary); margin-bottom: 0.5rem;">🐾 Animales Senior</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Ellos también necesitan amor y un sofá cómodo donde descansar sus últimos años.</p>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--primary); margin-bottom: 0.5rem;">👻 Animales Invisibles</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Llevan más de un año con nosotros. ¿Serás tú quien cambie su suerte?</p>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
-
-    <div class="animal-grid" id="animal-grid">
-        <div th:each="a : ${animales}" 
-             class="animal-card" 
-             th:id="'card-' + ${a.id.value}">
-            
-            <div class="animal-image-wrapper">
-                <img th:if="${a.foto}" th:src="${a.foto}" class="animal-image" alt="Animal">
-                <img th:unless="${a.foto}" src="/images/placeholder-animal.png" class="animal-image" alt="Animal">
-                <span class="animal-status-badge" th:text="${a.estado}">Disponible</span>
-            </div>
-
-            <div class="animal-info">
-                <div class="animal-header">
-                    <h3 class="animal-name" th:text="${a.nombre}">Luna</h3>
-                </div>
-
-                <div class="animal-meta">
-                    <div class="meta-item">
-                        <i data-lucide="info" style="width:14px;"></i>
-                        <span th:text="${a.especie}">Perro</span>
-                    </div>
-                    <div class="meta-item">
-                        <i data-lucide="tag" style="width:14px;"></i>
-                        <span th:text="${a.raza}">Labrador</span>
-                    </div>
-                    <div class="meta-item">
-                        <i data-lucide="calendar" style="width:14px;"></i>
-                        <span th:text="${a.edad} + ' años'">3 años</span>
-                    </div>
-                </div>
-
-                <p class="animal-description" th:text="${a.descripcion}">Muy tranquila y cariñosa.</p>
-
-                <div class="animal-actions" th:if="${a.estado.toString() == 'DISPONIBLE' or a.estado.toString() == 'EN_TRATAMIENTO'}">
-                    
-                    <!-- Si el usuario no está autenticado, intentar ir a la solicitud (Spring los llevará al login y volverá aquí) -->
-                    <div sec:authorize="!isAuthenticated()">
-                        <a th:href="@{/web/solicitudes/nueva(animalId=${a.id.value})}" class="btn-adopt">
-                            <i data-lucide="heart" style="width: 18px; height: 18px; margin-right: 0.5rem;"></i>
-                            <span th:text="#{animal.button.adopt}">¡Adopta!</span>
-                        </a>
-                    </div>
-
-                    <!-- Si el usuario está autenticado pero no es adoptante, mostrar modal de conversión -->
-                    <div sec:authorize="hasRole('ROLE_PUBLICO')">
-                        <button class="btn-adopt"
-                                th:attr="hx-get=@{/web/adoptantes/modal-convertir(animalId=${a.id.value})}"
-                                hx-target="#modal-host" 
-                                hx-swap="outerHTML">
-                            <i data-lucide="heart" style="width: 18px; height: 18px; margin-right: 0.5rem;"></i>
-                            <span th:text="#{animal.button.adopt}">¡Adopta!</span>
-                        </button>
-                    </div>
-
-                    <!-- Si el usuario ya es adoptante, ir directo al formulario de solicitud -->
-                    <div sec:authorize="hasRole('ROLE_ADOPTANTE')">
-                        <a th:href="@{/web/solicitudes/nueva(animalId=${a.id.value})}" class="btn-adopt">
-                            <i data-lucide="heart" style="width: 18px; height: 18px; margin-right: 0.5rem;"></i>
-                            <span th:text="#{animal.button.adopt}">¡Adopta!</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Acciones Admin (Sutiles en hover) -->
-                <div class="admin-actions" sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')">
-                    <a class="admin-btn" th:href="@{/web/animales/{id}/editar(id=${a.id.value})}">
-                        <i data-lucide="edit-2" style="width:16px;"></i>
-                    </a>
-                    <button class="admin-btn delete"
-                            th:attr="hx-post=@{/web/animales/{id}/borrar(id=${a.id.value})}, hx-target='#card-' + ${a.id.value}"
-                            hx-swap="outerHTML swap:0.3s"
-                            hx-confirm="¿Eliminar este animal del sistema?">
-                        <i data-lucide="trash-2" style="width:16px;"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Empty State -->
-    <div th:if="${#lists.isEmpty(animales)}"
-         style="text-align:center;padding:5rem;color:var(--text-muted); grid-column:1/-1;">
-         <i data-lucide="dog" style="width:64px; height:64px; margin-bottom:1.5rem; opacity:0.3; display:block; margin: 0 auto;"></i>
-         <p th:text="#{animal.list.empty}">No hay compañeros peludos esperando por ahora.</p>
-    </div>
-
 </div>
 
 </body>

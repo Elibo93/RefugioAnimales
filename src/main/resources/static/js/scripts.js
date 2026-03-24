@@ -4,6 +4,13 @@ document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
     }
 
+    // Re-initialize Lucide Icons after HTMX swaps
+    document.body.addEventListener('htmx:afterSettle', () => {
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    });
+
     // Initialize carousel
     initCarousel();
 
@@ -56,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
 
 function initCarousel() {
     const carousel = document.getElementById('story-carousel');

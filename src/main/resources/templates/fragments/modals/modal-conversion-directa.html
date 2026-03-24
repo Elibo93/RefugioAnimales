@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<div th:fragment="modal" class="modal-overlay" id="modal" onclick="if(event.target == this) this.remove()">
+<div th:fragment="modal" class="modal-overlay" id="modal-host" onclick="if(event.target == this) this.innerHTML = ''">
     <div class="modal" onclick="event.stopPropagation()">
         
         <div style="text-align:center; margin-bottom: 2rem;">
@@ -48,7 +48,7 @@
             </div>
 
             <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal').remove()">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal-host').innerHTML = ''">
                     Cancelar
                 </button>
                 <button type="submit" class="btn btn-primary">

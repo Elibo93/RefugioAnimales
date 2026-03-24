@@ -71,6 +71,15 @@ public class AnimalEntity {
 
     @Column(name = "foto")
     private String foto;
+    
+    @Column(name = "peso")
+    private Double peso;
+
+    @Column(name = "nivel_energia")
+    private Integer nivelEnergia;
+
+    @Column(name = "urgencia", columnDefinition = "TINYINT(1)")
+    private Boolean urgencia;
 
     @Column(name = "fecha_ingreso", nullable = false)
     private LocalDateTime fechaIngreso;

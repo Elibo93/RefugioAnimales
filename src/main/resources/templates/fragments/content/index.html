@@ -167,58 +167,8 @@
         </section>
 
         <!-- 6. Sección de Gestión (Shortcuts) -->
-        <div sec:authorize="isAuthenticated()">
-            <section class="page-header" style="margin-top: 6rem;">
-                <h2 class="page-title" style="margin-bottom:1.5rem;">Panel de Gestión</h2>
-            </section>
-
-            <div class="dashboard-grid" style="margin-bottom: 3rem;">
-                <a th:href="@{/web/animales}" class="card">
-                    <div class="card-icon icon-orange"><i data-lucide="dog"></i></div>
-                    <h3 class="card-title">Animales</h3>
-                    <p class="card-desc">Listado de animales y su estado.</p>
-                </a>
-
-                <div sec:authorize="hasRole('ADMIN')" style="display: contents;">
-                    <a th:href="@{/web/personas}" class="card">
-                        <div class="card-icon icon-blue"><i data-lucide="users"></i></div>
-                        <h3 class="card-title">Personas</h3>
-                        <p class="card-desc">Gestión de adoptantes y contactos.</p>
-                    </a>
-                    <a th:href="@{/web/voluntarios}" class="card">
-                        <div class="card-icon icon-green"><i data-lucide="heart"></i></div>
-                        <h3 class="card-title">Voluntarios</h3>
-                        <p class="card-desc">Equipo de voluntarios y cuidadores.</p>
-                    </a>
-                    <a th:href="@{/web/adopciones}" class="card">
-                        <div class="card-icon icon-purple"><i data-lucide="clipboard-check"></i></div>
-                        <h3 class="card-title">Adopciones</h3>
-                        <p class="card-desc">Procesos de adopción en curso.</p>
-                    </a>
-                    <a th:href="@{/web/solicitudes}" class="card">
-                        <div class="card-icon icon-blue" style="background: #E0F2FE; color: #0369A1;"><i data-lucide="file-text"></i></div>
-                        <h3 class="card-title">Solicitudes</h3>
-                        <p class="card-desc">Gestión de solicitudes de adopción.</p>
-                    </a>
-                </div>
-
-                <a th:href="@{/web/donaciones}" class="card">
-                    <div class="card-icon icon-green" style="background: #DCFCE7; color: #15803D;"><i data-lucide="coins"></i></div>
-                    <h3 class="card-title">Donaciones</h3>
-                    <p class="card-desc">Registro de donaciones.</p>
-                </a>
-
-                <div sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')" style="display: contents;">
-                    <a th:href="@{/web/historiales}" class="card">
-                        <div class="card-icon icon-red" style="background: #FEE2E2; color: #991B1B;"><i data-lucide="stethoscope"></i></div>
-                        <h3 class="card-title">Historial médico</h3>
-                    </a>
-                    <a th:href="@{/web/tareas}" class="card">
-                        <div class="card-icon icon-yellow" style="background: #FEF3C7; color: #92400E;"><i data-lucide="check-square"></i></div>
-                        <h3 class="card-title">Tareas</h3>
-                    </a>
-                </div>
             </div>
+        </div>
     </div>
 </body>
 

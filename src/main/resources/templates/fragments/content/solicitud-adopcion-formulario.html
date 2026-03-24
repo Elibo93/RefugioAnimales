@@ -29,12 +29,15 @@
                                 th:selected="${solicitud.adoptanteId != null and ad.id.value == solicitud.adoptanteId.value}"></option>
                     </select>
                 </div>
-                <div class="form-group">
+                <div class="form-group" sec:authorize="hasRole('ADMIN')">
                     <label th:text="#{solicitud.field.estado}">Estado</label>
                     <select name="estado" required>
                         <option th:each="e : ${estados}" th:value="${e}" th:text="${e}" th:selected="${e == solicitud.estado}"></option>
                     </select>
                 </div>
+                <input type="hidden" name="estado" 
+                       th:value="${solicitud.estado != null ? solicitud.estado : 'PENDIENTE'}" 
+                       sec:authorize="!hasRole('ADMIN')">
                 <div class="form-group" style="grid-column:1/-1;">
                     <label th:text="#{solicitud.field.comentario}">Comentario</label>
                     <textarea name="comentario" th:text="${solicitud.comentario}"></textarea>
