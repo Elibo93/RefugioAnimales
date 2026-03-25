@@ -18,6 +18,7 @@ public class Adoptante {
     private Integer usuarioId; // Relación con la entidad Usuario (FK)
     private String dni;
     private String nombre;
+    private String apellido;
     private String direccion;
     private String fechaNacimiento;
     private EstadoValidacion estadoValidacion;

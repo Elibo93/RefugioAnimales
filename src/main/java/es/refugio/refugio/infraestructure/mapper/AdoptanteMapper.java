@@ -59,6 +59,8 @@ public class AdoptanteMapper {
         return Adoptante.builder()
                 .id(e.getId() != null ? new AdoptanteId(e.getId()) : null)
                 .usuarioId(e.getUsuario() != null ? e.getUsuario().getId() : null)
+                .nombre(e.getUsuario() != null ? e.getUsuario().getNombre() : "")
+                .apellido(e.getUsuario() != null ? e.getUsuario().getApellido() : "")
                 .dni(e.getDni())
                 .direccion(e.getDireccion())
                 .fechaNacimiento(e.getFechaNacimiento())

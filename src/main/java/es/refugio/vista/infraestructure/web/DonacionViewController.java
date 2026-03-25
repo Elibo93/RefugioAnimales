@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
+
+import es.refugio.refugio.domain.model.usuario.Usuario;
 
 import es.refugio.refugio.application.command.donacion.CreateDonacionCommand;
 import es.refugio.refugio.application.command.donacion.EditDonacionCommand;
@@ -48,8 +51,52 @@ public class DonacionViewController {
     private final TemplateEngine templateEngine;
 
     @GetMapping(WebRoutes.donaciones_BASE)
-    public String listar(Model model, @RequestParam(required = false) String successMessage) {
-        model.addAttribute(ModelAttribute.Donacion_LIST.getName(), findDonacionService.findAll());
+    public String listar(Model model, Authentication authentication, @RequestParam(required = false) String successMessage) {
+        List<Donacion> donaciones = findDonacionService.findAll();
+        model.addAttribute(ModelAttribute.Donacion_LIST.getName(), donaciones);
+
+        List<Usuario> usuarios = findUsuarioService.findAll();
+        
+        // Detectar usuario actual o anónimo
+        Integer currentUserId = null;
+        if (authentication != null && authentication.isAuthenticated()) {
+            Usuario usuarioActual = usuarios.stream()
+                .filter(u -> u.getEmail().equals(authentication.getName()))
+                .findFirst()
+                .orElse(null);
+            if (usuarioActual != null) {
+                currentUserId = usuarioActual.getId().getValue();
+                model.addAttribute("currentUserName", usuarioActual.getNombre() + " " + usuarioActual.getApellido());
+            }
+        }
+        model.addAttribute("currentUserId", currentUserId);
+
+        java.util.Map<Integer, String> usuarioMap = usuarios.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        u -> u.getId().getValue(),
+                        u -> u.getNombre() + " " + u.getApellido()));
+        model.addAttribute("usuarioMap", usuarioMap);
+
+        // Atributos para el formulario de donación embebido
+        model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), Donacion.builder().fecha(LocalDateTime.now()).build());
+        model.addAttribute("usuarios", usuarios);
+        Usuario anonimo = usuarios.stream()
+                .filter(u -> "anonimo@refugio.es".equals(u.getEmail()))
+                .findFirst()
+                .orElse(null);
+        model.addAttribute("anonimoId", anonimo != null ? anonimo.getId().getValue() : null);
+        model.addAttribute("tipos", TipoDonacion.values());
+
+        // Cálculo de progreso para necesidades actuales con guardas para evitar NPE
+        double totalDinero = donaciones.stream()
+                .filter(d -> d != null && d.getTipo() != null && "DINERO".equals(d.getTipo().name()))
+                .filter(d -> d.getCantidad() != null)
+                .mapToDouble(Donacion::getCantidad)
+                .sum();
+        
+        model.addAttribute("totalDinero", totalDinero);
+        model.addAttribute("metaDinero", 1000.0);
+
         if (successMessage != null) {
             model.addAttribute("successMessage", successMessage);
         }
@@ -58,9 +105,32 @@ public class DonacionViewController {
     }
 
     @GetMapping(WebRoutes.donaciones_NUEVA)
-    public String formulario(Model model) {
+    public String formulario(Model model, Authentication authentication) {
         model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), Donacion.builder().fecha(LocalDateTime.now()).build());
-        model.addAttribute("usuarios", findUsuarioService.findAll());
+        
+        List<Usuario> usuarios = findUsuarioService.findAll();
+        model.addAttribute("usuarios", usuarios);
+        
+        // Detectar usuario actual o anónimo
+        Integer currentUserId = null;
+        if (authentication != null && authentication.isAuthenticated()) {
+            Usuario usuarioActual = usuarios.stream()
+                .filter(u -> u.getEmail().equals(authentication.getName()))
+                .findFirst()
+                .orElse(null);
+            if (usuarioActual != null) {
+                currentUserId = usuarioActual.getId().getValue();
+                model.addAttribute("currentUserName", usuarioActual.getNombre() + " " + usuarioActual.getApellido());
+            }
+        }
+        model.addAttribute("currentUserId", currentUserId);
+
+        Usuario anonimo = usuarios.stream()
+                .filter(u -> "anonimo@refugio.es".equals(u.getEmail()))
+                .findFirst()
+                .orElse(null);
+        model.addAttribute("anonimoId", anonimo != null ? anonimo.getId().getValue() : null);
+        
         model.addAttribute("tipos", TipoDonacion.values());
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -79,10 +149,33 @@ public class DonacionViewController {
     }
 
     @GetMapping(WebRoutes.donaciones_EDITAR)
-    public String editarFormulario(@PathVariable Integer id, Model model) {
+    public String editarFormulario(@PathVariable Integer id, Model model, Authentication authentication) {
         Donacion donacion = findDonacionService.findById(new DonacionId(id));
         model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), donacion);
-        model.addAttribute("usuarios", findUsuarioService.findAll());
+        
+        List<Usuario> usuarios = findUsuarioService.findAll();
+        model.addAttribute("usuarios", usuarios);
+
+        // Detectar usuario actual o anónimo (útil para mostrar quién es el donante original o el actual)
+        Integer currentUserId = null;
+        if (authentication != null && authentication.isAuthenticated()) {
+            Usuario usuarioActual = usuarios.stream()
+                .filter(u -> u.getEmail().equals(authentication.getName()))
+                .findFirst()
+                .orElse(null);
+            if (usuarioActual != null) {
+                currentUserId = usuarioActual.getId().getValue();
+                model.addAttribute("currentUserName", usuarioActual.getNombre() + " " + usuarioActual.getApellido());
+            }
+        }
+        model.addAttribute("currentUserId", currentUserId);
+
+        Usuario anonimo = usuarios.stream()
+                .filter(u -> "anonimo@refugio.es".equals(u.getEmail()))
+                .findFirst()
+                .orElse(null);
+        model.addAttribute("anonimoId", anonimo != null ? anonimo.getId().getValue() : null);
+
         model.addAttribute("tipos", TipoDonacion.values());
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();

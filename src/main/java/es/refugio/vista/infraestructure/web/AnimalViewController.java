@@ -52,10 +52,17 @@ public class AnimalViewController {
     public String listar(Model model, 
                         @RequestParam(required = false) String successMessage,
                         @RequestParam(required = false) EstadoAnimal estado,
+                        @RequestParam(required = false) String especie,
+                        @RequestParam(required = false) String tamano,
+                        @RequestParam(required = false) java.util.List<String> edad,
+                        @RequestParam(required = false) String sexo,
+                        @RequestParam(required = false) Boolean urgencia,
                         HttpServletRequest request) {
         
         List<Animal> animales;
-        if (estado != null) {
+        if (especie != null || tamano != null || edad != null || sexo != null || urgencia != null) {
+            animales = findAnimalService.findFiltered(especie, tamano, edad, sexo, urgencia);
+        } else if (estado != null) {
             animales = findAnimalService.findByStatus(estado);
         } else {
             animales = findAnimalService.findAll();
@@ -64,6 +71,11 @@ public class AnimalViewController {
         model.addAttribute(ModelAttribute.Animal_LIST.getName(), animales);
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), findVoluntarioService.findAll());
         model.addAttribute("selectedEstado", estado);
+        model.addAttribute("selectedEspecie", especie);
+        model.addAttribute("selectedTamano", tamano);
+        model.addAttribute("selectedEdad", edad);
+        model.addAttribute("selectedSexo", sexo);
+        model.addAttribute("selectedUrgencia", urgencia);
         
         if (successMessage != null) {
             model.addAttribute("successMessage", successMessage);
@@ -97,11 +109,14 @@ public class AnimalViewController {
             @RequestParam(required = false) String tamano,
             @RequestParam(required = false) String descripcion,
             @RequestParam(required = false) String foto,
+            @RequestParam(required = false) Double peso,
+            @RequestParam(required = false) Integer nivelEnergia,
+            @RequestParam(required = false) Boolean urgencia,
             RedirectAttributes redirectAttributes) {
 
         createAnimalService.createAnimal(
                 new CreateAnimalCommand(nombre, especie, especiePersonalizada, raza, sexo, chipId, estado, edad, tamano,
-                        descripcion, foto));
+                        descripcion, foto, peso, nivelEnergia, urgencia));
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",
@@ -128,11 +143,14 @@ public class AnimalViewController {
             @RequestParam(required = false) String tamano,
             @RequestParam(required = false) String descripcion,
             @RequestParam(required = false) String foto,
+            @RequestParam(required = false) Double peso,
+            @RequestParam(required = false) Integer nivelEnergia,
+            @RequestParam(required = false) Boolean urgencia,
             RedirectAttributes redirectAttributes) {
 
         editAnimalService.update(
                 new EditAnimalCommand(new AnimalId(id), nombre, chipId, estado, edad, tamano,
-                        descripcion, foto));
+                        descripcion, foto, peso, nivelEnergia, urgencia));
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",
@@ -176,5 +194,12 @@ public class AnimalViewController {
         renderer.createPDF(outputStream);
 
         outputStream.close();
+    }
+
+    @GetMapping(WebRoutes.animales_BASE + "/{id}/detalle")
+    public String detalleModal(@PathVariable Integer id, Model model) {
+        Animal animal = findAnimalService.findById(new AnimalId(id));
+        model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
+        return "fragments/content/animales-detalle-modal :: detalle";
     }
 }

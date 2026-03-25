@@ -25,7 +25,10 @@ public class AnimalMapper {
                 req.edad(),
                 req.tamano(),
                 req.descripcion(),
-                req.foto());
+                req.foto(),
+                req.peso(),
+                req.nivelEnergia(),
+                req.urgencia());
     }
 
     public static EditAnimalCommand toCommand(int id, AnimalRequest req) {
@@ -37,7 +40,10 @@ public class AnimalMapper {
                 req.edad(),
                 req.tamano(),
                 req.descripcion(),
-                req.foto());
+                req.foto(),
+                req.peso(),
+                req.nivelEnergia(),
+                req.urgencia());
     }
 
     public static AnimalResponse toResponse(Animal a) {
@@ -54,7 +60,10 @@ public class AnimalMapper {
                 a.getTamano() != null ? a.getTamano().name() : null,
                 a.getDescripcion(),
                 a.getFoto(),
-                a.getFechaIngreso());
+                a.getFechaIngreso(),
+                a.getPeso(),
+                a.getNivelEnergia(),
+                a.getUrgencia());
     }
 
     public static AnimalEntity toEntity(Animal a) {
@@ -71,6 +80,9 @@ public class AnimalMapper {
                 .tamano(a.getTamano())
                 .descripcion(a.getDescripcion())
                 .foto(a.getFoto())
+                .peso(a.getPeso())
+                .nivelEnergia(a.getNivelEnergia())
+                .urgencia(a.getUrgencia())
                 .fechaIngreso(a.getFechaIngreso())
                 .build();
     }
@@ -89,6 +101,9 @@ public class AnimalMapper {
                 .tamano(e.getTamano())
                 .descripcion(e.getDescripcion())
                 .foto(e.getFoto())
+                .peso(e.getPeso())
+                .nivelEnergia(e.getNivelEnergia())
+                .urgencia(e.getUrgencia())
                 .fechaIngreso(e.getFechaIngreso())
                 .build();
     }

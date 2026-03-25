@@ -5,41 +5,109 @@
 </head>
 <body>
 <div th:fragment="content">
-    <div class="page-header" style="text-align:center;">
-        <h1 class="page-title" th:text="${donacion.id == null ? #messages.msg('donacion.form.title') : #messages.msg('donacion.modal.edit.title')}">Registrar donación</h1>
-    </div>
-    <div class="card" style="max-width:800px; margin:0 auto;">
+    <div id="formulario-donacion" class="glass-panel" style="max-width:800px; margin:2rem auto; padding: 3rem; border-radius: 24px;">
+        <div class="page-header" style="text-align:center; margin-bottom: 2.5rem;">
+            <h2 style="font-size: 2.25rem; font-weight: 800; color: var(--text-main);" 
+                th:text="${donacion.id == null ? #messages.msg('donacion.form.title') : #messages.msg('donacion.modal.edit.title')}">Registrar donación</h2>
+            <p style="color: var(--text-muted); margin-top: 0.5rem;">Tu generosidad hace posible nuestra labor diaria</p>
+        </div>
+
+        <!-- Monthly / One-time Toggle -->
+        <div class="view-toggle">
+            <button type="button" class="toggle-btn active" onclick="setRecurrence('unica')">Donación única</button>
+            <button type="button" class="toggle-btn" onclick="setRecurrence('mensual')">Donación mensual</button>
+        </div>
+
         <form th:action="@{${donacion.id == null ? '/web/donaciones/nueva' : '/web/donaciones/' + donacion.id.value + '/editar'}}" method="post" th:object="${donacion}">
             <div class="form-grid">
-                <div class="form-group">
+                <div class="form-group" style="grid-column: 1/-1;">
                     <label th:text="#{donacion.field.usuario}">Donante</label>
-                    <select name="usuarioId" required>
-                        <option value="" th:text="#{form.select.student}">Seleccione una persona...</option>
-                        <option th:each="u : ${usuarios}" th:value="${u.id.value}" th:text="${u.nombre + ' ' + u.apellido}" 
-                                th:selected="${donacion.usuarioId != null and u.id.value == donacion.usuarioId.value}"></option>
-                    </select>
+                    
+                    <!-- Usuario Autenticado -->
+                    <div th:if="${currentUserId != null}" class="alert alert-success glass-panel" 
+                         style="padding: 1rem; border-radius: 12px; background: rgba(220, 252, 231, 0.5); color: #15803d; border: 1px solid #bbf7d0; display: flex; align-items: center; gap: 0.75rem;">
+                        <i data-lucide="user" style="width: 24px; height: 24px;"></i>
+                        <span style="font-weight: 600;" th:text="${currentUserName}">Nombre de Usuario</span>
+                    </div>
+
+                    <!-- Usuario NO Autenticado (Anónimo) -->
+                    <div th:if="${currentUserId == null}" class="alert alert-info glass-panel" 
+                         style="padding: 1rem; border-radius: 12px; background: rgba(224, 242, 254, 0.5); color: #0369a1; border: 1px solid #bae6fd; display: flex; align-items: center; gap: 0.75rem;">
+                        <i data-lucide="info" style="width: 24px; height: 24px;"></i>
+                        <span style="font-weight: 600;">Donación Anónima</span>
+                    </div>
+
+                    <input type="hidden" name="usuarioId" th:value="${currentUserId != null ? currentUserId : anonimoId}">
+                    
+                    <p th:if="${currentUserId == null}" style="font-size: 0.85rem; margin-top: 0.75rem; color: var(--text-muted); text-align: center;">
+                        ¿Prefieres registrarla en tu perfil? <a th:href="@{/login}" style="color: var(--primary); font-weight: 700;">Inicia sesión aquí</a>.
+                    </p>
                 </div>
+
+                <!-- Quick Amount Selector -->
+                <div class="form-group" style="grid-column: 1/-1;">
+                    <label>Selecciona una cantidad</label>
+                    <div class="amount-selector">
+                        <button type="button" class="amount-btn" onclick="setAmount(10, this)">10€</button>
+                        <button type="button" class="amount-btn" onclick="setAmount(30, this)">30€</button>
+                        <button type="button" class="amount-btn" onclick="setAmount(50, this)">50€</button>
+                        <button type="button" class="amount-btn" onclick="setAmount(100, this)">100€</button>
+                        <button type="button" class="amount-btn" onclick="focusAmount(this)">Otra</button>
+                    </div>
+                </div>
+
                 <div class="form-group">
-                    <label th:text="#{donacion.field.tipo}">Tipo</label>
+                    <label th:text="#{donacion.field.tipo}">Tipo de ayuda</label>
                     <select name="tipo" required>
                         <option th:each="t : ${tipos}" th:value="${t}" th:text="${t}" th:selected="${t == donacion.tipo}"></option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label th:text="#{donacion.field.cantidad}">Cantidad</label>
-                    <input type="number" step="0.01" name="cantidad" th:value="${donacion.cantidad}" required>
+                    <label th:text="#{donacion.field.cantidad}">Cantidad exacta (€)</label>
+                    <input type="number" step="0.01" name="cantidad" id="donation-amount" th:value="${donacion.cantidad}" required placeholder="0.00">
                 </div>
                 <div class="form-group" style="grid-column:1/-1;">
-                    <label th:text="#{donacion.field.descripcion}">Descripción</label>
-                    <textarea name="descripcion" th:text="${donacion.descripcion}"></textarea>
+                    <label th:text="#{donacion.field.descripcion}">Mensaje o dedicatoria (opcional)</label>
+                    <textarea name="descripcion" th:text="${donacion.descripcion}" placeholder="Escribe un mensaje de apoyo..." style="height: 120px;"></textarea>
                 </div>
             </div>
-            <div class="modal-actions" style="margin-top:2rem;">
-                <a th:href="@{/web/donaciones}" class="btn btn-secondary" th:text="#{generic.btn.cancel}">Cancelar</a>
-                <button type="submit" class="btn btn-primary" th:text="#{generic.btn.save}">Guardar donación</button>
+            <div class="modal-actions" style="margin-top:2.5rem;">
+                <a th:href="@{/web/donaciones}" class="btn btn-secondary btn-lg" th:text="#{generic.btn.cancel}">Volver</a>
+                <button type="submit" class="btn btn-primary btn-lg" style="box-shadow: 0 10px 15px -3px rgba(21, 128, 61, 0.3);">
+                    <i data-lucide="paw-print" style="width:20px;"></i>
+                    <span th:text="${donacion.id == null ? 'Confirmar Donación' : #messages.msg('generic.btn.save')}">Confirmar Donación</span>
+                </button>
             </div>
         </form>
     </div>
+
+    <script th:inline="javascript">
+        function setAmount(val, btn) {
+            document.getElementById('donation-amount').value = val;
+            updateButtons(btn);
+        }
+
+        function focusAmount(btn) {
+            document.getElementById('donation-amount').focus();
+            updateButtons(btn);
+        }
+
+        function updateButtons(activeBtn) {
+            document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        function setRecurrence(type) {
+            document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            // Aquí se podría añadir lógica para cambiar el texto o añadir un flag al form si el backend lo soporta
+        }
+
+        // Initialize icons after HTMX swap or initial load
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    </script>
 </div>
 </body>
 </html>

@@ -1,5 +1,6 @@
 package es.refugio.refugio.infraestructure.web.rest;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
 import es.refugio.auth.infrastructure.repository.UserRepository;
 import es.refugio.auth.domain.AuthCredentialEntity;
-
+import es.refugio.auth.domain.Rol;
 import es.refugio.refugio.application.command.adoptante.ApproveAdoptanteCommand;
 import es.refugio.refugio.application.command.adoptante.CreateAdoptanteCommand;
 import es.refugio.refugio.application.command.adoptante.EditAdoptanteCommand;
@@ -37,8 +38,6 @@ import es.refugio.refugio.infraestructure.mapper.AdoptanteMapper;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteRequest;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteResponse;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.ConvertirAdoptanteRequest;
-import es.refugio.auth.domain.Rol;
-import java.time.LocalDateTime;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 

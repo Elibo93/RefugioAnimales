@@ -10,5 +10,8 @@ public record EditAnimalCommand(
                 Integer edad,
                 String tamano,
                 String descripcion,
-                String foto) {
+                String foto,
+                Double peso,
+                Integer nivelEnergia,
+                Boolean urgencia) {
 }

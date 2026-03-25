@@ -23,6 +23,9 @@ public class EditAnimalUseCase {
                     t.setTamano(Tamano.valueOf(command.tamano().toUpperCase()));
                     t.setDescripcion(command.descripcion());
                     t.setFoto(command.foto());
+                    t.setPeso(command.peso());
+                    t.setNivelEnergia(command.nivelEnergia());
+                    t.setUrgencia(command.urgencia());
 
                     return animalRepository.save(t);
                 })

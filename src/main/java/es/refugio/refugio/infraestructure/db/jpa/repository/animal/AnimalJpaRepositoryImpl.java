@@ -54,4 +54,43 @@ public class AnimalJpaRepositoryImpl implements AnimalRepository {
     public List<Animal> getByEspecie(Especie especie) {
         return AnimalMapper.toDomain(repository.findByEspecie(especie));
     }
+
+    @Override
+    public List<Animal> findFiltered(String especie, String tamano, java.util.List<String> edad, String sexo, Boolean urgencia) {
+        return AnimalMapper.toDomain(repository.findAll((root, query, cb) -> {
+            var predicates = new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();
+
+            if (especie != null && !especie.isEmpty() && !"ALL".equalsIgnoreCase(especie)) {
+                predicates.add(cb.equal(root.get("especie"), Especie.valueOf(especie.toUpperCase())));
+            }
+            if (tamano != null && !tamano.isEmpty() && !"ALL".equalsIgnoreCase(tamano)) {
+                predicates.add(cb.equal(root.get("tamano"), tamano.toUpperCase()));
+            }
+            if (sexo != null && !sexo.isEmpty()) {
+                predicates.add(cb.equal(root.get("sexo"), sexo.toUpperCase()));
+            }
+            if (urgencia != null && urgencia) {
+                predicates.add(cb.equal(root.get("urgencia"), true));
+            }
+            
+            // Age mapping [cachorro, adulto, senior]
+            if (edad != null && !edad.isEmpty()) {
+                var agePredicates = new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();
+                for (String e : edad) {
+                    if ("cachorro".equalsIgnoreCase(e)) {
+                        agePredicates.add(cb.lessThan(root.get("edad"), 2));
+                    } else if ("adulto".equalsIgnoreCase(e)) {
+                        agePredicates.add(cb.between(root.get("edad"), 2, 7));
+                    } else if ("senior".equalsIgnoreCase(e)) {
+                        agePredicates.add(cb.greaterThan(root.get("edad"), 7));
+                    }
+                }
+                if (!agePredicates.isEmpty()) {
+                    predicates.add(cb.or(agePredicates.toArray(new jakarta.persistence.criteria.Predicate[0])));
+                }
+            }
+
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        }));
+    }
 }

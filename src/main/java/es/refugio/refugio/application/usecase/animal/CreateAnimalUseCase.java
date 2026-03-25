@@ -30,6 +30,9 @@ public class CreateAnimalUseCase {
                 .tamano(Tamano.valueOf(comando.tamano().toUpperCase()))
                 .descripcion(comando.descripcion())
                 .foto(comando.foto())
+                .peso(comando.peso())
+                .nivelEnergia(comando.nivelEnergia())
+                .urgencia(comando.urgencia())
                 .fechaIngreso(LocalDateTime.now())
                 .build();
 

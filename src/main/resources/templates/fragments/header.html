@@ -8,84 +8,29 @@
     <div class="header-banner" th:classappend="${!showBack} ? 'hero-header' : ''"></div>
     <div class="header-container">
         <div class="header-left">
-            <a th:if="${showBack}" th:href="@{/web/home}" class="back-link" title="Volver">
+            <!-- Sidebar Toggle Button (Now on the left) -->
+            <button id="open-sidebar" class="sidebar-toggle-btn" title="Menú de usuario">
+                <i data-lucide="menu" sec:authorize="!isAuthenticated()"></i>
+                <i data-lucide="user" sec:authorize="isAuthenticated()"></i>
+                <i data-lucide="chevron-right" class="toggle-arrow"></i>
+            </button>
+
+            <a th:if="${showBack}" href="javascript:history.back()" class="back-link" title="Volver">
                 <i data-lucide="arrow-left" class="back-arrow" style="width:20px;"></i>
             </a>
-            <img th:src="@{/images/logo-Refugio.png}" class="app-logo">
-            <div class="app-brand">
-                <span class="app-name" th:text="#{app.name}">Refugio</span>
-                <span class="app-subtitle" th:text="#{app.subtitle}">Gestión</span>
-            </div>
+            
+            <!-- Brand Pill for visibility -->
+            <a th:href="@{/web/home}" class="app-brand-pill" style="text-decoration: none; color: inherit;">
+                <img th:src="@{/images/logo-Refugio.png}" class="app-logo">
+                <div class="app-brand">
+                    <span class="app-name" th:text="#{app.name}">Refugio</span>
+                    <span class="app-subtitle" th:text="#{app.subtitle}">Gestión</span>
+                </div>
+            </a>
         </div>
-        <nav class="header-right lang-nav">
-
-
-            <div class="dropdown-container">
-                <div class="dropdown-trigger user-profile" sec:authorize="isAuthenticated()">
-                    <div class="avatar"><i data-lucide="user"></i></div>
-                    <span class="user-name" sec:authentication="name">User</span>
-                    <i data-lucide="chevron-down" style="width:16px; height:16px;"></i>
-                </div>
-                <!-- Guest section directly below if not authenticated -->
-                <div class="dropdown-trigger user-profile" sec:authorize="!isAuthenticated()">
-                    <a th:href="@{/login}" style="color:inherit;text-decoration:none;font-weight:bold;"
-                        th:text="#{auth.login.title}">Iniciar Sesión</a>
-                </div>
-
-                <div class="dropdown-menu" sec:authorize="isAuthenticated()">
-                    <a th:href="@{/web/personas}" class="dropdown-item" sec:authorize="hasRole('ADMIN')">
-                        <i data-lucide="users"></i>
-                        <span th:text="#{menu.students.card.title}">personas</span>
-                    </a>
-                    <a th:href="@{/web/voluntarios}" class="dropdown-item"
-                        sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')">
-                        <i data-lucide="heart"></i>
-                        <span th:text="#{menu.professors.card.title}">voluntarios</span>
-                    </a>
-                    <a th:href="@{/web/animales}" class="dropdown-item">
-                        <i data-lucide="dog"></i>
-                        <span th:text="#{menu.workshops.card.title}">animales</span>
-                    </a>
-                    <a th:href="@{/web/adopciones}" class="dropdown-item">
-                        <i data-lucide="clipboard-check"></i>
-                        <span th:text="#{menu.enrollments.card.title}">adopciones</span>
-                    </a>
-                    <a th:href="@{/web/solicitudes}" class="dropdown-item">
-                        <i data-lucide="file-text"></i>
-                        <span th:text="#{solicitud.list.title}">solicitudes</span>
-                    </a>
-                    <a th:href="@{/web/donaciones}" class="dropdown-item">
-                        <i data-lucide="coins"></i>
-                        <span th:text="#{donacion.list.title}">donaciones</span>
-                    </a>
-                    <a th:href="@{/web/historiales}" class="dropdown-item">
-                        <i data-lucide="stethoscope"></i>
-                        <span th:text="#{historial.list.title}">historiales</span>
-                    </a>
-                    <a th:href="@{/web/tareas}" class="dropdown-item">
-                        <i data-lucide="check-square"></i>
-                        <span th:text="#{tarea.list.title}">tareas</span>
-                    </a>
-
-                    <form th:action="@{/logout}" method="post" style="margin: 0; padding: 0;">
-                        <button type="submit" class="dropdown-item"
-                            style="border: none; background: none; width: 100%; text-align: left; cursor: pointer; padding: 12px 16px;">
-                            <i data-lucide="log-out"></i>
-                            <span th:text="#{header.logout}">Cerrar Sesión</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <a th:href="@{${currentPage}(lang=es)}" title="Español"
-                th:classappend="${#locale.language == 'es'} ? 'active'">🇪🇸</a>
-            <a th:href="@{${currentPage}(lang=en)}" title="English"
-                th:classappend="${#locale.language == 'en'} ? 'active'">🇬🇧</a>
-            <a th:href="@{${currentPage}(lang=ar)}" title="العربية"
-                th:classappend="${#locale.language == 'ar'} ? 'active'">🇲🇦</a>
-            <a th:href="@{${currentPage}(lang=it)}" title="Italiano"
-                th:classappend="${#locale.language == 'it'} ? 'active'">🇮🇹</a>
-        </nav>
+        <div class="header-right">
+            <!-- empty for now or placeholders -->
+        </div>
     </div>
 </header>
 

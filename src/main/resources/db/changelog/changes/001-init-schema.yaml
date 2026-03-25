@@ -122,6 +122,16 @@ databaseChangeLog:
                   type: DATETIME
                   constraints:
                     nullable: false
+              - column:
+                  name: peso
+                  type: DOUBLE
+              - column:
+                  name: nivel_energia
+                  type: INT
+              - column:
+                  name: urgencia
+                  type: BIT
+                  defaultValueBoolean: false
 
   # ============================================================
   # 003 — Crear tabla adoptantes
@@ -262,6 +272,9 @@ databaseChangeLog:
               - column:
                   name: contrato
                   type: VARCHAR(500)
+              - column:
+                  name: solicitud_adopcion_id
+                  type: INT
         - addForeignKeyConstraint:
             baseTableName: adopciones
             baseColumnNames: adoptante_id
@@ -497,3 +510,14 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_vt_voluntario
             onDelete: CASCADE
+  - changeSet:
+      id: 003-add-solicitud-adopcion-id-to-adopciones
+      author: refugio
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: adopciones
+            baseColumnNames: solicitud_adopcion_id
+            referencedTableName: solicitudes_adopcion
+            referencedColumnNames: id
+            constraintName: fk_adopciones_solicitud
+            onDelete: SET NULL

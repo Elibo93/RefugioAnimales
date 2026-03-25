@@ -15,6 +15,9 @@ public record AnimalResponse(
         String tamano,
         String descripcion,
         String foto,
-        LocalDateTime fechaIngreso
+        LocalDateTime fechaIngreso,
+        Double peso,
+        Integer nivelEnergia,
+        Boolean urgencia
 ) {
 }

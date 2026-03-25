@@ -34,5 +34,19 @@ public class AdminInitializer implements CommandLineRunner {
             usuarioRepository.save(admin);
             log.info("Usuario administrador por defecto creado: admin@refugio.es / admin123");
         }
+
+        if (usuarioRepository.findByEmail("anonimo@refugio.es").isEmpty()) {
+            log.info("Creando usuario anónimo para donaciones sin registro...");
+            UsuarioEntity anonimo = UsuarioEntity.builder()
+                    .nombre("Anónimo")
+                    .apellido("Sistema")
+                    .email("anonimo@refugio.es")
+                    .contrasena(passwordEncoder.encode("anonimo123")) // No se usará para login normalmente
+                    .rol(Rol.ROLE_PUBLICO)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            usuarioRepository.save(anonimo);
+            log.info("Usuario anónimo creado: anonimo@refugio.es");
+        }
     }
 }

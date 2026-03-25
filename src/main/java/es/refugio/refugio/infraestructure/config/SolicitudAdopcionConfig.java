@@ -31,8 +31,9 @@ public class SolicitudAdopcionConfig {
     }
 
     @Bean
-    public CreateSolicitudAdopcionUseCase createSolicitudAdopcionUseCase(SolicitudAdopcionRepository repository) {
-        return new CreateSolicitudAdopcionUseCase(repository);
+    public CreateSolicitudAdopcionUseCase createSolicitudAdopcionUseCase(SolicitudAdopcionRepository repository,
+            AnimalRepository animalRepository) {
+        return new CreateSolicitudAdopcionUseCase(repository, animalRepository);
     }
 
     @Bean

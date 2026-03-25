@@ -13,6 +13,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +32,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import es.refugio.auth.domain.Rol;
+import es.refugio.refugio.application.command.usuario.CreateUsuarioCommand;
 import es.refugio.refugio.application.command.usuario.EditUsuarioCommand;
 import es.refugio.refugio.application.command.voluntario.CreateVoluntarioCommand;
 import es.refugio.refugio.application.command.voluntario.EditVoluntarioCommand;
@@ -30,6 +41,7 @@ import es.refugio.refugio.application.service.voluntario.CreateVoluntarioService
 import es.refugio.refugio.application.service.voluntario.DeleteVoluntarioService;
 import es.refugio.refugio.application.service.voluntario.EditVoluntarioService;
 import es.refugio.refugio.application.service.voluntario.FindVoluntarioService;
+import es.refugio.refugio.application.service.usuario.CreateUsuarioService;
 import es.refugio.refugio.application.service.usuario.EditUsuarioService;
 import es.refugio.refugio.application.service.usuario.FindUsuarioService;
 import es.refugio.refugio.domain.model.usuario.Usuario;
@@ -44,7 +56,6 @@ import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class VoluntarioViewController {
 
     private final FindVoluntarioService findVoluntarioService;
@@ -53,18 +64,30 @@ public class VoluntarioViewController {
     private final EditVoluntarioService editVoluntarioService;
     private final FindUsuarioService findUsuarioService;
     private final EditUsuarioService editUsuarioService;
+    private final CreateUsuarioService createUsuarioService;
+    private final AuthenticationManager authenticationManager;
 
     private final TemplateEngine templateEngine;
+    private final HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
 
     @GetMapping(WebRoutes.voluntarios_BASE)
+    @PreAuthorize("hasRole('ADMIN')")
     public String listar(Model model) {
-        List<Voluntario> voluntarios = findVoluntarioService.findAll();
-        // Mapa usuarioId -> Usuario para lookup en la plantilla
-        Map<Integer, Usuario> usuariosMap = voluntarios.stream()
-                .map(v -> findUsuarioService.findById(v.getUsuarioId()))
-                .collect(Collectors.toMap(u -> u.getId().getValue(), u -> u, (a, b) -> a));
-        model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), voluntarios);
-        model.addAttribute("usuariosMap", usuariosMap);
+        try {
+            List<Voluntario> voluntarios = findVoluntarioService.findAll();
+            // Mapa usuarioId -> Usuario para lookup en la plantilla
+            Map<Integer, Usuario> usuariosMap = voluntarios.stream()
+                    .map(v -> findUsuarioService.findById(v.getUsuarioId()))
+                    .collect(Collectors.toMap(u -> u.getId().getValue(), u -> u, (a, b) -> a));
+            model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), voluntarios);
+            model.addAttribute("usuariosMap", usuariosMap);
+        } catch (Exception e) {
+            model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), List.of());
+            model.addAttribute("usuariosMap", Map.of());
+        }
+        
+        model.addAttribute("currentUri", WebRoutes.voluntarios_BASE);
+        model.addAttribute("showBack", false);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -72,30 +95,80 @@ public class VoluntarioViewController {
     @GetMapping(WebRoutes.voluntarios_NUEVO)
     public String formulario(Model model) {
         model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), Voluntario.builder().build());
+        model.addAttribute("currentUri", WebRoutes.voluntarios_NUEVO);
+        model.addAttribute("showBack", true);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
     @GetMapping(WebRoutes.voluntarios_EDITAR)
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public String editarFormulario(@PathVariable Integer id, Model model) {
         Voluntario voluntario = findVoluntarioService.findById(new VoluntarioId(id));
         model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), voluntario);
+        model.addAttribute("currentUri", WebRoutes.voluntarios_EDITAR);
+        model.addAttribute("showBack", true);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
     @PostMapping(WebRoutes.voluntarios_NUEVO)
     public String crearVoluntario(
-            @RequestParam Integer idUsuario,
+            @RequestParam(required = false) Integer idUsuario,
             @RequestParam String disponibilidad,
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String contrasena,
+            HttpServletRequest request,
+            HttpServletResponse response,
             RedirectAttributes redirectAttributes) {
 
-        // Solo le pasamos el ID del Usuario y los datos exclusivos del voluntario
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        
+        // 1. Determinar el Usuario ID (ya sea por autenticación o por registro nuevo)
+        if (auth == null || auth instanceof AnonymousAuthenticationToken) {
+            // Usuario NO registrado: Crear registro de Usuario con rol Voluntario
+            Usuario newUser = createUsuarioService.createUsuario(
+                new CreateUsuarioCommand(nombre, "Voluntario", email, contrasena, "", Rol.ROLE_VOLUNTARIO));
+            idUsuario = newUser.getId().getValue();
+
+            // AUTO-LOGIN PERSISTENTE: Autenticar y guardar en la sesión
+            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(email, contrasena);
+            Authentication authenticated = authenticationManager.authenticate(token);
+            
+            SecurityContext sc = SecurityContextHolder.getContext();
+            sc.setAuthentication(authenticated);
+            request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, sc);
+
+        } else if (idUsuario == null) {
+            // Usuario YA registrado: Obtener su ID y asegurar que tenga rol de Voluntario
+            Usuario usuarioActual = findUsuarioService.findByEmail(auth.getName());
+            idUsuario = usuarioActual.getId().getValue();
+            
+            if (usuarioActual.getRol() != Rol.ROLE_VOLUNTARIO && usuarioActual.getRol() != Rol.ROLE_ADMIN) {
+                 editUsuarioService.update(new EditUsuarioCommand(
+                    usuarioActual.getId(),
+                    usuarioActual.getNombre(),
+                    usuarioActual.getApellido(),
+                    usuarioActual.getEmail(),
+                    usuarioActual.getTelefono(),
+                    Rol.ROLE_VOLUNTARIO));
+            }
+        }
+
+        // 2. Crear el registro de voluntario
         createVoluntarioService.createVoluntario(
                 new CreateVoluntarioCommand(new UsuarioId(idUsuario), disponibilidad));
 
-        redirectAttributes.addFlashAttribute("successMessage", "Voluntario creado correctamente");
-        return "redirect:" + WebRoutes.voluntarios_BASE;
+        redirectAttributes.addFlashAttribute("successMessage", "¡Bienvenido al equipo voluntario! Ya puedes empezar a ayudar.");
+
+        // Redirigir a la URL guardada por Spring Security si existe
+        SavedRequest savedRequest = requestCache.getRequest(request, response);
+        if (savedRequest != null) {
+            return "redirect:" + savedRequest.getRedirectUrl();
+        }
+
+        return "redirect:" + WebRoutes.HOME;
     }
 
     @PostMapping(WebRoutes.voluntarios_EDITAR)

@@ -21,4 +21,8 @@ public class FindUsuarioService {
     public Usuario findById(UsuarioId id) {
         return findUsuarioUseCase.findById(id);
     }
+
+    public Usuario findByEmail(String email) {
+        return findUsuarioUseCase.findByEmail(email);
+    }
 }
