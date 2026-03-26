@@ -35,6 +35,8 @@ public class AnimalMapper {
         return new EditAnimalCommand(
                 new AnimalId(id),
                 req.nombre(),
+                req.especie(),
+                req.especiePersonalizada(),
                 req.chipId(),
                 req.estado(),
                 req.edad(),

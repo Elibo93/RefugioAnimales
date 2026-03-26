@@ -93,6 +93,10 @@ public class AnimalViewController {
     public String formulario(Model model) {
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), Animal.builder().build());
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), findVoluntarioService.findAll());
+        model.addAttribute("tamanos", es.refugio.refugio.domain.model.animal.enums.Tamano.values());
+        model.addAttribute("sexos", es.refugio.refugio.domain.model.animal.enums.Sexo.values());
+        model.addAttribute("estados", es.refugio.refugio.domain.model.animal.enums.EstadoAnimal.values());
+        model.addAttribute("especies", es.refugio.refugio.domain.model.animal.enums.Especie.values());
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Animal_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -130,6 +134,10 @@ public class AnimalViewController {
         Animal animal = findAnimalService.findById(new AnimalId(id));
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), findVoluntarioService.findAll());
+        model.addAttribute("tamanos", es.refugio.refugio.domain.model.animal.enums.Tamano.values());
+        model.addAttribute("sexos", es.refugio.refugio.domain.model.animal.enums.Sexo.values());
+        model.addAttribute("estados", es.refugio.refugio.domain.model.animal.enums.EstadoAnimal.values());
+        model.addAttribute("especies", es.refugio.refugio.domain.model.animal.enums.Especie.values());
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Animal_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -137,6 +145,8 @@ public class AnimalViewController {
     @PostMapping(WebRoutes.animales_EDITAR)
     public String procesarEdicion(@PathVariable Integer id,
             @RequestParam String nombre,
+            @RequestParam String especie,
+            @RequestParam(required = false) String especiePersonalizada,
             @RequestParam String chipId,
             @RequestParam String estado,
             @RequestParam(required = false) Integer edad,
@@ -149,7 +159,7 @@ public class AnimalViewController {
             RedirectAttributes redirectAttributes) {
 
         editAnimalService.update(
-                new EditAnimalCommand(new AnimalId(id), nombre, chipId, estado, edad, tamano,
+                new EditAnimalCommand(new AnimalId(id), nombre, especie, especiePersonalizada, chipId, estado, edad, tamano,
                         descripcion, foto, peso, nivelEnergia, urgencia));
 
         redirectAttributes.addFlashAttribute(

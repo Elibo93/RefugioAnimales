@@ -5,6 +5,8 @@ import es.refugio.refugio.domain.model.animal.AnimalId;
 public record EditAnimalCommand(
                 AnimalId id,
                 String nombre,
+                String especie,
+                String especiePersonalizada,
                 String chipId,
                 String estado,
                 Integer edad,

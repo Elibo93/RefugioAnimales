@@ -3,6 +3,7 @@ package es.refugio.refugio.application.usecase.animal;
 import es.refugio.refugio.application.command.animal.EditAnimalCommand;
 import es.refugio.refugio.domain.error.AnimalNotFoundException;
 import es.refugio.refugio.domain.model.animal.Animal;
+import es.refugio.refugio.domain.model.animal.enums.Especie;
 import es.refugio.refugio.domain.model.animal.enums.EstadoAnimal;
 import es.refugio.refugio.domain.model.animal.enums.Tamano;
 import es.refugio.refugio.domain.repository.AnimalRepository;
@@ -17,6 +18,8 @@ public class EditAnimalUseCase {
         return animalRepository.getById(command.id())
                 .map(t -> {
                     t.setNombre(command.nombre());
+                    t.setEspecie(Especie.valueOf(command.especie().toUpperCase()));
+                    t.setEspeciePersonalizada(command.especiePersonalizada());
                     t.setChipId(command.chipId());
                     t.setEstado(EstadoAnimal.valueOf(command.estado().toUpperCase()));
                     t.setEdad(command.edad());

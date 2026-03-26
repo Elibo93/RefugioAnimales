@@ -157,64 +157,49 @@
             </section>
 
             <div class="animal-grid">
-                <!-- Mock Featured Animals (or use model data if filtered) -->
-                <div class="animal-card">
-                    <div class="animal-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=max&w=800&q=80"
-                            alt="Perro" class="animal-image">
-                    </div>
-                    <div class="animal-content" style="padding: 1.5rem;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <h3 style="font-size: 1.25rem; font-weight: 800;">Rocky ♂</h3>
-                            <span class="badge"
-                                style="background: var(--primary-light); color: var(--primary);">Cachorro</span>
-                        </div>
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-                            <span class="badge" style="font-size: 0.75rem;">Tranquilo</span>
-                            <span class="badge" style="font-size: 0.75rem;">Apto para gatos</span>
-                        </div>
-                        <a th:href="@{/web/solicitudes/nueva(animalId=1)}" class="btn btn-primary"
-                            style="width: 100%; justify-content: center;">Adoptar</a>
-                    </div>
-                </div>
+                <!-- Dinamizamos la sección con animales reales -->
+                <th:block th:each="a, iterStat : ${animales}" th:if="${iterStat.index < 3 && a.estado.toString() == 'DISPONIBLE'}">
+                    <div class="animal-card-glass glass-card" style="position: relative; overflow: hidden; border-radius: 24px; transition: transform 0.3s ease;">
+                        <div class="card-img-container" style="position: relative; aspect-ratio: 4/5; overflow: hidden;">
+                            <img th:src="${a.foto != null ? a.foto : '/images/placeholder-animal.png'}" 
+                                 alt="Animal" style="width: 100%; height: 100%; object-fit: cover;">
 
-                <div class="animal-card">
-                    <div class="animal-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=max&w=800&q=80"
-                            alt="Gato" class="animal-image">
-                    </div>
-                    <div class="animal-content" style="padding: 1.5rem;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <h3 style="font-size: 1.25rem; font-weight: 800;">Luna ♀</h3>
-                            <span class="badge" style="background: #FEE2E2; color: #EF4444;">Adulto</span>
-                        </div>
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-                            <span class="badge" style="font-size: 0.75rem;">Muy cariñosa</span>
-                        </div>
-                        <a th:href="@{/web/solicitudes/nueva(animalId=2)}" class="btn btn-primary"
-                            style="width: 100%; justify-content: center;">Adoptar</a>
-                    </div>
-                </div>
+                            <!-- Status Badge -->
+                            <span class="status-badge badge-available" 
+                                  style="position: absolute; top: 1rem; left: 1rem; padding: 0.5rem 1rem; border-radius: 99px; background: rgba(52, 211, 153, 0.9); color: white; font-weight: 700; font-size: 0.75rem; backdrop-filter: blur(4px);"
+                                  th:text="${a.estado}">
+                                Disponible
+                            </span>
 
-                <div class="animal-card">
-                    <div class="animal-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=max&w=800&q=80"
-                            alt="Perro" class="animal-image">
-                    </div>
-                    <div class="animal-content" style="padding: 1.5rem;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <h3 style="font-size: 1.25rem; font-weight: 800;">Bella ♀</h3>
-                            <span class="badge" style="background: #FEF3C7; color: #D97706;">Senior</span>
+                            <!-- Hover Overlay (Mismo diseño que el catálogo) -->
+                            <div class="card-info-overlay" style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); display: flex; flex-direction: column; justify-content: flex-end; padding: 2rem; opacity: 0; transition: opacity 0.3s ease;"
+                                 onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
+                                <p style="font-size: 0.85rem; margin-bottom: 1.5rem; color: white;" th:text="${a.descripcion}">
+                                    Descripción breve...
+                                </p>
+                                <button class="btn btn-primary" style="width: 100%; justify-content: center;"
+                                    th:attr="hx-get=@{/web/animales/{id}/detalle(id=${a.id.value})}"
+                                    hx-target="#modal-host" hx-swap="outerHTML">
+                                    <i data-lucide="maximize-2"></i>
+                                    <span th:text="#{animal.button.view.profile}">Conóceme</span>
+                                </button>
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-                            <span class="badge" style="font-size: 0.75rem;">Necesita calma</span>
+
+                        <div class="card-body-glass" style="padding: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3 class="animal-name" th:text="${a.nombre}" style="font-weight: 800; font-size: 1.2rem;">Rocky</h3>
+                                <i th:data-lucide="${a.sexo.toString() == 'MACHO' ? 'mars' : 'venus'}"
+                                   th:style="${a.sexo.toString() == 'MACHO' ? 'color: #3B82F6' : 'color: #EC4899'}"></i>
+                            </div>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;" th:text="${a.raza}">Labrador</p>
                         </div>
-                        <a th:href="@{/web/solicitudes/nueva(animalId=3)}" class="btn btn-primary"
-                            style="width: 100%; justify-content: center;">Adoptar</a>
                     </div>
+                </th:block>
+
+                <!-- Estado vacío si no hay disponibles -->
+                <div th:if="${#lists.isEmpty(animales)}" class="glass-card" style="grid-column: 1/-1; padding: 4rem; text-align: center;">
+                    <p>Buscando nuevos amigos...</p>
                 </div>
             </div>
 
