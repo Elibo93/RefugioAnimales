@@ -86,8 +86,6 @@ public class VoluntarioViewController {
             model.addAttribute("usuariosMap", Map.of());
         }
         
-        model.addAttribute("currentUri", WebRoutes.voluntarios_BASE);
-        model.addAttribute("showBack", false);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -95,8 +93,6 @@ public class VoluntarioViewController {
     @GetMapping(WebRoutes.voluntarios_NUEVO)
     public String formulario(Model model) {
         model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), Voluntario.builder().build());
-        model.addAttribute("currentUri", WebRoutes.voluntarios_NUEVO);
-        model.addAttribute("showBack", true);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -106,8 +102,6 @@ public class VoluntarioViewController {
     public String editarFormulario(@PathVariable Integer id, Model model) {
         Voluntario voluntario = findVoluntarioService.findById(new VoluntarioId(id));
         model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), voluntario);
-        model.addAttribute("currentUri", WebRoutes.voluntarios_EDITAR);
-        model.addAttribute("showBack", true);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }

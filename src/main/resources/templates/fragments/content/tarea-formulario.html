@@ -24,7 +24,9 @@
                 <div class="form-group">
                     <label th:text="#{tarea.field.voluntarios}">Voluntarios asignados</label>
                     <select name="voluntarioIds" multiple style="height:100px;">
-                        <option th:each="v : ${voluntarios}" th:value="${v.id.value}" th:text="${v.nombre + ' ' + v.apellido}"
+                        <option th:each="v : ${voluntarios}" th:value="${v.id.value}" 
+                                th:with="u=${usuariosMap[v.usuarioId.value]}"
+                                th:text="${u?.nombre + ' ' + u?.apellido}"
                                 th:selected="${tarea.voluntarios != null and tarea.voluntarios.contains(v.id)}"></option>
                     </select>
                 </div>

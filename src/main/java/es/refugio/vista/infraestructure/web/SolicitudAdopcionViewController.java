@@ -77,8 +77,6 @@ public class SolicitudAdopcionViewController {
         if (successMessage != null) {
             model.addAttribute("successMessage", successMessage);
         }
-        model.addAttribute("currentUri", WebRoutes.solicitudes_BASE);
-        model.addAttribute("showBack", false);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -143,8 +141,6 @@ public class SolicitudAdopcionViewController {
         }
 
         model.addAttribute("estados", EstadoSolicitud.values());
-        model.addAttribute("currentUri", WebRoutes.solicitudes_NUEVA);
-        model.addAttribute("showBack", true);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
