@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" 
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      lang="es">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -11,7 +9,7 @@
     <div th:fragment="content">
         <!-- VISTA ADMINISTRADOR -->
         <div sec:authorize="hasRole('ROLE_ADMIN')">
-            <section class="admin-hero">
+            <section class="admin-hero" style="margin-top: 0;">
                 <div class="admin-welcome-card glass-panel">
                     <h1 class="admin-title">Panel de Control <span class="badge-admin">ADMIN</span></h1>
                     <p class="admin-subtitle">Gestión operativa del refugio, seguimiento de animales y solicitudes pendientes.</p>
@@ -23,28 +21,28 @@
                 <div class="kpi-card glass-panel">
                     <div class="kpi-icon icon-blue"><i data-lucide="dog"></i></div>
                     <div class="kpi-info">
-                        <span class="kpi-label">Animales</span>
+                        <span class="kpi-label" th:text="#{menu.animales.card.title}">Animales</span>
                         <span class="kpi-value" th:text="${animales != null ? #lists.size(animales) : 0}">0</span>
                     </div>
                 </div>
                 <div class="kpi-card glass-panel">
                     <div class="kpi-icon icon-green"><i data-lucide="award"></i></div>
                     <div class="kpi-info">
-                        <span class="kpi-label">Adopciones</span>
+                        <span class="kpi-label" th:text="#{menu.adopciones.card.title}">Adopciones</span>
                         <span class="kpi-value" th:text="${adopciones != null ? #lists.size(adopciones) : 0}">0</span>
                     </div>
                 </div>
                 <div class="kpi-card glass-panel">
                     <div class="kpi-icon icon-orange"><i data-lucide="users"></i></div>
                     <div class="kpi-info">
-                        <span class="kpi-label">Voluntarios</span>
+                        <span class="kpi-label" th:text="#{menu.voluntarios.card.title}">Voluntarios</span>
                         <span class="kpi-value" th:text="${voluntarios != null ? #lists.size(voluntarios) : 0}">0</span>
                     </div>
                 </div>
                 <div class="kpi-card glass-panel">
                     <div class="kpi-icon icon-purple"><i data-lucide="user-check"></i></div>
                     <div class="kpi-info">
-                        <span class="kpi-label">Personas</span>
+                        <span class="kpi-label" th:text="#{menu.personas.card.title}">Personas</span>
                         <span class="kpi-value" th:text="${personas != null ? #lists.size(personas) : 0}">0</span>
                     </div>
                 </div>
@@ -77,7 +75,7 @@
         <!-- VISTA USUARIO / PÚBLICO -->
         <div sec:authorize="!hasRole('ROLE_ADMIN')">
             <!-- 1. Hero Section -->
-            <section class="home-hero">
+            <section class="home-hero" style="margin-top: 0;">
                 <div class="hero-glass-card hero-card-with-bg">
                     <h1 class="hero-title">No puedes comprar el amor, <br> pero puedes adoptarlo</h1>
                     <div class="hero-ctas">
@@ -162,50 +160,60 @@
                 <!-- Mock Featured Animals (or use model data if filtered) -->
                 <div class="animal-card">
                     <div class="animal-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=max&w=800&q=80" alt="Perro" class="animal-image">
+                        <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=max&w=800&q=80"
+                            alt="Perro" class="animal-image">
                     </div>
                     <div class="animal-content" style="padding: 1.5rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                             <h3 style="font-size: 1.25rem; font-weight: 800;">Rocky ♂</h3>
-                            <span class="badge" style="background: var(--primary-light); color: var(--primary);">Cachorro</span>
+                            <span class="badge"
+                                style="background: var(--primary-light); color: var(--primary);">Cachorro</span>
                         </div>
                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
                             <span class="badge" style="font-size: 0.75rem;">Tranquilo</span>
                             <span class="badge" style="font-size: 0.75rem;">Apto para gatos</span>
                         </div>
-                        <a th:href="@{/web/solicitudes/nueva(animalId=1)}" class="btn btn-primary" style="width: 100%; justify-content: center;">Adoptar</a>
+                        <a th:href="@{/web/solicitudes/nueva(animalId=1)}" class="btn btn-primary"
+                            style="width: 100%; justify-content: center;">Adoptar</a>
                     </div>
                 </div>
 
                 <div class="animal-card">
                     <div class="animal-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=max&w=800&q=80" alt="Gato" class="animal-image">
+                        <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=max&w=800&q=80"
+                            alt="Gato" class="animal-image">
                     </div>
                     <div class="animal-content" style="padding: 1.5rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                             <h3 style="font-size: 1.25rem; font-weight: 800;">Luna ♀</h3>
                             <span class="badge" style="background: #FEE2E2; color: #EF4444;">Adulto</span>
                         </div>
                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
                             <span class="badge" style="font-size: 0.75rem;">Muy cariñosa</span>
                         </div>
-                        <a th:href="@{/web/solicitudes/nueva(animalId=2)}" class="btn btn-primary" style="width: 100%; justify-content: center;">Adoptar</a>
+                        <a th:href="@{/web/solicitudes/nueva(animalId=2)}" class="btn btn-primary"
+                            style="width: 100%; justify-content: center;">Adoptar</a>
                     </div>
                 </div>
 
                 <div class="animal-card">
                     <div class="animal-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=max&w=800&q=80" alt="Perro" class="animal-image">
+                        <img src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=max&w=800&q=80"
+                            alt="Perro" class="animal-image">
                     </div>
                     <div class="animal-content" style="padding: 1.5rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                             <h3 style="font-size: 1.25rem; font-weight: 800;">Bella ♀</h3>
                             <span class="badge" style="background: #FEF3C7; color: #D97706;">Senior</span>
                         </div>
                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
                             <span class="badge" style="font-size: 0.75rem;">Necesita calma</span>
                         </div>
-                        <a th:href="@{/web/solicitudes/nueva(animalId=3)}" class="btn btn-primary" style="width: 100%; justify-content: center;">Adoptar</a>
+                        <a th:href="@{/web/solicitudes/nueva(animalId=3)}" class="btn btn-primary"
+                            style="width: 100%; justify-content: center;">Adoptar</a>
                     </div>
                 </div>
             </div>
@@ -217,17 +225,21 @@
                 </div>
                 <div id="story-carousel" class="story-carousel">
                     <div class="story-card active">
-                        <img src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=600&q=80" class="story-img" alt="Final Feliz">
+                        <img src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=600&q=80"
+                            class="story-img" alt="Final Feliz">
                         <div class="story-text">
-                            <p class="story-quote">"Luna llegó asustada y ahora es la reina del sofá. Gracias al refugio por unir nuestros caminos."</p>
+                            <p class="story-quote">"Luna llegó asustada y ahora es la reina del sofá. Gracias al refugio
+                                por unir nuestros caminos."</p>
                             <p class="story-author">— Familia Pérez</p>
                         </div>
                     </div>
                     <!-- Extra stories for carousel -->
                     <div class="story-card" style="display: none;">
-                        <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=600&q=80" class="story-img" alt="Final Feliz">
+                        <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=600&q=80"
+                            class="story-img" alt="Final Feliz">
                         <div class="story-text">
-                            <p class="story-quote">"Rocky ha encontrado su hogar definitivo. Nunca imaginamos que un perro senior daría tanta vida a nuestra casa."</p>
+                            <p class="story-quote">"Rocky ha encontrado su hogar definitivo. Nunca imaginamos que un
+                                perro senior daría tanta vida a nuestra casa."</p>
                             <p class="story-author">— Juan y Marta</p>
                         </div>
                     </div>
@@ -236,11 +248,9 @@
         </div>
 
         <!-- 6. Sección de Gestión (Shortcuts) -->
-            </div>
-        </div>
+    </div>
+    </div>
     </div>
 </body>
 
 </html>
-
-

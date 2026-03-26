@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
-import es.refugio.vista.infraestructure.web.constants.WebRoutes;
 
 @ControllerAdvice
 public class GlobalModelAttributesAdvice {
@@ -17,8 +16,8 @@ public class GlobalModelAttributesAdvice {
     @ModelAttribute("showBack")
     public boolean showBack(HttpServletRequest request) {
         String uri = request.getRequestURI();
-        // Solo ocultamos el botón de volver en la home
-        return !WebRoutes.HOME.equals(uri) && !"/".equals(uri);
+        // Solo ocultamos el botón de volver en las variantes de la home
+        return !(uri.equals("/") || uri.equals("/web/home") || uri.equals("/web/home/"));
     }
 }
 

@@ -1,23 +1,32 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
+
 <head>
     <meta charset="UTF-8">
 </head>
+
 <body>
     <div th:fragment="content">
 
         <div class="page-header" style="text-align:center;">
-            <h1 class="page-title" th:text="${adopcion.id == null ? #messages.msg('enrollment.modal.create.title') : #messages.msg('enrollment.modal.edit.title')}">Registrar Adopción</h1>
-            <p style="color:var(--text-muted); margin-top:0.5rem;" th:text="${adopcion.id == null ? #messages.msg('adopcion.form.subtitle.create') : #messages.msg('adopcion.form.subtitle.edit')}">Asocie una persona a un animal</p>
+            <h1 class="page-title"
+                th:text="${adopcion.id == null ? #messages.msg('enrollment.modal.create.title') : #messages.msg('enrollment.modal.edit.title')}">
+                Registrar Adopción</h1>
+            <p style="color:var(--text-muted); margin-top:0.5rem;"
+                th:text="${adopcion.id == null ? #messages.msg('adopcion.form.subtitle.create') : #messages.msg('adopcion.form.subtitle.edit')}">
+                Asocie una persona a un animal</p>
         </div>
 
         <div class="card" style="max-width:600px; margin:0 auto;">
-            <form th:action="@{${adopcion.id == null ? '/web/adopciones/nueva' : '/web/adopciones/' + adopcion.id.value + '/editar'}}" method="post" th:object="${adopcion}">
+            <form
+                th:action="@{${adopcion.id == null ? '/web/adopciones/nueva' : '/web/adopciones/' + adopcion.id.value + '/editar'}}"
+                method="post" th:object="${adopcion}">
                 <div class="form-grid" style="grid-template-columns: 1fr;">
                     <div class="form-group">
                         <label th:text="#{enrollment.field.student}">persona</label>
                         <select name="idPersona" required>
-                            <option value="" disabled selected th:text="#{form.select.student}">Seleccione una persona...
+                            <option value="" disabled selected th:text="#{form.select.student}">Seleccione una
+                                persona...
                             </option>
                             <option th:each="a : ${personas}" th:value="${a.id.value}"
                                 th:text="${a.nombre} + ' ' + ${a.apellido}"
@@ -42,10 +51,8 @@
                         <label>Estado de Adopción</label>
                         <select name="estado" required>
                             <option value="" disabled selected>Seleccione un estado...</option>
-                            <option th:each="estadoEnum : ${estadosAdopcion}"
-                                    th:value="${estadoEnum.name()}" 
-                                    th:text="${estadoEnum.nombre}" 
-                                    th:selected="${adopcion.estado == estadoEnum}">
+                            <option th:each="estadoEnum : ${estadosAdopcion}" th:value="${estadoEnum.name()}"
+                                th:text="${estadoEnum.nombre}" th:selected="${adopcion.estado == estadoEnum}">
                             </option>
                         </select>
                     </div>
@@ -59,12 +66,9 @@
                 </div>
             </form>
         </div>
-    
+
 
     </div>
 </body>
+
 </html>
-
-
-
-

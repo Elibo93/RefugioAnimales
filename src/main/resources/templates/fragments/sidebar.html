@@ -49,19 +49,19 @@
                     </a>
                     <a th:href="@{/web/animales}" class="sidebar-item" th:classappend="${#strings.contains(currentUri, '/web/animales')} ? 'active' : ''">
                         <i data-lucide="dog"></i>
-                        <span th:text="#{menu.workshops.card.title}">Animales</span>
+                        <span th:text="#{menu.animales.card.title}">Animales</span>
                     </a>
                     <a th:href="@{/web/personas}" class="sidebar-item" sec:authorize="hasRole('ADMIN')" th:classappend="${#strings.contains(currentUri, '/web/personas')} ? 'active' : ''">
                         <i data-lucide="users"></i>
-                        <span th:text="#{menu.students.card.title}">Personas</span>
+                        <span th:text="#{menu.personas.card.title}">Personas</span>
                     </a>
                     <a th:href="@{/web/voluntarios}" class="sidebar-item" sec:authorize="hasRole('ADMIN')" th:classappend="${#strings.contains(currentUri, '/web/voluntarios')} ? 'active' : ''">
                         <i data-lucide="heart"></i>
-                        <span th:text="#{menu.professors.card.title}">Voluntarios</span>
+                        <span th:text="#{menu.voluntarios.card.title}">Voluntarios</span>
                     </a>
                     <a th:href="@{/web/adopciones}" class="sidebar-item" sec:authorize="hasRole('ADMIN')" th:classappend="${#strings.contains(currentUri, '/web/adopciones')} ? 'active' : ''">
                         <i data-lucide="clipboard-check"></i>
-                        <span th:text="#{menu.enrollments.card.title}">Adopciones</span>
+                        <span th:text="#{menu.adopciones.card.title}">Adopciones</span>
                     </a>
                     <a th:href="@{/web/solicitudes}" class="sidebar-item" sec:authorize="hasRole('ADMIN')" th:classappend="${#strings.contains(currentUri, '/web/solicitudes')} ? 'active' : ''">
                         <i data-lucide="file-text"></i>
