@@ -9,8 +9,7 @@
     <div th:fragment="content">
         <!-- 1. Hero Section -->
         <section class="home-hero">
-            <div class="hero-overlay"></div>
-            <div class="hero-glass-card">
+            <div class="hero-glass-card hero-card-with-bg">
                 <h1 class="hero-title">No puedes comprar el amor, <br> pero puedes adoptarlo</h1>
                 <div class="hero-ctas">
                     <a th:href="@{/web/animales}" class="btn-hero btn-hero-primary">
@@ -26,39 +25,39 @@
         </section>
 
         <!-- 2. Buscador Rápido (Floating) -->
-        <div class="search-bar-floating">
+        <form class="search-bar-floating" th:action="@{/web/animales}" method="GET">
             <div class="search-field">
                 <label>Especie</label>
-                <select>
-                    <option>Cualquier especie</option>
-                    <option>Perro</option>
-                    <option>Gato</option>
+                <select name="especie">
+                    <option value="">Cualquier especie</option>
+                    <option value="PERRO">Perro</option>
+                    <option value="GATO">Gato</option>
                 </select>
             </div>
             <div style="width: 1px; height: 30px; background: var(--border);"></div>
             <div class="search-field">
                 <label>Tamaño</label>
-                <select>
-                    <option>Cualquier tamaño</option>
-                    <option>Pequeño</option>
-                    <option>Mediano</option>
-                    <option>Grande</option>
+                <select name="tamano">
+                    <option value="">Cualquier tamaño</option>
+                    <option value="PEQUEÑO">Pequeño</option>
+                    <option value="MEDIANO">Mediano</option>
+                    <option value="GRANDE">Grande</option>
                 </select>
             </div>
             <div style="width: 1px; height: 30px; background: var(--border);"></div>
             <div class="search-field">
                 <label>Edad</label>
-                <select>
-                    <option>Cualquier edad</option>
-                    <option>Cachorro</option>
-                    <option>Adulto</option>
-                    <option>Senior</option>
+                <select name="edad">
+                    <option value="">Cualquier edad</option>
+                    <option value="cachorro">Cachorro</option>
+                    <option value="adulto">Adulto</option>
+                    <option value="senior">Senior</option>
                 </select>
             </div>
-            <button class="btn-search">
+            <button class="btn-search" type="submit">
                 <i data-lucide="search" style="color: white;"></i>
             </button>
-        </div>
+        </form>
 
         <!-- 3. Contador de Impacto -->
         <section id="impact" class="impact-container">
@@ -94,7 +93,7 @@
             <!-- Mock Featured Animals (or use model data if filtered) -->
             <div class="animal-card">
                 <div class="animal-image-wrapper">
-                    <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80" alt="Perro">
+                    <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=max&w=800&q=80" alt="Perro" class="animal-image">
                 </div>
                 <div class="animal-content" style="padding: 1.5rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
@@ -105,13 +104,13 @@
                         <span class="badge" style="font-size: 0.75rem;">Tranquilo</span>
                         <span class="badge" style="font-size: 0.75rem;">Apto para gatos</span>
                     </div>
-                    <a th:href="@{/web/animales}" class="btn btn-primary" style="width: 100%; justify-content: center;">Adoptar</a>
+                    <a th:href="@{/web/solicitudes/nueva(animalId=1)}" class="btn btn-primary" style="width: 100%; justify-content: center;">Adoptar</a>
                 </div>
             </div>
 
             <div class="animal-card">
                 <div class="animal-image-wrapper">
-                    <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80" alt="Gato">
+                    <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=max&w=800&q=80" alt="Gato" class="animal-image">
                 </div>
                 <div class="animal-content" style="padding: 1.5rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
@@ -121,13 +120,13 @@
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
                         <span class="badge" style="font-size: 0.75rem;">Muy cariñosa</span>
                     </div>
-                    <a th:href="@{/web/animales}" class="btn btn-primary" style="width: 100%; justify-content: center;">Adoptar</a>
+                    <a th:href="@{/web/solicitudes/nueva(animalId=2)}" class="btn btn-primary" style="width: 100%; justify-content: center;">Adoptar</a>
                 </div>
             </div>
 
             <div class="animal-card">
                 <div class="animal-image-wrapper">
-                    <img src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&w=800&q=80" alt="Perro">
+                    <img src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=max&w=800&q=80" alt="Perro" class="animal-image">
                 </div>
                 <div class="animal-content" style="padding: 1.5rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
@@ -137,7 +136,7 @@
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
                         <span class="badge" style="font-size: 0.75rem;">Necesita calma</span>
                     </div>
-                    <a th:href="@{/web/animales}" class="btn btn-primary" style="width: 100%; justify-content: center;">Adoptar</a>
+                    <a th:href="@{/web/solicitudes/nueva(animalId=3)}" class="btn btn-primary" style="width: 100%; justify-content: center;">Adoptar</a>
                 </div>
             </div>
         </div>
