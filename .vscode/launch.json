@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-RefugioAnimalesApplication<refugio-animales>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "es.refugio.RefugioAnimalesApplication",
+            "projectName": "refugio-animales",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

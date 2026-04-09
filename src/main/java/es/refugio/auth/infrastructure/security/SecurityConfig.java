@@ -23,40 +23,42 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/error", "/web/home", "/login", "/registro", "/css/**",
-                                "/js/**", "/img/**", "/images/**", "/webjars/**", "/favicon.ico",
-                                "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs", "/v3/api-docs/**")
+                        // Recursos públicos y swagger
+                        .requestMatchers("/", "/error", "/login", "/login-post", "/registro",
+                                "/css/**", "/js/**", "/img/**", "/images/**", "/webjars/**", "/favicon.ico",
+                                "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**",
+                                "/v3/api-docs", "/v3/api-docs/**")
                         .permitAll()
+                        // API pública (lectura de animales y donaciones sin login)
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/animales/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/donaciones").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/web/animales/**", "/web/donaciones/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/web/donaciones/nueva").permitAll()
-                        .requestMatchers("/api/v1/tareas/**", "/web/tareas/**").hasAnyRole("ADMIN", "VOLUNTARIO")
-                        .requestMatchers("/web/voluntarios/nuevo").permitAll()
-                        .requestMatchers("/web/voluntarios/**", "/web/personas/**").hasRole("ADMIN")
-                        .requestMatchers("/web/historiales/**").hasAnyRole("ADMIN", "VOLUNTARIO")
-                        .requestMatchers("/web/solicitudes/**", "/web/adopciones/**").authenticated()
+                        // API de tareas y voluntarios requiere roles específicos
+                        .requestMatchers("/api/v1/tareas/**").hasAnyRole("ADMIN", "VOLUNTARIO")
+                        .requestMatchers("/api/v1/historiales/**").hasAnyRole("ADMIN", "VOLUNTARIO")
+                        // Resto de API requiere autenticación
                         .requestMatchers("/api/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/voluntarios/**").hasAnyRole("ADMIN", "VOLUNTARIO")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login-post")
-                        .defaultSuccessUrl("/web/home", false)
+                        // Tras login exitoso redirigir a raíz → Gateway lo enviará al frontend
+                        .defaultSuccessUrl("/", true)
                         .permitAll())
                 .httpBasic(basic -> {
                 })
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/web/home")
+                        .logoutSuccessUrl("/")
                         .permitAll())
                 .exceptionHandling(ex -> ex
+                        // Para /api/** devolver 401 en lugar de redirect al login
                         .defaultAuthenticationEntryPointFor(
                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
                                 new AntPathRequestMatcher("/api/**")));
 
         return http.build();
+
     }
 
     @Bean

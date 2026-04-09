@@ -40,7 +40,7 @@ public class AuthController {
     @GetMapping("/login")
     public String loginPage(Model model) {
         model.addAttribute("currentUri", "/login");
-        model.addAttribute("showBack", true);
+        model.addAttribute("showBack", false);
         model.addAttribute("content", "fragments/content/login");
         return "main-layout";
     }
@@ -101,6 +101,6 @@ public class AuthController {
             return "redirect:" + savedRequest.getRedirectUrl();
         }
 
-        return "redirect:/web/home?registroExitoso";
+        return "redirect:/?registroExitoso";
     }
 }

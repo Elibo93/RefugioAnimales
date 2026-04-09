@@ -1,0 +1,521 @@
+databaseChangeLog:
+
+  # ============================================================
+  # 011 — Insertar usuarios de prueba
+  # ============================================================
+  - changeSet:
+      id: 011-seed-usuarios
+      author: refugio
+      changes:
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: "Laura" }
+              - column: { name: apellido, value: "García" }
+              - column: { name: email, value: "laura.garcia@refugio.local" }
+              - column: { name: contrasena, value: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy" }
+              - column: { name: telefono, value: "600000001" }
+              - column: { name: rol, value: "ROLE_VOLUNTARIO" }
+              - column: { name: created_at, valueDate: "now()" }
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: "Carlos" }
+              - column: { name: apellido, value: "Martín" }
+              - column: { name: email, value: "carlos.martin@refugio.local" }
+              - column: { name: contrasena, value: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy" }
+              - column: { name: telefono, value: "600000002" }
+              - column: { name: rol, value: "ROLE_VOLUNTARIO" }
+              - column: { name: created_at, valueDate: "now()" }
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: "Marta" }
+              - column: { name: apellido, value: "López" }
+              - column: { name: email, value: "marta.lopez@refugio.local" }
+              - column: { name: contrasena, value: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy" }
+              - column: { name: telefono, value: "600000003" }
+              - column: { name: rol, value: "ROLE_VOLUNTARIO" }
+              - column: { name: created_at, valueDate: "now()" }
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: "Diego" }
+              - column: { name: apellido, value: "Romero" }
+              - column: { name: email, value: "diego.romero@local" }
+              - column: { name: contrasena, value: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy" }
+              - column: { name: telefono, value: "600000004" }
+              - column: { name: rol, value: "ROLE_ADOPTANTE" }
+              - column: { name: created_at, valueDate: "now()" }
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: "Lucía" }
+              - column: { name: apellido, value: "Martínez" }
+              - column: { name: email, value: "lucia.martinez@local" }
+              - column: { name: contrasena, value: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy" }
+              - column: { name: telefono, value: "600000005" }
+              - column: { name: rol, value: "ROLE_ADOPTANTE" }
+              - column: { name: created_at, valueDate: "now()" }
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: "Mario" }
+              - column: { name: apellido, value: "Gómez" }
+              - column: { name: email, value: "mario.gomez@local" }
+              - column: { name: contrasena, value: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy" }
+              - column: { name: telefono, value: "600000006" }
+              - column: { name: rol, value: "ROLE_ADOPTANTE" }
+              - column: { name: created_at, valueDate: "now()" }
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: "Sara" }
+              - column: { name: apellido, value: "Nadal" }
+              - column: { name: email, value: "sara.nadal@local" }
+              - column: { name: contrasena, value: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy" }
+              - column: { name: telefono, value: "600000007" }
+              - column: { name: rol, value: "ROLE_ADOPTANTE" }
+              - column: { name: created_at, valueDate: "now()" }
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: "Pablo" }
+              - column: { name: apellido, value: "Díaz" }
+              - column: { name: email, value: "pablo.diaz@local" }
+              - column: { name: contrasena, value: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy" }
+              - column: { name: telefono, value: "600000008" }
+              - column: { name: rol, value: "ROLE_ADOPTANTE" }
+              - column: { name: created_at, valueDate: "now()" }
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: "David" }
+              - column: { name: apellido, value: "Torres" }
+              - column: { name: email, value: "david.torres@local" }
+              - column: { name: contrasena, value: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy" }
+              - column: { name: telefono, value: "600000009" }
+              - column: { name: rol, value: "ROLE_ADOPTANTE" }
+              - column: { name: created_at, valueDate: "now()" }
+
+  # ============================================================
+  # 012 — Insertar voluntarios (usuarios 1, 2, 3)
+  # ============================================================
+  - changeSet:
+      id: 012-seed-voluntarios
+      author: refugio
+      changes:
+        - insert:
+            tableName: voluntarios
+            columns:
+              - column: { name: disponibilidad, value: "Tardes y fines de semana" }
+              - column: { name: usuario_id, valueNumeric: 1 }
+              - column: { name: created_at, valueDate: "now()" }
+        - insert:
+            tableName: voluntarios
+            columns:
+              - column: { name: disponibilidad, value: "Mañanas de Lunes a Viernes" }
+              - column: { name: usuario_id, valueNumeric: 2 }
+              - column: { name: created_at, valueDate: "now()" }
+        - insert:
+            tableName: voluntarios
+            columns:
+              - column: { name: disponibilidad, value: "Fines de semana completos" }
+              - column: { name: usuario_id, valueNumeric: 3 }
+              - column: { name: created_at, valueDate: "now()" }
+
+  # ============================================================
+  # 013 — Insertar adoptantes (usuarios 4 al 9)
+  # ============================================================
+  - changeSet:
+      id: 013-seed-adoptantes
+      author: refugio
+      changes:
+        - insert:
+            tableName: adoptantes
+            columns:
+              - column: { name: dni, value: "12345678A" }
+              - column: { name: direccion, value: "C/ Sol 1, Madrid" }
+              - column: { name: fecha_nacimiento, value: "2001-03-10" }
+              - column: { name: estado_validacion, value: "Aprobado" }
+              - column: { name: fecha_registro, valueDate: "now()" }
+              - column: { name: usuario_id, valueNumeric: 4 }
+        - insert:
+            tableName: adoptantes
+            columns:
+              - column: { name: dni, value: "23456789B" }
+              - column: { name: direccion, value: "C/ Luna 2, Sevilla" }
+              - column: { name: fecha_nacimiento, value: "2003-07-22" }
+              - column: { name: estado_validacion, value: "Aprobado" }
+              - column: { name: fecha_registro, valueDate: "now()" }
+              - column: { name: usuario_id, valueNumeric: 5 }
+        - insert:
+            tableName: adoptantes
+            columns:
+              - column: { name: dni, value: "34567890C" }
+              - column: { name: direccion, value: "C/ Norte 5, Valencia" }
+              - column: { name: fecha_nacimiento, value: "1998-11-15" }
+              - column: { name: estado_validacion, value: "Pendiente" }
+              - column: { name: fecha_registro, valueDate: "now()" }
+              - column: { name: usuario_id, valueNumeric: 6 }
+        - insert:
+            tableName: adoptantes
+            columns:
+              - column: { name: dni, value: "45678901D" }
+              - column: { name: direccion, value: "C/ Sur 8, Málaga" }
+              - column: { name: fecha_nacimiento, value: "2000-02-03" }
+              - column: { name: estado_validacion, value: "Aprobado" }
+              - column: { name: fecha_registro, valueDate: "now()" }
+              - column: { name: usuario_id, valueNumeric: 7 }
+        - insert:
+            tableName: adoptantes
+            columns:
+              - column: { name: dni, value: "56789012E" }
+              - column: { name: direccion, value: "Av. Mar 12, Cádiz" }
+              - column: { name: fecha_nacimiento, value: "1997-06-18" }
+              - column: { name: estado_validacion, value: "Aprobado" }
+              - column: { name: fecha_registro, valueDate: "now()" }
+              - column: { name: usuario_id, valueNumeric: 8 }
+        - insert:
+            tableName: adoptantes
+            columns:
+              - column: { name: dni, value: "67890123F" }
+              - column: { name: direccion, value: "C/ Parque 3, Bilbao" }
+              - column: { name: fecha_nacimiento, value: "1996-01-20" }
+              - column: { name: estado_validacion, value: "Pendiente" }
+              - column: { name: fecha_registro, valueDate: "now()" }
+              - column: { name: usuario_id, valueNumeric: 9 }
+
+  # ============================================================
+  # 014 — Insertar animales
+  # ============================================================
+  - changeSet:
+      id: 014-seed-animales
+      author: refugio
+      changes:
+        - insert:
+            tableName: animales
+            columns:
+              - column: { name: nombre, value: "Luna" }
+              - column: { name: especie, value: "PERRO" }
+              - column: { name: raza, value: "Labrador" }
+              - column: { name: sexo, value: "HEMBRA" }
+              - column: { name: chip_id, value: "CHIP001" }
+              - column: { name: estado, value: "DISPONIBLE" }
+              - column: { name: edad, valueNumeric: 3 }
+              - column: { name: tamano, value: "MEDIANO" }
+              - column: { name: descripcion, value: "Perrita muy cariñosa" }
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=800" }
+              - column: { name: fecha_ingreso, valueDate: "now()" }
+              - column: { name: peso, valueNumeric: 25.5 }
+              - column: { name: nivel_energia, valueNumeric: 3 }
+              - column: { name: urgencia, valueBoolean: false }
+        - insert:
+            tableName: animales
+            columns:
+              - column: { name: nombre, value: "Simba" }
+              - column: { name: especie, value: "GATO" }
+              - column: { name: raza, value: "Común Europeo" }
+              - column: { name: sexo, value: "MACHO" }
+              - column: { name: chip_id, value: "CHIP002" }
+              - column: { name: estado, value: "DISPONIBLE" }
+              - column: { name: edad, valueNumeric: 2 }
+              - column: { name: tamano, value: "PEQUEÑO" }
+              - column: { name: descripcion, value: "Gato dormilón" }
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=800" }
+              - column: { name: fecha_ingreso, valueDate: "now()" }
+              - column: { name: peso, valueNumeric: 4.2 }
+              - column: { name: nivel_energia, valueNumeric: 2 }
+              - column: { name: urgencia, valueBoolean: false }
+        - insert:
+            tableName: animales
+            columns:
+              - column: { name: nombre, value: "Rex" }
+              - column: { name: especie, value: "PERRO" }
+              - column: { name: raza, value: "Pastor Alemán" }
+              - column: { name: sexo, value: "MACHO" }
+              - column: { name: chip_id, value: "CHIP003" }
+              - column: { name: estado, value: "EN_TRATAMIENTO" }
+              - column: { name: edad, valueNumeric: 5 }
+              - column: { name: tamano, value: "GRANDE" }
+              - column: { name: descripcion, value: "Buen guardián, pero necesita medicación" }
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?q=80&w=800" }
+              - column: { name: fecha_ingreso, valueDate: "now()" }
+              - column: { name: peso, valueNumeric: 32.0 }
+              - column: { name: nivel_energia, valueNumeric: 4 }
+              - column: { name: urgencia, valueBoolean: true }
+        - insert:
+            tableName: animales
+            columns:
+              - column: { name: nombre, value: "Bella" }
+              - column: { name: especie, value: "PERRO" }
+              - column: { name: raza, value: "Galgo" }
+              - column: { name: sexo, value: "HEMBRA" }
+              - column: { name: chip_id, value: "CHIP004" }
+              - column: { name: estado, value: "DISPONIBLE" }
+              - column: { name: edad, valueNumeric: 4 }
+              - column: { name: tamano, value: "GRANDE" }
+              - column: { name: descripcion, value: "Corre muy rápido" }
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1510771463146-e89e6e86560e?q=80&w=800" }
+              - column: { name: fecha_ingreso, valueDate: "now()" }
+              - column: { name: peso, valueNumeric: 22.1 }
+              - column: { name: nivel_energia, valueNumeric: 5 }
+              - column: { name: urgencia, valueBoolean: false }
+        - insert:
+            tableName: animales
+            columns:
+              - column: { name: nombre, value: "Nala" }
+              - column: { name: especie, value: "GATO" }
+              - column: { name: raza, value: "Siamés" }
+              - column: { name: sexo, value: "HEMBRA" }
+              - column: { name: chip_id, value: "CHIP005" }
+              - column: { name: estado, value: "ADOPTADO" }
+              - column: { name: edad, valueNumeric: 1 }
+              - column: { name: tamano, value: "PEQUEÑO" }
+              - column: { name: descripcion, value: "Muy curiosa e inteligente" }
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1513245543132-31f507417b26?q=80&w=800" }
+              - column: { name: fecha_ingreso, valueDate: "now()" }
+              - column: { name: peso, valueNumeric: 3.5 }
+              - column: { name: nivel_energia, valueNumeric: 3 }
+              - column: { name: urgencia, valueBoolean: false }
+        - insert:
+            tableName: animales
+            columns:
+              - column: { name: nombre, value: "Thor" }
+              - column: { name: especie, value: "PERRO" }
+              - column: { name: raza, value: "Husky" }
+              - column: { name: sexo, value: "MACHO" }
+              - column: { name: chip_id, value: "CHIP006" }
+              - column: { name: estado, value: "DISPONIBLE" }
+              - column: { name: edad, valueNumeric: 3 }
+              - column: { name: tamano, value: "GRANDE" }
+              - column: { name: descripcion, value: "Le encanta la nieve y jugar" }
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1537151625747-7ae8a03a4bc2?q=80&w=800" }
+              - column: { name: fecha_ingreso, valueDate: "now()" }
+              - column: { name: peso, valueNumeric: 28.0 }
+              - column: { name: nivel_energia, valueNumeric: 5 }
+              - column: { name: urgencia, valueBoolean: false }
+        - insert:
+            tableName: animales
+            columns:
+              - column: { name: nombre, value: "Milo" }
+              - column: { name: especie, value: "GATO" }
+              - column: { name: raza, value: "Persa" }
+              - column: { name: sexo, value: "MACHO" }
+              - column: { name: chip_id, value: "CHIP007" }
+              - column: { name: estado, value: "DISPONIBLE" }
+              - column: { name: edad, valueNumeric: 4 }
+              - column: { name: tamano, value: "MEDIANO" }
+              - column: { name: descripcion, value: "Tranquilo y mimoso" }
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1557246565-8a3d3abfa5fc?q=80&w=800" }
+              - column: { name: fecha_ingreso, valueDate: "now()" }
+              - column: { name: peso, valueNumeric: 5.8 }
+              - column: { name: nivel_energia, valueNumeric: 1 }
+              - column: { name: urgencia, valueBoolean: false }
+        - insert:
+            tableName: animales
+            columns:
+              - column: { name: nombre, value: "Kira" }
+              - column: { name: especie, value: "PERRO" }
+              - column: { name: raza, value: "Border Collie" }
+              - column: { name: sexo, value: "HEMBRA" }
+              - column: { name: chip_id, value: "CHIP008" }
+              - column: { name: estado, value: "RESERVADO" }
+              - column: { name: edad, valueNumeric: 2 }
+              - column: { name: tamano, value: "MEDIANO" }
+              - column: { name: descripcion, value: "Muy inteligente y activa" }
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1503256207526-0d5d80fa2f47?q=80&w=800" }
+              - column: { name: fecha_ingreso, valueDate: "now()" }
+              - column: { name: peso, valueNumeric: 18.5 }
+              - column: { name: nivel_energia, valueNumeric: 5 }
+              - column: { name: urgencia, valueBoolean: true }
+        - insert:
+            tableName: animales
+            columns:
+              - column: { name: nombre, value: "Coco" }
+              - column: { name: especie, value: "OTRO" }
+              - column: { name: especie_personalizada, value: "Conejo" }
+              - column: { name: raza, value: "Belier" }
+              - column: { name: sexo, value: "HEMBRA" }
+              - column: { name: chip_id, value: "CHIP009" }
+              - column: { name: estado, value: "DISPONIBLE" }
+              - column: { name: edad, valueNumeric: 1 }
+              - column: { name: tamano, value: "PEQUEÑO" }
+              - column: { name: descripcion, value: "Le encantan las zanahorias" }
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?q=80&w=800" }
+              - column: { name: fecha_ingreso, valueDate: "now()" }
+              - column: { name: peso, valueNumeric: 1.5 }
+              - column: { name: nivel_energia, valueNumeric: 2 }
+              - column: { name: urgencia, valueBoolean: false }
+        - insert:
+            tableName: animales
+            columns:
+              - column: { name: nombre, value: "Rocky" }
+              - column: { name: especie, value: "PERRO" }
+              - column: { name: raza, value: "Boxer" }
+              - column: { name: sexo, value: "MACHO" }
+              - column: { name: chip_id, value: "CHIP010" }
+              - column: { name: estado, value: "EN_TRATAMIENTO" }
+              - column: { name: edad, valueNumeric: 6 }
+              - column: { name: tamano, value: "GRANDE" }
+              - column: { name: descripcion, value: "Fuerte pero con problemas articulares" }
+              - column: { name: foto, value: "https://images.unsplash.com/photo-1504595403659-9088ce801e29?q=80&w=800" }
+              - column: { name: fecha_ingreso, valueDate: "now()" }
+              - column: { name: peso, valueNumeric: 23.0 }
+              - column: { name: nivel_energia, valueNumeric: 3 }
+              - column: { name: urgencia, valueBoolean: false }
+
+  # ============================================================
+  # 015 — Insertar adopción (Nala - adoptante 1)
+  # ============================================================
+  - changeSet:
+      id: 015-seed-adopciones
+      author: refugio
+      changes:
+        - insert:
+            tableName: adopciones
+            columns:
+              - column: { name: adoptante_id, valueNumeric: 1 }
+              - column: { name: animal_id, valueNumeric: 5 }
+              - column: { name: fecha_adopcion, valueDate: "now()" }
+              - column: { name: estado, value: "COMPLETADA" }
+              - column: { name: contrato, value: "Contrato de adopción Nala firmado correctamente." }
+
+  # ============================================================
+  # 016 — Insertar donaciones
+  # ============================================================
+  - changeSet:
+      id: 016-seed-donaciones
+      author: refugio
+      changes:
+        - insert:
+            tableName: donaciones
+            columns:
+              - column: { name: usuario_id, valueNumeric: 5 }
+              - column: { name: tipo, value: "DINERO" }
+              - column: { name: cantidad, valueNumeric: 50.00 }
+              - column: { name: fecha, valueDate: "now()" }
+              - column: { name: descripcion, value: "Donación mensual de apoyo monetario" }
+        - insert:
+            tableName: donaciones
+            columns:
+              - column: { name: usuario_id, valueNumeric: 2 }
+              - column: { name: tipo, value: "COMIDA" }
+              - column: { name: cantidad, valueNumeric: 20.00 }
+              - column: { name: fecha, valueDate: "now()" }
+              - column: { name: descripcion, value: "Sacos de pienso canino y latas de gato" }
+        - insert:
+            tableName: donaciones
+            columns:
+              - column: { name: usuario_id, valueNumeric: 6 }
+              - column: { name: tipo, value: "MEDICINAS" }
+              - column: { name: cantidad, valueNumeric: 15.50 }
+              - column: { name: fecha, valueDate: "now()" }
+              - column: { name: descripcion, value: "Desparasitantes externos e internos" }
+
+  # ============================================================
+  # 017 — Insertar historial médico
+  # ============================================================
+  - changeSet:
+      id: 017-seed-historial-medico
+      author: refugio
+      changes:
+        - insert:
+            tableName: historial_medicos
+            columns:
+              - column: { name: id_animal, valueNumeric: 3 }
+              - column: { name: fecha, valueDate: "now()" }
+              - column: { name: descripcion, value: "Revisión por cojera pata trasera" }
+              - column: { name: tratamiento, value: "Reposo y antiinflamatorios" }
+              - column: { name: veterinario, value: "Dr. Gómez" }
+        - insert:
+            tableName: historial_medicos
+            columns:
+              - column: { name: id_animal, valueNumeric: 10 }
+              - column: { name: fecha, valueDate: "now()" }
+              - column: { name: descripcion, value: "Problemas articulares detectados" }
+              - column: { name: tratamiento, value: "Medicación diaria articular" }
+              - column: { name: veterinario, value: "Dra. Silva" }
+        - insert:
+            tableName: historial_medicos
+            columns:
+              - column: { name: id_animal, valueNumeric: 1 }
+              - column: { name: fecha, valueDate: "now()" }
+              - column: { name: descripcion, value: "Vacunación anual" }
+              - column: { name: tratamiento, value: "Vacuna polivalente y rabia" }
+              - column: { name: veterinario, value: "Dr. Gómez" }
+
+  # ============================================================
+  # 018 — Insertar solicitudes de adopción
+  # ============================================================
+  - changeSet:
+      id: 018-seed-solicitudes-adopcion
+      author: refugio
+      changes:
+        - insert:
+            tableName: solicitudes_adopcion
+            columns:
+              - column: { name: animal_id, valueNumeric: 8 }
+              - column: { name: adoptante_id, valueNumeric: 2 }
+              - column: { name: fecha, valueDate: "now()" }
+              - column: { name: estado, value: "APROBADA" }
+              - column: { name: comentario, value: "Parece una familia ideal para Kira, el Border Collie" }
+        - insert:
+            tableName: solicitudes_adopcion
+            columns:
+              - column: { name: animal_id, valueNumeric: 1 }
+              - column: { name: adoptante_id, valueNumeric: 3 }
+              - column: { name: fecha, valueDate: "now()" }
+              - column: { name: estado, value: "PENDIENTE" }
+              - column: { name: comentario, value: "Esperando para entrevista personal con el adoptante para Luna" }
+
+  # ============================================================
+  # 019 — Insertar tareas y asignaciones
+  # ============================================================
+  - changeSet:
+      id: 019-seed-tareas
+      author: refugio
+      changes:
+        - insert:
+            tableName: tareas
+            columns:
+              - column: { name: descripcion, value: "Pasear a los perros grandes (Thor y Rocky)" }
+              - column: { name: fecha, valueDate: "now()" }
+              - column: { name: estado, value: "PENDIENTE" }
+        - insert:
+            tableName: tareas
+            columns:
+              - column: { name: descripcion, value: "Limpieza profunda de jaulas de gatitos" }
+              - column: { name: fecha, valueDate: "now()" }
+              - column: { name: estado, value: "COMPLETADA" }
+        - insert:
+            tableName: tareas
+            columns:
+              - column: { name: descripcion, value: "Administración de medicamentos a Rex y Rocky" }
+              - column: { name: fecha, valueDate: "now()" }
+              - column: { name: estado, value: "EN_PROCESO" }
+
+  - changeSet:
+      id: 019-seed-voluntarios-tareas
+      author: refugio
+      changes:
+        - insert:
+            tableName: voluntarios_tareas
+            columns:
+              - column: { name: tarea_id, valueNumeric: 1 }
+              - column: { name: voluntario_id, valueNumeric: 1 }
+        - insert:
+            tableName: voluntarios_tareas
+            columns:
+              - column: { name: tarea_id, valueNumeric: 1 }
+              - column: { name: voluntario_id, valueNumeric: 2 }
+        - insert:
+            tableName: voluntarios_tareas
+            columns:
+              - column: { name: tarea_id, valueNumeric: 2 }
+              - column: { name: voluntario_id, valueNumeric: 3 }
+        - insert:
+            tableName: voluntarios_tareas
+            columns:
+              - column: { name: tarea_id, valueNumeric: 3 }
+              - column: { name: voluntario_id, valueNumeric: 1 }

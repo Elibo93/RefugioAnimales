@@ -1,0 +1,525 @@
+databaseChangeLog:
+
+  # ============================================================
+  # 001 — Crear tabla usuarios
+  # ============================================================
+  - changeSet:
+      id: 001-crear-tabla-usuarios
+      author: refugio
+      changes:
+        - createTable:
+            tableName: usuarios
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: nombre
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: apellido
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uq_usuarios_email
+              - column:
+                  name: contrasena
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: telefono
+                  type: VARCHAR(20)
+              - column:
+                  name: rol
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+
+  # ============================================================
+  # 002 — Crear tabla animales
+  # ============================================================
+  - changeSet:
+      id: 002-crear-tabla-animales
+      author: refugio
+      changes:
+        - createTable:
+            tableName: animales
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: nombre
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: especie
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: especie_personalizada
+                  type: VARCHAR(255)
+              - column:
+                  name: raza
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: sexo
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: chip_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uq_animales_chip_id
+              - column:
+                  name: estado
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: edad
+                  type: INT
+              - column:
+                  name: tamano
+                  type: VARCHAR(50)
+              - column:
+                  name: descripcion
+                  type: VARCHAR(1000)
+              - column:
+                  name: foto
+                  type: VARCHAR(255)
+              - column:
+                  name: fecha_ingreso
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: peso
+                  type: DOUBLE
+              - column:
+                  name: nivel_energia
+                  type: INT
+              - column:
+                  name: urgencia
+                  type: BIT
+                  defaultValueBoolean: false
+
+  # ============================================================
+  # 003 — Crear tabla adoptantes
+  # ============================================================
+  - changeSet:
+      id: 003-crear-tabla-adoptantes
+      author: refugio
+      changes:
+        - createTable:
+            tableName: adoptantes
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: dni
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uq_adoptantes_dni
+              - column:
+                  name: direccion
+                  type: VARCHAR(500)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fecha_nacimiento
+                  type: VARCHAR(50)
+              - column:
+                  name: estado_validacion
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fecha_registro
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: usuario_id
+                  type: INT
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uq_adoptantes_usuario_id
+        - addForeignKeyConstraint:
+            baseTableName: adoptantes
+            baseColumnNames: usuario_id
+            referencedTableName: usuarios
+            referencedColumnNames: id
+            constraintName: fk_adoptantes_usuario
+
+  # ============================================================
+  # 004 — Crear tabla voluntarios
+  # ============================================================
+  - changeSet:
+      id: 004-crear-tabla-voluntarios
+      author: refugio
+      changes:
+        - createTable:
+            tableName: voluntarios
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: disponibilidad
+                  type: VARCHAR(500)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: usuario_id
+                  type: INT
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uq_voluntarios_usuario_id
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: voluntarios
+            baseColumnNames: usuario_id
+            referencedTableName: usuarios
+            referencedColumnNames: id
+            constraintName: fk_voluntarios_usuario
+
+  # ============================================================
+  # 005 — Crear tabla adopciones
+  # ============================================================
+  - changeSet:
+      id: 005-crear-tabla-adopciones
+      author: refugio
+      changes:
+        - createTable:
+            tableName: adopciones
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: adoptante_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: animal_id
+                  type: INT
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uq_adopciones_animal_id
+              - column:
+                  name: fecha_adopcion
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: estado
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: contrato
+                  type: VARCHAR(500)
+              - column:
+                  name: solicitud_adopcion_id
+                  type: INT
+        - addForeignKeyConstraint:
+            baseTableName: adopciones
+            baseColumnNames: adoptante_id
+            referencedTableName: adoptantes
+            referencedColumnNames: id
+            constraintName: fk_adopciones_adoptante
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: adopciones
+            baseColumnNames: animal_id
+            referencedTableName: animales
+            referencedColumnNames: id
+            constraintName: fk_adopciones_animal
+            onDelete: CASCADE
+
+  # ============================================================
+  # 006 — Crear tabla donaciones
+  # ============================================================
+  - changeSet:
+      id: 006-crear-tabla-donaciones
+      author: refugio
+      changes:
+        - createTable:
+            tableName: donaciones
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: usuario_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tipo
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cantidad
+                  type: DOUBLE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fecha
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: descripcion
+                  type: VARCHAR(500)
+        - addForeignKeyConstraint:
+            baseTableName: donaciones
+            baseColumnNames: usuario_id
+            referencedTableName: usuarios
+            referencedColumnNames: id
+            constraintName: fk_donaciones_usuario
+            onDelete: CASCADE
+
+  # ============================================================
+  # 007 — Crear tabla historial_medicos
+  # ============================================================
+  - changeSet:
+      id: 007-crear-tabla-historial-medicos
+      author: refugio
+      changes:
+        - createTable:
+            tableName: historial_medicos
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: id_animal
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fecha
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: descripcion
+                  type: VARCHAR(1000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tratamiento
+                  type: VARCHAR(1000)
+              - column:
+                  name: veterinario
+                  type: VARCHAR(255)
+        - addForeignKeyConstraint:
+            baseTableName: historial_medicos
+            baseColumnNames: id_animal
+            referencedTableName: animales
+            referencedColumnNames: id
+            constraintName: fk_historial_animal
+            onDelete: CASCADE
+
+  # ============================================================
+  # 008 — Crear tabla solicitudes_adopcion
+  # ============================================================
+  - changeSet:
+      id: 008-crear-tabla-solicitudes-adopcion
+      author: refugio
+      changes:
+        - createTable:
+            tableName: solicitudes_adopcion
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: animal_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: adoptante_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fecha
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: estado
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: comentario
+                  type: VARCHAR(1000)
+        - addForeignKeyConstraint:
+            baseTableName: solicitudes_adopcion
+            baseColumnNames: animal_id
+            referencedTableName: animales
+            referencedColumnNames: id
+            constraintName: fk_solicitudes_animal
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: solicitudes_adopcion
+            baseColumnNames: adoptante_id
+            referencedTableName: adoptantes
+            referencedColumnNames: id
+            constraintName: fk_solicitudes_adoptante
+            onDelete: CASCADE
+
+  # ============================================================
+  # 009 — Crear tabla tareas
+  # ============================================================
+  - changeSet:
+      id: 009-crear-tabla-tareas
+      author: refugio
+      changes:
+        - createTable:
+            tableName: tareas
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: descripcion
+                  type: VARCHAR(500)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fecha
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: estado
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+
+  # ============================================================
+  # 010 — Crear tabla pivote voluntarios_tareas (N:M)
+  # ============================================================
+  - changeSet:
+      id: 010-crear-tabla-voluntarios-tareas
+      author: refugio
+      changes:
+        - createTable:
+            tableName: voluntarios_tareas
+            columns:
+              - column:
+                  name: tarea_id
+                  type: INT
+                  constraints:
+                    nullable: false
+                    primaryKey: true # <-- Añadido aquí
+              - column:
+                  name: voluntario_id
+                  type: INT
+                  constraints:
+                    nullable: false
+                    primaryKey: true # <-- Añadido aquí
+        - addForeignKeyConstraint:
+            baseTableName: voluntarios_tareas
+            baseColumnNames: tarea_id
+            referencedTableName: tareas
+            referencedColumnNames: id
+            constraintName: fk_vt_tarea
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: voluntarios_tareas
+            baseColumnNames: voluntario_id
+            referencedTableName: voluntarios
+            referencedColumnNames: id
+            constraintName: fk_vt_voluntario
+            onDelete: CASCADE
+
+# ============================================================
+# 011 — Añadir solicitud_adopcion_id a adopciones
+# ============================================================
+  - changeSet:
+      id: 011-add-solicitud-adopcion-id-to-adopciones
+      author: refugio
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: adopciones
+            baseColumnNames: solicitud_adopcion_id
+            referencedTableName: solicitudes_adopcion
+            referencedColumnNames: id
+            constraintName: fk_adopciones_solicitud
+            onDelete: SET NULL
