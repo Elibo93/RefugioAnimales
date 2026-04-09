@@ -26,6 +26,7 @@ import es.refugio.refugio.application.service.animal.CreateAnimalService;
 import es.refugio.refugio.application.service.animal.DeleteAnimalService;
 import es.refugio.refugio.application.service.animal.EditAnimalService;
 import es.refugio.refugio.application.service.animal.FindAnimalService;
+import es.refugio.refugio.application.service.animal.IncrementarVisitasService;
 import es.refugio.refugio.application.service.voluntario.FindVoluntarioService;
 import es.refugio.refugio.domain.model.animal.Animal;
 import es.refugio.refugio.domain.model.animal.AnimalId;
@@ -45,6 +46,7 @@ public class AnimalViewController {
     private final DeleteAnimalService deleteAnimalService;
     private final EditAnimalService editAnimalService;
     private final FindVoluntarioService findVoluntarioService;
+    private final IncrementarVisitasService incrementarVisitasService;
 
     private final TemplateEngine templateEngine;
 
@@ -93,6 +95,10 @@ public class AnimalViewController {
     public String formulario(Model model) {
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), Animal.builder().build());
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), findVoluntarioService.findAll());
+        model.addAttribute("tamanos", es.refugio.refugio.domain.model.animal.enums.Tamano.values());
+        model.addAttribute("sexos", es.refugio.refugio.domain.model.animal.enums.Sexo.values());
+        model.addAttribute("estados", es.refugio.refugio.domain.model.animal.enums.EstadoAnimal.values());
+        model.addAttribute("especies", es.refugio.refugio.domain.model.animal.enums.Especie.values());
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Animal_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -130,6 +136,10 @@ public class AnimalViewController {
         Animal animal = findAnimalService.findById(new AnimalId(id));
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), findVoluntarioService.findAll());
+        model.addAttribute("tamanos", es.refugio.refugio.domain.model.animal.enums.Tamano.values());
+        model.addAttribute("sexos", es.refugio.refugio.domain.model.animal.enums.Sexo.values());
+        model.addAttribute("estados", es.refugio.refugio.domain.model.animal.enums.EstadoAnimal.values());
+        model.addAttribute("especies", es.refugio.refugio.domain.model.animal.enums.Especie.values());
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Animal_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -137,6 +147,8 @@ public class AnimalViewController {
     @PostMapping(WebRoutes.ANIMALES_EDITAR)
     public String procesarEdicion(@PathVariable Integer id,
             @RequestParam String nombre,
+            @RequestParam String especie,
+            @RequestParam(required = false) String especiePersonalizada,
             @RequestParam String chipId,
             @RequestParam String estado,
             @RequestParam(required = false) Integer edad,
@@ -149,7 +161,7 @@ public class AnimalViewController {
             RedirectAttributes redirectAttributes) {
 
         editAnimalService.update(
-                new EditAnimalCommand(new AnimalId(id), nombre, chipId, estado, edad, tamano,
+                new EditAnimalCommand(new AnimalId(id), nombre, especie, especiePersonalizada, chipId, estado, edad, tamano,
                         descripcion, foto, peso, nivelEnergia, urgencia));
 
         redirectAttributes.addFlashAttribute(
@@ -198,7 +210,9 @@ public class AnimalViewController {
 
     @GetMapping(WebRoutes.ANIMALES_BASE + "/{id}/detalle")
     public String detalleModal(@PathVariable Integer id, Model model) {
-        Animal animal = findAnimalService.findById(new AnimalId(id));
+        AnimalId animalId = new AnimalId(id);
+        incrementarVisitasService.incrementar(animalId);
+        Animal animal = findAnimalService.findById(animalId);
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
         return "fragments/content/animales-detalle-modal :: detalle";
     }

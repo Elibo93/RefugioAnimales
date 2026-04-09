@@ -3,6 +3,16 @@
     
     <form th:action="@{/registro}" th:object="${registroDto}" method="post" style="display: flex; flex-direction: column; gap: 15px;">
         <div style="display: flex; flex-direction: column; gap: 5px;">
+            <label style="font-weight: 600;" th:text="#{professor.field.name}">Nombre:</label>
+            <input type="text" th:field="*{nombre}" required style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;" />
+            <span th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}" style="color: #dc2626; font-size: 0.85rem;"></span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+            <label style="font-weight: 600;" th:text="#{professor.field.surname}">Apellidos:</label>
+            <input type="text" th:field="*{apellido}" required style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;" />
+            <span th:if="${#fields.hasErrors('apellido')}" th:errors="*{apellido}" style="color: #dc2626; font-size: 0.85rem;"></span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 5px;">
             <label style="font-weight: 600;" th:text="#{auth.login.email}">Email:</label>
             <input type="email" th:field="*{email}" required style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;" />
             <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" style="color: #dc2626; font-size: 0.85rem;"></span>

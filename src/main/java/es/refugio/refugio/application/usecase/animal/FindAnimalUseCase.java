@@ -33,4 +33,8 @@ public class FindAnimalUseCase {
     public List<Animal> findFiltered(String especie, String tamano, java.util.List<String> edad, String sexo, Boolean urgencia) {
         return animalRepository.findFiltered(especie, tamano, edad, sexo, urgencia);
     }
-}
+
+    public List<Animal> findTop3Favoritos() {
+        return animalRepository.findTop3ByEstadoOrderByVisitasDesc(es.refugio.refugio.domain.model.animal.enums.EstadoAnimal.DISPONIBLE);
+    }
+}

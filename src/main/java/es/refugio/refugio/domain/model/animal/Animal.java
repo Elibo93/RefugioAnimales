@@ -31,6 +31,7 @@ public class Animal {
     private Double peso;
     private Integer nivelEnergia;
     private Boolean urgencia;
+    private Integer visitas;
     private LocalDateTime fechaIngreso;
 
 }

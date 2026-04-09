@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import es.refugio.refugio.domain.model.donacion.enums.FrecuenciaDonacion;
 import es.refugio.refugio.domain.model.donacion.enums.TipoDonacion;
 
 import jakarta.persistence.Column;
@@ -47,9 +48,14 @@ public class DonacionEntity {
     @Column(nullable = false)
     private Double cantidad;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private FrecuenciaDonacion frecuencia;
+
     @Column(nullable = false)
     private LocalDateTime fecha;
 
     @Column(length = 500)
     private String descripcion;
 }
+

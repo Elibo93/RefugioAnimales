@@ -143,11 +143,12 @@ public class DonacionViewController {
     public String crear(@RequestParam Integer usuarioId,
             @RequestParam String tipo,
             @RequestParam Double cantidad,
+            @RequestParam(defaultValue = "UNICA") String frecuencia,
             @RequestParam String descripcion,
             RedirectAttributes redirectAttributes) {
 
-        createDonacionService
-                .create(new CreateDonacionCommand(usuarioId, tipo, cantidad, LocalDateTime.now(), descripcion));
+        createDonacionService.create(
+                new CreateDonacionCommand(usuarioId, tipo, cantidad, frecuencia, LocalDateTime.now(), descripcion));
         redirectAttributes.addFlashAttribute("successMessage", "Donación registrada correctamente");
         return "redirect:" + WebRoutes.DONACIONES_BASE;
     }
@@ -191,10 +192,11 @@ public class DonacionViewController {
             @RequestParam Integer usuarioId,
             @RequestParam String tipo,
             @RequestParam Double cantidad,
+            @RequestParam(defaultValue = "UNICA") String frecuencia,
             @RequestParam String descripcion,
             RedirectAttributes redirectAttributes) {
 
-        editDonacionService.update(new EditDonacionCommand(new DonacionId(id), usuarioId, tipo, cantidad,
+        editDonacionService.update(new EditDonacionCommand(new DonacionId(id), usuarioId, tipo, cantidad, frecuencia,
                 LocalDateTime.now(), descripcion));
         redirectAttributes.addFlashAttribute("successMessage", "Donación editada correctamente");
         return "redirect:" + WebRoutes.DONACIONES_BASE;

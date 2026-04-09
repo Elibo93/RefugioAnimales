@@ -35,6 +35,8 @@ public class AnimalMapper {
         return new EditAnimalCommand(
                 new AnimalId(id),
                 req.nombre(),
+                req.especie(),
+                req.especiePersonalizada(),
                 req.chipId(),
                 req.estado(),
                 req.edad(),
@@ -63,7 +65,8 @@ public class AnimalMapper {
                 a.getFechaIngreso(),
                 a.getPeso(),
                 a.getNivelEnergia(),
-                a.getUrgencia());
+                a.getUrgencia(),
+                a.getVisitas());
     }
 
     public static AnimalEntity toEntity(Animal a) {
@@ -83,6 +86,7 @@ public class AnimalMapper {
                 .peso(a.getPeso())
                 .nivelEnergia(a.getNivelEnergia())
                 .urgencia(a.getUrgencia())
+                .visitas(a.getVisitas())
                 .fechaIngreso(a.getFechaIngreso())
                 .build();
     }
@@ -104,6 +108,7 @@ public class AnimalMapper {
                 .peso(e.getPeso())
                 .nivelEnergia(e.getNivelEnergia())
                 .urgencia(e.getUrgencia())
+                .visitas(e.getVisitas())
                 .fechaIngreso(e.getFechaIngreso())
                 .build();
     }

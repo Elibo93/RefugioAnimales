@@ -28,4 +28,8 @@ public class FindAnimalService {
     public List<Animal> findFiltered(String especie, String tamano, java.util.List<String> edad, String sexo, Boolean urgencia) {
         return findAnimalUseCase.findFiltered(especie, tamano, edad, sexo, urgencia);
     }
-}
+
+    public List<Animal> findTop3Favoritos() {
+        return findAnimalUseCase.findTop3Favoritos();
+    }
+}

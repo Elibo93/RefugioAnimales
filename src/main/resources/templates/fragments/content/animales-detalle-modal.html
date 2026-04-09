@@ -32,7 +32,7 @@
                 <div class="quick-stats" style="background: rgba(255,255,255,0.3); padding: 1.5rem; border-radius: 20px;">
                     <div class="stat-item">
                         <i data-lucide="dog"></i>
-                        <span th:text="${animal.especie}">Perro</span>
+                        <span th:text="${animal.especie.name() == 'OTRO' ? animal.especiePersonalizada : animal.especie}">Perro</span>
                         <span style="font-size: 0.65rem; opacity: 0.7;">Especie</span>
                     </div>
                     <div class="stat-item">
@@ -60,8 +60,8 @@
                 </div>
 
                 <div style="margin-top: auto; display: flex; gap: 1rem;">
-                    <!-- Botón de Adopción (Lógica de Seguridad) -->
-                    <div style="flex: 1;">
+                    <!-- Botón de Adopción (Sólo si DISPONIBLE) -->
+                    <div style="flex: 1;" th:if="${animal.estado.toString() == 'DISPONIBLE'}">
                         <!-- No Auth -->
                         <div sec:authorize="!isAuthenticated()">
                             <a th:href="@{/web/solicitudes/nueva(animalId=${animal.id.value})}" class="btn btn-primary" style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
@@ -86,6 +86,13 @@
                                 <i data-lucide="heart"></i>
                                 <span th:text="#{animal.button.adopt}">¡Adopta!</span>
                             </button>
+                        </div>
+                        <!-- Admin/Voluntario (Preview) -->
+                        <div sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_VOLUNTARIO')">
+                            <a th:href="@{/web/solicitudes/nueva(animalId=${animal.id.value})}" class="btn btn-primary" style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
+                                <i data-lucide="heart"></i>
+                                <span th:text="#{animal.button.adopt}">¡Adopta!</span>
+                            </a>
                         </div>
                     </div>
                     

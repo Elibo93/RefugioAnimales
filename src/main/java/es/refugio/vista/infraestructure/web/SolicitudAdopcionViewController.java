@@ -180,7 +180,7 @@ public class SolicitudAdopcionViewController {
 
         createSolicitudAdopcionService
                 .create(new CreateSolicitudAdopcionCommand(animalId, adoptanteId, LocalDateTime.now(), comentario));
-        
+
         if ("true".equals(request.getHeader("HX-Request"))) {
             return "fragments/content/solicitud-creada :: success-modal";
         }

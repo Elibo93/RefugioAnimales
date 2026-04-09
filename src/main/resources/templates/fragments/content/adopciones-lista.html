@@ -15,16 +15,16 @@
                     <form id="filterForm" th:action="@{/web/adopciones}" method="get"
                         style="display:flex; gap:10px; margin:0;">
                         <select name="adoptanteId" class="filter-select" hx-get th:hx-get="@{/web/adopciones}"
-                            hx-target="#tabla-adopciones-body" hx-select="#tabla-adopciones-body"
-                            hx-swap="outerHTML" hx-include="#filterForm">
+                            hx-target="#tabla-adopciones-body" hx-select="#tabla-adopciones-body" hx-swap="outerHTML"
+                            hx-include="#filterForm">
                             <option value="" th:text="#{enrollment.filter.student.all}">Todo personas</option>
                             <option th:each="a : ${listaadoptantes}" th:value="${a.id.value}"
                                 th:text="${personasMap[a.usuarioId] != null ? personasMap[a.usuarioId].nombre + ' ' + personasMap[a.usuarioId].apellido : 'Desconocido'}"
                                 th:selected="${a.id.value == selectedAdoptanteId}">adoptante</option>
                         </select>
                         <select name="animalId" class="filter-select" hx-get th:hx-get="@{/web/adopciones}"
-                            hx-target="#tabla-adopciones-body" hx-select="#tabla-adopciones-body"
-                            hx-swap="outerHTML" hx-include="#filterForm">
+                            hx-target="#tabla-adopciones-body" hx-select="#tabla-adopciones-body" hx-swap="outerHTML"
+                            hx-include="#filterForm">
                             <option value="" th:text="#{enrollment.filter.workshop.all}">Todo animales</option>
                             <option th:each="t : ${listaanimales}" th:value="${t.id.value}" th:text="${t.nombre}"
                                 th:selected="${t.id.value == selectedanimalId}">animal</option>
@@ -93,7 +93,3 @@
 </body>
 
 </html>
-
-
-
-

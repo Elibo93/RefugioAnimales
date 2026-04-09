@@ -76,8 +76,8 @@ public class AuthController {
         }
 
         UsuarioEntity newUser = UsuarioEntity.builder()
-                .nombre("Nuevo")
-                .apellido("Usuario")
+                .nombre(registroDto.getNombre())
+                .apellido(registroDto.getApellido())
                 .email(registroDto.getEmail())
                 .contrasena(passwordEncoder.encode(registroDto.getPassword()))
                 .rol(registroDto.getRol())

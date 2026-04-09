@@ -28,6 +28,11 @@ import es.refugio.refugio.application.service.voluntario.FindVoluntarioService;
 import es.refugio.refugio.domain.model.tarea.Tarea;
 import es.refugio.refugio.domain.model.tarea.TareaId;
 import es.refugio.refugio.domain.model.tarea.enums.EstadoTarea;
+import es.refugio.refugio.domain.model.usuario.Usuario;
+import es.refugio.refugio.domain.model.voluntario.Voluntario;
+import es.refugio.refugio.application.service.usuario.FindUsuarioService;
+import java.util.Map;
+import java.util.stream.Collectors;
 import es.refugio.vista.infraestructure.web.constants.WebRoutes;
 import es.refugio.vista.infraestructure.web.enums.FragmentoContenido;
 import es.refugio.vista.infraestructure.web.enums.ModelAttribute;
@@ -46,6 +51,7 @@ public class TareaViewController {
     private final DeleteTareaService deleteTareaService;
     private final EditTareaService editTareaService;
     private final FindVoluntarioService findVoluntarioService;
+    private final FindUsuarioService findUsuarioService;
 
     private final TemplateEngine templateEngine;
 
@@ -62,7 +68,14 @@ public class TareaViewController {
     @GetMapping(WebRoutes.TAREAS_NUEVA)
     public String formulario(Model model) {
         model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), Tarea.builder().fecha(LocalDateTime.now()).build());
-        model.addAttribute("voluntarios", findVoluntarioService.findAll());
+
+        List<Voluntario> voluntarios = findVoluntarioService.findAll();
+        Map<Integer, Usuario> usuariosMap = voluntarios.stream()
+                .map(v -> findUsuarioService.findById(v.getUsuarioId()))
+                .collect(Collectors.toMap(u -> u.getId().getValue(), u -> u, (a, b) -> a));
+
+        model.addAttribute("voluntarios", voluntarios);
+        model.addAttribute("usuariosMap", usuariosMap);
         model.addAttribute("estados", EstadoTarea.values());
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Tarea_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -83,7 +96,14 @@ public class TareaViewController {
     public String editarFormulario(@PathVariable Integer id, Model model) {
         Tarea tarea = findTareaService.findById(new TareaId(id));
         model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
-        model.addAttribute("voluntarios", findVoluntarioService.findAll());
+
+        List<Voluntario> voluntarios = findVoluntarioService.findAll();
+        Map<Integer, Usuario> usuariosMap = voluntarios.stream()
+                .map(v -> findUsuarioService.findById(v.getUsuarioId()))
+                .collect(Collectors.toMap(u -> u.getId().getValue(), u -> u, (a, b) -> a));
+
+        model.addAttribute("voluntarios", voluntarios);
+        model.addAttribute("usuariosMap", usuariosMap);
         model.addAttribute("estados", EstadoTarea.values());
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Tarea_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();

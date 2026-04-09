@@ -93,4 +93,14 @@ public class AnimalJpaRepositoryImpl implements AnimalRepository {
             return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
         }));
     }
-}
+
+    @Override
+    public List<Animal> findTop3ByEstadoOrderByVisitasDesc(EstadoAnimal estado) {
+        return AnimalMapper.toDomain(repository.findTop3ByEstadoOrderByVisitasDesc(estado));
+    }
+
+    @Override
+    public void incrementarVisitas(AnimalId id) {
+        repository.incrementarVisitas(id.getValue());
+    }
+}

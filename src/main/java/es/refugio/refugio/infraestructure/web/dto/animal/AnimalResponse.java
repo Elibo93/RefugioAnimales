@@ -18,6 +18,7 @@ public record AnimalResponse(
         LocalDateTime fechaIngreso,
         Double peso,
         Integer nivelEnergia,
-        Boolean urgencia
+        Boolean urgencia,
+        Integer visitas
 ) {
 }

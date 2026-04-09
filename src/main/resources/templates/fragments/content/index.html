@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -7,171 +7,245 @@
 
 <body>
     <div th:fragment="content">
-        <!-- 1. Hero Section -->
-        <section class="home-hero">
-            <div class="hero-overlay"></div>
-            <div class="hero-glass-card">
-                <h1 class="hero-title">No puedes comprar el amor, <br> pero puedes adoptarlo</h1>
-                <div class="hero-ctas">
-                    <a th:href="@{/web/animales}" class="btn-hero btn-hero-primary">
+        <!-- VISTA ADMINISTRADOR -->
+        <div sec:authorize="hasRole('ROLE_ADMIN')">
+            <section class="admin-hero" style="margin-top: 0;">
+                <div class="admin-welcome-card glass-panel">
+                    <h1 class="admin-title">Panel de Control <span class="badge-admin">ADMIN</span></h1>
+                    <p class="admin-subtitle">Gestión operativa del refugio, seguimiento de animales y solicitudes
+                        pendientes.</p>
+                </div>
+            </section>
+
+            <!-- KPI Grid -->
+            <section class="kpi-grid">
+                <div class="kpi-card glass-panel">
+                    <div class="kpi-icon icon-blue"><i data-lucide="dog"></i></div>
+                    <div class="kpi-info">
+                        <span class="kpi-label" th:text="#{menu.animales.card.title}">Animales</span>
+                        <span class="kpi-value" th:text="${animales != null ? #lists.size(animales) : 0}">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card glass-panel">
+                    <div class="kpi-icon icon-green"><i data-lucide="award"></i></div>
+                    <div class="kpi-info">
+                        <span class="kpi-label" th:text="#{menu.adopciones.card.title}">Adopciones</span>
+                        <span class="kpi-value" th:text="${adopciones != null ? #lists.size(adopciones) : 0}">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card glass-panel">
+                    <div class="kpi-icon icon-orange"><i data-lucide="users"></i></div>
+                    <div class="kpi-info">
+                        <span class="kpi-label" th:text="#{menu.voluntarios.card.title}">Voluntarios</span>
+                        <span class="kpi-value" th:text="${voluntarios != null ? #lists.size(voluntarios) : 0}">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card glass-panel">
+                    <div class="kpi-icon icon-purple"><i data-lucide="user-check"></i></div>
+                    <div class="kpi-info">
+                        <span class="kpi-label" th:text="#{menu.personas.card.title}">Personas</span>
+                        <span class="kpi-value" th:text="${personas != null ? #lists.size(personas) : 0}">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Acciones Rápidas -->
+            <section class="quick-actions-admin">
+                <h2 class="section-title">Acciones Rápidas de Gestión</h2>
+                <div class="actions-grid">
+                    <a th:href="@{/web/animales/nuevo}" class="action-btn glass-panel">
+                        <i data-lucide="plus-circle"></i>
+                        <span>Nuevo Animal</span>
+                    </a>
+                    <a th:href="@{/web/solicitudes}" class="action-btn glass-panel">
+                        <i data-lucide="file-text"></i>
+                        <span>Ver Solicitudes</span>
+                    </a>
+                    <a th:href="@{/web/tareas/nueva}" class="action-btn glass-panel">
+                        <i data-lucide="calendar"></i>
+                        <span>Asignar Tarea</span>
+                    </a>
+                    <a th:href="@{/web/donaciones}" class="action-btn glass-panel">
                         <i data-lucide="heart"></i>
-                        Conoce a nuestros amigos
-                    </a>
-                    <a th:href="@{/web/voluntarios/nuevo}" class="btn-hero btn-hero-secondary">
-                        <i data-lucide="users"></i>
-                        Quiero ser voluntario
+                        <span>Donaciones</span>
                     </a>
                 </div>
-            </div>
-        </section>
-
-        <!-- 2. Buscador Rápido (Floating) -->
-        <div class="search-bar-floating">
-            <div class="search-field">
-                <label>Especie</label>
-                <select>
-                    <option>Cualquier especie</option>
-                    <option>Perro</option>
-                    <option>Gato</option>
-                </select>
-            </div>
-            <div style="width: 1px; height: 30px; background: var(--border);"></div>
-            <div class="search-field">
-                <label>Tamaño</label>
-                <select>
-                    <option>Cualquier tamaño</option>
-                    <option>Pequeño</option>
-                    <option>Mediano</option>
-                    <option>Grande</option>
-                </select>
-            </div>
-            <div style="width: 1px; height: 30px; background: var(--border);"></div>
-            <div class="search-field">
-                <label>Edad</label>
-                <select>
-                    <option>Cualquier edad</option>
-                    <option>Cachorro</option>
-                    <option>Adulto</option>
-                    <option>Senior</option>
-                </select>
-            </div>
-            <button class="btn-search">
-                <i data-lucide="search" style="color: white;"></i>
-            </button>
+            </section>
         </div>
 
-        <!-- 3. Contador de Impacto -->
-        <section id="impact" class="impact-container">
-            <div class="impact-item">
-                <span class="impact-icon">🏠</span>
-                <span class="impact-number">+500</span>
-                <span class="impact-label">Hogares encontrados</span>
-            </div>
-            <div class="impact-item">
-                <span class="impact-icon">🐾</span>
-                <span class="impact-number" th:text="${animales != null ? #lists.size(animales) : 42}">42</span>
-                <span class="impact-label">Esperando hoy</span>
-            </div>
-            <div class="impact-item">
-                <span class="impact-icon">❤️</span>
-                <span class="impact-number">120</span>
-                <span class="impact-label">Voluntarios activos</span>
-            </div>
-            <div class="impact-item">
-                <span class="impact-icon">🦴</span>
-                <span class="impact-number">2T</span>
-                <span class="impact-label">Comida donada este año</span>
-            </div>
-        </section>
+        <!-- VISTA USUARIO / PÚBLICO -->
+        <div sec:authorize="!hasRole('ROLE_ADMIN')">
+            <!-- 1. Hero Section -->
+            <section class="home-hero" style="margin-top: 0;">
+                <div class="hero-glass-card hero-card-with-bg">
+                    <h1 class="hero-title">No puedes comprar el amor, <br> pero puedes adoptarlo</h1>
+                    <div class="hero-ctas">
+                        <a th:href="@{/web/animales}" class="btn-hero btn-hero-primary">
+                            <i data-lucide="heart"></i>
+                            Conoce a nuestros amigos
+                        </a>
+                        <a th:href="@{/web/voluntarios/nuevo}" class="btn-hero btn-hero-secondary">
+                            <i data-lucide="users"></i>
+                            Quiero ser voluntario
+                        </a>
+                    </div>
+                </div>
+            </section>
 
-        <!-- 4. Favoritos de la Semana -->
-        <section class="page-header" style="text-align: center; margin-bottom: 3rem;">
-            <h2 class="page-title">Favoritos de la Semana</h2>
-            <p style="color: var(--text-muted);">Animales que buscan un hogar con urgencia</p>
-        </section>
-
-        <div class="animal-grid">
-            <!-- Mock Featured Animals (or use model data if filtered) -->
-            <div class="animal-card">
-                <div class="animal-image-wrapper">
-                    <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80" alt="Perro">
+            <!-- 2. Buscador Rápido (Floating) -->
+            <form class="search-bar-floating" th:action="@{/web/animales}" method="GET">
+                <div class="search-field">
+                    <label>Especie</label>
+                    <select name="especie">
+                        <option value="">Cualquier especie</option>
+                        <option value="PERRO">Perro</option>
+                        <option value="GATO">Gato</option>
+                    </select>
                 </div>
-                <div class="animal-content" style="padding: 1.5rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <h3 style="font-size: 1.25rem; font-weight: 800;">Rocky ♂</h3>
-                        <span class="badge" style="background: var(--primary-light); color: var(--primary);">Cachorro</span>
+                <div style="width: 1px; height: 30px; background: var(--border);"></div>
+                <div class="search-field">
+                    <label>Tamaño</label>
+                    <select name="tamano">
+                        <option value="">Cualquier tamaño</option>
+                        <option value="PEQUEÑO">Pequeño</option>
+                        <option value="MEDIANO">Mediano</option>
+                        <option value="GRANDE">Grande</option>
+                    </select>
+                </div>
+                <div style="width: 1px; height: 30px; background: var(--border);"></div>
+                <div class="search-field">
+                    <label>Edad</label>
+                    <select name="edad">
+                        <option value="">Cualquier edad</option>
+                        <option value="cachorro">Cachorro</option>
+                        <option value="adulto">Adulto</option>
+                        <option value="senior">Senior</option>
+                    </select>
+                </div>
+                <button class="btn-search" type="submit">
+                    <i data-lucide="search" style="color: white;"></i>
+                </button>
+            </form>
+
+            <!-- 3. Contador de Impacto -->
+            <section id="impact" class="impact-container">
+                <div class="impact-item">
+                    <span class="impact-icon">🏠</span>
+                    <span class="impact-number">+500</span>
+                    <span class="impact-label">Hogares encontrados</span>
+                </div>
+                <div class="impact-item">
+                    <span class="impact-icon">🐾</span>
+                    <span class="impact-number" th:text="${animales != null ? #lists.size(animales) : 42}">42</span>
+                    <span class="impact-label">Esperando hoy</span>
+                </div>
+                <div class="impact-item">
+                    <span class="impact-icon">❤️</span>
+                    <span class="impact-number">120</span>
+                    <span class="impact-label">Voluntarios activos</span>
+                </div>
+                <div class="impact-item">
+                    <span class="impact-icon">🦴</span>
+                    <span class="impact-number">2T</span>
+                    <span class="impact-label">Comida donada este año</span>
+                </div>
+            </section>
+
+            <!-- 4. Favoritos de la Semana -->
+            <section class="page-header" style="text-align: center; margin-bottom: 3rem;">
+                <h2 class="page-title">Favoritos de la Semana</h2>
+                <p style="color: var(--text-muted);">Los animales más populares que buscan un hogar</p>
+            </section>
+
+            <div class="animal-grid">
+                <!-- Dinamizamos la sección con animales favoritos del backend -->
+                <th:block th:each="a : ${favoritos}">
+                    <div class="animal-card-glass glass-card"
+                        style="position: relative; overflow: hidden; border-radius: 24px; transition: transform 0.3s ease;">
+                        <div class="card-img-container"
+                            style="position: relative; aspect-ratio: 4/5; overflow: hidden;">
+                            <img th:src="${a.foto != null ? a.foto : '/images/placeholder-animal.png'}" alt="Animal"
+                                style="width: 100%; height: 100%; object-fit: cover;">
+
+                            <!-- Status Badge -->
+                            <span class="status-badge badge-available"
+                                style="position: absolute; top: 1rem; left: 1rem; padding: 0.5rem 1rem; border-radius: 99px; background: rgba(52, 211, 153, 0.9); color: white; font-weight: 700; font-size: 0.75rem; backdrop-filter: blur(4px);"
+                                th:text="${a.estado}">
+                                Disponible
+                            </span>
+
+                            <!-- Hover Overlay -->
+                            <div class="card-info-overlay"
+                                style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); display: flex; flex-direction: column; justify-content: flex-end; padding: 2rem; opacity: 0; transition: opacity 0.3s ease;"
+                                onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
+                                <p style="font-size: 0.85rem; margin-bottom: 1.5rem; color: white;"
+                                    th:text="${a.descripcion}">
+                                    Descripción breve...
+                                </p>
+                                <button class="btn btn-primary" style="width: 100%; justify-content: center;"
+                                    th:attr="hx-get=@{/web/animales/{id}/detalle(id=${a.id.value})}"
+                                    hx-target="#modal-host" hx-swap="outerHTML">
+                                    <i data-lucide="maximize-2"></i>
+                                    <span th:text="#{animal.button.view.profile}">Conóceme</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card-body-glass" style="padding: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3 class="animal-name" th:text="${a.nombre}"
+                                    style="font-weight: 800; font-size: 1.2rem;">Nombre</h3>
+                                <i th:data-lucide="${a.sexo.toString() == 'MACHO' ? 'mars' : 'venus'}"
+                                    th:style="${a.sexo.toString() == 'MACHO' ? 'color: #3B82F6' : 'color: #EC4899'}"></i>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.2rem;">
+                                <p style="color: var(--text-muted); font-size: 0.9rem;" th:text="${a.raza}">Raza</p>
+                                <span style="font-size: 0.7rem; color: var(--secondary); font-weight: 600;" th:text="${a.visitas} + ' vistas'">0 vistas</span>
+                            </div>
+                        </div>
                     </div>
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-                        <span class="badge" style="font-size: 0.75rem;">Tranquilo</span>
-                        <span class="badge" style="font-size: 0.75rem;">Apto para gatos</span>
-                    </div>
-                    <a th:href="@{/web/animales}" class="btn btn-primary" style="width: 100%; justify-content: center;">Adoptar</a>
+                </th:block>
+
+                <!-- Estado vacío -->
+                <div th:if="${#lists.isEmpty(favoritos)}" class="glass-card"
+                    style="grid-column: 1/-1; padding: 4rem; text-align: center;">
+                    <p>Buscando a los más populares...</p>
                 </div>
             </div>
 
-            <div class="animal-card">
-                <div class="animal-image-wrapper">
-                    <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80" alt="Gato">
+            <!-- 5. Historias con Final Feliz -->
+            <section style="margin: 6rem 0;">
+                <div class="stories-header">
+                    <h2 class="page-title">Historias con Final Feliz</h2>
                 </div>
-                <div class="animal-content" style="padding: 1.5rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <h3 style="font-size: 1.25rem; font-weight: 800;">Luna ♀</h3>
-                        <span class="badge" style="background: #FEE2E2; color: #EF4444;">Adulto</span>
+                <div id="story-carousel" class="story-carousel">
+                    <div class="story-card active">
+                        <img src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=600&q=80"
+                            class="story-img" alt="Final Feliz">
+                        <div class="story-text">
+                            <p class="story-quote">"Luna llegó asustada y ahora es la reina del sofá. Gracias al refugio
+                                por unir nuestros caminos."</p>
+                            <p class="story-author">— Familia Pérez</p>
+                        </div>
                     </div>
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-                        <span class="badge" style="font-size: 0.75rem;">Muy cariñosa</span>
+                    <!-- Extra stories for carousel -->
+                    <div class="story-card" style="display: none;">
+                        <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=600&q=80"
+                            class="story-img" alt="Final Feliz">
+                        <div class="story-text">
+                            <p class="story-quote">"Rocky ha encontrado su hogar definitivo. Nunca imaginamos que un
+                                perro senior daría tanta vida a nuestra casa."</p>
+                            <p class="story-author">— Juan y Marta</p>
+                        </div>
                     </div>
-                    <a th:href="@{/web/animales}" class="btn btn-primary" style="width: 100%; justify-content: center;">Adoptar</a>
                 </div>
-            </div>
-
-            <div class="animal-card">
-                <div class="animal-image-wrapper">
-                    <img src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&w=800&q=80" alt="Perro">
-                </div>
-                <div class="animal-content" style="padding: 1.5rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <h3 style="font-size: 1.25rem; font-weight: 800;">Bella ♀</h3>
-                        <span class="badge" style="background: #FEF3C7; color: #D97706;">Senior</span>
-                    </div>
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-                        <span class="badge" style="font-size: 0.75rem;">Necesita calma</span>
-                    </div>
-                    <a th:href="@{/web/animales}" class="btn btn-primary" style="width: 100%; justify-content: center;">Adoptar</a>
-                </div>
-            </div>
+            </section>
         </div>
-
-        <!-- 5. Historias con Final Feliz -->
-        <section style="margin: 6rem 0;">
-            <div class="stories-header">
-                <h2 class="page-title">Historias con Final Feliz</h2>
-            </div>
-            <div id="story-carousel" class="story-carousel">
-                <div class="story-card active">
-                    <img src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=600&q=80" class="story-img" alt="Final Feliz">
-                    <div class="story-text">
-                        <p class="story-quote">"Luna llegó asustada y ahora es la reina del sofá. Gracias al refugio por unir nuestros caminos."</p>
-                        <p class="story-author">— Familia Pérez</p>
-                    </div>
-                </div>
-                <!-- Extra stories for carousel -->
-                <div class="story-card" style="display: none;">
-                    <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=600&q=80" class="story-img" alt="Final Feliz">
-                    <div class="story-text">
-                        <p class="story-quote">"Rocky ha encontrado su hogar definitivo. Nunca imaginamos que un perro senior daría tanta vida a nuestra casa."</p>
-                        <p class="story-author">— Juan y Marta</p>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <!-- 6. Sección de Gestión (Shortcuts) -->
-            </div>
-        </div>
+    </div>
+    </div>
     </div>
 </body>
 
 </html>
-
-

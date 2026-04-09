@@ -19,7 +19,11 @@
         </div>
 
         <form th:action="@{${donacion.id == null ? '/web/donaciones/nueva' : '/web/donaciones/' + donacion.id.value + '/editar'}}" method="post" th:object="${donacion}">
+            <!-- Hidden field for Frequency -->
+            <input type="hidden" name="frecuencia" id="frecuencia-input" th:value="${donacion.frecuencia != null ? donacion.frecuencia : 'UNICA'}">
+            
             <div class="form-grid">
+
                 <div class="form-group" style="grid-column: 1/-1;">
                     <label th:text="#{donacion.field.usuario}">Donante</label>
                     
@@ -98,10 +102,21 @@
         }
 
         function setRecurrence(type) {
-            document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.view-toggle .toggle-btn').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
-            // Aquí se podría añadir lógica para cambiar el texto o añadir un flag al form si el backend lo soporta
+            
+            const input = document.getElementById('frecuencia-input');
+            input.value = type.toUpperCase();
+
+            // Mensaje de feedback en el botón
+            const submitBtn = document.querySelector('button[type="submit"] span');
+            if (type === 'mensual') {
+                submitBtn.textContent = 'Confirmar Donación Mensual';
+            } else {
+                submitBtn.textContent = 'Confirmar Donación';
+            }
         }
+
 
         // Initialize icons after HTMX swap or initial load
         if (window.lucide) {

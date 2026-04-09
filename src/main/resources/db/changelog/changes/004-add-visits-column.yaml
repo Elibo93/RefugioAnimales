@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-add-visits-column
+      author: antigravity
+      changes:
+        - addColumn:
+            tableName: animales
+            columns:
+              - column:
+                  name: visitas
+                  type: INT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
