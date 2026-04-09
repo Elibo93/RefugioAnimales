@@ -17,6 +17,8 @@ public enum FragmentoContenido {
 
     Donacion_LIST("fragments/content/donaciones-lista"),
     Donacion_FORM("fragments/content/donacion-formulario"),
+    Donacion_GRACIAS("fragments/content/donacion-gracias"),
+
 
     Historial_LIST("fragments/content/historiales-medicos-lista"),
     Historial_FORM("fragments/content/historial-medico-formulario"),

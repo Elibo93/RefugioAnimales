@@ -43,7 +43,9 @@ public interface WebRoutes {
     // DONACIONES
     public static final String DONACIONES_BASE = "/web/donaciones";
     public static final String DONACIONES_NUEVA = "/web/donaciones/nueva";
+    public static final String DONACIONES_GRACIAS = "/web/donaciones/gracias";
     public static final String DONACIONES_EDITAR = "/web/donaciones/{id}/editar";
+
     public static final String DONACIONES_ELIMINAR = "/web/donaciones/{id}/borrar";
     public static final String DONACIONES_PDF = "/web/donaciones/pdf";
 

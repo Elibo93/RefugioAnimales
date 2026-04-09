@@ -31,9 +31,11 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/donaciones").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/web/animales/**", "/web/donaciones/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/web/donaciones/nueva").permitAll()
+                        .requestMatchers("/web/animales/nuevo/**", "/web/animales/*/editar/**", "/web/animales/*/borrar/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/tareas/**", "/web/tareas/**").hasAnyRole("ADMIN", "VOLUNTARIO")
                         .requestMatchers("/web/voluntarios/nuevo").permitAll()
                         .requestMatchers("/web/voluntarios/**", "/web/personas/**").hasRole("ADMIN")
+
                         .requestMatchers("/web/historiales/**").hasAnyRole("ADMIN", "VOLUNTARIO")
                         .requestMatchers("/web/solicitudes/**", "/web/adopciones/**").authenticated()
                         .requestMatchers("/api/**").authenticated()

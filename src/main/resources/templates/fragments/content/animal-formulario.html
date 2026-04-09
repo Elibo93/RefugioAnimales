@@ -21,7 +21,7 @@
         <div class="card" style="max-width:800px; margin:0 auto;">
             <form
                 th:action="@{${animal.id == null ? '/web/animales/nuevo' : '/web/animales/' + animal.id.value + '/editar'}}"
-                method="post" th:object="${animal}">
+                method="post" th:object="${animal}" enctype="multipart/form-data">
 
                 <div class="form-grid">
 
@@ -127,9 +127,18 @@
                     </div>
 
                     <div class="form-group" style="grid-column:1/-1;">
-                        <label th:text="#{animal.field.foto}">URL Foto</label>
-                        <input type="text" th:field="*{foto}">
+                        <label>Fotografía del Animal</label>
+                        <div th:if="${animal.foto != null && !animal.foto.isEmpty()}" style="margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem;">
+                            <img th:src="${animal.foto}" alt="Miniatura" style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px; border: 2px solid var(--primary-color);">
+                            <div>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Imagen actual</p>
+                                <input type="hidden" th:field="*{foto}">
+                            </div>
+                        </div>
+                        <input type="file" name="fotoFile" accept="image/*" style="padding: 0.5rem; background: rgba(0,0,0,0.02); border: 2px dashed var(--border-color); border-radius: 12px; width: 100%;">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">Formatos aceptados: JPG, PNG. Máximo 5MB.</p>
                     </div>
+
 
                     <div class="form-group" style="grid-column:1/-1;">
                         <label th:text="#{animal.field.description}">Descripción</label>

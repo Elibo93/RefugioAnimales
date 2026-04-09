@@ -33,8 +33,10 @@ public class CreateAnimalUseCase {
                 .peso(comando.peso())
                 .nivelEnergia(comando.nivelEnergia())
                 .urgencia(comando.urgencia())
+                .visitas(0)
                 .fechaIngreso(LocalDateTime.now())
                 .build();
+
 
         return animalRepository.save(animal);
     }

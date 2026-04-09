@@ -150,8 +150,15 @@ public class DonacionViewController {
         createDonacionService.create(
                 new CreateDonacionCommand(usuarioId, tipo, cantidad, frecuencia, LocalDateTime.now(), descripcion));
         redirectAttributes.addFlashAttribute("successMessage", "Donación registrada correctamente");
-        return "redirect:" + WebRoutes.DONACIONES_BASE;
+        return "redirect:" + WebRoutes.DONACIONES_GRACIAS;
     }
+
+    @GetMapping(WebRoutes.DONACIONES_GRACIAS)
+    public String gracias(Model model) {
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_GRACIAS.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
 
     @GetMapping(WebRoutes.DONACIONES_EDITAR)
     public String editarFormulario(@PathVariable Integer id, Model model, Authentication authentication) {

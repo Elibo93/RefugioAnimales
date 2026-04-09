@@ -19,6 +19,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
+
 
 import es.refugio.refugio.application.command.animal.CreateAnimalCommand;
 import es.refugio.refugio.application.command.animal.EditAnimalCommand;
@@ -114,15 +122,22 @@ public class AnimalViewController {
             @RequestParam(required = false) Integer edad,
             @RequestParam(required = false) String tamano,
             @RequestParam(required = false) String descripcion,
-            @RequestParam(required = false) String foto,
+            @RequestParam(required = false, name = "foto") String fotoUrl,
+            @RequestParam(required = false) MultipartFile fotoFile,
             @RequestParam(required = false) Double peso,
             @RequestParam(required = false) Integer nivelEnergia,
             @RequestParam(required = false) Boolean urgencia,
             RedirectAttributes redirectAttributes) {
 
+        String fotoFinal = fotoUrl;
+
+        if (fotoFile != null && !fotoFile.isEmpty()) {
+            fotoFinal = saveFile(fotoFile);
+        }
+
         createAnimalService.createAnimal(
                 new CreateAnimalCommand(nombre, especie, especiePersonalizada, raza, sexo, chipId, estado, edad, tamano,
-                        descripcion, foto, peso, nivelEnergia, urgencia));
+                        descripcion, fotoFinal, peso, nivelEnergia, urgencia));
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",
@@ -130,6 +145,7 @@ public class AnimalViewController {
 
         return "redirect:" + WebRoutes.ANIMALES_BASE;
     }
+
 
     @GetMapping(WebRoutes.ANIMALES_EDITAR)
     public String editarFormulario(@PathVariable Integer id, Model model) {
@@ -154,15 +170,22 @@ public class AnimalViewController {
             @RequestParam(required = false) Integer edad,
             @RequestParam(required = false) String tamano,
             @RequestParam(required = false) String descripcion,
-            @RequestParam(required = false) String foto,
+            @RequestParam(required = false, name = "foto") String fotoActual,
+            @RequestParam(required = false) MultipartFile fotoFile,
             @RequestParam(required = false) Double peso,
             @RequestParam(required = false) Integer nivelEnergia,
             @RequestParam(required = false) Boolean urgencia,
             RedirectAttributes redirectAttributes) {
 
+        String fotoFinal = fotoActual;
+
+        if (fotoFile != null && !fotoFile.isEmpty()) {
+            fotoFinal = saveFile(fotoFile);
+        }
+
         editAnimalService.update(
                 new EditAnimalCommand(new AnimalId(id), nombre, especie, especiePersonalizada, chipId, estado, edad, tamano,
-                        descripcion, foto, peso, nivelEnergia, urgencia));
+                        descripcion, fotoFinal, peso, nivelEnergia, urgencia));
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",
@@ -170,6 +193,21 @@ public class AnimalViewController {
 
         return "redirect:" + WebRoutes.ANIMALES_BASE;
     }
+
+    private String saveFile(MultipartFile file) {
+        try {
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            Path uploadPath = Paths.get("src/main/resources/static/uploads/animals");
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+            Files.copy(file.getInputStream(), uploadPath.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+            return "/uploads/animals/" + fileName;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 
     @PostMapping(WebRoutes.ANIMALES_ELIMINAR)
     @ResponseBody
