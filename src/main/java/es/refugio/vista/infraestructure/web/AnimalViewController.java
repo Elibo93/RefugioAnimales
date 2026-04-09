@@ -11,7 +11,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -100,7 +102,9 @@ public class AnimalViewController {
     }
 
     @GetMapping(WebRoutes.ANIMALES_NUEVO)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String formulario(Model model) {
+
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), Animal.builder().build());
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), findVoluntarioService.findAll());
         model.addAttribute("tamanos", es.refugio.refugio.domain.model.animal.enums.Tamano.values());
@@ -112,7 +116,9 @@ public class AnimalViewController {
     }
 
     @PostMapping(WebRoutes.ANIMALES_NUEVO)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String crearAnimal(@RequestParam String nombre,
+
             @RequestParam String especie,
             @RequestParam(required = false) String especiePersonalizada,
             @RequestParam String raza,
@@ -148,7 +154,9 @@ public class AnimalViewController {
 
 
     @GetMapping(WebRoutes.ANIMALES_EDITAR)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String editarFormulario(@PathVariable Integer id, Model model) {
+
         Animal animal = findAnimalService.findById(new AnimalId(id));
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), findVoluntarioService.findAll());
@@ -161,7 +169,9 @@ public class AnimalViewController {
     }
 
     @PostMapping(WebRoutes.ANIMALES_EDITAR)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String procesarEdicion(@PathVariable Integer id,
+
             @RequestParam String nombre,
             @RequestParam String especie,
             @RequestParam(required = false) String especiePersonalizada,
@@ -211,7 +221,9 @@ public class AnimalViewController {
 
     @PostMapping(WebRoutes.ANIMALES_ELIMINAR)
     @ResponseBody
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> borrar(@PathVariable Integer id, RedirectAttributes redirectAttributes,
+
             HttpServletRequest request) {
 
         deleteAnimalService.delete(new AnimalId(id));

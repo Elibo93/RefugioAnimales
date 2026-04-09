@@ -102,7 +102,7 @@
                                     th:text="${a.estado}">
                                     Disponible
                                 </span>
-                                <div class="card-info-overlay">
+                                <div class="card-info-overlay" sec:authorize="!hasRole('ROLE_ADMIN')">
                                     <p style="font-size: 0.85rem; margin-bottom: 1rem;" th:text="${a.descripcion}">
                                         Descripción breve.
                                     </p>
@@ -142,17 +142,24 @@
                                             th:text="#{animal.field.energy}">Energía</span>
                                     </div>
                                 </div>
-                                <div style="margin-top: auto; display: flex; gap: 0.5rem; justify-content: flex-end;"
-                                    sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')">
+
+                                <!-- Acciones del Administrador (Sin Hover) -->
+                                <div style="margin-top: auto; display: flex; gap: 0.75rem; justify-content: flex-end;"
+                                    sec:authorize="hasRole('ROLE_ADMIN')">
+                                    <button class="btn-view-small" title="Ver Detalle"
+                                        th:attr="hx-get=@{/web/animales/{id}/detalle(id=${a.id.value})}"
+                                        hx-target="#modal-host" hx-swap="outerHTML">
+                                        <i data-lucide="eye"></i>
+                                    </button>
                                     <a th:href="@{/web/animales/{id}/editar(id=${a.id.value})}"
-                                        style="color: var(--text-muted); padding: 4px;">
-                                        <i data-lucide="edit-2" style="width: 16px;"></i>
+                                        class="btn-edit-small" title="Editar">
+                                        <i data-lucide="edit-2"></i>
                                     </a>
                                     <button
                                         th:attr="hx-post=@{/web/animales/{id}/borrar(id=${a.id.value})}, hx-target='#card-' + ${a.id.value}"
                                         hx-swap="outerHTML swap:0.3s" hx-confirm="¿Eliminar?"
-                                        style="color: var(--danger); background: none; border: none; cursor: pointer; padding: 4px;">
-                                        <i data-lucide="trash-2" style="width: 16px;"></i>
+                                        class="btn-delete-small" title="Eliminar">
+                                        <i data-lucide="trash-2"></i>
                                     </button>
                                 </div>
                             </div>

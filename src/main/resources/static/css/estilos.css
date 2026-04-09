@@ -950,9 +950,143 @@ body {
     }
 }
 
+.story-card.active {
+    animation: fadeInUp 0.5s ease-out forwards;
+    display: flex !important;
+}
+
+.carousel-control {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    color: var(--primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.carousel-control:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: var(--shadow-lg);
+}
+
+.carousel-control.prev {
+    left: -10px;
+}
+
+.carousel-control.next {
+    right: -10px;
+}
+
+@media (max-width: 768px) {
+    .carousel-wrapper {
+        padding: 0 10px !important;
+    }
+    .carousel-control {
+        width: 40px;
+        height: 40px;
+    }
+    .carousel-control.prev { left: 0; }
+    .carousel-control.next { right: 0; }
+}
+
+
+/* Botones de acción rápidos en Grid */
+.btn-edit-small, .btn-delete-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-edit-small {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3B82F6;
+}
+
+.btn-edit-small:hover {
+    background: #3B82F6;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-view-small {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8B5CF6;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-view-small:hover {
+    background: #8B5CF6;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-delete-small {
+
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+}
+
+.btn-delete-small:hover {
+    background: #EF4444;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-edit-small i, .btn-delete-small i {
+    width: 16px;
+    height: 16px;
+}
+
+/* Estilos para campos de Solo Lectura */
+.readonly-group label {
+    color: var(--text-muted) !important;
+}
+
+.readonly-group input, .readonly-group select {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    color: var(--text-muted) !important;
+    cursor: not-allowed !important;
+    pointer-events: none; /* Evita cualquier interacción */
+}
+
+.readonly-group input:focus, .readonly-group select:focus {
+    box-shadow: none !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
 /* =====================
    3. MAIN LAYOUT
 ===================== */
+
+
 main {
     flex: 1;
     max-width: 1200px;

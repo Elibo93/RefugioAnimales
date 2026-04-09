@@ -87,14 +87,27 @@
                                 <span th:text="#{animal.button.adopt}">¡Adopta!</span>
                             </button>
                         </div>
-                        <!-- Admin/Voluntario (Preview) -->
-                        <div sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_VOLUNTARIO')">
+                        <!-- Admin (Preview & Edit) -->
+                        <div sec:authorize="hasRole('ROLE_ADMIN')" style="display: flex; gap: 1rem; width: 100%;">
+                            <a th:href="@{/web/animales/{id}/editar(id=${animal.id.value})}" class="btn btn-secondary" style="flex: 1; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px; background: rgba(0,0,0,0.05);">
+                                <i data-lucide="edit"></i>
+                                <span>Editar Ficha</span>
+                            </a>
+                            <a th:href="@{/web/solicitudes/nueva(animalId=${animal.id.value})}" class="btn btn-primary" style="flex: 1; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
+                                <i data-lucide="heart"></i>
+                                <span th:text="#{animal.button.adopt}">¡Adopta!</span>
+                            </a>
+                        </div>
+                        <!-- Voluntario (Preview only) -->
+                        <div sec:authorize="hasRole('ROLE_VOLUNTARIO')">
                             <a th:href="@{/web/solicitudes/nueva(animalId=${animal.id.value})}" class="btn btn-primary" style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
                                 <i data-lucide="heart"></i>
                                 <span th:text="#{animal.button.adopt}">¡Adopta!</span>
                             </a>
                         </div>
                     </div>
+
+
                     
                     <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal-host').innerHTML = ''" style="height: 56px; border-radius: 16px;">
                         Cerrar

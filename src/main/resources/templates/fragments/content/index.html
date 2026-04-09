@@ -53,10 +53,16 @@
             <section class="quick-actions-admin">
                 <h2 class="section-title">Acciones Rápidas de Gestión</h2>
                 <div class="actions-grid">
-                    <a th:href="@{/web/animales/nuevo}" class="action-btn glass-panel">
+                    <a th:href="@{/web/animales/nuevo}" class="action-btn glass-panel" sec:authorize="hasRole('ROLE_ADMIN')">
                         <i data-lucide="plus-circle"></i>
                         <span>Nuevo Animal</span>
                     </a>
+                    <a th:href="@{/web/animales}" class="action-btn glass-panel" sec:authorize="hasRole('ROLE_ADMIN')">
+                        <i data-lucide="edit"></i>
+                        <span>Modificar Animal</span>
+                    </a>
+
+
                     <a th:href="@{/web/solicitudes}" class="action-btn glass-panel">
                         <i data-lucide="file-text"></i>
                         <span>Ver Solicitudes</span>
@@ -200,7 +206,6 @@
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.2rem;">
                                 <p style="color: var(--text-muted); font-size: 0.9rem;" th:text="${a.raza}">Raza</p>
-                                <span style="font-size: 0.7rem; color: var(--secondary); font-weight: 600;" th:text="${a.visitas} + ' vistas'">0 vistas</span>
                             </div>
                         </div>
                     </div>
@@ -214,32 +219,92 @@
             </div>
 
             <!-- 5. Historias con Final Feliz -->
-            <section style="margin: 6rem 0;">
+            <section style="margin: 6rem 0; position: relative;">
                 <div class="stories-header">
                     <h2 class="page-title">Historias con Final Feliz</h2>
                 </div>
-                <div id="story-carousel" class="story-carousel">
-                    <div class="story-card active">
-                        <img src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=600&q=80"
-                            class="story-img" alt="Final Feliz">
-                        <div class="story-text">
-                            <p class="story-quote">"Luna llegó asustada y ahora es la reina del sofá. Gracias al refugio
-                                por unir nuestros caminos."</p>
-                            <p class="story-author">— Familia Pérez</p>
+                
+                <div class="carousel-wrapper" style="position: relative; max-width: 1000px; margin: 0 auto; padding: 0 50px;">
+                    <!-- Botones de Navegación -->
+                    <button class="carousel-control prev" onclick="moveCarousel(-1)" aria-label="Anterior">
+                        <i data-lucide="chevron-left"></i>
+                    </button>
+                    <button class="carousel-control next" onclick="moveCarousel(1)" aria-label="Siguiente">
+                        <i data-lucide="chevron-right"></i>
+                    </button>
+
+                    <div id="story-carousel" class="story-carousel">
+                        <div class="story-card active">
+                            <img src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=600&q=80"
+                                class="story-img" alt="Final Feliz">
+                            <div class="story-text">
+                                <p class="story-quote">"Luna llegó asustada y ahora es la reina del sofá. Gracias al refugio
+                                    por unir nuestros caminos."</p>
+                                <p class="story-author">— Familia Pérez</p>
+                            </div>
                         </div>
-                    </div>
-                    <!-- Extra stories for carousel -->
-                    <div class="story-card" style="display: none;">
-                        <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=600&q=80"
-                            class="story-img" alt="Final Feliz">
-                        <div class="story-text">
-                            <p class="story-quote">"Rocky ha encontrado su hogar definitivo. Nunca imaginamos que un
-                                perro senior daría tanta vida a nuestra casa."</p>
-                            <p class="story-author">— Juan y Marta</p>
+                        
+                        <div class="story-card" style="display: none;">
+                            <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=600&q=80"
+                                class="story-img" alt="Final Feliz">
+                            <div class="story-text">
+                                <p class="story-quote">"Rocky ha encontrado su hogar definitivo. Nunca imaginamos que un
+                                    perro senior daría tanta vida a nuestra casa."</p>
+                                <p class="story-author">— Juan y Marta</p>
+                            </div>
+                        </div>
+
+                        <div class="story-card" style="display: none;">
+                            <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=600&q=80"
+                                class="story-img" alt="Mila">
+                            <div class="story-text">
+                                <p class="story-quote">"Mila era una perrita muy miedosa, pero con paciencia ahora corre feliz por el parque. Es pura alegría."</p>
+                                <p class="story-author">— Familia García</p>
+                            </div>
+                        </div>
+
+                        <div class="story-card" style="display: none;">
+                            <img src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&w=600&q=80"
+                                class="story-img" alt="Boby">
+                            <div class="story-text">
+                                <p class="story-quote">"Boby, nuestro senior favorito, ha encontrado el sofá de sus sueños. Nunca es tarde para ser feliz."</p>
+                                <p class="story-author">— Carlos y Elena</p>
+                            </div>
+                        </div>
+
+                        <div class="story-card" style="display: none;">
+                            <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=600&q=80"
+                                class="story-img" alt="Simba">
+                            <div class="story-text">
+                                <p class="story-quote">"Simba ha encontrado un compañero de juegos inseparable. Verlos crecer juntos es nuestro mayor regalo."</p>
+                                <p class="story-author">— Sofía y familia</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
+
+            <script th:inline="javascript">
+                let currentItem = 0;
+                const items = document.querySelectorAll('.story-card');
+
+                function moveCarousel(direction) {
+                    // Ocultar actual
+                    items[currentItem].style.display = 'none';
+                    items[currentItem].classList.remove('active');
+
+                    // Calcular siguiente
+                    currentItem = (currentItem + direction + items.length) % items.length;
+
+                    // Mostrar siguiente
+                    items[currentItem].style.display = 'flex';
+                    items[currentItem].classList.add('active');
+                    
+                    // Asegurar que Lucide refresque si hay iconos nuevos (aunque aquí no hay)
+                    if (window.lucide) lucide.createIcons();
+                }
+            </script>
+
         </div>
 
         <!-- 6. Sección de Gestión (Shortcuts) -->

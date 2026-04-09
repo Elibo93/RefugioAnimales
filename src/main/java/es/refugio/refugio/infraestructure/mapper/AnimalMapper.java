@@ -31,6 +31,7 @@ public class AnimalMapper {
                 req.urgencia());
     }
 
+
     public static EditAnimalCommand toCommand(int id, AnimalRequest req) {
         return new EditAnimalCommand(
                 new AnimalId(id),
