@@ -7,10 +7,12 @@ import es.refugio.refugio.application.service.animal.CreateAnimalService;
 import es.refugio.refugio.application.service.animal.DeleteAnimalService;
 import es.refugio.refugio.application.service.animal.EditAnimalService;
 import es.refugio.refugio.application.service.animal.FindAnimalService;
+import es.refugio.refugio.application.service.animal.IncrementarVisitasService;
 import es.refugio.refugio.application.usecase.animal.CreateAnimalUseCase;
 import es.refugio.refugio.application.usecase.animal.DeleteAnimalUseCase;
 import es.refugio.refugio.application.usecase.animal.EditAnimalUseCase;
 import es.refugio.refugio.application.usecase.animal.FindAnimalUseCase;
+import es.refugio.refugio.application.usecase.animal.IncrementarVisitasUseCase;
 import es.refugio.refugio.domain.repository.AnimalRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.animal.AnimalEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.animal.AnimalJpaRepositoryImpl;
@@ -66,4 +68,14 @@ public class AnimalConfig {
     public EditAnimalService editAnimalService() {
         return new EditAnimalService(editAnimalUseCase());
     }
-}
+
+    @Bean
+    public IncrementarVisitasUseCase incrementarVisitasUseCase() {
+        return new IncrementarVisitasUseCase(animalRepository());
+    }
+
+    @Bean
+    public IncrementarVisitasService incrementarVisitasService() {
+        return new IncrementarVisitasService(incrementarVisitasUseCase());
+    }
+}

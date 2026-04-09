@@ -26,6 +26,7 @@ import es.refugio.refugio.application.service.animal.CreateAnimalService;
 import es.refugio.refugio.application.service.animal.DeleteAnimalService;
 import es.refugio.refugio.application.service.animal.EditAnimalService;
 import es.refugio.refugio.application.service.animal.FindAnimalService;
+import es.refugio.refugio.application.service.animal.IncrementarVisitasService;
 import es.refugio.refugio.application.service.voluntario.FindVoluntarioService;
 import es.refugio.refugio.domain.model.animal.Animal;
 import es.refugio.refugio.domain.model.animal.AnimalId;
@@ -45,6 +46,7 @@ public class AnimalViewController {
     private final DeleteAnimalService deleteAnimalService;
     private final EditAnimalService editAnimalService;
     private final FindVoluntarioService findVoluntarioService;
+    private final IncrementarVisitasService incrementarVisitasService;
 
     private final TemplateEngine templateEngine;
 
@@ -208,7 +210,9 @@ public class AnimalViewController {
 
     @GetMapping(WebRoutes.animales_BASE + "/{id}/detalle")
     public String detalleModal(@PathVariable Integer id, Model model) {
-        Animal animal = findAnimalService.findById(new AnimalId(id));
+        AnimalId animalId = new AnimalId(id);
+        incrementarVisitasService.incrementar(animalId);
+        Animal animal = findAnimalService.findById(animalId);
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
         return "fragments/content/animales-detalle-modal :: detalle";
     }

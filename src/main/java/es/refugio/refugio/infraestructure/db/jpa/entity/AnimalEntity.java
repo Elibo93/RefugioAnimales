@@ -81,6 +81,10 @@ public class AnimalEntity {
     @Column(name = "urgencia", columnDefinition = "TINYINT(1)")
     private Boolean urgencia;
 
+    @Builder.Default
+    @Column(name = "visitas")
+    private Integer visitas = 0;
+
     @Column(name = "fecha_ingreso", nullable = false)
     private LocalDateTime fechaIngreso;
 

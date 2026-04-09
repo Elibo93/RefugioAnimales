@@ -20,6 +20,7 @@ public class DonacionMapper {
                 req.usuarioId(),
                 req.tipo(),
                 req.cantidad(),
+                req.frecuencia(),
                 req.fecha(),
                 req.descripcion()
         );
@@ -31,6 +32,7 @@ public class DonacionMapper {
                 req.usuarioId(),
                 req.tipo(),
                 req.cantidad(),
+                req.frecuencia(),
                 req.fecha(),
                 req.descripcion()
         );
@@ -42,6 +44,7 @@ public class DonacionMapper {
                 d.getUsuarioId() != null ? d.getUsuarioId().getValue() : null,
                 d.getTipo() != null ? d.getTipo().name() : null,
                 d.getCantidad(),
+                d.getFrecuencia() != null ? d.getFrecuencia().name() : null,
                 d.getFecha(),
                 d.getDescripcion()
         );
@@ -58,6 +61,7 @@ public class DonacionMapper {
                 .usuario(usuarioEntity)
                 .tipo(d.getTipo())
                 .cantidad(d.getCantidad())
+                .frecuencia(d.getFrecuencia())
                 .fecha(d.getFecha())
                 .descripcion(d.getDescripcion())
                 .build();
@@ -69,10 +73,12 @@ public class DonacionMapper {
                 .usuarioId(e.getUsuario() != null ? new UsuarioId(e.getUsuario().getId()) : null)
                 .tipo(e.getTipo())
                 .cantidad(e.getCantidad())
+                .frecuencia(e.getFrecuencia())
                 .fecha(e.getFecha())
                 .descripcion(e.getDescripcion())
                 .build();
     }
+
 
     public static List<Donacion> toDomain(List<DonacionEntity> entities) {
         return entities.stream().map(DonacionMapper::toDomain).collect(Collectors.toList());

@@ -77,9 +77,9 @@ function initCarousel() {
     setInterval(() => {
         slides[currentSlide].style.display = 'none';
         slides[currentSlide].classList.remove('active');
-        
+
         currentSlide = (currentSlide + 1) % slides.length;
-        
+
         slides[currentSlide].style.display = 'flex';
         slides[currentSlide].classList.add('active');
     }, 5000);

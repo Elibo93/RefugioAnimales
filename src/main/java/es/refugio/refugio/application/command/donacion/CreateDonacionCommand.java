@@ -6,7 +6,9 @@ public record CreateDonacionCommand(
         Integer usuarioId,
         String tipo,
         Double cantidad,
+        String frecuencia,
         LocalDateTime fecha,
         String descripcion
 ) {
 }
+

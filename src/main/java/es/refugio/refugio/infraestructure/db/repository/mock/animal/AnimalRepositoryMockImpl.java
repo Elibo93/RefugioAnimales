@@ -72,4 +72,23 @@ public class AnimalRepositoryMockImpl implements AnimalRepository {
     public List<Animal> findFiltered(String especie, String tamano, java.util.List<String> edad, String sexo, Boolean urgencia) {
         return getAll(); // Stub, mostly used for compilation
     }
-}
+
+    @Override
+    public List<Animal> findTop3ByEstadoOrderByVisitasDesc(EstadoAnimal estado) {
+        return animales.values().stream()
+                .filter(a -> a.getEstado() == estado)
+                .sorted((a1, a2) -> Integer.compare(
+                        a2.getVisitas() != null ? a2.getVisitas() : 0, 
+                        a1.getVisitas() != null ? a1.getVisitas() : 0))
+                .limit(3)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void incrementarVisitas(AnimalId id) {
+        Animal a = animales.get(id);
+        if (a != null) {
+            a.setVisitas((a.getVisitas() != null ? a.getVisitas() : 0) + 1);
+        }
+    }
+}

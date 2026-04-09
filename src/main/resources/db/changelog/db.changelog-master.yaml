@@ -7,4 +7,10 @@ databaseChangeLog:
       relativeToChangelogFile: false
   - include:
       file: db/changelog/changes/003-more-animals.yaml
+  - include:
+      file: db/changelog/changes/004-add-visits-column.yaml
       relativeToChangelogFile: false
+  - include:
+      file: db/changelog/changes/005-add-frecuencia-donacion.yaml
+      relativeToChangelogFile: false
+

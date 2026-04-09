@@ -2,6 +2,7 @@ package es.refugio.refugio.domain.model.donacion;
 
 import java.time.LocalDateTime;
 
+import es.refugio.refugio.domain.model.donacion.enums.FrecuenciaDonacion;
 import es.refugio.refugio.domain.model.donacion.enums.TipoDonacion;
 import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import lombok.AllArgsConstructor;
@@ -17,7 +18,9 @@ public class Donacion {
     private UsuarioId usuarioId;
     private TipoDonacion tipo;
     private Double cantidad;
+    private FrecuenciaDonacion frecuencia;
     private LocalDateTime fecha;
     private String descripcion;
 
 }
+

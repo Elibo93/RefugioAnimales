@@ -30,6 +30,7 @@ public class HomeViewController {
         model.addAttribute(ModelAttribute.Persona_LIST.getName(),
                 findPersonaService.findAll());
         model.addAttribute(ModelAttribute.Animal_LIST.getName(), findAnimalService.findAll());
+        model.addAttribute("favoritos", findAnimalService.findTop3Favoritos());
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), findVoluntarioService.findAll());
         model.addAttribute(ModelAttribute.Adopcion_LIST.getName(), findAdopcionService.findAll());
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.HOME_VIEW.getPath());
