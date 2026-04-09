@@ -12,6 +12,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConvertirAdoptanteRequest {
+    @NotBlank(message = "El nombre es obligatorio")
+    private String nombre;
+
+    @NotBlank(message = "El apellido es obligatorio")
+    private String apellido;
+
     @NotBlank(message = "El DNI es obligatorio")
     private String dni;
 
@@ -23,4 +29,6 @@ public class ConvertirAdoptanteRequest {
 
     @NotNull(message = "El ID del animal es obligatorio")
     private Integer animalId;
+
+    private String comentario;
 }

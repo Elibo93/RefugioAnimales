@@ -48,7 +48,7 @@ public class HistorialMedicoViewController {
 
     private final TemplateEngine templateEngine;
 
-    @GetMapping(WebRoutes.historiales_BASE)
+    @GetMapping(WebRoutes.HISTORIALES_BASE)
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
         model.addAttribute(ModelAttribute.Historial_LIST.getName(), findHistorialMedicoService.findAll());
         if (successMessage != null) {
@@ -58,27 +58,29 @@ public class HistorialMedicoViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @GetMapping(WebRoutes.historiales_NUEVO)
+    @GetMapping(WebRoutes.HISTORIALES_NUEVO)
     public String formulario(Model model) {
-        model.addAttribute(ModelAttribute.SINGLE_Historial.getName(), HistorialMedico.builder().fecha(LocalDateTime.now()).build());
+        model.addAttribute(ModelAttribute.SINGLE_Historial.getName(),
+                HistorialMedico.builder().fecha(LocalDateTime.now()).build());
         model.addAttribute("animales", findAnimalService.findAll());
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Historial_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @PostMapping(WebRoutes.historiales_NUEVO)
+    @PostMapping(WebRoutes.HISTORIALES_NUEVO)
     public String crear(@RequestParam Integer animalId,
-                        @RequestParam String descripcion,
-                        @RequestParam String tratamiento,
-                        @RequestParam String veterinario,
-                        RedirectAttributes redirectAttributes) {
+            @RequestParam String descripcion,
+            @RequestParam String tratamiento,
+            @RequestParam String veterinario,
+            RedirectAttributes redirectAttributes) {
 
-        createHistorialMedicoService.create(new CreateHistorialMedicoCommand(animalId, LocalDateTime.now(), descripcion, tratamiento, veterinario));
+        createHistorialMedicoService.create(
+                new CreateHistorialMedicoCommand(animalId, LocalDateTime.now(), descripcion, tratamiento, veterinario));
         redirectAttributes.addFlashAttribute("successMessage", "Historial médico registrado correctamente");
-        return "redirect:" + WebRoutes.historiales_BASE;
+        return "redirect:" + WebRoutes.HISTORIALES_BASE;
     }
 
-    @GetMapping(WebRoutes.historiales_EDITAR)
+    @GetMapping(WebRoutes.HISTORIALES_EDITAR)
     public String editarFormulario(@PathVariable Integer id, Model model) {
         HistorialMedico historial = findHistorialMedicoService.findById(new HistorialMedicoId(id));
         model.addAttribute(ModelAttribute.SINGLE_Historial.getName(), historial);
@@ -87,30 +89,31 @@ public class HistorialMedicoViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @PostMapping(WebRoutes.historiales_EDITAR)
+    @PostMapping(WebRoutes.HISTORIALES_EDITAR)
     public String procesarEdicion(@PathVariable Integer id,
-                                 @RequestParam Integer animalId,
-                                 @RequestParam String descripcion,
-                                 @RequestParam String tratamiento,
-                                 @RequestParam String veterinario,
-                                 RedirectAttributes redirectAttributes) {
+            @RequestParam Integer animalId,
+            @RequestParam String descripcion,
+            @RequestParam String tratamiento,
+            @RequestParam String veterinario,
+            RedirectAttributes redirectAttributes) {
 
-        editHistorialMedicoService.update(new EditHistorialMedicoCommand(new HistorialMedicoId(id), animalId, LocalDateTime.now(), descripcion, tratamiento, veterinario));
+        editHistorialMedicoService.update(new EditHistorialMedicoCommand(new HistorialMedicoId(id), animalId,
+                LocalDateTime.now(), descripcion, tratamiento, veterinario));
         redirectAttributes.addFlashAttribute("successMessage", "Historial médico editado correctamente");
-        return "redirect:" + WebRoutes.historiales_BASE;
+        return "redirect:" + WebRoutes.HISTORIALES_BASE;
     }
 
-    @PostMapping(WebRoutes.historiales_ELIMINAR)
+    @PostMapping(WebRoutes.HISTORIALES_ELIMINAR)
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         deleteHistorialMedicoService.delete(new HistorialMedicoId(id));
         if ("true".equals(request.getHeader("HX-Request"))) {
             return ResponseEntity.ok("");
         }
-        return ResponseEntity.status(302).header("Location", WebRoutes.historiales_BASE).build();
+        return ResponseEntity.status(302).header("Location", WebRoutes.HISTORIALES_BASE).build();
     }
 
-    @GetMapping(WebRoutes.historiales_PDF)
+    @GetMapping(WebRoutes.HISTORIALES_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<HistorialMedico> historiales = findHistorialMedicoService.findAll();
         Context context = new Context();

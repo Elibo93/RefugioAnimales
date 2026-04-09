@@ -47,6 +47,7 @@ import es.refugio.refugio.application.command.usuario.EditUsuarioCommand;
 import es.refugio.refugio.application.service.usuario.FindUsuarioService;
 import es.refugio.refugio.domain.model.usuario.Usuario;
 import es.refugio.refugio.domain.model.usuario.UsuarioId; // NUEVO
+import es.refugio.auth.domain.AuthCredentialEntity;
 import es.refugio.auth.domain.Rol;
 
 @Controller
@@ -66,32 +67,53 @@ public class SolicitudAdopcionViewController {
 
     private final TemplateEngine templateEngine;
 
-    @GetMapping(WebRoutes.solicitudes_BASE)
+    @GetMapping(WebRoutes.SOLICITUDES_MODAL_NUEVA)
+    public String modalNueva(@RequestParam Integer animalId, Model model, Authentication authentication) {
+        String email = authentication.getName();
+        AuthCredentialEntity user = userRepository.findByEmail(email).orElse(null);
+
+        if (user != null) {
+            try {
+                Adoptante adoptante = findAdoptanteService.findByUsuarioId(user.getId());
+                model.addAttribute("adoptante", adoptante);
+            } catch (Exception e) {
+                // Si por algún motivo no tiene perfil, lo mandamos al de conversión
+                return "redirect:" + WebRoutes.ADOPTANTES_MODAL_CONVERTIR + "?animalId=" + animalId;
+            }
+        }
+
+        model.addAttribute("animal", findAnimalService.findById(new AnimalId(animalId)));
+        return "fragments/modals/modal-solicitud-directa :: modal";
+    }
+
+    @GetMapping(WebRoutes.SOLICITUDES_BASE)
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
         try {
             model.addAttribute(ModelAttribute.Solicitud_LIST.getName(), findSolicitudAdopcionService.findAll());
         } catch (Exception e) {
             model.addAttribute(ModelAttribute.Solicitud_LIST.getName(), List.of());
         }
-        
+
         if (successMessage != null) {
             model.addAttribute("successMessage", successMessage);
         }
-        model.addAttribute("currentUri", WebRoutes.solicitudes_BASE);
+        model.addAttribute("currentUri", WebRoutes.SOLICITUDES_BASE);
         model.addAttribute("showBack", false);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @GetMapping(WebRoutes.solicitudes_NUEVA)
-    public String formulario(Model model, @RequestParam(required = false) Integer animalId, Authentication authentication) {
+    @GetMapping(WebRoutes.SOLICITUDES_NUEVA)
+    public String formulario(Model model, @RequestParam(required = false) Integer animalId,
+            Authentication authentication) {
         SolicitudAdopcion.SolicitudAdopcionBuilder builder = SolicitudAdopcion.builder().fecha(LocalDateTime.now());
-        
+
         if (animalId != null) {
             builder.animalId(new AnimalId(animalId));
         }
 
-        // Si es un usuario logueado, intentamos pre-seleccionar o crear su perfil de adoptante
+        // Si es un usuario logueado, intentamos pre-seleccionar o crear su perfil de
+        // adoptante
         if (authentication != null && authentication.isAuthenticated()) {
             userRepository.findByEmail(authentication.getName()).ifPresent(userEntity -> {
                 try {
@@ -100,24 +122,24 @@ public class SolicitudAdopcionViewController {
                         Adoptante adoptante = findAdoptanteService.findByUsuarioId(userEntity.getId());
                         builder.adoptanteId(adoptante.getId());
                     } catch (Exception e) {
-                        // Si no tiene perfil social de adoptante, lo creamos automáticamente para que el flujo sea fluido
+                        // Si no tiene perfil social de adoptante, lo creamos automáticamente para que
+                        // el flujo sea fluido
                         if (userEntity.getRol() == Rol.ROLE_PUBLICO || userEntity.getRol() == Rol.ROLE_ADOPTANTE) {
                             // 1. Crear el perfil básico
                             Adoptante newAdoptante = createAdoptanteService.createAdoptante(
-                                new CreateAdoptanteCommand(userEntity.getId(), "PENDIENTE", "PENDIENTE", ""));
+                                    new CreateAdoptanteCommand(userEntity.getId(), "PENDIENTE", "PENDIENTE", ""));
                             builder.adoptanteId(newAdoptante.getId());
 
                             // 2. Si era rol PUBLICO, lo promocionamos a ADOPTANTE
                             if (userEntity.getRol() == Rol.ROLE_PUBLICO) {
                                 Usuario usuarioDomain = findUsuarioService.findById(new UsuarioId(userEntity.getId()));
                                 editUsuarioService.update(new EditUsuarioCommand(
-                                    usuarioDomain.getId(),
-                                    usuarioDomain.getNombre(),
-                                    usuarioDomain.getApellido(),
-                                    usuarioDomain.getEmail(),
-                                    usuarioDomain.getTelefono() != null ? usuarioDomain.getTelefono() : "",
-                                    Rol.ROLE_ADOPTANTE
-                                ));
+                                        usuarioDomain.getId(),
+                                        usuarioDomain.getNombre(),
+                                        usuarioDomain.getApellido(),
+                                        usuarioDomain.getEmail(),
+                                        usuarioDomain.getTelefono() != null ? usuarioDomain.getTelefono() : "",
+                                        Rol.ROLE_ADOPTANTE));
                             }
                         }
                     }
@@ -128,7 +150,7 @@ public class SolicitudAdopcionViewController {
         }
 
         model.addAttribute(ModelAttribute.SINGLE_Solicitud.getName(), builder.build());
-        
+
         // Manejamos las listas con seguridad (pueden lanzar excepcion si estan vacias)
         try {
             model.addAttribute("animales", findAnimalService.findAll());
@@ -143,24 +165,31 @@ public class SolicitudAdopcionViewController {
         }
 
         model.addAttribute("estados", EstadoSolicitud.values());
-        model.addAttribute("currentUri", WebRoutes.solicitudes_NUEVA);
+        model.addAttribute("currentUri", WebRoutes.SOLICITUDES_NUEVA);
         model.addAttribute("showBack", true);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @PostMapping(WebRoutes.solicitudes_NUEVA)
+    @PostMapping(WebRoutes.SOLICITUDES_NUEVA)
     public String crear(@RequestParam Integer animalId,
-                        @RequestParam Integer adoptanteId,
-                        @RequestParam String comentario,
-                        RedirectAttributes redirectAttributes) {
+            @RequestParam Integer adoptanteId,
+            @RequestParam String comentario,
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes) {
 
-        createSolicitudAdopcionService.create(new CreateSolicitudAdopcionCommand(animalId, adoptanteId, LocalDateTime.now(), comentario));
+        createSolicitudAdopcionService
+                .create(new CreateSolicitudAdopcionCommand(animalId, adoptanteId, LocalDateTime.now(), comentario));
+        
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return "fragments/content/solicitud-creada :: success-modal";
+        }
+
         redirectAttributes.addFlashAttribute("successMessage", "Solicitud de adopción registrada correctamente");
-        return "redirect:" + WebRoutes.solicitudes_BASE;
+        return "redirect:" + WebRoutes.SOLICITUDES_BASE;
     }
 
-    @GetMapping(WebRoutes.solicitudes_EDITAR)
+    @GetMapping(WebRoutes.SOLICITUDES_EDITAR)
     public String editarFormulario(@PathVariable Integer id, Model model) {
         SolicitudAdopcion solicitud = findSolicitudAdopcionService.findById(new SolicitudAdopcionId(id));
         model.addAttribute(ModelAttribute.SINGLE_Solicitud.getName(), solicitud);
@@ -171,30 +200,31 @@ public class SolicitudAdopcionViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @PostMapping(WebRoutes.solicitudes_EDITAR)
+    @PostMapping(WebRoutes.SOLICITUDES_EDITAR)
     public String procesarEdicion(@PathVariable Integer id,
-                                 @RequestParam Integer animalId,
-                                 @RequestParam Integer adoptanteId,
-                                 @RequestParam String estado,
-                                 @RequestParam String comentario,
-                                 RedirectAttributes redirectAttributes) {
+            @RequestParam Integer animalId,
+            @RequestParam Integer adoptanteId,
+            @RequestParam String estado,
+            @RequestParam String comentario,
+            RedirectAttributes redirectAttributes) {
 
-        editSolicitudAdopcionService.update(new EditSolicitudAdopcionCommand(new SolicitudAdopcionId(id), animalId, adoptanteId, LocalDateTime.now(), estado, comentario));
+        editSolicitudAdopcionService.update(new EditSolicitudAdopcionCommand(new SolicitudAdopcionId(id), animalId,
+                adoptanteId, LocalDateTime.now(), estado, comentario));
         redirectAttributes.addFlashAttribute("successMessage", "Solicitud de adopción editada correctamente");
-        return "redirect:" + WebRoutes.solicitudes_BASE;
+        return "redirect:" + WebRoutes.SOLICITUDES_BASE;
     }
 
-    @PostMapping(WebRoutes.solicitudes_ELIMINAR)
+    @PostMapping(WebRoutes.SOLICITUDES_ELIMINAR)
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         deleteSolicitudAdopcionService.delete(new SolicitudAdopcionId(id));
         if ("true".equals(request.getHeader("HX-Request"))) {
             return ResponseEntity.ok("");
         }
-        return ResponseEntity.status(302).header("Location", WebRoutes.solicitudes_BASE).build();
+        return ResponseEntity.status(302).header("Location", WebRoutes.SOLICITUDES_BASE).build();
     }
 
-    @GetMapping(WebRoutes.solicitudes_PDF)
+    @GetMapping(WebRoutes.SOLICITUDES_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<SolicitudAdopcion> solicitudes = findSolicitudAdopcionService.findAll();
         Context context = new Context();

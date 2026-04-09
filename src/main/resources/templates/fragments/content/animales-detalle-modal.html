@@ -80,10 +80,12 @@
                         </div>
                         <!-- Adoptante Role -->
                         <div sec:authorize="hasRole('ROLE_ADOPTANTE')">
-                            <a th:href="@{/web/solicitudes/nueva(animalId=${animal.id.value})}" class="btn btn-primary" style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
+                            <button class="btn btn-primary" style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;"
+                                    th:attr="hx-get=@{/web/solicitudes/modal-nueva(animalId=${animal.id.value})}"
+                                    hx-target="#modal-host" hx-swap="outerHTML">
                                 <i data-lucide="heart"></i>
                                 <span th:text="#{animal.button.adopt}">¡Adopta!</span>
-                            </a>
+                            </button>
                         </div>
                     </div>
                     

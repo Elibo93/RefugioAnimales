@@ -50,20 +50,21 @@ public class DonacionViewController {
 
     private final TemplateEngine templateEngine;
 
-    @GetMapping(WebRoutes.donaciones_BASE)
-    public String listar(Model model, Authentication authentication, @RequestParam(required = false) String successMessage) {
+    @GetMapping(WebRoutes.DONACIONES_BASE)
+    public String listar(Model model, Authentication authentication,
+            @RequestParam(required = false) String successMessage) {
         List<Donacion> donaciones = findDonacionService.findAll();
         model.addAttribute(ModelAttribute.Donacion_LIST.getName(), donaciones);
 
         List<Usuario> usuarios = findUsuarioService.findAll();
-        
+
         // Detectar usuario actual o anónimo
         Integer currentUserId = null;
         if (authentication != null && authentication.isAuthenticated()) {
             Usuario usuarioActual = usuarios.stream()
-                .filter(u -> u.getEmail().equals(authentication.getName()))
-                .findFirst()
-                .orElse(null);
+                    .filter(u -> u.getEmail().equals(authentication.getName()))
+                    .findFirst()
+                    .orElse(null);
             if (usuarioActual != null) {
                 currentUserId = usuarioActual.getId().getValue();
                 model.addAttribute("currentUserName", usuarioActual.getNombre() + " " + usuarioActual.getApellido());
@@ -78,7 +79,8 @@ public class DonacionViewController {
         model.addAttribute("usuarioMap", usuarioMap);
 
         // Atributos para el formulario de donación embebido
-        model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), Donacion.builder().fecha(LocalDateTime.now()).build());
+        model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(),
+                Donacion.builder().fecha(LocalDateTime.now()).build());
         model.addAttribute("usuarios", usuarios);
         Usuario anonimo = usuarios.stream()
                 .filter(u -> "anonimo@refugio.es".equals(u.getEmail()))
@@ -93,7 +95,7 @@ public class DonacionViewController {
                 .filter(d -> d.getCantidad() != null)
                 .mapToDouble(Donacion::getCantidad)
                 .sum();
-        
+
         model.addAttribute("totalDinero", totalDinero);
         model.addAttribute("metaDinero", 1000.0);
 
@@ -104,20 +106,21 @@ public class DonacionViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @GetMapping(WebRoutes.donaciones_NUEVA)
+    @GetMapping(WebRoutes.DONACIONES_NUEVA)
     public String formulario(Model model, Authentication authentication) {
-        model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), Donacion.builder().fecha(LocalDateTime.now()).build());
-        
+        model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(),
+                Donacion.builder().fecha(LocalDateTime.now()).build());
+
         List<Usuario> usuarios = findUsuarioService.findAll();
         model.addAttribute("usuarios", usuarios);
-        
+
         // Detectar usuario actual o anónimo
         Integer currentUserId = null;
         if (authentication != null && authentication.isAuthenticated()) {
             Usuario usuarioActual = usuarios.stream()
-                .filter(u -> u.getEmail().equals(authentication.getName()))
-                .findFirst()
-                .orElse(null);
+                    .filter(u -> u.getEmail().equals(authentication.getName()))
+                    .findFirst()
+                    .orElse(null);
             if (usuarioActual != null) {
                 currentUserId = usuarioActual.getId().getValue();
                 model.addAttribute("currentUserName", usuarioActual.getNombre() + " " + usuarioActual.getApellido());
@@ -130,39 +133,41 @@ public class DonacionViewController {
                 .findFirst()
                 .orElse(null);
         model.addAttribute("anonimoId", anonimo != null ? anonimo.getId().getValue() : null);
-        
+
         model.addAttribute("tipos", TipoDonacion.values());
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @PostMapping(WebRoutes.donaciones_NUEVA)
+    @PostMapping(WebRoutes.DONACIONES_NUEVA)
     public String crear(@RequestParam Integer usuarioId,
-                        @RequestParam String tipo,
-                        @RequestParam Double cantidad,
-                        @RequestParam String descripcion,
-                        RedirectAttributes redirectAttributes) {
+            @RequestParam String tipo,
+            @RequestParam Double cantidad,
+            @RequestParam String descripcion,
+            RedirectAttributes redirectAttributes) {
 
-        createDonacionService.create(new CreateDonacionCommand(usuarioId, tipo, cantidad, LocalDateTime.now(), descripcion));
+        createDonacionService
+                .create(new CreateDonacionCommand(usuarioId, tipo, cantidad, LocalDateTime.now(), descripcion));
         redirectAttributes.addFlashAttribute("successMessage", "Donación registrada correctamente");
-        return "redirect:" + WebRoutes.donaciones_BASE;
+        return "redirect:" + WebRoutes.DONACIONES_BASE;
     }
 
-    @GetMapping(WebRoutes.donaciones_EDITAR)
+    @GetMapping(WebRoutes.DONACIONES_EDITAR)
     public String editarFormulario(@PathVariable Integer id, Model model, Authentication authentication) {
         Donacion donacion = findDonacionService.findById(new DonacionId(id));
         model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), donacion);
-        
+
         List<Usuario> usuarios = findUsuarioService.findAll();
         model.addAttribute("usuarios", usuarios);
 
-        // Detectar usuario actual o anónimo (útil para mostrar quién es el donante original o el actual)
+        // Detectar usuario actual o anónimo (útil para mostrar quién es el donante
+        // original o el actual)
         Integer currentUserId = null;
         if (authentication != null && authentication.isAuthenticated()) {
             Usuario usuarioActual = usuarios.stream()
-                .filter(u -> u.getEmail().equals(authentication.getName()))
-                .findFirst()
-                .orElse(null);
+                    .filter(u -> u.getEmail().equals(authentication.getName()))
+                    .findFirst()
+                    .orElse(null);
             if (usuarioActual != null) {
                 currentUserId = usuarioActual.getId().getValue();
                 model.addAttribute("currentUserName", usuarioActual.getNombre() + " " + usuarioActual.getApellido());
@@ -181,30 +186,31 @@ public class DonacionViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @PostMapping(WebRoutes.donaciones_EDITAR)
+    @PostMapping(WebRoutes.DONACIONES_EDITAR)
     public String procesarEdicion(@PathVariable Integer id,
-                                 @RequestParam Integer usuarioId,
-                                 @RequestParam String tipo,
-                                 @RequestParam Double cantidad,
-                                 @RequestParam String descripcion,
-                                 RedirectAttributes redirectAttributes) {
+            @RequestParam Integer usuarioId,
+            @RequestParam String tipo,
+            @RequestParam Double cantidad,
+            @RequestParam String descripcion,
+            RedirectAttributes redirectAttributes) {
 
-        editDonacionService.update(new EditDonacionCommand(new DonacionId(id), usuarioId, tipo, cantidad, LocalDateTime.now(), descripcion));
+        editDonacionService.update(new EditDonacionCommand(new DonacionId(id), usuarioId, tipo, cantidad,
+                LocalDateTime.now(), descripcion));
         redirectAttributes.addFlashAttribute("successMessage", "Donación editada correctamente");
-        return "redirect:" + WebRoutes.donaciones_BASE;
+        return "redirect:" + WebRoutes.DONACIONES_BASE;
     }
 
-    @PostMapping(WebRoutes.donaciones_ELIMINAR)
+    @PostMapping(WebRoutes.DONACIONES_ELIMINAR)
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         deleteDonacionService.delete(new DonacionId(id));
         if ("true".equals(request.getHeader("HX-Request"))) {
             return ResponseEntity.ok("");
         }
-        return ResponseEntity.status(302).header("Location", WebRoutes.donaciones_BASE).build();
+        return ResponseEntity.status(302).header("Location", WebRoutes.DONACIONES_BASE).build();
     }
 
-    @GetMapping(WebRoutes.donaciones_PDF)
+    @GetMapping(WebRoutes.DONACIONES_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<Donacion> donaciones = findDonacionService.findAll();
         Context context = new Context();

@@ -57,7 +57,7 @@ public class AdopcionViewController {
 
         private final TemplateEngine templateEngine;
 
-        @GetMapping(WebRoutes.adopciones_PDF)
+        @GetMapping(WebRoutes.ADOPCIONES_PDF)
         public void exportarPDF(HttpServletResponse response) throws Exception {
                 List<Adopcion> adopciones = findAdopcionService.findAll();
                 Context context = new Context();
@@ -84,7 +84,7 @@ public class AdopcionViewController {
                 outputStream.close();
         }
 
-        @GetMapping(WebRoutes.adopciones_BASE)
+        @GetMapping(WebRoutes.ADOPCIONES_BASE)
         public String listar(Model model,
                         @RequestParam(required = false) Integer adoptanteId,
                         @RequestParam(required = false) Integer animalId,
@@ -109,8 +109,9 @@ public class AdopcionViewController {
                                 .collect(java.util.stream.Collectors.toMap(
                                                 a -> a.getId().getValue(),
                                                 a -> {
-                                                    Usuario u = personasMap.get(a.getUsuarioId());
-                                                    return u != null ? u.getNombre() + " " + u.getApellido() : "Desconocido";
+                                                        Usuario u = personasMap.get(a.getUsuarioId());
+                                                        return u != null ? u.getNombre() + " " + u.getApellido()
+                                                                        : "Desconocido";
                                                 }));
 
                 java.util.Map<Integer, Animal> animalesMap = findAnimalService
@@ -132,7 +133,7 @@ public class AdopcionViewController {
                 return ThymTemplates.MAIN_LAYOUT.getPath();
         }
 
-        @GetMapping(WebRoutes.adopciones_NUEVA)
+        @GetMapping(WebRoutes.ADOPCIONES_NUEVA)
         public String formulario(Model model) {
                 model.addAttribute(ModelAttribute.SINGLE_Adopcion.getName(), Adopcion.builder().build());
                 model.addAttribute(ModelAttribute.Persona_LIST.getName(), findPersonaService.findAll());
@@ -143,7 +144,7 @@ public class AdopcionViewController {
                 return ThymTemplates.MAIN_LAYOUT.getPath();
         }
 
-        @PostMapping(WebRoutes.adopciones_NUEVA)
+        @PostMapping(WebRoutes.ADOPCIONES_NUEVA)
         public String crearAdopcion(@RequestParam Integer idPersona,
                         @RequestParam Integer idAnimal,
                         @RequestParam String estado,
@@ -157,10 +158,10 @@ public class AdopcionViewController {
                                 "successMessage",
                                 "Adopcion creada correctamente");
 
-                return "redirect:" + WebRoutes.adopciones_BASE;
+                return "redirect:" + WebRoutes.ADOPCIONES_BASE;
         }
 
-        @GetMapping(WebRoutes.adopciones_EDITAR)
+        @GetMapping(WebRoutes.ADOPCIONES_EDITAR)
         public String editarFormulario(@PathVariable Integer id, Model model) {
                 Adopcion adopcion = findAdopcionService.findById(new AdopcionId(id));
                 model.addAttribute(ModelAttribute.SINGLE_Adopcion.getName(), adopcion);
@@ -172,7 +173,7 @@ public class AdopcionViewController {
                 return ThymTemplates.MAIN_LAYOUT.getPath();
         }
 
-        @PostMapping(WebRoutes.adopciones_EDITAR)
+        @PostMapping(WebRoutes.ADOPCIONES_EDITAR)
         public String procesarEdicion(@PathVariable Integer id,
                         @RequestParam Integer idPersona,
                         @RequestParam Integer idAnimal,
@@ -190,10 +191,10 @@ public class AdopcionViewController {
                                 "successMessage",
                                 "Adopcion editada correctamente");
 
-                return "redirect:" + WebRoutes.adopciones_BASE;
+                return "redirect:" + WebRoutes.ADOPCIONES_BASE;
         }
 
-        @PostMapping(WebRoutes.adopciones_ELIMINAR)
+        @PostMapping(WebRoutes.ADOPCIONES_ELIMINAR)
         @ResponseBody
         public ResponseEntity<String> borrar(@PathVariable Integer id, RedirectAttributes redirectAttributes,
                         HttpServletRequest request) {
@@ -209,7 +210,7 @@ public class AdopcionViewController {
                                 "Adopcion eliminada correctamente");
 
                 return ResponseEntity.status(302)
-                                .header("Location", WebRoutes.adopciones_BASE)
+                                .header("Location", WebRoutes.ADOPCIONES_BASE)
                                 .build();
         }
 }

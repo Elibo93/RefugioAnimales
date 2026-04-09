@@ -46,7 +46,7 @@ public class UsuarioViewController {
 
     private final TemplateEngine templateEngine;
 
-    @GetMapping(WebRoutes.personas_BASE)
+    @GetMapping(WebRoutes.PERSONAS_BASE)
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
         model.addAttribute(ModelAttribute.Persona_LIST.getName(), findUsuarioService.findAll());
         if (successMessage != null) {
@@ -56,7 +56,7 @@ public class UsuarioViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @GetMapping(WebRoutes.personas_NUEVO)
+    @GetMapping(WebRoutes.PERSONAS_NUEVO)
     public String formulario(Model model) {
 
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), new Usuario());
@@ -65,7 +65,7 @@ public class UsuarioViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @PostMapping(WebRoutes.personas_NUEVO)
+    @PostMapping(WebRoutes.PERSONAS_NUEVO)
     public String crearPersona(@RequestParam String nombre,
             @RequestParam String apellido,
             @RequestParam String email,
@@ -80,7 +80,7 @@ public class UsuarioViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @GetMapping(WebRoutes.personas_EDITAR)
+    @GetMapping(WebRoutes.PERSONAS_EDITAR)
     public String editarFormulario(@PathVariable Integer id, Model model) {
         Usuario persona = findUsuarioService.findById(new UsuarioId(id));
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), persona);
@@ -88,7 +88,7 @@ public class UsuarioViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @PostMapping(WebRoutes.personas_EDITAR)
+    @PostMapping(WebRoutes.PERSONAS_EDITAR)
     public String procesarEdicion(@PathVariable Integer id,
             @RequestParam String nombre,
             @RequestParam String apellido,
@@ -107,10 +107,10 @@ public class UsuarioViewController {
                 "successMessage",
                 "Persona editada correctamente");
 
-        return "redirect:" + WebRoutes.personas_BASE;
+        return "redirect:" + WebRoutes.PERSONAS_BASE;
     }
 
-    @PostMapping(WebRoutes.personas_ELIMINAR)
+    @PostMapping(WebRoutes.PERSONAS_ELIMINAR)
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, RedirectAttributes redirectAttributes,
             HttpServletRequest request) {
@@ -126,11 +126,11 @@ public class UsuarioViewController {
                 "Persona eliminado correctamente");
 
         return ResponseEntity.status(302)
-                .header("Location", WebRoutes.personas_BASE)
+                .header("Location", WebRoutes.PERSONAS_BASE)
                 .build();
     }
 
-    @GetMapping(WebRoutes.personas_PDF)
+    @GetMapping(WebRoutes.PERSONAS_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<Usuario> personas = findUsuarioService.findAll();
         Context context = new Context();

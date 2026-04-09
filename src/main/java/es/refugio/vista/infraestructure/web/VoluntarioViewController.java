@@ -70,7 +70,7 @@ public class VoluntarioViewController {
     private final TemplateEngine templateEngine;
     private final HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
 
-    @GetMapping(WebRoutes.voluntarios_BASE)
+    @GetMapping(WebRoutes.VOLUNTARIOS_BASE)
     @PreAuthorize("hasRole('ADMIN')")
     public String listar(Model model) {
         try {
@@ -85,34 +85,34 @@ public class VoluntarioViewController {
             model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), List.of());
             model.addAttribute("usuariosMap", Map.of());
         }
-        
-        model.addAttribute("currentUri", WebRoutes.voluntarios_BASE);
+
+        model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_BASE);
         model.addAttribute("showBack", false);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @GetMapping(WebRoutes.voluntarios_NUEVO)
+    @GetMapping(WebRoutes.VOLUNTARIOS_NUEVO)
     public String formulario(Model model) {
         model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), Voluntario.builder().build());
-        model.addAttribute("currentUri", WebRoutes.voluntarios_NUEVO);
+        model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_NUEVO);
         model.addAttribute("showBack", true);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @GetMapping(WebRoutes.voluntarios_EDITAR)
+    @GetMapping(WebRoutes.VOLUNTARIOS_EDITAR)
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public String editarFormulario(@PathVariable Integer id, Model model) {
         Voluntario voluntario = findVoluntarioService.findById(new VoluntarioId(id));
         model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), voluntario);
-        model.addAttribute("currentUri", WebRoutes.voluntarios_EDITAR);
+        model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_EDITAR);
         model.addAttribute("showBack", true);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @PostMapping(WebRoutes.voluntarios_NUEVO)
+    @PostMapping(WebRoutes.VOLUNTARIOS_NUEVO)
     public String crearVoluntario(
             @RequestParam(required = false) Integer idUsuario,
             @RequestParam String disponibilidad,
@@ -124,18 +124,18 @@ public class VoluntarioViewController {
             RedirectAttributes redirectAttributes) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        
+
         // 1. Determinar el Usuario ID (ya sea por autenticación o por registro nuevo)
         if (auth == null || auth instanceof AnonymousAuthenticationToken) {
             // Usuario NO registrado: Crear registro de Usuario con rol Voluntario
             Usuario newUser = createUsuarioService.createUsuario(
-                new CreateUsuarioCommand(nombre, "Voluntario", email, contrasena, "", Rol.ROLE_VOLUNTARIO));
+                    new CreateUsuarioCommand(nombre, "Voluntario", email, contrasena, "", Rol.ROLE_VOLUNTARIO));
             idUsuario = newUser.getId().getValue();
 
             // AUTO-LOGIN PERSISTENTE: Autenticar y guardar en la sesión
             UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(email, contrasena);
             Authentication authenticated = authenticationManager.authenticate(token);
-            
+
             SecurityContext sc = SecurityContextHolder.getContext();
             sc.setAuthentication(authenticated);
             request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, sc);
@@ -144,15 +144,15 @@ public class VoluntarioViewController {
             // Usuario YA registrado: Obtener su ID y asegurar que tenga rol de Voluntario
             Usuario usuarioActual = findUsuarioService.findByEmail(auth.getName());
             idUsuario = usuarioActual.getId().getValue();
-            
+
             if (usuarioActual.getRol() != Rol.ROLE_VOLUNTARIO && usuarioActual.getRol() != Rol.ROLE_ADMIN) {
-                 editUsuarioService.update(new EditUsuarioCommand(
-                    usuarioActual.getId(),
-                    usuarioActual.getNombre(),
-                    usuarioActual.getApellido(),
-                    usuarioActual.getEmail(),
-                    usuarioActual.getTelefono(),
-                    Rol.ROLE_VOLUNTARIO));
+                editUsuarioService.update(new EditUsuarioCommand(
+                        usuarioActual.getId(),
+                        usuarioActual.getNombre(),
+                        usuarioActual.getApellido(),
+                        usuarioActual.getEmail(),
+                        usuarioActual.getTelefono(),
+                        Rol.ROLE_VOLUNTARIO));
             }
         }
 
@@ -160,7 +160,8 @@ public class VoluntarioViewController {
         createVoluntarioService.createVoluntario(
                 new CreateVoluntarioCommand(new UsuarioId(idUsuario), disponibilidad));
 
-        redirectAttributes.addFlashAttribute("successMessage", "¡Bienvenido al equipo voluntario! Ya puedes empezar a ayudar.");
+        redirectAttributes.addFlashAttribute("successMessage",
+                "¡Bienvenido al equipo voluntario! Ya puedes empezar a ayudar.");
 
         // Redirigir a la URL guardada por Spring Security si existe
         SavedRequest savedRequest = requestCache.getRequest(request, response);
@@ -171,7 +172,7 @@ public class VoluntarioViewController {
         return "redirect:" + WebRoutes.HOME;
     }
 
-    @PostMapping(WebRoutes.voluntarios_EDITAR)
+    @PostMapping(WebRoutes.VOLUNTARIOS_EDITAR)
     public String editarVoluntario(@PathVariable Integer id,
             @RequestParam String disponibilidad,
             @RequestParam String email,
@@ -201,10 +202,10 @@ public class VoluntarioViewController {
 
         redirectAttributes.addFlashAttribute("successMessage", "Voluntario editado correctamente");
 
-        return "redirect:" + WebRoutes.voluntarios_BASE;
+        return "redirect:" + WebRoutes.VOLUNTARIOS_BASE;
     }
 
-    @PostMapping(WebRoutes.voluntarios_ELIMINAR)
+    @PostMapping(WebRoutes.VOLUNTARIOS_ELIMINAR)
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, RedirectAttributes redirectAttributes,
             HttpServletRequest request) {
@@ -227,11 +228,11 @@ public class VoluntarioViewController {
         }
 
         return ResponseEntity.status(302)
-                .header("Location", WebRoutes.voluntarios_BASE)
+                .header("Location", WebRoutes.VOLUNTARIOS_BASE)
                 .build();
     }
 
-    @GetMapping(WebRoutes.voluntarios_PDF)
+    @GetMapping(WebRoutes.VOLUNTARIOS_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<Voluntario> voluntarios = findVoluntarioService.findAll();
         Context context = new Context();

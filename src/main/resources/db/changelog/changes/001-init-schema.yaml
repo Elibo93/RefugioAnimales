@@ -487,15 +487,13 @@ databaseChangeLog:
                   type: INT
                   constraints:
                     nullable: false
+                    primaryKey: true # <-- Añadido aquí
               - column:
                   name: voluntario_id
                   type: INT
                   constraints:
                     nullable: false
-        - addPrimaryKey:
-            tableName: voluntarios_tareas
-            columnNames: tarea_id, voluntario_id
-            constraintName: pk_voluntarios_tareas
+                    primaryKey: true # <-- Añadido aquí
         - addForeignKeyConstraint:
             baseTableName: voluntarios_tareas
             baseColumnNames: tarea_id
@@ -510,8 +508,12 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_vt_voluntario
             onDelete: CASCADE
+
+# ============================================================
+# 011 — Añadir solicitud_adopcion_id a adopciones
+# ============================================================
   - changeSet:
-      id: 003-add-solicitud-adopcion-id-to-adopciones
+      id: 011-add-solicitud-adopcion-id-to-adopciones
       author: refugio
       changes:
         - addForeignKeyConstraint:

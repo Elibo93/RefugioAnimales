@@ -49,7 +49,7 @@ public class TareaViewController {
 
     private final TemplateEngine templateEngine;
 
-    @GetMapping(WebRoutes.tareas_BASE)
+    @GetMapping(WebRoutes.TAREAS_BASE)
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
         model.addAttribute(ModelAttribute.Tarea_LIST.getName(), findTareaService.findAll());
         if (successMessage != null) {
@@ -59,7 +59,7 @@ public class TareaViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @GetMapping(WebRoutes.tareas_NUEVA)
+    @GetMapping(WebRoutes.TAREAS_NUEVA)
     public String formulario(Model model) {
         model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), Tarea.builder().fecha(LocalDateTime.now()).build());
         model.addAttribute("voluntarios", findVoluntarioService.findAll());
@@ -68,18 +68,18 @@ public class TareaViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @PostMapping(WebRoutes.tareas_NUEVA)
+    @PostMapping(WebRoutes.TAREAS_NUEVA)
     public String crear(@RequestParam String descripcion,
-                        @RequestParam String estado,
-                        @RequestParam(required = false) List<Integer> voluntarioIds,
-                        RedirectAttributes redirectAttributes) {
+            @RequestParam String estado,
+            @RequestParam(required = false) List<Integer> voluntarioIds,
+            RedirectAttributes redirectAttributes) {
 
         createTareaService.create(new CreateTareaCommand(descripcion, LocalDateTime.now(), estado, voluntarioIds));
         redirectAttributes.addFlashAttribute("successMessage", "Tarea creada correctamente");
-        return "redirect:" + WebRoutes.tareas_BASE;
+        return "redirect:" + WebRoutes.TAREAS_BASE;
     }
 
-    @GetMapping(WebRoutes.tareas_EDITAR)
+    @GetMapping(WebRoutes.TAREAS_EDITAR)
     public String editarFormulario(@PathVariable Integer id, Model model) {
         Tarea tarea = findTareaService.findById(new TareaId(id));
         model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
@@ -89,29 +89,30 @@ public class TareaViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @PostMapping(WebRoutes.tareas_EDITAR)
+    @PostMapping(WebRoutes.TAREAS_EDITAR)
     public String procesarEdicion(@PathVariable Integer id,
-                                 @RequestParam String descripcion,
-                                 @RequestParam String estado,
-                                 @RequestParam(required = false) List<Integer> voluntarioIds,
-                                 RedirectAttributes redirectAttributes) {
+            @RequestParam String descripcion,
+            @RequestParam String estado,
+            @RequestParam(required = false) List<Integer> voluntarioIds,
+            RedirectAttributes redirectAttributes) {
 
-        editTareaService.update(new EditTareaCommand(new TareaId(id), descripcion, LocalDateTime.now(), estado, voluntarioIds));
+        editTareaService
+                .update(new EditTareaCommand(new TareaId(id), descripcion, LocalDateTime.now(), estado, voluntarioIds));
         redirectAttributes.addFlashAttribute("successMessage", "Tarea editada correctamente");
-        return "redirect:" + WebRoutes.tareas_BASE;
+        return "redirect:" + WebRoutes.TAREAS_BASE;
     }
 
-    @PostMapping(WebRoutes.tareas_ELIMINAR)
+    @PostMapping(WebRoutes.TAREAS_ELIMINAR)
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         deleteTareaService.delete(new TareaId(id));
         if ("true".equals(request.getHeader("HX-Request"))) {
             return ResponseEntity.ok("");
         }
-        return ResponseEntity.status(302).header("Location", WebRoutes.tareas_BASE).build();
+        return ResponseEntity.status(302).header("Location", WebRoutes.TAREAS_BASE).build();
     }
 
-    @GetMapping(WebRoutes.tareas_PDF)
+    @GetMapping(WebRoutes.TAREAS_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<Tarea> tareas = findTareaService.findAll();
         Context context = new Context();

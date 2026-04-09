@@ -48,17 +48,17 @@ public class AnimalViewController {
 
     private final TemplateEngine templateEngine;
 
-    @GetMapping(WebRoutes.animales_BASE)
-    public String listar(Model model, 
-                        @RequestParam(required = false) String successMessage,
-                        @RequestParam(required = false) EstadoAnimal estado,
-                        @RequestParam(required = false) String especie,
-                        @RequestParam(required = false) String tamano,
-                        @RequestParam(required = false) java.util.List<String> edad,
-                        @RequestParam(required = false) String sexo,
-                        @RequestParam(required = false) Boolean urgencia,
-                        HttpServletRequest request) {
-        
+    @GetMapping(WebRoutes.ANIMALES_BASE)
+    public String listar(Model model,
+            @RequestParam(required = false) String successMessage,
+            @RequestParam(required = false) EstadoAnimal estado,
+            @RequestParam(required = false) String especie,
+            @RequestParam(required = false) String tamano,
+            @RequestParam(required = false) java.util.List<String> edad,
+            @RequestParam(required = false) String sexo,
+            @RequestParam(required = false) Boolean urgencia,
+            HttpServletRequest request) {
+
         List<Animal> animales;
         if (especie != null || tamano != null || edad != null || sexo != null || urgencia != null) {
             animales = findAnimalService.findFiltered(especie, tamano, edad, sexo, urgencia);
@@ -76,7 +76,7 @@ public class AnimalViewController {
         model.addAttribute("selectedEdad", edad);
         model.addAttribute("selectedSexo", sexo);
         model.addAttribute("selectedUrgencia", urgencia);
-        
+
         if (successMessage != null) {
             model.addAttribute("successMessage", successMessage);
         }
@@ -89,7 +89,7 @@ public class AnimalViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @GetMapping(WebRoutes.animales_NUEVO)
+    @GetMapping(WebRoutes.ANIMALES_NUEVO)
     public String formulario(Model model) {
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), Animal.builder().build());
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), findVoluntarioService.findAll());
@@ -97,7 +97,7 @@ public class AnimalViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @PostMapping(WebRoutes.animales_NUEVO)
+    @PostMapping(WebRoutes.ANIMALES_NUEVO)
     public String crearAnimal(@RequestParam String nombre,
             @RequestParam String especie,
             @RequestParam(required = false) String especiePersonalizada,
@@ -122,10 +122,10 @@ public class AnimalViewController {
                 "successMessage",
                 "Animal creado correctamente");
 
-        return "redirect:" + WebRoutes.animales_BASE;
+        return "redirect:" + WebRoutes.ANIMALES_BASE;
     }
 
-    @GetMapping(WebRoutes.animales_EDITAR)
+    @GetMapping(WebRoutes.ANIMALES_EDITAR)
     public String editarFormulario(@PathVariable Integer id, Model model) {
         Animal animal = findAnimalService.findById(new AnimalId(id));
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
@@ -134,7 +134,7 @@ public class AnimalViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @PostMapping(WebRoutes.animales_EDITAR)
+    @PostMapping(WebRoutes.ANIMALES_EDITAR)
     public String procesarEdicion(@PathVariable Integer id,
             @RequestParam String nombre,
             @RequestParam String chipId,
@@ -156,10 +156,10 @@ public class AnimalViewController {
                 "successMessage",
                 "Animal editado correctamente");
 
-        return "redirect:" + WebRoutes.animales_BASE;
+        return "redirect:" + WebRoutes.ANIMALES_BASE;
     }
 
-    @PostMapping(WebRoutes.animales_ELIMINAR)
+    @PostMapping(WebRoutes.ANIMALES_ELIMINAR)
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, RedirectAttributes redirectAttributes,
             HttpServletRequest request) {
@@ -175,11 +175,11 @@ public class AnimalViewController {
                 "Animal eliminado correctamente");
 
         return ResponseEntity.status(302)
-                .header("Location", WebRoutes.animales_BASE)
+                .header("Location", WebRoutes.ANIMALES_BASE)
                 .build();
     }
 
-    @GetMapping(WebRoutes.animales_PDF)
+    @GetMapping(WebRoutes.ANIMALES_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<Animal> animales = findAnimalService.findAll();
         Context context = new Context();
@@ -196,7 +196,7 @@ public class AnimalViewController {
         outputStream.close();
     }
 
-    @GetMapping(WebRoutes.animales_BASE + "/{id}/detalle")
+    @GetMapping(WebRoutes.ANIMALES_BASE + "/{id}/detalle")
     public String detalleModal(@PathVariable Integer id, Model model) {
         Animal animal = findAnimalService.findById(new AnimalId(id));
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);

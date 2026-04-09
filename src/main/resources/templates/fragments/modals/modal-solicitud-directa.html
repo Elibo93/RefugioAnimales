@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="modal" class="modal-overlay" id="modal-host" onclick="if(event.target == this) this.innerHTML = ''">
+    <div class="modal" onclick="event.stopPropagation()" style="max-width: 550px;">
+        
+        <div style="text-align:center; margin-bottom: 2rem;">
+            <div style="background: var(--primary-light); color: var(--primary); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                <i data-lucide="heart" style="width: 32px; height: 32px; fill: currentColor;"></i>
+            </div>
+            <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">
+                ¡Adopta a <span th:text="${animal.nombre}">Rocky</span>!
+            </h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">
+                Estás a un paso de iniciar el proceso de adopción.
+            </p>
+        </div>
+
+        <form th:attr="hx-post=@{/web/solicitudes/nueva}" 
+              hx-target="#modal-host" 
+              hx-swap="outerHTML">
+            
+            <input type="hidden" name="animalId" th:value="${animal.id.value}">
+            <input type="hidden" name="adoptanteId" th:value="${adoptante.id.value}">
+
+            <div class="form-grid">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Solicitante</label>
+                    <input type="text" th:value="${adoptante.nombre + ' ' + adoptante.apellido}" disabled style="background: #f8fafc; cursor: not-allowed;">
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>¿Por qué quieres adoptarlo?</label>
+                    <textarea name="comentario" placeholder="Cuéntanos un poco sobre por qué has elegido a este peludo..." required style="width: 100%; min-height: 120px; padding: 0.75rem; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.5); font-family: inherit;"></textarea>
+                </div>
+            </div>
+
+            <div class="modal-actions" style="margin-top: 2rem;">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal-host').innerHTML = ''">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    Enviar Solicitud
+                </button>
+            </div>
+        </form>
+
+        <script>
+            lucide.createIcons();
+        </script>
+    </div>
+</div>
+
+</body>
+</html>
