@@ -38,22 +38,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="d : ${donaciones}" th:id="'row-' + ${d.id}">
+                    <tr th:each="d : ${donaciones}" th:id="'row-' + ${d.get('id')}">
                         <td style="font-weight:600;color:var(--primary);"
-                            th:text="${d.usuarioId != null ? d.usuarioId : 'Anónimo'}">
+                            th:text="${d.get('usuarioId') != null ? d.get('usuarioId') : 'Anónimo'}">
                             Usuario
                         </td>
-                        <td th:text="${d.tipo}">DINERO</td>
-                        <td th:text="${d.cantidad}">100.0</td>
-                        <td th:text="${d.fecha != null ? d.fecha.toString().replace('T', ' ').substring(0, (d.fecha.toString().length() > 16 ? 16 : d.fecha.toString().length())) : '-'}">01/01/2024</td>
-                        <td th:text="${d.descripcion}">Descripción</td>
+                        <td th:text="${d.get('tipo')}">DINERO</td>
+                        <td th:text="${d.get('cantidad')}">100.0</td>
+                        <td th:text="${d.get('fecha') != null ? d.get('fecha').toString().replace('T', ' ').substring(0, (d.get('fecha').toString().length() > 16 ? 16 : d.get('fecha').toString().length())) : '-'}">01/01/2024</td>
+                        <td th:text="${d.get('descripcion')}">Descripción</td>
                         <td style="display:flex; gap:8px;" th:if="${isVoluntario}">
-                            <a class="btn-icon" th:href="@{/web/donaciones/{id}/editar(id=${d.id})}">
+                            <a class="btn-icon" th:href="@{/web/donaciones/{id}/editar(id=${d.get('id')})}">
                                 <i data-lucide="edit-2" style="width:16px;"></i>
                             </a>
                             <button class="btn-icon delete"
-                                th:hx-post="@{/web/donaciones/{id}/borrar(id=${d.id})}"
-                                th:hx-target="'#row-' + ${d.id}" hx-swap="outerHTML swap:0.3s"
+                                th:hx-post="@{/web/donaciones/{id}/borrar(id=${d.get('id')})}"
+                                th:hx-target="'#row-' + ${d.get('id')}" hx-swap="outerHTML swap:0.3s"
                                 hx-confirm="¿Eliminar donación?">
                                 <i data-lucide="trash-2" style="width:16px;"></i>
                             </button>

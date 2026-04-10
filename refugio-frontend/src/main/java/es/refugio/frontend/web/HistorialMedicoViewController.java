@@ -35,7 +35,7 @@ public class HistorialMedicoViewController {
 
     @GetMapping(WebRoutes.HISTORIALES_BASE)
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
-        model.addAttribute(ModelAttribute.Historial_LIST.getName(), fetchList("/v1/historiales"));
+        model.addAttribute(ModelAttribute.Historial_LIST.getName(), fetchList("/v1/historial-medico"));
         if (successMessage != null) model.addAttribute("successMessage", successMessage);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Historial_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -63,14 +63,14 @@ public class HistorialMedicoViewController {
         body.put("veterinario", veterinario);
         body.put("fecha",       LocalDateTime.now().toString());
 
-        restTemplate.postForObject(apiUrl + "/v1/historiales", body, Object.class);
+        restTemplate.postForObject(apiUrl + "/v1/historial-medico", body, Object.class);
         redirectAttributes.addFlashAttribute("successMessage", "Historial médico registrado correctamente");
         return "redirect:" + WebRoutes.HISTORIALES_BASE;
     }
 
     @GetMapping(WebRoutes.HISTORIALES_EDITAR)
     public String editarFormulario(@PathVariable Integer id, Model model) {
-        Object historial = restTemplate.getForObject(apiUrl + "/v1/historiales/" + id, Object.class);
+        Object historial = restTemplate.getForObject(apiUrl + "/v1/historial-medico/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Historial.getName(), historial);
         model.addAttribute("animales", fetchList("/v1/animales"));
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Historial_FORM.getPath());
@@ -92,7 +92,7 @@ public class HistorialMedicoViewController {
         body.put("veterinario", veterinario);
         body.put("fecha",       LocalDateTime.now().toString());
 
-        restTemplate.put(apiUrl + "/v1/historiales/" + id, body);
+        restTemplate.put(apiUrl + "/v1/historial-medico/" + id, body);
         redirectAttributes.addFlashAttribute("successMessage", "Historial médico editado correctamente");
         return "redirect:" + WebRoutes.HISTORIALES_BASE;
     }
@@ -100,14 +100,14 @@ public class HistorialMedicoViewController {
     @PostMapping(WebRoutes.HISTORIALES_ELIMINAR)
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
-        restTemplate.delete(apiUrl + "/v1/historiales/" + id);
+        restTemplate.delete(apiUrl + "/v1/historial-medico/" + id);
         if ("true".equals(request.getHeader("HX-Request"))) return ResponseEntity.ok("");
         return ResponseEntity.status(302).header("Location", WebRoutes.HISTORIALES_BASE).build();
     }
 
     @GetMapping(WebRoutes.HISTORIALES_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
-        List<Object> historiales = fetchList("/v1/historiales");
+        List<Object> historiales = fetchList("/v1/historial-medico");
         Context context = new Context();
         context.setVariable("historiales", historiales);
         String html = templateEngine.process(ThymTemplates.Historial_LIST_PDF.getPath(), context);
@@ -125,6 +125,9 @@ public class HistorialMedicoViewController {
         try {
             Object[] arr = restTemplate.getForObject(apiUrl + path, Object[].class);
             return arr != null ? Arrays.asList(arr) : List.of();
-        } catch (Exception e) { return List.of(); }
+        } catch (Exception e) { 
+            e.printStackTrace();
+            return List.of(); 
+        }
     }
 }

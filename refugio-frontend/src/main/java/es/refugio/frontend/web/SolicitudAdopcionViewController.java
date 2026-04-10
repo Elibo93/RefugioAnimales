@@ -49,7 +49,7 @@ public class SolicitudAdopcionViewController {
 
     @GetMapping(WebRoutes.SOLICITUDES_BASE)
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
-        model.addAttribute(ModelAttribute.Solicitud_LIST.getName(), fetchList("/v1/solicitudes"));
+        model.addAttribute(ModelAttribute.Solicitud_LIST.getName(), fetchList("/v1/solicitudes-adopcion"));
         if (successMessage != null) model.addAttribute("successMessage", successMessage);
         model.addAttribute("currentUri", WebRoutes.SOLICITUDES_BASE);
         model.addAttribute("showBack", false);
@@ -86,7 +86,7 @@ public class SolicitudAdopcionViewController {
         body.put("comentario",  comentario);
         body.put("fecha",       LocalDateTime.now().toString());
 
-        restTemplate.postForObject(apiUrl + "/v1/solicitudes", body, Object.class);
+        restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion", body, Object.class);
 
         if ("true".equals(request.getHeader("HX-Request"))) {
             return "fragments/content/solicitud-creada :: success-modal";
@@ -98,7 +98,7 @@ public class SolicitudAdopcionViewController {
 
     @GetMapping(WebRoutes.SOLICITUDES_EDITAR)
     public String editarFormulario(@PathVariable Integer id, Model model) {
-        Object solicitud = restTemplate.getForObject(apiUrl + "/v1/solicitudes/" + id, Object.class);
+        Object solicitud = restTemplate.getForObject(apiUrl + "/v1/solicitudes-adopcion/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Solicitud.getName(), solicitud);
         model.addAttribute("animales",   fetchList("/v1/animales"));
         model.addAttribute("adoptantes", fetchList("/v1/adoptantes"));
@@ -120,7 +120,7 @@ public class SolicitudAdopcionViewController {
         body.put("estado",   estado);   body.put("comentario",  comentario);
         body.put("fecha",    LocalDateTime.now().toString());
 
-        restTemplate.put(apiUrl + "/v1/solicitudes/" + id, body);
+        restTemplate.put(apiUrl + "/v1/solicitudes-adopcion/" + id, body);
         redirectAttributes.addFlashAttribute("successMessage", "Solicitud editada correctamente");
         return "redirect:" + WebRoutes.SOLICITUDES_BASE;
     }
@@ -128,14 +128,14 @@ public class SolicitudAdopcionViewController {
     @PostMapping(WebRoutes.SOLICITUDES_ELIMINAR)
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
-        restTemplate.delete(apiUrl + "/v1/solicitudes/" + id);
+        restTemplate.delete(apiUrl + "/v1/solicitudes-adopcion/" + id);
         if ("true".equals(request.getHeader("HX-Request"))) return ResponseEntity.ok("");
         return ResponseEntity.status(302).header("Location", WebRoutes.SOLICITUDES_BASE).build();
     }
 
     @GetMapping(WebRoutes.SOLICITUDES_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
-        List<Object> solicitudes = fetchList("/v1/solicitudes");
+        List<Object> solicitudes = fetchList("/v1/solicitudes-adopcion");
         Context context = new Context();
         context.setVariable("solicitudes", solicitudes);
         String html = templateEngine.process(ThymTemplates.Solicitud_LIST_PDF.getPath(), context);
@@ -153,6 +153,9 @@ public class SolicitudAdopcionViewController {
         try {
             Object[] arr = restTemplate.getForObject(apiUrl + path, Object[].class);
             return arr != null ? Arrays.asList(arr) : List.of();
-        } catch (Exception e) { return List.of(); }
+        } catch (Exception e) { 
+            e.printStackTrace();
+            return List.of(); 
+        }
     }
 }

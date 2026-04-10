@@ -98,7 +98,7 @@ public class AnimalViewController {
     @GetMapping(WebRoutes.ANIMALES_NUEVO)
     public String formulario(Model model) {
         // Enums disponibles en el backend — se listan hardcoded ya que son valores fijos
-        model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), Map.of());
+        model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), new HashMap<>());
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), fetchList("/v1/voluntarios"));
         model.addAttribute("tamanos", List.of("PEQUEÑO", "MEDIANO", "GRANDE", "GIGANTE"));
         model.addAttribute("sexos",   List.of("MACHO", "HEMBRA"));
@@ -239,6 +239,7 @@ public class AnimalViewController {
             Object[] arr = restTemplate.getForObject(apiUrl + path, Object[].class);
             return arr != null ? Arrays.asList(arr) : List.of();
         } catch (Exception e) {
+            System.err.println("Error llamando a " + path + ": " + e.getMessage());
             return List.of();
         }
     }

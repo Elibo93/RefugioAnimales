@@ -32,18 +32,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="h : ${historiales}" th:id="'row-' + ${h.id}">
-                        <td th:text="${h.id}">1</td>
-                        <td style="font-weight:600;color:var(--primary);" th:text="${h.animalId}">Animal</td>
-                        <td th:text="${h.fecha != null ? h.fecha.toString().replace('T', ' ').substring(0, (h.fecha.toString().length() > 10 ? 10 : h.fecha.toString().length())) : '-'}">01/01/2024</td>
-                        <td th:text="${h.veterinario}">Dr. Smith</td>
+                    <tr th:each="h : ${historiales}" th:id="'row-' + ${h.get('id')}">
+                        <td th:text="${h.get('id')}">1</td>
+                        <td style="font-weight:600;color:var(--primary);" th:text="${h.get('animalId')}">Animal</td>
+                        <td th:text="${h.get('fecha') != null ? h.get('fecha').toString().replace('T', ' ').substring(0, (h.get('fecha').toString().length() > 10 ? 10 : h.get('fecha').toString().length())) : '-'}">01/01/2024</td>
+                        <td th:text="${h.get('veterinario')}">Dr. Smith</td>
                         <td style="display:flex; gap:8px;">
-                            <a class="btn-icon" th:href="@{/web/historiales/{id}/editar(id=${h.id})}">
+                            <a class="btn-icon" th:href="@{/web/historiales/{id}/editar(id=${h.get('id')})}">
                                 <i data-lucide="edit-2" style="width:16px;"></i>
                             </a>
                             <button class="btn-icon delete"
-                                th:hx-post="@{/web/historiales/{id}/borrar(id=${h.id})}"
-                                th:hx-target="'#row-' + ${h.id}" hx-swap="outerHTML swap:0.3s"
+                                th:hx-post="@{/web/historiales/{id}/borrar(id=${h.get('id')})}"
+                                th:hx-target="'#row-' + ${h.get('id')}" hx-swap="outerHTML swap:0.3s"
                                 hx-confirm="¿Eliminar historial médico?">
                                 <i data-lucide="trash-2" style="width:16px;"></i>
                             </button>

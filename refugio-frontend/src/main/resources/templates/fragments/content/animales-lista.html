@@ -105,21 +105,21 @@
                 <div id="animal-pagination-container">
                     <div class="animals-grid" id="animal-grid">
                         <div th:each="a : ${animales}" class="animal-card-glass glass-card animal-item"
-                            th:id="'card-' + ${a.id}">
+                            th:id="'card-' + ${a.get('id')}">
                             <div class="card-img-container">
-                                <img th:src="${a.foto != null ? a.foto : '/images/placeholder-animal.png'}"
+                                <img th:src="${a.get('foto') != null ? a.get('foto') : '/images/placeholder-animal.png'}"
                                     alt="Animal">
                                 <span class="status-badge"
-                                    th:classappend="${a.estado != null ? (a.estado.toString() == 'DISPONIBLE' ? 'badge-available' : (a.estado.toString() == 'RESERVADO' ? 'badge-reserved' : 'badge-treatment')) : 'badge-available'}"
-                                    th:text="${a.estado}">
+                                    th:classappend="${a.get('estado') != null ? (a.get('estado').toString() == 'DISPONIBLE' ? 'badge-available' : (a.get('estado').toString() == 'RESERVADO' ? 'badge-reserved' : 'badge-treatment')) : 'badge-available'}"
+                                    th:text="${a.get('estado')}">
                                     Disponible
                                 </span>
                                 <div class="card-info-overlay" th:if="${!isAdmin}">
-                                    <p style="font-size: 0.85rem; margin-bottom: 1rem;" th:text="${a.descripcion}">
+                                    <p style="font-size: 0.85rem; margin-bottom: 1rem;" th:text="${a.get('descripcion')}">
                                         Descripción breve.
                                     </p>
                                     <button class="btn btn-primary" style="width: 100%; justify-content: center;"
-                                        th:attr="hx-get=@{/web/animales/{id}/detalle(id=${a.id})}"
+                                        th:attr="hx-get=@{/web/animales/{id}/detalle(id=${a.get('id')})}"
                                         hx-target="#modal-host" hx-swap="outerHTML">
                                         <i data-lucide="maximize-2"></i>
                                         <span th:text="#{animal.button.view.profile}">Conóceme</span>
@@ -129,27 +129,27 @@
 
                             <div class="card-body-glass">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <h3 class="animal-name" th:text="${a.nombre}">Rocky</h3>
-                                    <i th:data-lucide="${a.sexo != null ? (a.sexo.toString() == 'MACHO' ? 'mars' : 'venus') : 'circle'}"
-                                        th:style="${a.sexo != null ? (a.sexo.toString() == 'MACHO' ? 'color: #3B82F6' : 'color: #EC4899') : ''}"></i>
+                                    <h3 class="animal-name" th:text="${a.get('nombre')}">Rocky</h3>
+                                    <i th:data-lucide="${a.get('sexo') != null ? (a.get('sexo').toString() == 'MACHO' ? 'mars' : 'venus') : 'circle'}"
+                                        th:style="${a.get('sexo') != null ? (a.get('sexo').toString() == 'MACHO' ? 'color: #3B82F6' : 'color: #EC4899') : ''}"></i>
                                 </div>
                                 <div class="quick-stats">
                                     <div class="stat-item">
                                         <i data-lucide="calendar"></i>
-                                        <span th:text="${a.edad} + 'a'">2a</span>
+                                        <span th:text="${a.get('edad') != null ? a.get('edad') + 'a' : '-'}">2a</span>
                                         <span style="font-size: 0.6rem; opacity: 0.7;"
                                             th:text="#{animal.field.age}">Edad</span>
                                     </div>
                                     <div class="stat-item">
                                         <i data-lucide="weight"></i>
-                                        <span th:text="${a.peso != null ? a.peso + 'kg' : '-'}">12kg</span>
+                                        <span th:text="${a.get('peso') != null ? a.get('peso') + 'kg' : '-'}">12kg</span>
                                         <span style="font-size: 0.6rem; opacity: 0.7;"
                                             th:text="#{animal.field.size}">Peso</span>
                                     </div>
                                     <div class="stat-item">
                                         <i data-lucide="zap"></i>
                                         <span
-                                            th:text="${a.nivelEnergia != null ? a.nivelEnergia + '/5' : '-'}">4/5</span>
+                                            th:text="${a.get('nivelEnergia') != null ? a.get('nivelEnergia') + '/5' : '-'}">4/5</span>
                                         <span style="font-size: 0.6rem; opacity: 0.7;"
                                             th:text="#{animal.field.energy}">Energía</span>
                                     </div>
@@ -159,16 +159,16 @@
                                 <div style="margin-top: auto; display: flex; gap: 0.75rem; justify-content: flex-end;"
                                     th:if="${isAdmin}">
                                     <button class="btn-view-small" title="Ver Detalle"
-                                        th:attr="hx-get=@{/web/animales/{id}/detalle(id=${a.id})}"
+                                        th:attr="hx-get=@{/web/animales/{id}/detalle(id=${a.get('id')})}"
                                         hx-target="#modal-host" hx-swap="outerHTML">
                                         <i data-lucide="eye"></i>
                                     </button>
-                                    <a th:href="@{/web/animales/{id}/editar(id=${a.id})}" class="btn-edit-small"
+                                    <a th:href="@{/web/animales/{id}/editar(id=${a.get('id')})}" class="btn-edit-small"
                                         title="Editar">
                                         <i data-lucide="edit-2"></i>
                                     </a>
                                     <button
-                                        th:attr="hx-post=@{/web/animales/{id}/borrar(id=${a.id})}, hx-target='#card-' + ${a.id}"
+                                        th:attr="hx-post=@{/web/animales/{id}/borrar(id=${a.get('id')})}, hx-target='#card-' + ${a.get('id')}"
                                         hx-swap="outerHTML swap:0.3s" hx-confirm="¿Eliminar?" class="btn-delete-small"
                                         title="Eliminar">
                                         <i data-lucide="trash-2"></i>

@@ -36,23 +36,23 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="p : ${voluntarios}" th:id="'row-' + ${p.id}"
-                        th:with="u=${usuariosMap != null ? usuariosMap[p.usuarioId] : null}"
-                        th:attr="data-id=${p.id}, data-nombre=${u != null ? u['nombre'] : ''}, data-apellido=${u != null ? u['apellido'] : ''}, data-disp=${p.disponibilidad}, data-email=${u != null ? u['email'] : ''}, data-tlf=${u != null ? u['telefono'] : ''}">
+                    <tr th:each="p : ${voluntarios}" th:id="'row-' + ${p.get('id')}"
+                        th:with="u=${usuariosMap != null ? usuariosMap[p.get('usuarioId')] : null}"
+                        th:attr="data-id=${p.get('id')}, data-nombre=${u != null ? u.get('nombre') : ''}, data-apellido=${u != null ? u.get('apellido') : ''}, data-disp=${p.get('disponibilidad')}, data-email=${u != null ? u.get('email') : ''}, data-tlf=${u != null ? u.get('telefono') : ''}">
 
-                        <td th:text="${p.id}">1</td>
-                        <td style="font-weight: 600; color: var(--text-main);" th:text="${u?.nombre}">Juan</td>
-                        <td th:text="${u?.apellido}">Pérez</td>
+                        <td th:text="${p.get('id')}">1</td>
+                        <td style="font-weight: 600; color: var(--text-main);" th:text="${u != null ? u.get('nombre') : ''}">Juan</td>
+                        <td th:text="${u != null ? u.get('apellido') : ''}">Pérez</td>
                         <td><span class="badge-soon" style="background:#F3E8FF; color:#9333EA;"
-                                th:text="${p.disponibilidad}">Tarde</span></td>
-                        <td th:text="${u?.email}">juan@mail.com</td>
-                        <td th:text="${u?.telefono}">600...</td>
+                                th:text="${p.get('disponibilidad')}">Tarde</span></td>
+                        <td th:text="${u != null ? u.get('email') : ''}">juan@mail.com</td>
+                        <td th:text="${u != null ? u.get('telefono') : ''}">600...</td>
                         <td style="display:flex; gap:8px;">
                             <button class="btn-icon trigger-modal"><i data-lucide="edit-2"
                                     style="width:16px;"></i></button>
                             <button class="btn-icon delete"
-                                th:hx-post="@{/web/voluntarios/{id}/borrar(id=${p.id})}"
-                                th:hx-target="'#row-' + ${p.id}" hx-swap="outerHTML swap:0.3s"
+                                th:hx-post="@{/web/voluntarios/{id}/borrar(id=${p.get('id')})}"
+                                th:hx-target="'#row-' + ${p.get('id')}" hx-swap="outerHTML swap:0.3s"
                                 hx-confirm="¿Eliminar voluntario?">
                                 <i data-lucide="trash-2" style="width:16px;"></i>
                             </button>
