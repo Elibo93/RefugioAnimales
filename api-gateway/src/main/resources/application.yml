@@ -1,0 +1,128 @@
+server:
+  port: 8443
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-password: mi_contrasena_segura
+    key-store-type: PKCS12
+    key-alias: springboot
+  # Redirigir HTTP (8080) a HTTPS (8443) automáticamente
+  http2:
+    enabled: true
+
+# Redirect HTTP → HTTPS
+http:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  # Aumentar el tamaño máximo del buffer del codec para respuestas grandes
+  # (el /web/home con animales, estilos y scripts supera el límite de 256KB por defecto)
+  codec:
+    max-in-memory-size: 10MB
+
+  cloud:
+    compatibility-verifier:
+      enabled: false   # Spring Boot 3.4.4 con Spring Cloud 2024.0.0
+    gateway:
+      # ─────────────────────────────────────────
+      # RUTAS DE ENRUTAMIENTO
+      # ─────────────────────────────────────────
+      routes:
+
+        # ── BACKEND: Auth y API REST (el backend gestiona login/sesión) ──
+        - id: backend-auth
+          uri: lb://REFUGIO-BACKEND
+          predicates:
+            - Path=/login, /login-post, /logout, /registro, /error
+
+        - id: backend-api
+          uri: lb://REFUGIO-BACKEND
+          predicates:
+            - Path=/api/**
+
+        - id: backend-swagger
+          uri: lb://REFUGIO-BACKEND
+          predicates:
+            - Path=/api-docs/**, /v3/api-docs/**, /swagger-ui/**, /swagger-ui.html
+
+        # ── FRONTEND: Vistas Thymeleaf ──
+        # Páginas web (ViewControllers)
+        - id: frontend-web
+          uri: lb://REFUGIO-FRONTEND
+          predicates:
+            - Path=/web/**
+
+        # Recursos estáticos — los sirve el frontend
+        - id: frontend-static
+          uri: lb://REFUGIO-FRONTEND
+          predicates:
+            - Path=/css/**, /js/**, /img/**, /images/**, /webjars/**, /favicon.ico
+
+        # Raíz → redirige al frontend
+        - id: frontend-root
+          uri: lb://REFUGIO-FRONTEND
+          predicates:
+            - Path=/
+
+      # ─────────────────────────────────────────
+      # CORS GLOBAL (el gateway gestiona CORS)
+      # ─────────────────────────────────────────
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns:
+              - "https://localhost:8443"
+              - "http://localhost:8082"
+              - "http://localhost:8080"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
+      # Propagar X-Forwarded headers para que Thymeleaf genere URLs correctas
+      forwarded:
+        enabled: true
+      x-forwarded:
+        enabled: true
+
+      # Timeouts del cliente HTTP hacia los microservicios upstream
+      # El frontend puede tardar hasta 10s en renderizar páginas que llaman al backend
+      httpclient:
+        response-timeout: 30s
+        connect-timeout: 5000
+        pool:
+          max-connections: 500
+          acquire-timeout: 10000
+
+# Registro en Eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    prefer-ip-address: true
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, gateway
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    reactor.netty: WARN

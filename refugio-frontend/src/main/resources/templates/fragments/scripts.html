@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+
+<div th:fragment="scripts" th:remove="tag">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+    <script th:src="@{/js/scripts.js}"></script>
+    <script>
+        // Initialize Lucide icons on page load
+        if (window.lucide) lucide.createIcons();
+
+        // CSRF for HTMX POST requests
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            var csrfHeaderAttr = document.querySelector('meta[name="_csrf_header"]');
+            var csrfTokenAttr = document.querySelector('meta[name="_csrf"]');
+            if (csrfHeaderAttr && csrfTokenAttr && evt.detail.verb !== "get") {
+                var headerName = csrfHeaderAttr.getAttribute('content');
+                var token = csrfTokenAttr.getAttribute('content');
+                if (headerName && token) {
+                    evt.detail.headers[headerName] = token;
+                }
+            }
+        });
+
+        // Re-initialize Lucide icons after every HTMX content swap
+        document.body.addEventListener('htmx:afterSettle', function() {
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
+</div>
+
+</html>
+
+
+
+

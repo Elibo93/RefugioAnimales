@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <div th:fragment="content">
+        <!-- Impact Section at the top -->
+        <div th:replace="~{fragments/content/donacion-impacto :: impact}"></div>
+
+        <!-- Integrated Donation Form -->
+        <div th:replace="~{fragments/content/donacion-formulario :: content}"></div>
+
+        <div class="table-wrapper glass-panel" style="margin-top: 4rem; padding: 3rem; border-radius: 24px;"
+            th:if="${isAdmin}">
+            <div class="actions-bar" style="background:transparent; border-bottom: none; padding-bottom: 2rem;">
+                <h2 style="font-size: 2rem; font-weight: 800; color: var(--text-main);"
+                    th:text="#{donacion.list.title}">Donaciones Recientes</h2>
+                <div style="display:flex; gap:10px;">
+                    <a class="btn btn-secondary" th:href="@{/web/donaciones/pdf}" target="_blank"
+                        th:text="#{generic.link.export.pdf}" th:if="${isVoluntario}">
+                        Exportar PDF
+                    </a>
+                </div>
+            </div>
+            <table id="tabladonaciones">
+                <thead>
+                    <tr>
+                        <th th:text="#{donacion.table.header.usuario}">Donante</th>
+                        <th th:text="#{donacion.field.tipo}">Tipo</th>
+                        <th th:text="#{donacion.field.cantidad}">Cantidad</th>
+                        <th th:text="#{donacion.table.header.fecha}">Fecha</th>
+                        <th th:text="#{donacion.field.descripcion}">Descripción</th>
+                        <th th:text="#{workshop.table.header.action}" th:if="${isVoluntario}">
+                            Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="d : ${donaciones}" th:id="'row-' + ${d.id}">
+                        <td style="font-weight:600;color:var(--primary);"
+                            th:text="${d.usuarioId != null ? d.usuarioId : 'Anónimo'}">
+                            Usuario
+                        </td>
+                        <td th:text="${d.tipo}">DINERO</td>
+                        <td th:text="${d.cantidad}">100.0</td>
+                        <td th:text="${d.fecha != null ? d.fecha.toString().replace('T', ' ').substring(0, (d.fecha.toString().length() > 16 ? 16 : d.fecha.toString().length())) : '-'}">01/01/2024</td>
+                        <td th:text="${d.descripcion}">Descripción</td>
+                        <td style="display:flex; gap:8px;" th:if="${isVoluntario}">
+                            <a class="btn-icon" th:href="@{/web/donaciones/{id}/editar(id=${d.id})}">
+                                <i data-lucide="edit-2" style="width:16px;"></i>
+                            </a>
+                            <button class="btn-icon delete"
+                                th:hx-post="@{/web/donaciones/{id}/borrar(id=${d.id})}"
+                                th:hx-target="'#row-' + ${d.id}" hx-swap="outerHTML swap:0.3s"
+                                hx-confirm="¿Eliminar donación?">
+                                <i data-lucide="trash-2" style="width:16px;"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div th:if="${#lists.isEmpty(donaciones)}" style="text-align:center;padding:3rem;color:var(--text-muted);">
+                <i data-lucide="inbox" style="width:48px; height:48px; margin-bottom:1rem; opacity:0.5;"></i>
+                <p th:text="#{donacion.list.empty}">No hay donaciones registradas.</p>
+            </div>
+        </div>
+        <script>
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        </script>
+    </div>
+</body>
+
+</html>

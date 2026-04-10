@@ -1,0 +1,54 @@
+server:
+  port: 8082
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+  error:
+    include-message: always
+    include-exception: true
+    include-stacktrace: always
+
+spring:
+  application:
+    name: REFUGIO-FRONTEND
+
+  cloud:
+    compatibility-verifier:
+      enabled: false   # Spring Boot 3.4.4 con Spring Cloud 2024.0.0
+
+  # Thymeleaf
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: UTF-8
+    cache: false
+
+  # i18n — usa los mismos archivos messages copiados del backend
+  messages:
+    encoding: UTF-8
+    basename: messages
+
+  # Jackson — soporte para LocalDateTime
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+# Eureka — el frontend se registra para que el Gateway lo descubra
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    prefer-ip-address: true
+
+# URL interna del backend (via Gateway para aprovechar el lb:// de Eureka)
+backend:
+  api:
+    url: http://localhost:8081/api
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info

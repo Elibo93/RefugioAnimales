@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="#{pdf.animales.title}">Listado de animales</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 {
+            color: #4f46e5;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 12px;
+        }
+
+        th {
+            background-color: #f3f4f6;
+            color: #000;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #ccc;
+        }
+
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 th:text="#{pdf.animales.header}">Listado de animales</h1>
+    <table>
+        <thead>
+            <tr>
+                <th th:text="#{pdf.column.id}">ID</th>
+                <th th:text="#{pdf.column.name}">Nombre</th>
+                <th th:text="#{pdf.column.species}">Especie</th>
+                <th th:text="#{pdf.column.breed}">Raza</th>
+                <th th:text="#{pdf.column.sex}">Sexo</th>
+                <th th:text="#{pdf.column.chip}">Chip ID</th>
+                <th th:text="#{pdf.column.status}">Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="t : ${animales}">
+                <td th:text="${t.id.value}"></td>
+                <td th:text="${t.nombre}"></td>
+                <td th:text="${t.especie.name() == 'OTRO' ? t.especiePersonalizada : t.especie}"></td>
+                <td th:text="${t.raza}"></td>
+                <td th:text="${t.sexo}"></td>
+                <td th:text="${t.chipId}"></td>
+                <td th:text="${t.estado}"></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>
+
+
+
+

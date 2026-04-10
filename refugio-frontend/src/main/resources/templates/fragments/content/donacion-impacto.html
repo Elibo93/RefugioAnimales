@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="impact">
+    <!-- Hero Section -->
+    <div class="donation-hero">
+        <div class="donation-hero-image">
+            <img th:src="@{/images/donation_hero.png}" alt="Rescued Animals">
+        </div>
+        <div class="donation-hero-content">
+            <h1>Tu ayuda salva vidas</h1>
+            <p>Hoy puedes ser el héroe de cientos de animales que esperan una segunda oportunidad. Cada donación cuenta.</p>
+            <a href="#formulario-donacion" class="btn btn-primary btn-lg" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                <i data-lucide="heart" style="width:20px; fill: white;"></i>
+                Donar ahora
+            </a>
+        </div>
+    </div>
+
+    <!-- Impact Grid -->
+    <div class="impact-grid">
+        <div class="impact-card glass-panel">
+            <span class="impact-icon">🦴</span>
+            <span class="impact-amount">10€</span>
+            <p class="impact-text">Alimentas a un perro durante una semana completa con comida de alta calidad.</p>
+        </div>
+        <div class="impact-card glass-panel">
+            <span class="impact-icon">💉</span>
+            <span class="impact-amount">30€</span>
+            <p class="impact-text">Vacunas y desparasitas a un cachorro, dándole el mejor comienzo posible.</p>
+        </div>
+        <div class="impact-card glass-panel">
+            <span class="impact-icon">🏥</span>
+            <span class="impact-amount">100€</span>
+            <p class="impact-text">Cubres una cirugía de urgencia o un tratamiento especializado vital.</p>
+        </div>
+    </div>
+
+    <!-- Transparency Section (Needs & Progress) -->
+    <div class="glass-panel" style="padding: 3rem; border-radius: 24px; margin-bottom: 3rem;">
+        <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 2rem; text-align: center;">Nuestras necesidades actuales</h2>
+        <div class="needs-list">
+            <div class="need-item" style="background: rgba(21, 128, 61, 0.05);">
+                <div class="need-header">
+                    <span class="need-title">🏠 Arreglo del patio de gatos</span>
+                    <span class="text-primary" style="font-weight: 700;" 
+                          th:text="${(totalDinero != null and metaDinero != null) ? #numbers.formatDecimal(totalDinero, 1, 0) + '€ / ' + #numbers.formatDecimal(metaDinero, 1, 0) + '€' : 'Cargando...'}">600€ / 1000€</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" th:style="'width: ' + ${(totalDinero != null and metaDinero != null and metaDinero > 0) ? (totalDinero * 100 / metaDinero > 100 ? 100 : totalDinero * 100 / metaDinero) : 0} + '%;'"></div>
+                </div>
+                <div class="progress-info">
+                    <span th:text="${(totalDinero != null and metaDinero != null and metaDinero > 0) ? #numbers.formatDecimal(totalDinero * 100 / metaDinero > 100 ? 100 : totalDinero * 100 / metaDinero, 1, 0) + '% completado' : '0% completado'}">60% completado</span>
+                    <span th:text="${(totalDinero != null and metaDinero != null) ? (totalDinero >= metaDinero ? '¡Objetivo conseguido!' : 'Quedan ' + #numbers.formatDecimal(metaDinero - totalDinero, 1, 0) + '€') : ''}">Quedan 400€</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testimonials -->
+    <div class="testimonial-section">
+        <div class="testimonial-card">
+            <p class="testimonial-quote">"Gracias a las donaciones, pudieron operar a mi perro antes de que yo lo conociera. Ahora es el miembro más feliz de la familia."</p>
+            <div class="testimonial-author">
+                <img src="https://i.pravatar.cc/150?u=adoptante1" alt="Adoptante" class="testimonial-avatar">
+                <div>
+                    <div style="font-weight: 700;">María García</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">Adoptante de 'Rex'</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,140 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+
+        // ─── 1. EUREKA SERVER ────────────────────────────────────────────────
+        {
+            "label": "1. Start Eureka Server",
+            "type": "shell",
+            "command": "mvn spring-boot:run",
+            "options": {
+                "cwd": "${workspaceFolder}/eureka-server"
+            },
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "eureka",
+                "pattern": { "regexp": "^$" },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "\\[INFO\\] Spring Boot Maven Plugin",
+                    "endsPattern": "Started EurekaServerApplication"
+                }
+            },
+            "presentation": {
+                "label": "Eureka Server",
+                "group": "refugio",
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": false
+            }
+        },
+
+        // ─── 2. BACKEND ──────────────────────────────────────────────────────
+        {
+            "label": "2. Start Backend",
+            "type": "shell",
+            "command": "mvn spring-boot:run",
+            "options": {
+                "cwd": "${workspaceFolder}/refugio-backend"
+            },
+            "dependsOn": ["1. Start Eureka Server"],
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "backend",
+                "pattern": { "regexp": "^$" },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "\\[INFO\\] Spring Boot Maven Plugin",
+                    "endsPattern": "Started RefugioAnimalesApplication"
+                }
+            },
+            "presentation": {
+                "label": "Backend",
+                "group": "refugio",
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": false
+            }
+        },
+
+        // ─── 3. FRONTEND ─────────────────────────────────────────────────────
+        {
+            "label": "3. Start Frontend",
+            "type": "shell",
+            "command": "mvn spring-boot:run",
+            "options": {
+                "cwd": "${workspaceFolder}/refugio-frontend"
+            },
+            "dependsOn": ["2. Start Backend"],
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "frontend",
+                "pattern": { "regexp": "^$" },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "\\[INFO\\] Spring Boot Maven Plugin",
+                    "endsPattern": "Started RefugioFrontendApplication"
+                }
+            },
+            "presentation": {
+                "label": "Frontend",
+                "group": "refugio",
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": false
+            }
+        },
+
+        // ─── 4. API GATEWAY ──────────────────────────────────────────────────
+        {
+            "label": "4. Start API Gateway",
+            "type": "shell",
+            "command": "mvn spring-boot:run",
+            "options": {
+                "cwd": "${workspaceFolder}/api-gateway"
+            },
+            "dependsOn": ["3. Start Frontend"],
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "gateway",
+                "pattern": { "regexp": "^$" },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "\\[INFO\\] Spring Boot Maven Plugin",
+                    "endsPattern": "Started ApiGatewayApplication"
+                }
+            },
+            "presentation": {
+                "label": "API Gateway",
+                "group": "refugio",
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": false
+            }
+        },
+
+        // ─── COMPOUND: Arrancar todo en orden ────────────────────────────────
+        {
+            "label": "🚀 Start All Microservices",
+            "dependsOn": ["4. Start API Gateway"],
+            "dependsOrder": "sequence",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+
+        // ─── STOP ALL (cierra todos los procesos Maven) ──────────────────────
+        {
+            "label": "🛑 Stop All Microservices",
+            "type": "shell",
+            "command": "Get-Process -Name 'java' -ErrorAction SilentlyContinue | Stop-Process -Force; Write-Host '✅ Todos los servicios detenidos'",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        }
+    ]
+}

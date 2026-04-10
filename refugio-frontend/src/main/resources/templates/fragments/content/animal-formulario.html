@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <div th:fragment="content">
+
+        <div class="page-header" style="text-align:center;">
+            <h1 class="page-title"
+                th:text="${animal.id == null ? #messages.msg('workshop.form.title') : #messages.msg('workshop.modal.edit.title')}">
+                Crear animal</h1>
+            <p style="color:var(--text-muted); margin-top:0.5rem;"
+                th:text="${animal.id == null ? #messages.msg('animal.form.subtitle.create') : #messages.msg('animal.form.subtitle.edit')}">
+                Configure los detalles del animal
+            </p>
+        </div>
+
+        <div class="card" style="max-width:800px; margin:0 auto;">
+            <form
+                th:action="${animal.id == null ? '/web/animales/nuevo' : '/web/animales/' + animal.id + '/editar'}"
+                method="post" th:object="${animal}" enctype="multipart/form-data">
+
+                <div class="form-grid">
+
+                    <div class="form-group" th:classappend="${animal.id != null ? 'readonly-group' : ''}">
+                        <label th:text="#{workshop.field.name}">Nombre</label>
+                        <input type="text" th:field="*{nombre}" required th:readonly="${animal.id != null}">
+                    </div>
+
+                    <div class="form-group" th:classappend="${animal.id != null ? 'readonly-group' : ''}">
+                        <label th:text="#{animal.field.species}">Especie</label>
+                        <select th:field="*{especie}" id="especieSelect" required
+                            onchange="toggleEspeciePersonalizada()" th:disabled="${animal.id != null}">
+                            <option th:each="e : ${especies}" th:value="${e}"
+                                th:text="${#strings.capitalize(e.name().toLowerCase())}">Especie</option>
+                        </select>
+                        <input type="hidden" th:if="${animal.id != null}" th:field="*{especie}">
+                    </div>
+
+                    <div class="form-group" id="especiePersonalizadaGroup"
+                        th:style="${animal.especie != null && animal.especie.name() == 'OTRO' ? 'display:block' : 'display:none'}"
+                        th:classappend="${animal.id != null ? 'readonly-group' : ''}">
+                        <label>¿Qué especie es?</label>
+                        <input type="text" th:field="*{especiePersonalizada}" id="especiePersonalizadaInput"
+                            placeholder="Ej: Hámster, Conejo..." th:readonly="${animal.id != null}">
+                    </div>
+
+                    <script>
+                        function toggleEspeciePersonalizada() {
+                            const select = document.getElementById('especieSelect');
+                            const group = document.getElementById('especiePersonalizadaGroup');
+                            const input = document.getElementById('especiePersonalizadaInput');
+
+                            if (select.value === 'OTRO') {
+                                group.style.display = 'block';
+                                input.required = true;
+                            } else {
+                                group.style.display = 'none';
+                                input.required = false;
+                                input.value = ''; // Limpiar si se cambia a Perro/Gato
+                            }
+                        }
+                    </script>
+
+                    <div class="form-group" th:classappend="${animal.id != null ? 'readonly-group' : ''}">
+                        <label th:text="#{animal.field.breed}">Raza</label>
+                        <input type="text" th:field="*{raza}" th:readonly="${animal.id != null}">
+                    </div>
+
+                    <div class="form-group" th:classappend="${animal.id != null ? 'readonly-group' : ''}">
+                        <label th:text="#{animal.field.sex}">Sexo</label>
+                        <select th:field="*{sexo}" th:disabled="${animal.id != null}">
+                            <option th:each="s : ${sexos}" th:value="${s}"
+                                th:text="${#strings.capitalize(s.name().toLowerCase())}">Sexo</option>
+                        </select>
+                        <input type="hidden" th:if="${animal.id != null}" th:field="*{sexo}">
+                    </div>
+
+                    <div class="form-group" th:classappend="${animal.id != null ? 'readonly-group' : ''}">
+                        <label th:text="#{animal.field.chip}">Chip ID</label>
+                        <input type="text" th:field="*{chipId}" th:readonly="${animal.id != null}">
+                    </div>
+
+                    <div class="form-group">
+                        <label th:text="#{animal.field.status}">Estado</label>
+                        <select th:field="*{estado}">
+                            <option th:each="e : ${estados}" th:value="${e}"
+                                th:text="${#strings.capitalize(e.name().toLowerCase().replace('_', ' '))}">Estado
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label th:text="#{animal.field.age}">Edad</label>
+                        <input type="number" th:field="*{edad}">
+                    </div>
+
+                    <div class="form-group">
+                        <label th:text="#{animal.field.size}">Tamaño</label>
+                        <select th:field="*{tamano}">
+                            <option th:each="t : ${tamanos}" th:value="${t}"
+                                th:text="${#strings.capitalize(t.name().toLowerCase())}">Tamaño</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Peso (kg)</label>
+                        <input type="number" step="0.1" th:field="*{peso}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nivel de Energía (1-5)</label>
+                        <select th:field="*{nivelEnergia}">
+                            <option value="1">1 - Muy Bajo</option>
+                            <option value="2">2 - Bajo</option>
+                            <option value="3">3 - Medio</option>
+                            <option value="4">4 - Alto</option>
+                            <option value="5">5 - Muy Alto</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="display: flex; align-items: center; gap: 10px; padding-top: 1.5rem;">
+                        <input type="checkbox" th:field="*{urgencia}" style="width: auto;">
+                        <label style="margin: 0;">¿Es adopción urgente? 🔥</label>
+                    </div>
+
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label>Fotografía del Animal</label>
+                        <div th:if="${animal.foto != null && !animal.foto.isEmpty()}"
+                            style="margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem;">
+                            <img th:src="${animal.foto}" alt="Miniatura"
+                                style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px; border: 2px solid var(--primary-color);">
+                            <div>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Imagen actual</p>
+                                <input type="hidden" th:field="*{foto}">
+                            </div>
+                        </div>
+                        <input type="file" name="fotoFile" accept="image/*"
+                            style="padding: 0.5rem; background: rgba(0,0,0,0.02); border: 2px dashed var(--border-color); border-radius: 12px; width: 100%;">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">Formatos aceptados:
+                            JPG, PNG. Máximo 5MB.</p>
+                    </div>
+
+
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label th:text="#{animal.field.description}">Descripción</label>
+                        <textarea th:field="*{descripcion}"></textarea>
+                    </div>
+
+
+                </div>
+
+                <div class="modal-actions" style="margin-top:2rem;">
+                    <a th:href="@{/web/animales}" class="btn btn-secondary" th:text="#{generic.btn.cancel}">
+                        Cancelar
+                    </a>
+
+                    <button type="submit" class="btn btn-primary" th:text="#{generic.btn.save}">
+                        Guardar animal
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</body>
+
+</html>

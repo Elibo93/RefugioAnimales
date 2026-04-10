@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Solicitudes de Adopción</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; color: #333; }
+        h1 { color: #4f46e5; border-bottom: 2px solid #ccc; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
+        th { background-color: #f3f4f6; color: #000; padding: 10px; text-align: left; border-bottom: 2px solid #ccc; }
+        td { padding: 8px; border-bottom: 1px solid #eee; }
+        tr:nth-child(even) { background-color: #fafafa; }
+    </style>
+</head>
+<body>
+    <h1>Listado de Solicitudes de Adopción</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Animal (ID)</th>
+                <th>Adoptante (ID)</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+                <th>Comentario</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="s : ${solicitudes}">
+                <td th:text="${s.id.value}"></td>
+                <td th:text="${s.animalId.value}"></td>
+                <td th:text="${s.adoptanteId.value}"></td>
+                <td th:text="${s.estado}"></td>
+                <td th:text="${#temporals.format(s.fecha, 'dd/MM/yyyy')}"></td>
+                <td th:text="${s.comentario}"></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
