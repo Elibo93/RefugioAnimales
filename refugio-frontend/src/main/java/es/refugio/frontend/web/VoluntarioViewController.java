@@ -61,7 +61,7 @@ public class VoluntarioViewController {
 
     @GetMapping(WebRoutes.VOLUNTARIOS_NUEVO)
     public String formulario(Model model) {
-        model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), Map.of());
+        model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), new HashMap<String, Object>());
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_NUEVO);
         model.addAttribute("showBack", true);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_FORM.getPath());

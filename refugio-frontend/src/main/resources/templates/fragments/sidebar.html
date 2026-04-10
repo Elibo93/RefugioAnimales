@@ -70,6 +70,11 @@
                         <i data-lucide="coins"></i>
                         <span th:text="#{donacion.list.title}">Donaciones</span>
                     </a>
+                    <a th:href="@{/web/voluntarios/nuevo}" class="sidebar-item" th:if="${!isAdmin}" th:classappend="${#strings.equals(currentUri, '/web/voluntarios/nuevo')} ? 'active' : ''">
+                        <i data-lucide="heart"></i>
+                        <span th:text="#{menu.voluntarios.nuevo}">Quiero ser voluntario</span>
+                    </a>
+
                     <a th:href="@{/web/historiales}" class="sidebar-item" th:if="${isVoluntario}" th:classappend="${#strings.contains(currentUri, '/web/historiales')} ? 'active' : ''">
                         <i data-lucide="stethoscope"></i>
                         <span th:text="#{historial.list.title}">Historiales</span>

@@ -45,6 +45,11 @@
                         <i data-lucide="dog"></i>
                         <span th:text="#{menu.animales.card.title}">Animales</span>
                     </a>
+                    <a th:href="@{/web/voluntarios/nuevo}" class="sidebar-item" sec:authorize="!hasRole('ADMIN')">
+                        <i data-lucide="heart"></i>
+                        <span th:text="#{menu.voluntarios.nuevo}">Quiero ser voluntario</span>
+                    </a>
+
                 </div>
             </div>
 
