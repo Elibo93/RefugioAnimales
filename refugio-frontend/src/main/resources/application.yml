@@ -45,7 +45,8 @@ eureka:
 # URL interna del backend (via Gateway para aprovechar el lb:// de Eureka)
 backend:
   api:
-    url: http://localhost:8081/api
+    url: http://localhost:8080/api
+
 
 management:
   endpoints:

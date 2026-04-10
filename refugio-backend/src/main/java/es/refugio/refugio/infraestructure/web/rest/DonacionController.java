@@ -61,8 +61,12 @@ public class DonacionController {
                     .anyMatch(a -> a.getAuthority().equals("ROLE_VOLUNTARIO"));
             
             if (isVolunteer) {
+                if (request.tipo() == null) {
+                    throw new IllegalArgumentException("El tipo de donación es obligatorio.");
+                }
                 String tipo = request.tipo().toUpperCase();
                 if (!tipo.equals("COMIDA") && !tipo.equals("OTRO")) {
+
                     throw new AccessDeniedException("Los voluntarios solo pueden registrar donaciones físicas (COMIDA o MATERIAL/OTRO).");
                 }
             }

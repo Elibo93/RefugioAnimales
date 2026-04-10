@@ -47,18 +47,6 @@ public class DonacionViewController {
             totalDinero = 0.0;
         }
 
-        // Buscar el ID del usuario anónimo para donaciones sin registro
-        Object anonimoId = null;
-        for (Object u : usuarios) {
-            if (u instanceof Map) {
-                Object email = ((Map<?,?>) u).get("email");
-                if ("anonimo@refugio.es".equals(email)) {
-                    anonimoId = ((Map<?,?>) u).get("id");
-                    break;
-                }
-            }
-        }
-
         model.addAttribute(ModelAttribute.Donacion_LIST.getName(), donaciones);
         model.addAttribute("usuarios", usuarios);
         Map<String, Object> nuevaDonacion = new HashMap<>();
@@ -73,7 +61,6 @@ public class DonacionViewController {
         model.addAttribute("tipos", List.of("DINERO", "ALIMENTO", "MEDICAMENTO", "MATERIAL", "OTRO"));
         model.addAttribute("metaDinero", 1000.0);
         model.addAttribute("totalDinero", totalDinero);
-        model.addAttribute("anonimoId", anonimoId);
         model.addAttribute("formActionUrl", "/web/donaciones/nueva");
 
         if (successMessage != null) model.addAttribute("successMessage", successMessage);
@@ -84,16 +71,7 @@ public class DonacionViewController {
     @GetMapping(WebRoutes.DONACIONES_NUEVA)
     public String formulario(Model model) {
         List<Object> usuarios = fetchList("/v1/usuarios");
-        Object anonimoId = null;
-        for (Object u : usuarios) {
-            if (u instanceof Map) {
-                Object email = ((Map<?,?>) u).get("email");
-                if ("anonimo@refugio.es".equals(email)) {
-                    anonimoId = ((Map<?,?>) u).get("id");
-                    break;
-                }
-            }
-        }
+
         Map<String, Object> nuevaDonacion = new HashMap<>();
         nuevaDonacion.put("fecha", LocalDateTime.now().toString());
         nuevaDonacion.put("id", null);
@@ -104,7 +82,6 @@ public class DonacionViewController {
         model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), nuevaDonacion);
         model.addAttribute("usuarios", usuarios);
         model.addAttribute("tipos", List.of("DINERO", "ALIMENTO", "MEDICAMENTO", "MATERIAL", "OTRO"));
-        model.addAttribute("anonimoId", anonimoId);
         model.addAttribute("formActionUrl", "/web/donaciones/nueva");
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();

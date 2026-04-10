@@ -4,21 +4,34 @@ import es.refugio.refugio.application.command.donacion.CreateDonacionCommand;
 import es.refugio.refugio.domain.model.donacion.Donacion;
 import es.refugio.refugio.domain.model.donacion.enums.FrecuenciaDonacion;
 import es.refugio.refugio.domain.model.donacion.enums.TipoDonacion;
+import es.refugio.refugio.domain.model.usuario.Usuario;
 import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.repository.DonacionRepository;
+import es.refugio.refugio.domain.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class CreateDonacionUseCase {
 
     private final DonacionRepository donacionRepository;
+    private final UsuarioRepository usuarioRepository;
 
     public Donacion create(CreateDonacionCommand command) {
         TipoDonacion tipoEnum = TipoDonacion.valueOf(command.tipo().toUpperCase());
         FrecuenciaDonacion frecuenciaEnum = FrecuenciaDonacion.valueOf(command.frecuencia().toUpperCase());
         
+        Integer targetUserId = command.usuarioId();
+        
+        // Si no hay usuarioId (donación anónima), buscar el usuario 'anonimo@refugio.es'
+        if (targetUserId == null) {
+            targetUserId = usuarioRepository.getByEmail("anonimo@refugio.es")
+                    .map(Usuario::getId)
+                    .map(UsuarioId::getValue)
+                    .orElseThrow(() -> new IllegalStateException("No se encontró el usuario anónimo en el sistema"));
+        }
+
         Donacion donacion = Donacion.builder()
-                .usuarioId(new UsuarioId(command.usuarioId()))
+                .usuarioId(new UsuarioId(targetUserId))
                 .tipo(tipoEnum)
                 .frecuencia(frecuenciaEnum)
                 .cantidad(command.cantidad())
@@ -29,4 +42,5 @@ public class CreateDonacionUseCase {
         return donacionRepository.save(donacion);
     }
 }
+
 
