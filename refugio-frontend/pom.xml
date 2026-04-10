@@ -51,6 +51,12 @@
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
 
+        <!-- LoadBalancer para resolución de servicios con RestTemplate -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
+
         <!-- Generación de PDFs -->
         <dependency>
             <groupId>org.xhtmlrenderer</groupId>

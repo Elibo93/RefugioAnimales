@@ -42,10 +42,10 @@ eureka:
   instance:
     prefer-ip-address: true
 
-# URL interna del backend (via Gateway para aprovechar el lb:// de Eureka)
+# URL interna del backend (comunicación server-to-server vía Eureka Service Discovery)
 backend:
   api:
-    url: http://localhost:8080/api
+    url: http://REFUGIO-BACKEND/api
 
 
 management:

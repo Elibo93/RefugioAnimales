@@ -36,23 +36,23 @@
                     </tr>
                 </thead>
                 <tbody id="tabla-personas-body">
-                    <tr th:each="a : ${personas}" th:id="'row-' + ${a.id}"
-                        th:attr="data-id=${a.id}, data-email=${a.email}, data-tlf=${a.telefono}">
+                    <tr th:each="a : ${personas}" th:id="'row-' + ${a.get('id')}"
+                        th:attr="data-id=${a.get('id')}, data-email=${a.get('email')}, data-tlf=${a.get('telefono')}">
 
-                        <td th:text="${a.id}">1</td>
-                        <td style="font-weight:600; color:var(--text-main);" th:text="${a.nombre}">Juan</td>
-                        <td th:text="${a.apellido}">Pérez</td>
+                        <td th:text="${a.get('id')}">1</td>
+                        <td style="font-weight:600; color:var(--text-main);" th:text="${a.get('nombre')}">Juan</td>
+                        <td th:text="${a.get('apellido')}">Pérez</td>
                         <td><span class="badge-soon" style="background:#F1F5F9; color:#64748B;"
-                                th:text="${a.rol}">ROLE_ADMIN</span></td>
-                        <td class="col-email" th:text="${a.email}">juan@mail.com</td>
-                        <td class="col-tlf" th:text="${a.telefono}">600...</td>
+                                th:text="${a.get('rol')}">ROLE_ADMIN</span></td>
+                        <td class="col-email" th:text="${a.get('email')}">juan@mail.com</td>
+                        <td class="col-tlf" th:text="${a.get('telefono')}">600...</td>
                         <td style="display:flex; gap:8px;">
-                            <a class="btn-icon" th:href="@{/web/personas/{id}/editar(id=${a.id})}">
+                            <a class="btn-icon" th:href="@{/web/personas/{id}/editar(id=${a.get('id')})}">
                                 <i data-lucide="edit-2" style="width:16px;"></i>
                             </a>
                             <button class="btn-icon delete" hx-post
-                                th:hx-post="@{/web/personas/{id}/borrar(id=${a.id})}" hx-target
-                                th:hx-target="'#row-' + ${a.id}" hx-swap="outerHTML swap:0.3s"
+                                th:hx-post="@{/web/personas/{id}/borrar(id=${a.get('id')})}" hx-target
+                                th:hx-target="'#row-' + ${a.get('id')}" hx-swap="outerHTML swap:0.3s"
                                 hx-confirm="¿Eliminar persona?">
                                 <i data-lucide="trash-2" style="width:16px;"></i>
                             </button>

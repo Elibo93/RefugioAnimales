@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -22,6 +23,7 @@ public class RestTemplateConfig {
      * 3. Ignora propiedades JSON desconocidas (tolerante a cambios del backend).
      */
     @Bean
+    @LoadBalanced
     public RestTemplate restTemplate(SessionCookieRelayInterceptor sessionCookieRelayInterceptor) {
         RestTemplate restTemplate = new RestTemplate();
 

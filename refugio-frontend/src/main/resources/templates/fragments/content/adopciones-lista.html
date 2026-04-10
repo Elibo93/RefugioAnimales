@@ -16,14 +16,14 @@
                         style="display:flex; gap:10px; margin:0;">
                         <select name="adoptanteId" class="filter-select" onchange="this.form.submit()">
                             <option value="" th:text="#{enrollment.filter.student.all}">Todo personas</option>
-                            <option th:each="a : ${listaadoptantes}" th:value="${a.id}"
-                                th:text="${a.nombre != null ? a.nombre + ' ' + a.apellido : 'Adoptante'}"
-                                th:selected="${a.id == selectedAdoptanteId}">adoptante</option>
+                            <option th:each="a : ${listaadoptantes}" th:value="${a.get('id')}"
+                                th:text="${a.get('nombre') != null ? a.get('nombre') + ' ' + a.get('apellido') : 'Adoptante'}"
+                                th:selected="${a.get('id') == selectedAdoptanteId}">adoptante</option>
                         </select>
                         <select name="animalId" class="filter-select" onchange="this.form.submit()">
                             <option value="" th:text="#{enrollment.filter.workshop.all}">Todo animales</option>
-                            <option th:each="t : ${listaanimales}" th:value="${t.id}" th:text="${t.nombre}"
-                                th:selected="${t.id == selectedanimalId}">animal</option>
+                            <option th:each="t : ${listaanimales}" th:value="${t.get('id')}" th:text="${t.get('nombre')}"
+                                th:selected="${t.get('id') == selectedanimalId}">animal</option>
                         </select>
                     </form>
                     <a class="btn btn-secondary" th:href="@{/web/adopciones/pdf}" target="_blank">
@@ -48,21 +48,21 @@
                     </tr>
                 </thead>
                 <tbody id="tabla-adopciones-body">
-                    <tr th:each="i : ${adopciones}" th:id="'row-' + ${i.id}">
-                        <td th:text="${i.id}">1</td>
+                    <tr th:each="i : ${adopciones}" th:id="'row-' + ${i.get('id')}">
+                        <td th:text="${i.get('id')}">1</td>
                         <td style="font-weight:600; color:var(--text-main);"
-                            th:text="${adoptanteNombres != null and i.adoptanteId != null ? adoptanteNombres[i.adoptanteId] : (i.adoptanteId != null ? i.adoptanteId : 'Desconocido')}">
+                            th:text="${adoptanteNombres != null and i.get('adoptanteId') != null ? adoptanteNombres[i.get('adoptanteId')] : (i.get('adoptanteId') != null ? i.get('adoptanteId') : 'Desconocido')}">
                             Juan Pérez</td>
                         <td style="color:var(--primary); font-weight:500;"
-                            th:text="${animalesMap != null and i.animalId != null and animalesMap[i.animalId] != null ? animalesMap[i.animalId].nombre : (i.animalId != null ? i.animalId : '-')}">Animal</td>
-                        <td th:text="${i.fechaAdopcion != null ? i.fechaAdopcion : '-'}">01/01/2023</td>
+                            th:text="${animalesMap != null and i.get('animalId') != null and animalesMap[i.get('animalId')] != null ? animalesMap[i.get('animalId')].get('nombre') : (i.get('animalId') != null ? i.get('animalId') : '-')}">Animal</td>
+                        <td th:text="${i.get('fechaAdopcion') != null ? i.get('fechaAdopcion') : '-'}">01/01/2023</td>
                         <td style="display:flex; gap:8px;">
-                            <a class="btn-icon" th:href="@{/web/adopciones/{id}/editar(id=${i.id})}">
+                            <a class="btn-icon" th:href="@{/web/adopciones/{id}/editar(id=${i.get('id')})}">
                                 <i data-lucide="edit-2" style="width:16px;"></i>
                             </a>
                             <button class="btn-icon delete"
-                                th:hx-post="@{/web/adopciones/{id}/borrar(id=${i.id})}"
-                                th:hx-target="'#row-' + ${i.id}" hx-swap="outerHTML swap:0.3s"
+                                th:hx-post="@{/web/adopciones/{id}/borrar(id=${i.get('id')})}"
+                                th:hx-target="'#row-' + ${i.get('id')}" hx-swap="outerHTML swap:0.3s"
                                 hx-confirm="¿Eliminar inscripción?">
                                 <i data-lucide="trash-2" style="width:16px;"></i>
                             </button>
