@@ -10,20 +10,20 @@
 
         <div class="page-header" style="text-align:center;">
             <h1 class="page-title"
-                th:text="${voluntario.id == null ? #messages.msg('voluntario.form.title') : #messages.msg('voluntario.modal.edit.title')}">
+                th:text="${voluntario.get('id') == null ? #messages.msg('voluntario.form.title') : #messages.msg('voluntario.modal.edit.title')}">
                 Registrar voluntario</h1>
             <p style="color:var(--text-muted); margin-top:0.5rem;"
-                th:text="${voluntario.id == null ? #messages.msg('voluntario.form.subtitle.create') : #messages.msg('voluntario.form.subtitle.edit')}">
+                th:text="${voluntario.get('id') == null ? #messages.msg('voluntario.form.subtitle.create') : #messages.msg('voluntario.form.subtitle.edit')}">
                 Añada un nuevo voluntario al equipo</p>
         </div>
 
         <div class="card" style="max-width:800px; margin:0 auto;">
             <form id="volunteerForm"
-                th:action="${voluntario.id == null ? '/web/voluntarios/nuevo' : '/web/voluntarios/' + voluntario.id + '/editar'}"
+                th:action="${voluntario.get('id') == null ? '/web/voluntarios/nuevo' : '/web/voluntarios/' + voluntario.get('id') + '/editar'}"
                 method="post">
 
                 <!-- Si es Admin, permite elegir usuario -->
-                <div th:if="${isAdmin and voluntario.id == null}" class="form-group"
+                <div th:if="${isAdmin and voluntario.get('id') == null}" class="form-group"
                     style="margin-bottom:1.5rem;">
                     <label>ID de Usuario (Persona)</label>
                     <input type="number" name="idUsuario" required placeholder="Ingrese ID del usuario"
@@ -51,7 +51,7 @@
                 <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
                     <div class="form-group">
                         <label th:text="#{voluntario.field.phone}">Teléfono</label>
-                        <input type="text" name="telefono" placeholder="Opcional" th:value="${voluntario.telefono}">
+                        <input type="text" name="telefono" placeholder="Opcional" th:value="${voluntario.get('telefono')}">
                     </div>
                     <div class="form-group">
                         <label th:text="#{voluntario.field.specialty}">Área de interés</label>
@@ -74,7 +74,7 @@
                     <textarea name="disponibilidad" required 
                         placeholder="Ej: Fines de semana por la mañana, pasear perros..."
                         style="width: 100%; min-height: 120px; padding: 1rem; border-radius: 12px; border: 1px solid var(--border-color);"
-                        th:text="${voluntario.disponibilidad}"></textarea>
+                        th:text="${voluntario.get('disponibilidad')}"></textarea>
                 </div>
 
                 <div class="modal-actions" style="margin-top:2rem;">
