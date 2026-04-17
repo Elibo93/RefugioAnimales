@@ -110,7 +110,10 @@
                                 <img th:src="${a.get('foto') != null ? a.get('foto') : '/images/placeholder-animal.png'}"
                                     alt="Animal">
                                 <span class="status-badge"
-                                    th:classappend="${a.get('estado') != null ? (a.get('estado').toString() == 'DISPONIBLE' ? 'badge-available' : (a.get('estado').toString() == 'RESERVADO' ? 'badge-reserved' : 'badge-treatment')) : 'badge-available'}"
+                                    th:classappend="${a.get('estado') != null ? 
+                                        (a.get('estado').toString() == 'DISPONIBLE' ? 'badge-available' : 
+                                        (a.get('estado').toString() == 'RESERVADO' ? 'badge-reserved' : 
+                                        (a.get('estado').toString() == 'ADOPTADO' ? 'badge-adopted' : 'badge-treatment'))) : 'badge-available'}"
                                     th:text="${a.get('estado')}">
                                     Disponible
                                 </span>

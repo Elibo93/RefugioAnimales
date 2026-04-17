@@ -176,8 +176,12 @@
                                 style="width: 100%; height: 100%; object-fit: cover;">
 
                             <!-- Status Badge -->
-                            <span class="status-badge badge-available"
-                                style="position: absolute; top: 1rem; left: 1rem; padding: 0.5rem 1rem; border-radius: 99px; background: rgba(52, 211, 153, 0.9); color: white; font-weight: 700; font-size: 0.75rem; backdrop-filter: blur(4px);"
+                            <span class="status-badge"
+                                th:classappend="${a.get('estado') != null ? 
+                                    (a.get('estado').toString() == 'DISPONIBLE' ? 'badge-available' : 
+                                    (a.get('estado').toString() == 'RESERVADO' ? 'badge-reserved' : 
+                                    (a.get('estado').toString() == 'ADOPTADO' ? 'badge-adopted' : 'badge-treatment'))) : 'badge-available'}"
+                                style="position: absolute; top: 1rem; left: 1rem; padding: 0.5rem 1rem; border-radius: 99px; font-weight: 700; font-size: 0.75rem; backdrop-filter: blur(4px); z-index: 10;"
                                 th:text="${a.get('estado')}">
                                 Disponible
                             </span>

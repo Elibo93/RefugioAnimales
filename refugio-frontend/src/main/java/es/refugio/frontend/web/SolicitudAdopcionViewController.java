@@ -10,6 +10,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
@@ -147,6 +150,123 @@ public class SolicitudAdopcionViewController {
         renderer.layout();
         renderer.createPDF(out);
         out.close();
+    }
+
+    @GetMapping(WebRoutes.SOLICITUDES_PUBLICO_REGISTRO)
+    public String formularioPublico(Model model, @RequestParam Integer animalId) {
+        try {
+            Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
+            model.addAttribute("animal", animal);
+        } catch (Exception e) {
+            model.addAttribute("animal", Map.of("id", animalId, "nombre", "Animal"));
+        }
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_REGISTRO.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    @GetMapping(WebRoutes.SOLICITUDES_OPCIONES)
+    public String formularioOpciones(Model model, @RequestParam Integer animalId) {
+        try {
+            Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
+            model.addAttribute("animal", animal);
+        } catch (Exception e) {
+            model.addAttribute("animal", Map.of("id", animalId, "nombre", "Animal"));
+        }
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_OPCIONES.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    @GetMapping(WebRoutes.SOLICITUDES_CONVERTIR)
+    public String formularioConversion(Model model, @RequestParam Integer animalId) {
+        try {
+            Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
+            model.addAttribute("animal", animal);
+        } catch (Exception e) {
+            model.addAttribute("animal", Map.of("id", animalId, "nombre", "Animal"));
+        }
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_CONVERSION.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    @PostMapping(WebRoutes.SOLICITUDES_CONVERTIR)
+    public String procesarConversionYAdopcion(
+            @RequestParam String dni,
+            @RequestParam String direccion,
+            @RequestParam String fechaNacimiento,
+            @RequestParam Integer animalId,
+            @RequestParam(required = false) String comentario,
+            RedirectAttributes redirectAttributes) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("dni",             dni);
+        body.put("direccion",       direccion);
+        body.put("fechaNacimiento", fechaNacimiento);
+        body.put("animalId",        animalId);
+        body.put("comentario",      comentario);
+
+        restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/convertir-y-adopcion", body, Object.class);
+
+        // Actualizar contexto de seguridad (cambio de rol)
+        var authorities = List.of(new SimpleGrantedAuthority("ROLE_ADOPTANTE"));
+        var currentAuth = SecurityContextHolder.getContext().getAuthentication();
+        var auth = new UsernamePasswordAuthenticationToken(currentAuth.getPrincipal(), null, authorities);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Solicitud enviada con éxito. Tu perfil ha sido actualizado a Adoptante.");
+        return "redirect:" + WebRoutes.HOME;
+    }
+
+    @PostMapping(WebRoutes.SOLICITUDES_DIRECTA)
+    public String procesarAdopcionDirecta(
+            @RequestParam Integer animalId,
+            @RequestParam(required = false) String comentario,
+            RedirectAttributes redirectAttributes) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("animalId",   animalId);
+        body.put("comentario", comentario);
+
+        restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/directa", body, Object.class);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Solicitud enviada con éxito");
+        return "redirect:" + WebRoutes.HOME;
+    }
+
+    @PostMapping(WebRoutes.SOLICITUDES_PUBLICO_REGISTRO)
+    public String procesarRegistroYAdopcion(
+            @RequestParam String nombre,
+            @RequestParam String apellido,
+            @RequestParam String email,
+            @RequestParam String contrasena,
+            @RequestParam String telefono,
+            @RequestParam String dni,
+            @RequestParam String direccion,
+            @RequestParam String fechaNacimiento,
+            @RequestParam Integer animalId,
+            @RequestParam(required = false) String comentario,
+            RedirectAttributes redirectAttributes) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("nombre",          nombre);
+        body.put("apellido",        apellido);
+        body.put("email",           email);
+        body.put("contrasena",      contrasena);
+        body.put("telefono",        telefono);
+        body.put("dni",             dni);
+        body.put("direccion",       direccion);
+        body.put("fechaNacimiento", fechaNacimiento);
+        body.put("animalId",        animalId);
+        body.put("comentario",      comentario);
+
+        restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/publico/registro-y-adopcion", body, Object.class);
+
+        // Auto-login en el Frontend
+        var authorities = List.of(new SimpleGrantedAuthority("ROLE_ADOPTANTE"));
+        var auth = new UsernamePasswordAuthenticationToken(email, null, authorities);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Solicitud enviada con éxito");
+        return "redirect:" + WebRoutes.HOME;
     }
 
     private List<Object> fetchList(String path) {

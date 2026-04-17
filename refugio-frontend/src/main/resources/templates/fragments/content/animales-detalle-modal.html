@@ -17,7 +17,10 @@
                 <header>
                     <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
                         <span class="status-badge"
-                            th:classappend="${animal.get('estado') != null ? (animal.get('estado').toString() == 'DISPONIBLE' ? 'badge-available' : (animal.get('estado').toString() == 'RESERVADO' ? 'badge-reserved' : 'badge-treatment')) : 'badge-available'}"
+                            th:classappend="${animal.get('estado') != null ? 
+                                (#strings.toUpperCase(animal.get('estado').toString()) == 'DISPONIBLE' ? 'badge-available' : 
+                                (#strings.toUpperCase(animal.get('estado').toString()) == 'RESERVADO' ? 'badge-reserved' : 
+                                (#strings.toUpperCase(animal.get('estado').toString()) == 'ADOPTADO' ? 'badge-adopted' : 'badge-treatment'))) : 'badge-available'}"
                             th:text="${animal.get('estado')}">
                             Disponible
                         </span>
@@ -67,24 +70,46 @@
 
                 <div style="margin-top: auto; display: flex; gap: 1rem;">
                     <!-- Botón de Adopción (Sólo si DISPONIBLE) -->
-                    <div style="flex: 1;" th:if="${animal.get('estado') != null and animal.get('estado').toString() == 'DISPONIBLE'}">
-                        <!-- No Auth -->
+                    <div style="flex: 1;" th:if="${animal.get('estado') != null and #strings.toUpperCase(animal.get('estado').toString()) == 'DISPONIBLE'}">
+                        
+                        <!-- 1. Usuario No Autenticado -->
                         <div th:if="${!isAuthenticated}">
-                            <a th:href="@{/web/solicitudes/nueva(animalId=${animal.get('id')})}" class="btn btn-primary"
-                                style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
+                            <a th:href="@{/web/solicitudes/publico/opciones(animalId=${animal.get('id')})}" 
+                               class="btn btn-primary"
+                               style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
                                 <i data-lucide="heart"></i>
                                 <span th:text="#{animal.button.adopt}">¡Adopta!</span>
                             </a>
                         </div>
-                        <!-- Authenticated (no Admin) -->
-                        <div th:if="${isAuthenticated and !isAdmin}">
-                            <a th:href="@{/web/solicitudes/nueva(animalId=${animal.get('id')})}" class="btn btn-primary"
-                                style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
-                                <i data-lucide="heart"></i>
-                                <span th:text="#{animal.button.adopt}">¡Adopta!</span>
-                            </a>
+
+                        <!-- 2. Usuario Autenticado (No Admin) -->
+                        <div th:if="${isAuthenticated and !isAdmin}" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+                            
+                            <!-- Caso A: Ya es Adoptante -> Adopción Directa -->
+                            <div sec:authorize="hasRole('ROLE_ADOPTANTE')">
+                                <form th:action="@{/web/solicitudes/publico/directa}" method="POST" 
+                                      onsubmit="return confirm('¿Estás seguro de que deseas enviar una solicitud de adopción para este animal?')">
+                                    <input type="hidden" name="animalId" th:value="${animal.get('id')}">
+                                    <button type="submit" class="btn btn-primary"
+                                            style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
+                                        <i data-lucide="heart-handshake"></i>
+                                        <span>Solicitar Adopción</span>
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Caso B: Usuario Registrado pero NO Adoptante -> Ir a Conversión -->
+                            <div sec:authorize="!hasRole('ROLE_ADOPTANTE')">
+                                <a th:href="@{/web/solicitudes/publico/convertir(animalId=${animal.get('id')})}" 
+                                   class="btn btn-primary"
+                                   style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
+                                    <i data-lucide="heart"></i>
+                                    <span>¡Quiero Adoptar!</span>
+                                </a>
+                            </div>
                         </div>
-                        <!-- Admin (Edit & Adopt) -->
+
+                        <!-- 3. Administrador -->
                         <div th:if="${isAdmin}" style="display: flex; gap: 1rem; width: 100%;">
                             <a th:href="@{/web/animales/{id}/editar(id=${animal.get('id')})}" class="btn btn-secondary"
                                 style="flex: 1; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px; background: rgba(0,0,0,0.05);">

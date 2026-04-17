@@ -1,5 +1,6 @@
 package es.refugio.refugio.infraestructure.web.rest;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,31 +22,37 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import es.refugio.auth.domain.Rol;
 import es.refugio.auth.infrastructure.repository.UserRepository;
 import es.refugio.auth.domain.AuthCredentialEntity;
 import es.refugio.refugio.domain.model.adoptante.Adoptante;
-import es.refugio.refugio.application.service.adoptante.FindAdoptanteService;
-
-import es.refugio.refugio.application.command.solicitud_adopcion.CreateSolicitudAdopcionCommand;
-import es.refugio.refugio.application.command.solicitud_adopcion.EditSolicitudAdopcionCommand;
-import es.refugio.refugio.application.service.solicitud_adopcion.CreateSolicitudAdopcionService;
-import es.refugio.refugio.application.service.solicitud_adopcion.DeleteSolicitudAdopcionService;
-import es.refugio.refugio.application.service.solicitud_adopcion.EditSolicitudAdopcionService;
-import es.refugio.refugio.application.service.solicitud_adopcion.FindSolicitudAdopcionService;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.domain.model.animal.AnimalId;
 import es.refugio.refugio.domain.model.solicitud_adopcion.SolicitudAdopcion;
 import es.refugio.refugio.domain.model.solicitud_adopcion.SolicitudAdopcionId;
+import es.refugio.refugio.application.service.adoptante.FindAdoptanteService;
+import es.refugio.refugio.application.service.adoptante.CreateAdoptanteService;
+import es.refugio.refugio.application.service.usuario.CreateUsuarioService;
+import es.refugio.refugio.application.service.solicitud_adopcion.CreateSolicitudAdopcionService;
+import es.refugio.refugio.application.service.solicitud_adopcion.DeleteSolicitudAdopcionService;
+import es.refugio.refugio.application.service.solicitud_adopcion.EditSolicitudAdopcionService;
+import es.refugio.refugio.application.service.solicitud_adopcion.FindSolicitudAdopcionService;
+import es.refugio.refugio.application.service.solicitud_adopcion.AprobarSolicitudAdopcionService;
+import es.refugio.refugio.application.service.solicitud_adopcion.RechazarSolicitudAdopcionService;
+import es.refugio.refugio.application.command.usuario.CreateUsuarioCommand;
+import es.refugio.refugio.application.command.adoptante.CreateAdoptanteCommand;
+import es.refugio.refugio.application.command.solicitud_adopcion.CreateSolicitudAdopcionCommand;
+import es.refugio.refugio.application.command.solicitud_adopcion.EditSolicitudAdopcionCommand;
 import es.refugio.refugio.infraestructure.mapper.AdopcionMapper;
 import es.refugio.refugio.infraestructure.mapper.SolicitudAdopcionMapper;
 import es.refugio.refugio.infraestructure.web.dto.adopcion.AdopcionResponse;
 import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.SolicitudAdopcionRequest;
 import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.SolicitudAdopcionResponse;
-
-
-
-import es.refugio.refugio.application.service.solicitud_adopcion.AprobarSolicitudAdopcionService;
-import es.refugio.refugio.application.service.solicitud_adopcion.RechazarSolicitudAdopcionService;
+import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.PublicSolicitudAdopcionRequest;
+import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.ConvertAdoptanteRequest;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +67,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Solicitudes de Adopción", description = "Gestión de solicitudes de adopción")
 public class SolicitudAdopcionController {
 
+    private final CreateUsuarioService createUsuarioService;
+    private final CreateAdoptanteService createAdoptanteService;
     private final CreateSolicitudAdopcionService createSolicitudAdopcionService;
     private final FindSolicitudAdopcionService findSolicitudAdopcionService;
     private final EditSolicitudAdopcionService editSolicitudAdopcionService;
@@ -75,6 +84,105 @@ public class SolicitudAdopcionController {
     public ResponseEntity<SolicitudAdopcionResponse> createSolicitudAdopcion(@Valid @RequestBody SolicitudAdopcionRequest request) {
         CreateSolicitudAdopcionCommand command = SolicitudAdopcionMapper.toCommand(request);
         SolicitudAdopcion solicitud = createSolicitudAdopcionService.create(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(SolicitudAdopcionMapper.toResponse(solicitud));
+    }
+
+    @Operation(summary = "Registro público y solicitud de adopción", description = "Registra un nuevo usuario, crea su perfil de adoptante y envía la solicitud de adopción en un solo paso.")
+    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Registro exitoso"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
+    @PostMapping("/publico/registro-y-adopcion")
+    public ResponseEntity<SolicitudAdopcionResponse> registerAndRequest(@Valid @RequestBody PublicSolicitudAdopcionRequest request) {
+        // 1. Crear Usuario
+        var userCommand = new CreateUsuarioCommand(
+                request.nombre(),
+                request.apellido(),
+                request.email(),
+                request.contrasena(),
+                request.telefono(),
+                Rol.ROLE_ADOPTANTE);
+        var usuario = createUsuarioService.createUsuario(userCommand);
+
+        // 2. Crear Adoptante
+        var adoptanteCommand = new CreateAdoptanteCommand(
+                usuario.getId().getValue(),
+                request.dni(),
+                request.direccion(),
+                request.fechaNacimiento());
+        var adoptante = createAdoptanteService.createAdoptante(adoptanteCommand);
+
+        // 3. Crear Solicitud
+        var solicitudCommand = new CreateSolicitudAdopcionCommand(
+                request.animalId(),
+                adoptante.getId().getValue(),
+                LocalDateTime.now(),
+                request.comentario());
+        var solicitud = createSolicitudAdopcionService.create(solicitudCommand);
+
+        // 4. Auto-Login
+        var authorities = List.of(new SimpleGrantedAuthority(Rol.ROLE_ADOPTANTE.name()));
+        var auth = new UsernamePasswordAuthenticationToken(usuario.getEmail(), null, authorities);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(SolicitudAdopcionMapper.toResponse(solicitud));
+    }
+
+    @Operation(summary = "Convertir usuario a adoptante y enviar solicitud", description = "Asocia un perfil de adoptante a un usuario existente, cambia su rol a ROLE_ADOPTANTE y crea la solicitud.")
+    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Conversión y solicitud exitosas"), @ApiResponse(responseCode = "400", description = "Datos inválidos o usuario ya tiene perfil") })
+    @PostMapping("/convertir-y-adopcion")
+    public ResponseEntity<SolicitudAdopcionResponse> convertAndRequest(@Valid @RequestBody ConvertAdoptanteRequest request) {
+        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        AuthCredentialEntity user = userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new AccessDeniedException("Usuario no autenticado"));
+
+        // 1. Crear perfil de Adoptante
+        var adoptanteCommand = new CreateAdoptanteCommand(
+                user.getId(),
+                request.dni(),
+                request.direccion(),
+                request.fechaNacimiento());
+        var adoptante = createAdoptanteService.createAdoptante(adoptanteCommand);
+
+        // 2. Actualizar Rol del Usuario
+        user.setRol(Rol.ROLE_ADOPTANTE);
+        userRepository.save(user);
+
+        // 3. Crear Solicitud
+        var solicitudCommand = new CreateSolicitudAdopcionCommand(
+                request.animalId(),
+                adoptante.getId().getValue(),
+                LocalDateTime.now(),
+                request.comentario());
+        var solicitud = createSolicitudAdopcionService.create(solicitudCommand);
+
+        // 4. Actualizar contexto de seguridad del hilo actual
+        var authorities = List.of(new SimpleGrantedAuthority(Rol.ROLE_ADOPTANTE.name()));
+        var auth = new UsernamePasswordAuthenticationToken(user.getEmail(), null, authorities);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(SolicitudAdopcionMapper.toResponse(solicitud));
+    }
+
+    @Operation(summary = "Adopción directa para adoptantes registrados", description = "Crea una solicitud de adopción directamente para el perfil del usuario autenticado.")
+    @PostMapping("/directa")
+    public ResponseEntity<SolicitudAdopcionResponse> directRequest(@RequestBody Map<String, Object> request) {
+        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        AuthCredentialEntity user = userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new AccessDeniedException("Usuario no autenticado"));
+
+        Adoptante adoptante = findAdoptanteService.findAll().stream()
+                .filter(a -> a.getUsuarioId().equals(user.getId()))
+                .findFirst()
+                .orElseThrow(() -> new AccessDeniedException("El usuario no tiene un perfil de adoptante activo"));
+
+        Integer animalId = (Integer) request.get("animalId");
+        String comentario = (String) request.get("comentario");
+
+        var solicitudCommand = new CreateSolicitudAdopcionCommand(
+                animalId,
+                adoptante.getId().getValue(),
+                LocalDateTime.now(),
+                comentario);
+        var solicitud = createSolicitudAdopcionService.create(solicitudCommand);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(SolicitudAdopcionMapper.toResponse(solicitud));
     }
 

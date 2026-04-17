@@ -27,6 +27,9 @@ public enum FragmentoContenido {
 
     Tarea_LIST("fragments/content/tareas-lista"),
     Tarea_FORM("fragments/content/tarea-formulario"),
+    Solicitud_REGISTRO("fragments/content/solicitud-registro-form"),
+    Solicitud_OPCIONES("fragments/content/solicitud-opciones"),
+    Solicitud_CONVERSION("fragments/content/solicitud-conversion-form"),
 
     HOME_VIEW("fragments/content/index");
 

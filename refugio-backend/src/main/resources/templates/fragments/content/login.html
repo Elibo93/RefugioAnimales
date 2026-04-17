@@ -12,6 +12,9 @@
     </div>
     
     <form th:action="@{/login-post}" method="post" style="display: flex; flex-direction: column; gap: 15px;">
+        <!-- Capturar el parámetro 'redirect' si existe -->
+        <input type="hidden" name="redirect" th:value="${param.redirect}" th:if="${param.redirect != null}">
+        
         <div style="display: flex; flex-direction: column; gap: 5px;">
             <label style="font-weight: 600;" th:text="#{auth.login.email}">Email:</label>
             <input type="email" name="username" required style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;" />

@@ -37,16 +37,25 @@ public class SecurityConfig {
                         @Override
                         protected String determineTargetUrl(HttpServletRequest request,
                                         HttpServletResponse response) {
-                                // Leer headers X-Forwarded-* del API Gateway
+                                // 1. Verificar si hay un parámetro de 'redirect' en la petición original
+                                // Nota: En un flujo de login normal, el parámetro está en la URL del GET /login
+                                // pero Spring Security lo descarta en el POST /login-post a menos que lo guardemos.
+                                // Sin embargo, si el usuario vino de un link th:href="@{/login(redirect=...)}"
+                                // el parámetro debería estar presente si el formulario de login lo incluye como hidden.
+                                
+                                String redirect = request.getParameter("redirect");
+                                if (redirect != null && !redirect.isBlank()) {
+                                    return redirect;
+                                }
+
+                                // 2. Fallback al comportamiento estándar vía Gateway
                                 String proto = request.getHeader("X-Forwarded-Proto");
                                 String host  = request.getHeader("X-Forwarded-Host");
 
                                 if (proto != null && !proto.isBlank()
-                                                && host != null && !host.isBlank()) {
-                                        // Redirigir al frontend a través del Gateway
+                                                 && host != null && !host.isBlank()) {
                                         return proto + "://" + host + "/web/home";
                                 }
-                                // Fallback: sin proxy, redirigir relativo
                                 return "/web/home";
                         }
                 };
@@ -70,7 +79,7 @@ public class SecurityConfig {
                                                                 "/api/v1/animales/**", "/api/v1/me", "/api/v1/donaciones/total")
                                                 .permitAll()
                                                 .requestMatchers(org.springframework.http.HttpMethod.POST,
-                                                                "/api/v1/donaciones")
+                                                                "/api/v1/donaciones", "/api/v1/solicitudes-adopcion/publico/registro-y-adopcion")
                                                 .permitAll()
                                                 // API de tareas y voluntarios requiere roles específicos
                                                 .requestMatchers("/api/v1/tareas/**").hasAnyRole("ADMIN", "VOLUNTARIO")

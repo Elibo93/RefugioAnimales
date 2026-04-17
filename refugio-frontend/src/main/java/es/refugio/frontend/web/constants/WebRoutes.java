@@ -61,6 +61,10 @@ public interface WebRoutes {
     String SOLICITUDES_EDITAR       = "/web/solicitudes/{id}/editar";
     String SOLICITUDES_ELIMINAR     = "/web/solicitudes/{id}/borrar";
     String SOLICITUDES_PDF          = "/web/solicitudes/pdf";
+    String SOLICITUDES_PUBLICO_REGISTRO = "/web/solicitudes/publico/registro-y-adopcion";
+    String SOLICITUDES_OPCIONES = "/web/solicitudes/publico/opciones";
+    String SOLICITUDES_CONVERTIR = "/web/solicitudes/publico/convertir";
+    String SOLICITUDES_DIRECTA = "/web/solicitudes/publico/directa";
 
     // TAREAS
     String TAREAS_BASE     = "/web/tareas";

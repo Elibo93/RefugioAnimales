@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <div th:fragment="content">
+        <div class="page-header" style="text-align: center; margin-bottom: 3rem;">
+            <h1 class="page-title">Únete a nuestra familia y adopta</h1>
+            <p style="color: var(--text-muted);">Completa tus datos para crear una cuenta y enviar tu solicitud para <strong th:text="${animal.get('nombre')}"></strong></p>
+        </div>
+
+        <div class="card glass-panel" style="max-width: 900px; margin: 0 auto; padding: 2.5rem; border-radius: 32px;">
+            <form th:action="@{/web/solicitudes/publico/registro-y-adopcion}" method="POST">
+                
+                <!-- Animal Info (Mini Card) -->
+                <div style="display: flex; align-items: center; gap: 1.5rem; background: rgba(255,255,255,0.4); padding: 1rem; border-radius: 20px; margin-bottom: 2.5rem; border: 1px solid var(--border);">
+                    <img th:src="${animal.get('foto') != null ? animal.get('foto') : '/images/placeholder-animal.png'}" 
+                         style="width: 80px; height: 80px; border-radius: 16px; object-fit: cover;" alt="Animal">
+                    <div>
+                        <h3 style="margin: 0; font-weight: 800;" th:text="${animal.get('nombre')}">Nombre</h3>
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);" th:text="${animal.get('raza')}">Raza</p>
+                    </div>
+                </div>
+
+                <input type="hidden" name="animalId" th:value="${animal.get('id')}">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    
+                    <!-- Columna 1: Cuenta de Usuario -->
+                    <div class="form-section">
+                        <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i data-lucide="user"></i> Datos de la Cuenta
+                        </h2>
+                        
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" name="nombre" required placeholder="Tu nombre">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Apellido</label>
+                            <input type="text" name="apellido" required placeholder="Tus apellidos">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email" required placeholder="ejemplo@correo.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Contraseña</label>
+                            <input type="password" name="contrasena" required placeholder="Min. 8 caracteres">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Teléfono</label>
+                            <input type="tel" name="telefono" required placeholder="+34 XXX XX XX XX">
+                        </div>
+                    </div>
+
+                    <!-- Columna 2: Datos de Adoptante -->
+                    <div class="form-section">
+                        <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i data-lucide="home"></i> Datos de Adoptante
+                        </h2>
+
+                        <div class="form-group">
+                            <label>DNI / NIE</label>
+                            <input type="text" name="dni" required placeholder="12345678X">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Dirección Completa</label>
+                            <input type="text" name="direccion" required placeholder="Calle, Número, Ciudad, CP">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Fecha de Nacimiento</label>
+                            <input type="date" name="fechaNacimiento" required>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label>¿Por qué quieres adoptar a <span th:text="${animal.get('nombre')}"></span>?</label>
+                            <textarea name="comentario" rows="4" placeholder="Cuéntanos un poco sobre el futuro hogar del animal..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions" style="margin-top: 3rem; display: flex; justify-content: flex-end; gap: 1rem;">
+                    <a th:href="@{/web/animales}" class="btn btn-secondary" style="height: 56px; border-radius: 16px; padding: 0 2rem; display: flex; align-items: center;">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary" style="height: 56px; border-radius: 16px; padding: 0 2.5rem; font-weight: 700; font-size: 1.1rem;">
+                        <i data-lucide="heart" style="width: 20px; height: 20px;"></i>
+                        Enviar Solicitud y Registrarme
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <script>
+            if (window.lucide) lucide.createIcons();
+        </script>
+    </div>
+</body>
+
+</html>
