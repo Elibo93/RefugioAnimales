@@ -10,7 +10,6 @@ import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
 import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
 import es.refugio.refugio.infraestructure.db.jpa.entity.TareaEntity;
-import es.refugio.refugio.infraestructure.db.jpa.entity.UsuarioEntity;
 import es.refugio.refugio.infraestructure.db.jpa.entity.VoluntarioEntity;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioRequest;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioResponse;
@@ -37,9 +36,9 @@ public class VoluntarioMapper {
     }
 
     public static VoluntarioEntity toEntity(Voluntario v) {
-        UsuarioEntity usuarioEntity = null;
+        Integer usuarioId = null;
         if (v.getUsuarioId() != null) {
-            usuarioEntity = UsuarioEntity.builder().id(v.getUsuarioId().getValue()).build();
+            usuarioId = v.getUsuarioId().getValue();
         }
 
         List<TareaEntity> tareas = null;
@@ -51,7 +50,7 @@ public class VoluntarioMapper {
 
         return VoluntarioEntity.builder()
                 .id(v.getId() != null ? v.getId().getValue() : null)
-                .usuario(usuarioEntity)
+                .usuarioId(usuarioId)
                 .disponibilidad(v.getDisponibilidad())
                 .tareas(tareas)
                 .build();
@@ -60,7 +59,7 @@ public class VoluntarioMapper {
     public static Voluntario toDomain(VoluntarioEntity e) {
         return Voluntario.builder()
                 .id(e.getId() != null ? new VoluntarioId(e.getId()) : null)
-                .usuarioId(e.getUsuario() != null ? new UsuarioId(e.getUsuario().getId()) : null)
+                .usuarioId(e.getUsuarioId() != null ? new UsuarioId(e.getUsuarioId()) : null)
                 .disponibilidad(e.getDisponibilidad())
                 .tareas(e.getTareas() != null
                         ? e.getTareas().stream().map(te -> new TareaId(te.getId())).collect(Collectors.toList())

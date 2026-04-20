@@ -21,6 +21,8 @@ import java.io.IOException;
 @Component
 public class SessionCookieRelayInterceptor implements ClientHttpRequestInterceptor {
 
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(SessionCookieRelayInterceptor.class);
+
     @Override
     public ClientHttpResponse intercept(HttpRequest request,
                                         byte[] body,
@@ -33,11 +35,21 @@ public class SessionCookieRelayInterceptor implements ClientHttpRequestIntercept
             // Reenviar todas las cookies del navegador al backend
             String cookie = currentRequest.getHeader("Cookie");
             if (cookie != null && !cookie.isBlank()) {
+                logger.info("Relaying cookie to backend for " + request.getURI() + ": " + maskCookie(cookie));
                 request.getHeaders().add("Cookie", cookie);
+            } else {
+                logger.warn("No cookie header found in current request attributes to relay to " + request.getURI());
             }
         } catch (IllegalStateException e) {
             // Sin contexto de request (tests, llamadas fuera de un hilo HTTP) — ignorar
+            logger.debug("No request context for cookie relay: " + e.getMessage());
         }
         return execution.execute(request, body);
+    }
+
+    private String maskCookie(String cookie) {
+        if (cookie == null) return null;
+        if (cookie.length() < 10) return "****";
+        return cookie.substring(0, 5) + "..." + cookie.substring(cookie.length() - 5);
     }
 }

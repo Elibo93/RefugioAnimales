@@ -34,7 +34,9 @@
                 <tbody>
                     <tr th:each="h : ${historiales}" th:id="'row-' + ${h.get('id')}">
                         <td th:text="${h.get('id')}">1</td>
-                        <td style="font-weight:600;color:var(--primary);" th:text="${h.get('animalId')}">Animal</td>
+                        <td style="font-weight:600;color:var(--primary);" 
+                            th:with="a=${h.get('animalId') != null and animalesMap != null ? animalesMap[h.get('animalId')] : null}"
+                            th:text="${a != null ? a.get('nombre') : 'Desconocido'}">Animal</td>
                         <td th:text="${h.get('fecha') != null ? h.get('fecha').toString().replace('T', ' ').substring(0, (h.get('fecha').toString().length() > 10 ? 10 : h.get('fecha').toString().length())) : '-'}">01/01/2024</td>
                         <td th:text="${h.get('veterinario')}">Dr. Smith</td>
                         <td style="display:flex; gap:8px;">

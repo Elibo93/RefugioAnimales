@@ -22,12 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import es.refugio.auth.domain.Rol;
-import es.refugio.auth.infrastructure.repository.UserRepository;
-import es.refugio.auth.domain.AuthCredentialEntity;
+
 import es.refugio.refugio.domain.model.adoptante.Adoptante;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.domain.model.animal.AnimalId;
@@ -35,14 +31,12 @@ import es.refugio.refugio.domain.model.solicitud_adopcion.SolicitudAdopcion;
 import es.refugio.refugio.domain.model.solicitud_adopcion.SolicitudAdopcionId;
 import es.refugio.refugio.application.service.adoptante.FindAdoptanteService;
 import es.refugio.refugio.application.service.adoptante.CreateAdoptanteService;
-import es.refugio.refugio.application.service.usuario.CreateUsuarioService;
 import es.refugio.refugio.application.service.solicitud_adopcion.CreateSolicitudAdopcionService;
 import es.refugio.refugio.application.service.solicitud_adopcion.DeleteSolicitudAdopcionService;
 import es.refugio.refugio.application.service.solicitud_adopcion.EditSolicitudAdopcionService;
 import es.refugio.refugio.application.service.solicitud_adopcion.FindSolicitudAdopcionService;
 import es.refugio.refugio.application.service.solicitud_adopcion.AprobarSolicitudAdopcionService;
 import es.refugio.refugio.application.service.solicitud_adopcion.RechazarSolicitudAdopcionService;
-import es.refugio.refugio.application.command.usuario.CreateUsuarioCommand;
 import es.refugio.refugio.application.command.adoptante.CreateAdoptanteCommand;
 import es.refugio.refugio.application.command.solicitud_adopcion.CreateSolicitudAdopcionCommand;
 import es.refugio.refugio.application.command.solicitud_adopcion.EditSolicitudAdopcionCommand;
@@ -67,7 +61,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Solicitudes de Adopción", description = "Gestión de solicitudes de adopción")
 public class SolicitudAdopcionController {
 
-    private final CreateUsuarioService createUsuarioService;
     private final CreateAdoptanteService createAdoptanteService;
     private final CreateSolicitudAdopcionService createSolicitudAdopcionService;
     private final FindSolicitudAdopcionService findSolicitudAdopcionService;
@@ -75,7 +68,6 @@ public class SolicitudAdopcionController {
     private final DeleteSolicitudAdopcionService deleteSolicitudAdopcionService;
     private final AprobarSolicitudAdopcionService aprobarSolicitudAdopcionService;
     private final RechazarSolicitudAdopcionService rechazarSolicitudAdopcionService;
-    private final UserRepository userRepository;
     private final FindAdoptanteService findAdoptanteService;
 
     @Operation(summary = "Crear solicitud de adopción")
@@ -91,19 +83,14 @@ public class SolicitudAdopcionController {
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Registro exitoso"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping("/publico/registro-y-adopcion")
     public ResponseEntity<SolicitudAdopcionResponse> registerAndRequest(@Valid @RequestBody PublicSolicitudAdopcionRequest request) {
-        // 1. Crear Usuario
-        var userCommand = new CreateUsuarioCommand(
-                request.nombre(),
-                request.apellido(),
-                request.email(),
-                request.contrasena(),
-                request.telefono(),
-                Rol.ROLE_ADOPTANTE);
-        var usuario = createUsuarioService.createUsuario(userCommand);
+        Integer usuarioId = request.usuarioId();
+        if (usuarioId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
 
         // 2. Crear Adoptante
         var adoptanteCommand = new CreateAdoptanteCommand(
-                usuario.getId().getValue(),
+                usuarioId,
                 request.dni(),
                 request.direccion(),
                 request.fechaNacimiento());
@@ -116,34 +103,28 @@ public class SolicitudAdopcionController {
                 LocalDateTime.now(),
                 request.comentario());
         var solicitud = createSolicitudAdopcionService.create(solicitudCommand);
-
-        // 4. Auto-Login
-        var authorities = List.of(new SimpleGrantedAuthority(Rol.ROLE_ADOPTANTE.name()));
-        var auth = new UsernamePasswordAuthenticationToken(usuario.getEmail(), null, authorities);
-        SecurityContextHolder.getContext().setAuthentication(auth);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(SolicitudAdopcionMapper.toResponse(solicitud));
     }
 
-    @Operation(summary = "Convertir usuario a adoptante y enviar solicitud", description = "Asocia un perfil de adoptante a un usuario existente, cambia su rol a ROLE_ADOPTANTE y crea la solicitud.")
+    @Operation(summary = "Convertir usuario a adoptante y enviar solicitud", description = "Asocia un perfil de adoptante a un usuario existente.")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Conversión y solicitud exitosas"), @ApiResponse(responseCode = "400", description = "Datos inválidos o usuario ya tiene perfil") })
     @PostMapping("/convertir-y-adopcion")
     public ResponseEntity<SolicitudAdopcionResponse> convertAndRequest(@Valid @RequestBody ConvertAdoptanteRequest request) {
-        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        AuthCredentialEntity user = userRepository.findByEmail(currentEmail)
-                .orElseThrow(() -> new AccessDeniedException("Usuario no autenticado"));
+        
+        es.refugio.refugio.infraestructure.security.CustomUserDetails userDetails = 
+                (es.refugio.refugio.infraestructure.security.CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Integer usuarioId = userDetails.getId();
 
         // 1. Crear perfil de Adoptante
         var adoptanteCommand = new CreateAdoptanteCommand(
-                user.getId(),
+                usuarioId,
                 request.dni(),
                 request.direccion(),
                 request.fechaNacimiento());
         var adoptante = createAdoptanteService.createAdoptante(adoptanteCommand);
 
-        // 2. Actualizar Rol del Usuario
-        user.setRol(Rol.ROLE_ADOPTANTE);
-        userRepository.save(user);
+        // Actualización de rol es manejada remotamente (por el frontend que orquesta)
 
         // 3. Crear Solicitud
         var solicitudCommand = new CreateSolicitudAdopcionCommand(
@@ -152,11 +133,6 @@ public class SolicitudAdopcionController {
                 LocalDateTime.now(),
                 request.comentario());
         var solicitud = createSolicitudAdopcionService.create(solicitudCommand);
-
-        // 4. Actualizar contexto de seguridad del hilo actual
-        var authorities = List.of(new SimpleGrantedAuthority(Rol.ROLE_ADOPTANTE.name()));
-        var auth = new UsernamePasswordAuthenticationToken(user.getEmail(), null, authorities);
-        SecurityContextHolder.getContext().setAuthentication(auth);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(SolicitudAdopcionMapper.toResponse(solicitud));
     }
@@ -164,12 +140,12 @@ public class SolicitudAdopcionController {
     @Operation(summary = "Adopción directa para adoptantes registrados", description = "Crea una solicitud de adopción directamente para el perfil del usuario autenticado.")
     @PostMapping("/directa")
     public ResponseEntity<SolicitudAdopcionResponse> directRequest(@RequestBody Map<String, Object> request) {
-        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        AuthCredentialEntity user = userRepository.findByEmail(currentEmail)
-                .orElseThrow(() -> new AccessDeniedException("Usuario no autenticado"));
+        es.refugio.refugio.infraestructure.security.CustomUserDetails userDetails = 
+                (es.refugio.refugio.infraestructure.security.CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Integer usuarioId = userDetails.getId();
 
         Adoptante adoptante = findAdoptanteService.findAll().stream()
-                .filter(a -> a.getUsuarioId().equals(user.getId()))
+                .filter(a -> a.getUsuarioId().equals(usuarioId))
                 .findFirst()
                 .orElseThrow(() -> new AccessDeniedException("El usuario no tiene un perfil de adoptante activo"));
 
@@ -230,17 +206,16 @@ public class SolicitudAdopcionController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
     public List<SolicitudAdopcionResponse> getAll() {
-        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         boolean isStaff = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
         
         List<SolicitudAdopcion> solicitudes = findSolicitudAdopcionService.findAll();
         
         if (!isStaff) {
-            AuthCredentialEntity user = userRepository.findByEmail(currentEmail)
-                    .orElseThrow(() -> new AccessDeniedException("Usuario no encontrado"));
+            es.refugio.refugio.infraestructure.security.CustomUserDetails userDetails = (es.refugio.refugio.infraestructure.security.CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Integer usuarioId = userDetails.getId();
             Adoptante adoptante = findAdoptanteService.findAll().stream()
-                    .filter(a -> a.getUsuarioId().equals(user.getId()))
+                    .filter(a -> a.getUsuarioId().equals(usuarioId))
                     .findFirst()
                     .orElseThrow(() -> new AccessDeniedException("Adoptante no vinculado"));
                     
@@ -281,16 +256,15 @@ public class SolicitudAdopcionController {
     }
 
     private void checkOwnership(AdoptanteId adoptanteId) {
-        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         boolean isStaff = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
         
         if (!isStaff) {
-            AuthCredentialEntity user = userRepository.findByEmail(currentEmail)
-                    .orElseThrow(() -> new AccessDeniedException("Usuario no encontrado"));
+            es.refugio.refugio.infraestructure.security.CustomUserDetails userDetails = (es.refugio.refugio.infraestructure.security.CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Integer usuarioId = userDetails.getId();
             
             Adoptante adoptante = findAdoptanteService.findById(adoptanteId);
-            if (!adoptante.getUsuarioId().equals(user.getId())) {
+            if (!adoptante.getUsuarioId().equals(usuarioId)) {
                 throw new AccessDeniedException("No tienes permiso para acceder a estas solicitudes.");
             }
         }

@@ -15,8 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
-import es.refugio.auth.domain.AuthCredentialEntity;
-import es.refugio.auth.infrastructure.repository.UserRepository;
+
 
 import es.refugio.refugio.application.command.donacion.CreateDonacionCommand;
 import es.refugio.refugio.application.command.donacion.EditDonacionCommand;
@@ -47,7 +46,6 @@ public class DonacionController {
     private final FindDonacionService findDonacionService;
     private final EditDonacionService editDonacionService;
     private final DeleteDonacionService deleteDonacionService;
-    private final UserRepository userRepository;
 
     @Operation(summary = "Registrar donación")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Donación registrada"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
@@ -96,10 +94,8 @@ public class DonacionController {
         List<Donacion> donaciones = findDonacionService.findAll();
         
         if (!isStaff) {
-            String currentEmail = auth.getName();
-            AuthCredentialEntity user = userRepository.findByEmail(currentEmail)
-                    .orElseThrow(() -> new AccessDeniedException("Usuario no encontrado"));
-            Integer currentUserId = user.getId();
+            // TODO: Recuperar de JWT
+            Integer currentUserId = 1;
             
             donaciones = donaciones.stream()
                     .filter(d -> d.getUsuarioId() != null && d.getUsuarioId().getValue().equals(currentUserId))
@@ -129,11 +125,10 @@ public class DonacionController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
         
         if (!isStaff) {
-            String currentEmail = auth.getName();
-            AuthCredentialEntity user = userRepository.findByEmail(currentEmail)
-                    .orElseThrow(() -> new AccessDeniedException("Usuario no encontrado"));
+            es.refugio.refugio.infraestructure.security.CustomUserDetails userDetails = (es.refugio.refugio.infraestructure.security.CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Integer currentUserId = userDetails.getId();
             
-            if (!targetUsuarioId.equals(user.getId())) {
+            if (!targetUsuarioId.equals(currentUserId)) {
                 throw new AccessDeniedException("No tienes permiso para ver estas donaciones.");
             }
         }

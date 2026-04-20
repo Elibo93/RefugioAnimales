@@ -40,7 +40,8 @@
                 <tbody>
                     <tr th:each="d : ${donaciones}" th:id="'row-' + ${d.get('id')}">
                         <td style="font-weight:600;color:var(--primary);"
-                            th:text="${d.get('usuarioId') != null ? d.get('usuarioId') : 'Anónimo'}">
+                            th:with="u=${d.get('usuarioId') != null and usuariosMap != null ? usuariosMap[d.get('usuarioId')] : null}"
+                            th:text="${u != null ? (u.get('nombre') + (u.get('apellido') != null ? ' ' + u.get('apellido') : '')) : 'Donante Anónimo'}">
                             Usuario
                         </td>
                         <td th:text="${d.get('tipo')}">DINERO</td>

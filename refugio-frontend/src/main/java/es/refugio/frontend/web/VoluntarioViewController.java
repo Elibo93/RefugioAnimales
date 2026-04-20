@@ -35,18 +35,21 @@ public class VoluntarioViewController {
     @Value("${backend.api.url}")
     private String apiUrl;
 
+    @Value("${auth.api.url}")
+    private String authUrl;
+
     @GetMapping(WebRoutes.VOLUNTARIOS_BASE)
     public String listar(Model model) {
         List<Object> voluntarios = fetchList("/v1/voluntarios");
-        List<Object> usuarios = fetchList("/v1/usuarios");
+        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
 
         // Build usuariosMap: Map<userId, userObject>
-        Map<Integer, Object> usuariosMap = new HashMap<>();
+        Map<String, Object> usuariosMap = new HashMap<>();
         for (Object u : usuarios) {
             if (u instanceof Map) {
                 Object id = ((Map<?, ?>) u).get("id");
                 if (id instanceof Number) {
-                    usuariosMap.put(((Number) id).intValue(), u);
+                    usuariosMap.put(String.valueOf(((Number) id).intValue()), u);
                 }
             }
         }
@@ -149,7 +152,8 @@ public class VoluntarioViewController {
 
     private List<Object> fetchList(String path) {
         try {
-            Object[] arr = restTemplate.getForObject(apiUrl + path, Object[].class);
+            String finalUrl = path.startsWith("http") ? path : apiUrl + path;
+            Object[] arr = restTemplate.getForObject(finalUrl, Object[].class);
             return arr != null ? Arrays.asList(arr) : List.of();
         } catch (Exception e) { return List.of(); }
     }

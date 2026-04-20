@@ -37,7 +37,7 @@
                 </thead>
                 <tbody>
                     <tr th:each="p : ${voluntarios}" th:id="'row-' + ${p.get('id')}"
-                        th:with="u=${usuariosMap != null ? usuariosMap[p.get('usuarioId')] : null}"
+                        th:with="u=${usuariosMap != null ? usuariosMap['' + p.get('usuarioId')] : null}"
                         th:attr="data-id=${p.get('id')}, data-nombre=${u != null ? u.get('nombre') : ''}, data-apellido=${u != null ? u.get('apellido') : ''}, data-disp=${p.get('disponibilidad')}, data-email=${u != null ? u.get('email') : ''}, data-tlf=${u != null ? u.get('telefono') : ''}">
 
                         <td th:text="${p.get('id')}">1</td>

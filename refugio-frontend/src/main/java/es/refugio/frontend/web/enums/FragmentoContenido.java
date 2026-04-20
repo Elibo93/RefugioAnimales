@@ -9,6 +9,9 @@ public enum FragmentoContenido {
     Voluntario_LIST("fragments/content/voluntarios-lista"),
     Voluntario_FORM("fragments/content/voluntario-formulario"),
 
+    Adoptante_LIST("fragments/content/adoptantes-lista"),
+    Adoptante_FORM("fragments/content/adoptante-formulario"),
+
     Animal_LIST("fragments/content/animales-lista"),
     Animal_FORM("fragments/content/animal-formulario"),
 
@@ -30,6 +33,7 @@ public enum FragmentoContenido {
     Solicitud_REGISTRO("fragments/content/solicitud-registro-form"),
     Solicitud_OPCIONES("fragments/content/solicitud-opciones"),
     Solicitud_CONVERSION("fragments/content/solicitud-conversion-form"),
+    Solicitud_DIRECTA_FORM("fragments/content/solicitud-directa-form"),
 
     HOME_VIEW("fragments/content/index");
 

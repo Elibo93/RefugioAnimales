@@ -1,59 +1,6 @@
 databaseChangeLog:
 
   # ============================================================
-  # 001 — Crear tabla usuarios
-  # ============================================================
-  - changeSet:
-      id: 001-crear-tabla-usuarios
-      author: refugio
-      changes:
-        - createTable:
-            tableName: usuarios
-            columns:
-              - column:
-                  name: id
-                  type: INT
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: nombre
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: apellido
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: email
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-                    unique: true
-                    uniqueConstraintName: uq_usuarios_email
-              - column:
-                  name: contrasena
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: telefono
-                  type: VARCHAR(20)
-              - column:
-                  name: rol
-                  type: VARCHAR(50)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: created_at
-                  type: DATETIME
-                  constraints:
-                    nullable: false
-
-  # ============================================================
   # 002 — Crear tabla animales
   # ============================================================
   - changeSet:
@@ -182,12 +129,6 @@ databaseChangeLog:
                     nullable: false
                     unique: true
                     uniqueConstraintName: uq_adoptantes_usuario_id
-        - addForeignKeyConstraint:
-            baseTableName: adoptantes
-            baseColumnNames: usuario_id
-            referencedTableName: usuarios
-            referencedColumnNames: id
-            constraintName: fk_adoptantes_usuario
 
   # ============================================================
   # 004 — Crear tabla voluntarios
@@ -223,12 +164,6 @@ databaseChangeLog:
                   type: DATETIME
                   constraints:
                     nullable: false
-        - addForeignKeyConstraint:
-            baseTableName: voluntarios
-            baseColumnNames: usuario_id
-            referencedTableName: usuarios
-            referencedColumnNames: id
-            constraintName: fk_voluntarios_usuario
 
   # ============================================================
   # 005 — Crear tabla adopciones
@@ -330,13 +265,6 @@ databaseChangeLog:
               - column:
                   name: descripcion
                   type: VARCHAR(500)
-        - addForeignKeyConstraint:
-            baseTableName: donaciones
-            baseColumnNames: usuario_id
-            referencedTableName: usuarios
-            referencedColumnNames: id
-            constraintName: fk_donaciones_usuario
-            onDelete: CASCADE
 
   # ============================================================
   # 007 — Crear tabla historial_medicos

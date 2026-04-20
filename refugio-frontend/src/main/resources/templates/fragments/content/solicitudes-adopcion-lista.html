@@ -35,8 +35,10 @@
                 <tbody>
                     <tr th:each="s : ${solicitudes}" th:id="'row-' + ${s.get('id')}">
                         <td th:text="${s.get('id')}">1</td>
-                        <td th:text="${s.get('animalId')}">Animal</td>
-                        <td th:text="${s.get('adoptanteId')}">Adoptante</td>
+                        <td th:with="a=${s.get('animalId') != null and animalesMap != null ? animalesMap['' + s.get('animalId')] : null}"
+                            th:text="${a != null ? a.get('nombre') : 'Desconocido'}">Animal</td>
+                        <td th:with="n=${s.get('adoptanteId') != null and adoptanteNombres != null ? adoptanteNombres['' + s.get('adoptanteId')] : null}"
+                            th:text="${n != null ? n : 'Anónimo'}">Adoptante</td>
                         <td>
                             <span class="badge-soon"
                                 th:classappend="${s.get('estado') != null ? (s.get('estado').toString() == 'APROBADA' ? 'success' : (s.get('estado').toString() == 'RECHAZADA' ? 'danger' : 'warning')) : 'warning'}"
@@ -44,6 +46,21 @@
                         </td>
                         <td th:text="${s.get('fecha') != null ? s.get('fecha').toString().replace('T', ' ').substring(0, (s.get('fecha').toString().length() > 10 ? 10 : s.get('fecha').toString().length())) : '-'}">01/01/2024</td>
                         <td style="display:flex; gap:8px;">
+                            <!-- Botones admin para aprobar o rechazar rápido -->
+                            <form th:if="${isAdmin and s.get('estado') != null and s.get('estado').toString() == 'PENDIENTE'}" 
+                                  th:action="@{/web/solicitudes/{id}/aprobar(id=${s.get('id')})}" method="post" style="margin:0;">
+                                <button type="submit" class="btn-icon" style="color: green; background-color: rgba(30,220,100,0.1);" title="Aprobar">
+                                    <i data-lucide="check" style="width:16px;"></i>
+                                </button>
+                            </form>
+                            <form th:if="${isAdmin and s.get('estado') != null and s.get('estado').toString() == 'PENDIENTE'}" 
+                                  th:action="@{/web/solicitudes/{id}/rechazar(id=${s.get('id')})}" method="post" style="margin:0;">
+                                <button type="submit" class="btn-icon" style="color: red; background-color: rgba(220,30,30,0.1);" title="Rechazar">
+                                    <i data-lucide="x" style="width:16px;"></i>
+                                </button>
+                            </form>
+                            <div th:if="${isAdmin}" style="width:1px; background:#ddd; margin:0 5px;"></div>
+
                             <a class="btn-icon" th:href="@{/web/solicitudes/{id}/editar(id=${s.get('id')})}">
                                 <i data-lucide="edit-2" style="width:16px;"></i>
                             </a>

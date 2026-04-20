@@ -3,7 +3,7 @@
 
 <div th:fragment="sidebar(currentPage)">
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
-    
+
     <aside id="app-sidebar" class="app-sidebar">
         <!-- Sidebar Header -->
         <div class="sidebar-header">
@@ -26,11 +26,12 @@
                 <div class="user-profile-large" th:if="${isAuthenticated}">
                     <div class="avatar-large"><i data-lucide="user"></i></div>
                     <div class="user-info">
-                        <span class="user-fullname" th:text="${currentUserName != null ? currentUserName : 'Usuario'}">User</span>
+                        <span class="user-fullname"
+                            th:text="${currentUserName != null ? currentUserName : 'Usuario'}">User</span>
                         <span class="user-email" style="font-size: 0.75rem; color: var(--text-muted);">Conectado</span>
                     </div>
                 </div>
-                
+
                 <div class="user-profile-large" th:if="${!isAuthenticated}">
                     <a th:href="@{/login}" class="btn btn-primary" style="width: 100%; justify-content: center;">
                         <i data-lucide="log-in"></i>
@@ -42,44 +43,59 @@
             <!-- Navigation Menu (Visible to all, items restricted below) -->
             <div class="sidebar-section">
                 <div class="sidebar-menu">
-                    <a th:href="@{/web/home}" class="sidebar-item" th:classappend="${#strings.equals(currentUri, '/web/home') or #strings.equals(currentUri, '/')} ? 'active' : ''">
+                    <a th:href="@{/web/home}" class="sidebar-item"
+                        th:classappend="${#strings.equals(currentUri, '/web/home') or #strings.equals(currentUri, '/')} ? 'active' : ''">
                         <i data-lucide="home"></i>
                         <span>Inicio</span>
                     </a>
-                    <a th:href="@{/web/animales}" class="sidebar-item" th:classappend="${#strings.contains(currentUri, '/web/animales')} ? 'active' : ''">
+                    <a th:href="@{/web/animales}" class="sidebar-item"
+                        th:classappend="${#strings.contains(currentUri, '/web/animales')} ? 'active' : ''">
                         <i data-lucide="dog"></i>
                         <span th:text="#{menu.animales.card.title}">Animales</span>
                     </a>
-                    <a th:href="@{/web/personas}" class="sidebar-item" th:if="${isAdmin}" th:classappend="${#strings.contains(currentUri, '/web/personas')} ? 'active' : ''">
+                    <a th:href="@{/web/personas}" class="sidebar-item" th:if="${isAdmin}"
+                        th:classappend="${#strings.contains(currentUri, '/web/personas')} ? 'active' : ''">
                         <i data-lucide="users"></i>
                         <span th:text="#{menu.personas.card.title}">Personas</span>
                     </a>
-                    <a th:href="@{/web/voluntarios}" class="sidebar-item" th:if="${isAdmin}" th:classappend="${#strings.contains(currentUri, '/web/voluntarios')} ? 'active' : ''">
+                    <a th:href="@{/web/voluntarios}" class="sidebar-item" th:if="${isAdmin}"
+                        th:classappend="${#strings.contains(currentUri, '/web/voluntarios')} ? 'active' : ''">
                         <i data-lucide="heart"></i>
                         <span th:text="#{menu.voluntarios.card.title}">Voluntarios</span>
                     </a>
-                    <a th:href="@{/web/adopciones}" class="sidebar-item" th:if="${isAdmin}" th:classappend="${#strings.contains(currentUri, '/web/adopciones')} ? 'active' : ''">
+                    <a th:href="@{/web/adoptantes}" class="sidebar-item" th:if="${isAdmin}"
+                        th:classappend="${#strings.contains(currentUri, '/web/adoptantes')} ? 'active' : ''">
+                        <i data-lucide="user-check"></i>
+                        <span>Adoptantes</span>
+                    </a>
+                    <a th:href="@{/web/adopciones}" class="sidebar-item" th:if="${isAdmin}"
+                        th:classappend="${#strings.contains(currentUri, '/web/adopciones')} ? 'active' : ''">
                         <i data-lucide="clipboard-check"></i>
                         <span th:text="#{menu.adopciones.card.title}">Adopciones</span>
                     </a>
-                    <a th:href="@{/web/solicitudes}" class="sidebar-item" th:if="${isAdmin}" th:classappend="${#strings.contains(currentUri, '/web/solicitudes')} ? 'active' : ''">
+                    <a th:href="@{/web/solicitudes}" class="sidebar-item" th:if="${isAdmin}"
+                        th:classappend="${#strings.contains(currentUri, '/web/solicitudes')} ? 'active' : ''">
                         <i data-lucide="file-text"></i>
                         <span th:text="#{solicitud.list.title}">Solicitudes</span>
                     </a>
-                    <a th:href="@{/web/donaciones}" class="sidebar-item" th:classappend="${#strings.contains(currentUri, '/web/donaciones')} ? 'active' : ''">
+                    <a th:href="@{/web/donaciones}" class="sidebar-item"
+                        th:classappend="${#strings.contains(currentUri, '/web/donaciones')} ? 'active' : ''">
                         <i data-lucide="coins"></i>
                         <span th:text="#{donacion.list.title}">Donaciones</span>
                     </a>
-                    <a th:href="@{/web/voluntarios/nuevo}" class="sidebar-item" th:if="${!isAdmin}" th:classappend="${#strings.equals(currentUri, '/web/voluntarios/nuevo')} ? 'active' : ''">
+                    <a th:href="@{/web/voluntarios/nuevo}" class="sidebar-item" th:if="${!isAdmin}"
+                        th:classappend="${#strings.equals(currentUri, '/web/voluntarios/nuevo')} ? 'active' : ''">
                         <i data-lucide="heart"></i>
                         <span th:text="#{menu.voluntarios.nuevo}">Quiero ser voluntario</span>
                     </a>
 
-                    <a th:href="@{/web/historiales}" class="sidebar-item" th:if="${isVoluntario}" th:classappend="${#strings.contains(currentUri, '/web/historiales')} ? 'active' : ''">
+                    <a th:href="@{/web/historiales}" class="sidebar-item" th:if="${isVoluntario}"
+                        th:classappend="${#strings.contains(currentUri, '/web/historiales')} ? 'active' : ''">
                         <i data-lucide="stethoscope"></i>
                         <span th:text="#{historial.list.title}">Historiales</span>
                     </a>
-                    <a th:href="@{/web/tareas}" class="sidebar-item" th:if="${isVoluntario}" th:classappend="${#strings.contains(currentUri, '/web/tareas')} ? 'active' : ''">
+                    <a th:href="@{/web/tareas}" class="sidebar-item" th:if="${isVoluntario}"
+                        th:classappend="${#strings.contains(currentUri, '/web/tareas')} ? 'active' : ''">
                         <i data-lucide="check-square"></i>
                         <span th:text="#{tarea.list.title}">Tareas</span>
                     </a>
@@ -89,19 +105,23 @@
             <!-- Languages Section -->
             <div class="sidebar-section">
                 <div class="lang-selector-grid">
-                    <a th:href="@{${currentPage}(lang=es)}" class="lang-option" th:classappend="${#locale.language == 'es'} ? 'active' : ''">
+                    <a th:href="@{${currentPage}(lang=es)}" class="lang-option"
+                        th:classappend="${#locale.language == 'es'} ? 'active' : ''">
                         <span class="flag">🇪🇸</span>
                         <span>Español</span>
                     </a>
-                    <a th:href="@{${currentPage}(lang=en)}" class="lang-option" th:classappend="${#locale.language == 'en'} ? 'active' : ''">
+                    <a th:href="@{${currentPage}(lang=en)}" class="lang-option"
+                        th:classappend="${#locale.language == 'en'} ? 'active' : ''">
                         <span class="flag">🇬🇧</span>
                         <span>English</span>
                     </a>
-                    <a th:href="@{${currentPage}(lang=ar)}" class="lang-option" th:classappend="${#locale.language == 'ar'} ? 'active' : ''">
+                    <a th:href="@{${currentPage}(lang=ar)}" class="lang-option"
+                        th:classappend="${#locale.language == 'ar'} ? 'active' : ''">
                         <span class="flag">🇲🇦</span>
                         <span>العربية</span>
                     </a>
-                    <a th:href="@{${currentPage}(lang=it)}" class="lang-option" th:classappend="${#locale.language == 'it'} ? 'active' : ''">
+                    <a th:href="@{${currentPage}(lang=it)}" class="lang-option"
+                        th:classappend="${#locale.language == 'it'} ? 'active' : ''">
                         <span class="flag">🇮🇹</span>
                         <span>Italiano</span>
                     </a>

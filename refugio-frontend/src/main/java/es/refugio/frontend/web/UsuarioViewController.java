@@ -32,9 +32,12 @@ public class UsuarioViewController {
     @Value("${backend.api.url}")
     private String apiUrl;
 
+    @Value("${auth.api.url}")
+    private String authUrl;
+
     @GetMapping(WebRoutes.PERSONAS_BASE)
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
-        model.addAttribute(ModelAttribute.Persona_LIST.getName(), fetchList("/v1/usuarios"));
+        model.addAttribute(ModelAttribute.Persona_LIST.getName(), fetchList(authUrl + "/v1/usuarios"));
         if (successMessage != null) model.addAttribute("successMessage", successMessage);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -60,14 +63,14 @@ public class UsuarioViewController {
         body.put("email",     email);     body.put("telefono",   telefono);
         body.put("contrasena", contrasena); body.put("rol", "ROLE_PUBLICO");
 
-        restTemplate.postForObject(apiUrl + "/v1/usuarios", body, Object.class);
+        restTemplate.postForObject(authUrl + "/v1/usuarios", body, Object.class);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_CREATED.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
     @GetMapping(WebRoutes.PERSONAS_EDITAR)
     public String editarFormulario(@PathVariable Integer id, Model model) {
-        Object persona = restTemplate.getForObject(apiUrl + "/v1/usuarios/" + id, Object.class);
+        Object persona = restTemplate.getForObject(authUrl + "/v1/usuarios/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), persona);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -85,7 +88,7 @@ public class UsuarioViewController {
         body.put("nombre",   nombre);   body.put("apellido", apellido);
         body.put("email",    email);    body.put("telefono", telefono);
 
-        restTemplate.put(apiUrl + "/v1/usuarios/" + id, body);
+        restTemplate.put(authUrl + "/v1/usuarios/" + id, body);
         redirectAttributes.addFlashAttribute("successMessage", "Persona editada correctamente");
         return "redirect:" + WebRoutes.PERSONAS_BASE;
     }
@@ -93,14 +96,14 @@ public class UsuarioViewController {
     @PostMapping(WebRoutes.PERSONAS_ELIMINAR)
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
-        restTemplate.delete(apiUrl + "/v1/usuarios/" + id);
+        restTemplate.delete(authUrl + "/v1/usuarios/" + id);
         if ("true".equals(request.getHeader("HX-Request"))) return ResponseEntity.ok("");
         return ResponseEntity.status(302).header("Location", WebRoutes.PERSONAS_BASE).build();
     }
 
     @GetMapping(WebRoutes.PERSONAS_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
-        List<Object> personas = fetchList("/v1/usuarios");
+        List<Object> personas = fetchList(authUrl + "/v1/usuarios");
         Context context = new Context();
         context.setVariable("personas", personas);
         String html = templateEngine.process(ThymTemplates.Persona_LIST_PDF.getPath(), context);
@@ -116,7 +119,9 @@ public class UsuarioViewController {
 
     private List<Object> fetchList(String path) {
         try {
-            Object[] arr = restTemplate.getForObject(apiUrl + path, Object[].class);
+            // Si el path ya es absoluto (empieza por http), no prependemos apiUrl.
+            String finalUrl = path.startsWith("http") ? path : apiUrl + path;
+            Object[] arr = restTemplate.getForObject(finalUrl, Object[].class);
             return arr != null ? Arrays.asList(arr) : List.of();
         } catch (Exception e) { return List.of(); }
     }

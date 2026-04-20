@@ -17,9 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
-import es.refugio.auth.infrastructure.repository.UserRepository;
-import es.refugio.auth.domain.AuthCredentialEntity;
-import es.refugio.auth.domain.Rol;
+
 import es.refugio.refugio.application.command.adoptante.ApproveAdoptanteCommand;
 import es.refugio.refugio.application.command.adoptante.CreateAdoptanteCommand;
 import es.refugio.refugio.application.command.adoptante.EditAdoptanteCommand;
@@ -54,7 +52,6 @@ public class AdoptanteController {
     private final ApproveAdoptanteService approveService;
     private final RejectAdoptanteService rejectService;
     private final CreateSolicitudAdopcionService solicitudService;
-    private final UserRepository userRepository;
 
     @Operation(summary = "Crear adoptante", description = "Registra un nuevo adoptante vinculado a un usuario")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Adoptante creado"),
@@ -144,17 +141,12 @@ public class AdoptanteController {
     @PostMapping("/convertir-y-solicitar")
     @PreAuthorize("hasRole('PUBLICO')")
     public ResponseEntity<String> convertirYSolicitar(@Valid @RequestBody ConvertirAdoptanteRequest request) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        AuthCredentialEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AccessDeniedException("Usuario no encontrado"));
-
-        // 1. Actualizar Rol
-        user.setRol(Rol.ROLE_ADOPTANTE);
-        userRepository.save(user);
+        // TODO: Mover lógica a refugio-auth o usar FeignClient
+        Integer usuarioId = 1;
 
         // 2. Crear Perfil de Adoptante
         Adoptante adoptante = createService.createAdoptante(new CreateAdoptanteCommand(
-                user.getId(),
+                usuarioId,
                 request.getDni(),
                 request.getDireccion(),
                 request.getFechaNacimiento()));
@@ -175,10 +167,10 @@ public class AdoptanteController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
 
         if (!isStaff) {
-            AuthCredentialEntity user = userRepository.findByEmail(currentEmail)
-                    .orElseThrow(() -> new AccessDeniedException("Usuario no encontrado"));
+            // TODO: Extraer desde JWT
+            Integer usuarioId = 1;
 
-            if (!adoptante.getUsuarioId().equals(user.getId())) {
+            if (!adoptante.getUsuarioId().equals(usuarioId)) {
                 throw new AccessDeniedException("No tienes permiso para acceder a este perfil.");
             }
         }

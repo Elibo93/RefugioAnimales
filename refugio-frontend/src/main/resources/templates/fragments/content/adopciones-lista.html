@@ -51,10 +51,10 @@
                     <tr th:each="i : ${adopciones}" th:id="'row-' + ${i.get('id')}">
                         <td th:text="${i.get('id')}">1</td>
                         <td style="font-weight:600; color:var(--text-main);"
-                            th:text="${adoptanteNombres != null and i.get('adoptanteId') != null ? adoptanteNombres[i.get('adoptanteId')] : (i.get('adoptanteId') != null ? i.get('adoptanteId') : 'Desconocido')}">
+                            th:text="${adoptanteNombres != null and i.get('adoptanteId') != null ? adoptanteNombres['' + i.get('adoptanteId')] : (i.get('adoptanteId') != null ? i.get('adoptanteId') : 'Desconocido')}">
                             Juan Pérez</td>
                         <td style="color:var(--primary); font-weight:500;"
-                            th:text="${animalesMap != null and i.get('animalId') != null and animalesMap[i.get('animalId')] != null ? animalesMap[i.get('animalId')].get('nombre') : (i.get('animalId') != null ? i.get('animalId') : '-')}">Animal</td>
+                            th:text="${animalesMap != null and i.get('animalId') != null and animalesMap['' + i.get('animalId')] != null ? animalesMap['' + i.get('animalId')].get('nombre') : (i.get('animalId') != null ? i.get('animalId') : '-')}">Animal</td>
                         <td th:text="${i.get('fechaAdopcion') != null ? i.get('fechaAdopcion') : '-'}">01/01/2023</td>
                         <td style="display:flex; gap:8px;">
                             <a class="btn-icon" th:href="@{/web/adopciones/{id}/editar(id=${i.get('id')})}">

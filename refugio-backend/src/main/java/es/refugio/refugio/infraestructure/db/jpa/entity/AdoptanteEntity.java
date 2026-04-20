@@ -35,9 +35,8 @@ public class AdoptanteEntity {
     @Column(name = "fecha_registro", nullable = false, updatable = false)
     private LocalDateTime fechaRegistro;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = false, unique = true)
-    private UsuarioEntity usuario;
+    @Column(name = "usuario_id", nullable = false, unique = true)
+    private Integer usuarioId;
 
     @OneToMany(mappedBy = "adoptante", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SolicitudAdopcionEntity> solicitudes;

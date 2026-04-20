@@ -21,8 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
-import es.refugio.auth.infrastructure.repository.UserRepository;
-import es.refugio.auth.domain.AuthCredentialEntity;
+
 import es.refugio.refugio.domain.model.adoptante.Adoptante;
 import es.refugio.refugio.application.service.adoptante.FindAdoptanteService;
 
@@ -57,7 +56,6 @@ public class AdopcionController {
     private final FindAdopcionService findAdopcionService;
     private final EditAdopcionService editAdopcionService;
     private final DeleteAdopcionService deleteAdopcionService;
-    private final UserRepository userRepository;
     private final FindAdoptanteService findAdoptanteService;
 
     @Operation(summary = "Registrar adopción", description = "Crea una nueva adopción vinculando adoptante y animal")
@@ -83,17 +81,16 @@ public class AdopcionController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
     public List<AdopcionResponse> getAll() {
-        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         boolean isStaff = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
         
         List<Adopcion> adopciones = findAdopcionService.findAll();
         
         if (!isStaff) {
-            AuthCredentialEntity user = userRepository.findByEmail(currentEmail)
-                    .orElseThrow(() -> new AccessDeniedException("Usuario no encontrado"));
+            es.refugio.refugio.infraestructure.security.CustomUserDetails userDetails = (es.refugio.refugio.infraestructure.security.CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Integer usuarioId = userDetails.getId();
             Adoptante adoptante = findAdoptanteService.findAll().stream()
-                    .filter(a -> a.getUsuarioId().equals(user.getId()))
+                    .filter(a -> a.getUsuarioId().equals(usuarioId))
                     .findFirst()
                     .orElseThrow(() -> new AccessDeniedException("Adoptante no vinculado"));
                     
@@ -141,16 +138,15 @@ public class AdopcionController {
     }
 
     private void checkOwnership(AdoptanteId adoptanteId) {
-        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         boolean isStaff = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
         
         if (!isStaff) {
-            AuthCredentialEntity user = userRepository.findByEmail(currentEmail)
-                    .orElseThrow(() -> new AccessDeniedException("Usuario no encontrado"));
+            es.refugio.refugio.infraestructure.security.CustomUserDetails userDetails = (es.refugio.refugio.infraestructure.security.CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Integer usuarioId = userDetails.getId();
             
             Adoptante adoptante = findAdoptanteService.findById(adoptanteId);
-            if (!adoptante.getUsuarioId().equals(user.getId())) {
+            if (!adoptante.getUsuarioId().equals(usuarioId)) {
                 throw new AccessDeniedException("No tienes permiso para acceder a esta información.");
             }
         }

@@ -85,17 +85,14 @@
                         <!-- 2. Usuario Autenticado (No Admin) -->
                         <div th:if="${isAuthenticated and !isAdmin}" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
                             
-                            <!-- Caso A: Ya es Adoptante -> Adopción Directa -->
+                            <!-- Caso A: Ya es Adoptante -> Adopción Directa (Va al nuevo formulario sin JS) -->
                             <div sec:authorize="hasRole('ROLE_ADOPTANTE')">
-                                <form th:action="@{/web/solicitudes/publico/directa}" method="POST" 
-                                      onsubmit="return confirm('¿Estás seguro de que deseas enviar una solicitud de adopción para este animal?')">
-                                    <input type="hidden" name="animalId" th:value="${animal.get('id')}">
-                                    <button type="submit" class="btn btn-primary"
-                                            style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
-                                        <i data-lucide="heart-handshake"></i>
-                                        <span>Solicitar Adopción</span>
-                                    </button>
-                                </form>
+                                <a th:href="@{/web/solicitudes/publico/directa/formulario(animalId=${animal.get('id')})}" 
+                                   class="btn btn-primary"
+                                   style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
+                                    <i data-lucide="heart-handshake"></i>
+                                    <span>Solicitar Adopción</span>
+                                </a>
                             </div>
 
                             <!-- Caso B: Usuario Registrado pero NO Adoptante -> Ir a Conversión -->

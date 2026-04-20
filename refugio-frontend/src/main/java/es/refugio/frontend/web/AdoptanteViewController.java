@@ -27,6 +27,133 @@ public class AdoptanteViewController {
     @Value("${backend.api.url}")
     private String apiUrl;
 
+    @Value("${auth.api.url}")
+    private String authUrl;
+
+    @GetMapping(WebRoutes.ADOPTANTES_BASE)
+    public String listar(Model model) {
+        List<Object> adoptantes = fetchList("/v1/adoptantes");
+        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+
+        Map<String, Object> usuariosMap = new HashMap<>();
+        for (Object u : usuarios) {
+            if (u instanceof Map) {
+                Object id = ((Map<?, ?>) u).get("id");
+                if (id instanceof Number) {
+                    usuariosMap.put(String.valueOf(((Number) id).intValue()), u);
+                }
+            }
+        }
+
+        model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.Adoptante_LIST.getName(), adoptantes);
+        model.addAttribute("usuariosMap", usuariosMap);
+        model.addAttribute("currentUri", WebRoutes.ADOPTANTES_BASE);
+        model.addAttribute("showBack", false);
+        model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.FRAGMENTO_CONTENIDO.getName(), es.refugio.frontend.web.enums.FragmentoContenido.Adoptante_LIST.getPath());
+        return es.refugio.frontend.web.enums.ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    private List<Object> fetchList(String path) {
+        try {
+            String finalUrl = path.startsWith("http") ? path : apiUrl + path;
+            Object[] arr = restTemplate.getForObject(finalUrl, Object[].class);
+            return arr != null ? Arrays.asList(arr) : List.of();
+        } catch (Exception e) { return List.of(); }
+    }
+
+    @GetMapping(WebRoutes.ADOPTANTES_NUEVO)
+    public String nuevo(Model model) {
+        model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.SINGLE_Adoptante.getName(), new HashMap<>());
+        model.addAttribute("currentUri", WebRoutes.ADOPTANTES_BASE);
+        model.addAttribute("showBack", true);
+        model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.FRAGMENTO_CONTENIDO.getName(), es.refugio.frontend.web.enums.FragmentoContenido.Adoptante_FORM.getPath());
+        return es.refugio.frontend.web.enums.ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    @PostMapping(WebRoutes.ADOPTANTES_NUEVO)
+    public String guardarNuevo(
+            @RequestParam Integer usuarioId,
+            @RequestParam String dni,
+            @RequestParam String direccion,
+            @RequestParam String fechaNacimiento,
+            Model model) {
+        try {
+            Map<String, Object> body = new HashMap<>();
+            body.put("usuarioId", usuarioId);
+            body.put("dni", dni);
+            body.put("direccion", direccion);
+            body.put("fechaNacimiento", fechaNacimiento);
+            restTemplate.postForObject(apiUrl + "/v1/adoptantes", body, Object.class);
+            return "redirect:" + WebRoutes.ADOPTANTES_BASE;
+        } catch (Exception e) {
+            return "redirect:" + WebRoutes.ADOPTANTES_BASE;
+        }
+    }
+
+    @PostMapping(WebRoutes.ADOPTANTES_EDITAR)
+    public String guardarEdicion(
+            @PathVariable Integer id,
+            @RequestParam Integer usuarioId,
+            @RequestParam String dni,
+            @RequestParam String direccion,
+            @RequestParam String fechaNacimiento,
+            Model model) {
+        try {
+            Map<String, Object> body = new HashMap<>();
+            body.put("usuarioId", usuarioId);
+            body.put("dni", dni);
+            body.put("direccion", direccion);
+            body.put("fechaNacimiento", fechaNacimiento);
+            restTemplate.put(apiUrl + "/v1/adoptantes/" + id, body);
+            return "redirect:" + WebRoutes.ADOPTANTES_BASE;
+        } catch (Exception e) {
+            return "redirect:" + WebRoutes.ADOPTANTES_BASE;
+        }
+    }
+
+    @PostMapping(WebRoutes.ADOPTANTES_ELIMINAR)
+    public String eliminar(@PathVariable Integer id, Model model) {
+        try {
+            restTemplate.delete(apiUrl + "/v1/adoptantes/" + id);
+        } catch (Exception ignored) {}
+        return "redirect:" + WebRoutes.ADOPTANTES_BASE;
+    }
+
+    @PostMapping(WebRoutes.ADOPTANTES_APROBAR)
+    public String aprobar(@PathVariable Integer id) {
+        try {
+            restTemplate.patchForObject(apiUrl + "/v1/adoptantes/" + id + "/approve", null, Object.class);
+        } catch (Exception ignored) {}
+        return "redirect:" + WebRoutes.ADOPTANTES_BASE;
+    }
+
+    @PostMapping(WebRoutes.ADOPTANTES_RECHAZAR)
+    public String rechazar(@PathVariable Integer id) {
+        try {
+            restTemplate.patchForObject(apiUrl + "/v1/adoptantes/" + id + "/reject", null, Object.class);
+        } catch (Exception ignored) {}
+        return "redirect:" + WebRoutes.ADOPTANTES_BASE;
+    }
+
+    @GetMapping(WebRoutes.ADOPTANTES_PDF)
+    public String exportPdf(Model model) {
+        List<Object> adoptantes = fetchList("/v1/adoptantes");
+        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+
+        Map<String, Object> usuariosMap = new HashMap<>();
+        for (Object u : usuarios) {
+            if (u instanceof Map) {
+                Object id = ((Map<?, ?>) u).get("id");
+                if (id instanceof Number) {
+                    usuariosMap.put(String.valueOf(((Number) id).intValue()), u);
+                }
+            }
+        }
+        model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.Adoptante_LIST.getName(), adoptantes);
+        model.addAttribute("usuariosMap", usuariosMap);
+        return es.refugio.frontend.web.enums.ThymTemplates.Adoptante_LIST_PDF.getPath();
+    }
+
     /**
      * Modal de conversión a adoptante (cuando el usuario no tiene perfil de
      * adoptante).

@@ -9,7 +9,6 @@ import es.refugio.refugio.domain.model.adoptante.Adoptante;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.domain.model.adoptante.enums.EstadoValidacion;
 import es.refugio.refugio.infraestructure.db.jpa.entity.AdoptanteEntity;
-import es.refugio.refugio.infraestructure.db.jpa.entity.UsuarioEntity;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteRequest;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteResponse;
 
@@ -51,16 +50,16 @@ public class AdoptanteMapper {
                 .fechaNacimiento(t.getFechaNacimiento())
                 .estadoValidacion(t.getEstadoValidacion() != null ? t.getEstadoValidacion().name() : null)
                 .fechaRegistro(t.getFechaRegistro())
-                .usuario(UsuarioEntity.builder().id(t.getUsuarioId()).build())
+                .usuarioId(t.getUsuarioId())
                 .build();
     }
 
     public static Adoptante toDomain(AdoptanteEntity e) {
         return Adoptante.builder()
                 .id(e.getId() != null ? new AdoptanteId(e.getId()) : null)
-                .usuarioId(e.getUsuario() != null ? e.getUsuario().getId() : null)
-                .nombre(e.getUsuario() != null ? e.getUsuario().getNombre() : "")
-                .apellido(e.getUsuario() != null ? e.getUsuario().getApellido() : "")
+                .usuarioId(e.getUsuarioId())
+                .nombre("")
+                .apellido("")
                 .dni(e.getDni())
                 .direccion(e.getDireccion())
                 .fechaNacimiento(e.getFechaNacimiento())

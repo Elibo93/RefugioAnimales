@@ -19,7 +19,8 @@ public enum ThymTemplates {
     Donacion_LIST_PDF("pdf/donaciones-lista"),
     Historial_LIST_PDF("pdf/historiales-medicos-lista"),
     Solicitud_LIST_PDF("pdf/solicitudes-adopcion-lista"),
-    Tarea_LIST_PDF("pdf/tareas-lista");
+    Tarea_LIST_PDF("pdf/tareas-lista"),
+    Adoptante_LIST_PDF("pdf/adoptantes-lista");
 
     private final String path;
 

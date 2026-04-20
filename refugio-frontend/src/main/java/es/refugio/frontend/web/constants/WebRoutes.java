@@ -16,8 +16,15 @@ public interface WebRoutes {
     String PERSONAS_ELIMINAR = "/web/personas/{id}/borrar";
 
     // ADOPTANTES
+    String ADOPTANTES_BASE                 = "/web/adoptantes";
     String ADOPTANTES_MODAL_CONVERTIR      = "/web/adoptantes/modal-convertir";
     String ADOPTANTES_CONVERTIR_Y_SOLICITAR = "/web/adoptantes/convertir-y-solicitar";
+    String ADOPTANTES_NUEVO                = "/web/adoptantes/nuevo";
+    String ADOPTANTES_EDITAR               = "/web/adoptantes/{id}/editar";
+    String ADOPTANTES_ELIMINAR             = "/web/adoptantes/{id}/borrar";
+    String ADOPTANTES_PDF                  = "/web/adoptantes/pdf";
+    String ADOPTANTES_APROBAR              = "/web/adoptantes/{id}/aprobar";
+    String ADOPTANTES_RECHAZAR             = "/web/adoptantes/{id}/rechazar";
 
     // VOLUNTARIOS
     String VOLUNTARIOS_BASE     = "/web/voluntarios";
@@ -62,8 +69,11 @@ public interface WebRoutes {
     String SOLICITUDES_ELIMINAR     = "/web/solicitudes/{id}/borrar";
     String SOLICITUDES_PDF          = "/web/solicitudes/pdf";
     String SOLICITUDES_PUBLICO_REGISTRO = "/web/solicitudes/publico/registro-y-adopcion";
+
+    // Vistas públicas de adopción (formularios y flujos)
     String SOLICITUDES_OPCIONES = "/web/solicitudes/publico/opciones";
     String SOLICITUDES_CONVERTIR = "/web/solicitudes/publico/convertir";
+    String SOLICITUDES_DIRECTA_FORM = "/web/solicitudes/publico/directa/formulario";
     String SOLICITUDES_DIRECTA = "/web/solicitudes/publico/directa";
 
     // TAREAS

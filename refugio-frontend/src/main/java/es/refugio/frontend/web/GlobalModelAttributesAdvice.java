@@ -34,8 +34,8 @@ public class GlobalModelAttributesAdvice {
 
     private final RestTemplate restTemplate;
 
-    @Value("${backend.api.url}")
-    private String apiUrl;
+    @Value("${auth.api.url}")
+    private String authUrl;
 
     @ModelAttribute("currentUri")
     public String currentUri(HttpServletRequest request) {
@@ -58,7 +58,7 @@ public class GlobalModelAttributesAdvice {
         try {
             @SuppressWarnings("unchecked")
             Map<String, Object> me = restTemplate.getForObject(
-                    apiUrl + "/v1/me", Map.class);
+                    authUrl + "/v1/me", Map.class);
 
             if (me != null) {
                 model.addAttribute("currentUserId",   me.get("id"));
