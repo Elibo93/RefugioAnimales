@@ -33,10 +33,17 @@ spring:
       routes:
 
         # ── BACKEND: Auth y API REST (el backend gestiona login/sesión) ──
-        - id: backend-auth
-          uri: lb://REFUGIO-BACKEND
+        # Los submits de formulario van al auth service
+        - id: backend-auth-post
+          uri: lb://REFUGIO-AUTH
           predicates:
-            - Path=/login, /login-post, /logout, /registro, /error
+            - Path=/login-post, /registro
+            - Method=POST
+
+        - id: backend-auth-other
+          uri: lb://REFUGIO-AUTH
+          predicates:
+            - Path=/logout, /error
 
         - id: backend-api
           uri: lb://REFUGIO-BACKEND
@@ -49,6 +56,13 @@ spring:
             - Path=/api-docs/**, /v3/api-docs/**, /swagger-ui/**, /swagger-ui.html
 
         # ── FRONTEND: Vistas Thymeleaf ──
+        # Páginas de Login y Registro (Solo renderizan plantillas HTTPS GET)
+        - id: frontend-auth
+          uri: lb://REFUGIO-FRONTEND
+          predicates:
+            - Path=/login, /registro
+            - Method=GET
+
         # Páginas web (ViewControllers)
         - id: frontend-web
           uri: lb://REFUGIO-FRONTEND

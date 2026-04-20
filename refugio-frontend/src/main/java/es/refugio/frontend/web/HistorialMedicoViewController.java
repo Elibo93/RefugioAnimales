@@ -35,7 +35,19 @@ public class HistorialMedicoViewController {
 
     @GetMapping(WebRoutes.HISTORIALES_BASE)
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
-        model.addAttribute(ModelAttribute.Historial_LIST.getName(), fetchList("/v1/historial-medico"));
+        List<Object> historiales = fetchList("/v1/historial-medico");
+        List<Object> animales   = fetchList("/v1/animales");
+
+        Map<Integer, Object> animalesMap = new HashMap<>();
+        for (Object a : animales) {
+            if (a instanceof Map) {
+                Object id = ((Map<?, ?>) a).get("id");
+                if (id instanceof Number) animalesMap.put(((Number) id).intValue(), a);
+            }
+        }
+
+        model.addAttribute(ModelAttribute.Historial_LIST.getName(), historiales);
+        model.addAttribute("animalesMap", animalesMap);
         if (successMessage != null) model.addAttribute("successMessage", successMessage);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Historial_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();

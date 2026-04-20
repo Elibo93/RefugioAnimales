@@ -33,22 +33,38 @@ public class DonacionViewController {
     @Value("${backend.api.url}")
     private String apiUrl;
 
+    @Value("${auth.api.url}")
+    private String authUrl;
+
     @GetMapping(WebRoutes.DONACIONES_BASE)
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
         List<Object> donaciones = fetchList("/v1/donaciones");
-        List<Object> usuarios   = fetchList("/v1/usuarios");
+        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+
+        // Build usuariosMap: Map<userId, userObject>
+        Map<Integer, Object> usuariosMap = new HashMap<>();
+        for (Object u : usuarios) {
+            if (u instanceof Map) {
+                Object id = ((Map<?, ?>) u).get("id");
+                if (id instanceof Number) {
+                    usuariosMap.put(((Number) id).intValue(), u);
+                }
+            }
+        }
 
         // Obtener el total recaudado en dinero desde el endpoint público
         Double totalDinero = 0.0;
         try {
             Double callRes = restTemplate.getForObject(apiUrl + "/v1/donaciones/total", Double.class);
-            if (callRes != null) totalDinero = callRes;
+            if (callRes != null)
+                totalDinero = callRes;
         } catch (Exception e) {
             totalDinero = 0.0;
         }
 
         model.addAttribute(ModelAttribute.Donacion_LIST.getName(), donaciones);
         model.addAttribute("usuarios", usuarios);
+        model.addAttribute("usuariosMap", usuariosMap);
         Map<String, Object> nuevaDonacion = new HashMap<>();
         nuevaDonacion.put("fecha", LocalDateTime.now().toString());
         nuevaDonacion.put("id", null);
@@ -56,21 +72,22 @@ public class DonacionViewController {
         nuevaDonacion.put("tipo", "DINERO");
         nuevaDonacion.put("cantidad", null);
         nuevaDonacion.put("descripcion", "");
-        
+
         model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), nuevaDonacion);
         model.addAttribute("tipos", List.of("DINERO", "ALIMENTO", "MEDICAMENTO", "MATERIAL", "OTRO"));
         model.addAttribute("metaDinero", 1000.0);
         model.addAttribute("totalDinero", totalDinero);
         model.addAttribute("formActionUrl", "/web/donaciones/nueva");
 
-        if (successMessage != null) model.addAttribute("successMessage", successMessage);
+        if (successMessage != null)
+            model.addAttribute("successMessage", successMessage);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
     @GetMapping(WebRoutes.DONACIONES_NUEVA)
     public String formulario(Model model) {
-        List<Object> usuarios = fetchList("/v1/usuarios");
+        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
 
         Map<String, Object> nuevaDonacion = new HashMap<>();
         nuevaDonacion.put("fecha", LocalDateTime.now().toString());
@@ -96,12 +113,12 @@ public class DonacionViewController {
             Model model) {
 
         Map<String, Object> body = new HashMap<>();
-        body.put("usuarioId",   usuarioId);
-        body.put("tipo",        tipo);
-        body.put("cantidad",    cantidad);
-        body.put("frecuencia",  frecuencia);
+        body.put("usuarioId", usuarioId);
+        body.put("tipo", tipo);
+        body.put("cantidad", cantidad);
+        body.put("frecuencia", frecuencia);
         body.put("descripcion", descripcion);
-        body.put("fecha",       LocalDateTime.now().toString());
+        body.put("fecha", LocalDateTime.now().toString());
 
         restTemplate.postForObject(apiUrl + "/v1/donaciones", body, Object.class);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_GRACIAS.getPath());
@@ -112,7 +129,7 @@ public class DonacionViewController {
     public String editarFormulario(@PathVariable Integer id, Model model) {
         Object donacion = restTemplate.getForObject(apiUrl + "/v1/donaciones/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), donacion);
-        model.addAttribute("usuarios", fetchList("/v1/usuarios"));
+        model.addAttribute("usuarios", fetchList(authUrl + "/v1/usuarios"));
         model.addAttribute("tipos", List.of("DINERO", "ALIMENTO", "MEDICAMENTO", "MATERIAL", "OTRO"));
         model.addAttribute("formActionUrl", "/web/donaciones/" + id + "/editar");
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_FORM.getPath());
@@ -129,9 +146,12 @@ public class DonacionViewController {
             RedirectAttributes redirectAttributes) {
 
         Map<String, Object> body = new HashMap<>();
-        body.put("usuarioId", usuarioId); body.put("tipo", tipo);
-        body.put("cantidad",  cantidad);  body.put("frecuencia", frecuencia);
-        body.put("descripcion", descripcion); body.put("fecha", LocalDateTime.now().toString());
+        body.put("usuarioId", usuarioId);
+        body.put("tipo", tipo);
+        body.put("cantidad", cantidad);
+        body.put("frecuencia", frecuencia);
+        body.put("descripcion", descripcion);
+        body.put("fecha", LocalDateTime.now().toString());
 
         restTemplate.put(apiUrl + "/v1/donaciones/" + id, body);
         redirectAttributes.addFlashAttribute("successMessage", "Donación editada correctamente");
@@ -142,7 +162,8 @@ public class DonacionViewController {
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         restTemplate.delete(apiUrl + "/v1/donaciones/" + id);
-        if ("true".equals(request.getHeader("HX-Request"))) return ResponseEntity.ok("");
+        if ("true".equals(request.getHeader("HX-Request")))
+            return ResponseEntity.ok("");
         return ResponseEntity.status(302).header("Location", WebRoutes.DONACIONES_BASE).build();
     }
 
@@ -164,8 +185,11 @@ public class DonacionViewController {
 
     private List<Object> fetchList(String path) {
         try {
-            Object[] arr = restTemplate.getForObject(apiUrl + path, Object[].class);
+            String finalUrl = path.startsWith("http") ? path : apiUrl + path;
+            Object[] arr = restTemplate.getForObject(finalUrl, Object[].class);
             return arr != null ? Arrays.asList(arr) : List.of();
-        } catch (Exception e) { return List.of(); }
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 }

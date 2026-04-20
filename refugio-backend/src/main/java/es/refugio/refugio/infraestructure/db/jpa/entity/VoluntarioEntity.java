@@ -22,9 +22,8 @@ public class VoluntarioEntity {
     @Column(name = "disponibilidad", nullable = false, length = 500)
     private String disponibilidad;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = false, unique = true)
-    private UsuarioEntity usuario;
+    @Column(name = "usuario_id", nullable = false, unique = true)
+    private Integer usuarioId;
 
     @ManyToMany(mappedBy = "voluntarios")
     private java.util.List<TareaEntity> tareas;

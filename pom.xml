@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.7</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    
+    <groupId>es.refugio</groupId>
+    <artifactId>refugio-parent</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>refugio-parent</name>
+    <description>Proyecto raíz Multi-módulo para el sistema del Refugio de Animales</description>
+
+    <properties>
+        <java.version>17</java.version>
+        <spring-cloud.version>2024.0.0</spring-cloud.version>
+    </properties>
+
+    <modules>
+        <module>refugio-common</module>
+        <module>refugio-auth</module>
+        <module>refugio-backend</module>
+        <module>refugio-frontend</module>
+        <module>api-gateway</module>
+        <module>eureka-server</module>
+    </modules>
+
+</project>

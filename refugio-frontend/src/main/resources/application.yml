@@ -1,5 +1,6 @@
 server:
   port: 8082
+  forward-headers-strategy: native
   servlet:
     encoding:
       charset: UTF-8
@@ -47,9 +48,18 @@ backend:
   api:
     url: http://REFUGIO-BACKEND/api
 
+auth:
+  api:
+    url: http://REFUGIO-AUTH/api
+
 
 management:
   endpoints:
     web:
       exposure:
         include: health, info
+
+# Claves JWT compartidas para decodificar (Variables de entorno con Fallback local)
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION}

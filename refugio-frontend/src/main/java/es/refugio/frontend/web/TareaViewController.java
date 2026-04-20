@@ -33,9 +33,41 @@ public class TareaViewController {
     @Value("${backend.api.url}")
     private String apiUrl;
 
+    @Value("${auth.api.url}")
+    private String authUrl;
+
     @GetMapping(WebRoutes.TAREAS_BASE)
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
-        model.addAttribute(ModelAttribute.Tarea_LIST.getName(), fetchList("/v1/tareas"));
+        List<Object> tareas      = fetchList("/v1/tareas");
+        List<Object> voluntarios = fetchList("/v1/voluntarios");
+        List<Object> usuarios    = fetchList(authUrl + "/v1/usuarios");
+
+        Map<Integer, Map<String, Object>> usuariosMap = new HashMap<>();
+        for (Object u : usuarios) {
+            if (u instanceof Map) {
+                Object id = ((Map<?, ?>) u).get("id");
+                if (id instanceof Number) usuariosMap.put(((Number) id).intValue(), (Map<String, Object>) u);
+            }
+        }
+
+        Map<String, String> voluntarioNombres = new HashMap<>();
+        for (Object v : voluntarios) {
+            if (v instanceof Map) {
+                Object vId = ((Map<?, ?>) v).get("id");
+                Object uId = ((Map<?, ?>) v).get("usuarioId");
+                if (vId instanceof Number && uId instanceof Number) {
+                    Map<String, Object> user = usuariosMap.get(((Number) uId).intValue());
+                    if (user != null) {
+                        Object n = user.get("nombre");
+                        Object a = user.get("apellido");
+                        voluntarioNombres.put(vId.toString(), ((n!=null?n.toString():"") + " " + (a!=null?a.toString():"")).trim());
+                    }
+                }
+            }
+        }
+
+        model.addAttribute(ModelAttribute.Tarea_LIST.getName(), tareas);
+        model.addAttribute("voluntarioNombres", voluntarioNombres);
         if (successMessage != null) model.addAttribute("successMessage", successMessage);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Tarea_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -121,7 +153,8 @@ public class TareaViewController {
 
     private List<Object> fetchList(String path) {
         try {
-            Object[] arr = restTemplate.getForObject(apiUrl + path, Object[].class);
+            String finalUrl = path.startsWith("http") ? path : apiUrl + path;
+            Object[] arr = restTemplate.getForObject(finalUrl, Object[].class);
             return arr != null ? Arrays.asList(arr) : List.of();
         } catch (Exception e) { return List.of(); }
     }

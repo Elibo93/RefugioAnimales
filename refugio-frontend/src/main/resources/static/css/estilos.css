@@ -1500,6 +1500,26 @@ tbody tr:hover {
     text-transform: uppercase;
 }
 
+.badge-available {
+    background: #10B981 !important;
+    color: white !important;
+}
+
+.badge-reserved {
+    background: #F59E0B !important;
+    color: white !important;
+}
+
+.badge-adopted {
+    background: #6366F1 !important;
+    color: white !important;
+}
+
+.badge-treatment {
+    background: #EF4444 !important;
+    color: white !important;
+}
+
 .user-name.page {
     font-size: 1rem;
     color: var(--text-main);

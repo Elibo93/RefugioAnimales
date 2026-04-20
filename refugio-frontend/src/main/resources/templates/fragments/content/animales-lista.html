@@ -77,7 +77,8 @@
                             <i data-lucide="search" style="width:16px;"></i>
                             <span>Filtrar</span>
                         </button>
-                        <a th:href="@{/web/animales}" class="btn btn-secondary" style="width:100%; justify-content:center; margin-top:0.5rem;">
+                        <a th:href="@{/web/animales}" class="btn btn-secondary"
+                            style="width:100%; justify-content:center; margin-top:0.5rem;">
                             <i data-lucide="x" style="width:16px;"></i>
                             <span>Limpiar</span>
                         </a>
@@ -86,8 +87,8 @@
 
                 <div class="filter-group"
                     style="margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2);">
-                    <a class="btn btn-primary" th:href="@{/web/animales/nuevo}"
-                        th:if="${isVoluntario}" style="width: 100%; justify-content: center;">
+                    <a class="btn btn-primary" th:href="@{/web/animales/nuevo}" th:if="${isVoluntario}"
+                        style="width: 100%; justify-content: center;">
                         <i data-lucide="plus"></i>
                         <span th:text="#{generic.link.create}">Nuevo</span>
                     </a>
@@ -110,12 +111,16 @@
                                 <img th:src="${a.get('foto') != null ? a.get('foto') : '/images/placeholder-animal.png'}"
                                     alt="Animal">
                                 <span class="status-badge"
-                                    th:classappend="${a.get('estado') != null ? (a.get('estado').toString() == 'DISPONIBLE' ? 'badge-available' : (a.get('estado').toString() == 'RESERVADO' ? 'badge-reserved' : 'badge-treatment')) : 'badge-available'}"
+                                    th:classappend="${a.get('estado') != null ? 
+                                        (a.get('estado').toString() == 'DISPONIBLE' ? 'badge-available' : 
+                                        (a.get('estado').toString() == 'RESERVADO' ? 'badge-reserved' : 
+                                        (a.get('estado').toString() == 'ADOPTADO' ? 'badge-adopted' : 'badge-treatment'))) : 'badge-available'}"
                                     th:text="${a.get('estado')}">
                                     Disponible
                                 </span>
                                 <div class="card-info-overlay" th:if="${!isAdmin}">
-                                    <p style="font-size: 0.85rem; margin-bottom: 1rem;" th:text="${a.get('descripcion')}">
+                                    <p style="font-size: 0.85rem; margin-bottom: 1rem;"
+                                        th:text="${a.get('descripcion')}">
                                         Descripción breve.
                                     </p>
                                     <button class="btn btn-primary" style="width: 100%; justify-content: center;"
@@ -142,7 +147,8 @@
                                     </div>
                                     <div class="stat-item">
                                         <i data-lucide="weight"></i>
-                                        <span th:text="${a.get('peso') != null ? a.get('peso') + 'kg' : '-'}">12kg</span>
+                                        <span
+                                            th:text="${a.get('peso') != null ? a.get('peso') + 'kg' : '-'}">12kg</span>
                                         <span style="font-size: 0.6rem; opacity: 0.7;"
                                             th:text="#{animal.field.size}">Peso</span>
                                     </div>

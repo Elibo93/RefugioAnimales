@@ -9,7 +9,6 @@ import es.refugio.refugio.domain.model.donacion.Donacion;
 import es.refugio.refugio.domain.model.donacion.DonacionId;
 import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.infraestructure.db.jpa.entity.DonacionEntity;
-import es.refugio.refugio.infraestructure.db.jpa.entity.UsuarioEntity;
 import es.refugio.refugio.infraestructure.web.dto.donacion.DonacionRequest;
 import es.refugio.refugio.infraestructure.web.dto.donacion.DonacionResponse;
 
@@ -22,8 +21,7 @@ public class DonacionMapper {
                 req.cantidad(),
                 req.frecuencia(),
                 req.fecha(),
-                req.descripcion()
-        );
+                req.descripcion());
     }
 
     public static EditDonacionCommand toCommand(int id, DonacionRequest req) {
@@ -34,8 +32,7 @@ public class DonacionMapper {
                 req.cantidad(),
                 req.frecuencia(),
                 req.fecha(),
-                req.descripcion()
-        );
+                req.descripcion());
     }
 
     public static DonacionResponse toResponse(Donacion d) {
@@ -46,19 +43,18 @@ public class DonacionMapper {
                 d.getCantidad(),
                 d.getFrecuencia() != null ? d.getFrecuencia().name() : null,
                 d.getFecha(),
-                d.getDescripcion()
-        );
+                d.getDescripcion());
     }
 
     public static DonacionEntity toEntity(Donacion d) {
-        UsuarioEntity usuarioEntity = null;
+        Integer usuarioId = null;
         if (d.getUsuarioId() != null) {
-            usuarioEntity = UsuarioEntity.builder().id(d.getUsuarioId().getValue()).build();
+            usuarioId = d.getUsuarioId().getValue();
         }
 
         return DonacionEntity.builder()
                 .id(d.getId() != null ? d.getId().getValue() : null)
-                .usuario(usuarioEntity)
+                .usuarioId(usuarioId)
                 .tipo(d.getTipo())
                 .cantidad(d.getCantidad())
                 .frecuencia(d.getFrecuencia())
@@ -70,7 +66,7 @@ public class DonacionMapper {
     public static Donacion toDomain(DonacionEntity e) {
         return Donacion.builder()
                 .id(e.getId() != null ? new DonacionId(e.getId()) : null)
-                .usuarioId(e.getUsuario() != null ? new UsuarioId(e.getUsuario().getId()) : null)
+                .usuarioId(e.getUsuarioId() != null ? new UsuarioId(e.getUsuarioId()) : null)
                 .tipo(e.getTipo())
                 .cantidad(e.getCantidad())
                 .frecuencia(e.getFrecuencia())
@@ -78,7 +74,6 @@ public class DonacionMapper {
                 .descripcion(e.getDescripcion())
                 .build();
     }
-
 
     public static List<Donacion> toDomain(List<DonacionEntity> entities) {
         return entities.stream().map(DonacionMapper::toDomain).collect(Collectors.toList());

@@ -9,12 +9,12 @@
     <div th:fragment="content">
         <div class="page-header" style="text-align:center;">
             <h1 class="page-title"
-                th:text="${solicitud.id == null ? #messages.msg('solicitud.form.title') : #messages.msg('solicitud.modal.edit.title')}">
+                th:text="${solicitud.get('id') == null ? #messages.msg('solicitud.form.title') : #messages.msg('solicitud.modal.edit.title')}">
                 Nueva solicitud</h1>
         </div>
         <div class="card" style="max-width:800px; margin:0 auto;">
             <form
-                th:action="${solicitud.id == null ? '/web/solicitudes/nueva' : '/web/solicitudes/' + solicitud.id + '/editar'}"
+                th:action="${solicitud.get('id') == null ? '/web/solicitudes/nueva' : '/web/solicitudes/' + solicitud.get('id') + '/editar'}"
                 method="post" th:object="${solicitud}">
                 <div class="form-grid">
                     <div class="form-group">
@@ -22,9 +22,9 @@
                         <select name="animalId" required>
                             <option value="" th:text="#{form.select.workshop}">Seleccione un animal...</option>
                             <option th:each="a : ${animales}"
-                                th:if="${a.estado != null and (a.estado.toString() == 'DISPONIBLE' or a.estado.toString() == 'EN_TRATAMIENTO' or (solicitud.animalId != null and a.id == solicitud.animalId))}"
-                                th:value="${a.id}" th:text="${a.nombre}"
-                                th:selected="${solicitud.animalId != null and a.id == solicitud.animalId}">
+                                th:if="${a.get('estado') != null and (a.get('estado').toString() == 'DISPONIBLE' or a.get('estado').toString() == 'EN_TRATAMIENTO' or (solicitud.get('animalId') != null and a.get('id') == solicitud.get('animalId')))}"
+                                th:value="${a.get('id')}" th:text="${a.get('nombre')}"
+                                th:selected="${solicitud.get('animalId') != null and a.get('id') == solicitud.get('animalId')}">
                             </option>
                         </select>
                     </div>
@@ -32,9 +32,9 @@
                         <label th:text="#{solicitud.field.adoptante}">Solicitante</label>
                         <select name="adoptanteId" required>
                             <option value="" th:text="#{form.select.student}">Seleccione una persona...</option>
-                            <option th:each="ad : ${adoptantes}" th:value="${ad.id}"
-                                th:text="${ad.nombre + ' ' + ad.apellido}"
-                                th:selected="${solicitud.adoptanteId != null and ad.id == solicitud.adoptanteId}">
+                            <option th:each="ad : ${adoptantes}" th:value="${ad.get('id')}"
+                                th:text="${ad.get('nombre') + ' ' + ad.get('apellido')}"
+                                th:selected="${solicitud.get('adoptanteId') != null and ad.get('id') == solicitud.get('adoptanteId')}">
                             </option>
                         </select>
                     </div>
@@ -42,15 +42,15 @@
                         <label th:text="#{solicitud.field.estado}">Estado</label>
                         <select name="estado" required>
                             <option th:each="e : ${estados}" th:value="${e}" th:text="${e}"
-                                th:selected="${e == solicitud.estado}"></option>
+                                th:selected="${e == solicitud.get('estado')}"></option>
                         </select>
                     </div>
                     <input type="hidden" name="estado"
-                        th:value="${solicitud.estado != null ? solicitud.estado : 'PENDIENTE'}"
+                        th:value="${solicitud.get('estado') != null ? solicitud.get('estado') : 'PENDIENTE'}"
                         sec:authorize="!hasRole('ADMIN')">
                     <div class="form-group" style="grid-column:1/-1;">
                         <label th:text="#{solicitud.field.comentario}">Comentario</label>
-                        <textarea name="comentario" th:text="${solicitud.comentario}"></textarea>
+                        <textarea name="comentario" th:text="${solicitud.get('comentario')}"></textarea>
                     </div>
                 </div>
                 <div class="modal-actions" style="margin-top:2rem;">

@@ -16,6 +16,7 @@ public enum ModelAttribute {
     Historial_LIST("historiales"),
     Solicitud_LIST("solicitudes"),
     Tarea_LIST("tareas"),
+    Adoptante_LIST("adoptantes"),
 
     // ─── Objeto único ────────────────────────────────────────────────────────
     SINGLE_Persona("persona"),
@@ -26,6 +27,7 @@ public enum ModelAttribute {
     SINGLE_Historial("historial"),
     SINGLE_Solicitud("solicitud"),
     SINGLE_Tarea("tarea"),
+    SINGLE_Adoptante("adoptante"),
 
     // ─── Layout ──────────────────────────────────────────────────────────────
     FRAGMENTO_CONTENIDO("content");

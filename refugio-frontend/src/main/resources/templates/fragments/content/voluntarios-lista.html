@@ -10,7 +10,7 @@
 
         <div class="table-wrapper">
             <div class="actions-bar">
-                <span class="user-name page" th:text="#{professor.list.title}">voluntarios</span>
+                <span class="user-name page" th:text="#{voluntario.list.title}">voluntarios</span>
                 <div style="display:flex; gap:10px;">
                     <a class="btn btn-secondary" th:href="@{/web/voluntarios/pdf}" target="_blank">
                         <i data-lucide="file-text" style="width:18px;"></i>
@@ -26,22 +26,23 @@
             <table id="tablavoluntarios">
                 <thead>
                     <tr>
-                        <th th:text="#{professor.table.header.id}">ID</th>
-                        <th th:text="#{professor.table.header.name}">Nombre</th>
-                        <th th:text="#{professor.table.header.surname}">Apellido</th>
+                        <th th:text="#{voluntario.table.header.id}">ID</th>
+                        <th th:text="#{voluntario.table.header.name}">Nombre</th>
+                        <th th:text="#{voluntario.table.header.surname}">Apellido</th>
                         <th th:text="#{voluntario.table.header.disponibilidad}">Disponibilidad</th>
-                        <th th:text="#{professor.table.header.email}">Email</th>
-                        <th th:text="#{professor.table.header.phone}">Tlf</th>
-                        <th th:text="#{professor.table.header.action}">Acción</th>
+                        <th th:text="#{voluntario.table.header.email}">Email</th>
+                        <th th:text="#{voluntario.table.header.phone}">Tlf</th>
+                        <th th:text="#{voluntario.table.header.action}">Acción</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="p : ${voluntarios}" th:id="'row-' + ${p.get('id')}"
-                        th:with="u=${usuariosMap != null ? usuariosMap[p.get('usuarioId')] : null}"
+                        th:with="u=${usuariosMap != null ? usuariosMap['' + p.get('usuarioId')] : null}"
                         th:attr="data-id=${p.get('id')}, data-nombre=${u != null ? u.get('nombre') : ''}, data-apellido=${u != null ? u.get('apellido') : ''}, data-disp=${p.get('disponibilidad')}, data-email=${u != null ? u.get('email') : ''}, data-tlf=${u != null ? u.get('telefono') : ''}">
 
                         <td th:text="${p.get('id')}">1</td>
-                        <td style="font-weight: 600; color: var(--text-main);" th:text="${u != null ? u.get('nombre') : ''}">Juan</td>
+                        <td style="font-weight: 600; color: var(--text-main);"
+                            th:text="${u != null ? u.get('nombre') : ''}">Juan</td>
                         <td th:text="${u != null ? u.get('apellido') : ''}">Pérez</td>
                         <td><span class="badge-soon" style="background:#F3E8FF; color:#9333EA;"
                                 th:text="${p.get('disponibilidad')}">Tarde</span></td>
@@ -71,17 +72,17 @@
 
         <div id="modalOverlay" class="modal-overlay" style="display:none;"></div>
         <div id="editModal" class="modal" style="display:none;">
-            <h3 th:text="#{professor.modal.edit.title}">Editar voluntario</h3>
+            <h3 th:text="#{voluntario.modal.edit.title}">Editar voluntario</h3>
             <form id="editForm" method="post" action="#">
                 <input type="hidden" id="editId" name="id">
 
                 <div class="form-grid" style="display:block;">
                     <div class="form-group">
-                        <label th:text="#{professor.field.name}">Nombre</label>
+                        <label th:text="#{voluntario.field.name}">Nombre</label>
                         <input type="text" id="editNombre" name="nombre" required>
                     </div>
                     <div class="form-group">
-                        <label th:text="#{professor.field.surname}">Apellido</label>
+                        <label th:text="#{voluntario.field.surname}">Apellido</label>
                         <input type="text" id="editApellido" name="apellido" required>
                     </div>
                     <div class="form-group">
@@ -89,11 +90,11 @@
                         <input type="text" id="editEspecialidad" name="disponibilidad" required>
                     </div>
                     <div class="form-group">
-                        <label th:text="#{professor.field.email}">Email</label>
+                        <label th:text="#{voluntario.field.email}">Email</label>
                         <input type="email" id="editEmail" name="email" required>
                     </div>
                     <div class="form-group">
-                        <label th:text="#{professor.field.phone}">Teléfono</label>
+                        <label th:text="#{voluntario.field.phone}">Teléfono</label>
                         <input type="text" id="editTlf" name="telefono">
                     </div>
                 </div>

@@ -1,0 +1,56 @@
+<div th:fragment="content" class="container" style="max-width: 800px; margin: 4rem auto;">
+    <div class="glass-panel" style="padding: 3rem; border-radius: 32px;">
+        <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2.5rem;">
+            <div style="background: var(--primary-light); color: var(--primary); width: 64px; height: 64px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="heart" style="width: 32px; height: 32px;"></i>
+            </div>
+            <div>
+                <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;">Finaliza tu Adopción</h1>
+                <p style="color: var(--text-muted); margin: 0;">¡Ya casi estás! Envía la solicitud para dar el paso final.</p>
+            </div>
+        </div>
+
+        <div class="glass-card" style="padding: 2rem; margin-bottom: 2.5rem; background: rgba(var(--primary-rgb), 0.02); border: 1px solid var(--primary-light);">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <img th:src="${animal.get('foto') != null ? animal.get('foto') : '/images/placeholder-animal.png'}" 
+                     style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">
+                <div>
+                    <span style="font-size: 0.8rem; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Solicitud para</span>
+                    <h3 style="margin: 0; font-weight: 800;" th:text="${animal.get('nombre')}">Nombre del Animal</h3>
+                </div>
+            </div>
+        </div>
+
+        <form th:action="@{/web/solicitudes/publico/directa}" method="POST" class="form-grid">
+            <input type="hidden" name="animalId" th:value="${animal.get('id')}">
+
+            <!-- Sección: La Adopción -->
+            <div style="grid-column: 1 / -1; margin: 1rem 0 1rem;">
+                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="message-square" style="width: 18px;"></i>
+                    <span>Información para el refugio</span>
+                </h3>
+                <div style="height: 1px; background: rgba(0,0,0,0.05); margin-top: 0.5rem;"></div>
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label>¿Por qué quieres adoptar a <span th:text="${animal.get('nombre')}"></span>?</label>
+                <textarea name="comentario" rows="4" placeholder="Cuéntanos un poco sobre por qué has elegido a este peludo..."></textarea>
+            </div>
+
+            <div style="grid-column: 1 / -1; margin-top: 2rem; display: flex; gap: 1rem;">
+                <a th:href="@{/web/home}" class="btn btn-secondary" style="flex: 1; justify-content: center; height: 56px; border-radius: 16px;">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary" style="flex: 2; justify-content: center; height: 56px; border-radius: 16px;">
+                    <i data-lucide="send"></i>
+                    <span>Enviar Solicitud</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    if (window.lucide) lucide.createIcons();
+</script>

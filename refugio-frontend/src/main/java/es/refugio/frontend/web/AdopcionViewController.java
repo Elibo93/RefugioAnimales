@@ -35,6 +35,9 @@ public class AdopcionViewController {
     @Value("${backend.api.url}")
     private String apiUrl;
 
+    @Value("${auth.api.url}")
+    private String authUrl;
+
     @GetMapping(WebRoutes.ADOPCIONES_BASE)
     public String listar(Model model,
             @RequestParam(required = false) Integer adoptanteId,
@@ -42,37 +45,55 @@ public class AdopcionViewController {
             @RequestParam(required = false) String successMessage) {
 
         List<Object> adopciones = fetchList("/v1/adopciones");
-        List<Object> adoptantes  = fetchList("/v1/adoptantes");
-        List<Object> animales    = fetchList("/v1/animales");
+        List<Object> adoptantes = fetchList("/v1/adoptantes");
+        List<Object> animales   = fetchList("/v1/animales");
+        List<Object> usuarios   = fetchList(authUrl + "/v1/usuarios");
+
+        Map<String, Map<String, Object>> usuariosMap = new HashMap<>();
+        for (Object u : usuarios) {
+            if (u instanceof Map) {
+                Object id = ((Map<?, ?>) u).get("id");
+                if (id instanceof Number) {
+                    usuariosMap.put(String.valueOf(((Number) id).intValue()), (Map<String, Object>) u);
+                }
+            }
+        }
 
         // Build adoptanteNombres: Map<adoptanteId, nombreCompleto>
-        Map<Integer, String> adoptanteNombres = new HashMap<>();
+        Map<String, String> adoptanteNombres = new HashMap<>();
         for (Object a : adoptantes) {
             if (a instanceof Map) {
-                Object id      = ((Map<?, ?>) a).get("id");
-                Object nombre  = ((Map<?, ?>) a).get("nombre");
-                Object apellido= ((Map<?, ?>) a).get("apellido");
-                if (id instanceof Number) {
-                    String fullName = (nombre != null ? nombre.toString() : "")
-                            + (apellido != null ? " " + apellido.toString() : "");
-                    adoptanteNombres.put(((Number) id).intValue(), fullName.trim());
+                Object id = ((Map<?, ?>) a).get("id");
+                Object uid = ((Map<?, ?>) a).get("usuarioId");
+                if (id instanceof Number && uid instanceof Number) {
+                    Map<String, Object> user = usuariosMap.get(String.valueOf(((Number) uid).intValue()));
+                    if (user != null) {
+                        Object nombre = user.get("nombre");
+                        Object apellido = user.get("apellido");
+                        String fullName = (nombre != null ? nombre.toString() : "")
+                                + (apellido != null ? " " + apellido.toString() : "");
+                        adoptanteNombres.put(String.valueOf(((Number) id).intValue()), fullName.trim());
+                        // Add temporary name/apellido inside 'a' map so filters can see it
+                        ((Map<String, Object>) a).put("nombre", nombre);
+                        ((Map<String, Object>) a).put("apellido", apellido);
+                    }
                 }
             }
         }
 
         // Build animalesMap: Map<animalId, animalObject>
-        Map<Integer, Object> animalesMap = new HashMap<>();
+        Map<String, Object> animalesMap = new HashMap<>();
         for (Object a : animales) {
             if (a instanceof Map) {
                 Object id = ((Map<?, ?>) a).get("id");
                 if (id instanceof Number) {
-                    animalesMap.put(((Number) id).intValue(), a);
+                    animalesMap.put(String.valueOf(((Number) id).intValue()), a);
                 }
             }
         }
 
         model.addAttribute(ModelAttribute.Adopcion_LIST.getName(),   adopciones);
-        model.addAttribute(ModelAttribute.Persona_LIST.getName(),    fetchList("/v1/usuarios"));
+        model.addAttribute(ModelAttribute.Persona_LIST.getName(),    usuarios);
         model.addAttribute("listaadoptantes",                        adoptantes);
         model.addAttribute("listaanimales",                          animales);
         model.addAttribute("adoptanteNombres",                       adoptanteNombres);
@@ -88,7 +109,7 @@ public class AdopcionViewController {
     @GetMapping(WebRoutes.ADOPCIONES_NUEVA)
     public String formulario(Model model) {
         model.addAttribute(ModelAttribute.SINGLE_Adopcion.getName(), Map.of());
-        model.addAttribute(ModelAttribute.Persona_LIST.getName(),    fetchList("/v1/usuarios"));
+        model.addAttribute(ModelAttribute.Persona_LIST.getName(),    fetchList(authUrl + "/v1/usuarios"));
         model.addAttribute(ModelAttribute.Animal_LIST.getName(),     fetchList("/v1/animales"));
         model.addAttribute("estadosAdopcion", List.of("COMPLETADA", "CANCELADA", "EN_PROCESO"));
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Adopcion_FORM.getPath());
@@ -116,7 +137,7 @@ public class AdopcionViewController {
     public String editarFormulario(@PathVariable Integer id, Model model) {
         Object adopcion = restTemplate.getForObject(apiUrl + "/v1/adopciones/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Adopcion.getName(), adopcion);
-        model.addAttribute(ModelAttribute.Persona_LIST.getName(),    fetchList("/v1/usuarios"));
+        model.addAttribute(ModelAttribute.Persona_LIST.getName(),    fetchList(authUrl + "/v1/usuarios"));
         model.addAttribute(ModelAttribute.Animal_LIST.getName(),     fetchList("/v1/animales"));
         model.addAttribute("estadosAdopcion", List.of("COMPLETADA", "CANCELADA", "EN_PROCESO"));
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Adopcion_FORM.getPath());
@@ -166,7 +187,8 @@ public class AdopcionViewController {
 
     private List<Object> fetchList(String path) {
         try {
-            Object[] arr = restTemplate.getForObject(apiUrl + path, Object[].class);
+            String finalUrl = path.startsWith("http") ? path : apiUrl + path;
+            Object[] arr = restTemplate.getForObject(finalUrl, Object[].class);
             return arr != null ? Arrays.asList(arr) : List.of();
         } catch (Exception e) { return List.of(); }
     }

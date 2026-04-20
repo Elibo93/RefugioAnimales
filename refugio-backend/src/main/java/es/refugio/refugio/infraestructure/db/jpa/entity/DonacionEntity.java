@@ -36,10 +36,8 @@ public class DonacionEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "usuario_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private UsuarioEntity usuario;
+    @Column(name = "usuario_id", nullable = false)
+    private Integer usuarioId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
@@ -58,4 +56,3 @@ public class DonacionEntity {
     @Column(length = 500)
     private String descripcion;
 }
-
