@@ -28,7 +28,6 @@ import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class VoluntarioViewController {
 
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(VoluntarioViewController.class);
@@ -43,6 +42,7 @@ public class VoluntarioViewController {
     private String authUrl;
 
     @GetMapping(WebRoutes.VOLUNTARIOS_BASE)
+    @PreAuthorize("hasRole('ADMIN')")
     public String listar(Model model) {
         List<Object> voluntarios = fetchList("/v1/voluntarios");
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
@@ -74,6 +74,7 @@ public class VoluntarioViewController {
     }
 
     @GetMapping(WebRoutes.VOLUNTARIOS_EDITAR)
+    @PreAuthorize("hasRole('ADMIN')")
     public String editarFormulario(@PathVariable Integer id, Model model) {
         Object voluntario = restTemplate.getForObject(apiUrl + "/v1/voluntarios/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), voluntario);
@@ -83,6 +84,8 @@ public class VoluntarioViewController {
     }
 
     @GetMapping(WebRoutes.VOLUNTARIOS_MODAL_EDITAR)
+    @PreAuthorize("hasRole('ADMIN')")
+    @SuppressWarnings("unchecked")
     public String modalEditar(@PathVariable Integer id, Model model) {
         try {
             Map<String, Object> voluntario = restTemplate.getForObject(apiUrl + "/v1/voluntarios/" + id, Map.class);
@@ -127,6 +130,7 @@ public class VoluntarioViewController {
     }
 
     @PostMapping(WebRoutes.VOLUNTARIOS_EDITAR)
+    @PreAuthorize("hasRole('ADMIN')")
     public String editarVoluntario(@PathVariable Integer id,
             @RequestParam Integer usuarioId,
             @RequestParam String disponibilidad,
@@ -162,6 +166,7 @@ public class VoluntarioViewController {
     }
 
     @PostMapping(WebRoutes.VOLUNTARIOS_ELIMINAR)
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         try {
@@ -177,6 +182,7 @@ public class VoluntarioViewController {
     }
 
     @GetMapping(WebRoutes.VOLUNTARIOS_PDF)
+    @PreAuthorize("hasRole('ADMIN')")
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<Object> voluntarios = fetchList("/v1/voluntarios");
         Context context = new Context();
@@ -193,6 +199,8 @@ public class VoluntarioViewController {
     }
 
     @GetMapping(WebRoutes.VOLUNTARIOS_DETALLE)
+    @PreAuthorize("hasRole('ADMIN')")
+    @SuppressWarnings("unchecked")
     public String verDetalle(@PathVariable Integer id, Model model) {
         try {
             Map<String, Object> voluntario = (Map<String, Object>) restTemplate.getForObject(apiUrl + "/v1/voluntarios/" + id, Map.class);

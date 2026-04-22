@@ -81,6 +81,7 @@ public interface WebRoutes {
     String SOLICITUDES_CONVERTIR    = "/web/solicitudes/publico/convertir";
     String SOLICITUDES_DIRECTA_FORM = "/web/solicitudes/publico/directa/formulario";
     String SOLICITUDES_DIRECTA      = "/web/solicitudes/publico/directa";
+    String SOLICITUDES_MIS_ADOPTADOS = "/web/solicitudes/mis-adoptados";
 
     // TAREAS
     String TAREAS_BASE     = "/web/tareas";
