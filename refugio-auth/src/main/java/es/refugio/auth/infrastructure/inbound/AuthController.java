@@ -1,12 +1,8 @@
 package es.refugio.auth.infrastructure.inbound;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -66,6 +62,7 @@ public class AuthController {
                 .rol(registroDto.getRol() == null ? es.refugio.auth.domain.Rol.ROLE_VOLUNTARIO : registroDto.getRol())
                 .createdAt(LocalDateTime.now())
                 .build();
+        
 
         usuarioEntityJpaRepository.save(newUser);
 

@@ -42,7 +42,7 @@ public class SolicitudAdopcionEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private AdoptanteEntity adoptante;
 
-    @Column(name = "fecha", nullable = false)
+    @Column(name = "fecha", nullable = false, columnDefinition = "DATETIME")
     private LocalDateTime fecha;
 
     @Enumerated(EnumType.STRING)

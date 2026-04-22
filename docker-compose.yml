@@ -22,10 +22,9 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3307:3306"
-
   # Adminer (Opcional - Interfaz web para visualizar la base de datos)
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - "8090:8080"
+  # adminer:
+  #   image: adminer
+  #   restart: always
+  #   ports:
+  #     - "8090:8080"
