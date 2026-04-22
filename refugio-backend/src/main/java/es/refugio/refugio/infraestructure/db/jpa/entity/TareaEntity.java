@@ -26,7 +26,7 @@ public class TareaEntity {
     @Column(nullable = false, length = 500)
     private String descripcion;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "DATETIME")
     private LocalDateTime fecha;
 
     @Enumerated(EnumType.STRING)

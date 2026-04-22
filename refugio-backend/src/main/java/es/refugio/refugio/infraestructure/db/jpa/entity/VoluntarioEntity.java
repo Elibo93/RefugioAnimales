@@ -28,7 +28,7 @@ public class VoluntarioEntity {
     @ManyToMany(mappedBy = "voluntarios")
     private java.util.List<TareaEntity> tareas;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME")
     private LocalDateTime createdAt;
 
     @PrePersist

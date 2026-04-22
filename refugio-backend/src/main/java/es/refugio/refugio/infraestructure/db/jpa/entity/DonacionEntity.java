@@ -44,7 +44,7 @@ public class DonacionEntity {
     @Column(nullable = false, length = 20)
     private FrecuenciaDonacion frecuencia;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "DATETIME")
     private LocalDateTime fecha;
 
     @Column(length = 500)

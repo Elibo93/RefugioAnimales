@@ -1,7 +1,6 @@
 package es.refugio.refugio.infraestructure.db.jpa.entity;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import es.refugio.auth.domain.Rol;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +9,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import org.hibernate.annotations.CreationTimestamp;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,7 +47,8 @@ public class UsuarioEntity {
     @Column(nullable = false, length = 50)
     private Rol rol;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME")
     private LocalDateTime createdAt;
 
 }
