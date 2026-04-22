@@ -32,7 +32,7 @@ public class AdoptanteEntity {
     @Column(name = "estado_validacion", nullable = false, length = 50)
     private String estadoValidacion;
 
-    @Column(name = "fecha_registro", nullable = false, updatable = false)
+    @Column(name = "fecha_registro", nullable = false, updatable = false, columnDefinition = "DATETIME")
     private LocalDateTime fechaRegistro;
 
     @Column(name = "usuario_id", nullable = false, unique = true)

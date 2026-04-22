@@ -34,7 +34,7 @@ public class HistorialMedicoEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private AnimalEntity animal;
 
-    @Column(name = "fecha", nullable = false)
+    @Column(name = "fecha", nullable = false, columnDefinition = "DATETIME")
     private LocalDateTime fecha;
 
     @Column(name = "descripcion", nullable = false, length = 1000)
