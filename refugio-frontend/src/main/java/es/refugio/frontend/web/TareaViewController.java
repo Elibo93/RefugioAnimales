@@ -66,16 +66,33 @@ public class TareaViewController {
             }
         }
 
+        Map<String, String> voluntarioUsuarioIds = new HashMap<>();
+        for (Object v : voluntarios) {
+            if (v instanceof Map) {
+                Object vId = ((Map<?, ?>) v).get("id");
+                Object uId = ((Map<?, ?>) v).get("usuarioId");
+                if (vId instanceof Number && uId instanceof Number) {
+                    voluntarioUsuarioIds.put(vId.toString(), uId.toString());
+                }
+            }
+        }
+
         model.addAttribute(ModelAttribute.Tarea_LIST.getName(), tareas);
         model.addAttribute("voluntarioNombres", voluntarioNombres);
+        model.addAttribute("voluntarioUsuarioIds", voluntarioUsuarioIds);
         if (successMessage != null) model.addAttribute("successMessage", successMessage);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Tarea_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
     @GetMapping(WebRoutes.TAREAS_NUEVA)
-    public String formulario(Model model) {
-        model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), Map.of("fecha", LocalDateTime.now().toString()));
+    public String formulario(Model model, @RequestParam(required = false) Integer voluntarioId) {
+        Map<String, Object> tarea = new HashMap<>();
+        tarea.put("fecha", LocalDateTime.now().toString());
+        if (voluntarioId != null) {
+            tarea.put("voluntarioIds", List.of(voluntarioId));
+        }
+        model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
         model.addAttribute("voluntarios", fetchList("/v1/voluntarios"));
         model.addAttribute("estados", List.of("PENDIENTE", "EN_PROGRESO", "COMPLETADA", "CANCELADA"));
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Tarea_FORM.getPath());

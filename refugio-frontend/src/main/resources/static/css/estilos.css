@@ -294,14 +294,55 @@ body {
     margin-bottom: 2rem;
 }
 
-.section-title {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-    font-weight: 700;
-    margin-bottom: 1rem;
-    padding-left: 0.5rem;
+aside.app-sidebar .sidebar-section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: var(--text-main);
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 0.25rem;
+    margin-top: 1rem;
+}
+
+aside.app-sidebar .sidebar-section-title .title-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+aside.app-sidebar .sidebar-section-title:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+    transform: translateX(4px);
+}
+
+aside.app-sidebar .sidebar-section-title i:not(.chevron-icon) {
+    width: 20px;
+    height: 20px;
+}
+
+aside.app-sidebar .sidebar-section-title .chevron-icon {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s ease;
+    opacity: 0.5;
+}
+
+.sidebar-item-group.open > .sidebar-section-title {
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.sidebar-item-group.open > .sidebar-section-title .chevron-icon {
+    transform: rotate(180deg);
+    opacity: 1;
 }
 
 .user-profile-large {
@@ -361,6 +402,65 @@ body {
 .sidebar-item.active {
     background: var(--primary);
     color: white;
+}
+
+/* Estilos para Submenús */
+.sidebar-submenu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-left: 1rem;
+    padding-left: 0.75rem;
+    border-left: 1px solid var(--border);
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+    
+    /* Lógica para desplegables */
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.sidebar-submenu.open {
+    max-height: 800px;
+    opacity: 1;
+    pointer-events: auto;
+    margin-bottom: 1rem;
+}
+
+.submenu-item {
+    font-size: 0.9rem !important;
+    padding: 0.6rem 0.75rem !important;
+    font-weight: 500 !important;
+    border-radius: 10px !important;
+}
+
+.submenu-item i {
+    width: 18px !important;
+    height: 18px !important;
+    opacity: 0.7;
+}
+
+.chevron-icon {
+    margin-left: auto;
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s ease;
+    color: var(--text-muted);
+}
+
+.sidebar-item.active .chevron-icon {
+    color: white;
+}
+
+.sidebar-item-group.open .chevron-icon {
+    transform: rotate(180deg);
+}
+
+.submenu-toggle {
+    cursor: pointer;
 }
 
 .lang-selector-grid {

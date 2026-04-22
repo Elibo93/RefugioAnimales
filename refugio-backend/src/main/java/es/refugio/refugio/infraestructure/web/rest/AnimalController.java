@@ -132,6 +132,13 @@ public class AnimalController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Incrementar visitas")
+    @PostMapping("/{id}/visitas")
+    public ResponseEntity<Void> incrementVisitas(@PathVariable Integer id) {
+        editAnimalService.incrementVisitas(new AnimalId(id));
+        return ResponseEntity.ok().build();
+    }
+
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Map<String, String> handleValidationErrors(MethodArgumentNotValidException ex) {

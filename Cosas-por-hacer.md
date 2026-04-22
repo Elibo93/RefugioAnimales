@@ -18,29 +18,23 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 ## 🛠️ Bloques de Trabajo
 
 ### 1) Frontend: Reorganización del Dashboard (Admin)
-- [ ] **Navegación:** Agrupar en secciones:
+- [✅] **Navegación:** Agrupar en secciones:
   - **Miembros del refugio:** Usuarios, Adoptantes, Voluntarios (con submenú para Tareas).
   - **Adopciones:** Solicitudes y Adopciones Procesadas.
   - **Gestión:** Animales e Historiales Médicos.
+
 - [ ] **Listados:**
-  - Cambiar estética de animales a formato lista simple con miniatura.
+  - ✅ Cambiar estética de animales a formato lista simple con miniatura.
   - Botón de "Asignar Tareas" en lista de voluntarios.
   - Botón de "Ver Historial Médico" en lista de animales.
-  - Hacer clickables los nombres en las listas para ir al perfil.
+  - ✅-Hacer clickables los nombres en las listas para ir al perfil. 
 
 ### 2) Frontend: Perfiles Detallados
-- [ ] **Perfil de Persona:** Página exclusiva que muestre info de adoptante y/o voluntario, animales adoptados y seguimiento.
-- [ ] **Perfil de Animal:** Página exclusiva con datos completos, historial médico, estadísticas de vistas e info del adoptante.
+- [✅] **Perfil de Persona:** Página exclusiva que muestre info de adoptante y/o voluntario, animales adoptados y seguimiento.
+- [✅] **Perfil de Animal:** Página exclusiva con datos completos, historial médico, estadísticas de vistas e info del adoptante.
 
 ### 3) Frontend: Panel del Adoptante
-<<<<<<< Updated upstream
-- [ ] **"Mis Adoptados" (Sección del Sidebar):** * **Visibilidad de la sección:** Mostrar en el sidebar única y exclusivamente a los usuarios que tengan el **rol de Adoptante** (adquirido tras enviar una solicitud de adopción).
-    * **Lógica de visualización del contenido:**
-        * **Estado Pendiente o Aprobado:** Si el usuario tiene una o varias solicitudes en curso o ya aprobadas por el administrador, se mostrará la lista con la información del animal (o animales) correspondientes.
-        * **Estado Denegado:** Si la solicitud del usuario ha sido rechazada por el administrador (y no tiene otras en curso), se mostrará la pantalla vacía con el mensaje: *"Vaya, parece que aún no te has hecho con ninguno de nuestros amiguitos"* junto con el botón **"Adopta ahora"**.
-=======
 - [ ] **"Mis Adoptados":** Lista de sus animales. Si no hay ninguno, mostrar mensaje: *"Vaya, parece que aún no te has hecho con ninguno de nuestros amiguitos"* + botón "Adopta ahora".
->>>>>>> Stashed changes
 - [ ] **Notificaciones:** Estados de solicitudes (aprobada/rechazada) y sugerencias de animales.
 - [ ] **Encuesta:** Formulario de preferencias para activar recomendaciones inteligentes.
 

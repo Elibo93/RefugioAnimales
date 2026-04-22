@@ -40,8 +40,16 @@
                         th:attr="data-id=${a.get('id')}, data-uid=${a.get('usuarioId')}, data-nombre=${u != null ? u.get('nombre') : ''}, data-apellido=${u != null ? u.get('apellido') : ''}, data-dni=${a.get('dni')}, data-dir=${a.get('direccion')}, data-fnac=${a.get('fechaNacimiento')}">
 
                         <td th:text="${a.get('id')}">1</td>
-                        <td style="font-weight: 600; color: var(--text-main);" th:text="${u != null ? u.get('nombre') : 'Usuario anónimo'}">Juan</td>
-                        <td th:text="${u != null ? u.get('apellido') : ''}">Pérez</td>
+                        <td>
+                            <a th:href="@{/web/personas/{id}(id=${a.get('usuarioId')})}" 
+                               style="font-weight:600; color:var(--primary); text-decoration: none; display: block;" 
+                               th:text="${u != null ? u.get('nombre') : 'Usuario anónimo'}">Juan</a>
+                        </td>
+                        <td>
+                            <a th:href="@{/web/personas/{id}(id=${a.get('usuarioId')})}" 
+                               style="color:var(--text-main); text-decoration: none; display: block;" 
+                               th:text="${u != null ? u.get('apellido') : ''}">Pérez</a>
+                        </td>
                         <td th:text="${a.get('dni')}">12345678Z</td>
                         <td th:text="${a.get('direccion')}">Calle Falsa 123</td>
                         <td>

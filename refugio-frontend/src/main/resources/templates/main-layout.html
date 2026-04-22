@@ -7,7 +7,7 @@
 
 <body class="bg-dots">
     <div th:replace="~{fragments/sidebar :: sidebar(${currentUri})}"></div>
-    <header th:replace="~{fragments/header :: header(${currentUri}, ${showBack})}"></header>
+    <header th:replace="~{fragments/header :: header(${currentUri}, ${currentUri != '/web/home' and currentUri != '/web/home/' and currentUri != '/'})}"></header>
 
     <div th:replace="~{fragments/toast :: toast}"></div>
 
