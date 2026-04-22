@@ -85,7 +85,7 @@ public class AnimalEntity {
     @Column(name = "visitas")
     private Integer visitas = 0;
 
-    @Column(name = "fecha_ingreso", nullable = false)
+    @Column(name = "fecha_ingreso", nullable = false, columnDefinition = "DATETIME")
     private LocalDateTime fechaIngreso;
 
     @OneToOne(mappedBy = "animal", cascade = CascadeType.ALL, orphanRemoval = true)
