@@ -69,6 +69,7 @@ public class GlobalModelAttributesAdvice {
                 String rol = String.valueOf(me.get("rol"));
                 model.addAttribute("isAdmin",      rol.contains("ADMIN"));
                 model.addAttribute("isVoluntario", rol.contains("VOLUNTARIO") || rol.contains("ADMIN"));
+                model.addAttribute("isAdoptante",  rol.contains("ADOPTANTE"));
             } else {
                 setAnonymous(model);
             }
@@ -88,5 +89,6 @@ public class GlobalModelAttributesAdvice {
         model.addAttribute("isAuthenticated", false);
         model.addAttribute("isAdmin",         false);
         model.addAttribute("isVoluntario",    false);
+        model.addAttribute("isAdoptante",     false);
     }
 }

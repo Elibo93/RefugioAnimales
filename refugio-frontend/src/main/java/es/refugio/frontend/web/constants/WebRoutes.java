@@ -11,6 +11,7 @@ public interface WebRoutes {
     // PERSONAS
     String PERSONAS_BASE     = "/web/personas";
     String PERSONAS_NUEVO    = "/web/personas/nuevo";
+    String PERSONAS_DETALLE  = "/web/personas/{id}";
     String PERSONAS_EDITAR   = "/web/personas/{id}/editar";
     String PERSONAS_PDF      = "/web/personas/pdf";
     String PERSONAS_ELIMINAR = "/web/personas/{id}/borrar";
@@ -31,6 +32,7 @@ public interface WebRoutes {
     String VOLUNTARIOS_BASE     = "/web/voluntarios";
     String VOLUNTARIOS_MODAL_EDITAR = "/web/voluntarios/modal-editar/{id}";
     String VOLUNTARIOS_NUEVO    = "/web/voluntarios/nuevo";
+    String VOLUNTARIOS_DETALLE  = "/web/voluntarios/{id}";
     String VOLUNTARIOS_EDITAR   = "/web/voluntarios/{id}/editar";
     String VOLUNTARIOS_PDF      = "/web/voluntarios/pdf";
     String VOLUNTARIOS_ELIMINAR = "/web/voluntarios/{id}/borrar";
@@ -38,6 +40,7 @@ public interface WebRoutes {
     // ANIMALES
     String ANIMALES_BASE     = "/web/animales";
     String ANIMALES_NUEVO    = "/web/animales/nuevo";
+    String ANIMALES_DETALLE  = "/web/animales/{id}";
     String ANIMALES_EDITAR   = "/web/animales/{id}/editar";
     String ANIMALES_PDF      = "/web/animales/pdf";
     String ANIMALES_ELIMINAR = "/web/animales/{id}/borrar";

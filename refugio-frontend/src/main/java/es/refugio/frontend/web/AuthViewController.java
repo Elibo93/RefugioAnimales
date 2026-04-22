@@ -13,7 +13,6 @@ public class AuthViewController {
     @GetMapping("/login")
     public String loginPage(Model model) {
         model.addAttribute("currentUri", "/login");
-        model.addAttribute("showBack", false);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), "fragments/content/login");
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -24,7 +23,6 @@ public class AuthViewController {
         // de forma nativa con HTML5 en el frontend o redirigiendo errores mapeados si es necesario.
         // Por simplicidad, exclusivamente retornamos la vista del formulario.
         model.addAttribute("currentUri", "/registro");
-        model.addAttribute("showBack", true);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), "fragments/content/registro");
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }

@@ -33,10 +33,19 @@ public class SessionCookieRelayInterceptor implements ClientHttpRequestIntercept
             HttpServletRequest currentRequest = attrs.getRequest();
 
             // Reenviar todas las cookies del navegador al backend
-            String cookie = currentRequest.getHeader("Cookie");
-            if (cookie != null && !cookie.isBlank()) {
-                logger.info("Relaying cookie to backend for " + request.getURI() + ": " + maskCookie(cookie));
-                request.getHeaders().add("Cookie", cookie);
+            String cookieHeader = currentRequest.getHeader("Cookie");
+            if (cookieHeader != null && !cookieHeader.isBlank()) {
+                request.getHeaders().add("Cookie", cookieHeader);
+                
+                // Si existe JWT_TOKEN, enviarlo también como Authorization Bearer para mayor compatibilidad
+                if (currentRequest.getCookies() != null) {
+                    for (jakarta.servlet.http.Cookie c : currentRequest.getCookies()) {
+                        if ("JWT_TOKEN".equals(c.getName())) {
+                            request.getHeaders().setBearerAuth(c.getValue());
+                            logger.info("Relaying JWT as Bearer token to backend");
+                        }
+                    }
+                }
             } else {
                 logger.warn("No cookie header found in current request attributes to relay to " + request.getURI());
             }

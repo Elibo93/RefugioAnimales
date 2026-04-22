@@ -36,10 +36,18 @@
                 <tbody>
                     <tr th:each="s : ${solicitudes}" th:id="'row-' + ${s.get('id')}">
                         <td th:text="${s.get('id')}">1</td>
-                        <td th:with="a=${s.get('animalId') != null and animalesMap != null ? animalesMap['' + s.get('animalId')] : null}"
-                            th:text="${a != null ? a.get('nombre') : 'Desconocido'}">Animal</td>
-                        <td th:with="n=${s.get('adoptanteId') != null and adoptanteNombres != null ? adoptanteNombres['' + s.get('adoptanteId')] : null}"
-                            th:text="${n != null ? n : 'Anónimo'}">Adoptante</td>
+                        <td>
+                            <a th:href="@{/web/animales/{id}(id=${s.get('animalId')})}" 
+                               style="font-weight:600; color:var(--secondary); text-decoration: none;"
+                               th:with="a=${s.get('animalId') != null and animalesMap != null ? animalesMap['' + s.get('animalId')] : null}"
+                               th:text="${a != null ? a.get('nombre') : 'Desconocido'}">Animal</a>
+                        </td>
+                        <td>
+                            <a th:href="@{/web/personas/{id}(id=${adoptanteUsuarioIds != null ? adoptanteUsuarioIds['' + s.get('adoptanteId')] : '0'})}" 
+                               style="font-weight:600; color:var(--primary); text-decoration: none;"
+                               th:with="n=${s.get('adoptanteId') != null and adoptanteNombres != null ? adoptanteNombres['' + s.get('adoptanteId')] : null}"
+                               th:text="${n != null ? n : 'Anónimo'}">Adoptante</a>
+                        </td>
                         <td>
                             <span class="badge-soon"
                                 th:classappend="${s.get('estado') != null ? (s.get('estado').toString() == 'APROBADA' ? 'success' : (s.get('estado').toString() == 'RECHAZADA' ? 'danger' : 'warning')) : 'warning'}"

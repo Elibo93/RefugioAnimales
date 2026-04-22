@@ -40,20 +40,35 @@
                         th:with="u=${usuariosMap != null ? usuariosMap['' + p.get('usuarioId')] : null}">
 
                         <td th:text="${p.get('id')}">1</td>
-                        <td style="font-weight: 600; color: var(--text-main);"
-                            th:text="${u != null ? u.get('nombre') : ''}">Juan</td>
-                        <td th:text="${u != null ? u.get('apellido') : ''}">Pérez</td>
+                        <td>
+                            <a th:href="@{/web/voluntarios/{id}(id=${p.get('id')})}" 
+                               style="font-weight:600; color:var(--primary); text-decoration: none; display: block;" 
+                               th:text="${u != null ? u.get('nombre') : ''}">Juan</a>
+                        </td>
+                        <td>
+                            <a th:href="@{/web/voluntarios/{id}(id=${p.get('id')})}" 
+                               style="color:var(--text-main); text-decoration: none; display: block;" 
+                               th:text="${u != null ? u.get('apellido') : ''}">Pérez</a>
+                        </td>
                         <td><span class="badge-soon" style="background:#F3E8FF; color:#9333EA;"
                                 th:text="${p.get('disponibilidad')}">Tarde</span></td>
                         <td th:text="${u != null ? u.get('email') : ''}">juan@mail.com</td>
                         <td th:text="${u != null ? u.get('telefono') : ''}">600...</td>
                         <td style="display:flex; gap:8px;">
+<<<<<<< HEAD
                             <button class="btn-icon" 
                                     th:hx-get="@{/web/voluntarios/modal-editar/{id}(id=${p.get('id')})}"
                                     hx-target="#modal-host" 
                                     hx-swap="innerHTML">
                                 <i data-lucide="edit-2" style="width:16px;"></i>
                             </button>
+=======
+                            <a class="btn-icon" th:href="@{/web/tareas/nueva(voluntarioId=${p.get('id')})}" title="Asignar Tarea">
+                                <i data-lucide="clipboard-list" style="width:16px; color:var(--secondary);"></i>
+                            </a>
+                            <button class="btn-icon trigger-modal" title="Editar"><i data-lucide="edit-2"
+                                    style="width:16px;"></i></button>
+>>>>>>> f94d0836d93be56b795b0ee0cf3d4d36125820bb
                             <button class="btn-icon delete"
                                 th:hx-post="@{/web/voluntarios/{id}/borrar(id=${p.get('id')})}"
                                 th:hx-target="'#row-' + ${p.get('id')}" hx-swap="outerHTML swap:0.3s"

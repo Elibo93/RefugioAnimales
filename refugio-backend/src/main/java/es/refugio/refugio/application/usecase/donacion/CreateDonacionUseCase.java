@@ -17,10 +17,11 @@ public class CreateDonacionUseCase {
     public Donacion create(CreateDonacionCommand command) {
         TipoDonacion tipoEnum = TipoDonacion.valueOf(command.tipo().toUpperCase());
         FrecuenciaDonacion frecuenciaEnum = FrecuenciaDonacion.valueOf(command.frecuencia().toUpperCase());
-        
+
         Integer targetUserId = command.usuarioId();
-        
-        // Si no hay usuarioId (donación anónima), buscar el usuario 'anonimo@refugio.es'
+
+        // Si no hay usuarioId (donación anónima), buscar el usuario
+        // 'anonimo@refugio.es'
         if (targetUserId == null) {
             // TODO: Fetch anonymous user from refugio-auth Feign
             targetUserId = 2; // Mock anonymous user ID
@@ -34,9 +35,7 @@ public class CreateDonacionUseCase {
                 .fecha(command.fecha())
                 .descripcion(command.descripcion())
                 .build();
-                
+
         return donacionRepository.save(donacion);
     }
 }
-
-

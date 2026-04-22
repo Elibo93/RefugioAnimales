@@ -20,6 +20,9 @@ import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
 
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.util.Base64;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -50,15 +53,22 @@ public class AnimalViewController {
         try {
             // Construir URL con parámetros de filtro
             StringBuilder url = new StringBuilder(apiUrl + "/v1/animales?");
-            if (especie  != null) url.append("especie=").append(especie).append("&");
-            if (tamano   != null) url.append("tamano=").append(tamano).append("&");
-            if (sexo     != null) url.append("sexo=").append(sexo).append("&");
-            if (urgencia != null) url.append("urgencia=").append(urgencia).append("&");
-            if (estado   != null) url.append("estado=").append(estado).append("&");
-            if (edad     != null) edad.forEach(e -> url.append("edad=").append(e).append("&"));
+            if (especie != null)
+                url.append("especie=").append(especie).append("&");
+            if (tamano != null)
+                url.append("tamano=").append(tamano).append("&");
+            if (sexo != null)
+                url.append("sexo=").append(sexo).append("&");
+            if (urgencia != null)
+                url.append("urgencia=").append(urgencia).append("&");
+            if (estado != null)
+                url.append("estado=").append(estado).append("&");
+            if (edad != null)
+                edad.forEach(e -> url.append("edad=").append(e).append("&"));
 
             Object[] animales = restTemplate.getForObject(url.toString(), Object[].class);
-            model.addAttribute(ModelAttribute.Animal_LIST.getName(), animales != null ? Arrays.asList(animales) : List.of());
+            model.addAttribute(ModelAttribute.Animal_LIST.getName(),
+                    animales != null ? Arrays.asList(animales) : List.of());
         } catch (Exception e) {
             model.addAttribute(ModelAttribute.Animal_LIST.getName(), List.of());
         }
@@ -71,22 +81,25 @@ public class AnimalViewController {
             model.addAttribute("especiesActivas", List.of());
         }
 
-        // Voluntarios solo son necesarios para el panel de admin — fallo aquí no afecta la lista de animales
+        // Voluntarios solo son necesarios para el panel de admin — fallo aquí no afecta
+        // la lista de animales
         try {
             Object[] voluntarios = restTemplate.getForObject(apiUrl + "/v1/voluntarios", Object[].class);
-            model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), voluntarios != null ? Arrays.asList(voluntarios) : List.of());
+            model.addAttribute(ModelAttribute.Voluntario_LIST.getName(),
+                    voluntarios != null ? Arrays.asList(voluntarios) : List.of());
         } catch (Exception e) {
             model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), List.of());
         }
 
-        model.addAttribute("selectedEstado",   estado);
-        model.addAttribute("selectedEspecie",  especie);
-        model.addAttribute("selectedTamano",   tamano);
-        model.addAttribute("selectedEdad",     edad);
-        model.addAttribute("selectedSexo",     sexo);
+        model.addAttribute("selectedEstado", estado);
+        model.addAttribute("selectedEspecie", especie);
+        model.addAttribute("selectedTamano", tamano);
+        model.addAttribute("selectedEdad", edad);
+        model.addAttribute("selectedSexo", sexo);
         model.addAttribute("selectedUrgencia", urgencia);
 
-        if (successMessage != null) model.addAttribute("successMessage", successMessage);
+        if (successMessage != null)
+            model.addAttribute("successMessage", successMessage);
 
         if ("true".equals(request.getHeader("HX-Request"))) {
             return FragmentoContenido.Animal_LIST.getPath();
@@ -98,14 +111,23 @@ public class AnimalViewController {
 
     @GetMapping(WebRoutes.ANIMALES_NUEVO)
     @PreAuthorize("hasRole('ADMIN')")
-    public String formulario(Model model) {
-        // Enums disponibles en el backend — se listan hardcoded ya que son valores fijos
+    public String formulario(Model model, HttpServletRequest request) {
+        System.out.println(
+                "DEBUG: Accediendo a formulario de nuevo animal. HX-Request: " + request.getHeader("HX-Request"));
+        // Enums disponibles en el backend — se listan hardcoded ya que son valores
+        // fijos
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), new HashMap<>());
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), fetchList("/v1/voluntarios"));
         model.addAttribute("tamanos", List.of("PEQUEÑO", "MEDIANO", "GRANDE", "GIGANTE"));
-        model.addAttribute("sexos",   List.of("MACHO", "HEMBRA"));
-        model.addAttribute("estados", List.of("DISPONIBLE", "ADOPTADO", "EN_ACOGIDA", "EN_TRATAMIENTO", "RESERVADO", "FALLECIDO"));
+        model.addAttribute("sexos", List.of("MACHO", "HEMBRA"));
+        model.addAttribute("estados",
+                List.of("DISPONIBLE", "ADOPTADO", "EN_ACOGIDA", "EN_TRATAMIENTO", "RESERVADO", "FALLECIDO"));
         model.addAttribute("especies", List.of("PERRO", "GATO", "CONEJO", "AVE", "REPTIL", "OTRO"));
+
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Animal_FORM.getPath() + " :: content";
+        }
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Animal_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -126,39 +148,64 @@ public class AnimalViewController {
             @RequestParam(required = false) Double peso,
             @RequestParam(required = false) Integer nivelEnergia,
             @RequestParam(required = false) Boolean urgencia,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest request) {
+
+        System.out.println("DEBUG: Iniciando crearAnimal para " + nombre);
+        if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie c : request.getCookies()) {
+                if ("JWT_TOKEN".equals(c.getName())) {
+                    System.out.println("DEBUG: Encontrado JWT_TOKEN. Longitud: " + c.getValue().length());
+                }
+            }
+        }
 
         Map<String, Object> body = new HashMap<>();
-        body.put("nombre",               nombre);
-        body.put("especie",              especie);
+        body.put("nombre", nombre);
+        body.put("especie", especie);
         body.put("especiePersonalizada", especiePersonalizada != null ? especiePersonalizada : "");
-        body.put("raza",                 raza);
-        body.put("sexo",                 sexo);
-        body.put("chipId",               chipId);
-        body.put("estado",               estado);
-        body.put("edad",                 edad != null ? edad : 0);
-        body.put("tamano",               tamano != null ? tamano : "");
-        body.put("descripcion",          descripcion != null ? descripcion : "");
-        body.put("foto",                 foto != null ? foto : "");
-        body.put("peso",                 peso != null ? peso : 0.0);
-        body.put("nivelEnergia",         nivelEnergia != null ? nivelEnergia : 0);
-        body.put("urgencia",             urgencia != null && urgencia);
+        body.put("raza", raza);
+        body.put("sexo", sexo);
+        body.put("chipId", chipId);
+        body.put("estado", estado);
+        body.put("edad", edad != null ? edad : 0);
+        body.put("tamano", tamano != null ? tamano : "");
+        body.put("descripcion", descripcion != null ? descripcion : "");
+        body.put("foto", foto != null ? foto : "");
+        body.put("peso", peso != null ? peso : 0.0);
+        body.put("nivelEnergia", nivelEnergia != null ? nivelEnergia : 0);
+        body.put("urgencia", urgencia != null && urgencia);
 
-        restTemplate.postForObject(apiUrl + "/v1/animales", body, Object.class);
-        redirectAttributes.addFlashAttribute("successMessage", "Animal creado correctamente");
+        try {
+            restTemplate.postForObject(apiUrl + "/v1/animales", body, Object.class);
+            redirectAttributes.addFlashAttribute("successMessage", "Animal creado correctamente");
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            System.err.println(
+                    "ERROR: Error llamando al backend: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+            throw e;
+        }
+
         return "redirect:" + WebRoutes.ANIMALES_BASE;
     }
 
     @GetMapping(WebRoutes.ANIMALES_EDITAR)
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
-    public String editarFormulario(@PathVariable Integer id, Model model) {
+    public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
+        System.out.println("DEBUG: Accediendo a formulario de edición para ID: " + id + ". HX-Request: "
+                + request.getHeader("HX-Request"));
         Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), fetchList("/v1/voluntarios"));
         model.addAttribute("tamanos", List.of("PEQUEÑO", "MEDIANO", "GRANDE", "GIGANTE"));
-        model.addAttribute("sexos",   List.of("MACHO", "HEMBRA"));
-        model.addAttribute("estados", List.of("DISPONIBLE", "ADOPTADO", "EN_ACOGIDA", "EN_TRATAMIENTO", "RESERVADO", "FALLECIDO"));
+        model.addAttribute("sexos", List.of("MACHO", "HEMBRA"));
+        model.addAttribute("estados",
+                List.of("DISPONIBLE", "ADOPTADO", "EN_ACOGIDA", "EN_TRATAMIENTO", "RESERVADO", "FALLECIDO"));
         model.addAttribute("especies", List.of("PERRO", "GATO", "CONEJO", "AVE", "REPTIL", "OTRO"));
+
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Animal_FORM.getPath() + " :: content";
+        }
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Animal_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -181,18 +228,18 @@ public class AnimalViewController {
             RedirectAttributes redirectAttributes) {
 
         Map<String, Object> body = new HashMap<>();
-        body.put("nombre",               nombre);
-        body.put("especie",              especie);
+        body.put("nombre", nombre);
+        body.put("especie", especie);
         body.put("especiePersonalizada", especiePersonalizada != null ? especiePersonalizada : "");
-        body.put("chipId",               chipId);
-        body.put("estado",               estado);
-        body.put("edad",                 edad != null ? edad : 0);
-        body.put("tamano",               tamano != null ? tamano : "");
-        body.put("descripcion",          descripcion != null ? descripcion : "");
-        body.put("foto",                 foto != null ? foto : "");
-        body.put("peso",                 peso != null ? peso : 0.0);
-        body.put("nivelEnergia",         nivelEnergia != null ? nivelEnergia : 0);
-        body.put("urgencia",             urgencia != null && urgencia);
+        body.put("chipId", chipId);
+        body.put("estado", estado);
+        body.put("edad", edad != null ? edad : 0);
+        body.put("tamano", tamano != null ? tamano : "");
+        body.put("descripcion", descripcion != null ? descripcion : "");
+        body.put("foto", foto != null ? foto : "");
+        body.put("peso", peso != null ? peso : 0.0);
+        body.put("nivelEnergia", nivelEnergia != null ? nivelEnergia : 0);
+        body.put("urgencia", urgencia != null && urgencia);
 
         restTemplate.put(apiUrl + "/v1/animales/" + id, body);
         redirectAttributes.addFlashAttribute("successMessage", "Animal editado correctamente");
@@ -232,11 +279,48 @@ public class AnimalViewController {
         // Intentar incrementar visitas (endpoint opcional — no falla si no existe)
         try {
             restTemplate.postForObject(apiUrl + "/v1/animales/" + id + "/visitas", null, Object.class);
-        } catch (Exception ignored) { /* endpoint opcional */ }
+        } catch (Exception ignored) {
+            /* endpoint opcional */ }
 
         Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
         return "fragments/content/animales-detalle-modal :: detalle";
+    }
+
+    @GetMapping(WebRoutes.ANIMALES_DETALLE)
+    public String verDetalle(@PathVariable Integer id, Model model) {
+        // Intentar incrementar visitas (endpoint opcional)
+        try {
+            restTemplate.postForObject(apiUrl + "/v1/animales/" + id + "/visitas", null, Object.class);
+        } catch (Exception ignored) {
+        }
+
+        Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + id, Object.class);
+        model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
+
+        // Fetch Historial Médico
+        model.addAttribute("historiales", fetchList("/v1/historial-medico/animal/" + id));
+
+        // Fetch Info Adopción (si está adoptado)
+        try {
+            Object[] adopciones = restTemplate.getForObject(apiUrl + "/v1/adopciones/animal/" + id, Object[].class);
+            if (adopciones != null && adopciones.length > 0) {
+                Map<String, Object> adopcion = (Map<String, Object>) adopciones[0];
+                model.addAttribute("adopcion", adopcion);
+
+                // Fetch info del adoptante
+                Object adoptanteId = adopcion.get("adoptanteId");
+                if (adoptanteId != null) {
+                    Object adoptante = restTemplate.getForObject(apiUrl + "/v1/adoptantes/" + adoptanteId,
+                            Object.class);
+                    model.addAttribute("adoptante", adoptante);
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Animal_DETALLE.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
     // ─── Helper ────────────────────────────────────────────────────────────────
