@@ -48,7 +48,6 @@ public class AdoptanteViewController {
         model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.Adoptante_LIST.getName(), adoptantes);
         model.addAttribute("usuariosMap", usuariosMap);
         model.addAttribute("currentUri", WebRoutes.ADOPTANTES_BASE);
-        model.addAttribute("showBack", false);
         model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.FRAGMENTO_CONTENIDO.getName(), es.refugio.frontend.web.enums.FragmentoContenido.Adoptante_LIST.getPath());
         return es.refugio.frontend.web.enums.ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -65,7 +64,6 @@ public class AdoptanteViewController {
     public String nuevo(Model model) {
         model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.SINGLE_Adoptante.getName(), new HashMap<>());
         model.addAttribute("currentUri", WebRoutes.ADOPTANTES_BASE);
-        model.addAttribute("showBack", true);
         model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.FRAGMENTO_CONTENIDO.getName(), es.refugio.frontend.web.enums.FragmentoContenido.Adoptante_FORM.getPath());
         return es.refugio.frontend.web.enums.ThymTemplates.MAIN_LAYOUT.getPath();
     }

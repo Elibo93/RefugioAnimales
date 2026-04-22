@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import es.refugio.refugio.application.command.animal.EditAnimalCommand;
 import es.refugio.refugio.application.usecase.animal.EditAnimalUseCase;
 import es.refugio.refugio.domain.model.animal.Animal;
+import es.refugio.refugio.domain.model.animal.AnimalId;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -14,5 +15,9 @@ public class EditAnimalService {
 
     public Animal update(EditAnimalCommand command) {
         return editAnimalUseCase.update(command);
+    }
+
+    public void incrementVisitas(AnimalId id) {
+        editAnimalUseCase.incrementarVisitas(id);
     }
 }

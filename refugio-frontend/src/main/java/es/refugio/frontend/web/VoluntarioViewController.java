@@ -57,7 +57,6 @@ public class VoluntarioViewController {
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), voluntarios);
         model.addAttribute("usuariosMap", usuariosMap);
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_BASE);
-        model.addAttribute("showBack", false);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -66,7 +65,6 @@ public class VoluntarioViewController {
     public String formulario(Model model) {
         model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), new HashMap<String, Object>());
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_NUEVO);
-        model.addAttribute("showBack", true);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -76,7 +74,6 @@ public class VoluntarioViewController {
         Object voluntario = restTemplate.getForObject(apiUrl + "/v1/voluntarios/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), voluntario);
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_EDITAR);
-        model.addAttribute("showBack", true);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -148,6 +145,18 @@ public class VoluntarioViewController {
         renderer.layout();
         renderer.createPDF(out);
         out.close();
+    }
+
+    @GetMapping(WebRoutes.VOLUNTARIOS_DETALLE)
+    public String verDetalle(@PathVariable Integer id, Model model) {
+        try {
+            Map<String, Object> voluntario = (Map<String, Object>) restTemplate.getForObject(apiUrl + "/v1/voluntarios/" + id, Map.class);
+            if (voluntario != null && voluntario.containsKey("usuarioId")) {
+                return "redirect:/web/personas/" + voluntario.get("usuarioId");
+            }
+        } catch (Exception ignored) {}
+        
+        return "redirect:" + WebRoutes.VOLUNTARIOS_BASE;
     }
 
     private List<Object> fetchList(String path) {

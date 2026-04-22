@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping(WebRoutes.SOLICITUDES_BASE)
+@RequestMapping("/web/solicitudes")
 @RequiredArgsConstructor
 public class SolicitudAdopcionViewController {
 
@@ -49,7 +49,7 @@ public class SolicitudAdopcionViewController {
     @Value("${auth.api.url}")
     private String authUrl;
 
-    @GetMapping(WebRoutes.SOLICITUDES_MODAL_NUEVA)
+    @GetMapping("/modal-nueva")
     public String modalNueva(@RequestParam Integer animalId, Model model) {
         try {
             Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
@@ -60,7 +60,7 @@ public class SolicitudAdopcionViewController {
         return "fragments/modals/modal-solicitud-directa :: modal";
     }
 
-    @GetMapping(WebRoutes.SOLICITUDES_BASE)
+    @GetMapping
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
         List<Object> solicitudes = fetchList("/v1/solicitudes-adopcion");
         List<Object> animales   = fetchList("/v1/animales");
@@ -100,17 +100,29 @@ public class SolicitudAdopcionViewController {
             }
         }
 
+        // Build adoptanteUsuarioIds: Map<adoptanteId, usuarioId>
+        Map<String, String> adoptanteUsuarioIds = new HashMap<>();
+        for (Object a : adoptantes) {
+            if (a instanceof Map) {
+                Object id = ((Map<?, ?>) a).get("id");
+                Object uid = ((Map<?, ?>) a).get("usuarioId");
+                if (id instanceof Number && uid instanceof Number) {
+                    adoptanteUsuarioIds.put(id.toString(), uid.toString());
+                }
+            }
+        }
+
         model.addAttribute(ModelAttribute.Solicitud_LIST.getName(), solicitudes);
         model.addAttribute("animalesMap", animalesMap);
         model.addAttribute("adoptanteNombres", adoptanteNombres);
+        model.addAttribute("adoptanteUsuarioIds", adoptanteUsuarioIds);
         if (successMessage != null) model.addAttribute("successMessage", successMessage);
         model.addAttribute("currentUri", WebRoutes.SOLICITUDES_BASE);
-        model.addAttribute("showBack", false);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @GetMapping(WebRoutes.SOLICITUDES_NUEVA)
+    @GetMapping("/nueva")
     public String formulario(Model model, @RequestParam(required = false) Integer animalId) {
         Map<String, Object> solicitud = new HashMap<>();
         solicitud.put("fecha", LocalDateTime.now().toString());
@@ -121,12 +133,11 @@ public class SolicitudAdopcionViewController {
         model.addAttribute("adoptantes", fetchList("/v1/adoptantes"));
         model.addAttribute("estados",    List.of("PENDIENTE", "APROBADA", "RECHAZADA", "EN_REVISION"));
         model.addAttribute("currentUri", WebRoutes.SOLICITUDES_NUEVA);
-        model.addAttribute("showBack", true);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @PostMapping(WebRoutes.SOLICITUDES_NUEVA)
+    @PostMapping("/nueva")
     public String crear(@RequestParam Integer animalId,
             @RequestParam Integer adoptanteId,
             @RequestParam String comentario,
@@ -149,7 +160,7 @@ public class SolicitudAdopcionViewController {
         return "redirect:" + WebRoutes.SOLICITUDES_BASE;
     }
 
-    @GetMapping(WebRoutes.SOLICITUDES_EDITAR)
+    @GetMapping("/{id}/editar")
     public String editarFormulario(@PathVariable Integer id, Model model) {
         Object solicitud = restTemplate.getForObject(apiUrl + "/v1/solicitudes-adopcion/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Solicitud.getName(), solicitud);
@@ -160,7 +171,7 @@ public class SolicitudAdopcionViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @PostMapping(WebRoutes.SOLICITUDES_EDITAR)
+    @PostMapping("/{id}/editar")
     public String procesarEdicion(@PathVariable Integer id,
             @RequestParam Integer animalId,
             @RequestParam Integer adoptanteId,
@@ -178,7 +189,7 @@ public class SolicitudAdopcionViewController {
         return "redirect:" + WebRoutes.SOLICITUDES_BASE;
     }
 
-    @PostMapping(WebRoutes.SOLICITUDES_ELIMINAR)
+    @PostMapping("/{id}/borrar")
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         restTemplate.delete(apiUrl + "/v1/solicitudes-adopcion/" + id);
@@ -215,7 +226,7 @@ public class SolicitudAdopcionViewController {
         return "redirect:" + WebRoutes.SOLICITUDES_BASE;
     }
 
-    @GetMapping(WebRoutes.SOLICITUDES_PDF)
+    @GetMapping("/pdf")
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<Object> solicitudes = fetchList("/v1/solicitudes-adopcion");
         Context context = new Context();
@@ -231,7 +242,7 @@ public class SolicitudAdopcionViewController {
         out.close();
     }
 
-    @GetMapping(WebRoutes.SOLICITUDES_PUBLICO_REGISTRO)
+    @GetMapping("/publico/registro-y-adopcion")
     public String formularioPublico(Model model, @RequestParam Integer animalId) {
         try {
             Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
@@ -243,7 +254,7 @@ public class SolicitudAdopcionViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @GetMapping(WebRoutes.SOLICITUDES_OPCIONES)
+    @GetMapping("/publico/opciones")
     public String formularioOpciones(Model model, @RequestParam Integer animalId) {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
@@ -265,7 +276,7 @@ public class SolicitudAdopcionViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @GetMapping(WebRoutes.SOLICITUDES_CONVERTIR)
+    @GetMapping("/publico/convertir")
     public String formularioConversion(Model model, @RequestParam Integer animalId) {
         try {
             Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
@@ -277,7 +288,7 @@ public class SolicitudAdopcionViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @GetMapping(WebRoutes.SOLICITUDES_DIRECTA_FORM)
+    @GetMapping("/publico/directa/formulario")
     public String formularioDirecta(Model model, @RequestParam Integer animalId) {
         try {
             Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
@@ -289,7 +300,7 @@ public class SolicitudAdopcionViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @PostMapping(WebRoutes.SOLICITUDES_CONVERTIR)
+    @PostMapping("/publico/convertir")
     public String procesarConversionYAdopcion(
             @RequestParam String dni,
             @RequestParam String direccion,
@@ -334,7 +345,7 @@ public class SolicitudAdopcionViewController {
         return "redirect:" + WebRoutes.HOME;
     }
 
-    @PostMapping(WebRoutes.SOLICITUDES_DIRECTA)
+    @PostMapping("/publico/directa")
     public String procesarAdopcionDirecta(
             @RequestParam Integer animalId,
             @RequestParam(required = false) String comentario,
@@ -350,7 +361,7 @@ public class SolicitudAdopcionViewController {
         return "redirect:" + WebRoutes.HOME;
     }
 
-    @PostMapping(WebRoutes.SOLICITUDES_PUBLICO_REGISTRO)
+    @PostMapping("/publico/registro-y-adopcion")
     public String procesarRegistroYAdopcion(
             @RequestParam String nombre,
             @RequestParam String apellido,

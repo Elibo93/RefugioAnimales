@@ -233,6 +233,39 @@ public class AnimalViewController {
         return "fragments/content/animales-detalle-modal :: detalle";
     }
 
+    @GetMapping(WebRoutes.ANIMALES_DETALLE)
+    public String verDetalle(@PathVariable Integer id, Model model) {
+        // Intentar incrementar visitas (endpoint opcional)
+        try {
+            restTemplate.postForObject(apiUrl + "/v1/animales/" + id + "/visitas", null, Object.class);
+        } catch (Exception ignored) {}
+
+        Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + id, Object.class);
+        model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
+
+        // Fetch Historial Médico
+        model.addAttribute("historiales", fetchList("/v1/historial-medico/animal/" + id));
+
+        // Fetch Info Adopción (si está adoptado)
+        try {
+            Object[] adopciones = restTemplate.getForObject(apiUrl + "/v1/adopciones/animal/" + id, Object[].class);
+            if (adopciones != null && adopciones.length > 0) {
+                Map<String, Object> adopcion = (Map<String, Object>) adopciones[0];
+                model.addAttribute("adopcion", adopcion);
+                
+                // Fetch info del adoptante
+                Object adoptanteId = adopcion.get("adoptanteId");
+                if (adoptanteId != null) {
+                    Object adoptante = restTemplate.getForObject(apiUrl + "/v1/adoptantes/" + adoptanteId, Object.class);
+                    model.addAttribute("adoptante", adoptante);
+                }
+            }
+        } catch (Exception ignored) {}
+
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Animal_DETALLE.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
     // ─── Helper ────────────────────────────────────────────────────────────────
     private List<Object> fetchList(String path) {
         try {
