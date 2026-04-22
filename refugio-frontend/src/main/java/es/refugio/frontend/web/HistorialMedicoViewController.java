@@ -37,6 +37,7 @@ public class HistorialMedicoViewController {
 
     @GetMapping(WebRoutes.HISTORIALES_BASE)
     public String listar(Model model, 
+<<<<<<< HEAD
             @RequestParam(required = false) Integer animalId,
             @RequestParam(required = false) String successMessage) {
         
@@ -47,6 +48,18 @@ public class HistorialMedicoViewController {
             historiales = fetchList("/v1/historial-medico");
         }
         List<Object> animales = fetchList("/v1/animales");
+=======
+            @RequestParam(required = false) String successMessage,
+            @RequestParam(required = false) Integer animalId) {
+        List<Object> historiales = fetchList("/v1/historial-medico");
+        List<Object> animales   = fetchList("/v1/animales");
+>>>>>>> f94d0836d93be56b795b0ee0cf3d4d36125820bb
+
+        if (animalId != null) {
+            historiales = historiales.stream()
+                .filter(h -> h instanceof Map && Objects.equals(((Map<?,?>)h).get("animalId"), animalId))
+                .toList();
+        }
 
         Map<Integer, Object> animalesMap = new HashMap<>();
         for (Object a : animales) {
@@ -58,6 +71,7 @@ public class HistorialMedicoViewController {
 
         model.addAttribute(ModelAttribute.Historial_LIST.getName(), historiales);
         model.addAttribute("animalesMap", animalesMap);
+        model.addAttribute("selectedAnimalId", animalId);
         if (successMessage != null) model.addAttribute("successMessage", successMessage);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Historial_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -141,6 +155,26 @@ public class HistorialMedicoViewController {
         renderer.layout();
         renderer.createPDF(out);
         out.close();
+    }
+
+    @GetMapping(WebRoutes.HISTORIALES_BASE + "/{id}/detalle")
+    public String verDetalle(@PathVariable Integer id, Model model) {
+        Object historial = restTemplate.getForObject(apiUrl + "/v1/historial-medico/" + id, Object.class);
+        model.addAttribute("historial", historial);
+        
+        if (historial instanceof Map) {
+            Object animalId = ((Map<?, ?>) historial).get("animalId");
+            if (animalId != null) {
+                try {
+                    Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
+                    model.addAttribute("animal", animal);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        
+        return "fragments/content/historial-medico-detalle-modal :: detalle";
     }
 
     private List<Object> fetchList(String path) {

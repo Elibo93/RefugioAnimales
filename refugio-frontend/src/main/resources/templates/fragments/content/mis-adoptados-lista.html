@@ -1,0 +1,44 @@
+<div th:fragment="content">
+    <div class="actions-bar" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1 class="page-title" style="margin: 0; font-weight: 800;">Mis Adoptados</h1>
+            <p style="color: var(--text-muted); margin: 0.5rem 0 0 0;">Seguimiento de tus solicitudes de adopción</p>
+        </div>
+        <a th:href="@{/web/animales}" class="btn btn-secondary">
+            <i data-lucide="plus"></i>
+            <span>Nueva Adopción</span>
+        </a>
+    </div>
+
+    <div class="solicitudes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+        <th:block th:each="s : ${solicitudes}">
+            <div class="glass-card solicitud-card-user" style="padding: 1.5rem; display: flex; gap: 1.5rem; align-items: center;">
+                <div class="animal-thumb" style="flex-shrink: 0;">
+                    <img th:src="${animalesMap.get(s.get('animalId').toString()) != null ? animalesMap.get(s.get('animalId').toString()).get('foto') : '/images/placeholder-animal.png'}"
+                         style="width: 100px; height: 100px; object-fit: cover; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                </div>
+                <div class="solicitud-info" style="flex: 1;">
+                    <h3 style="margin: 0; font-weight: 800; color: var(--text-main);" 
+                        th:text="${animalesMap.get(s.get('animalId').toString()) != null ? animalesMap.get(s.get('animalId').toString()).get('nombre') : 'Animal'}">
+                        Nombre Animal
+                    </h3>
+                    <p style="margin: 0.2rem 0 0.8rem 0; font-size: 0.85rem; color: var(--text-muted);">
+                        Solicitado el <span th:text="${#strings.substring(s.get('fecha'), 0, 10)}">2024-01-01</span>
+                    </p>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="status-badge" th:classappend="${'badge-' + s.get('status').toString().toLowerCase()}" th:text="${s.get('status')}">
+                            PENDIENTE
+                        </span>
+                        <a th:href="@{/web/animales/{id}(id=${s.get('animalId')})}" class="btn-text" style="color: var(--primary); font-weight: 700; text-decoration: none; font-size: 0.9rem;">
+                            Ver perfil <i data-lucide="external-link" style="width: 14px; vertical-align: middle;"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+    </div>
+
+    <script>
+        if (window.lucide) lucide.createIcons();
+    </script>
+</div>

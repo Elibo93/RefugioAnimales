@@ -2,8 +2,13 @@ package es.refugio.frontend.web.enums;
 
 public enum FragmentoContenido {
 
+    Animal_LIST("fragments/content/animales-lista"),
+    Animal_FORM("fragments/content/animal-formulario"),
+    Animal_DETALLE("fragments/content/animal-detalle"),
+
     Persona_LIST("fragments/content/personas-lista"),
     Persona_FORM("fragments/content/persona-formulario"),
+    Persona_DETALLE("fragments/content/persona-detalle"),
     Persona_CREATED("fragments/content/persona-creada"),
 
     Voluntario_LIST("fragments/content/voluntarios-lista"),
@@ -11,9 +16,6 @@ public enum FragmentoContenido {
 
     Adoptante_LIST("fragments/content/adoptantes-lista"),
     Adoptante_FORM("fragments/content/adoptante-formulario"),
-
-    Animal_LIST("fragments/content/animales-lista"),
-    Animal_FORM("fragments/content/animal-formulario"),
 
     Adopcion_LIST("fragments/content/adopciones-lista"),
     Adopcion_FORM("fragments/content/adopcion-formulario"),
@@ -35,7 +37,9 @@ public enum FragmentoContenido {
     Solicitud_CONVERSION("fragments/content/solicitud-conversion-form"),
     Solicitud_DIRECTA_FORM("fragments/content/solicitud-directa-form"),
 
-    HOME_VIEW("fragments/content/index");
+    HOME_VIEW("fragments/content/index"),
+    MIS_ADOPTADOS_VACIO("fragments/content/mis-adoptados-vacio"),
+    MIS_ADOPTADOS_LISTA("fragments/content/mis-adoptados-lista");
 
     private final String path;
 

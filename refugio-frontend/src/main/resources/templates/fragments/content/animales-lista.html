@@ -8,82 +8,104 @@
 <body>
 
     <div th:fragment="content">
-        <div class="actions-bar" style="margin-bottom: 2rem;">
-            <span class="user-name page" th:text="#{workshop.list.title}">listado de animales</span>
-        </div>
-        <div class="animal-catalog-layout">
-            <!-- Sidebar Filters -->
-            <aside class="filter-sidebar glass-card">
-                <form method="get" action="/web/animales">
-                    <div class="filter-group">
-                        <span class="filter-label" th:text="#{animal.filter.species}">Especie</span>
-                        <select name="especie" class="form-select">
-                            <option value="" th:selected="${selectedEspecie == null or selectedEspecie == ''}"
-                                th:text="#{animal.filter.any}">Cualquiera</option>
-                            <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="${e}"
-                                th:selected="${selectedEspecie == e}"></option>
+        <div class="animal-catalog-layout" style="margin-top: 1rem;">
+            <!-- 1. SIDEBAR PARA ADMINISTRADOR (DISEÑO SIMPLE DE GESTIÓN) -->
+            <aside th:if="${isAdmin}" class="filter-sidebar glass-card" style="width: 260px; padding: 1.5rem; position: sticky; top: 2rem;">
+                <form method="get" action="/web/animales" hx-get="/web/animales" hx-target="#contenido-dinamico">
+                    <div class="filter-group" style="gap: 0.5rem;">
+                        <span class="filter-label" style="font-size: 0.7rem;"><i data-lucide="dog" style="width: 14px;"></i> Especie</span>
+                        <select name="especie" class="form-select" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+                            <option value="">Cualquiera</option>
+                            <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="${e}" th:selected="${selectedEspecie == e}"></option>
                         </select>
                     </div>
-
-                    <div class="filter-group" style="margin-top: 1rem;">
-                        <span class="filter-label" th:text="#{animal.filter.size}">Tamaño</span>
-                        <select name="tamano" class="form-select">
-                            <option value="" th:selected="${selectedTamano == null or selectedTamano == ''}"
-                                th:text="#{animal.filter.any}">Cualquiera</option>
-                            <option value="PEQUEÑO" th:selected="${selectedTamano == 'PEQUEÑO'}"
-                                th:text="#{animal.size.small}">Pequeño</option>
-                            <option value="MEDIANO" th:selected="${selectedTamano == 'MEDIANO'}"
-                                th:text="#{animal.size.medium}">Mediano</option>
-                            <option value="GRANDE" th:selected="${selectedTamano == 'GRANDE'}"
-                                th:text="#{animal.size.large}">Grande</option>
+                    <div class="filter-group" style="margin-top: 1rem; gap: 0.5rem;">
+                        <span class="filter-label" style="font-size: 0.7rem;"><i data-lucide="maximize-2" style="width: 14px;"></i> Tamaño</span>
+                        <select name="tamano" class="form-select" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+                            <option value="">Cualquiera</option>
+                            <option value="PEQUEÑO" th:selected="${selectedTamano == 'PEQUEÑO'}">Pequeño</option>
+                            <option value="MEDIANO" th:selected="${selectedTamano == 'MEDIANO'}">Mediano</option>
+                            <option value="GRANDE" th:selected="${selectedTamano == 'GRANDE'}">Grande</option>
                         </select>
                     </div>
+                    <div class="filter-group" style="margin-top: 1.5rem;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.5rem; font-size: 0.9rem;">Filtrar</button>
+                        <a th:href="@{/web/animales}" class="btn btn-secondary" style="width:100%; justify-content:center; margin-top: 0.5rem; padding: 0.5rem; font-size: 0.9rem;">Limpiar</a>
+                    </div>
+                </form>
+            </aside>
 
-                    <div class="filter-group" style="margin-top: 1rem;">
-                        <span class="filter-label" th:text="#{animal.filter.age}">Edad</span>
-                        <div style="display: flex; flex-direction: column; gap: 0.5rem;" id="filter-ages">
-                            <label class="checkbox-container" style="font-size: 0.9rem;">
-                                <input type="checkbox" name="edad" value="cachorro"
-                                    th:checked="${selectedEdad != null and selectedEdad.contains('cachorro')}">
-                                <span th:text="#{animal.age.puppy}">Cachorro</span>
+            <!-- 2. SIDEBAR PARA USUARIOS (DISEÑO COMPACTO) -->
+            <aside th:if="${!isAdmin}" class="filter-sidebar" style="width: 280px; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(15px); border-radius: 24px; padding: 1.8rem; border: 1px solid rgba(255, 255, 255, 0.3); height: fit-content; position: sticky; top: 2rem;">
+                <form method="get" action="/web/animales" hx-get="/web/animales" hx-target="#contenido-dinamico" hx-push-url="true">
+                    <!-- ESPECIE -->
+                    <div class="filter-group" style="margin-bottom: 1.2rem;">
+                        <label style="display: block; font-weight: 800; font-size: 0.75rem; color: #4b5563; text-transform: uppercase; margin-bottom: 0.6rem; letter-spacing: 0.025em;">ESPECIE</label>
+                        <select name="especie" class="form-select" style="width: 100%; padding: 0.5rem 0.8rem; border-radius: 8px; border: 1px solid #d1d5db; background-color: #f9fafb; font-size: 0.9rem;">
+                            <option value="" th:selected="${selectedEspecie == null or selectedEspecie == ''}">Cualquiera</option>
+                            <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="${e}" th:selected="${selectedEspecie == e}"></option>
+                        </select>
+                    </div>
+                    <!-- TAMAÑO -->
+                    <div class="filter-group" style="margin-bottom: 1.2rem;">
+                        <label style="display: block; font-weight: 800; font-size: 0.75rem; color: #4b5563; text-transform: uppercase; margin-bottom: 0.6rem; letter-spacing: 0.025em;">TAMAÑO</label>
+                        <select name="tamano" class="form-select" style="width: 100%; padding: 0.5rem 0.8rem; border-radius: 8px; border: 1px solid #d1d5db; background-color: #f9fafb; font-size: 0.9rem;">
+                            <option value="" th:selected="${selectedTamano == null or selectedTamano == ''}">Cualquiera</option>
+                            <option value="PEQUEÑO" th:selected="${selectedTamano == 'PEQUEÑO'}">Pequeño</option>
+                            <option value="MEDIANO" th:selected="${selectedTamano == 'MEDIANO'}">Mediano</option>
+                            <option value="GRANDE" th:selected="${selectedTamano == 'GRANDE'}">Grande</option>
+                        </select>
+                    </div>
+                    <!-- EDAD -->
+                    <div class="filter-group" style="margin-bottom: 1.2rem;">
+                        <label style="display: block; font-weight: 800; font-size: 0.75rem; color: #4b5563; text-transform: uppercase; margin-bottom: 0.8rem; letter-spacing: 0.025em;">EDAD</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; color: #374151;">
+                                <input type="checkbox" name="edad" value="CACHORRO" th:checked="${selectedEdad != null and #lists.contains(selectedEdad, 'CACHORRO')}" style="width: 18px; height: 18px; border-radius: 4px; border: 1px solid #d1d5db;">
+                                <span>Cachorro</span>
                             </label>
-                            <label class="checkbox-container" style="font-size: 0.9rem;">
-                                <input type="checkbox" name="edad" value="joven"
-                                    th:checked="${selectedEdad != null and selectedEdad.contains('joven')}">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; color: #374151;">
+                                <input type="checkbox" name="edad" value="JOVEN" th:checked="${selectedEdad != null and #lists.contains(selectedEdad, 'JOVEN')}" style="width: 18px; height: 18px; border-radius: 4px; border: 1px solid #d1d5db;">
                                 <span>Joven</span>
                             </label>
-                            <label class="checkbox-container" style="font-size: 0.9rem;">
-                                <input type="checkbox" name="edad" value="adulto"
-                                    th:checked="${selectedEdad != null and selectedEdad.contains('adulto')}">
-                                <span th:text="#{animal.age.adult}">Adulto</span>
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; color: #374151;">
+                                <input type="checkbox" name="edad" value="ADULTO" th:checked="${selectedEdad != null and #lists.contains(selectedEdad, 'ADULTO')}" style="width: 18px; height: 18px; border-radius: 4px; border: 1px solid #d1d5db;">
+                                <span>Adulto</span>
                             </label>
-                            <label class="checkbox-container" style="font-size: 0.9rem;">
-                                <input type="checkbox" name="edad" value="senior"
-                                    th:checked="${selectedEdad != null and selectedEdad.contains('senior')}">
-                                <span th:text="#{animal.age.senior}">Senior</span>
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; color: #374151;">
+                                <input type="checkbox" name="edad" value="SENIOR" th:checked="${selectedEdad != null and #lists.contains(selectedEdad, 'SENIOR')}" style="width: 18px; height: 18px; border-radius: 4px; border: 1px solid #d1d5db;">
+                                <span>Senior</span>
                             </label>
                         </div>
                     </div>
-
-                    <div class="filter-group" style="margin-top: 1rem;">
-                        <label class="checkbox-container" style="font-weight: 500;">
-                            <input type="checkbox" name="urgencia" value="true"
-                                th:checked="${selectedUrgencia == true}">
-                            <span th:text="#{animal.filter.urgency.only}">Solo urgentes 🔥</span>
+                    <!-- URGENCIA -->
+                    <div class="filter-group" style="margin-bottom: 1.5rem;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; color: #374151; font-weight: 500;">
+                            <input type="checkbox" name="urgencia" value="true" th:checked="${selectedUrgencia}" style="width: 18px; height: 18px; border-radius: 4px; border: 1px solid #d1d5db;">
+                            <span>Solo urgentes 🔥</span>
                         </label>
                     </div>
-                    <div class="filter-group" style="margin-top: 1.5rem;">
-                        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">
-                            <i data-lucide="search" style="width:16px;"></i>
-                            <span>Filtrar</span>
-                        </button>
-                        <a th:href="@{/web/animales}" class="btn btn-secondary"
-                            style="width:100%; justify-content:center; margin-top:0.5rem;">
-                            <i data-lucide="x" style="width:16px;"></i>
+                    <!-- BOTÓN FILTRAR -->
+                    <button type="submit" class="btn" style="width: 100%; background-color: #2d9d58; color: white; padding: 0.6rem; border-radius: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s; font-size: 0.9rem;">
+                        <i data-lucide="search" style="width: 16px; height: 16px;"></i>
+                        <span>Filtrar</span>
+                    </button>
+                    <!-- BOTÓN LIMPIAR -->
+                    <div style="text-align: center; margin-top: 1.2rem;">
+                        <a th:href="@{/web/animales}" style="color: #6b7280; text-decoration: none; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: 500;">
+                            <i data-lucide="x" style="width: 12px; height: 12px;"></i>
                             <span>Limpiar</span>
                         </a>
                     </div>
+                    <!-- BOTÓN PDF -->
+                    <div style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.05);">
+                        <a th:href="@{/web/animales/pdf}" target="_blank" style="color: #6b7280; text-decoration: none; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 500;">
+                            <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+                            <span>PDF</span>
+                        </a>
+                    </div>
                 </form>
+<<<<<<< HEAD
 
                 <div class="filter-group"
                     style="margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2);">
@@ -195,162 +217,150 @@
                                 style="width: 48px; height: 48px; opacity: 0.2; margin-bottom: 1rem;"></i>
                             <p th:text="#{animal.list.empty}">No hay peludos hoy.</p>
                         </div>
+=======
+            </aside>
+
+            <!-- Main Content Area -->
+            <div class="main-content-area" style="padding: 0 0 0 3rem; flex: 1;">
+                
+                <!-- 1. VISTA PREMIUM PARA ADMINISTRADOR (TABLA CENTRADA) -->
+                
+                <!-- 1. VISTA PREMIUM PARA ADMINISTRADOR (TABLA CENTRADA) -->
+                <div th:if="${isAdmin}" class="table-wrapper" style="background: transparent; border: none; box-shadow: none;">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding: 0 1rem;">
+                        <h2 style="font-weight: 800; color: var(--text-main); margin: 0;">Gestión de Animales</h2>
+                        <a th:href="@{/web/animales/nuevo}" class="btn btn-primary" style="padding: 0.8rem 2rem; border-radius: 15px; font-weight: 700; box-shadow: 0 10px 20px rgba(45, 157, 88, 0.2);">
+                            <i data-lucide="plus-circle"></i>
+                            Nuevo Animal
+                        </a>
+>>>>>>> f94d0836d93be56b795b0ee0cf3d4d36125820bb
                     </div>
 
-                    <!-- Paginación UI -->
-                    <div id="pagination-controls" class="pagination-footer glass-panel"
-                        style="margin-top: 2rem; display: flex; justify-content: center; align-items: center; gap: 1.5rem; padding: 1.5rem; border-radius: 20px;">
-                        <button id="prevPage" class="btn-circle"
-                            style="background: white; border: 1px solid rgba(0,0,0,0.1); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                            <i data-lucide="chevron-left"></i>
-                        </button>
-                        <div class="page-info" style="font-weight: 600; color: var(--text-main); font-size: 0.95rem;">
-                            Página <span id="currentPageNum" style="color: var(--primary);">1</span> de <span
-                                id="totalPagesNum">1</span>
+                    <table style="width: 100%; border-collapse: separate; border-spacing: 0 12px; table-layout: fixed;">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%; text-align: center;">ID</th>
+                                <th style="width: 25%; text-align: center;">NOMBRE</th>
+                                <th style="width: 15%; text-align: center;">ESPECIE</th>
+                                <th style="width: 15%; text-align: center;">EDAD</th>
+                                <th style="width: 15%; text-align: center;">ESTADO</th>
+                                <th style="width: 20%; text-align: center;">ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="animal-grid-admin">
+                            <tr th:each="a : ${animales}" class="animal-row-item" th:id="'card-' + ${a.get('id')}" style="background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); height: 90px;">
+                                <td style="text-align: center; border-radius: 15px 0 0 15px;">
+                                    <img th:src="${a.get('foto') != null ? a.get('foto') : '/images/placeholder-animal.png'}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 12px;">
+                                </td>
+                                <td style="text-align: center;">
+                                    <a th:href="@{/web/animales/{id}(id=${a.get('id')})}" style="font-weight: 800; color: var(--text-main); text-decoration: none;" th:text="${a.get('nombre')}">Rocky</a>
+                                </td>
+                                <td th:text="${a.get('especie')}" style="text-align: center;">Perro</td>
+                                <td th:text="${a.get('edad') != null ? a.get('edad') + ' años' : '-'}" style="text-align: center;">2 años</td>
+                                <td style="text-align: center;">
+                                    <span class="status-badge" th:classappend="${a.get('estado') != null ? 'badge-' + a.get('estado').toString().toLowerCase() : ''}" th:text="${a.get('estado')}">Disponible</span>
+                                </td>
+                                <td style="text-align: center; border-radius: 0 15px 15px 0;">
+                                    <div style="display: flex; gap: 8px; justify-content: center;">
+                                        <a class="btn-icon" th:href="@{/web/historiales(animalId=${a.get('id')})}" title="Historial"><i data-lucide="stethoscope" style="width: 16px;"></i></a>
+                                        <a class="btn-icon" th:href="@{/web/animales/{id}/editar(id=${a.get('id')})}" title="Editar"><i data-lucide="edit-2" style="width: 16px;"></i></a>
+                                        <button class="btn-icon delete" th:attr="hx-post=@{/web/animales/{id}/borrar(id=${a.get('id')})}, hx-target='#card-' + ${a.get('id')}" hx-swap="outerHTML swap:0.3s" hx-confirm="¿Eliminar?"><i data-lucide="trash-2" style="width: 16px;"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 2. VISTA DE TARJETAS (PARA VOLUNTARIOS, ADOPTANTES Y PÚBLICO) -->
+                <div th:if="${!isAdmin}" class="animal-grid" id="animal-grid-cards">
+                    <th:block th:each="a : ${animales}">
+                        <div class="animal-card-glass glass-card animal-card-item">
+                            <div class="card-img-container" style="position: relative; aspect-ratio: 4/5; overflow: hidden;">
+                                <img th:src="${a.get('foto') != null ? a.get('foto') : '/images/placeholder-animal.png'}" style="width: 100%; height: 100%; object-fit: cover;">
+                                <span class="status-badge" th:classappend="${a.get('estado') != null ? 'badge-' + a.get('estado').toString().toLowerCase() : ''}"
+                                      style="position: absolute; top: 1rem; left: 1rem; z-index: 10;" th:text="${a.get('estado')}">Disponible</span>
+                                
+                                <!-- Hover Overlay con Botón -->
+                                <div class="card-info-overlay">
+                                    <div style="text-align: center; width: 100%;">
+                                        <button th:attr="hx-get=@{/web/animales/{id}/detalle(id=${a.get('id')})}" hx-target="#modal-host" 
+                                                class="btn btn-primary" style="width: 80%; justify-content: center; margin-bottom: 1rem; border-radius: 50px; padding: 0.8rem;">
+                                            <i data-lucide="heart"></i>
+                                            <span>Conóceme</span>
+                                        </button>
+                                        <div th:if="${isVoluntario}" style="display: flex; justify-content: center; gap: 10px;">
+                                            <a th:href="@{/web/animales/{id}/editar(id=${a.get('id')})}" class="btn-icon" title="Editar" style="background: rgba(255,255,255,0.2); color: white;">
+                                                <i data-lucide="edit-2" style="width: 18px;"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body-glass" style="padding: 1.2rem;">
+                                <h3 class="animal-name" th:text="${a.get('nombre')}" style="font-weight: 800; margin: 0; font-size: 1.1rem;">Nombre</h3>
+                                <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0.2rem 0 0 0;" th:text="${a.get('raza')}">Raza</p>
+                            </div>
                         </div>
-                        <button id="nextPage" class="btn-circle"
-                            style="background: white; border: 1px solid rgba(0,0,0,0.1); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                            <i data-lucide="chevron-right"></i>
-                        </button>
-                    </div>
+                    </th:block>
+                </div>
 
-                    <script>
-                        (function () {
-                            const itemsPerPage = 10;
-                            const storageKey = 'animalCatalog_currentPage';
+                <!-- Paginación -->
+                <div id="pagination-controls" class="pagination-footer" style="margin-top: 2rem; display: flex; justify-content: center; align-items: center; gap: 1.5rem; padding: 1rem;">
+                    <button id="prevPage" class="btn-circle"><i data-lucide="chevron-left"></i></button>
+                    <div class="page-info">Página <span id="currentPageNum">1</span> de <span id="totalPagesNum">1</span></div>
+                    <button id="nextPage" class="btn-circle"><i data-lucide="chevron-right"></i></button>
+                </div>
 
-                            function initPagination(resetToFirst = false) {
-                                const grid = document.getElementById('animal-grid');
-                                if (!grid) return;
+                <script>
+                    (function () {
+                        const itemsPerPage = 8;
+                        function initPagination() {
+                            const grid = document.getElementById('animal-grid-admin') || document.getElementById('animal-grid-cards');
+                            if (!grid) return;
+                            const items = Array.from(grid.querySelectorAll('.animal-row-item, .animal-card-item'));
+                            const totalPages = Math.ceil(items.length / itemsPerPage);
+                            let currentPage = 1;
 
-                                if (resetToFirst) sessionStorage.setItem(storageKey, 1);
+                            const prevBtn = document.getElementById('prevPage');
+                            const nextBtn = document.getElementById('nextPage');
+                            const pageNumSpan = document.getElementById('currentPageNum');
+                            const totalPagesSpan = document.getElementById('totalPagesNum');
 
-                                let currentPage = parseInt(sessionStorage.getItem(storageKey)) || 1;
-                                const items = Array.from(grid.querySelectorAll('.animal-item'));
-                                const totalPages = Math.ceil(items.length / itemsPerPage);
-
-                                if (currentPage > totalPages) currentPage = 1;
-                                if (totalPages === 0) currentPage = 0;
-
-                                const prevBtn = document.getElementById('prevPage');
-                                const nextBtn = document.getElementById('nextPage');
-                                const pageNumSpan = document.getElementById('currentPageNum');
-                                const totalPagesSpan = document.getElementById('totalPagesNum');
-                                const paginationControls = document.getElementById('pagination-controls');
-
-                                if (items.length <= itemsPerPage) {
-                                    if (paginationControls) paginationControls.style.display = 'none';
-                                    items.forEach(item => item.style.display = 'block');
-                                    return;
-                                } else {
-                                    if (paginationControls) paginationControls.style.display = 'flex';
-                                }
-
-                                if (totalPagesSpan) totalPagesSpan.textContent = totalPages;
-
-                                function showPage(page, smoothScroll = true) {
-                                    if (page < 1) return;
-                                    currentPage = page;
-                                    sessionStorage.setItem(storageKey, page);
-                                    const start = (page - 1) * itemsPerPage;
-                                    const end = start + itemsPerPage;
-
-                                    items.forEach((item, index) => {
-                                        item.style.display = (index >= start && index < end) ? 'block' : 'none';
-                                    });
-
-                                    if (pageNumSpan) pageNumSpan.textContent = page;
-                                    if (prevBtn) {
-                                        prevBtn.style.opacity = page === 1 ? '0.3' : '1';
-                                        prevBtn.style.pointerEvents = page === 1 ? 'none' : 'auto';
-                                    }
-                                    if (nextBtn) {
-                                        nextBtn.style.opacity = page === totalPages ? '0.3' : '1';
-                                        nextBtn.style.pointerEvents = page === totalPages ? 'none' : 'auto';
-                                    }
-                                    if (smoothScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
-                                    if (window.lucide) lucide.createIcons();
-                                }
-
-                                if (prevBtn) prevBtn.onclick = (e) => { e.preventDefault(); if (currentPage > 1) showPage(currentPage - 1); };
-                                if (nextBtn) nextBtn.onclick = (e) => { e.preventDefault(); if (currentPage < totalPages) showPage(currentPage + 1); };
-
-                                showPage(currentPage, false);
+                            if (totalPagesSpan) totalPagesSpan.textContent = totalPages;
+                            if (items.length <= itemsPerPage) {
+                                document.getElementById('pagination-controls').style.display = 'none';
+                                items.forEach(i => i.style.display = (grid.tagName === 'TBODY' ? 'table-row' : 'block'));
+                                return;
                             }
 
-                            // Inicialización inmediata
-                            initPagination();
-
-                            if (!window.animalPaginationInitialized) {
-                                document.body.addEventListener('htmx:afterSwap', function (evt) {
-                                    if (evt.detail.target.id === 'animal-grid' || evt.detail.target.id === 'contenido-dinamico') {
-                                        initPagination(true);
-                                    }
+                            function showPage(page) {
+                                currentPage = page;
+                                const start = (page - 1) * itemsPerPage;
+                                const end = start + itemsPerPage;
+                                items.forEach((item, index) => {
+                                    const displayStyle = (grid.tagName === 'TBODY' ? 'table-row' : 'block');
+                                    item.style.display = (index >= start && index < end) ? displayStyle : 'none';
                                 });
-                                window.animalPaginationInitialized = true;
-                            } else {
-                                initPagination(true);
+                                if (pageNumSpan) pageNumSpan.textContent = page;
+                                if (prevBtn) prevBtn.disabled = (page === 1);
+                                if (nextBtn) nextBtn.disabled = (page === totalPages);
+                                if (window.lucide) lucide.createIcons();
                             }
-                        })();
-                    </script>
 
-                </div> <!-- Cierre animal-pagination-container -->
-
-                <!-- Special Sections -->
-                <section class="special-section" th:if="${not #lists.isEmpty(animales)}"
-                    style="margin-top: 5rem; padding-top: 3rem; border-top: 1px solid rgba(0,0,0,0.05);">
-                    <h2
-                        style="font-weight: 800; margin-bottom: 2.5rem; color: var(--text-main); display: flex; align-items: center; gap: 0.75rem;">
-                        <i data-lucide="sparkles" style="color: var(--secondary);"></i>
-                        <span>No te olvides de...</span>
-                    </h2>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
-                        <!-- Card 1 -->
-                        <div class="special-card glass-card hover-lift"
-                            style="padding: 2.5rem; cursor: pointer; transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.05); position: relative; background: white;"
-                            hx-get="/web/animales?edad=senior" hx-target="#contenido-dinamico" hx-push-url="true">
-                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
-                                <div style="background: rgba(255, 140, 0, 0.1); padding: 0.85rem; border-radius: 14px;">
-                                    <i data-lucide="heart" style="color: #FF8C00;"></i>
-                                </div>
-                                <h4 style="color: #FF8C00; margin: 0; font-weight: 800; font-size: 1.15rem;">🐾 Animales
-                                    Senior</h4>
-                            </div>
-                            <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.7;">
-                                Ellos también necesitan amor y un sofá cómodo donde descansar sus últimos años.
-                            </p>
-                            <div
-                                style="margin-top: 1.5rem; display: flex; align-items: center; gap: 0.5rem; color: #FF8C00; font-weight: 700; font-size: 0.9rem;">
-                                <span>Ver abuelitos</span>
-                                <i data-lucide="arrow-right" style="width: 16px;"></i>
-                            </div>
-                        </div>
-                        <!-- Card 2 -->
-                        <div class="special-card glass-card hover-lift"
-                            style="padding: 2.5rem; cursor: pointer; transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.05); position: relative; background: white;"
-                            hx-get="/web/animales?urgencia=true" hx-target="#contenido-dinamico" hx-push-url="true">
-                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
-                                <div style="background: rgba(79, 70, 229, 0.1); padding: 0.85rem; border-radius: 14px;">
-                                    <i data-lucide="zap" style="color: #4F46E5;"></i>
-                                </div>
-                                <h4 style="color: #4F46E5; margin: 0; font-weight: 800; font-size: 1.15rem;">👻 Animales
-                                    Invisibles</h4>
-                            </div>
-                            <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.7;">
-                                Llevan tiempo con nosotros o tienen necesidades especiales. ¿Serás tú su héroe?
-                            </p>
-                            <div
-                                style="margin-top: 1.5rem; display: flex; align-items: center; gap: 0.5rem; color: #4F46E5; font-weight: 700; font-size: 0.9rem;">
-                                <span>Ver urgentes</span>
-                                <i data-lucide="arrow-right" style="width: 16px;"></i>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div> <!-- Cierre main-content-area -->
-        </div> <!-- Cierre animal-catalog-layout -->
-    </div> <!-- Cierre content fragment -->
-
+                            if (prevBtn) prevBtn.onclick = () => { if (currentPage > 1) showPage(currentPage - 1); };
+                            if (nextBtn) nextBtn.onclick = () => { if (currentPage < totalPages) showPage(currentPage + 1); };
+                            showPage(1);
+                        }
+                        initPagination();
+                        document.body.addEventListener('htmx:afterSwap', function(evt) {
+                            if (evt.detail.target.id === 'contenido-dinamico') initPagination();
+                        });
+                    })();
+                </script>
+            </div>
+        </div>
+    </div>
 </body>
-
 </html>

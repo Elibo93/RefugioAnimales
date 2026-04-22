@@ -62,6 +62,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Submenu Toggle Logic
+    const submenuToggles = document.querySelectorAll('.submenu-toggle');
+    submenuToggles.forEach(toggle => {
+        toggle.addEventListener('click', () => {
+            const group = toggle.closest('.sidebar-item-group');
+            const submenu = group.querySelector('.sidebar-submenu');
+            
+            group.classList.toggle('open');
+            if (submenu) {
+                submenu.classList.toggle('open');
+            }
+        });
+    });
 });
 
 

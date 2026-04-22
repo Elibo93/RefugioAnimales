@@ -9,10 +9,38 @@
     <div th:fragment="content">
 
         <div class="table-wrapper">
-            <div class="actions-bar">
-                <span class="user-name page" th:text="#{persona.list.title}">personas</span>
-                <div style="display:flex; gap:10px;">
-                    <a class="btn btn-secondary" th:href="@{/web/personas/pdf}" target="_blank">
+            <div class="actions-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: nowrap;">
+                <div style="display:flex; align-items:center; gap:20px; flex: 1;">
+                    <span class="user-name page" style="white-space: nowrap; margin: 0;" th:text="#{persona.list.title}">personas</span>
+                    
+                    <!-- Role Filter Form (Standard GET for maximum reliability) -->
+                    <form action="/web/personas" method="get" 
+                          style="display:flex; align-items:center; gap:8px; background: var(--bg-main); padding: 4px 8px; border-radius: 12px; border: 1px solid var(--border);">
+                        
+                        <div style="display:flex; align-items:center; gap:6px; padding: 0 8px;">
+                            <i data-lucide="filter" style="width:14px; color:var(--text-muted);"></i>
+                            <select name="rol" autocomplete="off" class="form-control" style="width:auto; height:32px; padding:0 5px; border-radius:6px; border:none; background:transparent; font-size:0.9rem; font-weight:500; cursor:pointer;">
+                                <option value="ALL" th:selected="${selectedRol == 'ALL'}">Todos los roles</option>
+                                <option value="ROLE_PUBLICO" th:selected="${selectedRol == 'ROLE_PUBLICO'}">Simpatizantes</option>
+                                <option value="ROLE_VOLUNTARIO" th:selected="${selectedRol == 'ROLE_VOLUNTARIO'}">Voluntarios</option>
+                                <option value="ROLE_ADOPTANTE" th:selected="${selectedRol == 'ROLE_ADOPTANTE'}">Adoptantes</option>
+                                <option value="ROLE_ADMIN" th:selected="${selectedRol == 'ROLE_ADMIN'}">Administradores</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" style="height:30px; padding: 0 12px; font-size: 0.8rem; border-radius: 8px;">
+                            Filtrar
+                        </button>
+                        
+                        <a th:href="@{/web/personas}" class="btn btn-secondary" 
+                           style="height:30px; padding: 0 12px; font-size: 0.8rem; border-radius: 8px; display: flex; align-items: center; text-decoration: none;">
+                            Limpiar
+                        </a>
+                    </form>
+                </div>
+
+                <div style="display:flex; gap:10px; flex-shrink: 0;">
+                    <a class="btn btn-secondary" th:href="@{/web/personas/pdf(rol=${selectedRol})}" target="_blank">
                         <i data-lucide="file-text" style="width:18px;"></i>
                         <span th:text="#{generic.link.export.pdf}">Exportar PDF</span>
                     </a>
@@ -40,8 +68,16 @@
                         th:attr="data-id=${a.get('id')}, data-email=${a.get('email')}, data-tlf=${a.get('telefono')}">
 
                         <td th:text="${a.get('id')}">1</td>
-                        <td style="font-weight:600; color:var(--text-main);" th:text="${a.get('nombre')}">Juan</td>
-                        <td th:text="${a.get('apellido')}">Pérez</td>
+                        <td>
+                            <a th:href="@{/web/personas/{id}(id=${a.get('id')})}" 
+                               style="font-weight:600; color:var(--primary); text-decoration: none; display: block;" 
+                               th:text="${a.get('nombre')}">Juan</a>
+                        </td>
+                        <td>
+                            <a th:href="@{/web/personas/{id}(id=${a.get('id')})}" 
+                               style="color:var(--text-main); text-decoration: none; display: block;" 
+                               th:text="${a.get('apellido')}">Pérez</a>
+                        </td>
                         <td><span class="badge-soon" style="background:#F1F5F9; color:#64748B;"
                                 th:text="${a.get('rol')}">ROLE_ADMIN</span></td>
                         <td class="col-email" th:text="${a.get('email')}">juan@mail.com</td>

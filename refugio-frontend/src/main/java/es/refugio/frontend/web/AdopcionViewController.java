@@ -94,11 +94,24 @@ public class AdopcionViewController {
             }
         }
 
+        // Build adoptanteUsuarioIds: Map<adoptanteId, usuarioId>
+        Map<String, String> adoptanteUsuarioIds = new HashMap<>();
+        for (Object a : adoptantes) {
+            if (a instanceof Map) {
+                Object id = ((Map<?, ?>) a).get("id");
+                Object uid = ((Map<?, ?>) a).get("usuarioId");
+                if (id instanceof Number && uid instanceof Number) {
+                    adoptanteUsuarioIds.put(id.toString(), uid.toString());
+                }
+            }
+        }
+
         model.addAttribute(ModelAttribute.Adopcion_LIST.getName(),   adopciones);
         model.addAttribute(ModelAttribute.Persona_LIST.getName(),    usuarios);
         model.addAttribute("listaadoptantes",                        adoptantes);
         model.addAttribute("listaanimales",                          animales);
         model.addAttribute("adoptanteNombres",                       adoptanteNombres);
+        model.addAttribute("adoptanteUsuarioIds",                    adoptanteUsuarioIds);
         model.addAttribute("animalesMap",                            animalesMap);
         model.addAttribute("selectedAdoptanteId", adoptanteId);
         model.addAttribute("selectedanimalId",    animalId);   // lowercase 'a' to match template

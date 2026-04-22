@@ -90,6 +90,15 @@ public class AdoptanteController {
         return AdoptanteMapper.toResponse(adoptante);
     }
 
+    @Operation(summary = "Obtener adoptante por ID de usuario")
+    @GetMapping("/usuario/{usuarioId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
+    public AdoptanteResponse getByUsuarioId(@PathVariable int usuarioId) {
+        Adoptante adoptante = findService.findByUsuarioId(usuarioId);
+        checkOwnership(adoptante);
+        return AdoptanteMapper.toResponse(adoptante);
+    }
+
     @Operation(summary = "Eliminar adoptante")
     @ApiResponse(responseCode = "204", description = "Adoptante eliminado")
     @DeleteMapping("/{id}")
