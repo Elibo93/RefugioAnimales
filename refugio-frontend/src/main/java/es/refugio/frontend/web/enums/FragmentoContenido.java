@@ -37,7 +37,9 @@ public enum FragmentoContenido {
     Solicitud_CONVERSION("fragments/content/solicitud-conversion-form"),
     Solicitud_DIRECTA_FORM("fragments/content/solicitud-directa-form"),
 
-    HOME_VIEW("fragments/content/index");
+    HOME_VIEW("fragments/content/index"),
+    MIS_ADOPTADOS_VACIO("fragments/content/mis-adoptados-vacio"),
+    MIS_ADOPTADOS_LISTA("fragments/content/mis-adoptados-lista");
 
     private final String path;
 

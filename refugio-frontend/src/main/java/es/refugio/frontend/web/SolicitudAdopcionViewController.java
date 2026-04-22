@@ -122,6 +122,69 @@ public class SolicitudAdopcionViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
+    @GetMapping("/mis-adoptados")
+    public String misAdoptados(Model model) {
+        // 1. Obtener ID del usuario actual del modelo (inyectado por GlobalModelAttributesAdvice)
+        Object userIdObj = model.getAttribute("currentUserId");
+        if (userIdObj == null) return "redirect:/login";
+        
+        Integer currentUserId = (userIdObj instanceof Number) ? ((Number) userIdObj).intValue() : Integer.parseInt(userIdObj.toString());
+
+        // 2. Buscar perfil de adoptante para este usuario
+        List<Object> adoptantes = fetchList("/v1/adoptantes");
+        Integer adoptanteId = null;
+        for (Object obj : adoptantes) {
+            if (obj instanceof Map) {
+                Map<String, Object> a = (Map<String, Object>) obj;
+                Object uid = a.get("usuarioId");
+                if (uid != null && ((Number) uid).intValue() == currentUserId) {
+                    adoptanteId = ((Number) a.get("id")).intValue();
+                    break;
+                }
+            }
+        }
+
+        // 3. Filtrar solicitudes si existe el adoptante
+        List<Object> todas = fetchList("/v1/solicitudes-adopcion");
+        List<Object> misSolicitudes = new java.util.ArrayList<>();
+        
+        if (adoptanteId != null) {
+            for (Object obj : todas) {
+                if (obj instanceof Map) {
+                    Map<String, Object> s = (Map<String, Object>) obj;
+                    Object aid = s.get("adoptanteId");
+                    if (aid != null && ((Number) aid).intValue() == adoptanteId) {
+                        misSolicitudes.add(s);
+                    }
+                }
+            }
+        }
+
+        // 4. Si no hay solicitudes, mostrar vista vacía con mensaje personalizado
+        if (misSolicitudes.isEmpty()) {
+            model.addAttribute("mensajeVacio", "Vaya, parece que aún no te has hecho con ninguno de nuestros amiguitos");
+            model.addAttribute("currentUri", "/web/solicitudes/mis-adoptados");
+            model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.MIS_ADOPTADOS_VACIO.getPath());
+            return ThymTemplates.MAIN_LAYOUT.getPath();
+        }
+
+        // 5. Enriquecer con datos de animales para mostrar en la lista
+        List<Object> animales = fetchList("/v1/animales");
+        Map<String, Object> animalesMap = new HashMap<>();
+        for (Object a : animales) {
+            if (a instanceof Map) {
+                Object id = ((Map<?, ?>) a).get("id");
+                if (id instanceof Number) animalesMap.put(id.toString(), a);
+            }
+        }
+
+        model.addAttribute(ModelAttribute.Solicitud_LIST.getName(), misSolicitudes);
+        model.addAttribute("animalesMap", animalesMap);
+        model.addAttribute("currentUri", "/web/solicitudes/mis-adoptados");
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.MIS_ADOPTADOS_LISTA.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
     @GetMapping("/nueva")
     public String formulario(Model model, @RequestParam(required = false) Integer animalId) {
         Map<String, Object> solicitud = new HashMap<>();

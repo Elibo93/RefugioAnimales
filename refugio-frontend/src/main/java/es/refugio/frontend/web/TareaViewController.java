@@ -89,12 +89,39 @@ public class TareaViewController {
     public String formulario(Model model, @RequestParam(required = false) Integer voluntarioId) {
         Map<String, Object> tarea = new HashMap<>();
         tarea.put("fecha", LocalDateTime.now().toString());
+        
         if (voluntarioId != null) {
             tarea.put("voluntarioIds", List.of(voluntarioId));
+            // Buscar nombre del voluntario para mostrarlo en el título
+            try {
+                Map<String, Object> v = (Map<String, Object>) restTemplate.getForObject(apiUrl + "/v1/voluntarios/" + voluntarioId, Object.class);
+                if (v != null && v.get("usuarioId") != null) {
+                    Map<String, Object> u = (Map<String, Object>) restTemplate.getForObject(authUrl + "/v1/usuarios/" + v.get("usuarioId"), Object.class);
+                    if (u != null) {
+                        model.addAttribute("voluntarioPreseleccionado", u);
+                    }
+                }
+            } catch (Exception ignored) {}
+            model.addAttribute("returnUrl", WebRoutes.VOLUNTARIOS_BASE);
+        } else {
+            model.addAttribute("returnUrl", WebRoutes.TAREAS_BASE);
         }
+        
         model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
         model.addAttribute("voluntarios", fetchList("/v1/voluntarios"));
         model.addAttribute("estados", List.of("PENDIENTE", "EN_PROGRESO", "COMPLETADA", "CANCELADA"));
+        
+        // Cargar mapa de usuarios para el selector si no hay preseleccionado
+        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+        Map<Integer, Map<String, Object>> usuariosMap = new HashMap<>();
+        for (Object u : usuarios) {
+            if (u instanceof Map) {
+                Object id = ((Map<?, ?>) u).get("id");
+                if (id instanceof Number) usuariosMap.put(((Number) id).intValue(), (Map<String, Object>) u);
+            }
+        }
+        model.addAttribute("usuariosMap", usuariosMap);
+        
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Tarea_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
