@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+1<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
 
 <head>
@@ -28,6 +28,7 @@
                         <th th:text="#{solicitud.table.header.animal}">Animal</th>
                         <th th:text="#{solicitud.table.header.adoptante}">Solicitante</th>
                         <th th:text="#{solicitud.table.header.estado}">Estado</th>
+                        <th style="min-width: 200px;">Comentario</th>
                         <th th:text="#{enrollment.table.header.date}">Fecha</th>
                         <th th:text="#{workshop.table.header.action}">Acción</th>
                     </tr>
@@ -43,6 +44,12 @@
                             <span class="badge-soon"
                                 th:classappend="${s.get('estado') != null ? (s.get('estado').toString() == 'APROBADA' ? 'success' : (s.get('estado').toString() == 'RECHAZADA' ? 'danger' : 'warning')) : 'warning'}"
                                 th:text="${s.get('estado')}">PENDIENTE</span>
+                        </td>
+                        <td>
+                            <div style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); font-size: 0.9rem;"
+                                 th:text="${s.get('comentario') != null and s.get('comentario') != '' ? s.get('comentario') : '-'}">
+                                Razón de la adopción...
+                            </div>
                         </td>
                         <td
                             th:text="${s.get('fecha') != null ? s.get('fecha').toString().replace('T', ' ').substring(0, (s.get('fecha').toString().length() > 10 ? 10 : s.get('fecha').toString().length())) : '-'}">
@@ -69,9 +76,12 @@
                             </form>
                             <div th:if="${isAdmin}" style="width:1px; background:#ddd; margin:0 5px;"></div>
 
-                            <a class="btn-icon" th:href="@{/web/solicitudes/{id}/editar(id=${s.get('id')})}">
+                            <button class="btn-icon" 
+                                    th:hx-get="@{/web/solicitudes/modal-editar/{id}(id=${s.get('id')})}"
+                                    hx-target="#modal-host" 
+                                    hx-swap="innerHTML">
                                 <i data-lucide="edit-2" style="width:16px;"></i>
-                            </a>
+                            </button>
                             <button class="btn-icon delete"
                                 th:hx-post="@{/web/solicitudes/{id}/borrar(id=${s.get('id')})}"
                                 th:hx-target="'#row-' + ${s.get('id')}" hx-swap="outerHTML swap:0.3s"

@@ -87,7 +87,7 @@
 
                 <div class="filter-group"
                     style="margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2);">
-                    <a class="btn btn-primary" th:href="@{/web/animales/nuevo}" th:if="${isVoluntario}"
+                    <a class="btn btn-primary" th:href="@{/web/animales/nuevo}" th:if="${isAdmin}"
                         style="width: 100%; justify-content: center;">
                         <i data-lucide="plus"></i>
                         <span th:text="#{generic.link.create}">Nuevo</span>
@@ -161,19 +161,24 @@
                                     </div>
                                 </div>
 
-                                <!-- Acciones del Administrador (Sin Hover) -->
+                                <!-- Acciones del Administrador/Voluntario (Sin Hover) -->
                                 <div style="margin-top: auto; display: flex; gap: 0.75rem; justify-content: flex-end;"
-                                    th:if="${isAdmin}">
+                                    th:if="${isAdmin or isVoluntario}">
                                     <button class="btn-view-small" title="Ver Detalle"
                                         th:attr="hx-get=@{/web/animales/{id}/detalle(id=${a.get('id')})}"
                                         hx-target="#modal-host" hx-swap="outerHTML">
                                         <i data-lucide="eye"></i>
                                     </button>
+                                    <a th:href="@{/web/historiales(animalId=${a.get('id')})}" class="btn-edit-small"
+                                        title="Historial Médico" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">
+                                        <i data-lucide="stethoscope"></i>
+                                    </a>
                                     <a th:href="@{/web/animales/{id}/editar(id=${a.get('id')})}" class="btn-edit-small"
-                                        title="Editar">
+                                        th:if="${isAdmin or isVoluntario}" title="Editar">
                                         <i data-lucide="edit-2"></i>
                                     </a>
                                     <button
+                                        th:if="${isAdmin}"
                                         th:attr="hx-post=@{/web/animales/{id}/borrar(id=${a.get('id')})}, hx-target='#card-' + ${a.get('id')}"
                                         hx-swap="outerHTML swap:0.3s" hx-confirm="¿Eliminar?" class="btn-delete-small"
                                         title="Eliminar">

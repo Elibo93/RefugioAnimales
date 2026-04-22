@@ -2,19 +2,17 @@ package es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import es.refugio.refugio.infraestructure.web.validation.ValidDni;
+import es.refugio.refugio.infraestructure.web.validation.MinAge;
 
 public record ConvertAdoptanteRequest(
-        @NotBlank(message = "El DNI es obligatorio")
-        String dni,
-        
-        @NotBlank(message = "La dirección es obligatoria")
-        String direccion,
-        
-        @NotBlank(message = "La fecha de nacimiento es obligatoria")
-        String fechaNacimiento,
-        
-        @NotNull(message = "El ID del animal es obligatorio")
-        Integer animalId,
-        
-        String comentario
-) {}
+                @NotBlank(message = "El DNI es obligatorio") @ValidDni String dni,
+
+                @NotBlank(message = "La dirección es obligatoria") String direccion,
+
+                @NotBlank(message = "La fecha de nacimiento es obligatoria") @MinAge(18) String fechaNacimiento,
+
+                @NotNull(message = "El ID del animal es obligatorio") Integer animalId,
+
+                String comentario) {
+}

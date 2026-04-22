@@ -20,6 +20,7 @@ public interface WebRoutes {
     String ADOPTANTES_MODAL_CONVERTIR      = "/web/adoptantes/modal-convertir";
     String ADOPTANTES_CONVERTIR_Y_SOLICITAR = "/web/adoptantes/convertir-y-solicitar";
     String ADOPTANTES_NUEVO                = "/web/adoptantes/nuevo";
+    String ADOPTANTES_MODAL_EDITAR  = "/web/adoptantes/modal-editar/{id}";
     String ADOPTANTES_EDITAR               = "/web/adoptantes/{id}/editar";
     String ADOPTANTES_ELIMINAR             = "/web/adoptantes/{id}/borrar";
     String ADOPTANTES_PDF                  = "/web/adoptantes/pdf";
@@ -28,6 +29,7 @@ public interface WebRoutes {
 
     // VOLUNTARIOS
     String VOLUNTARIOS_BASE     = "/web/voluntarios";
+    String VOLUNTARIOS_MODAL_EDITAR = "/web/voluntarios/modal-editar/{id}";
     String VOLUNTARIOS_NUEVO    = "/web/voluntarios/nuevo";
     String VOLUNTARIOS_EDITAR   = "/web/voluntarios/{id}/editar";
     String VOLUNTARIOS_PDF      = "/web/voluntarios/pdf";
@@ -65,16 +67,17 @@ public interface WebRoutes {
     String SOLICITUDES_BASE         = "/web/solicitudes";
     String SOLICITUDES_NUEVA        = "/web/solicitudes/nueva";
     String SOLICITUDES_MODAL_NUEVA  = "/web/solicitudes/modal-nueva";
+    String SOLICITUDES_MODAL_EDITAR = "/web/solicitudes/modal-editar/{id}";
     String SOLICITUDES_EDITAR       = "/web/solicitudes/{id}/editar";
     String SOLICITUDES_ELIMINAR     = "/web/solicitudes/{id}/borrar";
     String SOLICITUDES_PDF          = "/web/solicitudes/pdf";
     String SOLICITUDES_PUBLICO_REGISTRO = "/web/solicitudes/publico/registro-y-adopcion";
-
-    // Vistas públicas de adopción (formularios y flujos)
-    String SOLICITUDES_OPCIONES = "/web/solicitudes/publico/opciones";
-    String SOLICITUDES_CONVERTIR = "/web/solicitudes/publico/convertir";
+    String SOLICITUDES_APROBAR      = "/web/solicitudes/{id}/aprobar";
+    String SOLICITUDES_RECHAZAR     = "/web/solicitudes/{id}/rechazar";
+    String SOLICITUDES_OPCIONES     = "/web/solicitudes/publico/opciones";
+    String SOLICITUDES_CONVERTIR    = "/web/solicitudes/publico/convertir";
     String SOLICITUDES_DIRECTA_FORM = "/web/solicitudes/publico/directa/formulario";
-    String SOLICITUDES_DIRECTA = "/web/solicitudes/publico/directa";
+    String SOLICITUDES_DIRECTA      = "/web/solicitudes/publico/directa";
 
     // TAREAS
     String TAREAS_BASE     = "/web/tareas";

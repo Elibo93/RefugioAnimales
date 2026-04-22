@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,10 @@ import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class VoluntarioViewController {
+
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(VoluntarioViewController.class);
 
     private final RestTemplate restTemplate;
     private final TemplateEngine templateEngine;
@@ -43,7 +47,7 @@ public class VoluntarioViewController {
         List<Object> voluntarios = fetchList("/v1/voluntarios");
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
 
-        // Build usuariosMap: Map<userId, userObject>
+        // Mapa auxiliar para asociar voluntarios con sus datos de usuario por ID
         Map<String, Object> usuariosMap = new HashMap<>();
         for (Object u : usuarios) {
             if (u instanceof Map) {
@@ -81,6 +85,29 @@ public class VoluntarioViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
+    @GetMapping(WebRoutes.VOLUNTARIOS_MODAL_EDITAR)
+    public String modalEditar(@PathVariable Integer id, Model model) {
+        try {
+            Map<String, Object> voluntario = restTemplate.getForObject(apiUrl + "/v1/voluntarios/" + id, Map.class);
+            model.addAttribute("voluntario", voluntario);
+
+            if (voluntario != null) {
+                Object uId = voluntario.get("usuarioId");
+                Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + uId, Map.class);
+                if (user != null) {
+                    model.addAttribute("nombre", user.get("nombre"));
+                    model.addAttribute("apellido", user.get("apellido"));
+                    model.addAttribute("email", user.get("email"));
+                    model.addAttribute("telefono", user.get("telefono"));
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error al cargar datos para el modal de voluntario: " + e.getMessage());
+            model.addAttribute("voluntario", new HashMap<>());
+        }
+        return "fragments/modals/modal-voluntario-editar :: modal";
+    }
+
     @PostMapping(WebRoutes.VOLUNTARIOS_NUEVO)
     public String crearVoluntario(
             @RequestParam(required = false) Integer idUsuario,
@@ -104,17 +131,35 @@ public class VoluntarioViewController {
 
     @PostMapping(WebRoutes.VOLUNTARIOS_EDITAR)
     public String editarVoluntario(@PathVariable Integer id,
+            @RequestParam Integer usuarioId,
             @RequestParam String disponibilidad,
             @RequestParam String email,
             @RequestParam String telefono,
             RedirectAttributes redirectAttributes) {
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("disponibilidad", disponibilidad);
-        body.put("email",          email);
-        body.put("telefono",       telefono);
+        // 1. Actualización de disponibilidad en el servicio de backend
+        Map<String, Object> bodyVol = new HashMap<>();
+        bodyVol.put("disponibilidad", disponibilidad);
+        restTemplate.put(apiUrl + "/v1/voluntarios/" + id, bodyVol);
 
-        restTemplate.put(apiUrl + "/v1/voluntarios/" + id, body);
+        // 2. Sincronización del teléfono en el servicio de autenticación
+        try {
+            Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + usuarioId, Map.class);
+            if (user != null) {
+                Map<String, Object> bodyUser = new HashMap<>(user);
+                bodyUser.put("telefono",     telefono);
+                
+                // Se envía una contraseña genérica para superar la validación @NotBlank de Auth,
+                // ya que el caso de uso de edición no actualiza la contraseña.
+                if (bodyUser.get("contrasena") == null) {
+                    bodyUser.put("contrasena", "secret_placeholder"); 
+                }
+                restTemplate.put(authUrl + "/v1/usuarios/" + usuarioId, bodyUser);
+            }
+        } catch (Exception e) {
+            logger.error("Error al sincronizar teléfono en el servicio de Auth: " + e.getMessage());
+        }
+
         redirectAttributes.addFlashAttribute("successMessage", "Voluntario editado correctamente");
         return "redirect:" + WebRoutes.VOLUNTARIOS_BASE;
     }

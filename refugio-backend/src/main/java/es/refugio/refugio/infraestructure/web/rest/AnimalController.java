@@ -51,7 +51,8 @@ public class AnimalController {
     private final DeleteAnimalService deleteAnimalService;
 
     @Operation(summary = "Crear animal", description = "Registra un nuevo animal en el refugio")
-    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Animal creado"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
+    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Animal creado"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AnimalResponse> createAnimal(@Valid @RequestBody AnimalRequest request) {
@@ -61,11 +62,12 @@ public class AnimalController {
     }
 
     @Operation(summary = "Actualizar animal", description = "Modifica los datos de un animal existente")
-    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Animal actualizado"), @ApiResponse(responseCode = "404", description = "Animal no encontrado") })
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Animal actualizado"),
+            @ApiResponse(responseCode = "404", description = "Animal no encontrado") })
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public ResponseEntity<AnimalResponse> updateAnimal(@PathVariable Integer id,
-                                                     @Valid @RequestBody AnimalRequest request) {
+            @Valid @RequestBody AnimalRequest request) {
         EditAnimalCommand comando = AnimalMapper.toCommand(id, request);
         Animal animal = editAnimalService.update(comando);
         return ResponseEntity.ok(AnimalMapper.toResponse(animal));
@@ -80,22 +82,26 @@ public class AnimalController {
             @org.springframework.web.bind.annotation.RequestParam(required = false) String tamano,
             @org.springframework.web.bind.annotation.RequestParam(required = false) List<String> edad,
             @org.springframework.web.bind.annotation.RequestParam(required = false) String sexo,
-            @org.springframework.web.bind.annotation.RequestParam(required = false) Boolean urgencia
-    ) {
+            @org.springframework.web.bind.annotation.RequestParam(required = false) Boolean urgencia) {
         return findAnimalService.findAll()
                 .stream()
-                .filter(a -> estado == null || estado.isEmpty() || (a.getEstado() != null && a.getEstado().name().equalsIgnoreCase(estado)))
-                .filter(a -> especie == null || especie.isEmpty() || (a.getEspecie() != null && a.getEspecie().name().equalsIgnoreCase(especie)))
-                .filter(a -> tamano == null || tamano.isEmpty() || (a.getTamano() != null && a.getTamano().name().equalsIgnoreCase(tamano)))
+                .filter(a -> estado == null || estado.isEmpty()
+                        || (a.getEstado() != null && a.getEstado().name().equalsIgnoreCase(estado)))
+                .filter(a -> especie == null || especie.isEmpty()
+                        || (a.getEspecie() != null && a.getEspecie().name().equalsIgnoreCase(especie)))
+                .filter(a -> tamano == null || tamano.isEmpty()
+                        || (a.getTamano() != null && a.getTamano().name().equalsIgnoreCase(tamano)))
                 .filter(a -> edad == null || edad.isEmpty() || edad.stream().anyMatch(e -> matchEdad(a.getEdad(), e)))
-                .filter(a -> sexo == null || sexo.isEmpty() || (a.getSexo() != null && a.getSexo().name().equalsIgnoreCase(sexo)))
+                .filter(a -> sexo == null || sexo.isEmpty()
+                        || (a.getSexo() != null && a.getSexo().name().equalsIgnoreCase(sexo)))
                 .filter(a -> urgencia == null || (a.getUrgencia() != null && a.getUrgencia().equals(urgencia)))
                 .map(AnimalMapper::toResponse)
                 .toList();
     }
 
     private boolean matchEdad(Integer animalEdad, String filtroEdad) {
-        if (animalEdad == null) return false;
+        if (animalEdad == null)
+            return false;
         return switch (filtroEdad.toUpperCase()) {
             case "CACHORRO" -> animalEdad <= 1;
             case "JOVEN" -> animalEdad == 2 || animalEdad == 3;
@@ -117,14 +123,16 @@ public class AnimalController {
     }
 
     @Operation(summary = "Obtener animal por ID")
-    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Animal encontrado"), @ApiResponse(responseCode = "404", description = "Animal no encontrado") })
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Animal encontrado"),
+            @ApiResponse(responseCode = "404", description = "Animal no encontrado") })
     @GetMapping("/{id}")
     public AnimalResponse getAnimalById(@PathVariable Integer id) {
         return AnimalMapper.toResponse(findAnimalService.findById(new AnimalId(id)));
     }
 
     @Operation(summary = "Eliminar animal")
-    @ApiResponses({ @ApiResponse(responseCode = "204", description = "Animal eliminado"), @ApiResponse(responseCode = "404", description = "Animal no encontrado") })
+    @ApiResponses({ @ApiResponse(responseCode = "204", description = "Animal eliminado"),
+            @ApiResponse(responseCode = "404", description = "Animal no encontrado") })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteAnimal(@PathVariable Integer id) {

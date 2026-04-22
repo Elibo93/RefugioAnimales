@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="modal" class="premium-modal-overlay"
+        onclick="if(event.target == this) document.getElementById('modal-host').innerHTML = ''">
+        
+        <div class="premium-modal-card" onclick="event.stopPropagation()">
+
+            <!-- Encabezado -->
+            <div class="premium-modal-header">
+                <div class="premium-modal-icon-wrapper">
+                    <i data-lucide="user-round-cog" style="width: 28px; height: 28px;"></i>
+                </div>
+                <h2 class="premium-modal-title">
+                    Editar Adoptante
+                </h2>
+                <p class="premium-modal-subtitle">
+                    Gestión de perfil y datos de contacto
+                </p>
+            </div>
+
+            <!-- Contenido con scroll -->
+            <div class="premium-modal-body">
+                <form th:action="@{/web/adoptantes/{id}/editar(id=${adoptante.get('id')})}" method="post" id="edit-form">
+                    
+                    <input type="hidden" name="usuarioId" th:value="${adoptante.get('usuarioId')}">
+                    <input type="hidden" name="dni" th:value="${adoptante.get('dni')}">
+                    <input type="hidden" name="fechaNacimiento" th:value="${adoptante.get('fechaNacimiento')}">
+
+                    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                        
+                        <!-- Sección: Información Personal -->
+                        <div class="modal-section-divider">
+                            <span>Información del Adoptante</span>
+                        </div>
+
+                        <div class="form-group">
+                            <span class="info-pill-label">Nombre Completo</span>
+                            <div class="info-pill">
+                                <i data-lucide="user" style="width: 14px;"></i>
+                                <span th:text="${nombreCompleto}">Nombre Completo</span>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <span class="info-pill-label">DNI</span>
+                                <div class="info-pill">
+                                    <i data-lucide="id-card" style="width: 14px;"></i>
+                                    <span th:text="${dni}">12345678X</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <span class="info-pill-label">Nacimiento</span>
+                                <div class="info-pill">
+                                    <i data-lucide="calendar" style="width: 14px;"></i>
+                                    <span th:text="${fechaNacimiento}">01/01/1990</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Gestión y Contacto -->
+                        <div class="modal-section-divider">
+                            <span>Gestión de Perfil</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="editable-label">Dirección de Residencia</label>
+                            <div class="premium-input-wrapper">
+                                <i data-lucide="map-pin"></i>
+                                <input type="text" name="direccion" th:value="${adoptante.get('direccion')}" required class="premium-input">
+                            </div>
+                        </div>
+
+                        <!-- Fila 3: Estado -->
+                        <div class="form-group">
+                            <label class="editable-label">Estado de Validación</label>
+                            <select name="estadoValidacion" required class="premium-select">
+                                <option th:each="e : ${estados}" 
+                                        th:value="${e}" 
+                                        th:text="${e}"
+                                        th:selected="${adoptante.get('estadoValidacion') != null and e == adoptante.get('estadoValidacion').toString()}">
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Pie con Acciones -->
+            <div class="premium-modal-footer">
+                <button type="button" class="btn btn-secondary" style="flex: 1; justify-content: center;"
+                    onclick="document.getElementById('modal-host').innerHTML = ''">
+                    Cancelar
+                </button>
+                <button type="submit" form="edit-form" class="btn btn-primary" style="flex: 1; justify-content: center;">
+                    <i data-lucide="save" style="width: 18px; margin-right: 8px;"></i>
+                    Guardar
+                </button>
+            </div>
+
+            <script>
+                lucide.createIcons();
+            </script>
+        </div>
+    </div>
+</body>
+</html>

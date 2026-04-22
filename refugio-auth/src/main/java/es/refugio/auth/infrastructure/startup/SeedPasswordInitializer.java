@@ -11,14 +11,15 @@ import es.refugio.refugio.infraestructure.db.jpa.entity.UsuarioEntity;
 import es.refugio.refugio.infraestructure.db.jpa.repository.usuario.UsuarioEntityJpaRepository;
 
 import java.util.List;
+import java.util.Set;
 
 /**
- * Inicializador que garantiza que los usuarios del seed tienen contraseñas
- * codificadas con BCrypt correctamente.
+ * Inicializador que garantiza que los usuarios del seed (data.sql) tienen
+ * contraseñas codificadas con BCrypt correctamente.
  *
- * Ejecuta passwordEncoder.matches() para verificar que el hash almacenado
- * realmente corresponde a la contraseña por defecto. Si no coincide (hash
- * incorrecto o texto plano), la re-codifica. Es completamente idempotente.
+ * IMPORTANTE: Solo actúa sobre los usuarios del seed (emails definidos en data.sql).
+ * Los usuarios registrados manualmente tienen sus propias contraseñas y NO deben
+ * ser modificados por este inicializador.
  */
 @Component
 @RequiredArgsConstructor
@@ -27,6 +28,19 @@ import java.util.List;
 public class SeedPasswordInitializer implements CommandLineRunner {
 
     private static final String DEFAULT_SEED_PASSWORD = "password";
+
+    // Emails exactos del data.sql — solo estos usuarios se gestionan aquí
+    private static final Set<String> SEED_EMAILS = Set.of(
+        "laura.garcia@refugio.local",
+        "carlos.martin@refugio.local",
+        "marta.lopez@refugio.local",
+        "diego.romero@local",
+        "lucia.martinez@local",
+        "mario.gomez@local",
+        "sara.nadal@local",
+        "pablo.diaz@local",
+        "david.torres@local"
+    );
 
     private final UsuarioEntityJpaRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
@@ -37,13 +51,12 @@ public class SeedPasswordInitializer implements CommandLineRunner {
         int actualizados = 0;
 
         for (UsuarioEntity usuario : usuarios) {
-            // Los admins tienen contraseñas gestionadas por AdminInitializer, no los tocamos
-            if (usuario.getRol() == es.refugio.auth.domain.Rol.ROLE_ADMIN) {
+            // Solo procesamos los usuarios del seed definidos en data.sql
+            if (!SEED_EMAILS.contains(usuario.getEmail())) {
                 continue;
             }
 
             String contrasena = usuario.getContrasena();
-            // matches() verifica que el hash realmente corresponde a DEFAULT_SEED_PASSWORD
             boolean esValida = contrasena != null
                     && passwordEncoder.matches(DEFAULT_SEED_PASSWORD, contrasena);
 

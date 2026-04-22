@@ -2,6 +2,7 @@ package es.refugio.refugio.infraestructure.web.dto.adoptante;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import es.refugio.refugio.infraestructure.web.validation.ValidDni;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,7 @@ public class ConvertirAdoptanteRequest {
     private String apellido;
 
     @NotBlank(message = "El DNI es obligatorio")
+    @ValidDni
     private String dni;
 
     @NotBlank(message = "La dirección es obligatoria")

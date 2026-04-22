@@ -2,11 +2,14 @@ package es.refugio.frontend.web;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import es.refugio.frontend.web.constants.WebRoutes;
+
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -22,6 +25,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class AdoptanteViewController {
 
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AdoptanteViewController.class);
+
     private final RestTemplate restTemplate;
 
     @Value("${backend.api.url}")
@@ -31,6 +36,7 @@ public class AdoptanteViewController {
     private String authUrl;
 
     @GetMapping(WebRoutes.ADOPTANTES_BASE)
+    @PreAuthorize("hasRole('ADMIN')")
     public String listar(Model model) {
         List<Object> adoptantes = fetchList("/v1/adoptantes");
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
@@ -59,6 +65,29 @@ public class AdoptanteViewController {
             Object[] arr = restTemplate.getForObject(finalUrl, Object[].class);
             return arr != null ? Arrays.asList(arr) : List.of();
         } catch (Exception e) { return List.of(); }
+    }
+
+    @GetMapping(WebRoutes.ADOPTANTES_MODAL_EDITAR)
+    public String modalEditar(@PathVariable Integer id, Model model) {
+        try {
+            Map<String, Object> adoptante = restTemplate.getForObject(apiUrl + "/v1/adoptantes/" + id, Map.class);
+            model.addAttribute("adoptante", adoptante);
+
+            if (adoptante != null) {
+                Object uId = adoptante.get("usuarioId");
+                Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + uId, Map.class);
+                if (user != null) {
+                    model.addAttribute("nombreCompleto", user.get("nombre") + " " + user.get("apellido"));
+                    model.addAttribute("dni", adoptante.get("dni"));
+                    model.addAttribute("fechaNacimiento", adoptante.get("fechaNacimiento"));
+                }
+            }
+            model.addAttribute("estados", List.of("PENDIENTE", "APROBADO", "RECHAZADO"));
+        } catch (Exception e) {
+            logger.error("Error al cargar datos para el modal de adoptante: " + e.getMessage());
+            model.addAttribute("adoptante", new HashMap<>());
+        }
+        return "fragments/modals/modal-adoptante-editar :: modal";
     }
 
     @GetMapping(WebRoutes.ADOPTANTES_NUEVO)
@@ -91,27 +120,39 @@ public class AdoptanteViewController {
     }
 
     @PostMapping(WebRoutes.ADOPTANTES_EDITAR)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ADOPTANTE')")
     public String guardarEdicion(
             @PathVariable Integer id,
             @RequestParam Integer usuarioId,
             @RequestParam String dni,
             @RequestParam String direccion,
             @RequestParam String fechaNacimiento,
-            Model model) {
+            @RequestParam(required = false) String estadoValidacion,
+            RedirectAttributes redirectAttributes) {
         try {
             Map<String, Object> body = new HashMap<>();
             body.put("usuarioId", usuarioId);
             body.put("dni", dni);
             body.put("direccion", direccion);
             body.put("fechaNacimiento", fechaNacimiento);
+            if (estadoValidacion != null) {
+                body.put("estadoValidacion", estadoValidacion);
+            }
             restTemplate.put(apiUrl + "/v1/adoptantes/" + id, body);
+            redirectAttributes.addFlashAttribute("successMessage", "Perfil de adoptante actualizado correctamente");
+            return "redirect:" + WebRoutes.ADOPTANTES_BASE;
+        } catch (org.springframework.web.client.RestClientResponseException e) {
+            logger.error("Error del backend al actualizar adoptante: " + e.getResponseBodyAsString());
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al actualizar: " + e.getResponseBodyAsString());
             return "redirect:" + WebRoutes.ADOPTANTES_BASE;
         } catch (Exception e) {
+            logger.error("Error inesperado al actualizar adoptante: " + e.getMessage());
             return "redirect:" + WebRoutes.ADOPTANTES_BASE;
         }
     }
 
     @PostMapping(WebRoutes.ADOPTANTES_ELIMINAR)
+    @PreAuthorize("hasRole('ADMIN')")
     public String eliminar(@PathVariable Integer id, Model model) {
         try {
             restTemplate.delete(apiUrl + "/v1/adoptantes/" + id);

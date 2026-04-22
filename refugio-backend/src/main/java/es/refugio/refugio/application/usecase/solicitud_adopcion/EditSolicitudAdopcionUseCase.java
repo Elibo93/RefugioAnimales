@@ -2,8 +2,6 @@ package es.refugio.refugio.application.usecase.solicitud_adopcion;
 
 import es.refugio.refugio.application.command.solicitud_adopcion.EditSolicitudAdopcionCommand;
 import es.refugio.refugio.domain.error.SolicitudAdopcionNotFoundException;
-import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
-import es.refugio.refugio.domain.model.animal.AnimalId;
 import es.refugio.refugio.domain.model.solicitud_adopcion.SolicitudAdopcion;
 import es.refugio.refugio.domain.model.solicitud_adopcion.enums.EstadoSolicitud;
 import es.refugio.refugio.domain.repository.SolicitudAdopcionRepository;
@@ -19,8 +17,6 @@ public class EditSolicitudAdopcionUseCase {
                 .map(solicitud -> {
                     EstadoSolicitud estadoEnum = EstadoSolicitud.valueOf(command.estado().toUpperCase());
                     
-                    solicitud.setAnimalId(new AnimalId(command.animalId()));
-                    solicitud.setAdoptanteId(new AdoptanteId(command.adoptanteId()));
                     solicitud.setFecha(command.fecha());
                     solicitud.setEstado(estadoEnum);
                     solicitud.setComentario(command.comentario());

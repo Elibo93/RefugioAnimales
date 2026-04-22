@@ -47,6 +47,7 @@ public class UsuarioController {
     private final DeleteUsuarioService deleteUsuarioService;
     private final EditUsuarioService editUsuarioService;
     private final es.refugio.refugio.infraestructure.db.jpa.repository.usuario.UsuarioEntityJpaRepository usuarioEntityJpaRepository;
+    private final es.refugio.auth.infrastructure.security.JwtTokenProvider tokenProvider;
 
     @Operation(summary = "Crea un Usuario", description = "Registra un nuevo usuario con sus credenciales y rol")
     @ApiResponses(value = {
@@ -70,17 +71,31 @@ public class UsuarioController {
     }
 
     @org.springframework.web.bind.annotation.PutMapping("/{id}/rol")
-    public ResponseEntity<Void> updateRole(@PathVariable int id, @RequestBody Map<String, String> body) {
+    public ResponseEntity<Map<String, String>> updateRole(@PathVariable int id, @RequestBody Map<String, String> body) {
         var userOptional = usuarioEntityJpaRepository.findById(id);
         if (userOptional.isPresent()) {
             var user = userOptional.get();
             try {
-                user.setRol(es.refugio.auth.domain.Rol.valueOf(body.get("rol")));
+                String nuevoRol = body.get("rol");
+                user.setRol(es.refugio.auth.domain.Rol.valueOf(nuevoRol));
                 usuarioEntityJpaRepository.save(user);
+
+                // Generar nuevo token con el rol actualizado para que el frontend pueda refrescar la sesión
+                java.util.List<org.springframework.security.core.authority.SimpleGrantedAuthority> authorities = new java.util.ArrayList<>();
+                authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority(nuevoRol));
+                if ("ROLE_VOLUNTARIO_ADOPTANTE".equals(nuevoRol)) {
+                    authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_VOLUNTARIO"));
+                    authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADOPTANTE"));
+                }
+                var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(user.getEmail(), null, authorities);
+                String newToken = tokenProvider.generateToken(auth);
+
+                return ResponseEntity.ok(Map.of("token", newToken));
             } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.notFound().build();
     }
 
     @Operation(summary = "Obtiene el listado de usuarios", description = "Retorna todos los usuarios registrados")

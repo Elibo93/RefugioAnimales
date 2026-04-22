@@ -73,6 +73,7 @@ public class HistorialMedicoController {
 
     @Operation(summary = "Listar historial médico")
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public List<HistorialMedicoResponse> getAll() {
         return findHistorialMedicoService.findAll()
                 .stream()
@@ -82,12 +83,14 @@ public class HistorialMedicoController {
 
     @Operation(summary = "Obtener registro médico por ID")
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public HistorialMedicoResponse getHistorialMedicoById(@PathVariable Integer id) {
         return HistorialMedicoMapper.toResponse(findHistorialMedicoService.findById(new HistorialMedicoId(id)));
     }
 
     @Operation(summary = "Historial médico por animal", description = "Retorna todos los registros médicos de un animal concreto")
     @GetMapping("/animal/{animalId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public List<HistorialMedicoResponse> getHistorialMedicoByAnimalId(@PathVariable Integer animalId) {
         List<HistorialMedico> historiales = findHistorialMedicoService.findByAnimalId(new AnimalId(animalId));
         return HistorialMedicoMapper.toResponse(historiales);

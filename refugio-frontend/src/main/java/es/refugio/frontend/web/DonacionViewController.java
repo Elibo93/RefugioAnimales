@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -126,6 +127,7 @@ public class DonacionViewController {
     }
 
     @GetMapping(WebRoutes.DONACIONES_EDITAR)
+    @PreAuthorize("hasRole('ADMIN')")
     public String editarFormulario(@PathVariable Integer id, Model model) {
         Object donacion = restTemplate.getForObject(apiUrl + "/v1/donaciones/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), donacion);
@@ -137,6 +139,7 @@ public class DonacionViewController {
     }
 
     @PostMapping(WebRoutes.DONACIONES_EDITAR)
+    @PreAuthorize("hasRole('ADMIN')")
     public String procesarEdicion(@PathVariable Integer id,
             @RequestParam Integer usuarioId,
             @RequestParam String tipo,
@@ -160,6 +163,7 @@ public class DonacionViewController {
 
     @PostMapping(WebRoutes.DONACIONES_ELIMINAR)
     @ResponseBody
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         restTemplate.delete(apiUrl + "/v1/donaciones/" + id);
         if ("true".equals(request.getHeader("HX-Request")))
@@ -168,6 +172,7 @@ public class DonacionViewController {
     }
 
     @GetMapping(WebRoutes.DONACIONES_PDF)
+    @PreAuthorize("hasRole('ADMIN')")
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<Object> donaciones = fetchList("/v1/donaciones");
         Context context = new Context();

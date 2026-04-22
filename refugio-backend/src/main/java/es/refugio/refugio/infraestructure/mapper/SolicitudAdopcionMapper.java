@@ -14,6 +14,7 @@ import es.refugio.refugio.infraestructure.db.jpa.entity.AnimalEntity;
 import es.refugio.refugio.infraestructure.db.jpa.entity.SolicitudAdopcionEntity;
 import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.SolicitudAdopcionRequest;
 import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.SolicitudAdopcionResponse;
+import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.SolicitudAdopcionUpdateRequest;
 
 public class SolicitudAdopcionMapper {
 
@@ -29,8 +30,15 @@ public class SolicitudAdopcionMapper {
     public static EditSolicitudAdopcionCommand toCommand(int id, SolicitudAdopcionRequest req) {
         return new EditSolicitudAdopcionCommand(
                 new SolicitudAdopcionId(id),
-                req.animalId(),
-                req.adoptanteId(),
+                req.fecha(),
+                req.estado(),
+                req.comentario()
+        );
+    }
+
+    public static EditSolicitudAdopcionCommand toCommand(int id, SolicitudAdopcionUpdateRequest req) {
+        return new EditSolicitudAdopcionCommand(
+                new SolicitudAdopcionId(id),
                 req.fecha(),
                 req.estado(),
                 req.comentario()

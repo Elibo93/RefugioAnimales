@@ -11,6 +11,7 @@ import es.refugio.refugio.domain.model.adoptante.enums.EstadoValidacion;
 import es.refugio.refugio.infraestructure.db.jpa.entity.AdoptanteEntity;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteRequest;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteResponse;
+import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteUpdateRequest;
 
 public class AdoptanteMapper {
 
@@ -23,6 +24,15 @@ public class AdoptanteMapper {
     }
 
     public static EditAdoptanteCommand toEditCommand(AdoptanteId id, AdoptanteRequest request) {
+        return new EditAdoptanteCommand(
+                id,
+                request.dni(),
+                request.direccion(),
+                request.fechaNacimiento(),
+                request.estadoValidacion());
+    }
+
+    public static EditAdoptanteCommand toEditCommand(AdoptanteId id, AdoptanteUpdateRequest request) {
         return new EditAdoptanteCommand(
                 id,
                 request.dni(),

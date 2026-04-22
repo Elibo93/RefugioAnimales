@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.transaction.annotation.Transactional;
 
 import es.refugio.refugio.domain.model.adoptante.Adoptante;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
@@ -44,6 +45,7 @@ import es.refugio.refugio.infraestructure.mapper.SolicitudAdopcionMapper;
 import es.refugio.refugio.infraestructure.web.dto.adopcion.AdopcionResponse;
 import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.SolicitudAdopcionRequest;
 import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.SolicitudAdopcionResponse;
+import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.SolicitudAdopcionUpdateRequest;
 import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.PublicSolicitudAdopcionRequest;
 import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.ConvertAdoptanteRequest;
 
@@ -73,6 +75,7 @@ public class SolicitudAdopcionController {
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Solicitud creada"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
+    @Transactional
     public ResponseEntity<SolicitudAdopcionResponse> createSolicitudAdopcion(
             @Valid @RequestBody SolicitudAdopcionRequest request) {
         CreateSolicitudAdopcionCommand command = SolicitudAdopcionMapper.toCommand(request);
@@ -84,6 +87,7 @@ public class SolicitudAdopcionController {
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Registro exitoso"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping("/publico/registro-y-adopcion")
+    @Transactional
     public ResponseEntity<SolicitudAdopcionResponse> registerAndRequest(
             @Valid @RequestBody PublicSolicitudAdopcionRequest request) {
         Integer usuarioId = request.usuarioId();
@@ -114,6 +118,7 @@ public class SolicitudAdopcionController {
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Conversión y solicitud exitosas"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos o usuario ya tiene perfil") })
     @PostMapping("/convertir-y-adopcion")
+    @Transactional
     public ResponseEntity<SolicitudAdopcionResponse> convertAndRequest(
             @Valid @RequestBody ConvertAdoptanteRequest request) {
 
@@ -144,6 +149,7 @@ public class SolicitudAdopcionController {
 
     @Operation(summary = "Adopción directa para adoptantes registrados", description = "Crea una solicitud de adopción directamente para el perfil del usuario autenticado.")
     @PostMapping("/directa")
+    @Transactional
     public ResponseEntity<SolicitudAdopcionResponse> directRequest(@RequestBody Map<String, Object> request) {
         es.refugio.refugio.infraestructure.security.CustomUserDetails userDetails = (es.refugio.refugio.infraestructure.security.CustomUserDetails) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
@@ -171,7 +177,7 @@ public class SolicitudAdopcionController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public ResponseEntity<SolicitudAdopcionResponse> updateSolicitudAdopcion(@PathVariable Integer id,
-            @Valid @RequestBody SolicitudAdopcionRequest request) {
+            @Valid @RequestBody SolicitudAdopcionUpdateRequest request) {
 
         boolean isVolunteer = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_VOLUNTARIO"));
@@ -288,6 +294,12 @@ public class SolicitudAdopcionController {
     public ResponseEntity<Void> deleteSolicitudAdopcion(@PathVariable Integer id) {
         deleteSolicitudAdopcionService.delete(new SolicitudAdopcionId(id));
         return ResponseEntity.noContent().build();
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(IllegalStateException.class)
+    public Map<String, String> handleIllegalState(IllegalStateException ex) {
+        return Map.of("message", ex.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ import java.util.*;
 
 @Controller
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
 public class HistorialMedicoViewController {
 
     private final RestTemplate restTemplate;
@@ -34,9 +36,17 @@ public class HistorialMedicoViewController {
     private String apiUrl;
 
     @GetMapping(WebRoutes.HISTORIALES_BASE)
-    public String listar(Model model, @RequestParam(required = false) String successMessage) {
-        List<Object> historiales = fetchList("/v1/historial-medico");
-        List<Object> animales   = fetchList("/v1/animales");
+    public String listar(Model model, 
+            @RequestParam(required = false) Integer animalId,
+            @RequestParam(required = false) String successMessage) {
+        
+        List<Object> historiales;
+        if (animalId != null) {
+            historiales = fetchList("/v1/historial-medico/animal/" + animalId);
+        } else {
+            historiales = fetchList("/v1/historial-medico");
+        }
+        List<Object> animales = fetchList("/v1/animales");
 
         Map<Integer, Object> animalesMap = new HashMap<>();
         for (Object a : animales) {

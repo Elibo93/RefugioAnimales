@@ -50,11 +50,8 @@ public class CurrentUserRestController {
 
         UsuarioEntity u = usuarioOpt.get();
 
-        // Obtener el rol del UserDetails (grantedAuthorities)
-        String rol = auth.getAuthorities().stream()
-                .map(a -> a.getAuthority())
-                .findFirst()
-                .orElse("ROLE_USER");
+        // Obtener el rol directamente de la base de datos para reflejar cambios en tiempo real
+        String rol = u.getRol().name();
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("id", u.getId());
