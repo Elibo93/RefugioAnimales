@@ -18,11 +18,7 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 ## 🛠️ Bloques de Trabajo
 
 ### 1) Frontend: Reorganización del Dashboard (Admin)
-<<<<<<< HEAD
-- [] **Navegación:** Agrupar en secciones:
-=======
 - [✅] **Navegación:** Agrupar en secciones:
->>>>>>> f94d0836d93be56b795b0ee0cf3d4d36125820bb
   - **Miembros del refugio:** Usuarios, Adoptantes, Voluntarios (con submenú para Tareas).
   - **Adopciones:** Solicitudes y Adopciones Procesadas.
   - **Gestión:** Animales e Historiales Médicos.
