@@ -8,52 +8,48 @@
 <body>
 
     <div th:fragment="content">
-        <div class="actions-bar" style="margin-bottom: 2rem;">
-            <span class="user-name page" th:text="#{workshop.list.title}">listado de animales</span>
-        </div>
-        
-        <div class="animal-catalog-layout">
+        <div class="animal-catalog-layout" style="margin-top: 1rem;">
             <!-- 1. SIDEBAR PARA ADMINISTRADOR (DISEÑO SIMPLE DE GESTIÓN) -->
-            <aside th:if="${isAdmin}" class="filter-sidebar glass-card" style="width: 280px; padding: 2rem; position: sticky; top: 2rem;">
+            <aside th:if="${isAdmin}" class="filter-sidebar glass-card" style="width: 260px; padding: 1.5rem; position: sticky; top: 2rem;">
                 <form method="get" action="/web/animales" hx-get="/web/animales" hx-target="#contenido-dinamico">
-                    <div class="filter-group">
-                        <span class="filter-label"><i data-lucide="dog"></i> Especie</span>
-                        <select name="especie" class="form-select">
+                    <div class="filter-group" style="gap: 0.5rem;">
+                        <span class="filter-label" style="font-size: 0.7rem;"><i data-lucide="dog" style="width: 14px;"></i> Especie</span>
+                        <select name="especie" class="form-select" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
                             <option value="">Cualquiera</option>
                             <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="${e}" th:selected="${selectedEspecie == e}"></option>
                         </select>
                     </div>
-                    <div class="filter-group" style="margin-top: 1rem;">
-                        <span class="filter-label"><i data-lucide="maximize-2"></i> Tamaño</span>
-                        <select name="tamano" class="form-select">
+                    <div class="filter-group" style="margin-top: 1rem; gap: 0.5rem;">
+                        <span class="filter-label" style="font-size: 0.7rem;"><i data-lucide="maximize-2" style="width: 14px;"></i> Tamaño</span>
+                        <select name="tamano" class="form-select" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
                             <option value="">Cualquiera</option>
                             <option value="PEQUEÑO" th:selected="${selectedTamano == 'PEQUEÑO'}">Pequeño</option>
                             <option value="MEDIANO" th:selected="${selectedTamano == 'MEDIANO'}">Mediano</option>
                             <option value="GRANDE" th:selected="${selectedTamano == 'GRANDE'}">Grande</option>
                         </select>
                     </div>
-                    <div class="filter-group" style="margin-top: 2rem;">
-                        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Filtrar</button>
-                        <a th:href="@{/web/animales}" class="btn btn-secondary" style="width:100%; justify-content:center; margin-top: 0.5rem;">Limpiar</a>
+                    <div class="filter-group" style="margin-top: 1.5rem;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.5rem; font-size: 0.9rem;">Filtrar</button>
+                        <a th:href="@{/web/animales}" class="btn btn-secondary" style="width:100%; justify-content:center; margin-top: 0.5rem; padding: 0.5rem; font-size: 0.9rem;">Limpiar</a>
                     </div>
                 </form>
             </aside>
 
-            <!-- 2. SIDEBAR PARA USUARIOS (DISEÑO EXACTO DEL SCREENSHOT) -->
-            <aside th:if="${!isAdmin}" class="filter-sidebar" style="width: 320px; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(15px); border-radius: 30px; padding: 2.5rem; border: 1px solid rgba(255, 255, 255, 0.3); height: fit-content; position: sticky; top: 2rem;">
+            <!-- 2. SIDEBAR PARA USUARIOS (DISEÑO COMPACTO) -->
+            <aside th:if="${!isAdmin}" class="filter-sidebar" style="width: 280px; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(15px); border-radius: 24px; padding: 1.8rem; border: 1px solid rgba(255, 255, 255, 0.3); height: fit-content; position: sticky; top: 2rem;">
                 <form method="get" action="/web/animales" hx-get="/web/animales" hx-target="#contenido-dinamico" hx-push-url="true">
                     <!-- ESPECIE -->
-                    <div class="filter-group" style="margin-bottom: 1.5rem;">
-                        <label style="display: block; font-weight: 800; font-size: 0.85rem; color: #4b5563; text-transform: uppercase; margin-bottom: 0.8rem; letter-spacing: 0.025em;">ESPECIE</label>
-                        <select name="especie" class="form-select" style="width: 100%; padding: 0.6rem 1rem; border-radius: 10px; border: 1px solid #d1d5db; background-color: #f9fafb; font-size: 0.95rem;">
+                    <div class="filter-group" style="margin-bottom: 1.2rem;">
+                        <label style="display: block; font-weight: 800; font-size: 0.75rem; color: #4b5563; text-transform: uppercase; margin-bottom: 0.6rem; letter-spacing: 0.025em;">ESPECIE</label>
+                        <select name="especie" class="form-select" style="width: 100%; padding: 0.5rem 0.8rem; border-radius: 8px; border: 1px solid #d1d5db; background-color: #f9fafb; font-size: 0.9rem;">
                             <option value="" th:selected="${selectedEspecie == null or selectedEspecie == ''}">Cualquiera</option>
                             <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="${e}" th:selected="${selectedEspecie == e}"></option>
                         </select>
                     </div>
                     <!-- TAMAÑO -->
-                    <div class="filter-group" style="margin-bottom: 1.5rem;">
-                        <label style="display: block; font-weight: 800; font-size: 0.85rem; color: #4b5563; text-transform: uppercase; margin-bottom: 0.8rem; letter-spacing: 0.025em;">TAMAÑO</label>
-                        <select name="tamano" class="form-select" style="width: 100%; padding: 0.6rem 1rem; border-radius: 10px; border: 1px solid #d1d5db; background-color: #f9fafb; font-size: 0.95rem;">
+                    <div class="filter-group" style="margin-bottom: 1.2rem;">
+                        <label style="display: block; font-weight: 800; font-size: 0.75rem; color: #4b5563; text-transform: uppercase; margin-bottom: 0.6rem; letter-spacing: 0.025em;">TAMAÑO</label>
+                        <select name="tamano" class="form-select" style="width: 100%; padding: 0.5rem 0.8rem; border-radius: 8px; border: 1px solid #d1d5db; background-color: #f9fafb; font-size: 0.9rem;">
                             <option value="" th:selected="${selectedTamano == null or selectedTamano == ''}">Cualquiera</option>
                             <option value="PEQUEÑO" th:selected="${selectedTamano == 'PEQUEÑO'}">Pequeño</option>
                             <option value="MEDIANO" th:selected="${selectedTamano == 'MEDIANO'}">Mediano</option>
@@ -61,50 +57,50 @@
                         </select>
                     </div>
                     <!-- EDAD -->
-                    <div class="filter-group" style="margin-bottom: 1.5rem;">
-                        <label style="display: block; font-weight: 800; font-size: 0.85rem; color: #4b5563; text-transform: uppercase; margin-bottom: 1rem; letter-spacing: 0.025em;">EDAD</label>
-                        <div style="display: flex; flex-direction: column; gap: 0.8rem;">
-                            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; color: #374151;">
-                                <input type="checkbox" name="edad" value="CACHORRO" th:checked="${selectedEdad != null and #lists.contains(selectedEdad, 'CACHORRO')}" style="width: 20px; height: 20px; border-radius: 4px; border: 1px solid #d1d5db;">
+                    <div class="filter-group" style="margin-bottom: 1.2rem;">
+                        <label style="display: block; font-weight: 800; font-size: 0.75rem; color: #4b5563; text-transform: uppercase; margin-bottom: 0.8rem; letter-spacing: 0.025em;">EDAD</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; color: #374151;">
+                                <input type="checkbox" name="edad" value="CACHORRO" th:checked="${selectedEdad != null and #lists.contains(selectedEdad, 'CACHORRO')}" style="width: 18px; height: 18px; border-radius: 4px; border: 1px solid #d1d5db;">
                                 <span>Cachorro</span>
                             </label>
-                            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; color: #374151;">
-                                <input type="checkbox" name="edad" value="JOVEN" th:checked="${selectedEdad != null and #lists.contains(selectedEdad, 'JOVEN')}" style="width: 20px; height: 20px; border-radius: 4px; border: 1px solid #d1d5db;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; color: #374151;">
+                                <input type="checkbox" name="edad" value="JOVEN" th:checked="${selectedEdad != null and #lists.contains(selectedEdad, 'JOVEN')}" style="width: 18px; height: 18px; border-radius: 4px; border: 1px solid #d1d5db;">
                                 <span>Joven</span>
                             </label>
-                            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; color: #374151;">
-                                <input type="checkbox" name="edad" value="ADULTO" th:checked="${selectedEdad != null and #lists.contains(selectedEdad, 'ADULTO')}" style="width: 20px; height: 20px; border-radius: 4px; border: 1px solid #d1d5db;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; color: #374151;">
+                                <input type="checkbox" name="edad" value="ADULTO" th:checked="${selectedEdad != null and #lists.contains(selectedEdad, 'ADULTO')}" style="width: 18px; height: 18px; border-radius: 4px; border: 1px solid #d1d5db;">
                                 <span>Adulto</span>
                             </label>
-                            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; color: #374151;">
-                                <input type="checkbox" name="edad" value="SENIOR" th:checked="${selectedEdad != null and #lists.contains(selectedEdad, 'SENIOR')}" style="width: 20px; height: 20px; border-radius: 4px; border: 1px solid #d1d5db;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; color: #374151;">
+                                <input type="checkbox" name="edad" value="SENIOR" th:checked="${selectedEdad != null and #lists.contains(selectedEdad, 'SENIOR')}" style="width: 18px; height: 18px; border-radius: 4px; border: 1px solid #d1d5db;">
                                 <span>Senior</span>
                             </label>
                         </div>
                     </div>
                     <!-- URGENCIA -->
-                    <div class="filter-group" style="margin-bottom: 2rem;">
-                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; color: #374151; font-weight: 500;">
-                            <input type="checkbox" name="urgencia" value="true" th:checked="${selectedUrgencia}" style="width: 20px; height: 20px; border-radius: 4px; border: 1px solid #d1d5db;">
+                    <div class="filter-group" style="margin-bottom: 1.5rem;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; color: #374151; font-weight: 500;">
+                            <input type="checkbox" name="urgencia" value="true" th:checked="${selectedUrgencia}" style="width: 18px; height: 18px; border-radius: 4px; border: 1px solid #d1d5db;">
                             <span>Solo urgentes 🔥</span>
                         </label>
                     </div>
                     <!-- BOTÓN FILTRAR -->
-                    <button type="submit" class="btn" style="width: 100%; background-color: #2d9d58; color: white; padding: 0.8rem; border-radius: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s;">
-                        <i data-lucide="search" style="width: 18px; height: 18px;"></i>
+                    <button type="submit" class="btn" style="width: 100%; background-color: #2d9d58; color: white; padding: 0.6rem; border-radius: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s; font-size: 0.9rem;">
+                        <i data-lucide="search" style="width: 16px; height: 16px;"></i>
                         <span>Filtrar</span>
                     </button>
                     <!-- BOTÓN LIMPIAR -->
-                    <div style="text-align: center; margin-top: 1.5rem;">
-                        <a th:href="@{/web/animales}" style="color: #6b7280; text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 500;">
-                            <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                    <div style="text-align: center; margin-top: 1.2rem;">
+                        <a th:href="@{/web/animales}" style="color: #6b7280; text-decoration: none; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: 500;">
+                            <i data-lucide="x" style="width: 12px; height: 12px;"></i>
                             <span>Limpiar</span>
                         </a>
                     </div>
                     <!-- BOTÓN PDF -->
-                    <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(0,0,0,0.05);">
-                        <a th:href="@{/web/animales/pdf}" target="_blank" style="color: #6b7280; text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500;">
-                            <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                    <div style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.05);">
+                        <a th:href="@{/web/animales/pdf}" target="_blank" style="color: #6b7280; text-decoration: none; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 500;">
+                            <i data-lucide="download" style="width: 14px; height: 14px;"></i>
                             <span>PDF</span>
                         </a>
                     </div>
@@ -118,6 +114,15 @@
                 
                 <!-- 1. VISTA PREMIUM PARA ADMINISTRADOR (TABLA CENTRADA) -->
                 <div th:if="${isAdmin}" class="table-wrapper" style="background: transparent; border: none; box-shadow: none;">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding: 0 1rem;">
+                        <h2 style="font-weight: 800; color: var(--text-main); margin: 0;">Gestión de Animales</h2>
+                        <a th:href="@{/web/animales/nuevo}" class="btn btn-primary" style="padding: 0.8rem 2rem; border-radius: 15px; font-weight: 700; box-shadow: 0 10px 20px rgba(45, 157, 88, 0.2);">
+                            <i data-lucide="plus-circle"></i>
+                            Nuevo Animal
+                        </a>
+                    </div>
+
                     <table style="width: 100%; border-collapse: separate; border-spacing: 0 12px; table-layout: fixed;">
                         <thead>
                             <tr>

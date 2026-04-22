@@ -749,6 +749,144 @@ aside.app-sidebar .sidebar-section-title .chevron-icon {
     }
 }
 
+/* Hero Search Overlay */
+.hero-search-container {
+    position: absolute;
+    bottom: -2.7rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 1000px;
+    z-index: 100;
+}
+
+.search-bar-glass {
+    background: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 99px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+.search-field {
+    flex: 1;
+    padding: 0.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.search-field label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+    letter-spacing: 0.05em;
+}
+
+.search-field select {
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    color: var(--text-main);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0;
+    width: 100%;
+}
+
+.search-field select:focus {
+    outline: none;
+}
+
+.field-divider {
+    width: 1px;
+    height: 40px;
+    background: rgba(0,0,0,0.08);
+}
+
+.btn-search-circle {
+    background: #15803d; /* Verde oscuro similar al de la imagen */
+    color: white;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+}
+
+.btn-search-circle:hover {
+    transform: scale(1.1) rotate(5deg);
+    background: #166534;
+    box-shadow: 0 5px 15px rgba(21, 128, 61, 0.4);
+}
+
+/* Stats Panel */
+.stats-panel-container {
+    margin-top: 6rem;
+    margin-bottom: 4rem;
+    display: flex;
+    justify-content: center;
+    padding: 0 2rem;
+}
+
+.stats-card-main {
+    background: white;
+    border-radius: 40px;
+    padding: 3.5rem 2rem;
+    width: 100%;
+    max-width: 1100px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.02);
+}
+
+.stat-item-landing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+}
+
+.stat-item-landing:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 20%;
+    height: 60%;
+    width: 1px;
+    background: rgba(0,0,0,0.05);
+}
+
+.stat-icon-emoji {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--text-main);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.stat-desc {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
 /* =====================
    2.6 ADMIN DASHBOARD (HOME)
    ===================== */

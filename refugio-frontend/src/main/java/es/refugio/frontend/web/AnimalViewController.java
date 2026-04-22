@@ -19,6 +19,9 @@ import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
 
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.util.Base64;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -96,7 +99,8 @@ public class AnimalViewController {
     }
 
     @GetMapping(WebRoutes.ANIMALES_NUEVO)
-    public String formulario(Model model) {
+    public String formulario(Model model, HttpServletRequest request) {
+        System.out.println("DEBUG: Accediendo a formulario de nuevo animal. HX-Request: " + request.getHeader("HX-Request"));
         // Enums disponibles en el backend — se listan hardcoded ya que son valores fijos
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), new HashMap<>());
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), fetchList("/v1/voluntarios"));
@@ -104,6 +108,11 @@ public class AnimalViewController {
         model.addAttribute("sexos",   List.of("MACHO", "HEMBRA"));
         model.addAttribute("estados", List.of("DISPONIBLE", "ADOPTADO", "EN_ACOGIDA", "EN_TRATAMIENTO", "RESERVADO", "FALLECIDO"));
         model.addAttribute("especies", List.of("PERRO", "GATO", "CONEJO", "AVE", "REPTIL", "OTRO"));
+        
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Animal_FORM.getPath() + " :: content";
+        }
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Animal_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -123,7 +132,17 @@ public class AnimalViewController {
             @RequestParam(required = false) Double peso,
             @RequestParam(required = false) Integer nivelEnergia,
             @RequestParam(required = false) Boolean urgencia,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest request) {
+
+        System.out.println("DEBUG: Iniciando crearAnimal para " + nombre);
+        if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie c : request.getCookies()) {
+                if ("JWT_TOKEN".equals(c.getName())) {
+                    System.out.println("DEBUG: Encontrado JWT_TOKEN. Longitud: " + c.getValue().length());
+                }
+            }
+        }
 
         Map<String, Object> body = new HashMap<>();
         body.put("nombre",               nombre);
@@ -141,13 +160,20 @@ public class AnimalViewController {
         body.put("nivelEnergia",         nivelEnergia != null ? nivelEnergia : 0);
         body.put("urgencia",             urgencia != null && urgencia);
 
-        restTemplate.postForObject(apiUrl + "/v1/animales", body, Object.class);
-        redirectAttributes.addFlashAttribute("successMessage", "Animal creado correctamente");
+        try {
+            restTemplate.postForObject(apiUrl + "/v1/animales", body, Object.class);
+            redirectAttributes.addFlashAttribute("successMessage", "Animal creado correctamente");
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            System.err.println("ERROR: Error llamando al backend: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+            throw e;
+        }
+        
         return "redirect:" + WebRoutes.ANIMALES_BASE;
     }
 
     @GetMapping(WebRoutes.ANIMALES_EDITAR)
-    public String editarFormulario(@PathVariable Integer id, Model model) {
+    public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
+        System.out.println("DEBUG: Accediendo a formulario de edición para ID: " + id + ". HX-Request: " + request.getHeader("HX-Request"));
         Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), fetchList("/v1/voluntarios"));
@@ -155,6 +181,11 @@ public class AnimalViewController {
         model.addAttribute("sexos",   List.of("MACHO", "HEMBRA"));
         model.addAttribute("estados", List.of("DISPONIBLE", "ADOPTADO", "EN_ACOGIDA", "EN_TRATAMIENTO", "RESERVADO", "FALLECIDO"));
         model.addAttribute("especies", List.of("PERRO", "GATO", "CONEJO", "AVE", "REPTIL", "OTRO"));
+
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Animal_FORM.getPath() + " :: content";
+        }
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Animal_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }

@@ -70,12 +70,12 @@
 
     <!-- 2. VISTA PARA EL RESTO (ADOPTANTES, VOLUNTARIOS Y PÚBLICO) -->
     <div th:if="${!isAdmin}">
-        <section class="home-hero">
-            <div class="hero-glass-card hero-card-with-bg">
+        <section class="home-hero" style="position: relative; flex-direction: column;">
+            <div class="hero-card-with-bg" style="overflow: visible; margin-bottom: 2rem;">
                 <h1 class="hero-title" th:if="${!isAuthenticated}">No puedes comprar el amor, <br> pero puedes adoptarlo</h1>
                 <h1 class="hero-title" th:if="${isAuthenticated}">Hola, <span th:text="${currentUserName}">Usuario</span> <br> ¡Bienvenido de nuevo!</h1>
                 
-                <div class="hero-ctas">
+                <div class="hero-ctas" style="margin-bottom: 4rem;">
                     <a th:href="@{/web/animales}" class="btn-hero btn-hero-primary">
                         <i data-lucide="heart"></i>
                         Conoce a nuestros amigos
@@ -88,13 +88,76 @@
                         <i data-lucide="check-square"></i>
                         Mis Tareas
                     </a>
-                    <a th:if="${isAdoptante}" th:href="@{/web/solicitudes}" class="btn-hero btn-hero-secondary">
+                    <a th:if="${isAdoptante}" th:href="@{/web/solicitudes/mis-adoptados}" class="btn-hero btn-hero-secondary">
                         <i data-lucide="file-text"></i>
-                        Mis Solicitudes
+                        Mis Adoptados
                     </a>
                 </div>
             </div>
+
+            <!-- Barra de búsqueda flotante (Overlapping Hero) - MOVED OUTSIDE -->
+            <div class="hero-search-container" style="bottom: 0.5rem;">
+                <form action="/web/animales" method="get" class="search-bar-glass" style="width: 100%;">
+                    <div class="search-field">
+                        <label>ESPECIE</label>
+                        <select name="especie">
+                            <option value="">Cualquier especie</option>
+                            <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="${e}"></option>
+                        </select>
+                    </div>
+                    <div class="field-divider"></div>
+                    <div class="search-field">
+                        <label>TAMAÑO</label>
+                        <select name="tamano">
+                            <option value="">Cualquier tamaño</option>
+                            <option value="PEQUEÑO">Pequeño</option>
+                            <option value="MEDIANO">Mediano</option>
+                            <option value="GRANDE">Grande</option>
+                        </select>
+                    </div>
+                    <div class="field-divider"></div>
+                    <div class="search-field">
+                        <label>EDAD</label>
+                        <select name="edad">
+                            <option value="">Cualquier edad</option>
+                            <option value="CACHORRO">Cachorro</option>
+                            <option value="JOVEN">Joven</option>
+                            <option value="ADULTO">Adulto</option>
+                            <option value="SENIOR">Senior</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-search-circle" style="margin-left: auto;">
+                        <i data-lucide="search"></i>
+                    </button>
+                </form>
+            </div>
         </section>
+
+        <!-- Panel de Estadísticas (Stats Section) -->
+        <div class="stats-panel-container">
+            <div class="stats-card-main glass-panel">
+                <div class="stat-item-landing">
+                    <div class="stat-icon-emoji">🏠</div>
+                    <div class="stat-number">+500</div>
+                    <div class="stat-desc">Hogares encontrados</div>
+                </div>
+                <div class="stat-item-landing">
+                    <div class="stat-icon-emoji">🐾</div>
+                    <div class="stat-number">20</div>
+                    <div class="stat-desc">Esperando hoy</div>
+                </div>
+                <div class="stat-item-landing">
+                    <div class="stat-icon-emoji">❤️</div>
+                    <div class="stat-number">120</div>
+                    <div class="stat-desc">Voluntarios activos</div>
+                </div>
+                <div class="stat-item-landing">
+                    <div class="stat-icon-emoji">🦴</div>
+                    <div class="stat-number">2T</div>
+                    <div class="stat-desc">Comida donada este año</div>
+                </div>
+            </div>
+        </div>
 
         <!-- Favoritos de la Semana -->
         <section class="page-header" style="text-align: center; margin-bottom: 3rem; margin-top: 4rem;">
