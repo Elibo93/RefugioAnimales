@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -96,6 +97,7 @@ public class AnimalViewController {
     }
 
     @GetMapping(WebRoutes.ANIMALES_NUEVO)
+    @PreAuthorize("hasRole('ADMIN')")
     public String formulario(Model model) {
         // Enums disponibles en el backend — se listan hardcoded ya que son valores fijos
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), new HashMap<>());
@@ -109,6 +111,7 @@ public class AnimalViewController {
     }
 
     @PostMapping(WebRoutes.ANIMALES_NUEVO)
+    @PreAuthorize("hasRole('ADMIN')")
     public String crearAnimal(@RequestParam String nombre,
             @RequestParam String especie,
             @RequestParam(required = false) String especiePersonalizada,
@@ -147,6 +150,7 @@ public class AnimalViewController {
     }
 
     @GetMapping(WebRoutes.ANIMALES_EDITAR)
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public String editarFormulario(@PathVariable Integer id, Model model) {
         Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
@@ -160,6 +164,7 @@ public class AnimalViewController {
     }
 
     @PostMapping(WebRoutes.ANIMALES_EDITAR)
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public String procesarEdicion(@PathVariable Integer id,
             @RequestParam String nombre,
             @RequestParam String especie,
@@ -196,6 +201,7 @@ public class AnimalViewController {
 
     @PostMapping(WebRoutes.ANIMALES_ELIMINAR)
     @ResponseBody
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> borrar(@PathVariable Integer id,
             HttpServletRequest request) {
         restTemplate.delete(apiUrl + "/v1/animales/" + id);

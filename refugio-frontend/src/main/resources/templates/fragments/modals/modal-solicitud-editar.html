@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+    <div th:fragment="modal" class="premium-modal-overlay"
+        onclick="if(event.target == this) document.getElementById('modal-host').innerHTML = ''">
+        
+        <div class="premium-modal-card" onclick="event.stopPropagation()">
+
+            <!-- Encabezado -->
+            <div class="premium-modal-header">
+                <div class="premium-modal-icon-wrapper">
+                    <i data-lucide="edit-3" style="width: 28px; height: 28px;"></i>
+                </div>
+                <h2 class="premium-modal-title">
+                    Solicitud #<span th:text="${solicitud.get('id')}">1</span>
+                </h2>
+                <p class="premium-modal-subtitle">
+                    Gestión de estado y observaciones
+                </p>
+            </div>
+
+            <!-- Contenido con scroll -->
+            <div class="premium-modal-body">
+                <form th:action="@{'/web/solicitudes/' + ${solicitud.get('id')} + '/editar'}" method="post" id="edit-form">
+                    
+                    <!-- Datos No Editables (Solo lectura) -->
+                    <input type="hidden" name="animalId" th:value="${solicitud.get('animalId')}">
+                    <input type="hidden" name="adoptanteId" th:value="${solicitud.get('adoptanteId')}">
+
+                    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                        
+                        <!-- Sección: Detalles de la Solicitud -->
+                        <div class="modal-section-divider">
+                            <span>Información del Caso</span>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <span class="info-pill-label">Animal</span>
+                                <div class="info-pill">
+                                    <i data-lucide="dog" style="width: 14px;"></i>
+                                    <span th:text="${animalNombre}">Rocky</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <span class="info-pill-label">Solicitante</span>
+                                <div class="info-pill">
+                                    <i data-lucide="user" style="width: 14px;"></i>
+                                    <span th:text="${adoptanteNombre}">Juan Pérez</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Gestión de Estado -->
+                        <div class="modal-section-divider">
+                            <span>Gestión Administrativa</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="editable-label">Estado de la Solicitud</label>
+                            <select name="estado" class="premium-select">
+                                <option th:each="e : ${estados}" th:value="${e}" th:text="${e}"
+                                    th:selected="${e.toString() == solicitud.get('estado').toString()}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Fila 3: Comentario (Ancho completo) -->
+                        <div class="form-group">
+                            <label class="editable-label">Razón / Comentario</label>
+                            <textarea name="comentario" th:text="${solicitud.get('comentario')}"
+                                placeholder="Escribe aquí las observaciones sobre la solicitud..."
+                                class="premium-textarea" style="min-height: 120px; resize: vertical;"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Pie con Acciones -->
+            <div class="premium-modal-footer">
+                <button type="button" class="btn btn-secondary" style="flex: 1; justify-content: center;"
+                    onclick="document.getElementById('modal-host').innerHTML = ''">
+                    Cerrar
+                </button>
+                <button type="submit" form="edit-form" class="btn btn-primary" style="flex: 1; justify-content: center;">
+                    Guardar
+                </button>
+            </div>
+
+            <script>
+                lucide.createIcons();
+            </script>
+        </div>
+    </div>
+
+</body>
+
+</html>

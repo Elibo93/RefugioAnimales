@@ -38,10 +38,10 @@ public class AdoptanteEntity {
     @Column(name = "usuario_id", nullable = false, unique = true)
     private Integer usuarioId;
 
-    @OneToMany(mappedBy = "adoptante", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "adoptante", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     private List<SolicitudAdopcionEntity> solicitudes;
 
-    @OneToMany(mappedBy = "adoptante", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "adoptante", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     private List<AdopcionEntity> adopciones;
 
     @PrePersist

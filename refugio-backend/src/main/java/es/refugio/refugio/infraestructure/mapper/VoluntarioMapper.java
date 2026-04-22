@@ -13,6 +13,7 @@ import es.refugio.refugio.infraestructure.db.jpa.entity.TareaEntity;
 import es.refugio.refugio.infraestructure.db.jpa.entity.VoluntarioEntity;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioRequest;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioResponse;
+import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioUpdateRequest;
 
 public class VoluntarioMapper {
 
@@ -23,6 +24,12 @@ public class VoluntarioMapper {
     }
 
     public static EditVoluntarioCommand toCommand(int id, VoluntarioRequest req) {
+        return new EditVoluntarioCommand(
+                new VoluntarioId(id),
+                req.disponibilidad());
+    }
+
+    public static EditVoluntarioCommand toCommand(int id, VoluntarioUpdateRequest req) {
         return new EditVoluntarioCommand(
                 new VoluntarioId(id),
                 req.disponibilidad());

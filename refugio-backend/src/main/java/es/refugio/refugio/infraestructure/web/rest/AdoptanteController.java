@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
+import es.refugio.refugio.infraestructure.security.CustomUserDetails;
 
 import es.refugio.refugio.application.command.adoptante.ApproveAdoptanteCommand;
 import es.refugio.refugio.application.command.adoptante.CreateAdoptanteCommand;
@@ -35,6 +36,7 @@ import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.infraestructure.mapper.AdoptanteMapper;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteRequest;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteResponse;
+import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteUpdateRequest;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.ConvertirAdoptanteRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -104,7 +106,7 @@ public class AdoptanteController {
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
     public AdoptanteResponse editAdoptante(
             @PathVariable int id,
-            @Valid @RequestBody AdoptanteRequest request) {
+            @Valid @RequestBody AdoptanteUpdateRequest request) {
         Adoptante adoptanteExistente = findService.findById(new AdoptanteId(id));
         checkOwnership(adoptanteExistente);
 
@@ -119,6 +121,7 @@ public class AdoptanteController {
             @ApiResponse(responseCode = "404", description = "Adoptante no encontrado")
     })
     @PatchMapping("/{id}/approve")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public AdoptanteResponse approveAdoptante(@PathVariable int id) {
         ApproveAdoptanteCommand command = new ApproveAdoptanteCommand(new AdoptanteId(id));
         Adoptante adoptante = approveService.approve(command);
@@ -131,6 +134,7 @@ public class AdoptanteController {
             @ApiResponse(responseCode = "404", description = "Adoptante no encontrado")
     })
     @PatchMapping("/{id}/reject")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public AdoptanteResponse rejectAdoptante(@PathVariable int id) {
         RejectAdoptanteCommand command = new RejectAdoptanteCommand(new AdoptanteId(id));
         Adoptante adoptante = rejectService.reject(command);
@@ -141,8 +145,8 @@ public class AdoptanteController {
     @PostMapping("/convertir-y-solicitar")
     @PreAuthorize("hasRole('PUBLICO')")
     public ResponseEntity<String> convertirYSolicitar(@Valid @RequestBody ConvertirAdoptanteRequest request) {
-        // TODO: Mover lógica a refugio-auth o usar FeignClient
-        Integer usuarioId = 1;
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Integer usuarioId = userDetails.getId();
 
         // 2. Crear Perfil de Adoptante
         Adoptante adoptante = createService.createAdoptante(new CreateAdoptanteCommand(
@@ -162,14 +166,13 @@ public class AdoptanteController {
     }
 
     private void checkOwnership(Adoptante adoptante) {
-        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Integer usuarioId = userDetails.getId();
+        
         boolean isStaff = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
 
         if (!isStaff) {
-            // TODO: Extraer desde JWT
-            Integer usuarioId = 1;
-
             if (!adoptante.getUsuarioId().equals(usuarioId)) {
                 throw new AccessDeniedException("No tienes permiso para acceder a este perfil.");
             }

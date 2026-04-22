@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+    <div th:fragment="modal" class="premium-modal-overlay"
+        onclick="if(event.target == this) document.getElementById('modal-host').innerHTML = ''">
+        
+        <div class="premium-modal-card" onclick="event.stopPropagation()">
+
+            <!-- Header -->
+            <div class="premium-modal-header">
+                <div class="premium-modal-icon-wrapper">
+                    <i data-lucide="user-cog" style="width: 28px; height: 28px;"></i>
+                </div>
+                <h2 class="premium-modal-title">
+                    Editar Voluntario
+                </h2>
+                <p class="premium-modal-subtitle">
+                    Actualiza la información de contacto y disponibilidad
+                </p>
+            </div>
+
+            <!-- Scrollable Content -->
+            <div class="premium-modal-body">
+                <form th:action="@{'/web/voluntarios/' + ${voluntario.get('id')} + '/editar'}" method="post" id="edit-volunteer-form">
+                    
+                    <!-- Datos No Editables (Solo lectura) -->
+                    <input type="hidden" name="usuarioId" th:value="${voluntario.get('usuarioId')}">
+                    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                        
+                        <!-- Sección: Información del Voluntario -->
+                        <div class="modal-section-divider">
+                            <span>Perfil del Voluntario</span>
+                        </div>
+
+                        <div class="form-group">
+                            <span class="info-pill-label">Nombre Completo</span>
+                            <div class="info-pill">
+                                <i data-lucide="user"></i>
+                                <span th:text="${nombre + ' ' + apellido}">Nombre Completo</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <span class="info-pill-label">Email</span>
+                            <div class="info-pill">
+                                <i data-lucide="mail" style="width: 14px;"></i>
+                                <span th:text="${email}">laura.garcia@refugio.local</span>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Disponibilidad y Contacto -->
+                        <div class="modal-section-divider">
+                            <span>Disponibilidad y Contacto</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="editable-label">Disponibilidad Actual</label>
+                            <input type="text" name="disponibilidad" th:value="${voluntario.get('disponibilidad')}" 
+                                required class="premium-select" placeholder="Ej: Tardes y fines de semana">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="editable-label">Teléfono Móvil</label>
+                            <input type="text" name="telefono" th:value="${telefono}" 
+                                class="premium-select" placeholder="Ej: 600000000">
+                        </div>
+
+                        <input type="hidden" name="email" th:value="${email}">
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer con Acciones -->
+            <div class="premium-modal-footer">
+                <button type="button" class="btn btn-secondary" style="flex: 1; justify-content: center;"
+                    onclick="document.getElementById('modal-host').innerHTML = ''">
+                    Cancelar
+                </button>
+                <button type="submit" form="edit-volunteer-form" class="btn btn-primary" style="flex: 1; justify-content: center;">
+                    Guardar
+                </button>
+            </div>
+
+            <script>
+                lucide.createIcons();
+            </script>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -91,9 +91,9 @@ public class AnimalEntity {
     @OneToOne(mappedBy = "animal", cascade = CascadeType.ALL, orphanRemoval = true)
     private AdopcionEntity adopcion;
 
-    @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "animal", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     private List<HistorialMedicoEntity> historialMedico;
 
-    @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "animal", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     private List<SolicitudAdopcionEntity> solicitudesAdopcion;
 }

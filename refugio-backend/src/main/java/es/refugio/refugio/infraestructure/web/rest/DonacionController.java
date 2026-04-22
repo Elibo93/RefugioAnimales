@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
+import es.refugio.refugio.infraestructure.security.CustomUserDetails;
 
 import es.refugio.refugio.application.command.donacion.CreateDonacionCommand;
 import es.refugio.refugio.application.command.donacion.EditDonacionCommand;
@@ -79,6 +80,7 @@ public class DonacionController {
 
     @Operation(summary = "Actualizar donación")
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DonacionResponse> update(@PathVariable Integer id,
             @Valid @RequestBody DonacionRequest request) {
         EditDonacionCommand command = DonacionMapper.toCommand(id, request);
@@ -88,28 +90,15 @@ public class DonacionController {
 
     @Operation(summary = "Listar donaciones")
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<DonacionResponse> findAll() {
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        boolean isStaff = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
-
         List<Donacion> donaciones = findDonacionService.findAll();
-
-        if (!isStaff) {
-            // TODO: Recuperar de JWT
-            Integer currentUserId = 1;
-
-            donaciones = donaciones.stream()
-                    .filter(d -> d.getUsuarioId() != null && d.getUsuarioId().getValue().equals(currentUserId))
-                    .toList();
-        }
-
         return DonacionMapper.toResponse(donaciones);
     }
 
     @Operation(summary = "Obtener donación por ID")
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public DonacionResponse findById(@PathVariable Integer id) {
         return DonacionMapper.toResponse(findDonacionService.findById(new DonacionId(id)));
     }

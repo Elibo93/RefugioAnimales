@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +40,7 @@ public class AdopcionViewController {
     private String authUrl;
 
     @GetMapping(WebRoutes.ADOPCIONES_BASE)
+    @PreAuthorize("hasRole('ADMIN')")
     public String listar(Model model,
             @RequestParam(required = false) Integer adoptanteId,
             @RequestParam(required = false) Integer animalId,

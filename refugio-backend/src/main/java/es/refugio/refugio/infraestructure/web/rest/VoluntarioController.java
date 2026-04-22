@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import es.refugio.refugio.application.command.voluntario.CreateVoluntarioCommand;
 import es.refugio.refugio.application.command.voluntario.EditVoluntarioCommand;
 import es.refugio.refugio.application.service.voluntario.CreateVoluntarioService;
@@ -25,6 +26,7 @@ import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
 import es.refugio.refugio.infraestructure.mapper.VoluntarioMapper;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioRequest;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioResponse;
+import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioUpdateRequest;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("api/v1/voluntarios")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "Voluntarios", description = "Gestión de voluntarios del refugio")
 public class VoluntarioController {
 
@@ -57,7 +60,7 @@ public class VoluntarioController {
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "Voluntario actualizado"), @ApiResponse(responseCode = "404", description = "No encontrado") })
     @PutMapping("/{id}")
     public ResponseEntity<VoluntarioResponse> update(@PathVariable Integer id,
-            @Valid @RequestBody VoluntarioRequest request) {
+            @Valid @RequestBody VoluntarioUpdateRequest request) {
         EditVoluntarioCommand command = VoluntarioMapper.toCommand(id, request);
         Voluntario voluntario = editVoluntarioService.update(command);
         return ResponseEntity.ok(VoluntarioMapper.toResponse(voluntario));

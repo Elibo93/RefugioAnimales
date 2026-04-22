@@ -81,7 +81,7 @@
                     <a th:href="@{/web/donaciones}" class="sidebar-item"
                         th:classappend="${#strings.contains(currentUri, '/web/donaciones')} ? 'active' : ''">
                         <i data-lucide="coins"></i>
-                        <span th:text="#{donacion.list.title}">Donaciones</span>
+                        <span th:text="${isAdmin} ? #{menu.donaciones.card.title} : #{menu.colaborar}">Donaciones</span>
                     </a>
                     <a th:href="@{/web/voluntarios/nuevo}" class="sidebar-item" th:if="${!isAdmin}"
                         th:classappend="${#strings.equals(currentUri, '/web/voluntarios/nuevo')} ? 'active' : ''">

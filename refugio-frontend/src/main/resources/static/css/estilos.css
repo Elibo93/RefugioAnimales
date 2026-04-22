@@ -97,7 +97,172 @@ body {
     flex-direction: column;
 }
 
-/* ... existing code ... */
+
+
+/* =====================
+   MODAL PREMIUM (REDISEÑO)
+   ===================== */
+.premium-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.premium-modal-card {
+    background: white;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: modalScaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalScaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.premium-modal-header {
+    padding: 2rem 2rem 1.5rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.premium-modal-icon-wrapper {
+    background: var(--primary-light);
+    color: var(--primary);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.premium-modal-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.25rem;
+}
+
+.premium-modal-subtitle {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.premium-modal-body {
+    padding: 0 2rem 1.5rem;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.premium-modal-footer {
+    padding: 1.5rem 2rem 2rem;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    flex-shrink: 0;
+    display: flex;
+    gap: 1rem;
+}
+
+/* Píldora de información (solo lectura) */
+.info-pill {
+    background: #f1f5f9;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    color: var(--text-main);
+    font-weight: 500;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Etiquetas Premium Unificadas */
+.info-pill-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+    /* Slate 500: Legible pero secundario */
+    margin-bottom: 0.6rem;
+}
+
+.editable-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #334155; /* Slate 700: Color sólido y profesional */
+    margin-bottom: 0.6rem;
+}
+
+/* Títulos de Sección sutiles */
+.modal-section-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.modal-section-divider span {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
+.modal-section-divider::after {
+    content: "";
+    flex-grow: 1;
+    height: 1px;
+    background: #e2e8f0;
+}
+
+.premium-select,
+.premium-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 12px;
+    border: 2px solid var(--primary-light);
+    background: white;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.premium-select:focus,
+.premium-textarea:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.1);
+}
 
 .form-group input,
 .form-group select,
@@ -122,7 +287,7 @@ body {
     border-color: var(--primary);
     background-color: #fff;
     box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-    /* Larger focus ring */
+    /* Anillo de enfoque más amplio */
 }
 
 /* =====================
@@ -160,7 +325,7 @@ body {
     gap: 1.5rem;
 }
 
-/* Brand Pill for visibility on image */
+/* Etiqueta de marca para visibilidad sobre imagen */
 .app-brand-pill {
     display: flex;
     align-items: center;
@@ -254,7 +419,7 @@ body {
     position: fixed;
     top: 0;
     left: -320px;
-    /* Hidden by default on the left */
+    /* Oculto por defecto a la izquierda */
     width: 320px;
     height: 100vh;
     background: rgba(255, 255, 255, 0.85);
@@ -417,7 +582,7 @@ body {
     color: white;
 }
 
-/* Toggle Button Styles */
+/* Estilos del botón de alternancia */
 .sidebar-toggle-btn {
     display: flex;
     align-items: center;
@@ -791,7 +956,7 @@ body {
     color: white;
 }
 
-/* Floating Search Bar */
+/* Barra de búsqueda flotante */
 .search-bar-floating {
     position: relative;
     z-index: 20;
@@ -851,7 +1016,7 @@ body {
     background: var(--primary-hover);
 }
 
-/* Impact Counter */
+/* Contador de impacto */
 .impact-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
