@@ -25,8 +25,8 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 
 - [ ] **Listados:**
   - ✅ Cambiar estética de animales a formato lista simple con miniatura.
-  - Botón de "Asignar Tareas" en lista de voluntarios.
-  - Botón de "Ver Historial Médico" en lista de animales.
+  - ✅ Botón de "Asignar Tareas" en lista de voluntarios.
+  - ✅Botón de "Ver Historial Médico" en lista de animales.
   - ✅-Hacer clickables los nombres en las listas para ir al perfil. 
 
 ### 2) Frontend: Perfiles Detallados
@@ -34,7 +34,7 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 - [✅] **Perfil de Animal:** Página exclusiva con datos completos, historial médico, estadísticas de vistas e info del adoptante.
 
 ### 3) Frontend: Panel del Adoptante
-- [ ] **"Mis Adoptados":** Lista de sus animales. Si no hay ninguno, mostrar mensaje: *"Vaya, parece que aún no te has hecho con ninguno de nuestros amiguitos"* + botón "Adopta ahora".
+- [✅] **"Mis Adoptados":** Lista de sus animales. Si no hay ninguno, mostrar mensaje: *"Vaya, parece que aún no te has hecho con ninguno de nuestros amiguitos"* + botón "Adopta ahora".
 - [ ] **Notificaciones:** Estados de solicitudes (aprobada/rechazada) y sugerencias de animales.
 - [ ] **Encuesta:** Formulario de preferencias para activar recomendaciones inteligentes.
 

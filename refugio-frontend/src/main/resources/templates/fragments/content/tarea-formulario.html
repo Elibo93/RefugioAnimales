@@ -7,41 +7,64 @@
 
 <body>
     <div th:fragment="content">
-        <div class="page-header" style="text-align:center;">
-            <h1 class="page-title"
-                th:text="${tarea.get('id') == null ? #messages.msg('tarea.form.title') : #messages.msg('tarea.modal.edit.title')}">
-                Nueva tarea</h1>
+        <div class="actions-bar" style="margin-bottom: 2rem;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <a th:href="${returnUrl}" class="btn-circle" style="background: white; border: 1px solid var(--border); color: var(--text-main); display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s;">
+                    <i data-lucide="chevron-left"></i>
+                </a>
+                <span class="user-name page" 
+                      th:text="${voluntarioPreseleccionado != null ? 'Asignar tarea a ' + voluntarioPreseleccionado.get('nombre') + ' ' + (voluntarioPreseleccionado.get('apellido') ?: '') : (tarea.get('id') == null ? 'Nueva tarea' : 'Editar tarea')}">
+                    Nueva tarea
+                </span>
+            </div>
         </div>
-        <div class="card" style="max-width:800px; margin:0 auto;">
-            <form
-                th:action="${tarea.get('id') == null ? '/web/tareas/nueva' : '/web/tareas/' + tarea.get('id') + '/editar'}"
+
+        <div class="card glass-card" style="max-width:800px; margin:0 auto; padding: 30px; border-radius: 20px;">
+            <form th:action="${tarea.get('id') == null ? '/web/tareas/nueva' : '/web/tareas/' + tarea.get('id') + '/editar'}"
                 method="post">
-                <div class="form-grid">
-                    <div class="form-group" style="grid-column:1/-1;">
-                        <label th:text="#{tarea.field.descripcion}">Descripción</label>
-                        <input type="text" name="descripcion" th:value="${tarea.get('descripcion')}" required>
+                
+                <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label style="font-weight: 700; color: var(--text-main); margin-bottom: 8px; display: block;">Descripción de la tarea</label>
+                        <input type="text" name="descripcion" th:value="${tarea.get('descripcion')}" 
+                               placeholder="Ej: Limpieza de jaulas sector A"
+                               style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-main);" required>
                     </div>
+
                     <div class="form-group">
-                        <label th:text="#{tarea.field.estado}">Estado</label>
-                        <select name="estado" required>
+                        <label style="font-weight: 700; color: var(--text-main); margin-bottom: 8px; display: block;">Estado inicial</label>
+                        <select name="estado" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-main);" required>
                             <option th:each="e : ${estados}" th:value="${e}" th:text="${e}"
                                 th:selected="${e == tarea.get('estado')}"></option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label th:text="#{tarea.field.voluntarios}">Voluntarios asignados</label>
-                        <select name="voluntarioIds" multiple style="height:100px;">
+
+                    <div class="form-group" th:if="${voluntarioPreseleccionado == null}">
+                        <label style="font-weight: 700; color: var(--text-main); margin-bottom: 8px; display: block;">Voluntarios asignados</label>
+                        <select name="voluntarioIds" multiple style="width: 100%; height: 120px; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-main);">
                             <option th:each="v : ${voluntarios}" th:value="${v.get('id').get('value')}"
-                                th:with="u=${usuariosMap[v.get('usuarioId').get('value')]}"
-                                th:text="${u?.get('nombre') + ' ' + u?.get('apellido')}"
-                                th:selected="${tarea.get('voluntarios') != null and tarea.get('voluntarios').contains(v.get('id').get('value'))}">
+                                th:with="u=${usuariosMap != null ? usuariosMap[v.get('usuarioId').get('value')] : null}"
+                                th:text="${u != null ? u.get('nombre') + ' ' + u.get('apellido') : 'ID: ' + v.get('id').get('value')}"
+                                th:selected="${tarea.get('voluntarioIds') != null and tarea.get('voluntarioIds').contains(v.get('id').get('value'))}">
                             </option>
                         </select>
+                        <small style="color: var(--text-muted); font-size: 0.75rem; margin-top: 5px; display: block;">Mantén Ctrl (o Cmd) para seleccionar varios</small>
+                    </div>
+
+                    <!-- Hidden input if pre-selected -->
+                    <div th:if="${voluntarioPreseleccionado != null}">
+                        <input type="hidden" name="voluntarioIds" th:each="vid : ${tarea.get('voluntarioIds')}" th:value="${vid}">
                     </div>
                 </div>
-                <div class="modal-actions" style="margin-top:2rem;">
-                    <a th:href="@{/web/tareas}" class="btn btn-secondary" th:text="#{generic.btn.cancel}">Cancelar</a>
-                    <button type="submit" class="btn btn-primary" th:text="#{generic.btn.save}">Guardar tarea</button>
+
+                <div class="modal-actions" style="margin-top: 3rem; display: flex; gap: 15px; justify-content: flex-end;">
+                    <a th:href="${returnUrl}" class="btn btn-secondary" 
+                       style="padding: 12px 25px; border-radius: 12px; font-weight: 600;">Cancelar</a>
+                    <button type="submit" class="btn btn-primary" 
+                            style="padding: 12px 30px; border-radius: 12px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="check-circle" style="width: 18px;"></i>
+                        <span th:text="${voluntarioPreseleccionado != null ? 'Asignar Tarea' : 'Guardar Tarea'}">Guardar tarea</span>
+                    </button>
                 </div>
             </form>
         </div>

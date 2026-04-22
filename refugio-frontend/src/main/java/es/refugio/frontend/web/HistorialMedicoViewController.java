@@ -142,6 +142,26 @@ public class HistorialMedicoViewController {
         out.close();
     }
 
+    @GetMapping(WebRoutes.HISTORIALES_BASE + "/{id}/detalle")
+    public String verDetalle(@PathVariable Integer id, Model model) {
+        Object historial = restTemplate.getForObject(apiUrl + "/v1/historial-medico/" + id, Object.class);
+        model.addAttribute("historial", historial);
+        
+        if (historial instanceof Map) {
+            Object animalId = ((Map<?, ?>) historial).get("animalId");
+            if (animalId != null) {
+                try {
+                    Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
+                    model.addAttribute("animal", animal);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        
+        return "fragments/content/historial-medico-detalle-modal :: detalle";
+    }
+
     private List<Object> fetchList(String path) {
         try {
             Object[] arr = restTemplate.getForObject(apiUrl + path, Object[].class);

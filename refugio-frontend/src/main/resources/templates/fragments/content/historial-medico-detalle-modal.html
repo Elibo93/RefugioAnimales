@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="detalle" class="modal-overlay-custom" onclick="if(event.target === this) closeModal()">
+        <div id="historialDetalleModal" class="modal-content fade-in" 
+             style="max-width: 550px; width: 90%; background: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.2);">
+            
+            <!-- Header con foto del animal -->
+            <div class="modal-header-image" style="position: relative; height: 240px; overflow: hidden;">
+                <img th:src="${animal != null and animal.get('foto') != null and !animal.get('foto').isEmpty() ? animal.get('foto') : '/img/placeholder-animal.png'}" 
+                     style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;" alt="Foto del animal">
+                <div style="position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.8));"></div>
+                <div style="position: absolute; bottom: 20px; left: 25px; right: 25px;">
+                    <span style="display: inline-block; padding: 4px 12px; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 20px; color: white; font-size: 0.75rem; font-weight: 600; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.3);" 
+                          th:text="${historial.get('fecha') != null ? historial.get('fecha').toString().substring(0,10) : '-'}">2024-01-01</span>
+                    <h2 style="margin: 0; color: white; font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px;" 
+                        th:text="${animal != null ? 'Historial de ' + animal.get('nombre') : 'Detalle Médico'}">Historial de Rocky</h2>
+                </div>
+                <button type="button" onclick="closeModal()" 
+                        style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.2s;">
+                    <i data-lucide="x" style="width: 20px;"></i>
+                </button>
+            </div>
+
+            <!-- Contenido -->
+            <div class="modal-body" style="padding: 30px; background: #ffffff;">
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    
+                    <!-- Veterinario -->
+                    <div class="info-row">
+                        <label style="display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 1.5px; margin-bottom: 10px;">Veterinario Responsable</label>
+                        <div style="display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 12px 16px; border-radius: 16px; border: 1px solid #f1f5f9;">
+                            <div style="width: 40px; height: 40px; border-radius: 12px; background: #e0f2fe; display: flex; align-items: center; justify-content: center; color: #0284c7;">
+                                <i data-lucide="user-check" style="width: 20px;"></i>
+                            </div>
+                            <div>
+                                <strong style="color: #1e293b; font-size: 1rem;" th:text="${historial.get('veterinario')}">Dra. Silva</strong>
+                                <span style="display: block; font-size: 0.75rem; color: #64748b;">Especialista Colegiado</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Diagnóstico -->
+                    <div class="info-row">
+                        <label style="display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 1.5px; margin-bottom: 10px;">Diagnóstico / Descripción</label>
+                        <div style="background: #fdf2f8; padding: 16px; border-radius: 16px; border-left: 5px solid #ec4899;">
+                            <p style="margin: 0; line-height: 1.6; color: #831843; font-weight: 500;" th:text="${historial.get('descripcion')}">
+                                Problemas articulares detectados...
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Tratamiento -->
+                    <div class="info-row">
+                        <label style="display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 1.5px; margin-bottom: 10px;">Tratamiento Aplicado</label>
+                        <div style="background: #f0fdf4; padding: 16px; border-radius: 16px; border-left: 5px solid #22c55e;">
+                            <p style="margin: 0; line-height: 1.6; color: #14532d; font-weight: 500;" th:text="${historial.get('tratamiento')}">
+                                Medicación diaria articular...
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer Acciones -->
+                <div style="margin-top: 35px; display: flex; justify-content: flex-end;">
+                    <button type="button" onclick="closeModal()" 
+                            class="btn-premium" 
+                            style="background: #1e293b; color: white; padding: 12px 30px; border-radius: 14px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 8px;">
+                        <span>Cerrar Detalle</span>
+                        <i data-lucide="chevron-right" style="width: 18px;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <script>
+            lucide.createIcons();
+            function closeModal() {
+                const modal = document.getElementById('historialDetalleModal').closest('.modal-overlay-custom');
+                if (modal) {
+                    modal.style.opacity = '0';
+                    setTimeout(() => modal.remove(), 300);
+                }
+            }
+        </script>
+    </div>
+</body>
+</html>
