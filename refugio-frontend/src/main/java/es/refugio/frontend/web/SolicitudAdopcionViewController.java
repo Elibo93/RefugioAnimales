@@ -33,10 +33,6 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-<<<<<<< HEAD
-=======
-@RequestMapping("/web/solicitudes")
->>>>>>> f94d0836d93be56b795b0ee0cf3d4d36125820bb
 @RequiredArgsConstructor
 public class SolicitudAdopcionViewController {
 
@@ -62,7 +58,6 @@ public class SolicitudAdopcionViewController {
         return "fragments/modals/modal-solicitud-directa :: modal";
     }
 
-<<<<<<< HEAD
     @GetMapping(WebRoutes.SOLICITUDES_MODAL_EDITAR)
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public String modalEditar(@PathVariable Integer id, Model model) {
@@ -119,9 +114,6 @@ public class SolicitudAdopcionViewController {
 
     @GetMapping(WebRoutes.SOLICITUDES_BASE)
     @PreAuthorize("hasRole('ADMIN')")
-=======
-    @GetMapping
->>>>>>> f94d0836d93be56b795b0ee0cf3d4d36125820bb
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
         List<Object> solicitudes = fetchList("/v1/solicitudes-adopcion");
         List<Object> animales = fetchList("/v1/animales");
@@ -179,22 +171,14 @@ public class SolicitudAdopcionViewController {
         model.addAttribute(ModelAttribute.Solicitud_LIST.getName(), solicitudes);
         model.addAttribute("animalesMap", animalesMap);
         model.addAttribute("adoptanteNombres", adoptanteNombres);
-<<<<<<< HEAD
-        if (successMessage != null)
-            model.addAttribute("successMessage", successMessage);
-=======
         model.addAttribute("adoptanteUsuarioIds", adoptanteUsuarioIds);
         if (successMessage != null) model.addAttribute("successMessage", successMessage);
->>>>>>> f94d0836d93be56b795b0ee0cf3d4d36125820bb
         model.addAttribute("currentUri", WebRoutes.SOLICITUDES_BASE);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-<<<<<<< HEAD
-    @GetMapping(WebRoutes.SOLICITUDES_NUEVA)
     @PreAuthorize("hasRole('ADMIN')")
-=======
     @GetMapping("/mis-adoptados")
     public String misAdoptados(Model model) {
         // 1. Obtener ID del usuario actual del modelo (inyectado por GlobalModelAttributesAdvice)
@@ -259,7 +243,6 @@ public class SolicitudAdopcionViewController {
     }
 
     @GetMapping("/nueva")
->>>>>>> f94d0836d93be56b795b0ee0cf3d4d36125820bb
     public String formulario(Model model, @RequestParam(required = false) Integer animalId) {
         Map<String, Object> solicitud = new HashMap<>();
         solicitud.put("fecha", LocalDateTime.now().toString());
@@ -275,12 +258,8 @@ public class SolicitudAdopcionViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-<<<<<<< HEAD
     @PostMapping(WebRoutes.SOLICITUDES_NUEVA)
     @PreAuthorize("hasRole('ADMIN')")
-=======
-    @PostMapping("/nueva")
->>>>>>> f94d0836d93be56b795b0ee0cf3d4d36125820bb
     public String crear(@RequestParam Integer animalId,
             @RequestParam Integer adoptanteId,
             @RequestParam String comentario,
@@ -303,12 +282,8 @@ public class SolicitudAdopcionViewController {
         return "redirect:" + WebRoutes.SOLICITUDES_BASE;
     }
 
-<<<<<<< HEAD
     @GetMapping(WebRoutes.SOLICITUDES_EDITAR)
     @PreAuthorize("hasRole('ADMIN')")
-=======
-    @GetMapping("/{id}/editar")
->>>>>>> f94d0836d93be56b795b0ee0cf3d4d36125820bb
     public String editarFormulario(@PathVariable Integer id, Model model) {
         Object solicitud = restTemplate.getForObject(apiUrl + "/v1/solicitudes-adopcion/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Solicitud.getName(), solicitud);
@@ -319,12 +294,8 @@ public class SolicitudAdopcionViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-<<<<<<< HEAD
     @PostMapping(WebRoutes.SOLICITUDES_EDITAR)
     @PreAuthorize("hasRole('ADMIN')")
-=======
-    @PostMapping("/{id}/editar")
->>>>>>> f94d0836d93be56b795b0ee0cf3d4d36125820bb
     public String procesarEdicion(@PathVariable Integer id,
             @RequestParam Integer animalId,
             @RequestParam Integer adoptanteId,
@@ -390,12 +361,8 @@ public class SolicitudAdopcionViewController {
         return "redirect:" + WebRoutes.SOLICITUDES_BASE;
     }
 
-<<<<<<< HEAD
     @GetMapping(WebRoutes.SOLICITUDES_PDF)
     @PreAuthorize("hasRole('ADMIN')")
-=======
-    @GetMapping("/pdf")
->>>>>>> f94d0836d93be56b795b0ee0cf3d4d36125820bb
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<Object> solicitudes = fetchList("/v1/solicitudes-adopcion");
         Context context = new Context();

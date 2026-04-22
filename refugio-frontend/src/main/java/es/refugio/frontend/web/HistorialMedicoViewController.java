@@ -37,7 +37,6 @@ public class HistorialMedicoViewController {
 
     @GetMapping(WebRoutes.HISTORIALES_BASE)
     public String listar(Model model, 
-<<<<<<< HEAD
             @RequestParam(required = false) Integer animalId,
             @RequestParam(required = false) String successMessage) {
         
@@ -48,12 +47,6 @@ public class HistorialMedicoViewController {
             historiales = fetchList("/v1/historial-medico");
         }
         List<Object> animales = fetchList("/v1/animales");
-=======
-            @RequestParam(required = false) String successMessage,
-            @RequestParam(required = false) Integer animalId) {
-        List<Object> historiales = fetchList("/v1/historial-medico");
-        List<Object> animales   = fetchList("/v1/animales");
->>>>>>> f94d0836d93be56b795b0ee0cf3d4d36125820bb
 
         if (animalId != null) {
             historiales = historiales.stream()
