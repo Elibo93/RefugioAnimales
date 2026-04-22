@@ -156,7 +156,7 @@
                         <a th:href="@{/web/donaciones}" class="sidebar-item"
                             th:classappend="${#strings.contains(currentUri, '/web/donaciones')} ? 'active' : ''">
                             <i data-lucide="coins"></i>
-                            <span>Donación</span>
+                            <span th:text="#{menu.colaborar}">Aportar</span>
                         </a>
                     </div>
                 </div>
@@ -184,7 +184,7 @@
                         </a>
                         <a th:href="@{/web/donaciones}" class="sidebar-item"
                             th:classappend="${#strings.contains(currentUri, '/web/donaciones')} ? 'active' : ''">
-                            <i data-lucide="coins"></i><span>Donaciones</span>
+                            <i data-lucide="coins"></i><span th:text="#{menu.colaborar}">Colaborar</span>
                         </a>
                     </div>
                 </div>
@@ -208,7 +208,7 @@
                         </a>
                         <a th:href="@{/web/donaciones}" class="sidebar-item"
                             th:classappend="${#strings.contains(currentUri, '/web/donaciones')} ? 'active' : ''">
-                            <i data-lucide="coins"></i><span>Donar</span>
+                            <i data-lucide="coins"></i><span th:text="#{menu.colaborar}">Donar</span>
                         </a>
                     </div>
                 </div>
