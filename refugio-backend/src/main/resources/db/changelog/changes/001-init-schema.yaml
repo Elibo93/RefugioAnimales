@@ -399,6 +399,12 @@ databaseChangeLog:
                   type: VARCHAR(50)
                   constraints:
                     nullable: false
+              - column:
+                  name: fecha_limite
+                  type: DATETIME
+              - column:
+                  name: instrucciones
+                  type: VARCHAR(1000)
 
   # ============================================================
   # 010 — Crear tabla pivote voluntarios_tareas (N:M)

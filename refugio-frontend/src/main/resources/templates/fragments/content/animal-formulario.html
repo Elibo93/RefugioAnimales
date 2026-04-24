@@ -50,22 +50,6 @@
                             placeholder="Ej: Hámster, Conejo..." th:readonly="${animal.get('id') != null}">
                     </div>
 
-                    <script>
-                        function toggleEspeciePersonalizada() {
-                            const select = document.getElementById('especieSelect');
-                            const group = document.getElementById('especiePersonalizadaGroup');
-                            const input = document.getElementById('especiePersonalizadaInput');
-
-                            if (select.value === 'OTRO') {
-                                group.style.display = 'block';
-                                input.required = true;
-                            } else {
-                                group.style.display = 'none';
-                                input.required = false;
-                                input.value = ''; // Limpiar si se cambia a Perro/Gato
-                            }
-                        }
-                    </script>
 
                     <div class="form-group" th:classappend="${animal.get('id') != null ? 'readonly-group' : ''}">
                         <label th:text="#{animal.field.breed}">Raza</label>
@@ -156,60 +140,6 @@
                         <!-- Campo oculto para la versión redimensionada -->
                         <input type="hidden" name="foto" id="resizedFotoInput">
 
-                        <script>
-                            function previewImage(input) {
-                                const container = document.getElementById('imagePreviewContainer');
-                                const preview = document.getElementById('imagePreview');
-                                const resizedInput = document.getElementById('resizedFotoInput');
-                                
-                                if (input.files && input.files[0]) {
-                                    const reader = new FileReader();
-                                    reader.onload = function(e) {
-                                        const img = new Image();
-                                        img.onload = function() {
-                                            // Redimensionar si es muy grande
-                                            const MAX_WIDTH = 1024;
-                                            const MAX_HEIGHT = 1024;
-                                            let width = img.width;
-                                            let height = img.height;
-
-                                            if (width > height) {
-                                                if (width > MAX_WIDTH) {
-                                                    height *= MAX_WIDTH / width;
-                                                    width = MAX_WIDTH;
-                                                }
-                                            } else {
-                                                if (height > MAX_HEIGHT) {
-                                                    width *= MAX_HEIGHT / height;
-                                                    height = MAX_HEIGHT;
-                                                }
-                                            }
-
-                                            const canvas = document.createElement('canvas');
-                                            canvas.width = width;
-                                            canvas.height = height;
-                                            const ctx = canvas.getContext('2d');
-                                            ctx.drawImage(img, 0, 0, width, height);
-
-                                            // Convertir a Base64 optimizado (JPEG 0.8 de calidad)
-                                            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                                            preview.src = dataUrl;
-                                            container.style.display = 'block';
-                                            
-                                            // Guardar en el campo oculto para enviarlo
-                                            resizedInput.value = dataUrl;
-                                            
-                                            console.log("Imagen redimensionada. Tamaño aproximado: " + Math.round(dataUrl.length / 1024) + " KB");
-                                        };
-                                        img.src = e.target.result;
-                                    }
-                                    reader.readAsDataURL(input.files[0]);
-                                } else {
-                                    container.style.display = 'none';
-                                    resizedInput.value = '';
-                                }
-                            }
-                        </script>
                         
                         <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">Formatos aceptados:
                             JPG, PNG. Máximo 5MB.</p>

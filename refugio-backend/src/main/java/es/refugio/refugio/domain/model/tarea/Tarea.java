@@ -17,5 +17,18 @@ public class Tarea {
     private String descripcion;
     private LocalDateTime fecha;
     private EstadoTarea estado;
+    private LocalDateTime fechaLimite;
+    private String instrucciones;
     private List<VoluntarioId> voluntarios;
+
+    public String getPrioridad() {
+        if (fechaLimite == null) return "BAJA";
+        LocalDateTime now = LocalDateTime.now();
+        if (fechaLimite.isBefore(now.plusDays(1))) {
+            return "ALTA";
+        } else if (fechaLimite.isBefore(now.plusDays(3))) {
+            return "MEDIA";
+        }
+        return "BAJA";
+    }
 }

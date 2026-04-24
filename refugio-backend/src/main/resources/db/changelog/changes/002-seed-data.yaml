@@ -384,18 +384,24 @@ databaseChangeLog:
               - column: { name: descripcion, value: "Pasear a los perros grandes (Thor y Rocky)" }
               - column: { name: fecha, valueDate: "now()" }
               - column: { name: estado, value: "PENDIENTE" }
+              - column: { name: fecha_limite, valueDate: "now() + interval 5 day" }
+              - column: { name: instrucciones, value: "Llevar correas fuertes y bolsas. Evitar zonas con muchos gatos." }
         - insert:
             tableName: tareas
             columns:
               - column: { name: descripcion, value: "Limpieza profunda de jaulas de gatitos" }
               - column: { name: fecha, valueDate: "now()" }
               - column: { name: estado, value: "COMPLETADA" }
+              - column: { name: fecha_limite, valueDate: "now() - interval 1 day" }
+              - column: { name: instrucciones, value: "Usar desinfectante especial. Cambiar todas las mantas." }
         - insert:
             tableName: tareas
             columns:
               - column: { name: descripcion, value: "Administración de medicamentos a Rex y Rocky" }
               - column: { name: fecha, valueDate: "now()" }
               - column: { name: estado, value: "EN_PROCESO" }
+              - column: { name: fecha_limite, valueDate: "now() + interval 12 hour" }
+              - column: { name: instrucciones, value: "Revisar dosis exacta en el historial médico antes de administrar." }
 
   - changeSet:
       id: 019-seed-voluntarios-tareas

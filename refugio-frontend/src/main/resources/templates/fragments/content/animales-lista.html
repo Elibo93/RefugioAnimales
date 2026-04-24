@@ -264,52 +264,61 @@
                     </div>
                     <button id="nextPage" class="btn-circle"><i data-lucide="chevron-right"></i></button>
                 </div>
+                <!-- Special Sections -->
+                <section class="special-section" th:if="${!isAdmin and not #lists.isEmpty(animales)}"
+                    style="margin-top: 5rem; padding-top: 3rem; border-top: 1px solid rgba(0,0,0,0.05);">
+                    <h2
+                        style="font-weight: 800; margin-bottom: 2.5rem; color: var(--text-main); display: flex; align-items: center; gap: 0.75rem;">
+                        <i data-lucide="sparkles" style="color: var(--secondary);"></i>
+                        <span>No te olvides de...</span>
+                    </h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+                        <!-- Card 1 -->
+                        <div class="special-card glass-card hover-lift"
+                            style="padding: 2.5rem; cursor: pointer; transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.05); position: relative; background: white;"
+                            hx-get="/web/animales?edad=senior" hx-target="#contenido-dinamico" hx-push-url="true">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
+                                <div style="background: rgba(255, 140, 0, 0.1); padding: 0.85rem; border-radius: 14px;">
+                                    <i data-lucide="heart" style="color: #FF8C00;"></i>
+                                </div>
+                                <h4 style="color: #FF8C00; margin: 0; font-weight: 800; font-size: 1.15rem;">🐾 Animales
+                                    Senior</h4>
+                            </div>
+                            <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.7;">
+                                Ellos también necesitan amor y un sofá cómodo donde descansar sus últimos años.
+                            </p>
+                            <div
+                                style="margin-top: 1.5rem; display: flex; align-items: center; gap: 0.5rem; color: #FF8C00; font-weight: 700; font-size: 0.9rem;">
+                                <span>Ver abuelitos</span>
+                                <i data-lucide="arrow-right" style="width: 16px;"></i>
+                            </div>
+                        </div>
+                        <!-- Card 2 -->
+                        <div class="special-card glass-card hover-lift"
+                            style="padding: 2.5rem; cursor: pointer; transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.05); position: relative; background: white;"
+                            hx-get="/web/animales?urgencia=true" hx-target="#contenido-dinamico" hx-push-url="true">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
+                                <div style="background: rgba(79, 70, 229, 0.1); padding: 0.85rem; border-radius: 14px;">
+                                    <i data-lucide="zap" style="color: #4F46E5;"></i>
+                                </div>
+                                <h4 style="color: #4F46E5; margin: 0; font-weight: 800; font-size: 1.15rem;">👻 Animales
+                                    Invisibles</h4>
+                            </div>
+                            <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.7;">
+                                Llevan tiempo con nosotros o tienen necesidades especiales. ¿Serás tú su héroe?
+                            </p>
+                            <div
+                                style="margin-top: 1.5rem; display: flex; align-items: center; gap: 0.5rem; color: #4F46E5; font-weight: 700; font-size: 0.9rem;">
+                                <span>Ver urgentes</span>
+                                <i data-lucide="arrow-right" style="width: 16px;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 <script>
-                    (function () {
-                        const itemsPerPage = 8;
-                        function initPagination() {
-                            const grid = document.getElementById('animal-grid-admin') || document.getElementById('animal-grid-cards');
-                            if (!grid) return;
-                            const items = Array.from(grid.querySelectorAll('.animal-row-item, .animal-card-item'));
-                            const totalPages = Math.ceil(items.length / itemsPerPage);
-                            let currentPage = 1;
-
-                            const prevBtn = document.getElementById('prevPage');
-                            const nextBtn = document.getElementById('nextPage');
-                            const pageNumSpan = document.getElementById('currentPageNum');
-                            const totalPagesSpan = document.getElementById('totalPagesNum');
-
-                            if (totalPagesSpan) totalPagesSpan.textContent = totalPages;
-                            if (items.length <= itemsPerPage) {
-                                document.getElementById('pagination-controls').style.display = 'none';
-                                items.forEach(i => i.style.display = (grid.tagName === 'TBODY' ? 'table-row' : 'block'));
-                                return;
-                            }
-
-                            function showPage(page) {
-                                currentPage = page;
-                                const start = (page - 1) * itemsPerPage;
-                                const end = start + itemsPerPage;
-                                items.forEach((item, index) => {
-                                    const displayStyle = (grid.tagName === 'TBODY' ? 'table-row' : 'block');
-                                    item.style.display = (index >= start && index < end) ? displayStyle : 'none';
-                                });
-                                if (pageNumSpan) pageNumSpan.textContent = page;
-                                if (prevBtn) prevBtn.disabled = (page === 1);
-                                if (nextBtn) nextBtn.disabled = (page === totalPages);
-                                if (window.lucide) lucide.createIcons();
-                            }
-
-                            if (prevBtn) prevBtn.onclick = () => { if (currentPage > 1) showPage(currentPage - 1); };
-                            if (nextBtn) nextBtn.onclick = () => { if (currentPage < totalPages) showPage(currentPage + 1); };
-                            showPage(1);
-                        }
-                        initPagination();
-                        document.body.addEventListener('htmx:afterSwap', function (evt) {
-                            if (evt.detail.target.id === 'contenido-dinamico') initPagination();
-                        });
-                    })();
+                    initPagination('animal-grid-admin');
+                    initPagination('animal-grid-cards');
                 </script>
             </div>
         </div>

@@ -1,7 +1,7 @@
 <div th:fragment="content">
     <!-- 1. VISTA ADMINISTRADOR (PREMIUM) -->
     <div th:if="${isAdmin}">
-        <section class="admin-hero">
+        <section class="admin-hero" style="margin-top: 0;">
             <div class="admin-welcome-card glass-panel">
                 <h1 class="admin-title">Panel de Control <span class="badge-admin">ADMIN</span></h1>
                 <p class="admin-subtitle">Gestión operativa del refugio, seguimiento de animales y solicitudes pendientes.</p>
@@ -70,7 +70,8 @@
 
     <!-- 2. VISTA PARA EL RESTO (ADOPTANTES, VOLUNTARIOS Y PÚBLICO) -->
     <div th:if="${!isAdmin}">
-        <section class="home-hero" style="position: relative; flex-direction: column;">
+        <!-- 1. Hero Section -->
+        <section class="home-hero" style="margin-top: 0; position: relative; flex-direction: column;">
             <div class="hero-card-with-bg" style="overflow: visible; margin-bottom: 2rem;">
                 <h1 class="hero-title" th:if="${!isAuthenticated}">No puedes comprar el amor, <br> pero puedes adoptarlo</h1>
                 <h1 class="hero-title" th:if="${isAuthenticated}">Hola, <span th:text="${currentUserName}">Usuario</span> <br> ¡Bienvenido de nuevo!</h1>
@@ -95,9 +96,9 @@
                 </div>
             </div>
 
-            <!-- Barra de búsqueda flotante (Overlapping Hero) - MOVED OUTSIDE -->
+            <!-- Barra de búsqueda flotante -->
             <div class="hero-search-container" style="bottom: 0.5rem;">
-                <form action="/web/animales" method="get" class="search-bar-glass" style="width: 100%;">
+                <form th:action="@{/web/animales}" method="GET" class="search-bar-glass" style="width: 100%;">
                     <div class="search-field">
                         <label>ESPECIE</label>
                         <select name="especie">
@@ -133,7 +134,7 @@
             </div>
         </section>
 
-        <!-- Panel de Estadísticas (Stats Section) -->
+        <!-- 3. Contador de Impacto -->
         <div class="stats-panel-container">
             <div class="stats-card-main glass-panel">
                 <div class="stat-item-landing">
@@ -143,7 +144,7 @@
                 </div>
                 <div class="stat-item-landing">
                     <div class="stat-icon-emoji">🐾</div>
-                    <div class="stat-number">20</div>
+                    <div class="stat-number" th:text="${animales != null ? #lists.size(animales) : 42}">42</div>
                     <div class="stat-desc">Esperando hoy</div>
                 </div>
                 <div class="stat-item-landing">
@@ -159,7 +160,7 @@
             </div>
         </div>
 
-        <!-- Favoritos de la Semana -->
+        <!-- 4. Favoritos de la Semana -->
         <section class="page-header" style="text-align: center; margin-bottom: 3rem; margin-top: 4rem;">
             <h2 class="page-title">Favoritos de la Semana</h2>
             <p style="color: var(--text-muted);">Los animales más populares que buscan un hogar</p>
@@ -167,34 +168,182 @@
 
         <div class="animal-grid">
             <th:block th:each="a : ${favoritos}">
-                <div class="animal-card-glass glass-card">
+                <div class="animal-card-glass glass-card" style="position: relative; overflow: hidden; border-radius: 24px; transition: transform 0.3s ease;">
                     <div class="card-img-container" style="position: relative; aspect-ratio: 4/5; overflow: hidden;">
-                        <img th:src="${a.get('foto') != null ? a.get('foto') : '/images/placeholder-animal.png'}"
-                            alt="Animal" style="width: 100%; height: 100%; object-fit: cover;">
-                        <span class="status-badge" th:classappend="${a.get('estado') != null ? 'badge-' + a.get('estado').toString().toLowerCase() : ''}"
-                              style="position: absolute; top: 1rem; left: 1rem; z-index: 10;" th:text="${a.get('estado')}">Disponible</span>
-                        
-                        <!-- Hover Overlay con Botón -->
+                        <img th:src="${a.get('foto') != null ? a.get('foto') : '/images/placeholder-animal.png'}" alt="Animal"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+
+                        <span class="animal-status-badge"
+                            th:classappend="${a.get('estado') != null ? 'badge-' + a.get('estado').toString().toLowerCase() : 'badge-disponible'}"
+                            th:text="${a.get('estado') != null ? #strings.replace(a.get('estado'), '_', ' ') : 'DISPONIBLE'}">
+                            Disponible
+                        </span>
+
                         <div class="card-info-overlay">
                             <div style="text-align: center; width: 100%;">
-                                <button th:attr="hx-get=@{/web/animales/{id}/detalle(id=${a.get('id')})}" hx-target="#modal-host" 
-                                        class="btn btn-primary" style="width: 80%; justify-content: center; border-radius: 50px; padding: 0.8rem;">
+                                <button class="btn btn-primary" style="width: 80%; justify-content: center; border-radius: 50px; padding: 0.8rem;"
+                                    th:attr="hx-get=@{/web/animales/{id}/detalle(id=${a.get('id')})}"
+                                    hx-target="#modal-host" hx-swap="outerHTML">
                                     <i data-lucide="heart"></i>
-                                    <span>Conóceme</span>
+                                    <span th:text="#{animal.button.view.profile}">Conóceme</span>
                                 </button>
                             </div>
                         </div>
                     </div>
+
                     <div class="card-body-glass" style="padding: 1.2rem;">
-                        <h3 class="animal-name" th:text="${a.get('nombre')}" style="font-weight: 800; margin: 0; font-size: 1.1rem;">Nombre</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 class="animal-name" th:text="${a.get('nombre')}" style="font-weight: 800; margin: 0; font-size: 1.1rem;">Nombre</h3>
+                            <i th:if="${a.get('sexo') != null}" th:data-lucide="${a.get('sexo').toString() == 'MACHO' ? 'mars' : 'venus'}"
+                                th:style="${a.get('sexo').toString() == 'MACHO' ? 'color: #3B82F6' : 'color: #EC4899'}"></i>
+                        </div>
                         <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0.2rem 0 0 0;" th:text="${a.get('raza')}">Raza</p>
                     </div>
                 </div>
             </th:block>
+
+            <div th:if="${#lists.isEmpty(favoritos)}" class="glass-card" style="grid-column: 1/-1; padding: 4rem; text-align: center;">
+                <p>Buscando a los más populares...</p>
+            </div>
         </div>
+
+        <!-- 5. Historias con Final Feliz (Carousel) -->
+        <section style="margin: 6rem 0; position: relative;">
+            <div class="stories-header">
+                <h2 class="page-title">Historias con Final Feliz</h2>
+            </div>
+
+            <div class="carousel-wrapper" style="position: relative; max-width: 1000px; margin: 0 auto; padding: 0 50px;">
+                <button class="carousel-control prev" onclick="moveCarousel(-1)" aria-label="Anterior">
+                    <i data-lucide="chevron-left"></i>
+                </button>
+                <button class="carousel-control next" onclick="moveCarousel(1)" aria-label="Siguiente">
+                    <i data-lucide="chevron-right"></i>
+                </button>
+
+                <div id="story-carousel" class="story-carousel">
+                    <div class="story-card active">
+                        <img src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=600&q=80" class="story-img" alt="Final Feliz">
+                        <div class="story-text">
+                            <p class="story-quote">"Luna llegó asustada y ahora es la reina del sofá. Gracias al refugio por unir nuestros caminos."</p>
+                            <p class="story-author">— Familia Pérez</p>
+                        </div>
+                    </div>
+
+                    <div class="story-card" style="display: none;">
+                        <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=600&q=80" class="story-img" alt="Final Feliz">
+                        <div class="story-text">
+                            <p class="story-quote">"Rocky ha encontrado su hogar definitivo. Nunca imaginamos que un perro senior daría tanta vida a nuestra casa."</p>
+                            <p class="story-author">— Juan y Marta</p>
+                        </div>
+                    </div>
+
+                    <div class="story-card" style="display: none;">
+                        <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=600&q=80" class="story-img" alt="Mila">
+                        <div class="story-text">
+                            <p class="story-quote">"Mila era una perrita muy miedosa, pero con paciencia ahora corre feliz por el parque."</p>
+                            <p class="story-author">— Familia García</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NUEVO 6. Caso de Éxito Destacado (De la Calle al Hogar) -->
+        <section class="success-story-highlight glass-panel" style="margin: 6rem 2rem; padding: 4rem; border-radius: 40px; background: linear-gradient(135deg, var(--primary-light), white);">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
+                <div class="story-visuals" style="position: relative; display: flex; gap: 1rem;">
+                    <div style="flex: 1; border-radius: 20px; overflow: hidden; transform: rotate(-3deg); box-shadow: var(--shadow-lg);">
+                        <img src="https://images.unsplash.com/photo-1598133894008-61f7fdb8cc3a?auto=format&fit=crop&w=400&q=80" alt="Antes" style="width: 100%; height: 300px; object-fit: cover;">
+                        <div style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.6); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">Antes</div>
+                    </div>
+                    <div style="flex: 1; border-radius: 20px; overflow: hidden; transform: rotate(3deg); box-shadow: var(--shadow-lg); margin-top: 2rem;">
+                        <img src="https://images.unsplash.com/photo-1534361960057-19889db9621e?auto=format&fit=crop&w=400&q=80" alt="Después" style="width: 100%; height: 300px; object-fit: cover;">
+                        <div style="position: absolute; bottom: 10px; right: 10px; background: var(--success); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">Ahora</div>
+                    </div>
+                </div>
+                <div class="story-content">
+                    <span style="color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8rem;">Historia del Mes</span>
+                    <h2 style="font-size: 2.5rem; font-weight: 800; margin: 1rem 0; color: var(--text-main);">El Gran Cambio de Balto</h2>
+                    <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 2rem;">
+                        Balto fue rescatado de una carretera en pleno invierno. Después de 4 meses en el refugio recuperando su salud y confianza, hoy corre libre en una finca de 2 hectáreas con su nueva familia.
+                    </p>
+                    <div style="display: flex; gap: 2rem; margin-top: 2rem;">
+                        <div>
+                            <span style="display: block; font-size: 1.5rem; font-weight: 800; color: var(--primary);">124</span>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">Días en espera</span>
+                        </div>
+                        <div style="width: 1px; background: var(--border);"></div>
+                        <div>
+                            <span style="display: block; font-size: 1.5rem; font-weight: 800; color: var(--primary);">0</span>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">Miedos restantes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NUEVO 7. Sección de Comentarios / Testimonios -->
+        <section class="testimonial-section" style="margin-bottom: 0;">
+            <div style="text-align: center; margin-bottom: 4rem;">
+                <h2 class="page-title">Lo que dicen nuestras familias</h2>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; padding: 0 2rem;">
+                <div class="glass-card" style="padding: 2rem; border-radius: 24px;">
+                    <div style="display: flex; gap: 4px; color: #F59E0B; margin-bottom: 1rem;">
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                    </div>
+                    <p style="font-style: italic; color: var(--text-main); margin-bottom: 1.5rem;">"El proceso de adopción fue impecable. Se nota que aman a los animales y se aseguran de que vayan al hogar adecuado."</p>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <img src="https://i.pravatar.cc/150?u=1" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%;">
+                        <div>
+                            <span style="display: block; font-weight: 700; font-size: 0.9rem;">María Torres</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Adoptó a Toby</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="padding: 2rem; border-radius: 24px;">
+                    <div style="display: flex; gap: 4px; color: #F59E0B; margin-bottom: 1rem;">
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                    </div>
+                    <p style="font-style: italic; color: var(--text-main); margin-bottom: 1.5rem;">"Ser voluntario aquí me ha cambiado la vida. La labor que hacen es increíble y transparente."</p>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <img src="https://i.pravatar.cc/150?u=2" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%;">
+                        <div>
+                            <span style="display: block; font-weight: 700; font-size: 0.9rem;">Roberto Sanz</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Voluntario desde 2022</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="padding: 2rem; border-radius: 24px;">
+                    <div style="display: flex; gap: 4px; color: #F59E0B; margin-bottom: 1rem;">
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                    </div>
+                    <p style="font-style: italic; color: var(--text-main); margin-bottom: 1.5rem;">"Donar es fácil y ves el impacto real. Recibo actualizaciones constantes de cómo ayudan mis aportaciones."</p>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <img src="https://i.pravatar.cc/150?u=3" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%;">
+                        <div>
+                            <span style="display: block; font-weight: 700; font-size: 0.9rem;">Elena Ruiz</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Donante recurrente</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 
-    <script>
-        if (window.lucide) lucide.createIcons();
-    </script>
 </div>

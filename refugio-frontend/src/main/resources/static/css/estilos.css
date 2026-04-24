@@ -1250,7 +1250,7 @@ aside.app-sidebar .sidebar-section-title .chevron-icon {
     background: white;
     border-radius: 24px;
     padding: 2rem;
-    display: flex;
+    display: none;
     gap: 2rem;
     align-items: center;
     box-shadow: var(--shadow);
@@ -1638,6 +1638,23 @@ td {
     border-bottom: 1px solid var(--border);
     color: var(--text-main);
     font-size: 0.95rem;
+    position: relative;
+}
+
+table th:not(:last-child)::after,
+table td:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 25%;
+    height: 50%;
+    width: 1px;
+    background-color: var(--border);
+    opacity: 0.3;
+}
+
+table th {
+    position: relative;
 }
 
 tbody tr:last-child td {
@@ -1648,6 +1665,58 @@ tbody tr:hover {
     background-color: #F8FAFC;
 }
 
+/* Radio buttons interactivos para tareas — diseño personalizado */
+.status-radio {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #cbd5e1;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0;
+    vertical-align: middle;
+    flex-shrink: 0;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.status-radio::after {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: transparent;
+    transition: background 0.15s ease;
+}
+.status-radio:hover {
+    border-color: #94a3b8;
+    transform: scale(1.1);
+}
+/* Colores por estado */
+.status-radio.radio-pendiente:checked   { border-color: #f59e0b; background: #fffbeb; }
+.status-radio.radio-pendiente:checked::after { background: #f59e0b; }
+
+.status-radio.radio-progreso:checked    { border-color: #3b82f6; background: #eff6ff; }
+.status-radio.radio-progreso:checked::after  { background: #3b82f6; }
+
+.status-radio.radio-completada:checked  { border-color: #10b981; background: #ecfdf5; }
+.status-radio.radio-completada:checked::after { background: #10b981; }
+
+.status-radio.radio-cancelada:checked   { border-color: #ef4444; background: #fef2f2; }
+.status-radio.radio-cancelada:checked::after  { background: #ef4444; }
+
+.save-status-btn {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
 /* Botones Acción */
 .btn {
     display: inline-flex;
@@ -1969,18 +2038,25 @@ tbody tr:hover {
 .animal-status-badge {
     position: absolute;
     top: 1rem;
-    right: 1rem;
+    left: 1rem;
     padding: 0.5rem 1rem;
     border-radius: 99px;
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
     backdrop-filter: blur(8px);
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.95);
     color: var(--primary);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     z-index: 10;
+    border: 1px solid rgba(255,255,255,0.5);
 }
+
+.badge-disponible { color: #059669; background: #ecfdf5e6; border-color: #10b981; }
+.badge-reservado  { color: #d97706; background: #fffbebe6; border-color: #f59e0b; }
+.badge-adoptado   { color: #2563eb; background: #eff6ffe6; border-color: #3b82f6; }
+.badge-en_tratamiento, .badge-tratamiento { color: #dc2626; background: #fef2f2e6; border-color: #ef4444; }
+
 
 .animal-info {
     padding: 1.5rem;
@@ -2340,7 +2416,7 @@ tbody tr:hover {
 /* Testimonials */
 .testimonial-section {
     margin-top: 4rem;
-    padding: 4rem 0;
+    padding: 4rem 0 0 0;
     border-top: 1px solid var(--border);
 }
 

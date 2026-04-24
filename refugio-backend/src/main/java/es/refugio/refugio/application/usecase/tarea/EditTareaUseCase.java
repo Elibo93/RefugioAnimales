@@ -22,6 +22,8 @@ public class EditTareaUseCase {
                     tarea.setDescripcion(command.descripcion());
                     tarea.setFecha(command.fecha());
                     tarea.setEstado(estadoEnum);
+                    tarea.setFechaLimite(command.fechaLimite());
+                    tarea.setInstrucciones(command.instrucciones());
                     tarea.setVoluntarios(command.voluntarioIds() != null ? 
                         command.voluntarioIds().stream().map(VoluntarioId::new).collect(Collectors.toList()) : 
                         null);

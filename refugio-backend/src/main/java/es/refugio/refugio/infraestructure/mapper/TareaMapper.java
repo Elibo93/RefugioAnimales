@@ -21,6 +21,8 @@ public class TareaMapper {
                 req.descripcion(),
                 req.fecha(),
                 req.estado(),
+                req.fechaLimite(),
+                req.instrucciones(),
                 req.voluntarioIds()
         );
     }
@@ -31,6 +33,8 @@ public class TareaMapper {
                 req.descripcion(),
                 req.fecha(),
                 req.estado(),
+                req.fechaLimite(),
+                req.instrucciones(),
                 req.voluntarioIds()
         );
     }
@@ -41,6 +45,9 @@ public class TareaMapper {
                 t.getDescripcion(),
                 t.getFecha(),
                 t.getEstado() != null ? t.getEstado().name() : null,
+                t.getFechaLimite(),
+                t.getInstrucciones(),
+                t.getPrioridad(),
                 t.getVoluntarios() != null ? 
                     t.getVoluntarios().stream().map(VoluntarioId::getValue).collect(Collectors.toList()) : 
                     new ArrayList<>()
@@ -60,6 +67,8 @@ public class TareaMapper {
                 .descripcion(t.getDescripcion())
                 .fecha(t.getFecha())
                 .estado(t.getEstado())
+                .fechaLimite(t.getFechaLimite())
+                .instrucciones(t.getInstrucciones())
                 .voluntarios(voluntarios)
                 .build();
     }
@@ -70,6 +79,8 @@ public class TareaMapper {
                 .descripcion(e.getDescripcion())
                 .fecha(e.getFecha())
                 .estado(e.getEstado())
+                .fechaLimite(e.getFechaLimite())
+                .instrucciones(e.getInstrucciones())
                 .voluntarios(e.getVoluntarios() != null ? 
                     e.getVoluntarios().stream().map(ve -> new VoluntarioId(ve.getId())).collect(Collectors.toList()) : 
                     new ArrayList<>())

@@ -10,32 +10,56 @@
         <div class="table-wrapper">
             <div class="actions-bar">
                 <span class="user-name page" th:text="#{tarea.list.title}">Tareas</span>
+                
+                <!-- Filtros de Prioridad (Solo Voluntarios) -->
+                <div th:if="${!isAdmin}" class="priority-filters" style="display:flex; gap:8px;">
+                    <button class="btn btn-secondary filter-btn active" onclick="filterByPriority('ALL', this)" style="border-radius:20px; padding:6px 15px; font-size:0.85rem;">Todas</button>
+                    <button class="btn btn-secondary filter-btn" onclick="filterByPriority('ALTA', this)" style="border-radius:20px; padding:6px 15px; font-size:0.85rem; border-color:var(--danger); color:var(--danger);">
+                        <i data-lucide="zap" style="width:14px; margin-right:4px;"></i> Alta
+                    </button>
+                    <button class="btn btn-secondary filter-btn" onclick="filterByPriority('MEDIA', this)" style="border-radius:20px; padding:6px 15px; font-size:0.85rem; border-color:var(--warning); color:var(--warning);">
+                        <i data-lucide="activity" style="width:14px; margin-right:4px;"></i> Media
+                    </button>
+                    <button class="btn btn-secondary filter-btn" onclick="filterByPriority('BAJA', this)" style="border-radius:20px; padding:6px 15px; font-size:0.85rem; border-color:var(--success); color:var(--success);">
+                        <i data-lucide="arrow-down-circle" style="width:14px; margin-right:4px;"></i> Baja
+                    </button>
+                </div>
+
                 <div style="display:flex; gap:10px;">
                     <a class="btn btn-secondary" th:href="@{/web/tareas/pdf}" target="_blank"
                         th:text="#{generic.link.export.pdf}">
                         Exportar PDF
                     </a>
-                    <a class="btn btn-primary" th:href="@{/web/tareas/nueva}">
+                    <a th:if="${isAdmin}" class="btn btn-primary" th:href="@{/web/tareas/nueva}">
                         <i data-lucide="plus" style="width:18px;"></i>
                         <span th:text="#{generic.link.create}">+ Nueva tarea</span>
                     </a>
                 </div>
             </div>
-            <table id="tablatareas">
+            <!-- TABLA PARA ADMINS -->
+            <table th:if="${isAdmin}" id="tablatareas">
                 <thead>
                     <tr>
-                        <th th:text="#{persona.table.header.id}">ID</th>
+                        <th style="width:40px;">#</th>
                         <th th:text="#{tarea.table.header.descripcion}">Descripción</th>
                         <th>Asignado a</th>
                         <th th:text="#{tarea.table.header.estado}">Estado</th>
-                        <th th:text="#{tarea.table.header.fecha}">Fecha</th>
+                        <th>Vencimiento</th>
                         <th th:text="#{workshop.table.header.action}">Acción</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="t : ${tareas}" th:id="'row-' + ${t.get('id')}">
-                        <td th:text="${t.get('id')}">1</td>
-                        <td style="font-weight:600;color:var(--primary);" th:text="${t.get('descripcion')}">Descripción
+                    <tr th:each="t, iterStat : ${tareas}" th:id="'row-' + ${t.get('id')}">
+                        <td th:text="${iterStat.count}">1</td>
+                        <td style="font-weight:600; color:var(--primary);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                                <span th:text="${t.get('descripcion')}">Descripción</span>
+                                <span th:if="${t.get('instrucciones') != null and !t.get('instrucciones').isEmpty()}" 
+                                      th:title="${t.get('instrucciones')}"
+                                      style="cursor:help; flex-shrink:0; display:flex; align-items:center;">
+                                    <i data-lucide="info" style="width:16px; color:var(--text-muted);"></i>
+                                </span>
+                            </div>
                         </td>
 
                         <!-- Iterate voluntarioIds and look up names -->
@@ -60,18 +84,111 @@
                                 th:classappend="${t.get('estado') != null ? (t.get('estado').toString() == 'COMPLETADA' ? 'success' : (t.get('estado').toString() == 'CANCELADA' ? 'danger' : 'warning')) : 'warning'}"
                                 th:text="${t.get('estado')}">PENDIENTE</span>
                         </td>
-                        <td
-                            th:text="${t.get('fecha') != null ? t.get('fecha').toString().replace('T', ' ').substring(0, (t.get('fecha').toString().length() > 10 ? 10 : t.get('fecha').toString().length())) : '-'}">
-                            01/01/2024</td>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
+                                <i th:if="${t.get('prioridad') == 'ALTA'}" data-lucide="zap" style="color:var(--danger); width:16px; flex-shrink:0;" title="Prioridad Alta"></i>
+                                <i th:if="${t.get('prioridad') == 'MEDIA'}" data-lucide="activity" style="color:var(--warning); width:16px; flex-shrink:0;" title="Prioridad Media"></i>
+                                <i th:if="${t.get('prioridad') == 'BAJA'}" data-lucide="arrow-down-circle" style="color:var(--success); width:16px; flex-shrink:0;" title="Prioridad Baja"></i>
+                                <span th:if="${t.get('fechaLimite') != null}" style="font-size:0.85rem;">
+                                    <span th:text="${t.get('fechaLimite').toString().substring(8,10) + '/' + t.get('fechaLimite').toString().substring(5,7)}"></span>
+                                    <span style="color:var(--text-muted); margin:0 2px;">·</span>
+                                    <span th:text="${t.get('fechaLimite').toString().substring(11,16)}"></span>
+                                </span>
+                                <span th:if="${t.get('fechaLimite') == null}" style="color:var(--text-muted); font-size:0.85rem;">Sin fecha</span>
+                            </div>
+                        </td>
                         <td style="display:flex; gap:8px;">
                             <a class="btn-icon" th:href="@{/web/tareas/{id}/editar(id=${t.get('id')})}">
                                 <i data-lucide="edit-2" style="width:16px;"></i>
                             </a>
-                            <button class="btn-icon delete" th:hx-post="@{/web/tareas/{id}/borrar(id=${t.get('id')})}"
+                            <button th:if="${isAdmin}" class="btn-icon delete" th:hx-post="@{/web/tareas/{id}/borrar(id=${t.get('id')})}"
                                 th:hx-target="'#row-' + ${t.get('id')}" hx-swap="outerHTML swap:0.3s"
                                 hx-confirm="¿Eliminar tarea?">
                                 <i data-lucide="trash-2" style="width:16px;"></i>
                             </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- TABLA PARA VOLUNTARIOS (INTERACTIVA) -->
+            <table th:if="${!isAdmin}" id="tablatareas-voluntario">
+                <thead>
+                    <tr>
+                        <th style="width:40px;">#</th>
+                        <th th:text="#{tarea.table.header.descripcion}">Descripción</th>
+                        <th>Vencimiento</th>
+                        <th style="text-align:center;">Pendiente</th>
+                        <th style="text-align:center;">En Progreso</th>
+                        <th style="text-align:center;">Completada</th>
+                        <th style="text-align:center;">Cancelada</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="t, iterStat : ${tareas}" 
+                        th:id="'row-vol-' + ${t.get('id')}" 
+                        class="task-row"
+                        th:attr="data-priority=${t.get('prioridad')}">
+                        <td th:text="${iterStat.count}">1</td>
+                        <td style="font-weight:600; color:var(--primary);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                                <span th:text="${t.get('descripcion')}">Descripción</span>
+                                <span th:if="${t.get('instrucciones') != null and !t.get('instrucciones').isEmpty()}" 
+                                      th:title="${t.get('instrucciones')}"
+                                      style="cursor:help; flex-shrink:0; display:flex; align-items:center;">
+                                    <i data-lucide="info" style="width:16px; color:var(--text-muted);"></i>
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
+                                <i th:if="${t.get('prioridad') == 'ALTA'}" data-lucide="zap" style="color:var(--danger); width:16px; flex-shrink:0;" title="Prioridad Alta"></i>
+                                <i th:if="${t.get('prioridad') == 'MEDIA'}" data-lucide="activity" style="color:var(--warning); width:16px; flex-shrink:0;" title="Prioridad Media"></i>
+                                <i th:if="${t.get('prioridad') == 'BAJA'}" data-lucide="arrow-down-circle" style="color:var(--success); width:16px; flex-shrink:0;" title="Prioridad Baja"></i>
+                                <span th:if="${t.get('fechaLimite') != null}" style="font-size:0.85rem;">
+                                    <span th:text="${t.get('fechaLimite').toString().substring(8,10) + '/' + t.get('fechaLimite').toString().substring(5,7)}"></span>
+                                    <span style="color:var(--text-muted); margin:0 2px;">·</span>
+                                    <span th:text="${t.get('fechaLimite').toString().substring(11,16)}"></span>
+                                </span>
+                                <span th:if="${t.get('fechaLimite') == null}" style="color:var(--text-muted); font-size:0.85rem;">Sin fecha</span>
+                            </div>
+                        </td>
+                        
+                        <td style="text-align:center;">
+                            <input type="radio" name="estado" value="PENDIENTE" class="status-radio radio-pendiente"
+                                th:checked="${t.get('estado') == 'PENDIENTE'}" 
+                                th:form="'form-tarea-' + ${t.get('id')}" 
+                                th:onchange="'document.getElementById(\'btn-save-' + ${t.get('id')} + '\').style.display = \'inline-block\''">
+                        </td>
+                        <td style="text-align:center;">
+                            <input type="radio" name="estado" value="EN_PROCESO" class="status-radio radio-progreso"
+                                th:checked="${t.get('estado') == 'EN_PROCESO'}" 
+                                th:form="'form-tarea-' + ${t.get('id')}" 
+                                th:onchange="'document.getElementById(\'btn-save-' + ${t.get('id')} + '\').style.display = \'inline-block\''">
+                        </td>
+                        <td style="text-align:center;">
+                            <input type="radio" name="estado" value="COMPLETADA" class="status-radio radio-completada"
+                                th:checked="${t.get('estado') == 'COMPLETADA'}" 
+                                th:form="'form-tarea-' + ${t.get('id')}" 
+                                th:onchange="'document.getElementById(\'btn-save-' + ${t.get('id')} + '\').style.display = \'inline-block\''">
+                        </td>
+                        <td style="text-align:center;">
+                            <input type="radio" name="estado" value="CANCELADA" class="status-radio radio-cancelada"
+                                th:checked="${t.get('estado') == 'CANCELADA'}" 
+                                th:form="'form-tarea-' + ${t.get('id')}" 
+                                th:onchange="'document.getElementById(\'btn-save-' + ${t.get('id')} + '\').style.display = \'inline-block\''">
+                        </td>
+                        <td style="min-width: 120px; text-align: right;">
+                            <form th:id="'form-tarea-' + ${t.get('id')}" th:action="@{/web/tareas/{id}/editar(id=${t.get('id')})}" method="post" style="display:none;">
+                                <input type="hidden" name="descripcion" th:value="${t.get('descripcion')}">
+                                <input type="hidden" name="fechaLimite" th:value="${t.get('fechaLimite')}">
+                                <input type="hidden" name="instrucciones" th:value="${t.get('instrucciones')}">
+                                <th:block th:if="${t.get('voluntarioIds') != null}">
+                                    <input th:each="vid : ${t.get('voluntarioIds')}" type="hidden" name="voluntarioIds" th:value="${vid}">
+                                </th:block>
+                            </form>
+                            <button type="submit" th:id="'btn-save-' + ${t.get('id')}" th:form="'form-tarea-' + ${t.get('id')}" class="btn btn-primary save-status-btn" style="display:none; font-size:0.75rem; padding:6px 12px; height: auto;">Guardar</button>
                         </td>
                     </tr>
                 </tbody>
@@ -81,6 +198,7 @@
                 <p th:text="#{tarea.list.empty}">No hay tareas registradas.</p>
             </div>
         </div>
+
     </div>
 </body>
 

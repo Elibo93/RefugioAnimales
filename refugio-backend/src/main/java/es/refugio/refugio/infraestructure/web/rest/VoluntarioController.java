@@ -80,6 +80,7 @@ public class VoluntarioController {
     }
 
     @Operation(summary = "Voluntario por usuario", description = "Retorna el voluntario asociado a un usuario")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     @GetMapping("/usuario/{usuarioId}")
     public VoluntarioResponse findByUsuarioId(@PathVariable Integer usuarioId) {
         return VoluntarioMapper.toResponse(findVoluntarioService.findByUsuarioId(new UsuarioId(usuarioId)));
