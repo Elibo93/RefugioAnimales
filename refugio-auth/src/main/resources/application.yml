@@ -9,8 +9,8 @@ spring:
     compatibility-verifier:
       enabled: false
   datasource:
-    url: jdbc:mysql://localhost:3306/auth_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT_AUTH}/${DB_NAME_AUTH}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${DB_USER}
     password: ${DB_PASSWORD}
   jpa:
     defer-datasource-initialization: true
