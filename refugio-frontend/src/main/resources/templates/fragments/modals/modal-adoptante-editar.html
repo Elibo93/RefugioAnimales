@@ -34,29 +34,20 @@
                             <span>Información del Adoptante</span>
                         </div>
 
-                        <div class="form-group">
-                            <span class="info-pill-label">Nombre Completo</span>
-                            <div class="info-pill">
-                                <i data-lucide="user" style="width: 14px;"></i>
-                                <span th:text="${nombreCompleto}">Nombre Completo</span>
-                            </div>
+                        <div class="form-group readonly-group">
+                            <label>Nombre Completo</label>
+                            <input type="text" th:value="${nombreCompleto}" readonly>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <div class="form-group">
-                                <span class="info-pill-label">DNI</span>
-                                <div class="info-pill">
-                                    <i data-lucide="id-card" style="width: 14px;"></i>
-                                    <span th:text="${dni}">12345678X</span>
-                                </div>
+                            <div class="form-group readonly-group">
+                                <label>DNI</label>
+                                <input type="text" th:value="${dni}" readonly>
                             </div>
 
-                            <div class="form-group">
-                                <span class="info-pill-label">Nacimiento</span>
-                                <div class="info-pill">
-                                    <i data-lucide="calendar" style="width: 14px;"></i>
-                                    <span th:text="${fechaNacimiento}">01/01/1990</span>
-                                </div>
+                            <div class="form-group readonly-group">
+                                <label>Nacimiento</label>
+                                <input type="text" th:value="${fechaNacimiento}" readonly>
                             </div>
                         </div>
 
@@ -66,17 +57,14 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="editable-label">Dirección de Residencia</label>
-                            <div class="premium-input-wrapper">
-                                <i data-lucide="map-pin"></i>
-                                <input type="text" name="direccion" th:value="${adoptante.get('direccion')}" required class="premium-input">
-                            </div>
+                            <label>Dirección de Residencia</label>
+                            <input type="text" name="direccion" th:value="${adoptante.get('direccion')}" required>
                         </div>
 
                         <!-- Fila 3: Estado -->
                         <div class="form-group">
-                            <label class="editable-label">Estado de Validación</label>
-                            <select name="estadoValidacion" required class="premium-select">
+                            <label>Estado de Validación</label>
+                            <select name="estadoValidacion" required>
                                 <option th:each="e : ${estados}" 
                                         th:value="${e}" 
                                         th:text="${e}"

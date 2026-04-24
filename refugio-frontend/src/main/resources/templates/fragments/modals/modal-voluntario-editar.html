@@ -34,20 +34,14 @@
                             <span>Perfil del Voluntario</span>
                         </div>
 
-                        <div class="form-group">
-                            <span class="info-pill-label">Nombre Completo</span>
-                            <div class="info-pill">
-                                <i data-lucide="user"></i>
-                                <span th:text="${nombre + ' ' + apellido}">Nombre Completo</span>
-                            </div>
+                        <div class="form-group readonly-group">
+                            <label>Nombre Completo</label>
+                            <input type="text" th:value="${nombre + ' ' + apellido}" readonly>
                         </div>
 
-                        <div class="form-group">
-                            <span class="info-pill-label">Email</span>
-                            <div class="info-pill">
-                                <i data-lucide="mail" style="width: 14px;"></i>
-                                <span th:text="${email}">laura.garcia@refugio.local</span>
-                            </div>
+                        <div class="form-group readonly-group">
+                            <label>Email</label>
+                            <input type="text" th:value="${email}" readonly>
                         </div>
 
                         <!-- Sección: Disponibilidad y Contacto -->
@@ -56,15 +50,15 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="editable-label">Disponibilidad Actual</label>
+                            <label>Disponibilidad Actual</label>
                             <input type="text" name="disponibilidad" th:value="${voluntario.get('disponibilidad')}" 
-                                required class="premium-select" placeholder="Ej: Tardes y fines de semana">
+                                required placeholder="Ej: Tardes y fines de semana">
                         </div>
 
                         <div class="form-group">
-                            <label class="editable-label">Teléfono Móvil</label>
+                            <label>Teléfono Móvil</label>
                             <input type="text" name="telefono" th:value="${telefono}" 
-                                class="premium-select" placeholder="Ej: 600000000">
+                                placeholder="Ej: 600000000">
                         </div>
 
                         <input type="hidden" name="email" th:value="${email}">
