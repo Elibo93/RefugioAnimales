@@ -39,7 +39,7 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 - [ ] **Encuesta:** Formulario de preferencias para activar recomendaciones inteligentes.
 
 ### 4) Frontend/Backend: Panel del Voluntario y Tareas
-- [ ] **"Mis Tareas":** Lista de tareas asignadas con estados: **Pendiente, Propuesta, Aceptada, En progreso, Finalizada, Rechazada, Cancelada**.
+- [✅] **"Mis Tareas":** Lista de tareas asignadas con estados: **Pendiente, Propuesta, Aceptada, En progreso, Finalizada, Rechazada, Cancelada**.
 - [ ] **Gestión de Propuestas:** El voluntario debe poder aceptar o rechazar tareas enviadas por el admin.
 - [ ] **Notificaciones:** Tareas nuevas y recordatorios de fechas de vencimiento.
 

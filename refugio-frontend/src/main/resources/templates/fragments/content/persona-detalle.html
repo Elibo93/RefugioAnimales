@@ -100,11 +100,11 @@
                     <h4 style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; margin: 0;">Historial de Tareas</h4>
                     <!-- Filtros de Tareas -->
                     <div id="task-filters" style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button onclick="filterTasks('ALL')" class="btn-filter active" data-filter="ALL">Todas</button>
-                        <button onclick="filterTasks('PENDIENTE')" class="btn-filter" data-filter="PENDIENTE">Pendientes</button>
-                        <button onclick="filterTasks('EN_PROCESO')" class="btn-filter" data-filter="EN_PROCESO">En Proceso</button>
-                        <button onclick="filterTasks('COMPLETADA')" class="btn-filter" data-filter="COMPLETADA">Completadas</button>
-                        <button onclick="filterTasks('CANCELADA')" class="btn-filter" data-filter="CANCELADA">Canceladas</button>
+                        <button onclick="filterListItems('btn-filter', 'task-item', 'ALL')" class="btn-filter active" data-filter="ALL">Todas</button>
+                        <button onclick="filterListItems('btn-filter', 'task-item', 'PENDIENTE')" class="btn-filter" data-filter="PENDIENTE">Pendientes</button>
+                        <button onclick="filterListItems('btn-filter', 'task-item', 'EN_PROCESO')" class="btn-filter" data-filter="EN_PROCESO">En Proceso</button>
+                        <button onclick="filterListItems('btn-filter', 'task-item', 'COMPLETADA')" class="btn-filter" data-filter="COMPLETADA">Completadas</button>
+                        <button onclick="filterListItems('btn-filter', 'task-item', 'CANCELADA')" class="btn-filter" data-filter="CANCELADA">Canceladas</button>
                     </div>
                 </div>
 
@@ -153,24 +153,7 @@
                 }
             </style>
 
-            <script>
-                function filterTasks(status) {
-                    // Update buttons
-                    document.querySelectorAll('.btn-filter').forEach(btn => {
-                        btn.classList.toggle('active', btn.getAttribute('data-filter') === status);
-                    });
 
-                    // Filter items
-                    const tasks = document.querySelectorAll('.task-item');
-                    tasks.forEach(task => {
-                        if (status === 'ALL' || task.getAttribute('data-status') === status) {
-                            task.style.display = 'flex';
-                        } else {
-                            task.style.display = 'none';
-                        }
-                    });
-                }
-            </script>
 
             </div>
 

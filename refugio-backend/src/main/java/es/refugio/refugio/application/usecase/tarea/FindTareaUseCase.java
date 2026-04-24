@@ -17,6 +17,13 @@ public class FindTareaUseCase {
         if (tareas.isEmpty()) {
             throw new TareaNotFoundException();
         }
+        // Sort by fechaLimite ascending, putting nulls at the end
+        tareas.sort((t1, t2) -> {
+            if (t1.getFechaLimite() == null && t2.getFechaLimite() == null) return 0;
+            if (t1.getFechaLimite() == null) return 1;
+            if (t2.getFechaLimite() == null) return -1;
+            return t1.getFechaLimite().compareTo(t2.getFechaLimite());
+        });
         return tareas;
     }
 

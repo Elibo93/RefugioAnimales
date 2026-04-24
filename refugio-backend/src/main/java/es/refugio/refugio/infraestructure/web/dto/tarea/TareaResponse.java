@@ -8,6 +8,9 @@ public record TareaResponse(
         String descripcion,
         LocalDateTime fecha,
         String estado,
+        LocalDateTime fechaLimite,
+        String instrucciones,
+        String prioridad,
         List<Integer> voluntarioIds
 ) {
 }

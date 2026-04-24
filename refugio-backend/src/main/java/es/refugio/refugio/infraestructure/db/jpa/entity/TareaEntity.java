@@ -33,6 +33,12 @@ public class TareaEntity {
     @Column(nullable = false, length = 50)
     private EstadoTarea estado;
 
+    @Column(name = "fecha_limite", columnDefinition = "DATETIME")
+    private LocalDateTime fechaLimite;
+
+    @Column(length = 1000)
+    private String instrucciones;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "voluntarios_tareas",

@@ -20,6 +20,8 @@ public class CreateTareaUseCase {
                 .descripcion(command.descripcion())
                 .fecha(command.fecha())
                 .estado(estadoEnum)
+                .fechaLimite(command.fechaLimite())
+                .instrucciones(command.instrucciones())
                 .voluntarios(command.voluntarioIds() != null ? 
                     command.voluntarioIds().stream().map(VoluntarioId::new).collect(Collectors.toList()) : 
                     null)

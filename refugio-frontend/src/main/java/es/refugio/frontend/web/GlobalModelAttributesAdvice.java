@@ -61,7 +61,9 @@ public class GlobalModelAttributesAdvice {
                     authUrl + "/v1/me", Map.class);
 
             if (me != null) {
-                model.addAttribute("currentUserId",   me.get("id"));
+                Object idObj = me.get("id");
+                if (idObj instanceof Map) idObj = ((Map<?, ?>) idObj).get("value");
+                model.addAttribute("currentUserId",   idObj);
                 model.addAttribute("currentUserName", me.get("nombreCompleto"));
                 model.addAttribute("currentUserRol",  me.get("rol"));
                 model.addAttribute("isAuthenticated", true);

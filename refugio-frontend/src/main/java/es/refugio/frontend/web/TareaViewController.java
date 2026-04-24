@@ -42,6 +42,51 @@ public class TareaViewController {
         List<Object> voluntarios = fetchList("/v1/voluntarios");
         List<Object> usuarios    = fetchList(authUrl + "/v1/usuarios");
 
+        // Determinar rol y ID del usuario actual desde el modelo (inyectado por GlobalModelAttributesAdvice)
+        Object isAdminObj = model.getAttribute("isAdmin");
+        boolean isAdmin = isAdminObj != null && (Boolean) isAdminObj;
+        Object currentUserId = model.getAttribute("currentUserId");
+
+        Integer myVoluntarioId = null;
+        if (!isAdmin && currentUserId != null) {
+            try {
+                Map<?, ?> vMap = (Map<?, ?>) restTemplate.getForObject(apiUrl + "/v1/voluntarios/usuario/" + currentUserId, Map.class);
+                if (vMap != null) {
+                    Object vId = vMap.get("id");
+                    if (vId instanceof Map) vId = ((Map<?, ?>) vId).get("value");
+                    if (vId instanceof Number) {
+                        myVoluntarioId = ((Number) vId).intValue();
+                    }
+                }
+            } catch (Exception ignored) {
+                // Si falla (por ejemplo no tiene registro de voluntario), myVoluntarioId seguirá siendo null
+            }
+        }
+
+        // Filtrar tareas estrictamente si el usuario no es admin
+        if (!isAdmin) {
+            List<Object> misTareas = new ArrayList<>();
+            if (myVoluntarioId != null) {
+                for (Object t : tareas) {
+                    if (t instanceof Map) {
+                        Object vIdsObj = ((Map<?, ?>) t).get("voluntarioIds");
+                        if (vIdsObj instanceof List) {
+                            for (Object vid : (List<?>) vIdsObj) {
+                                Object vidRaw = vid;
+                                if (vidRaw instanceof Map) vidRaw = ((Map<?, ?>) vidRaw).get("value");
+                                
+                                if (vidRaw instanceof Number && ((Number) vidRaw).intValue() == myVoluntarioId.intValue()) {
+                                    misTareas.add(t);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            tareas = misTareas; // Si es voluntario y no tiene asignadas, la lista será vacía, no la total.
+        }
+
         Map<Integer, Map<String, Object>> usuariosMap = new HashMap<>();
         for (Object u : usuarios) {
             if (u instanceof Map) {
@@ -55,12 +100,13 @@ public class TareaViewController {
             if (v instanceof Map) {
                 Object vId = ((Map<?, ?>) v).get("id");
                 Object uId = ((Map<?, ?>) v).get("usuarioId");
+                
                 if (vId instanceof Number && uId instanceof Number) {
                     Map<String, Object> user = usuariosMap.get(((Number) uId).intValue());
                     if (user != null) {
-                        Object n = user.get("nombre");
-                        Object a = user.get("apellido");
-                        voluntarioNombres.put(vId.toString(), ((n!=null?n.toString():"") + " " + (a!=null?a.toString():"")).trim());
+                        String n = String.valueOf(user.get("nombre"));
+                        String a = String.valueOf(user.get("apellido"));
+                        voluntarioNombres.put(String.valueOf(vId), (n + " " + a).trim());
                     }
                 }
             }
@@ -70,7 +116,10 @@ public class TareaViewController {
         for (Object v : voluntarios) {
             if (v instanceof Map) {
                 Object vId = ((Map<?, ?>) v).get("id");
+                if (vId instanceof Map) vId = ((Map<?, ?>) vId).get("value");
                 Object uId = ((Map<?, ?>) v).get("usuarioId");
+                if (uId instanceof Map) uId = ((Map<?, ?>) uId).get("value");
+                
                 if (vId instanceof Number && uId instanceof Number) {
                     voluntarioUsuarioIds.put(vId.toString(), uId.toString());
                 }
@@ -109,7 +158,7 @@ public class TareaViewController {
         
         model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
         model.addAttribute("voluntarios", fetchList("/v1/voluntarios"));
-        model.addAttribute("estados", List.of("PENDIENTE", "EN_PROGRESO", "COMPLETADA", "CANCELADA"));
+        model.addAttribute("estados", List.of("PENDIENTE", "EN_PROCESO", "COMPLETADA", "CANCELADA"));
         
         // Cargar mapa de usuarios para el selector si no hay preseleccionado
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
@@ -129,6 +178,8 @@ public class TareaViewController {
     @PostMapping(WebRoutes.TAREAS_NUEVA)
     public String crear(@RequestParam String descripcion,
             @RequestParam String estado,
+            @RequestParam(required = false) String fechaLimite,
+            @RequestParam(required = false) String instrucciones,
             @RequestParam(required = false) List<Integer> voluntarioIds,
             RedirectAttributes redirectAttributes) {
 
@@ -136,6 +187,8 @@ public class TareaViewController {
         body.put("descripcion",   descripcion);
         body.put("estado",        estado);
         body.put("fecha",         LocalDateTime.now().toString());
+        body.put("fechaLimite",   fechaLimite != null && !fechaLimite.isEmpty() ? fechaLimite : null);
+        body.put("instrucciones", instrucciones);
         body.put("voluntarioIds", voluntarioIds != null ? voluntarioIds : List.of());
 
         restTemplate.postForObject(apiUrl + "/v1/tareas", body, Object.class);
@@ -148,7 +201,7 @@ public class TareaViewController {
         Object tarea = restTemplate.getForObject(apiUrl + "/v1/tareas/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
         model.addAttribute("voluntarios", fetchList("/v1/voluntarios"));
-        model.addAttribute("estados", List.of("PENDIENTE", "EN_PROGRESO", "COMPLETADA", "CANCELADA"));
+        model.addAttribute("estados", List.of("PENDIENTE", "EN_PROCESO", "COMPLETADA", "CANCELADA"));
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Tarea_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -157,6 +210,8 @@ public class TareaViewController {
     public String procesarEdicion(@PathVariable Integer id,
             @RequestParam String descripcion,
             @RequestParam String estado,
+            @RequestParam(required = false) String fechaLimite,
+            @RequestParam(required = false) String instrucciones,
             @RequestParam(required = false) List<Integer> voluntarioIds,
             RedirectAttributes redirectAttributes) {
 
@@ -164,6 +219,8 @@ public class TareaViewController {
         body.put("descripcion",   descripcion);
         body.put("estado",        estado);
         body.put("fecha",         LocalDateTime.now().toString());
+        body.put("fechaLimite",   fechaLimite != null && !fechaLimite.isEmpty() ? fechaLimite : null);
+        body.put("instrucciones", instrucciones);
         body.put("voluntarioIds", voluntarioIds != null ? voluntarioIds : List.of());
 
         restTemplate.put(apiUrl + "/v1/tareas/" + id, body);

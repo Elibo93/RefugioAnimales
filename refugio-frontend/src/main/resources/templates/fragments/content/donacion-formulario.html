@@ -169,89 +169,12 @@
         </style>
 
         <script>
-            function handleTypeChange() {
-                const type = document.getElementById('donation-type-select').value;
-                const panelDineroExtra = document.getElementById('panel-dinero-extra');
-                const panelUnificado = document.getElementById('panel-unificado');
-                const actions = document.getElementById('form-actions');
-
-                const labelCant = document.getElementById('label-cantidad');
-                const iconCant = document.getElementById('icon-cantidad');
-                const inputCant = document.getElementById('input-cantidad');
-
-                const labelDesc = document.getElementById('label-descripcion');
-                const inputDesc = document.getElementById('input-descripcion');
-
-                panelDineroExtra.style.display = 'none';
-                panelUnificado.style.display = 'block';
-                actions.style.display = 'flex';
-
-                // Reset step and required
-                inputCant.step = "0.01";
-                inputCant.required = true;
-                inputDesc.required = (type !== 'DINERO'); // Descripción obligatoria para productos
-
-                if (type === 'DINERO') {
-                    panelDineroExtra.style.display = 'block';
-                    labelCant.textContent = 'Importe de la donación (€)';
-                    iconCant.setAttribute('data-lucide', 'euro');
-                    inputCant.placeholder = '0.00';
-                    labelDesc.textContent = 'Mensaje o dedicatoria (opcional)';
-                    inputDesc.placeholder = 'Escribe un mensaje de apoyo...';
-                } else {
-                    if (type === 'COMIDA') {
-                        labelCant.textContent = 'Peso aproximado (Kg)';
-                        iconCant.setAttribute('data-lucide', 'package');
-                        inputCant.placeholder = 'Ej: 15';
-                        inputCant.step = "0.5";
-                        labelDesc.textContent = 'Marca y tipo de alimento';
-                        inputDesc.placeholder = 'Ej: Pienso para cachorros, latas húmedas...';
-                    } else if (type === 'MEDICINAS') {
-                        labelCant.textContent = 'Unidades / Cajas';
-                        iconCant.setAttribute('data-lucide', 'pill');
-                        inputCant.placeholder = 'Ej: 2';
-                        inputCant.step = "1";
-                        labelDesc.textContent = 'Nombre y uso del medicamento';
-                        inputDesc.placeholder = 'Ej: Desparasitante, 3 cajas de Amoxicilina...';
-                    } else { // OTRO
-                        labelCant.textContent = 'Cantidad (opcional)';
-                        iconCant.setAttribute('data-lucide', 'gift');
-                        inputCant.placeholder = 'Ej: 1';
-                        inputCant.step = "1";
-                        labelDesc.textContent = 'Descripción del material';
-                        inputDesc.placeholder = 'Ej: Mantas, correas, juguetes...';
-                        inputCant.required = false;
-                    }
-                }
-                if (window.lucide) lucide.createIcons();
-            }
-
-            function setAmount(val, btn) {
-                document.getElementById('input-cantidad').value = val;
-                updateButtons(btn);
-            }
-
-            function focusAmount(btn) {
-                document.getElementById('input-cantidad').focus();
-                updateButtons(btn);
-            }
-
-            function updateButtons(activeBtn) {
-                document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
-                if (activeBtn) activeBtn.classList.add('active');
-            }
-
-            function setRecurrence(type) {
-                document.querySelectorAll('.view-toggle .toggle-btn').forEach(b => b.classList.remove('active'));
-                document.getElementById(type === 'mensual' ? 'btn-mensual' : 'btn-unica').classList.add('active');
-                document.getElementById('frecuencia-input').value = type.toUpperCase();
-                document.getElementById('submit-text').textContent = type === 'mensual' ? 'Confirmar Donación Mensual' : 'Confirmar Donación';
-            }
-
-            document.addEventListener('DOMContentLoaded', function() {
-                // Always call handleTypeChange on load to show the form panels
-                handleTypeChange();
-            });
+            // Ejecución segura para HTMX y carga normal (Llamando a la función global centralizada)
+            (function() {
+                const init = () => { if (typeof handleTypeChange === 'function') handleTypeChange(); };
+                if (document.readyState === 'complete') setTimeout(init, 100);
+                else window.addEventListener('load', init);
+            })();
         </script>
     </div>
 </body>

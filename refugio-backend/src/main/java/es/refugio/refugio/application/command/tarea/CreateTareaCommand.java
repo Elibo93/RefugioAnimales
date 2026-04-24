@@ -7,6 +7,8 @@ public record CreateTareaCommand(
         String descripcion,
         LocalDateTime fecha,
         String estado,
+        LocalDateTime fechaLimite,
+        String instrucciones,
         List<Integer> voluntarioIds
 ) {
 }

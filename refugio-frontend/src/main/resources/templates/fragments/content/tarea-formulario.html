@@ -7,63 +7,70 @@
 
 <body>
     <div th:fragment="content">
-        <div class="actions-bar" style="margin-bottom: 2rem;">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <a th:href="${returnUrl}" class="btn-circle" style="background: white; border: 1px solid var(--border); color: var(--text-main); display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s;">
-                    <i data-lucide="chevron-left"></i>
-                </a>
-                <span class="user-name page" 
-                      th:text="${voluntarioPreseleccionado != null ? 'Asignar tarea a ' + voluntarioPreseleccionado.get('nombre') + ' ' + (voluntarioPreseleccionado.get('apellido') ?: '') : (tarea.get('id') == null ? 'Nueva tarea' : 'Editar tarea')}">
-                    Nueva tarea
-                </span>
-            </div>
+
+        <div class="page-header" style="text-align:center;">
+            <h1 class="page-title" th:text="${tarea.get('id') == null ? (voluntarioPreseleccionado != null ? 'Asignar tarea a ' + voluntarioPreseleccionado.get('nombre') : 'Crear tarea') : 'Editar tarea'}">
+                Crear tarea
+            </h1>
+            <p style="color:var(--text-muted); margin-top:0.5rem;">Configure los detalles y plazos de la tarea</p>
         </div>
 
-        <div class="card glass-card" style="max-width:800px; margin:0 auto; padding: 30px; border-radius: 20px;">
+        <div class="card" style="max-width:800px; margin:0 auto;">
             <form th:action="${tarea.get('id') == null ? '/web/tareas/nueva' : '/web/tareas/' + tarea.get('id') + '/editar'}"
                 method="post">
-                
-                <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+                <div class="form-grid">
+                    
                     <div class="form-group" style="grid-column: 1 / -1;">
-                        <label style="font-weight: 700; color: var(--text-main); margin-bottom: 8px; display: block;">Descripción de la tarea</label>
+                        <label>Descripción de la tarea</label>
                         <input type="text" name="descripcion" th:value="${tarea.get('descripcion')}" 
-                               placeholder="Ej: Limpieza de jaulas sector A"
-                               style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-main);" required>
+                               placeholder="Ej: Limpieza profunda del sector B" required>
                     </div>
 
                     <div class="form-group">
-                        <label style="font-weight: 700; color: var(--text-main); margin-bottom: 8px; display: block;">Estado inicial</label>
-                        <select name="estado" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-main);" required>
-                            <option th:each="e : ${estados}" th:value="${e}" th:text="${e}"
+                        <label>Estado</label>
+                        <select name="estado" required>
+                            <option th:each="e : ${estados}" th:value="${e}" 
+                                th:text="${#strings.capitalize(e.toLowerCase().replace('_', ' '))}"
                                 th:selected="${e == tarea.get('estado')}"></option>
                         </select>
                     </div>
 
-                    <div class="form-group" th:if="${voluntarioPreseleccionado == null}">
-                        <label style="font-weight: 700; color: var(--text-main); margin-bottom: 8px; display: block;">Voluntarios asignados</label>
-                        <select name="voluntarioIds" multiple style="width: 100%; height: 120px; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-main);">
-                            <option th:each="v : ${voluntarios}" th:value="${v.get('id').get('value')}"
-                                th:with="u=${usuariosMap != null ? usuariosMap[v.get('usuarioId').get('value')] : null}"
-                                th:text="${u != null ? u.get('nombre') + ' ' + u.get('apellido') : 'ID: ' + v.get('id').get('value')}"
-                                th:selected="${tarea.get('voluntarioIds') != null and tarea.get('voluntarioIds').contains(v.get('id').get('value'))}">
+                    <div class="form-group">
+                        <label>Fecha y Hora Límite (Vencimiento)</label>
+                        <input type="datetime-local" name="fechaLimite" th:value="${tarea.get('fechaLimite')}">
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Instrucciones detalladas</label>
+                        <textarea name="instrucciones" rows="3" placeholder="Añade detalles, precauciones o información adicional sobre la tarea"
+                                  th:text="${tarea.get('instrucciones')}"></textarea>
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / -1;" th:if="${voluntarioPreseleccionado == null}">
+                        <label>Voluntario asignado <span style="color:var(--text-muted); font-size:0.8rem; font-weight:400;">(opcional)</span></label>
+                        <select name="voluntarioIds">
+                            <option value="">— Sin asignar —</option>
+                            <option th:each="v : ${voluntarios}" th:value="${v.get('id')}"
+                                th:with="u=${usuariosMap != null ? usuariosMap[v.get('usuarioId')] : null}"
+                                th:text="${u != null ? u.get('nombre') + ' ' + u.get('apellido') : 'Voluntario ' + v.get('id')}"
+                                th:selected="${tarea.get('voluntarioIds') != null and tarea.get('voluntarioIds').contains(v.get('id'))}">
                             </option>
                         </select>
-                        <small style="color: var(--text-muted); font-size: 0.75rem; margin-top: 5px; display: block;">Mantén Ctrl (o Cmd) para seleccionar varios</small>
                     </div>
 
                     <!-- Hidden input if pre-selected -->
                     <div th:if="${voluntarioPreseleccionado != null}">
                         <input type="hidden" name="voluntarioIds" th:each="vid : ${tarea.get('voluntarioIds')}" th:value="${vid}">
                     </div>
+
                 </div>
 
                 <div class="modal-actions" style="margin-top: 3rem; display: flex; gap: 15px; justify-content: flex-end;">
-                    <a th:href="${returnUrl}" class="btn btn-secondary" 
-                       style="padding: 12px 25px; border-radius: 12px; font-weight: 600;">Cancelar</a>
-                    <button type="submit" class="btn btn-primary" 
-                            style="padding: 12px 30px; border-radius: 12px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                        <i data-lucide="check-circle" style="width: 18px;"></i>
-                        <span th:text="${voluntarioPreseleccionado != null ? 'Asignar Tarea' : 'Guardar Tarea'}">Guardar tarea</span>
+                    <a th:href="${returnUrl}" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i data-lucide="save" style="width: 18px;"></i>
+                        <span th:text="${tarea.get('id') == null ? 'Crear Tarea' : 'Guardar Cambios'}">Crear Tarea</span>
                     </button>
                 </div>
             </form>

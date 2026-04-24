@@ -26,13 +26,16 @@ public class HomeViewController {
     @Value("${backend.api.url}")
     private String apiUrl;
 
+    @Value("${auth.api.url}")
+    private String authUrl;
+
     @GetMapping
     public String home(Model model) {
 
         // Cada llamada es independiente: si una falla, las demás siguen funcionando
         List<Object> animales = fetch("/v1/animales");
 
-        model.addAttribute(ModelAttribute.Persona_LIST.getName(),    fetch("/v1/usuarios"));
+        model.addAttribute(ModelAttribute.Persona_LIST.getName(),    fetchFull(authUrl + "/v1/usuarios"));
         model.addAttribute(ModelAttribute.Animal_LIST.getName(),     animales);
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), fetch("/v1/voluntarios"));
         model.addAttribute(ModelAttribute.Adopcion_LIST.getName(),   fetch("/v1/adopciones"));
@@ -46,10 +49,15 @@ public class HomeViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    /** Fetch genérico: devuelve lista vacía si el endpoint falla o requiere auth */
+    /** Fetch genérico para el backend: devuelve lista vacía si el endpoint falla o requiere auth */
     private List<Object> fetch(String path) {
+        return fetchFull(apiUrl + path);
+    }
+
+    /** Fetch genérico con URL completa */
+    private List<Object> fetchFull(String fullUrl) {
         try {
-            Object[] arr = restTemplate.getForObject(apiUrl + path, Object[].class);
+            Object[] arr = restTemplate.getForObject(fullUrl, Object[].class);
             return arr != null ? Arrays.asList(arr) : List.of();
         } catch (Exception e) {
             return List.of();

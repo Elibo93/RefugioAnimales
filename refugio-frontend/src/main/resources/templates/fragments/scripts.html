@@ -1,38 +1,65 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-
 <div th:fragment="scripts" th:remove="tag">
+    <!-- External Libraries -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+    
+    <!-- Static Scripts (Core Logic & Modules) -->
     <script th:src="@{/js/scripts.js}"></script>
+    
     <script>
-        // Initialize Lucide icons on page load
-        if (window.lucide) lucide.createIcons();
+        // --- HTMX GLOBAL CONFIGURATION ---
 
-        // CSRF for HTMX POST requests
+        // CSRF Token integration for HTMX AJAX requests
         document.body.addEventListener('htmx:configRequest', function(evt) {
-            var csrfHeaderAttr = document.querySelector('meta[name="_csrf_header"]');
-            var csrfTokenAttr = document.querySelector('meta[name="_csrf"]');
-            if (csrfHeaderAttr && csrfTokenAttr && evt.detail.verb !== "get") {
-                var headerName = csrfHeaderAttr.getAttribute('content');
-                var token = csrfTokenAttr.getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]');
+            const csrfToken = document.querySelector('meta[name="_csrf"]');
+            if (csrfHeader && csrfToken && evt.detail.verb !== "get") {
+                const headerName = csrfHeader.getAttribute('content');
+                const token = csrfToken.getAttribute('content');
                 if (headerName && token) {
                     evt.detail.headers[headerName] = token;
                 }
             }
         });
 
-        // Re-initialize Lucide icons after every HTMX content swap
-        document.body.addEventListener('htmx:afterSettle', function() {
-            if (window.lucide) lucide.createIcons();
+        // Component Re-initialization after HTMX swaps
+        document.body.addEventListener('htmx:afterSettle', () => {
+            // Re-render Lucide Icons
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                lucide.createIcons();
+            }
+            
+            // Re-start Carousel if present
+            if (document.querySelectorAll('.story-card').length > 0 && typeof startCarouselAutoPlay === 'function') {
+                startCarouselAutoPlay();
+            }
+        });
+
+        // Global Form Submission Handling (Loading states)
+        document.addEventListener('submit', function (e) {
+            const form = e.target;
+            const btn = form.querySelector('[type="submit"]');
+            if (btn && !btn.hasAttribute('data-no-loading')) {
+                const btnText = btn.querySelector('.btn-text') || btn;
+                btn.disabled = true;
+                if (btnText === btn) {
+                    btn.dataset.originalText = btn.textContent;
+                    btn.textContent = "Guardando...";
+                } else {
+                    btnText.dataset.originalText = btnText.textContent;
+                    btnText.textContent = "Guardando...";
+                }
+            }
+        });
+
+        // Initial load trigger
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
         });
     </script>
 </div>
-
 </html>
-
-
-
-
