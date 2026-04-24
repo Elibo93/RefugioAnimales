@@ -185,42 +185,7 @@ body {
     gap: 1rem;
 }
 
-/* Píldora de información (solo lectura) */
-.info-pill {
-    background: #f1f5f9;
-    padding: 0.75rem 1rem;
-    border-radius: 12px;
-    color: var(--text-main);
-    font-weight: 500;
-    border: 1px solid #e2e8f0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
 
-/* Etiquetas Premium Unificadas */
-.info-pill-label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #64748b;
-    /* Slate 500: Legible pero secundario */
-    margin-bottom: 0.6rem;
-}
-
-.editable-label {
-    display: block;
-    font-size: 0.72rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #334155; /* Slate 700: Color sólido y profesional */
-    margin-bottom: 0.6rem;
-}
 
 /* Títulos de Sección sutiles */
 .modal-section-divider {
@@ -246,23 +211,7 @@ body {
     background: #e2e8f0;
 }
 
-.premium-select,
-.premium-textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border-radius: 12px;
-    border: 2px solid var(--primary-light);
-    background: white;
-    font-weight: 600;
-    transition: all 0.2s;
-}
 
-.premium-select:focus,
-.premium-textarea:focus {
-    border-color: var(--primary);
-    outline: none;
-    box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.1);
-}
 
 .form-group input,
 .form-group select,

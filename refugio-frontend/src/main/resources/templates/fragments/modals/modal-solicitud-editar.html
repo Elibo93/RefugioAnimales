@@ -37,20 +37,14 @@
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <div class="form-group">
-                                <span class="info-pill-label">Animal</span>
-                                <div class="info-pill">
-                                    <i data-lucide="dog" style="width: 14px;"></i>
-                                    <span th:text="${animalNombre}">Rocky</span>
-                                </div>
+                            <div class="form-group readonly-group">
+                                <label>Animal</label>
+                                <input type="text" th:value="${animalNombre}" readonly>
                             </div>
 
-                            <div class="form-group">
-                                <span class="info-pill-label">Solicitante</span>
-                                <div class="info-pill">
-                                    <i data-lucide="user" style="width: 14px;"></i>
-                                    <span th:text="${adoptanteNombre}">Juan Pérez</span>
-                                </div>
+                            <div class="form-group readonly-group">
+                                <label>Solicitante</label>
+                                <input type="text" th:value="${adoptanteNombre}" readonly>
                             </div>
                         </div>
 
@@ -60,8 +54,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="editable-label">Estado de la Solicitud</label>
-                            <select name="estado" class="premium-select">
+                            <label>Estado de la Solicitud</label>
+                            <select name="estado">
                                 <option th:each="e : ${estados}" th:value="${e}" th:text="${e}"
                                     th:selected="${e.toString() == solicitud.get('estado').toString()}">
                                 </option>
@@ -70,10 +64,10 @@
 
                         <!-- Fila 3: Comentario (Ancho completo) -->
                         <div class="form-group">
-                            <label class="editable-label">Razón / Comentario</label>
+                            <label>Razón / Comentario</label>
                             <textarea name="comentario" th:text="${solicitud.get('comentario')}"
                                 placeholder="Escribe aquí las observaciones sobre la solicitud..."
-                                class="premium-textarea" style="min-height: 120px; resize: vertical;"></textarea>
+                                style="min-height: 120px; resize: vertical;"></textarea>
                         </div>
                     </div>
                 </form>
