@@ -1,27 +1,27 @@
 <div id="modal-host" th:fragment="detalle">
-    <div class="modal-glass-backdrop" onclick="document.getElementById('modal-host').innerHTML = ''">
+    <div class="modal-glass-backdrop" onclick="closeModal()">
         <div class="modal-glass-content glass-card" onclick="event.stopPropagation()">
-            <!-- Close Button -->
-            <button onclick="document.getElementById('modal-host').innerHTML = ''"
+            <!-- Botón de Cierre -->
+            <button onclick="closeModal()"
                 style="position: absolute; top: 1.5rem; right: 1.5rem; background: rgba(255,255,255,0.5); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; z-index: 100; display: flex; align-items: center; justify-content: center;">
                 <i data-lucide="x" style="width: 20px; height: 20px;"></i>
             </button>
 
-            <!-- Gallery / Image -->
+            <!-- Galería / Imagen -->
             <div class="modal-gallery">
                 <img th:src="${animal.get('foto') != null ? animal.get('foto') : '/images/placeholder-animal.png'}" alt="Animal">
             </div>
 
-            <!-- Content Area -->
+            <!-- Área de Contenido -->
             <div class="modal-body-detail">
                 <header>
                     <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
-                        <span class="status-badge"
+                        <span class="animal-status-badge"
                             th:classappend="${animal.get('estado') != null ? 
                                 (#strings.toUpperCase(animal.get('estado').toString()) == 'DISPONIBLE' ? 'badge-available' : 
                                 (#strings.toUpperCase(animal.get('estado').toString()) == 'RESERVADO' ? 'badge-reserved' : 
                                 (#strings.toUpperCase(animal.get('estado').toString()) == 'ADOPTADO' ? 'badge-adopted' : 'badge-treatment'))) : 'badge-available'}"
-                            th:text="${animal.get('estado')}">
+                            th:text="${animal.get('estado') != null ? #strings.replace(animal.get('estado'), '_', ' ') : ''}">
                             Disponible
                         </span>
                         <span th:if="${animal.get('urgencia')}"
@@ -124,7 +124,7 @@
 
 
                     <button type="button" class="btn btn-secondary"
-                        onclick="document.getElementById('modal-host').innerHTML = ''"
+                        onclick="closeModal()"
                         style="height: 56px; border-radius: 16px;">
                         Cerrar
                     </button>

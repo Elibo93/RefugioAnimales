@@ -1,20 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Lucide Icons
+    // Iconos de Lucide
     if (window.lucide) {
         lucide.createIcons();
     }
 
-    // Re-initialize Lucide Icons after HTMX swaps
+    // Reinicializar componentes dinámicos tras intercambios de HTMX
     document.body.addEventListener('htmx:afterSettle', () => {
-        if (window.lucide) {
-            lucide.createIcons();
-        }
+        refreshDynamicComponents();
     });
 
-    // Initialize carousel (now handled globally in scripts.html)
-    // initCarousel();
+    // Carga inicial
+    refreshDynamicComponents();
 
-    // Auto-dismiss Toasts
+    // Auto-cierre de notificaciones (Toasts)
     const toasts = document.querySelectorAll('.toast');
     if (toasts.length > 0) {
         setTimeout(() => {
@@ -27,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    // Sidebar Logic
+    // Lógica del Sidebar (Menú lateral)
     const openSidebarBtn = document.getElementById('open-sidebar');
     const closeSidebarBtn = document.getElementById('close-sidebar');
     const sidebar = document.getElementById('app-sidebar');
@@ -45,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebarOverlay.addEventListener('click', toggleSidebar);
     }
 
-    // Dropdown Logic (for legacy or internal dropdowns)
+    // Lógica de Desplegables (Dropdowns)
     const dropdownTrigger = document.querySelector('.dropdown-trigger');
     const dropdownMenu = document.querySelector('.dropdown-menu');
     const dropdownContainer = document.querySelector('.dropdown-container');
@@ -63,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Submenu Toggle Logic
+    // Lógica de Submenús en el Sidebar
     const submenuToggles = document.querySelectorAll('.submenu-toggle');
     submenuToggles.forEach(toggle => {
         toggle.addEventListener('click', () => {
@@ -80,18 +78,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-// === GLOBAL MODULE FUNCTIONS ===
+// === FUNCIONES GLOBALES ===
 
-// Modal Logic
+// Actualización general de componentes dinámicos
+function refreshDynamicComponents() {
+    if (window.lucide) lucide.createIcons();
+    
+    // Inicialización automática de cuadrículas con paginación
+    if (document.getElementById('animal-grid-admin')) initPagination('animal-grid-admin');
+    if (document.getElementById('animal-grid-cards')) initPagination('animal-grid-cards');
+    if (document.getElementById('historial-grid')) initPagination('historial-grid');
+    
+    // Inicialización automática de carruseles
+    if (document.querySelectorAll('.story-card').length > 0) startCarouselAutoPlay();
+}
+
+// Lógica de Modales
 function closeModal() {
     const modalHost = document.getElementById('modal-host');
     if (modalHost) {
         modalHost.innerHTML = '';
-        document.body.style.overflow = '';
+        document.body.classList.remove('modal-open');
     }
 }
 
-// Carousel Logic
+// Lógica de Carrusel
 let carouselInterval = null;
 let isCarouselMoving = false;
 
@@ -128,7 +139,7 @@ function moveCarousel(direction, isAuto = false) {
     if (window.lucide) lucide.createIcons();
 }
 
-// Pagination Logic
+// Lógica de Paginación
 function initPagination(gridId, itemsPerPage = 8) {
     const runInit = () => {
         const grid = document.getElementById(gridId);
@@ -170,7 +181,7 @@ function initPagination(gridId, itemsPerPage = 8) {
     setTimeout(runInit, 100);
 }
 
-// Filtering Logic
+// Lógica de Filtrado de elementos
 function filterListItems(filterClass, itemClass, status, dataAttr = 'status') {
     document.querySelectorAll('.' + filterClass).forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-filter') === status);
@@ -185,6 +196,8 @@ function filterListItems(filterClass, itemClass, status, dataAttr = 'status') {
     });
 }
 
+// Filtrado por prioridad (Tareas)
+// Filtrado por prioridad (Tareas)
 function filterByPriority(priority, btn) {
     if (btn) {
         const container = btn.parentElement;
@@ -202,7 +215,7 @@ function filterByPriority(priority, btn) {
     });
 }
 
-// Donation Form Logic
+// Lógica del Formulario de Donaciones
 function handleTypeChange() {
     const typeSelect = document.getElementById('donation-type-select');
     if (!typeSelect) return;

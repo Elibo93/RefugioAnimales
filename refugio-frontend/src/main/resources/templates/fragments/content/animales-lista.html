@@ -192,9 +192,9 @@
                                 <td th:text="${a.get('edad') != null ? a.get('edad') + ' años' : '-'}"
                                     style="text-align: center;">2 años</td>
                                 <td style="text-align: center;">
-                                    <span class="status-badge"
+                                    <span class="animal-status-badge"
                                         th:classappend="${a.get('estado') != null ? 'badge-' + a.get('estado').toString().toLowerCase() : ''}"
-                                        th:text="${a.get('estado')}">Disponible</span>
+                                        th:text="${a.get('estado') != null ? #strings.replace(a.get('estado'), '_', ' ') : ''}">Disponible</span>
                                 </td>
                                 <td style="text-align: center; border-radius: 0 15px 15px 0;">
                                     <div style="display: flex; gap: 8px; justify-content: center;">
@@ -221,10 +221,9 @@
                                 style="position: relative; aspect-ratio: 4/5; overflow: hidden;">
                                 <img th:src="${a.get('foto') != null ? a.get('foto') : '/images/placeholder-animal.png'}"
                                     style="width: 100%; height: 100%; object-fit: cover;">
-                                <span class="status-badge"
+                                <span class="animal-status-badge"
                                     th:classappend="${a.get('estado') != null ? 'badge-' + a.get('estado').toString().toLowerCase() : ''}"
-                                    style="position: absolute; top: 1rem; left: 1rem; z-index: 10;"
-                                    th:text="${a.get('estado')}">Disponible</span>
+                                    th:text="${a.get('estado') != null ? #strings.replace(a.get('estado'), '_', ' ') : ''}">Disponible</span>
 
                                 <!-- Hover Overlay con Botón -->
                                 <div class="card-info-overlay">
@@ -316,10 +315,6 @@
                     </div>
                 </section>
 
-                <script>
-                    initPagination('animal-grid-admin');
-                    initPagination('animal-grid-cards');
-                </script>
             </div>
         </div>
     </div>
