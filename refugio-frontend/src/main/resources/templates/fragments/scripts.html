@@ -2,18 +2,18 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <div th:fragment="scripts" th:remove="tag">
-    <!-- External Libraries -->
+    <!-- Librerías Externas -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
     
-    <!-- Static Scripts (Core Logic & Modules) -->
+    <!-- Scripts Estáticos (Lógica Principal) -->
     <script th:src="@{/js/scripts.js}"></script>
     
     <script>
-        // --- HTMX GLOBAL CONFIGURATION ---
+        // --- CONFIGURACIÓN GLOBAL DE HTMX ---
 
-        // CSRF Token integration for HTMX AJAX requests
+        // Integración de Token CSRF para peticiones HTMX
         document.body.addEventListener('htmx:configRequest', function(evt) {
             const csrfHeader = document.querySelector('meta[name="_csrf_header"]');
             const csrfToken = document.querySelector('meta[name="_csrf"]');
@@ -26,20 +26,22 @@
             }
         });
 
-        // Component Re-initialization after HTMX swaps
-        document.body.addEventListener('htmx:afterSettle', () => {
-            // Re-render Lucide Icons
-            if (typeof lucide !== 'undefined' && lucide.createIcons) {
-                lucide.createIcons();
+        // Reinicialización de componentes tras actualizaciones de HTMX
+        document.body.addEventListener('htmx:afterSettle', (evt) => {
+            // Bloquear scroll si hay un modal abierto
+            if (evt.detail.target && evt.detail.target.id === 'modal-host') {
+                if (evt.detail.target.innerHTML.trim() !== '') {
+                    document.body.classList.add('modal-open');
+                }
             }
-            
-            // Re-start Carousel if present
-            if (document.querySelectorAll('.story-card').length > 0 && typeof startCarouselAutoPlay === 'function') {
-                startCarouselAutoPlay();
+
+            // Actualización centralizada (Lucide, Paginación, etc.)
+            if (typeof refreshDynamicComponents === 'function') {
+                refreshDynamicComponents();
             }
         });
 
-        // Global Form Submission Handling (Loading states)
+        // Gestión de estados de carga en formularios
         document.addEventListener('submit', function (e) {
             const form = e.target;
             const btn = form.querySelector('[type="submit"]');
@@ -56,7 +58,7 @@
             }
         });
 
-        // Initial load trigger
+        // Disparo de carga inicial
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
         });
