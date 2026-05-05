@@ -102,6 +102,21 @@
                             document.getElementById('user-search').value = userName;
                             document.getElementById('user-suggestions').innerHTML = '';
                         }
+
+                        // Ocultar sugerencias al hacer clic fuera
+                        document.addEventListener('click', function(event) {
+                            const animalSearch = document.getElementById('animal-search');
+                            const animalSugg = document.getElementById('animal-suggestions');
+                            const userSearch = document.getElementById('user-search');
+                            const userSugg = document.getElementById('user-suggestions');
+
+                            if (animalSearch && !animalSearch.contains(event.target) && !animalSugg.contains(event.target)) {
+                                animalSugg.innerHTML = '';
+                            }
+                            if (userSearch && !userSearch.contains(event.target) && !userSugg.contains(event.target)) {
+                                userSugg.innerHTML = '';
+                            }
+                        });
                     </script>
 
                     <!-- Selección de Solicitante (Solo lectura en edición) -->
