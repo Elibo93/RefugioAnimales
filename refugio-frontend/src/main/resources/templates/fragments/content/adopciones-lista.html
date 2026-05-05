@@ -10,18 +10,18 @@
 
         <div class="table-wrapper">
             <div class="actions-bar">
-                <span class="user-name page" th:text="#{enrollment.list.title}">adopciones</span>
+                <span class="user-name page" th:text="#{adopcion.list.title}">adopciones</span>
                 <div style="display:flex; gap:10px; align-items: center;">
                     <form id="filterForm" th:action="@{/web/adopciones}" method="get"
                         style="display:flex; gap:10px; margin:0;">
                         <select name="adoptanteId" class="filter-select" onchange="this.form.submit()">
-                            <option value="" th:text="#{enrollment.filter.student.all}">Todo personas</option>
+                            <option value="" th:text="#{adopcion.filter.persona.all}">Todo personas</option>
                             <option th:each="a : ${listaadoptantes}" th:value="${a.get('id')}"
                                 th:text="${a.get('nombre') != null ? a.get('nombre') + ' ' + a.get('apellido') : 'Adoptante'}"
                                 th:selected="${a.get('id') == selectedAdoptanteId}">adoptante</option>
                         </select>
                         <select name="animalId" class="filter-select" onchange="this.form.submit()">
-                            <option value="" th:text="#{enrollment.filter.workshop.all}">Todo animales</option>
+                            <option value="" th:text="#{adopcion.filter.animal.all}">Todo animales</option>
                             <option th:each="t : ${listaanimales}" th:value="${t.get('id')}"
                                 th:text="${t.get('nombre')}" th:selected="${t.get('id') == selectedanimalId}">animal
                             </option>
@@ -41,11 +41,11 @@
             <table id="tablaadopciones">
                 <thead>
                     <tr>
-                        <th th:text="#{enrollment.table.header.id}">ID</th>
-                        <th th:text="#{enrollment.table.header.student}">persona</th>
-                        <th th:text="#{enrollment.table.header.workshop}">animal</th>
-                        <th th:text="#{enrollment.table.header.date}">Fecha</th>
-                        <th th:text="#{enrollment.table.header.action}">Acción</th>
+                        <th th:text="#{adopcion.table.header.id}">ID</th>
+                        <th th:text="#{adopcion.table.header.persona}">persona</th>
+                        <th th:text="#{adopcion.table.header.animal}">animal</th>
+                        <th th:text="#{adopcion.table.header.date}">Fecha</th>
+                        <th th:text="#{adopcion.table.header.action}">Acción</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-adopciones-body">

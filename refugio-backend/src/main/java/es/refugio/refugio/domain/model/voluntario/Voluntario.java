@@ -14,5 +14,6 @@ public class Voluntario {
     private VoluntarioId id;
     private UsuarioId usuarioId;
     private String disponibilidad;
+    private String especialidad;
     private List<TareaId> tareas;
 }

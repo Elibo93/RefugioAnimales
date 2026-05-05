@@ -33,7 +33,7 @@
                         <th th:text="#{donacion.field.cantidad}">Cantidad</th>
                         <th th:text="#{donacion.table.header.fecha}">Fecha</th>
                         <th th:text="#{donacion.field.descripcion}">Descripción</th>
-                        <th th:text="#{workshop.table.header.action}" th:if="${isVoluntario}">
+                        <th th:text="#{animal.table.header.action}" th:if="${isVoluntario}">
                             Acción</th>
                     </tr>
                 </thead>
@@ -44,7 +44,7 @@
                             th:text="${u != null ? (u.get('nombre') + (u.get('apellido') != null ? ' ' + u.get('apellido') : '')) : 'Donante Anónimo'}">
                             Usuario
                         </td>
-                        <td th:text="${d.get('tipo')}">DINERO</td>
+                        <td th:text="${d.get('tipo') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(d.get('tipo'), '_', ' '))) : ''}">DINERO</td>
                         <td th:text="${d.get('cantidad')}">100.0</td>
                         <td
                             th:text="${d.get('fecha') != null ? d.get('fecha').toString().replace('T', ' ').substring(0, (d.get('fecha').toString().length() > 16 ? 16 : d.get('fecha').toString().length())) : '-'}">

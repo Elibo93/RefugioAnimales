@@ -7,42 +7,141 @@
 
 <body>
     <div th:fragment="content">
-        <div class="page-header" style="text-align:center;">
-            <h1 class="page-title"
-                th:text="${solicitud.get('id') == null ? #messages.msg('solicitud.form.title') : #messages.msg('solicitud.modal.edit.title')}">
-                Nueva solicitud</h1>
+        <div class="page-header" style="text-align:center; margin-bottom: 2rem;">
+            <h1 class="page-title" style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+                <div class="premium-modal-icon-wrapper" style="margin: 0; width: 48px; height: 48px; background: #fff7ed; color: #ea580c;">
+                    <i data-lucide="file-text"></i>
+                </div>
+                <span th:text="${solicitud.get('id') == null ? #messages.msg('solicitud.form.title') : #messages.msg('solicitud.modal.edit.title')}">
+                    Nueva solicitud
+                </span>
+            </h1>
         </div>
         <div class="card" style="max-width:800px; margin:0 auto;">
             <form
                 th:action="${solicitud.get('id') == null ? '/web/solicitudes/nueva' : '/web/solicitudes/' + solicitud.get('id') + '/editar'}"
                 method="post" th:object="${solicitud}">
                 <div class="form-grid">
-                    <div class="form-group">
+                    <!-- Selección de Animal (Solo lectura en edición) -->
+                    <div class="form-group" th:if="${solicitud.get('id') != null}">
                         <label th:text="#{solicitud.field.animal}">Animal</label>
-                        <select name="animalId" required>
-                            <option value="" th:text="#{form.select.workshop}">Seleccione un animal...</option>
-                            <option th:each="a : ${animales}"
-                                th:if="${a.get('estado') != null and (a.get('estado').toString() == 'DISPONIBLE' or a.get('estado').toString() == 'EN_TRATAMIENTO' or (solicitud.get('animalId') != null and a.get('id') == solicitud.get('animalId')))}"
-                                th:value="${a.get('id')}" th:text="${a.get('nombre')}"
-                                th:selected="${solicitud.get('animalId') != null and a.get('id') == solicitud.get('animalId')}">
-                            </option>
-                        </select>
+                        <div class="read-only-display" style="display: flex; align-items: center; gap: 12px; padding: 10px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+                            <img th:if="${animalData != null and animalData.get('fotoUrl') != null}" 
+                                 th:src="${animalData.get('fotoUrl')}" 
+                                 style="width: 48px; height: 48px; border-radius: 8px; object-fit: cover;">
+                            <div th:if="${animalData == null or animalData.get('fotoUrl') == null}" 
+                                 style="width: 48px; height: 48px; border-radius: 8px; background: #f1f5f9; display: flex; align-items: center; justify-content: center;">
+                                <i data-lucide="paw-print" style="width: 20px; color: #94a3b8;"></i>
+                            </div>
+                            <div>
+                                <strong th:text="${animalData != null ? animalData.get('nombre') : 'Animal'}" style="display: block;"></strong>
+                                <span th:text="${animalData != null ? animalData.get('especie') : ''}" style="font-size: 0.8rem; color: #64748b;"></span>
+                            </div>
+                            <input type="hidden" name="animalId" th:value="${solicitud.get('animalId')}">
+                        </div>
                     </div>
-                    <div class="form-group">
+
+                    <div class="form-group" th:if="${solicitud.get('id') == null}" style="position: relative;">
+                        <label th:text="#{solicitud.field.animal}">Animal</label>
+                        <div style="position: relative;">
+                            <input type="text" id="animal-search" 
+                                    name="animal_q"
+                                    class="form-control"
+                                    placeholder="Escriba nombre del animal..." 
+                                    autocomplete="off"
+                                    hx-get="/web/animales/buscar"
+                                    hx-trigger="keyup changed delay:300ms, focus"
+                                    hx-target="#animal-suggestions">
+                            <input type="hidden" name="animalId" id="animalId-input" required th:value="${solicitud.get('animalId')}">
+                        </div>
+                        <div id="animal-suggestions" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 100;"></div>
+                        
+                        <!-- Previsualización del animal seleccionado -->
+                        <div id="selected-animal-card" style="display: none; margin-top: 1rem; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; align-items: center; gap: 12px;">
+                            <div style="width: 50px; height: 50px; border-radius: 8px; overflow: hidden; background: #f1f5f9; flex-shrink: 0;">
+                                <img id="selected-animal-img" src="" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                            <div>
+                                <strong id="selected-animal-name" style="display: block; color: var(--text-main);"></strong>
+                                <span id="selected-animal-species" style="font-size: 0.8rem; color: #64748b;"></span>
+                            </div>
+                            <button type="button" onclick="clearAnimalSelection()" style="margin-left: auto; background: none; border: none; color: #ef4444; cursor: pointer; padding: 5px;">
+                                <i data-lucide="x-circle" style="width: 20px;"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <script>
+                        function selectAnimal(id, nombre, especie, foto) {
+                            document.getElementById('animalId-input').value = id;
+                            document.getElementById('animal-search').value = nombre;
+                            document.getElementById('animal-suggestions').innerHTML = '';
+                            
+                            const card = document.getElementById('selected-animal-card');
+                            const img = document.getElementById('selected-animal-img');
+                            const nameTxt = document.getElementById('selected-animal-name');
+                            const speciesTxt = document.getElementById('selected-animal-species');
+                            
+                            img.src = (foto && foto !== 'null' && foto !== '') ? foto : '/images/placeholder-animal.png';
+                            nameTxt.innerText = nombre;
+                            speciesTxt.innerText = especie.charAt(0).toUpperCase() + especie.slice(1).toLowerCase();
+                            card.style.display = 'flex';
+                            lucide.createIcons();
+                        }
+
+                        function clearAnimalSelection() {
+                            document.getElementById('animalId-input').value = '';
+                            document.getElementById('animal-search').value = '';
+                            document.getElementById('selected-animal-card').style.display = 'none';
+                            document.getElementById('animal-search').focus();
+                        }
+                        
+                        function selectUser(userId, userName, alreadyRegistered, adoptanteId) {
+                            if (alreadyRegistered) return;
+                            document.getElementById('usuarioId-input').value = adoptanteId;
+                            document.getElementById('user-search').value = userName;
+                            document.getElementById('user-suggestions').innerHTML = '';
+                        }
+                    </script>
+
+                    <!-- Selección de Solicitante (Solo lectura en edición) -->
+                    <div class="form-group" th:if="${solicitud.get('id') != null}">
                         <label th:text="#{solicitud.field.adoptante}">Solicitante</label>
-                        <select name="adoptanteId" required>
-                            <option value="" th:text="#{form.select.student}">Seleccione una persona...</option>
-                            <option th:each="ad : ${adoptantes}" th:value="${ad.get('id')}"
-                                th:text="${ad.get('nombre') + ' ' + ad.get('apellido')}"
-                                th:selected="${solicitud.get('adoptanteId') != null and ad.get('id') == solicitud.get('adoptanteId')}">
-                            </option>
-                        </select>
+                        <div class="read-only-display" style="display: flex; align-items: center; gap: 12px; padding: 10px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
+                                <i data-lucide="user" style="width: 20px;"></i>
+                            </div>
+                            <div>
+                                <strong th:text="${nombreAdoptante}" style="display: block;"></strong>
+                                <span style="font-size: 0.8rem; color: #64748b;" th:text="#{solicitud.role.adoptante}">Adoptante</span>
+                            </div>
+                            <input type="hidden" name="adoptanteId" th:value="${solicitud.get('adoptanteId')}">
+                        </div>
+                    </div>
+
+                    <div class="form-group" th:if="${solicitud.get('id') == null}" style="position: relative;">
+                        <label th:text="#{solicitud.field.adoptante}">Solicitante</label>
+                        <div style="position: relative;">
+                            <input type="text" id="user-search" 
+                                    name="q"
+                                    class="form-control"
+                                    th:attr="placeholder=#{persona.placeholder.name}"
+                                    th:value="${nombreAdoptante}"
+                                    autocomplete="off"
+                                    hx-get="/web/personas/buscar?context=solicitud"
+                                    hx-trigger="keyup changed delay:500ms"
+                                    hx-target="#user-suggestions">
+                            <input type="hidden" name="adoptanteId" id="usuarioId-input" required th:value="${solicitud.get('adoptanteId')}">
+                        </div>
+                        <div id="user-suggestions" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 100;"></div>
                     </div>
                     <div class="form-group" sec:authorize="hasRole('ADMIN')">
                         <label th:text="#{solicitud.field.estado}">Estado</label>
                         <select name="estado" required>
-                            <option th:each="e : ${estados}" th:value="${e}" th:text="${e}"
-                                th:selected="${e == solicitud.get('estado')}"></option>
+                            <option th:each="e : ${estados}" 
+                                    th:value="${e}" 
+                                    th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(e, '_', ' ')))}"
+                                    th:selected="${e == solicitud.get('estado')}"></option>
                         </select>
                     </div>
                     <input type="hidden" name="estado"
@@ -54,10 +153,12 @@
                     </div>
                 </div>
                 <div class="modal-actions" style="margin-top:2rem;">
-                    <a th:href="@{/web/solicitudes}" class="btn btn-secondary"
+                    <a th:href="@{/web/solicitudes}" class="btn btn-secondary" style="justify-content:center;"
                         th:text="#{generic.btn.cancel}">Cancelar</a>
-                    <button type="submit" class="btn btn-primary" th:text="#{generic.btn.save}">Guardar
-                        solicitud</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit" style="justify-content:center;">
+                        <i data-lucide="check-circle"></i>
+                        <span id="btn-text" th:text="${solicitud.get('id') == null ? #messages.msg('generic.btn.create') : #messages.msg('generic.btn.save')}">Guardar</span>
+                    </button>
                 </div>
             </form>
         </div>

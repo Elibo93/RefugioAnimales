@@ -32,22 +32,25 @@ public class SessionCookieRelayInterceptor implements ClientHttpRequestIntercept
                     (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
             HttpServletRequest currentRequest = attrs.getRequest();
 
-            // Reenviar todas las cookies del navegador al backend
+            // 1. Reenviar el header Cookie completo si existe
             String cookieHeader = currentRequest.getHeader("Cookie");
             if (cookieHeader != null && !cookieHeader.isBlank()) {
                 request.getHeaders().add("Cookie", cookieHeader);
-                
-                // Si existe JWT_TOKEN, enviarlo también como Authorization Bearer para mayor compatibilidad
-                if (currentRequest.getCookies() != null) {
-                    for (jakarta.servlet.http.Cookie c : currentRequest.getCookies()) {
-                        if ("JWT_TOKEN".equals(c.getName())) {
-                            request.getHeaders().setBearerAuth(c.getValue());
-                            logger.info("Relaying JWT as Bearer token to backend");
-                        }
+            }
+
+            // 2. Buscar específicamente el JWT_TOKEN en los objetos Cookie
+            // Esto es más robusto que parsear el header manual o depender de que el header no sea null
+            if (currentRequest.getCookies() != null) {
+                for (jakarta.servlet.http.Cookie c : currentRequest.getCookies()) {
+                    if ("JWT_TOKEN".equals(c.getName())) {
+                        request.getHeaders().setBearerAuth(c.getValue());
+                        logger.info("Relaying JWT as Bearer token to " + request.getURI());
                     }
                 }
-            } else {
-                logger.warn("No cookie header found in current request attributes to relay to " + request.getURI());
+            }
+
+            if (cookieHeader == null && currentRequest.getCookies() == null) {
+                logger.warn("No cookies found in current request to relay to " + request.getURI());
             }
         } catch (IllegalStateException e) {
             // Sin contexto de request (tests, llamadas fuera de un hilo HTTP) — ignorar

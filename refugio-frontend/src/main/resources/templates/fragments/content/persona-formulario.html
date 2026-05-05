@@ -8,54 +8,76 @@
 <body>
     <div th:fragment="content">
 
-        <div class="page-header" style="text-align:center;">
-            <h1 class="page-title"
-                th:text="${persona.get('id') == null ? #messages.msg('persona.form.title') : #messages.msg('persona.modal.edit.title')}">
-                Crear persona</h1>
-            <p style="color:var(--text-muted); margin-top:0.5rem;" th:text="#{persona.form.subtitle}">Complete la
-                información para registrar una nueva persona</p>
+        <div class="page-header" style="text-align:center; margin-bottom: 2rem;">
+            <h1 class="page-title" style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+                <div class="premium-modal-icon-wrapper" style="margin: 0; width: 48px; height: 48px;">
+                    <i data-lucide="user"></i>
+                </div>
+                <span th:text="${persona.get('id') == null ? #messages.msg('persona.form.title') : #messages.msg('persona.modal.edit.title')}">
+                    Crear usuario
+                </span>
+            </h1>
+            <p style="color:var(--text-muted); margin-top:0.5rem;"
+                th:text="${persona.get('id') == null ? #messages.msg('persona.form.subtitle.create') : #messages.msg('persona.form.subtitle.edit')}">
+                Complete la información del usuario
+            </p>
         </div>
 
         <div class="card" style="max-width:800px; margin:0 auto;">
             <form
                 th:action="${persona.get('id') == null ? '/web/personas/nuevo' : '/web/personas/' + persona.get('id') + '/editar'}"
-                th:object="${persona}" method="POST">
+                method="POST">
+                
                 <div class="form-grid">
-                    <div class="form-group">
+                    <div class="form-group" th:classappend="${persona.get('id') != null ? 'readonly-group' : ''}">
                         <label th:text="#{persona.field.name}">Nombre</label>
-                        <input type="text" th:field="*{nombre}" required
+                        <input type="text" name="nombre" th:value="${persona.get('nombre')}" required
                             th:attr="placeholder=#{persona.placeholder.name}"
                             th:readonly="${persona.get('id') != null}">
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" th:classappend="${persona.get('id') != null ? 'readonly-group' : ''}">
                         <label th:text="#{persona.field.surname}">Apellidos</label>
-                        <input type="text" th:field="*{apellido}" required
+                        <input type="text" name="apellido" th:value="${persona.get('apellido')}" required
                             th:attr="placeholder=#{persona.placeholder.surname}"
                             th:readonly="${persona.get('id') != null}">
                     </div>
 
                     <div class="form-group">
                         <label th:text="#{persona.field.email}">Email</label>
-                        <input type="email" th:field="*{email}" th:attr="placeholder=#{persona.placeholder.email}">
-                    </div>
-
-                    <div class="form-group" th:with="pid=${persona.get('id')}" th:if="${pid == null}">
-                        <label>Contraseña</label>
-                        <input type="password" name="contrasena" required placeholder="Escriba su contraseña">
+                        <input type="email" name="email" th:value="${persona.get('email')}" 
+                            th:attr="placeholder=#{persona.placeholder.email}">
                     </div>
 
                     <div class="form-group">
                         <label th:text="#{persona.field.phone}">Teléfono</label>
-                        <input type="text" th:field="*{telefono}" th:attr="placeholder=#{persona.placeholder.phone}">
+                        <input type="text" name="telefono" th:value="${persona.get('telefono')}" 
+                            th:attr="placeholder=#{persona.placeholder.phone}">
+                    </div>
+
+                    <div class="form-group" th:if="${persona.get('id') == null}">
+                        <label th:text="#{persona.field.contrasena}">Contraseña</label>
+                        <input type="password" name="contrasena" required th:attr="placeholder=#{persona.placeholder.contrasena}">
+                    </div>
+
+                    <div class="form-group">
+                        <label th:text="#{persona.table.header.rol}">Rol</label>
+                        <select name="rol">
+                            <option th:each="r : ${roles}" th:value="${r}"
+                                th:text="${#strings.capitalize(r.replace('ROLE_', '').toLowerCase())}"
+                                th:selected="${persona.get('rol') == r}">Rol</option>
+                        </select>
                     </div>
                 </div>
 
                 <div class="modal-actions" style="margin-top:2rem;">
-                    <a th:href="@{/web/personas}" class="btn btn-secondary" style="justify-content:center;"
-                        th:text="#{generic.btn.cancel}">Cancelar</a>
-                    <button type="submit" class="btn btn-primary" style="justify-content:center;"
-                        th:text="#{generic.btn.save}">Guardar</button>
+                    <a th:href="@{/web/personas}" class="btn btn-secondary" th:text="#{generic.btn.cancel}">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary" style="justify-content:center;">
+                        <i data-lucide="check-circle"></i>
+                        <span th:text="${persona.get('id') == null ? #messages.msg('generic.btn.create') : #messages.msg('generic.btn.save')}">Guardar usuario</span>
+                    </button>
                 </div>
             </form>
         </div>

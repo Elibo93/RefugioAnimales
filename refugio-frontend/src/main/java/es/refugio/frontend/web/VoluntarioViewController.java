@@ -66,47 +66,50 @@ public class VoluntarioViewController {
     }
 
     @GetMapping(WebRoutes.VOLUNTARIOS_NUEVO)
-    public String formulario(Model model) {
+    public String formulario(Model model, HttpServletRequest request) {
         model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), new HashMap<String, Object>());
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_NUEVO);
+        
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Voluntario_FORM.getPath() + " :: content";
+        }
+        
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
     @GetMapping(WebRoutes.VOLUNTARIOS_EDITAR)
     @PreAuthorize("hasRole('ADMIN')")
-    public String editarFormulario(@PathVariable Integer id, Model model) {
-        Object voluntario = restTemplate.getForObject(apiUrl + "/v1/voluntarios/" + id, Object.class);
-        model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), voluntario);
+    @SuppressWarnings("unchecked")
+    public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
+        try {
+            Map<String, Object> voluntario = restTemplate.getForObject(apiUrl + "/v1/voluntarios/" + id, Map.class);
+            model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), voluntario);
+            
+            if (voluntario != null && voluntario.get("usuarioId") != null) {
+                Object uId = voluntario.get("usuarioId");
+                Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + uId, Map.class);
+                if (user != null) {
+                    model.addAttribute("nombreCompleto", user.get("nombre") + " " + user.get("apellido"));
+                    model.addAttribute("userPhone", user.get("telefono"));
+                    model.addAttribute("userEmail", user.get("email"));
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error al cargar voluntario/usuario para editar: " + e.getMessage());
+        }
+
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_EDITAR);
+        model.addAttribute("isAdmin", true);
+        
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Voluntario_FORM.getPath() + " :: content";
+        }
+        
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @GetMapping(WebRoutes.VOLUNTARIOS_MODAL_EDITAR)
-    @PreAuthorize("hasRole('ADMIN')")
-    @SuppressWarnings("unchecked")
-    public String modalEditar(@PathVariable Integer id, Model model) {
-        try {
-            Map<String, Object> voluntario = restTemplate.getForObject(apiUrl + "/v1/voluntarios/" + id, Map.class);
-            model.addAttribute("voluntario", voluntario);
-
-            if (voluntario != null) {
-                Object uId = voluntario.get("usuarioId");
-                Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + uId, Map.class);
-                if (user != null) {
-                    model.addAttribute("nombre", user.get("nombre"));
-                    model.addAttribute("apellido", user.get("apellido"));
-                    model.addAttribute("email", user.get("email"));
-                    model.addAttribute("telefono", user.get("telefono"));
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Error al cargar datos para el modal de voluntario: " + e.getMessage());
-            model.addAttribute("voluntario", new HashMap<>());
-        }
-        return "fragments/modals/modal-voluntario-editar :: modal";
-    }
 
     @PostMapping(WebRoutes.VOLUNTARIOS_NUEVO)
     public String crearVoluntario(
@@ -115,6 +118,7 @@ public class VoluntarioViewController {
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) String email,
             @RequestParam(required = false) String contrasena,
+            @RequestParam(required = false) String especialidad,
             RedirectAttributes redirectAttributes) {
 
         Map<String, Object> body = new HashMap<>();
@@ -123,6 +127,7 @@ public class VoluntarioViewController {
         if (nombre    != null) body.put("nombre",    nombre);
         if (email     != null) body.put("email",     email);
         if (contrasena != null) body.put("contrasena", contrasena);
+        if (especialidad != null) body.put("especialidad", especialidad);
 
         restTemplate.postForObject(apiUrl + "/v1/voluntarios", body, Object.class);
         redirectAttributes.addFlashAttribute("successMessage", "¡Bienvenido al equipo voluntario!");
@@ -136,19 +141,22 @@ public class VoluntarioViewController {
             @RequestParam String disponibilidad,
             @RequestParam String email,
             @RequestParam String telefono,
+            @RequestParam(required = false) String especialidad,
             RedirectAttributes redirectAttributes) {
 
         // 1. Actualización de disponibilidad en el servicio de backend
         Map<String, Object> bodyVol = new HashMap<>();
         bodyVol.put("disponibilidad", disponibilidad);
+        bodyVol.put("especialidad",   especialidad);
         restTemplate.put(apiUrl + "/v1/voluntarios/" + id, bodyVol);
 
-        // 2. Sincronización del teléfono en el servicio de autenticación
+        // 2. Sincronización de datos de contacto en el servicio de autenticación
         try {
             Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + usuarioId, Map.class);
             if (user != null) {
                 Map<String, Object> bodyUser = new HashMap<>(user);
-                bodyUser.put("telefono",     telefono);
+                bodyUser.put("telefono", telefono);
+                bodyUser.put("email", email);
                 
                 // Se envía una contraseña genérica para superar la validación @NotBlank de Auth,
                 // ya que el caso de uso de edición no actualiza la contraseña.
@@ -158,7 +166,7 @@ public class VoluntarioViewController {
                 restTemplate.put(authUrl + "/v1/usuarios/" + usuarioId, bodyUser);
             }
         } catch (Exception e) {
-            logger.error("Error al sincronizar teléfono en el servicio de Auth: " + e.getMessage());
+            logger.error("Error al sincronizar datos en el servicio de Auth: " + e.getMessage());
         }
 
         redirectAttributes.addFlashAttribute("successMessage", "Voluntario editado correctamente");

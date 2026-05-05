@@ -10,6 +10,7 @@ public enum FragmentoContenido {
     Persona_FORM("fragments/content/persona-formulario"),
     Persona_DETALLE("fragments/content/persona-detalle"),
     Persona_CREATED("fragments/content/persona-creada"),
+    USUARIO_SUGERENCIAS("fragments/content/usuarios-sugerencias"),
 
     Voluntario_LIST("fragments/content/voluntarios-lista"),
     Voluntario_FORM("fragments/content/voluntario-formulario"),

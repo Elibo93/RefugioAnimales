@@ -5,5 +5,6 @@ package es.refugio.refugio.infraestructure.web.dto.voluntario;
  * Solo permite modificar la disponibilidad, protegiendo el usuarioId vinculado.
  */
 public record VoluntarioUpdateRequest(
-        String disponibilidad
+        String disponibilidad,
+        String especialidad
 ) {}

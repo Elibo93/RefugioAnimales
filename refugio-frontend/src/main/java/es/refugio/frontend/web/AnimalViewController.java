@@ -36,6 +36,47 @@ public class AnimalViewController {
     @Value("${backend.api.url}")
     private String apiUrl;
 
+    @GetMapping("/web/animales/buscar")
+    public String buscarAnimales(@RequestParam(required = false) String animal_q, Model model) {
+        try {
+            // Obtenemos todos los animales candidatos (Disponibles o en tratamiento)
+            String queryUrl = apiUrl + "/v1/animales";
+            Object[] arr = restTemplate.getForObject(queryUrl, Object[].class);
+            List<Map<String, Object>> todos = arr != null ? (List) Arrays.asList(arr) : List.of();
+
+            // Filtramos en memoria para asegurar que la búsqueda por nombre/especie funcione
+            List<Map<String, Object>> filtrados;
+            if (animal_q != null && !animal_q.trim().isEmpty()) {
+                String search = animal_q.toLowerCase().trim();
+                filtrados = todos.stream()
+                    .filter(a -> {
+                        String nombre = a.get("nombre") != null ? a.get("nombre").toString().toLowerCase() : "";
+                        String especie = a.get("especie") != null ? a.get("especie").toString().toLowerCase() : "";
+                        String raza = a.get("raza") != null ? a.get("raza").toString().toLowerCase() : "";
+                        String estado = a.get("estado") != null ? a.get("estado").toString() : "";
+                        
+                        // Solo sugerimos animales que se pueden adoptar
+                        boolean esApto = estado.equals("DISPONIBLE") || estado.equals("EN_TRATAMIENTO") || estado.equals("EN_ACOGIDA");
+                        
+                        return esApto && (nombre.contains(search) || especie.contains(search) || raza.contains(search));
+                    })
+                    .limit(10) // Limitamos a 10 para que sea rápido
+                    .toList();
+            } else {
+                // Si no hay búsqueda, mostramos los 10 primeros disponibles
+                filtrados = todos.stream()
+                    .filter(a -> "DISPONIBLE".equals(a.get("estado")))
+                    .limit(10)
+                    .toList();
+            }
+            
+            model.addAttribute("animalesEncontrados", filtrados);
+        } catch (Exception e) {
+            model.addAttribute("animalesEncontrados", List.of());
+        }
+        return "fragments/content/animales-sugerencias :: suggestions";
+    }
+
     @GetMapping(WebRoutes.ANIMALES_BASE)
     public String listar(Model model,
             @RequestParam(required = false) String successMessage,
@@ -145,6 +186,7 @@ public class AnimalViewController {
             @RequestParam(required = false) Double peso,
             @RequestParam(required = false) Integer nivelEnergia,
             @RequestParam(required = false) Boolean urgencia,
+            @RequestParam(required = false) String fechaIngreso,
             RedirectAttributes redirectAttributes,
             HttpServletRequest request) {
 
@@ -172,6 +214,9 @@ public class AnimalViewController {
         body.put("peso", peso != null ? peso : 0.0);
         body.put("nivelEnergia", nivelEnergia != null ? nivelEnergia : 0);
         body.put("urgencia", urgencia != null && urgencia);
+        if (fechaIngreso != null && !fechaIngreso.isEmpty()) {
+            body.put("fechaIngreso", fechaIngreso);
+        }
 
         try {
             restTemplate.postForObject(apiUrl + "/v1/animales", body, Object.class);
@@ -222,6 +267,7 @@ public class AnimalViewController {
             @RequestParam(required = false) Double peso,
             @RequestParam(required = false) Integer nivelEnergia,
             @RequestParam(required = false) Boolean urgencia,
+            @RequestParam(required = false) String fechaIngreso,
             RedirectAttributes redirectAttributes) {
 
         Map<String, Object> body = new HashMap<>();
@@ -237,6 +283,9 @@ public class AnimalViewController {
         body.put("peso", peso != null ? peso : 0.0);
         body.put("nivelEnergia", nivelEnergia != null ? nivelEnergia : 0);
         body.put("urgencia", urgencia != null && urgencia);
+        if (fechaIngreso != null && !fechaIngreso.isEmpty()) {
+            body.put("fechaIngreso", fechaIngreso);
+        }
 
         restTemplate.put(apiUrl + "/v1/animales/" + id, body);
         redirectAttributes.addFlashAttribute("successMessage", "Animal editado correctamente");

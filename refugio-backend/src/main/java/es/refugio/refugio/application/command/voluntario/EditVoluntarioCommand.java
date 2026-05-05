@@ -4,5 +4,6 @@ import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
 
 public record EditVoluntarioCommand(
                 VoluntarioId id,
-                String disponibilidad) {
+                String disponibilidad,
+                String especialidad) {
 }

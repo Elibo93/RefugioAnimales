@@ -20,26 +20,30 @@ public class VoluntarioMapper {
     public static CreateVoluntarioCommand toCommand(VoluntarioRequest req) {
         return new CreateVoluntarioCommand(
                 new UsuarioId(req.usuarioId()),
-                req.disponibilidad());
+                req.disponibilidad(),
+                req.especialidad());
     }
 
     public static EditVoluntarioCommand toCommand(int id, VoluntarioRequest req) {
         return new EditVoluntarioCommand(
                 new VoluntarioId(id),
-                req.disponibilidad());
+                req.disponibilidad(),
+                req.especialidad());
     }
 
     public static EditVoluntarioCommand toCommand(int id, VoluntarioUpdateRequest req) {
         return new EditVoluntarioCommand(
                 new VoluntarioId(id),
-                req.disponibilidad());
+                req.disponibilidad(),
+                req.especialidad());
     }
 
     public static VoluntarioResponse toResponse(Voluntario v) {
         return new VoluntarioResponse(
                 v.getId() != null ? v.getId().getValue() : null,
                 v.getUsuarioId() != null ? v.getUsuarioId().getValue() : null,
-                v.getDisponibilidad());
+                v.getDisponibilidad(),
+                v.getEspecialidad());
     }
 
     public static VoluntarioEntity toEntity(Voluntario v) {
@@ -59,6 +63,7 @@ public class VoluntarioMapper {
                 .id(v.getId() != null ? v.getId().getValue() : null)
                 .usuarioId(usuarioId)
                 .disponibilidad(v.getDisponibilidad())
+                .especialidad(v.getEspecialidad())
                 .tareas(tareas)
                 .build();
     }
@@ -68,6 +73,7 @@ public class VoluntarioMapper {
                 .id(e.getId() != null ? new VoluntarioId(e.getId()) : null)
                 .usuarioId(e.getUsuarioId() != null ? new UsuarioId(e.getUsuarioId()) : null)
                 .disponibilidad(e.getDisponibilidad())
+                .especialidad(e.getEspecialidad())
                 .tareas(e.getTareas() != null
                         ? e.getTareas().stream().map(te -> new TareaId(te.getId())).collect(Collectors.toList())
                         : new java.util.ArrayList<>())

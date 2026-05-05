@@ -45,7 +45,7 @@
                         <th>Asignado a</th>
                         <th th:text="#{tarea.table.header.estado}">Estado</th>
                         <th>Vencimiento</th>
-                        <th th:text="#{workshop.table.header.action}">Acción</th>
+                        <th th:text="#{animal.table.header.action}">Acción</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -81,8 +81,8 @@
 
                         <td>
                             <span class="badge-soon"
-                                th:classappend="${t.get('estado') != null ? (t.get('estado').toString() == 'COMPLETADA' ? 'success' : (t.get('estado').toString() == 'CANCELADA' ? 'danger' : 'warning')) : 'warning'}"
-                                th:text="${t.get('estado')}">PENDIENTE</span>
+                                th:classappend="${t.get('estado') == 'COMPLETADA' ? 'success' : (t.get('estado') == 'CANCELADA' ? 'danger' : (t.get('estado') == 'EN_PROCESO' ? 'info' : 'warning'))}"
+                                th:text="${t.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(t.get('estado'), '_', ' '))) : 'Pendiente'}">PENDIENTE</span>
                         </td>
                         <td>
                             <div style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
@@ -98,7 +98,11 @@
                             </div>
                         </td>
                         <td style="display:flex; gap:8px;">
-                            <a class="btn-icon" th:href="@{/web/tareas/{id}/editar(id=${t.get('id')})}">
+                            <a class="btn-icon" 
+                               th:hx-get="@{/web/tareas/{id}/editar(id=${t.get('id')})}"
+                               hx-target="#contenido-dinamico"
+                               hx-push-url="true"
+                               title="Editar">
                                 <i data-lucide="edit-2" style="width:16px;"></i>
                             </a>
                             <button th:if="${isAdmin}" class="btn-icon delete" th:hx-post="@{/web/tareas/{id}/borrar(id=${t.get('id')})}"

@@ -74,6 +74,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Auto-ocultar sugerencias de usuario al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        const suggestions = document.getElementById('user-suggestions');
+        const searchInput = document.getElementById('user-search');
+        if (suggestions && searchInput && !suggestions.contains(e.target) && e.target !== searchInput) {
+            suggestions.innerHTML = '';
+        }
+    });
 });
 
 
@@ -309,5 +318,36 @@ function setRecurrence(type) {
     if (text) text.textContent = type === 'mensual' ? 'Confirmar Donación Mensual' : 'Confirmar Donación';
 }
 
+// Lógica de Selección de Usuario (Autocomplete)
+function selectUser(id, fullName, isRegistered, adoptanteId) {
+    // Normalizar adoptanteId: si llega como string 'null', undefined o vacío, lo tratamos como nulo real
+    const effectiveAId = (adoptanteId && adoptanteId !== 'null' && adoptanteId !== 'undefined' && adoptanteId !== '') ? adoptanteId : null;
 
+    const searchInput = document.getElementById('user-search');
+    const idInput = document.getElementById('usuarioId-input');
+    const suggestions = document.getElementById('user-suggestions');
 
+    // CASO 1: Estamos en contexto de solicitud y tenemos un adoptanteId real
+    if (effectiveAId) {
+        if (searchInput) searchInput.value = fullName;
+        if (idInput) idInput.value = effectiveAId;
+        if (suggestions) suggestions.innerHTML = '';
+        return;
+    }
+
+    // CASO 2: Estamos registrando un nuevo rol y el usuario ya lo tiene
+    if (isRegistered) {
+        const errorMsg = "Este usuario ya cuenta con un perfil registrado para este rol.";
+        if (typeof showToast === 'function') {
+            showToast(errorMsg, 'error');
+        } else {
+            alert(errorMsg);
+        }
+        return;
+    }
+
+    // CASO 3: Registro normal (Voluntario / Nuevo Adoptante) usando el ID de usuario
+    if (searchInput) searchInput.value = fullName;
+    if (idInput) idInput.value = id;
+    if (suggestions) suggestions.innerHTML = '';
+}

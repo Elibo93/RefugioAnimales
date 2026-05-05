@@ -71,6 +71,8 @@ build/
 .vscode/settings.json
 .vscode/extensions.json
 .vscode/*.code-snippets
+.vscode/launch.json
+.vscode/tasks.json
 
 # ─── Sistema Operativo (Windows) ─────────────────────────────────────────────
 Thumbs.db

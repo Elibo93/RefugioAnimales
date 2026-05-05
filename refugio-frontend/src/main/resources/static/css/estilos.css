@@ -1602,7 +1602,7 @@ main {
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     border: 1px solid var(--border);
-    overflow: hidden;
+    overflow-x: auto; /* Allow horizontal scroll */
 }
 
 .actions-bar {
@@ -1632,6 +1632,7 @@ th {
     font-weight: 700;
     color: var(--text-muted);
     letter-spacing: 0.05em;
+    white-space: nowrap;
 }
 
 td {
@@ -1947,14 +1948,19 @@ tbody tr:hover {
 /* =====================
    7. UTILIDADES
 ===================== */
+.badge, .badge-soon {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
 .badge-soon {
     background: var(--bg-body);
     color: var(--text-muted);
-    font-size: 0.75rem;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-weight: 700;
-    text-transform: uppercase;
 }
 
 .badge-available {

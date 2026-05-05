@@ -39,8 +39,14 @@ public class UsuarioViewController {
 
 
     @GetMapping(WebRoutes.PERSONAS_NUEVO)
-    public String formulario(Model model) {
-        model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), Map.of());
+    public String formulario(Model model, HttpServletRequest request) {
+        model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), new HashMap<>());
+        model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_ADMIN"));
+        
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Persona_FORM.getPath() + " :: content";
+        }
+        
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -51,12 +57,13 @@ public class UsuarioViewController {
             @RequestParam String email,
             @RequestParam String telefono,
             @RequestParam String contrasena,
+            @RequestParam(required = false, defaultValue = "ROLE_PUBLICO") String rol,
             Model model) {
 
         Map<String, Object> body = new HashMap<>();
         body.put("nombre",    nombre);    body.put("apellido",   apellido);
         body.put("email",     email);     body.put("telefono",   telefono);
-        body.put("contrasena", contrasena); body.put("rol", "ROLE_PUBLICO");
+        body.put("contrasena", contrasena); body.put("rol", rol);
 
         restTemplate.postForObject(authUrl + "/v1/usuarios", body, Object.class);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_CREATED.getPath());
@@ -64,9 +71,15 @@ public class UsuarioViewController {
     }
 
     @GetMapping(WebRoutes.PERSONAS_EDITAR)
-    public String editarFormulario(@PathVariable Integer id, Model model) {
+    public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
         Object persona = restTemplate.getForObject(authUrl + "/v1/usuarios/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), persona);
+        model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_ADMIN"));
+
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Persona_FORM.getPath() + " :: content";
+        }
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -77,11 +90,13 @@ public class UsuarioViewController {
             @RequestParam String apellido,
             @RequestParam String email,
             @RequestParam String telefono,
+            @RequestParam(required = false) String rol,
             RedirectAttributes redirectAttributes) {
 
         Map<String, Object> body = new HashMap<>();
         body.put("nombre",   nombre);   body.put("apellido", apellido);
         body.put("email",    email);    body.put("telefono", telefono);
+        if (rol != null) body.put("rol", rol);
 
         restTemplate.put(authUrl + "/v1/usuarios/" + id, body);
         redirectAttributes.addFlashAttribute("successMessage", "Persona editada correctamente");
@@ -268,6 +283,126 @@ public class UsuarioViewController {
         renderer.layout();
         renderer.createPDF(out);
         out.close();
+    }
+
+    @GetMapping(WebRoutes.PERSONAS_BUSCAR)
+    public String buscarUsuarios(
+            @RequestParam(required = false, defaultValue = "") String q,
+            @RequestParam(required = false) String context,
+            Model model) {
+            
+        if (q.trim().isEmpty()) {
+            model.addAttribute("usuariosEncontrados", List.of());
+            return FragmentoContenido.USUARIO_SUGERENCIAS.getPath() + " :: suggestions";
+        }
+
+        List<Object> todos = fetchList(authUrl + "/v1/usuarios");
+        String query = q.toLowerCase();
+        System.out.println("DEBUG: Buscando usuarios con query: " + query + " y contexto: " + context);
+        
+        // Obtener lista de IDs ya registrados según el contexto
+        List<Map<String, Object>> filtrados;
+        
+        if ("voluntario".equalsIgnoreCase(context)) {
+            List<Object> registrados = fetchList("/v1/voluntarios");
+            Set<Integer> registradosIds = new HashSet<>();
+            for (Object r : registrados) {
+                if (r instanceof Map) {
+                    Integer uid = toInteger(((Map<?, ?>) r).get("usuarioId"));
+                    if (uid != null) registradosIds.add(uid);
+                }
+            }
+            filtrados = todos.stream()
+                .filter(u -> u instanceof Map)
+                .map(u -> (Map<String, Object>) u)
+                .filter(user -> matchesQuery(user, query))
+                .limit(8)
+                .map(user -> {
+                    Map<String, Object> copy = new HashMap<>(user);
+                    Integer uId = toInteger(user.get("id"));
+                    copy.put("yaRegistrado", uId != null && registradosIds.contains(uId));
+                    copy.put("adoptanteId", null); // No aplica en este contexto
+                    return copy;
+                }).toList();
+        } else if ("adoptante".equalsIgnoreCase(context) || "solicitud".equalsIgnoreCase(context) || "adopcion".equalsIgnoreCase(context)) {
+            List<Object> registrados = fetchList("/v1/adoptantes");
+            Map<Integer, Integer> userToAdoptante = new HashMap<>();
+            for (Object r : registrados) {
+                if (r instanceof Map) {
+                    Integer uid = toInteger(((Map<?, ?>) r).get("usuarioId"));
+                    Integer aid = toInteger(((Map<?, ?>) r).get("id"));
+                    if (uid != null && aid != null) {
+                        userToAdoptante.put(uid, aid);
+                    }
+                }
+            }
+            filtrados = todos.stream()
+                .filter(u -> u instanceof Map)
+                .map(u -> (Map<String, Object>) u)
+                .filter(user -> {
+                    boolean matches = matchesQuery(user, query);
+                    if ("solicitud".equalsIgnoreCase(context)) {
+                        Integer uId = toInteger(user.get("id"));
+                        return matches && uId != null && userToAdoptante.containsKey(uId);
+                    }
+                    return matches;
+                })
+                .limit(8)
+                .map(user -> {
+                    Map<String, Object> copy = new HashMap<>(user);
+                    Integer uId = toInteger(user.get("id"));
+                    Integer aId = uId != null ? userToAdoptante.get(uId) : null;
+                    
+                    if ("solicitud".equalsIgnoreCase(context)) {
+                        copy.put("adoptanteId", aId);
+                        copy.put("yaRegistrado", false); // Siempre seleccionable
+                    } else {
+                        copy.put("adoptanteId", aId);
+                        copy.put("yaRegistrado", aId != null);
+                    }
+                    return copy;
+                }).toList();
+        } else {
+            filtrados = todos.stream()
+                .filter(u -> u instanceof Map)
+                .map(u -> (Map<String, Object>) u)
+                .filter(user -> matchesQuery(user, query))
+                .limit(8)
+                .map(user -> {
+                    Map<String, Object> copy = new HashMap<>(user);
+                    copy.put("yaRegistrado", false);
+                    copy.put("adoptanteId", null);
+                    return copy;
+                }).toList();
+        }
+            
+        model.addAttribute("usuariosEncontrados", filtrados);
+        model.addAttribute("contexto", context);
+        return FragmentoContenido.USUARIO_SUGERENCIAS.getPath() + " :: suggestions";
+    }
+
+    private Integer toInteger(Object obj) {
+        if (obj == null) return null;
+        if (obj instanceof Number) return ((Number) obj).intValue();
+        try {
+            return Integer.parseInt(obj.toString());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private boolean matchesQuery(Map<String, Object> user, String query) {
+        String id = String.valueOf(user.get("id"));
+        String nombre = String.valueOf(user.get("nombre")).toLowerCase();
+        String apellido = String.valueOf(user.get("apellido")).toLowerCase();
+        String email = String.valueOf(user.get("email")).toLowerCase();
+        String telefono = String.valueOf(user.get("telefono")).toLowerCase();
+        
+        return id.contains(query) || 
+               nombre.contains(query) || 
+               apellido.contains(query) || 
+               email.contains(query) || 
+               telefono.contains(query);
     }
 
     private List<Object> fetchList(String path) {

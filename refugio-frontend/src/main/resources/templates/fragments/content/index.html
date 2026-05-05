@@ -103,7 +103,7 @@
                         <label>ESPECIE</label>
                         <select name="especie">
                             <option value="">Cualquier especie</option>
-                            <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="${e}"></option>
+                            <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="${#strings.capitalize(#strings.toLowerCase(e))}"></option>
                         </select>
                     </div>
                     <div class="field-divider"></div>
@@ -175,7 +175,7 @@
 
                         <span class="animal-status-badge"
                             th:classappend="${a.get('estado') != null ? 'badge-' + a.get('estado').toString().toLowerCase() : 'badge-disponible'}"
-                            th:text="${a.get('estado') != null ? #strings.replace(a.get('estado'), '_', ' ') : 'DISPONIBLE'}">
+                            th:text="${a.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(a.get('estado'), '_', ' '))) : 'Disponible'}">
                             Disponible
                         </span>
 

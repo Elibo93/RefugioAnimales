@@ -11,18 +11,21 @@ databaseChangeLog:
             tableName: voluntarios
             columns:
               - column: { name: disponibilidad, value: "Tardes y fines de semana" }
+              - column: { name: especialidad, value: "PASEO" }
               - column: { name: usuario_id, valueNumeric: 1 }
               - column: { name: created_at, valueDate: "now()" }
         - insert:
             tableName: voluntarios
             columns:
               - column: { name: disponibilidad, value: "Mañanas de Lunes a Viernes" }
+              - column: { name: especialidad, value: "LIMPIEZA" }
               - column: { name: usuario_id, valueNumeric: 2 }
               - column: { name: created_at, valueDate: "now()" }
         - insert:
             tableName: voluntarios
             columns:
               - column: { name: disponibilidad, value: "Fines de semana completos" }
+              - column: { name: especialidad, value: "ADMINISTRATIVO" }
               - column: { name: usuario_id, valueNumeric: 3 }
               - column: { name: created_at, valueDate: "now()" }
 

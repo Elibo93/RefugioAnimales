@@ -17,8 +17,8 @@
                         <span class="filter-label" style="font-size: 0.7rem;"><i data-lucide="dog"
                                 style="width: 14px;"></i> Especie</span>
                         <select name="especie" class="form-select" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
-                            <option value="">Cualquiera</option>
-                            <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="${e}"
+                            <option value="" th:text="#{animal.filter.any}">Cualquiera</option>
+                            <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="${#strings.capitalize(#strings.toLowerCase(e))}"
                                 th:selected="${selectedEspecie == e}"></option>
                         </select>
                     </div>
@@ -26,7 +26,7 @@
                         <span class="filter-label" style="font-size: 0.7rem;"><i data-lucide="maximize-2"
                                 style="width: 14px;"></i> Tamaño</span>
                         <select name="tamano" class="form-select" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
-                            <option value="">Cualquiera</option>
+                            <option value="" th:text="#{animal.filter.any}">Cualquiera</option>
                             <option value="PEQUEÑO" th:selected="${selectedTamano == 'PEQUEÑO'}">Pequeño</option>
                             <option value="MEDIANO" th:selected="${selectedTamano == 'MEDIANO'}">Mediano</option>
                             <option value="GRANDE" th:selected="${selectedTamano == 'GRANDE'}">Grande</option>
@@ -52,9 +52,9 @@
                             style="display: block; font-weight: 800; font-size: 0.75rem; color: #4b5563; text-transform: uppercase; margin-bottom: 0.6rem; letter-spacing: 0.025em;">ESPECIE</label>
                         <select name="especie" class="form-select"
                             style="width: 100%; padding: 0.5rem 0.8rem; border-radius: 8px; border: 1px solid #d1d5db; background-color: #f9fafb; font-size: 0.9rem;">
-                            <option value="" th:selected="${selectedEspecie == null or selectedEspecie == ''}">
+                             <option value="" th:selected="${selectedEspecie == null or selectedEspecie == ''}" th:text="#{animal.filter.any}">
                                 Cualquiera</option>
-                            <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="${e}"
+                            <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="${#strings.capitalize(#strings.toLowerCase(e))}"
                                 th:selected="${selectedEspecie == e}"></option>
                         </select>
                     </div>
@@ -64,11 +64,11 @@
                             style="display: block; font-weight: 800; font-size: 0.75rem; color: #4b5563; text-transform: uppercase; margin-bottom: 0.6rem; letter-spacing: 0.025em;">TAMAÑO</label>
                         <select name="tamano" class="form-select"
                             style="width: 100%; padding: 0.5rem 0.8rem; border-radius: 8px; border: 1px solid #d1d5db; background-color: #f9fafb; font-size: 0.9rem;">
-                            <option value="" th:selected="${selectedTamano == null or selectedTamano == ''}">Cualquiera
+                            <option value="" th:selected="${selectedTamano == null or selectedTamano == ''}" th:text="#{animal.filter.any}">Cualquiera
                             </option>
-                            <option value="PEQUEÑO" th:selected="${selectedTamano == 'PEQUEÑO'}">Pequeño</option>
-                            <option value="MEDIANO" th:selected="${selectedTamano == 'MEDIANO'}">Mediano</option>
-                            <option value="GRANDE" th:selected="${selectedTamano == 'GRANDE'}">Grande</option>
+                            <option value="PEQUEÑO" th:selected="${selectedTamano == 'PEQUEÑO'}" th:text="#{animal.size.small}">Pequeño</option>
+                            <option value="MEDIANO" th:selected="${selectedTamano == 'MEDIANO'}" th:text="#{animal.size.medium}">Mediano</option>
+                            <option value="GRANDE" th:selected="${selectedTamano == 'GRANDE'}" th:text="#{animal.size.large}">Grande</option>
                         </select>
                     </div>
                     <!-- EDAD -->
@@ -81,7 +81,7 @@
                                 <input type="checkbox" name="edad" value="CACHORRO"
                                     th:checked="${selectedEdad != null and #lists.contains(selectedEdad, 'CACHORRO')}"
                                     style="width: 18px; height: 18px; border-radius: 4px; border: 1px solid #d1d5db;">
-                                <span>Cachorro</span>
+                                <span th:text="#{animal.age.puppy}">Cachorro</span>
                             </label>
                             <label
                                 style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; color: #374151;">
@@ -102,7 +102,7 @@
                                 <input type="checkbox" name="edad" value="SENIOR"
                                     th:checked="${selectedEdad != null and #lists.contains(selectedEdad, 'SENIOR')}"
                                     style="width: 18px; height: 18px; border-radius: 4px; border: 1px solid #d1d5db;">
-                                Amin<span>Senior</span>
+                                <span th:text="#{animal.age.senior}">Senior</span>
                             </label>
                         </div>
                     </div>
@@ -112,25 +112,25 @@
                             style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; color: #374151; font-weight: 500;">
                             <input type="checkbox" name="urgencia" value="true" th:checked="${selectedUrgencia}"
                                 style="width: 18px; height: 18px; border-radius: 4px; border: 1px solid #d1d5db;">
-                            <span>Solo urgentes 🔥</span>
+                            <span th:text="#{animal.filter.urgency.only}">Solo urgentes 🔥</span>
                         </label>
                     </div>
                     <!-- BOTÓN FILTRAR -->
                     <button type="submit" class="btn"
                         style="width: 100%; background-color: #2d9d58; color: white; padding: 0.6rem; border-radius: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s; font-size: 0.9rem;">
                         <i data-lucide="search" style="width: 16px; height: 16px;"></i>
-                        <span>Filtrar</span>
+                        <span th:text="#{generic.btn.filter}">Filtrar</span>
                     </button>
                     <!-- BOTÓN LIMPIAR -->
                     <div style="text-align: center; margin-top: 1.2rem;">
                         <a th:href="@{/web/animales}"
                             style="color: #6b7280; text-decoration: none; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: 500;">
                             <i data-lucide="x" style="width: 12px; height: 12px;"></i>
-                            <span>Limpiar</span>
+                            <span th:text="#{generic.link.clear}">Limpiar</span>
                         </a>
                     </div>
-                    <!-- BOTÓN PDF -->
-                    <div
+                    <!-- BOTÓN PDF (Solo para personal del refugio) -->
+                    <div sec:authorize="hasAnyRole('ADMIN', 'VOLUNTARIO')"
                         style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.05);">
                         <a th:href="@{/web/animales/pdf}" target="_blank"
                             style="color: #6b7280; text-decoration: none; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 500;">
@@ -150,7 +150,7 @@
 
                     <div
                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding: 0 1rem;">
-                        <h2 style="font-weight: 800; color: var(--text-main); margin: 0;">Gestión de Animales</h2>
+                        <h2 style="font-weight: 800; color: var(--text-main); margin: 0;" th:text="#{animal.list.title.admin}">Gestión de Animales</h2>
                         <div style="display: flex; gap: 1rem;">
                             <a th:href="@{/web/animales/pdf}" target="_blank" class="btn btn-secondary"
                                 style="padding: 0.8rem 1.5rem; border-radius: 15px; font-weight: 700;">
@@ -188,20 +188,26 @@
                                         style="font-weight: 800; color: var(--text-main); text-decoration: none;"
                                         th:text="${a.get('nombre')}">Rocky</a>
                                 </td>
-                                <td th:text="${a.get('especie')}" style="text-align: center;">Perro</td>
+                                <td style="text-align: center;">
+                                    <span th:text="${a.get('especie') != null ? #strings.capitalize(#strings.toLowerCase(a.get('especie'))) : ''}" 
+                                          style="font-weight: 500; color: var(--text-main);">Perro</span>
+                                </td>
                                 <td th:text="${a.get('edad') != null ? a.get('edad') + ' años' : '-'}"
                                     style="text-align: center;">2 años</td>
                                 <td style="text-align: center;">
-                                    <span class="animal-status-badge"
-                                        th:classappend="${a.get('estado') != null ? 'badge-' + a.get('estado').toString().toLowerCase() : ''}"
-                                        th:text="${a.get('estado') != null ? #strings.replace(a.get('estado'), '_', ' ') : ''}">Disponible</span>
+                                    <span class="badge-soon"
+                                        th:classappend="${a.get('estado') == 'DISPONIBLE' ? 'success' : (a.get('estado') == 'RESERVADO' ? 'warning' : (a.get('estado') == 'ADOPTADO' ? 'primary' : 'info'))}"
+                                        th:text="${a.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(a.get('estado'), '_', ' '))) : ''}">Disponible</span>
                                 </td>
                                 <td style="text-align: center; border-radius: 0 15px 15px 0;">
                                     <div style="display: flex; gap: 8px; justify-content: center;">
                                         <a class="btn-icon" th:href="@{/web/historiales(animalId=${a.get('id')})}"
                                             title="Historial"><i data-lucide="stethoscope" style="width: 16px;"></i></a>
-                                        <a class="btn-icon" th:href="@{/web/animales/{id}/editar(id=${a.get('id')})}"
-                                            title="Editar"><i data-lucide="edit-2" style="width: 16px;"></i></a>
+                                        <a class="btn-icon" 
+                                           th:hx-get="@{/web/animales/{id}/editar(id=${a.get('id')})}"
+                                           hx-target="#contenido-dinamico"
+                                           hx-push-url="true"
+                                           title="Editar"><i data-lucide="edit-2" style="width: 16px;"></i></a>
                                         <button class="btn-icon delete"
                                             th:attr="hx-post=@{/web/animales/{id}/borrar(id=${a.get('id')})}, hx-target='#card-' + ${a.get('id')}"
                                             hx-swap="outerHTML swap:0.3s" hx-confirm="¿Eliminar?"><i
@@ -223,7 +229,7 @@
                                     style="width: 100%; height: 100%; object-fit: cover;">
                                 <span class="animal-status-badge"
                                     th:classappend="${a.get('estado') != null ? 'badge-' + a.get('estado').toString().toLowerCase() : ''}"
-                                    th:text="${a.get('estado') != null ? #strings.replace(a.get('estado'), '_', ' ') : ''}">Disponible</span>
+                                    th:text="${a.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(a.get('estado'), '_', ' '))) : ''}">Disponible</span>
 
                                 <!-- Hover Overlay con Botón -->
                                 <div class="card-info-overlay">
@@ -238,7 +244,10 @@
                                             <a th:href="@{/web/historiales(animalId=${a.get('id')})}" class="btn-icon" title="Historial Médico" style="background: rgba(16, 185, 129, 0.2); color: white;">
                                                 <i data-lucide="stethoscope" style="width: 18px;"></i>
                                             </a>
-                                            <a th:href="@{/web/animales/{id}/editar(id=${a.get('id')})}" class="btn-icon" title="Editar" style="background: rgba(255,255,255,0.2); color: white;">
+                                            <a th:hx-get="@{/web/animales/{id}/editar(id=${a.get('id')})}" 
+                                               hx-target="#contenido-dinamico"
+                                               hx-push-url="true"
+                                               class="btn-icon" title="Editar" style="background: rgba(255,255,255,0.2); color: white;">
                                                 <i data-lucide="edit-2" style="width: 18px;"></i>
                                             </a>
                                         </div>
@@ -275,7 +284,7 @@
                         <!-- Card 1 -->
                         <div class="special-card glass-card hover-lift"
                             style="padding: 2.5rem; cursor: pointer; transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.05); position: relative; background: white;"
-                            hx-get="/web/animales?edad=senior" hx-target="#contenido-dinamico" hx-push-url="true">
+                            hx-get="/web/animales?edad=SENIOR" hx-target="#contenido-dinamico" hx-push-url="true" hx-swap="innerHTML show:top">
                             <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
                                 <div style="background: rgba(255, 140, 0, 0.1); padding: 0.85rem; border-radius: 14px;">
                                     <i data-lucide="heart" style="color: #FF8C00;"></i>
@@ -295,7 +304,7 @@
                         <!-- Card 2 -->
                         <div class="special-card glass-card hover-lift"
                             style="padding: 2.5rem; cursor: pointer; transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.05); position: relative; background: white;"
-                            hx-get="/web/animales?urgencia=true" hx-target="#contenido-dinamico" hx-push-url="true">
+                            hx-get="/web/animales?urgencia=true" hx-target="#contenido-dinamico" hx-push-url="true" hx-swap="innerHTML show:top">
                             <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
                                 <div style="background: rgba(79, 70, 229, 0.1); padding: 0.85rem; border-radius: 14px;">
                                     <i data-lucide="zap" style="color: #4F46E5;"></i>

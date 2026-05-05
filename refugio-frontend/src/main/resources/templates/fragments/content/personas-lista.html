@@ -78,8 +78,11 @@
                                style="color:var(--text-main); text-decoration: none; display: block;" 
                                th:text="${a.get('apellido')}">Pérez</a>
                         </td>
-                        <td><span class="badge-soon" style="background:#F1F5F9; color:#64748B;"
-                                th:text="${a.get('rol')}">ROLE_ADMIN</span></td>
+                        <td>
+                            <span class="badge-soon" 
+                                  th:classappend="${a.get('rol') == 'ROLE_ADMIN' ? 'danger' : (a.get('rol') == 'ROLE_VOLUNTARIO' ? 'info' : (a.get('rol') == 'ROLE_ADOPTANTE' ? 'primary' : ''))}"
+                                  th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(a.get('rol').toString().replace('ROLE_', ''), '_', ' ')))}">Rol</span>
+                        </td>
                         <td class="col-email" th:text="${a.get('email')}">juan@mail.com</td>
                         <td class="col-tlf" th:text="${a.get('telefono')}">600...</td>
                         <td style="display:flex; gap:8px;">
