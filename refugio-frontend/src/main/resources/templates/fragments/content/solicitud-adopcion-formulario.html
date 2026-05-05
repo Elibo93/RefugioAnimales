@@ -43,7 +43,7 @@
 
                     <div class="form-group" th:if="${solicitud.get('id') == null}" style="position: relative;">
                         <label th:text="#{solicitud.field.animal}">Animal</label>
-                        <div style="position: relative;">
+                        <div style="position: relative; margin-bottom: 0.5rem;">
                             <input type="text" id="animal-search" 
                                     name="animal_q"
                                     class="form-control"
@@ -51,13 +51,15 @@
                                     autocomplete="off"
                                     hx-get="/web/animales/buscar"
                                     hx-trigger="keyup changed delay:300ms, focus"
-                                    hx-target="#animal-suggestions">
+                                    hx-target="#animal-suggestions"
+                                    style="padding-left: 1rem; border-radius: 12px; height: 48px; border: 1px solid #e2e8f0; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.02);">
                             <input type="hidden" name="animalId" id="animalId-input" required th:value="${solicitud.get('animalId')}">
                         </div>
                         <div id="animal-suggestions" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 100;"></div>
                         
                         <!-- Previsualización del animal seleccionado -->
-                        <div id="selected-animal-card" style="display: none; margin-top: 1rem; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; align-items: center; gap: 12px;">
+                        <div id="selected-animal-card" 
+                             style="display: none; margin-top: 2.5rem; padding: 1.5rem; background: white; border: 1px solid #e2e8f0; border-radius: 24px; align-items: center; gap: 1.25rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02);">
                             <div style="width: 50px; height: 50px; border-radius: 8px; overflow: hidden; background: #f1f5f9; flex-shrink: 0;">
                                 <img id="selected-animal-img" src="" style="width: 100%; height: 100%; object-fit: cover;">
                             </div>

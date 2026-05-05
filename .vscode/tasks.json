@@ -1,0 +1,184 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        // ─── 0. DOCKER DBS ───────────────────────────────────────────────────
+        {
+            "label": "0. Start Databases",
+            "type": "shell",
+            "command": "docker compose up -d",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "label": "Databases",
+                "group": "refugio",
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+
+        // ─── 1. EUREKA SERVER ────────────────────────────────────────────────
+        {
+            "label": "1. Start Eureka Server",
+            "type": "shell",
+            "command": "set -a && source \"${workspaceFolder}/.env\" && set +a && mvn spring-boot:run",
+            "options": {
+                "cwd": "${workspaceFolder}/eureka-server"
+            },
+            "dependsOn": ["0. Start Databases"],
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "eureka",
+                "pattern": { "regexp": "^$" },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "\\[INFO\\] Spring Boot Maven Plugin",
+                    "endsPattern": "Started EurekaServerApplication"
+                }
+            },
+            "presentation": {
+                "label": "Eureka Server",
+                "group": "refugio",
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": false
+            }
+        },
+
+        // ─── 2. AUTH SERVICE ─────────────────────────────────────────────────
+        {
+            "label": "2. Start Auth Service",
+            "type": "shell",
+            "command": "set -a && source \"${workspaceFolder}/.env\" && set +a && mvn spring-boot:run",
+            "options": {
+                "cwd": "${workspaceFolder}/refugio-auth"
+            },
+            "dependsOn": ["1. Start Eureka Server"],
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "auth",
+                "pattern": { "regexp": "^$" },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "\\[INFO\\] Spring Boot Maven Plugin",
+                    "endsPattern": "Started AuthServiceApplication"
+                }
+            },
+            "presentation": {
+                "label": "Auth Service",
+                "group": "refugio",
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": false
+            }
+        },
+
+        // ─── 3. BACKEND ──────────────────────────────────────────────────────
+        {
+            "label": "3. Start Backend",
+            "type": "shell",
+            "command": "set -a && source \"${workspaceFolder}/.env\" && set +a && mvn spring-boot:run",
+            "options": {
+                "cwd": "${workspaceFolder}/refugio-backend"
+            },
+            "dependsOn": ["2. Start Auth Service"],
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "backend",
+                "pattern": { "regexp": "^$" },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "\\[INFO\\] Spring Boot Maven Plugin",
+                    "endsPattern": "Started RefugioAnimalesApplication"
+                }
+            },
+            "presentation": {
+                "label": "Backend",
+                "group": "refugio",
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": false
+            }
+        },
+
+        // ─── 4. FRONTEND ─────────────────────────────────────────────────────
+        {
+            "label": "4. Start Frontend",
+            "type": "shell",
+            "command": "set -a && source \"${workspaceFolder}/.env\" && set +a && mvn spring-boot:run",
+            "options": {
+                "cwd": "${workspaceFolder}/refugio-frontend"
+            },
+            "dependsOn": ["3. Start Backend"],
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "frontend",
+                "pattern": { "regexp": "^$" },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "\\[INFO\\] Spring Boot Maven Plugin",
+                    "endsPattern": "Started RefugioFrontendApplication"
+                }
+            },
+            "presentation": {
+                "label": "Frontend",
+                "group": "refugio",
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": false
+            }
+        },
+
+        // ─── 5. API GATEWAY ──────────────────────────────────────────────────
+        {
+            "label": "5. Start API Gateway",
+            "type": "shell",
+            "command": "set -a && source \"${workspaceFolder}/.env\" && set +a && mvn spring-boot:run",
+            "options": {
+                "cwd": "${workspaceFolder}/api-gateway"
+            },
+            "dependsOn": ["4. Start Frontend"],
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "gateway",
+                "pattern": { "regexp": "^$" },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "\\[INFO\\] Spring Boot Maven Plugin",
+                    "endsPattern": "Started ApiGatewayApplication"
+                }
+            },
+            "presentation": {
+                "label": "API Gateway",
+                "group": "refugio",
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": false
+            }
+        },
+
+        // ─── COMPOUND: Arrancar todo en orden ────────────────────────────────
+        {
+            "label": "🚀 Start All Microservices",
+            "dependsOn": ["5. Start API Gateway"],
+            "dependsOrder": "sequence",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+
+        // ─── STOP ALL (cierra todos los procesos Maven) ──────────────────────
+        {
+            "label": "🛑 Stop All Microservices",
+            "type": "shell",
+            "command": "pkill -f 'java.*spring-boot' || true && docker compose stop && echo '✅ Todos los servicios detenidos'",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        }
+    ]
+}
