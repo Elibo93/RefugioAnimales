@@ -80,6 +80,7 @@ ehthumbs_vista.db
 Desktop.ini
 $RECYCLE.BIN/
 *.lnk
+*:Zone.Identifier
 
 # ─── Sistema Operativo (macOS) ───────────────────────────────────────────────
 .DS_Store

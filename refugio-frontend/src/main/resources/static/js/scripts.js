@@ -197,7 +197,6 @@ function filterListItems(filterClass, itemClass, status, dataAttr = 'status') {
 }
 
 // Filtrado por prioridad (Tareas)
-// Filtrado por prioridad (Tareas)
 function filterByPriority(priority, btn) {
     if (btn) {
         const container = btn.parentElement;
@@ -280,6 +279,7 @@ function handleTypeChange() {
     if (window.lucide) lucide.createIcons();
 }
 
+// Establecer cantidad de donación
 function setAmount(val, btn) {
     const input = document.getElementById('input-cantidad');
     if (input) input.value = val;
@@ -292,11 +292,13 @@ function focusAmount(btn) {
     updateButtons(btn);
 }
 
+// Actualizar estado activo de los botones de cantidad
 function updateButtons(activeBtn) {
     document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
     if (activeBtn) activeBtn.classList.add('active');
 }
 
+// Establecer recurrencia de la donación
 function setRecurrence(type) {
     document.querySelectorAll('.view-toggle .toggle-btn').forEach(b => b.classList.remove('active'));
     const btn = document.getElementById(type === 'mensual' ? 'btn-mensual' : 'btn-unica');

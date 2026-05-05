@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
-import es.refugio.refugio.infraestructure.security.CustomUserDetails;
 
 import es.refugio.refugio.application.command.donacion.CreateDonacionCommand;
 import es.refugio.refugio.application.command.donacion.EditDonacionCommand;
