@@ -130,7 +130,7 @@ public class VoluntarioViewController {
         if (especialidad != null) body.put("especialidad", especialidad);
 
         restTemplate.postForObject(apiUrl + "/v1/voluntarios", body, Object.class);
-        redirectAttributes.addFlashAttribute("successMessage", "¡Bienvenido al equipo voluntario!");
+        redirectAttributes.addFlashAttribute("successMessage", "¡Solicitud enviada con éxito! El equipo revisará tu perfil pronto.");
         return "redirect:" + WebRoutes.HOME;
     }
 

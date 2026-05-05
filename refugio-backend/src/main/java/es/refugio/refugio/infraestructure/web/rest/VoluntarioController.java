@@ -38,7 +38,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("api/v1/voluntarios")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "Voluntarios", description = "Gestión de voluntarios del refugio")
 public class VoluntarioController {
 
@@ -58,6 +57,7 @@ public class VoluntarioController {
 
     @Operation(summary = "Actualizar voluntario")
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "Voluntario actualizado"), @ApiResponse(responseCode = "404", description = "No encontrado") })
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<VoluntarioResponse> update(@PathVariable Integer id,
             @Valid @RequestBody VoluntarioUpdateRequest request) {
@@ -68,12 +68,14 @@ public class VoluntarioController {
 
     @Operation(summary = "Listar voluntarios")
     @ApiResponse(responseCode = "200", description = "Listado retornado")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<VoluntarioResponse> findAll() {
         return VoluntarioMapper.toResponse(findVoluntarioService.findAll());
     }
 
     @Operation(summary = "Obtener voluntario por ID")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     @GetMapping("/{id}")
     public VoluntarioResponse findById(@PathVariable Integer id) {
         return VoluntarioMapper.toResponse(findVoluntarioService.findById(new VoluntarioId(id)));
@@ -88,6 +90,7 @@ public class VoluntarioController {
 
     @Operation(summary = "Eliminar voluntario")
     @ApiResponse(responseCode = "204", description = "Voluntario eliminado")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         deleteVoluntarioService.delete(new VoluntarioId(id));

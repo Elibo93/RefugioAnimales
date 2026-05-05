@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="pasarela-container" style="max-width: 900px; margin: 2rem auto; display: grid; grid-template-columns: 1.2fr 1fr; gap: 2rem; padding: 1rem;">
+            
+            <!-- Panel Izquierdo: Formulario de Pago -->
+            <div class="glass-panel" style="padding: 2.5rem; border-radius: 24px; box-shadow: var(--shadow-xl);">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 2rem;">
+                    <div style="background: var(--primary-light); color: var(--primary); padding: 8px; border-radius: 10px;">
+                        <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <div>
+                        <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: var(--text-main);">Pago Seguro</h2>
+                        <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Transacción cifrada y protegida</p>
+                    </div>
+                </div>
+
+                <form th:action="@{/web/donaciones/confirmar}" method="POST" id="payment-form">
+                    <!-- Datos de la donación (ocultos para persistir) -->
+                    <input type="hidden" name="usuarioId" th:value="${donacion.usuarioId}">
+                    <input type="hidden" name="tipo" th:value="${donacion.tipo}">
+                    <input type="hidden" name="cantidad" th:value="${donacion.cantidad}">
+                    <input type="hidden" name="frecuencia" th:value="${donacion.frecuencia}">
+                    <input type="hidden" name="descripcion" th:value="${donacion.descripcion}">
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-main);">Titular de la tarjeta</label>
+                        <div style="position: relative;">
+                            <i data-lucide="user" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 18px;"></i>
+                            <input type="text" placeholder="Nombre completo" required
+                                style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.75rem; border-radius: 12px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.5);">
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-main);">Número de tarjeta</label>
+                        <div style="position: relative;">
+                            <i data-lucide="credit-card" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 18px;"></i>
+                            <input type="text" placeholder="0000 0000 0000 0000" maxlength="19" required
+                                style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.75rem; border-radius: 12px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.5);">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;">
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-main);">Caducidad</label>
+                            <input type="text" placeholder="MM / AA" maxlength="5" required
+                                style="width: 100%; padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.5);">
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-main);">CVC</label>
+                            <div style="position: relative;">
+                                <input type="text" placeholder="123" maxlength="3" required
+                                    style="width: 100%; padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.5);">
+                                <i data-lucide="help-circle" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 16px;"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem; border-radius: 14px; justify-content: center; gap: 12px;">
+                        <i data-lucide="lock" style="width: 20px;"></i>
+                        <span>Pagar [[${#numbers.formatDecimal(donacion.cantidad, 1, 'POINT', 2, 'COMMA')}]] €</span>
+                    </button>
+                    
+                    <a th:href="@{/web/donaciones}" style="display: block; text-align: center; margin-top: 1.5rem; color: var(--text-muted); font-size: 0.9rem; text-decoration: none;">
+                        Cancelar y volver
+                    </a>
+                </form>
+            </div>
+
+            <!-- Panel Derecho: Resumen del Pedido -->
+            <div style="padding: 1rem;">
+                <div class="glass-panel" style="padding: 2rem; border-radius: 24px; background: rgba(255,255,255,0.3); border: 1px dashed var(--border-color);">
+                    <h3 style="margin-top: 0; margin-bottom: 1.5rem; font-size: 1.2rem; font-weight: 700;">Resumen de la Donación</h3>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.05);">
+                        <span style="color: var(--text-muted);">Tipo de ayuda</span>
+                        <span style="font-weight: 600; color: var(--text-main);" th:text="${donacion.tipo}">DINERO</span>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.05);">
+                        <span style="color: var(--text-muted);">Frecuencia</span>
+                        <span style="font-weight: 600; color: var(--text-main);" th:text="${donacion.frecuencia == 'MENSUAL' ? 'Mensual' : 'Pago único'}">Única</span>
+                    </div>
+
+                    <div style="margin-bottom: 2rem;">
+                        <span style="display: block; color: var(--text-muted); margin-bottom: 0.5rem;">Comentario</span>
+                        <p style="font-style: italic; color: var(--text-main); font-size: 0.9rem; margin: 0;" th:text="${!donacion.descripcion.isEmpty() ? donacion.descripcion : 'Sin comentario adicional.'}">
+                            "Gracias por vuestra labor."
+                        </p>
+                    </div>
+
+                    <div style="background: var(--primary); color: white; padding: 1.5rem; border-radius: 16px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 500;">Total a pagar</span>
+                        <span style="font-size: 1.75rem; font-weight: 800;">[[${#numbers.formatDecimal(donacion.cantidad, 1, 'POINT', 2, 'COMMA')}]] €</span>
+                    </div>
+
+                    <!-- Trust Badges -->
+                    <div style="margin-top: 3rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                        <div style="display: flex; gap: 15px; opacity: 0.6;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" style="height: 15px;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" style="height: 20px;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" style="height: 18px;">
+                        </div>
+                        <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center;">
+                            Al confirmar el pago, aceptas los términos y condiciones del refugio. Tu donación es deducible de impuestos.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            // Simulación de carga al pagar
+            document.getElementById('payment-form').addEventListener('submit', function(e) {
+                const btn = this.querySelector('button');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="loader-spinner"></i> <span>Procesando pago...</span>';
+            });
+        </script>
+
+        <style>
+            .loader-spinner {
+                width: 20px;
+                height: 20px;
+                border: 3px solid rgba(255,255,255,0.3);
+                border-radius: 50%;
+                border-top-color: white;
+                animation: spin 1s ease-in-out infinite;
+            }
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+        </style>
+    </div>
+</body>
+</html>
