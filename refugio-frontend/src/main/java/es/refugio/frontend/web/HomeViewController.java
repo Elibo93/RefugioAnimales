@@ -1,5 +1,8 @@
 package es.refugio.frontend.web;
 
+import es.refugio.frontend.web.enums.FragmentoContenido;
+import es.refugio.frontend.web.enums.ModelAttribute;
+import es.refugio.frontend.web.enums.ThymTemplates;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -8,23 +11,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
 
-import es.refugio.frontend.web.constants.WebRoutes;
-import es.refugio.frontend.web.enums.FragmentoContenido;
-import es.refugio.frontend.web.enums.ModelAttribute;
-import es.refugio.frontend.web.enums.ThymTemplates;
-
 import java.util.Arrays;
 import java.util.List;
 
 @Controller
+@RequestMapping({"/", "/web/home"})
 @RequiredArgsConstructor
-@RequestMapping({WebRoutes.HOME, "/"})
 public class HomeViewController {
 
     private final RestTemplate restTemplate;
-
-    @Value("${backend.api.url}")
-    private String apiUrl;
 
     @Value("${auth.api.url}")
     private String authUrl;
@@ -49,12 +44,15 @@ public class HomeViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    /** Fetch genérico para el backend: devuelve lista vacía si el endpoint falla o requiere auth */
     private List<Object> fetch(String path) {
-        return fetchFull(apiUrl + path);
+        try {
+            Object[] arr = restTemplate.getForObject(path, Object[].class);
+            return arr != null ? Arrays.asList(arr) : List.of();
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
-    /** Fetch genérico con URL completa */
     private List<Object> fetchFull(String fullUrl) {
         try {
             Object[] arr = restTemplate.getForObject(fullUrl, Object[].class);

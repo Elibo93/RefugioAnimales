@@ -42,7 +42,6 @@ public class DonacionViewController {
         List<Object> donaciones = fetchList("/v1/donaciones");
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
 
-        // Build usuariosMap: Map<userId, userObject>
         Map<Integer, Object> usuariosMap = new HashMap<>();
         for (Object u : usuarios) {
             if (u instanceof Map) {
@@ -53,12 +52,10 @@ public class DonacionViewController {
             }
         }
 
-        // Obtener el total recaudado en dinero desde el endpoint público
         Double totalDinero = 0.0;
         try {
             Double callRes = restTemplate.getForObject(apiUrl + "/v1/donaciones/total", Double.class);
-            if (callRes != null)
-                totalDinero = callRes;
+            if (callRes != null) totalDinero = callRes;
         } catch (Exception e) {
             totalDinero = 0.0;
         }
@@ -66,6 +63,7 @@ public class DonacionViewController {
         model.addAttribute(ModelAttribute.Donacion_LIST.getName(), donaciones);
         model.addAttribute("usuarios", usuarios);
         model.addAttribute("usuariosMap", usuariosMap);
+        
         Map<String, Object> nuevaDonacion = new HashMap<>();
         nuevaDonacion.put("fecha", LocalDateTime.now().toString());
         nuevaDonacion.put("id", null);
@@ -97,6 +95,7 @@ public class DonacionViewController {
         nuevaDonacion.put("tipo", "DINERO");
         nuevaDonacion.put("cantidad", null);
         nuevaDonacion.put("descripcion", "");
+        
         model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), nuevaDonacion);
         model.addAttribute("usuarios", usuarios);
         model.addAttribute("tipos", List.of("DINERO", "ALIMENTO", "MEDICAMENTO", "MATERIAL", "OTRO"));
@@ -112,6 +111,29 @@ public class DonacionViewController {
             @RequestParam(defaultValue = "UNICA") String frecuencia,
             @RequestParam(required = false) String descripcion,
             Model model) {
+        
+        System.out.println("DEBUG: Entrando en DonacionViewController.crear con cantidad: " + cantidad);
+
+        // En lugar de guardar, enviamos a la pasarela de pago (SIMULACIÓN)
+        Map<String, Object> donacionTemp = new HashMap<>();
+        donacionTemp.put("usuarioId", usuarioId);
+        donacionTemp.put("tipo", tipo);
+        donacionTemp.put("cantidad", cantidad);
+        donacionTemp.put("frecuencia", frecuencia);
+        donacionTemp.put("descripcion", (descripcion != null) ? descripcion : "");
+
+        model.addAttribute("donacion", donacionTemp);
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_PASARELA.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    @PostMapping("/web/donaciones/confirmar")
+    public String confirmarPago(@RequestParam(required = false) Integer usuarioId,
+            @RequestParam String tipo,
+            @RequestParam Double cantidad,
+            @RequestParam String frecuencia,
+            @RequestParam String descripcion,
+            Model model) {
 
         Map<String, Object> body = new HashMap<>();
         body.put("usuarioId", usuarioId);
@@ -121,7 +143,9 @@ public class DonacionViewController {
         body.put("descripcion", descripcion);
         body.put("fecha", LocalDateTime.now().toString());
 
+        // Ahora sí persistimos en el backend tras el "pago exitoso"
         restTemplate.postForObject(apiUrl + "/v1/donaciones", body, Object.class);
+        
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_GRACIAS.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
