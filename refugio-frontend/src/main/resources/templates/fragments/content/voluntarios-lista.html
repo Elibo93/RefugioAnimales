@@ -29,9 +29,8 @@
                         <th th:text="#{voluntario.table.header.id}">ID</th>
                         <th th:text="#{voluntario.table.header.name}">Nombre</th>
                         <th th:text="#{voluntario.table.header.surname}">Apellido</th>
+                        <th th:text="#{voluntario.table.header.specialty}">Especialidad</th>
                         <th th:text="#{voluntario.table.header.disponibilidad}">Disponibilidad</th>
-                        <th th:text="#{voluntario.table.header.email}">Email</th>
-                        <th th:text="#{voluntario.table.header.phone}">Tlf</th>
                         <th th:text="#{voluntario.table.header.action}">Acción</th>
                     </tr>
                 </thead>
@@ -50,28 +49,32 @@
                                 style="color:var(--text-main); text-decoration: none; display: block;"
                                 th:text="${u != null ? u.get('apellido') : ''}">Pérez</a>
                         </td>
+                        <td>
+                            <span class="badge" style="background:#E0F2FE; color:#0369A1; font-size:0.85rem;"
+                                  th:text="${p.get('especialidad') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(p.get('especialidad'), '_', ' '))) : 'General'}">Especialidad</span>
+                        </td>
                         <td><span class="badge-soon" style="background:#F3E8FF; color:#9333EA;"
                                 th:text="${p.get('disponibilidad')}">Tarde</span></td>
-                        <td th:text="${u != null ? u.get('email') : ''}">juan@mail.com</td>
-                        <td th:text="${u != null ? u.get('telefono') : ''}">600...</td>
-                        <td style="display:flex; gap:8px;">
-                            <a class="btn-icon" th:href="@{/web/tareas/nueva(voluntarioId=${p.get('id')})}"
-                                title="Asignar Tarea">
-                                <i data-lucide="clipboard-list" style="width:16px; color:var(--secondary);"></i>
-                            </a>
-                            <button class="btn-icon" 
-                                    th:hx-get="@{/web/voluntarios/modal-editar/{id}(id=${p.get('id')})}"
-                                    hx-target="#modal-host" 
-                                    hx-swap="innerHTML"
-                                    title="Editar">
-                                <i data-lucide="edit-2" style="width:16px;"></i>
-                            </button>
-                            <button class="btn-icon delete"
-                                th:hx-post="@{/web/voluntarios/{id}/borrar(id=${p.get('id')})}"
-                                th:hx-target="'#row-' + ${p.get('id')}" hx-swap="outerHTML swap:0.3s"
-                                hx-confirm="¿Eliminar voluntario?">
-                                <i data-lucide="trash-2" style="width:16px;"></i>
-                            </button>
+                        <td>
+                            <div style="display:flex; gap:8px;">
+                                <a class="btn-icon" th:href="@{/web/tareas/nueva(voluntarioId=${p.get('id')})}"
+                                    title="Asignar Tarea">
+                                    <i data-lucide="clipboard-list" style="width:16px; color:var(--secondary);"></i>
+                                </a>
+                                <a class="btn-icon" 
+                                   th:hx-get="@{/web/voluntarios/{id}/editar(id=${p.get('id')})}"
+                                   hx-target="#contenido-dinamico" 
+                                   hx-push-url="true"
+                                   title="Editar">
+                                    <i data-lucide="edit-2" style="width:16px;"></i>
+                                </a>
+                                <button class="btn-icon delete"
+                                    th:hx-post="@{/web/voluntarios/{id}/borrar(id=${p.get('id')})}"
+                                    th:hx-target="'#row-' + ${p.get('id')}" hx-swap="outerHTML swap:0.3s"
+                                    hx-confirm="¿Eliminar voluntario?">
+                                    <i data-lucide="trash-2" style="width:16px;"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 </tbody>

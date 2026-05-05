@@ -22,6 +22,9 @@ public class VoluntarioEntity {
     @Column(name = "disponibilidad", nullable = false, length = 500)
     private String disponibilidad;
 
+    @Column(name = "especialidad", length = 100)
+    private String especialidad;
+
     @Column(name = "usuario_id", nullable = false, unique = true)
     private Integer usuarioId;
 

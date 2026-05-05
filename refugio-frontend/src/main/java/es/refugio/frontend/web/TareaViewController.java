@@ -135,7 +135,7 @@ public class TareaViewController {
     }
 
     @GetMapping(WebRoutes.TAREAS_NUEVA)
-    public String formulario(Model model, @RequestParam(required = false) Integer voluntarioId) {
+    public String formulario(Model model, @RequestParam(required = false) Integer voluntarioId, HttpServletRequest request) {
         Map<String, Object> tarea = new HashMap<>();
         tarea.put("fecha", LocalDateTime.now().toString());
         
@@ -171,6 +171,10 @@ public class TareaViewController {
         }
         model.addAttribute("usuariosMap", usuariosMap);
         
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Tarea_FORM.getPath() + " :: content";
+        }
+        
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Tarea_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -197,11 +201,16 @@ public class TareaViewController {
     }
 
     @GetMapping(WebRoutes.TAREAS_EDITAR)
-    public String editarFormulario(@PathVariable Integer id, Model model) {
+    public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
         Object tarea = restTemplate.getForObject(apiUrl + "/v1/tareas/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
         model.addAttribute("voluntarios", fetchList("/v1/voluntarios"));
         model.addAttribute("estados", List.of("PENDIENTE", "EN_PROCESO", "COMPLETADA", "CANCELADA"));
+        
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Tarea_FORM.getPath() + " :: content";
+        }
+        
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Tarea_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }

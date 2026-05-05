@@ -160,6 +160,9 @@ databaseChangeLog:
                     unique: true
                     uniqueConstraintName: uq_voluntarios_usuario_id
               - column:
+                  name: especialidad
+                  type: VARCHAR(100)
+              - column:
                   name: created_at
                   type: DATETIME
                   constraints:

@@ -71,9 +71,16 @@ public class HistorialMedicoViewController {
     }
 
     @GetMapping(WebRoutes.HISTORIALES_NUEVO)
-    public String formulario(Model model) {
-        model.addAttribute(ModelAttribute.SINGLE_Historial.getName(), Map.of("fecha", LocalDateTime.now().toString()));
+    public String formulario(Model model, HttpServletRequest request) {
+        Map<String, Object> historial = new HashMap<>();
+        historial.put("fecha", LocalDateTime.now().toString());
+        model.addAttribute(ModelAttribute.SINGLE_Historial.getName(), historial);
         model.addAttribute("animales", fetchList("/v1/animales"));
+        
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Historial_FORM.getPath() + " :: content";
+        }
+        
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Historial_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -83,6 +90,7 @@ public class HistorialMedicoViewController {
             @RequestParam String descripcion,
             @RequestParam String tratamiento,
             @RequestParam String veterinario,
+            @RequestParam(required = false) String fecha,
             RedirectAttributes redirectAttributes) {
 
         Map<String, Object> body = new HashMap<>();
@@ -90,7 +98,11 @@ public class HistorialMedicoViewController {
         body.put("descripcion", descripcion);
         body.put("tratamiento", tratamiento);
         body.put("veterinario", veterinario);
-        body.put("fecha",       LocalDateTime.now().toString());
+        if (fecha != null && !fecha.isEmpty()) {
+            body.put("fecha", fecha);
+        } else {
+            body.put("fecha", LocalDateTime.now().toString());
+        }
 
         restTemplate.postForObject(apiUrl + "/v1/historial-medico", body, Object.class);
         redirectAttributes.addFlashAttribute("successMessage", "Historial médico registrado correctamente");
@@ -98,10 +110,15 @@ public class HistorialMedicoViewController {
     }
 
     @GetMapping(WebRoutes.HISTORIALES_EDITAR)
-    public String editarFormulario(@PathVariable Integer id, Model model) {
+    public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
         Object historial = restTemplate.getForObject(apiUrl + "/v1/historial-medico/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Historial.getName(), historial);
         model.addAttribute("animales", fetchList("/v1/animales"));
+        
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Historial_FORM.getPath() + " :: content";
+        }
+        
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Historial_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -112,6 +129,7 @@ public class HistorialMedicoViewController {
             @RequestParam String descripcion,
             @RequestParam String tratamiento,
             @RequestParam String veterinario,
+            @RequestParam(required = false) String fecha,
             RedirectAttributes redirectAttributes) {
 
         Map<String, Object> body = new HashMap<>();
@@ -119,7 +137,11 @@ public class HistorialMedicoViewController {
         body.put("descripcion", descripcion);
         body.put("tratamiento", tratamiento);
         body.put("veterinario", veterinario);
-        body.put("fecha",       LocalDateTime.now().toString());
+        if (fecha != null && !fecha.isEmpty()) {
+            body.put("fecha", fecha);
+        } else {
+            body.put("fecha", LocalDateTime.now().toString());
+        }
 
         restTemplate.put(apiUrl + "/v1/historial-medico/" + id, body);
         redirectAttributes.addFlashAttribute("successMessage", "Historial médico editado correctamente");

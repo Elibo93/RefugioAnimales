@@ -15,13 +15,11 @@ public interface WebRoutes {
     String PERSONAS_EDITAR   = "/web/personas/{id}/editar";
     String PERSONAS_PDF      = "/web/personas/pdf";
     String PERSONAS_ELIMINAR = "/web/personas/{id}/borrar";
+    String PERSONAS_BUSCAR   = "/web/personas/buscar";
 
     // ADOPTANTES
     String ADOPTANTES_BASE                 = "/web/adoptantes";
-    String ADOPTANTES_MODAL_CONVERTIR      = "/web/adoptantes/modal-convertir";
-    String ADOPTANTES_CONVERTIR_Y_SOLICITAR = "/web/adoptantes/convertir-y-solicitar";
     String ADOPTANTES_NUEVO                = "/web/adoptantes/nuevo";
-    String ADOPTANTES_MODAL_EDITAR  = "/web/adoptantes/modal-editar/{id}";
     String ADOPTANTES_EDITAR               = "/web/adoptantes/{id}/editar";
     String ADOPTANTES_ELIMINAR             = "/web/adoptantes/{id}/borrar";
     String ADOPTANTES_PDF                  = "/web/adoptantes/pdf";
@@ -30,7 +28,6 @@ public interface WebRoutes {
 
     // VOLUNTARIOS
     String VOLUNTARIOS_BASE     = "/web/voluntarios";
-    String VOLUNTARIOS_MODAL_EDITAR = "/web/voluntarios/modal-editar/{id}";
     String VOLUNTARIOS_NUEVO    = "/web/voluntarios/nuevo";
     String VOLUNTARIOS_DETALLE  = "/web/voluntarios/{id}";
     String VOLUNTARIOS_EDITAR   = "/web/voluntarios/{id}/editar";
@@ -69,8 +66,6 @@ public interface WebRoutes {
     // SOLICITUDES ADOPCIÓN
     String SOLICITUDES_BASE         = "/web/solicitudes";
     String SOLICITUDES_NUEVA        = "/web/solicitudes/nueva";
-    String SOLICITUDES_MODAL_NUEVA  = "/web/solicitudes/modal-nueva";
-    String SOLICITUDES_MODAL_EDITAR = "/web/solicitudes/modal-editar/{id}";
     String SOLICITUDES_EDITAR       = "/web/solicitudes/{id}/editar";
     String SOLICITUDES_ELIMINAR     = "/web/solicitudes/{id}/borrar";
     String SOLICITUDES_PDF          = "/web/solicitudes/pdf";

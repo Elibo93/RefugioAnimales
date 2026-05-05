@@ -67,25 +67,14 @@
                                 th:text="${a.get('estadoValidacion')}">PENDIENTE</span>
                         </td>
                         <td style="display:flex; gap:8px;">
-                            <form th:if="${isAdmin and a.get('estadoValidacion') != null and a.get('estadoValidacion').toString() == 'PENDIENTE'}" 
-                                  th:action="@{/web/adoptantes/{id}/aprobar(id=${a.get('id')})}" method="post" style="margin:0;">
-                                <button type="submit" class="btn-icon" style="color: green; background-color: rgba(30,220,100,0.1);" title="Aprobar">
-                                    <i data-lucide="check" style="width:16px;"></i>
-                                </button>
-                            </form>
-                            <form th:if="${isAdmin and a.get('estadoValidacion') != null and a.get('estadoValidacion').toString() == 'PENDIENTE'}" 
-                                  th:action="@{/web/adoptantes/{id}/rechazar(id=${a.get('id')})}" method="post" style="margin:0;">
-                                <button type="submit" class="btn-icon" style="color: red; background-color: rgba(220,30,30,0.1);" title="Rechazar">
-                                    <i data-lucide="x" style="width:16px;"></i>
-                                </button>
-                            </form>
 
-                            <button class="btn-icon" 
-                                    th:hx-get="@{/web/adoptantes/modal-editar/{id}(id=${a.get('id')})}"
-                                    hx-target="#modal-host" 
-                                    hx-swap="innerHTML">
+                            <a class="btn-icon" 
+                                    th:hx-get="@{/web/adoptantes/{id}/editar(id=${a.get('id')})}"
+                                    hx-target="#contenido-dinamico"
+                                    hx-push-url="true"
+                                    title="Editar">
                                 <i data-lucide="edit-2" style="width:16px;"></i>
-                            </button>
+                            </a>
                             <button class="btn-icon delete"
                                     th:hx-post="@{/web/adoptantes/{id}/borrar(id=${a.get('id')})}"
                                     th:hx-target="'#row-' + ${a.get('id')}" hx-swap="outerHTML swap:0.3s"

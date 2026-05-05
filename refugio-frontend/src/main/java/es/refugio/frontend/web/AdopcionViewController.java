@@ -123,9 +123,7 @@ public class AdopcionViewController {
 
     @GetMapping(WebRoutes.ADOPCIONES_NUEVA)
     public String formulario(Model model) {
-        model.addAttribute(ModelAttribute.SINGLE_Adopcion.getName(), Map.of());
-        model.addAttribute(ModelAttribute.Persona_LIST.getName(),    fetchList(authUrl + "/v1/usuarios"));
-        model.addAttribute(ModelAttribute.Animal_LIST.getName(),     fetchList("/v1/animales"));
+        model.addAttribute(ModelAttribute.SINGLE_Adopcion.getName(), new HashMap<>());
         model.addAttribute("estadosAdopcion", List.of("COMPLETADA", "CANCELADA", "EN_PROCESO"));
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Adopcion_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -135,25 +133,53 @@ public class AdopcionViewController {
     public String crearAdopcion(@RequestParam Integer idPersona,
             @RequestParam Integer idAnimal,
             @RequestParam String estado,
+            @RequestParam(required = false) String fechaAdopcion,
             RedirectAttributes redirectAttributes) {
 
         Map<String, Object> body = new HashMap<>();
         body.put("adoptanteId", idPersona);
         body.put("animalId",    idAnimal);
         body.put("estado",      estado);
-        body.put("contrato",    "Contrato pendiente");
+        body.put("fechaAdopcion", fechaAdopcion);
+        body.put("contrato",    "Contrato formalizado");
 
         restTemplate.postForObject(apiUrl + "/v1/adopciones", body, Object.class);
-        redirectAttributes.addFlashAttribute("successMessage", "Adopción creada correctamente");
+        redirectAttributes.addFlashAttribute("successMessage", "Adopción registrada correctamente");
         return "redirect:" + WebRoutes.ADOPCIONES_BASE;
     }
 
     @GetMapping(WebRoutes.ADOPCIONES_EDITAR)
     public String editarFormulario(@PathVariable Integer id, Model model) {
-        Object adopcion = restTemplate.getForObject(apiUrl + "/v1/adopciones/" + id, Object.class);
-        model.addAttribute(ModelAttribute.SINGLE_Adopcion.getName(), adopcion);
-        model.addAttribute(ModelAttribute.Persona_LIST.getName(),    fetchList(authUrl + "/v1/usuarios"));
-        model.addAttribute(ModelAttribute.Animal_LIST.getName(),     fetchList("/v1/animales"));
+        Object adopcionObj = restTemplate.getForObject(apiUrl + "/v1/adopciones/" + id, Object.class);
+        model.addAttribute(ModelAttribute.SINGLE_Adopcion.getName(), adopcionObj);
+        
+        if (adopcionObj instanceof Map) {
+            Map<String, Object> adopcion = (Map<String, Object>) adopcionObj;
+            Object animalId = adopcion.get("animalId");
+            Object adoptanteId = adopcion.get("adoptanteId");
+            
+            if (animalId != null) {
+                Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
+                model.addAttribute("animalData", animal);
+            }
+            
+            if (adoptanteId != null) {
+                try {
+                    Object adoptante = restTemplate.getForObject(apiUrl + "/v1/adoptantes/" + adoptanteId, Object.class);
+                    if (adoptante instanceof Map) {
+                        Object usuarioId = ((Map<?,?>)adoptante).get("usuarioId");
+                        if (usuarioId != null) {
+                            Object usuario = restTemplate.getForObject(authUrl + "/v1/usuarios/" + usuarioId, Object.class);
+                            if (usuario instanceof Map) {
+                                String nombre = ((Map<?,?>)usuario).get("nombre") + " " + ((Map<?,?>)usuario).get("apellido");
+                                model.addAttribute("nombreAdoptante", nombre.trim());
+                            }
+                        }
+                    }
+                } catch (Exception e) {}
+            }
+        }
+        
         model.addAttribute("estadosAdopcion", List.of("COMPLETADA", "CANCELADA", "EN_PROCESO"));
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Adopcion_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -164,15 +190,17 @@ public class AdopcionViewController {
             @RequestParam Integer idPersona,
             @RequestParam Integer idAnimal,
             @RequestParam String estado,
+            @RequestParam(required = false) String fechaAdopcion,
             RedirectAttributes redirectAttributes) {
 
         Map<String, Object> body = new HashMap<>();
         body.put("adoptanteId", idPersona);
         body.put("animalId",    idAnimal);
         body.put("estado",      estado);
+        body.put("fechaAdopcion", fechaAdopcion);
 
         restTemplate.put(apiUrl + "/v1/adopciones/" + id, body);
-        redirectAttributes.addFlashAttribute("successMessage", "Adopción editada correctamente");
+        redirectAttributes.addFlashAttribute("successMessage", "Adopción actualizada correctamente");
         return "redirect:" + WebRoutes.ADOPCIONES_BASE;
     }
 

@@ -127,7 +127,7 @@
                         </div>
                         <span class="badge-soon" 
                               th:classappend="${t.get('estado') == 'COMPLETADA' ? 'success' : (t.get('estado') == 'CANCELADA' ? 'danger' : (t.get('estado') == 'EN_PROCESO' ? 'info' : 'warning'))}" 
-                              th:text="${t.get('estado')}">ESTADO</span>
+                              th:text="${t.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(t.get('estado'), '_', ' '))) : ''}">ESTADO</span>
                     </div>
                 </div>
             </div>

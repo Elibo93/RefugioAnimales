@@ -28,7 +28,7 @@
                         <th th:text="#{historial.table.header.animal}">Animal</th>
                         <th th:text="#{historial.table.header.fecha}">Fecha</th>
                         <th th:text="#{historial.table.header.veterinario}">Veterinario</th>
-                        <th th:text="#{workshop.table.header.action}">Acción</th>
+                        <th th:text="#{animal.table.header.action}">Acción</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -50,7 +50,11 @@
                                 <i data-lucide="eye"></i>
                             </button>
                             
-                            <a class="btn-icon" th:href="@{/web/historiales/{id}/editar(id=${h.get('id')})}" title="Editar">
+                            <a class="btn-icon" 
+                               th:hx-get="@{/web/historiales/{id}/editar(id=${h.get('id')})}" 
+                               hx-target="#contenido-dinamico"
+                               hx-push-url="true"
+                               title="Editar">
                                 <i data-lucide="edit-2"></i>
                             </a>
                             <button class="btn-icon delete"

@@ -8,9 +8,14 @@
 <body>
     <div th:fragment="content">
 
-        <div class="page-header" style="text-align:center;">
-            <h1 class="page-title" th:text="${tarea.get('id') == null ? (voluntarioPreseleccionado != null ? 'Asignar tarea a ' + voluntarioPreseleccionado.get('nombre') : 'Crear tarea') : 'Editar tarea'}">
-                Crear tarea
+        <div class="page-header" style="text-align:center; margin-bottom: 2rem;">
+            <h1 class="page-title" style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+                <div class="premium-modal-icon-wrapper" style="margin: 0; width: 48px; height: 48px; background: #f3f4f6; color: #4b5563;">
+                    <i data-lucide="clipboard-list"></i>
+                </div>
+                <span th:text="${tarea.get('id') == null ? (voluntarioPreseleccionado != null ? 'Asignar tarea a ' + voluntarioPreseleccionado.get('nombre') : 'Crear tarea') : 'Editar tarea'}">
+                    Crear tarea
+                </span>
             </h1>
             <p style="color:var(--text-muted); margin-top:0.5rem;">Configure los detalles y plazos de la tarea</p>
         </div>

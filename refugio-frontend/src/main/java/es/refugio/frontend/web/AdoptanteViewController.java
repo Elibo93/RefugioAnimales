@@ -11,7 +11,10 @@ import es.refugio.frontend.web.constants.WebRoutes;
 
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDateTime;
+import jakarta.servlet.http.HttpServletRequest;
+import es.refugio.frontend.web.enums.FragmentoContenido;
+import es.refugio.frontend.web.enums.ModelAttribute;
+import es.refugio.frontend.web.enums.ThymTemplates;
 import java.util.*;
 
 /**
@@ -66,35 +69,48 @@ public class AdoptanteViewController {
         } catch (Exception e) { return List.of(); }
     }
 
-    @GetMapping(WebRoutes.ADOPTANTES_MODAL_EDITAR)
-    public String modalEditar(@PathVariable Integer id, Model model) {
+
+    @GetMapping(WebRoutes.ADOPTANTES_NUEVO)
+    public String nuevo(Model model, HttpServletRequest request) {
+        model.addAttribute(ModelAttribute.SINGLE_Adoptante.getName(), new HashMap<>());
+        model.addAttribute("currentUri", WebRoutes.ADOPTANTES_BASE);
+        
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Adoptante_FORM.getPath() + " :: content";
+        }
+        
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Adoptante_FORM.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    @GetMapping(WebRoutes.ADOPTANTES_EDITAR)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ADOPTANTE')")
+    @SuppressWarnings("unchecked")
+    public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
         try {
             Map<String, Object> adoptante = restTemplate.getForObject(apiUrl + "/v1/adoptantes/" + id, Map.class);
-            model.addAttribute("adoptante", adoptante);
-
+            model.addAttribute(ModelAttribute.SINGLE_Adoptante.getName(), adoptante);
+            
             if (adoptante != null) {
                 Object uId = adoptante.get("usuarioId");
                 Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + uId, Map.class);
                 if (user != null) {
                     model.addAttribute("nombreCompleto", user.get("nombre") + " " + user.get("apellido"));
-                    model.addAttribute("dni", adoptante.get("dni"));
-                    model.addAttribute("fechaNacimiento", adoptante.get("fechaNacimiento"));
                 }
             }
-            model.addAttribute("estados", List.of("PENDIENTE", "APROBADO", "RECHAZADO"));
-        } catch (Exception e) {
-            logger.error("Error al cargar datos para el modal de adoptante: " + e.getMessage());
-            model.addAttribute("adoptante", new HashMap<>());
-        }
-        return "fragments/modals/modal-adoptante-editar :: modal";
-    }
 
-    @GetMapping(WebRoutes.ADOPTANTES_NUEVO)
-    public String nuevo(Model model) {
-        model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.SINGLE_Adoptante.getName(), new HashMap<>());
-        model.addAttribute("currentUri", WebRoutes.ADOPTANTES_BASE);
-        model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.FRAGMENTO_CONTENIDO.getName(), es.refugio.frontend.web.enums.FragmentoContenido.Adoptante_FORM.getPath());
-        return es.refugio.frontend.web.enums.ThymTemplates.MAIN_LAYOUT.getPath();
+            model.addAttribute("currentUri", WebRoutes.ADOPTANTES_EDITAR);
+            model.addAttribute("estados", List.of("PENDIENTE", "APROBADO", "RECHAZADO"));
+            
+            if ("true".equals(request.getHeader("HX-Request"))) {
+                return FragmentoContenido.Adoptante_FORM.getPath() + " :: content";
+            }
+        } catch (Exception e) {
+            logger.error("Error al cargar adoptante para editar: " + e.getMessage());
+        }
+        
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Adoptante_FORM.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
     @PostMapping(WebRoutes.ADOPTANTES_NUEVO)
@@ -193,58 +209,4 @@ public class AdoptanteViewController {
         return es.refugio.frontend.web.enums.ThymTemplates.Adoptante_LIST_PDF.getPath();
     }
 
-    /**
-     * Modal de conversión a adoptante (cuando el usuario no tiene perfil de
-     * adoptante).
-     */
-    @GetMapping(WebRoutes.ADOPTANTES_MODAL_CONVERTIR)
-    public String modalConvertir(@RequestParam Integer animalId, Model model) {
-        try {
-            Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
-            model.addAttribute("animal", animal);
-        } catch (Exception e) {
-            model.addAttribute("animal", Map.of());
-        }
-        return "fragments/modals/modal-conversion-directa :: modal";
-    }
-
-    /**
-     * Procesa la conversión: crea el perfil de adoptante y la solicitud de
-     * adopción.
-     * Delega en el backend RESTful.
-     */
-    @PostMapping(WebRoutes.ADOPTANTES_CONVERTIR_Y_SOLICITAR)
-    public String convertirYSolicitar(
-            @RequestParam Integer animalId,
-            @RequestParam String nombre,
-            @RequestParam String apellido,
-            @RequestParam(required = false) String dni,
-            @RequestParam(required = false) String direccion,
-            @RequestParam(required = false) String fechaNacimiento,
-            @RequestParam(required = false) String comentario,
-            Model model) {
-        try {
-            Map<String, Object> body = new HashMap<>();
-            body.put("animalId", animalId);
-            body.put("nombre", nombre);
-            body.put("apellido", apellido);
-            body.put("dni", dni != null ? dni : "");
-            body.put("direccion", direccion != null ? direccion : "");
-            body.put("fechaNacimiento", fechaNacimiento != null ? fechaNacimiento : "");
-            body.put("comentario", comentario != null ? comentario : "Solicitud registrada");
-            body.put("fecha", LocalDateTime.now().toString());
-
-            restTemplate.postForObject(apiUrl + "/v1/adoptantes/convertir-y-solicitar", body, Object.class);
-            return "fragments/content/solicitud-creada :: success-modal";
-        } catch (Exception e) {
-            try {
-                Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
-                model.addAttribute("animal", animal);
-            } catch (Exception ignored) {
-            }
-            model.addAttribute("usuario", Map.of("nombre", nombre, "apellido", apellido));
-            model.addAttribute("errorMessage", "Error al procesar la solicitud: " + e.getMessage());
-            return "fragments/modals/modal-conversion-directa :: modal";
-        }
-    }
 }

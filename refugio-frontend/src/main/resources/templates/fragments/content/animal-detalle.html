@@ -2,7 +2,10 @@
     <div class="profile-header">
         <div class="profile-cover" style="height: 200px; background: linear-gradient(135deg, var(--primary-light), var(--primary)); border-radius: 20px 20px 0 0; position: relative;">
             <div class="profile-actions" style="position: absolute; top: 20px; right: 20px; display: flex; gap: 10px;">
-                <a th:href="@{/web/animales/{id}/editar(id=${animal.get('id')})}" class="btn btn-secondary" style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
+                <a th:hx-get="@{/web/animales/{id}/editar(id=${animal.get('id')})}" 
+                   hx-target="#contenido-dinamico"
+                   hx-push-url="true"
+                   class="btn btn-secondary" style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
                     <i data-lucide="edit-3" style="width: 18px; margin-right: 8px;"></i>
                     Editar Ficha
                 </a>
@@ -15,7 +18,7 @@
                      style="width: 180px; height: 180px; border-radius: 30px; object-fit: cover; border: 8px solid var(--bg-main); box-shadow: var(--shadow-lg);">
                 <div class="status-badge" th:classappend="${animal.get('estado') == 'DISPONIBLE' ? 'success' : (animal.get('estado') == 'ADOPTADO' ? 'primary' : 'warning')}"
                      style="position: absolute; bottom: 10px; right: 10px; padding: 6px 12px; border-radius: 12px; font-weight: 700; font-size: 0.75rem; border: 4px solid var(--bg-main);"
-                     th:text="${animal.get('estado')}">
+                     th:text="${animal.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(animal.get('estado'), '_', ' '))) : ''}">
                     DISPONIBLE
                 </div>
             </div>
@@ -176,7 +179,11 @@
 
             <!-- Botones de Acción Extra -->
             <div style="display: flex; flex-direction: column; gap: 10px;">
-                <a th:if="${animal.get('estado') == 'DISPONIBLE'}" th:href="@{/web/solicitudes/nueva(animalId=${animal.get('id')})}" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                <a th:if="${animal.get('estado') == 'DISPONIBLE'}" 
+                   th:hx-get="@{/web/solicitudes/nueva(animalId=${animal.get('id')})}" 
+                   hx-target="#contenido-dinamico"
+                   hx-push-url="true"
+                   class="btn btn-primary" style="width: 100%; justify-content: center;">
                     <i data-lucide="heart" style="width: 18px; margin-right: 8px;"></i>
                     Registrar Adopción
                 </a>

@@ -4,5 +4,6 @@ import es.refugio.refugio.domain.model.usuario.UsuarioId;
 
 public record CreateVoluntarioCommand(
                 UsuarioId usuarioId,
-                String disponibilidad) {
+                String disponibilidad,
+                String especialidad) {
 }

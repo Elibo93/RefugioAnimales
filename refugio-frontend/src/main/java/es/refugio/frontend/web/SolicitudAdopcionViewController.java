@@ -47,71 +47,6 @@ public class SolicitudAdopcionViewController {
     @Value("${auth.api.url}")
     private String authUrl;
 
-    @GetMapping(WebRoutes.SOLICITUDES_MODAL_NUEVA)
-    public String modalNueva(@RequestParam Integer animalId, Model model) {
-        try {
-            Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
-            model.addAttribute("animal", animal);
-        } catch (Exception e) {
-            model.addAttribute("animal", Map.of());
-        }
-        return "fragments/modals/modal-solicitud-directa :: modal";
-    }
-
-    @GetMapping(WebRoutes.SOLICITUDES_MODAL_EDITAR)
-    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
-    @SuppressWarnings("unchecked")
-    public String modalEditar(@PathVariable Integer id, Model model) {
-        try {
-            Map<String, Object> solicitud = restTemplate.getForObject(apiUrl + "/v1/solicitudes-adopcion/" + id, Map.class);
-            model.addAttribute("solicitud", solicitud);
-
-            // Cargar datos para resolver nombres
-            List<Object> animales = fetchList("/v1/animales");
-            List<Object> adoptantes = fetchList("/v1/adoptantes");
-            List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
-
-            Map<String, Object> animalesMap = new HashMap<>();
-            for (Object a : animales) {
-                if (a instanceof Map) {
-                    animalesMap.put(String.valueOf(((Map<?, ?>) a).get("id")), a);
-                }
-            }
-
-            Map<String, Map<String, Object>> usuariosMap = new HashMap<>();
-            for (Object u : usuarios) {
-                if (u instanceof Map) {
-                    usuariosMap.put(String.valueOf(((Map<?, ?>) u).get("id")), (Map<String, Object>) u);
-                }
-            }
-
-            // Resolver nombres para el modal (solo los necesarios)
-            if (solicitud != null) {
-                Object aId = solicitud.get("animalId");
-                Object animal = animalesMap.get(String.valueOf(aId));
-                model.addAttribute("animalNombre", animal != null ? ((Map<?,?>)animal).get("nombre") : "Desconocido");
-
-                Object adId = solicitud.get("adoptanteId");
-                // Buscar el adoptante para sacar su usuarioId
-                for (Object ad : adoptantes) {
-                    Map<?,?> adMap = (Map<?,?>) ad;
-                    if (String.valueOf(adMap.get("id")).equals(String.valueOf(adId))) {
-                        Object uId = adMap.get("usuarioId");
-                        Map<String, Object> user = usuariosMap.get(String.valueOf(uId));
-                        if (user != null) {
-                            model.addAttribute("adoptanteNombre", user.get("nombre") + " " + user.get("apellido"));
-                        }
-                        break;
-                    }
-                }
-            }
-
-            model.addAttribute("estados", List.of("PENDIENTE", "APROBADA", "RECHAZADA", "EN_REVISION"));
-        } catch (Exception e) {
-            logger.error("Error al cargar datos para el modal de edición: " + e.getMessage());
-        }
-        return "fragments/modals/modal-solicitud-editar :: modal";
-    }
 
     @GetMapping(WebRoutes.SOLICITUDES_BASE)
     @PreAuthorize("hasRole('ADMIN')")
@@ -244,7 +179,7 @@ public class SolicitudAdopcionViewController {
     }
 
     @GetMapping(WebRoutes.SOLICITUDES_NUEVA)
-    public String formulario(Model model, @RequestParam(required = false) Integer animalId) {
+    public String formulario(Model model, @RequestParam(required = false) Integer animalId, HttpServletRequest request) {
         Map<String, Object> solicitud = new HashMap<>();
         solicitud.put("fecha", LocalDateTime.now().toString());
         if (animalId != null)
@@ -255,7 +190,13 @@ public class SolicitudAdopcionViewController {
         model.addAttribute("adoptantes", fetchList("/v1/adoptantes"));
         model.addAttribute("estados", List.of("PENDIENTE", "APROBADA", "RECHAZADA", "EN_REVISION"));
         model.addAttribute("currentUri", WebRoutes.SOLICITUDES_NUEVA);
+        
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Solicitud_FORM.getPath() + " :: content";
+        }
+        
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_FORM.getPath());
+        model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
@@ -285,12 +226,42 @@ public class SolicitudAdopcionViewController {
 
     @GetMapping(WebRoutes.SOLICITUDES_EDITAR)
     @PreAuthorize("hasRole('ADMIN')")
-    public String editarFormulario(@PathVariable Integer id, Model model) {
+    public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
         Object solicitud = restTemplate.getForObject(apiUrl + "/v1/solicitudes-adopcion/" + id, Object.class);
-        model.addAttribute(ModelAttribute.SINGLE_Solicitud.getName(), solicitud);
+        Map<String, Object> sol = (Map<String, Object>) solicitud;
+        model.addAttribute(ModelAttribute.SINGLE_Solicitud.getName(), sol);
+        
+        if (sol != null && sol.get("adoptanteId") != null) {
+            try {
+                Map<String, Object> adoptante = restTemplate.getForObject(apiUrl + "/v1/adoptantes/" + sol.get("adoptanteId"), Map.class);
+                if (adoptante != null && adoptante.get("usuarioId") != null) {
+                    Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + adoptante.get("usuarioId"), Map.class);
+                    if (user != null) {
+                        model.addAttribute("nombreAdoptante", user.get("nombre") + " " + user.get("apellido"));
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Error al cargar datos del adoptante para editar solicitud: " + e.getMessage());
+            }
+        }
+
+        if (sol != null && sol.get("animalId") != null) {
+            try {
+                Map<String, Object> animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + sol.get("animalId"), Map.class);
+                model.addAttribute("animalData", animal);
+            } catch (Exception e) {
+                logger.error("Error al cargar datos del animal para editar solicitud: " + e.getMessage());
+            }
+        }
+
         model.addAttribute("animales", fetchList("/v1/animales"));
-        model.addAttribute("adoptantes", fetchList("/v1/adoptantes"));
         model.addAttribute("estados", List.of("PENDIENTE", "APROBADA", "RECHAZADA", "EN_REVISION"));
+        model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
+        
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Solicitud_FORM.getPath() + " :: content";
+        }
+        
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
