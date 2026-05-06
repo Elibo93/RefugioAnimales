@@ -8,7 +8,7 @@ public record CreateDonacionCommand(
         Double cantidad,
         String frecuencia,
         LocalDateTime fecha,
+        LocalDateTime proximaFechaPago,
         String descripcion
 ) {
 }
-

@@ -86,6 +86,14 @@
                         <span style="color: var(--text-muted);">Frecuencia</span>
                         <span style="font-weight: 600; color: var(--text-main);" th:text="${donacion.frecuencia == 'MENSUAL' ? 'Mensual' : 'Pago único'}">Única</span>
                     </div>
+                    
+                    <div th:if="${donacion.proximaFechaPago != null}" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.05); animation: slideDown 0.3s ease;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="calendar" style="width: 16px; color: var(--primary);"></i>
+                            <span style="color: var(--text-muted);">Próximo pago</span>
+                        </div>
+                        <span style="font-weight: 700; color: var(--primary);" th:text="${donacion.proximaFechaPago}">01/01/2024</span>
+                    </div>
 
                     <div style="margin-bottom: 2rem;">
                         <span style="display: block; color: var(--text-muted); margin-bottom: 0.5rem;">Comentario</span>
@@ -115,16 +123,17 @@
         </div>
 
         <script th:inline="javascript">
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-
             // Simulación de carga al pagar
-            document.getElementById('payment-form').addEventListener('submit', function(e) {
-                const btn = this.querySelector('button');
-                btn.disabled = true;
-                btn.innerHTML = '<i class="loader-spinner"></i> <span>Procesando pago...</span>';
-            });
+            const paymentForm = document.getElementById('payment-form');
+            if (paymentForm) {
+                paymentForm.addEventListener('submit', function(e) {
+                    const btn = this.querySelector('button');
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="loader-spinner"></i> <span>Procesando pago...</span>';
+                    }
+                });
+            }
         </script>
 
         <style>

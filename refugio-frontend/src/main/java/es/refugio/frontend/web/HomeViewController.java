@@ -24,20 +24,34 @@ public class HomeViewController {
     @Value("${auth.api.url}")
     private String authUrl;
 
+    @Value("${backend.api.url}")
+    private String apiUrl;
+
     @GetMapping
     public String home(Model model) {
 
         // Cada llamada es independiente: si una falla, las demás siguen funcionando
-        List<Object> animales = fetch("/v1/animales");
+        List<Object> animales = fetch(apiUrl + "/v1/animales");
 
         model.addAttribute(ModelAttribute.Persona_LIST.getName(),    fetchFull(authUrl + "/v1/usuarios"));
         model.addAttribute(ModelAttribute.Animal_LIST.getName(),     animales);
-        model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), fetch("/v1/voluntarios"));
-        model.addAttribute(ModelAttribute.Adopcion_LIST.getName(),   fetch("/v1/adopciones"));
-        model.addAttribute("especiesActivas", fetch("/v1/animales/especies"));
+        model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), fetch(apiUrl + "/v1/voluntarios"));
+        model.addAttribute(ModelAttribute.Adopcion_LIST.getName(),   fetch(apiUrl + "/v1/adopciones"));
+        model.addAttribute("especiesActivas", fetch(apiUrl + "/v1/animales/especies"));
 
-        // Top 3 animales como "favoritos destacados"
-        List<Object> favoritos = animales.size() > 3 ? animales.subList(0, 3) : animales;
+        // Top 3 animales más populares basados en visitas
+        List<Object> favoritos = animales.stream()
+                .filter(a -> a instanceof java.util.Map)
+                .map(a -> (java.util.Map<String, Object>) a)
+                .sorted((a1, a2) -> {
+                    Integer v1 = (Integer) a1.getOrDefault("visitas", 0);
+                    Integer v2 = (Integer) a2.getOrDefault("visitas", 0);
+                    return v2.compareTo(v1); // Orden descendente
+                })
+                .limit(3)
+                .map(a -> (Object) a)
+                .toList();
+        
         model.addAttribute("favoritos", favoritos);
 
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.HOME_VIEW.getPath());

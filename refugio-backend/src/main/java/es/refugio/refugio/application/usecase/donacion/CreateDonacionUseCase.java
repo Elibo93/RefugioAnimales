@@ -8,6 +8,7 @@ import es.refugio.refugio.domain.repository.DonacionRepository;
 import es.refugio.refugio.domain.model.usuario.UsuarioId;
 
 import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 public class CreateDonacionUseCase {
@@ -27,12 +28,20 @@ public class CreateDonacionUseCase {
             targetUserId = 2; // Mock anonymous user ID
         }
 
+        LocalDateTime fecha = command.fecha() != null ? command.fecha() : LocalDateTime.now();
+        LocalDateTime proximaFechaPago = null;
+
+        if (frecuenciaEnum == FrecuenciaDonacion.MENSUAL) {
+            proximaFechaPago = fecha.plusMonths(1);
+        }
+
         Donacion donacion = Donacion.builder()
                 .usuarioId(new UsuarioId(targetUserId))
                 .tipo(tipoEnum)
                 .frecuencia(frecuenciaEnum)
                 .cantidad(command.cantidad())
-                .fecha(command.fecha())
+                .fecha(fecha)
+                .proximaFechaPago(proximaFechaPago)
                 .descripcion(command.descripcion())
                 .build();
 

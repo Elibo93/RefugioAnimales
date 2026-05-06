@@ -310,12 +310,24 @@ function updateButtons(activeBtn) {
 // Establecer recurrencia de la donación
 function setRecurrence(type) {
     document.querySelectorAll('.view-toggle .toggle-btn').forEach(b => b.classList.remove('active'));
-    const btn = document.getElementById(type === 'mensual' ? 'btn-mensual' : 'btn-unica');
-    if (btn) btn.classList.add('active');
+    
+    // Marcar botones activos en ambas posibles ubicaciones del selector
+    const btnUnica = document.querySelectorAll('#btn-unica, button[onclick="setRecurrence(\'unica\')"]');
+    const btnMensual = document.querySelectorAll('#btn-mensual, button[onclick="setRecurrence(\'mensual\')"]');
+    
+    if (type === 'mensual') {
+        btnMensual.forEach(b => b.classList.add('active'));
+    } else {
+        btnUnica.forEach(b => b.classList.add('active'));
+    }
+
     const input = document.getElementById('frecuencia-input');
     if (input) input.value = type.toUpperCase();
+
     const text = document.getElementById('submit-text');
     if (text) text.textContent = type === 'mensual' ? 'Confirmar Donación Mensual' : 'Confirmar Donación';
+
+    if (window.lucide) lucide.createIcons();
 }
 
 // Lógica de Selección de Usuario (Autocomplete)

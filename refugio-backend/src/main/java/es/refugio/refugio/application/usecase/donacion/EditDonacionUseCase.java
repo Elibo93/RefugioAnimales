@@ -27,9 +27,14 @@ public class EditDonacionUseCase {
                     donacion.setFecha(command.fecha());
                     donacion.setDescripcion(command.descripcion());
 
+                    if (frecuenciaEnum == FrecuenciaDonacion.MENSUAL) {
+                        donacion.setProximaFechaPago(command.fecha().plusMonths(1));
+                    } else {
+                        donacion.setProximaFechaPago(null);
+                    }
+
                     return donacionRepository.save(donacion);
                 })
                 .orElseThrow(() -> new DonacionNotFoundException(command.id().getValue()));
     }
 }
-
