@@ -9,7 +9,7 @@ public record DonacionResponse(
         Double cantidad,
         String frecuencia,
         LocalDateTime fecha,
+        LocalDateTime proximaFechaPago,
         String descripcion
 ) {
 }
-

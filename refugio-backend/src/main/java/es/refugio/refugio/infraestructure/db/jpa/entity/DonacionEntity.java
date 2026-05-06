@@ -47,6 +47,9 @@ public class DonacionEntity {
     @Column(nullable = false, columnDefinition = "DATETIME")
     private LocalDateTime fecha;
 
+    @Column(name = "proxima_fecha_pago", columnDefinition = "DATETIME")
+    private LocalDateTime proximaFechaPago;
+
     @Column(length = 500)
     private String descripcion;
 }

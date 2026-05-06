@@ -21,6 +21,7 @@ public class DonacionMapper {
                 req.cantidad(),
                 req.frecuencia(),
                 req.fecha(),
+                req.proximaFechaPago(),
                 req.descripcion());
     }
 
@@ -32,6 +33,7 @@ public class DonacionMapper {
                 req.cantidad(),
                 req.frecuencia(),
                 req.fecha(),
+                req.proximaFechaPago(),
                 req.descripcion());
     }
 
@@ -43,6 +45,7 @@ public class DonacionMapper {
                 d.getCantidad(),
                 d.getFrecuencia() != null ? d.getFrecuencia().name() : null,
                 d.getFecha(),
+                d.getProximaFechaPago(),
                 d.getDescripcion());
     }
 
@@ -59,6 +62,7 @@ public class DonacionMapper {
                 .cantidad(d.getCantidad())
                 .frecuencia(d.getFrecuencia())
                 .fecha(d.getFecha())
+                .proximaFechaPago(d.getProximaFechaPago())
                 .descripcion(d.getDescripcion())
                 .build();
     }
@@ -71,6 +75,7 @@ public class DonacionMapper {
                 .cantidad(e.getCantidad())
                 .frecuencia(e.getFrecuencia())
                 .fecha(e.getFecha())
+                .proximaFechaPago(e.getProximaFechaPago())
                 .descripcion(e.getDescripcion())
                 .build();
     }

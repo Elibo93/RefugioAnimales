@@ -10,13 +10,16 @@
         <div class="header-left">
             <!-- Sidebar Toggle Button (Now on the left) -->
             <button id="open-sidebar" class="sidebar-toggle-btn" title="Menú de usuario">
-                <i data-lucide="menu" th:if="${!isAuthenticated}"></i>
-                <i data-lucide="user" th:if="${isAuthenticated}"></i>
-                <i data-lucide="chevron-right" class="toggle-arrow"></i>
+                <!-- Inline SVG for Menu/User -->
+                <svg th:if="${!isAuthenticated}" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                <svg th:if="${isAuthenticated}" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                
+                <!-- Inline SVG for Chevron -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="toggle-arrow"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </button>
 
             <a th:if="${showBack}" href="javascript:history.back()" class="back-link" title="Volver">
-                <i data-lucide="arrow-left" class="back-arrow" style="width:20px;"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="back-arrow"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
             </a>
             
             <!-- Brand Pill for visibility -->

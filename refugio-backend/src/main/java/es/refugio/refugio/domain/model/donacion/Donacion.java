@@ -20,7 +20,7 @@ public class Donacion {
     private Double cantidad;
     private FrecuenciaDonacion frecuencia;
     private LocalDateTime fecha;
+    private LocalDateTime proximaFechaPago;
     private String descripcion;
 
 }
-

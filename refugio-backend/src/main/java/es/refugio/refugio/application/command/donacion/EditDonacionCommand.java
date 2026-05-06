@@ -10,7 +10,7 @@ public record EditDonacionCommand(
         Double cantidad,
         String frecuencia,
         LocalDateTime fecha,
+        LocalDateTime proximaFechaPago,
         String descripcion
 ) {
 }
-

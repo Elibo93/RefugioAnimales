@@ -122,6 +122,12 @@ public class DonacionViewController {
         donacionTemp.put("frecuencia", frecuencia);
         donacionTemp.put("descripcion", (descripcion != null) ? descripcion : "");
 
+        if ("MENSUAL".equals(frecuencia)) {
+            LocalDateTime next = LocalDateTime.now().plusMonths(1);
+            String formattedDate = String.format("%02d/%02d/%d", next.getDayOfMonth(), next.getMonthValue(), next.getYear());
+            donacionTemp.put("proximaFechaPago", formattedDate);
+        }
+
         model.addAttribute("donacion", donacionTemp);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_PASARELA.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();

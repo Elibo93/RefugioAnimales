@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 012-add-proxima-fecha-pago-to-donaciones
+      author: refugio
+      changes:
+        - addColumn:
+            tableName: donaciones
+            columns:
+              - column:
+                  name: proxima_fecha_pago
+                  type: datetime
