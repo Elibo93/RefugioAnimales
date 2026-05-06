@@ -116,7 +116,10 @@ public class VoluntarioViewController {
             @RequestParam(required = false) Integer idUsuario,
             @RequestParam String disponibilidad,
             @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) String apellido,
             @RequestParam(required = false) String email,
+            @RequestParam(required = false) String dni,
+            @RequestParam(required = false) String telefono,
             @RequestParam(required = false) String contrasena,
             @RequestParam(required = false) String especialidad,
             RedirectAttributes redirectAttributes) {
@@ -125,7 +128,10 @@ public class VoluntarioViewController {
         body.put("disponibilidad", disponibilidad);
         if (idUsuario != null) body.put("usuarioId", idUsuario);
         if (nombre    != null) body.put("nombre",    nombre);
+        if (apellido  != null) body.put("apellido",  apellido);
         if (email     != null) body.put("email",     email);
+        if (dni       != null) body.put("dni",       dni);
+        if (telefono  != null) body.put("telefono",  telefono);
         if (contrasena != null) body.put("contrasena", contrasena);
         if (especialidad != null) body.put("especialidad", especialidad);
 

@@ -8,38 +8,8 @@
 <body>
 
     <div th:fragment="content">
-        <div class="animal-catalog-layout" style="margin-top: 1rem;">
+        <div th:class="${isAdmin ? '' : 'animal-catalog-layout'}" style="margin-top: 1rem;">
             <!-- 1. SIDEBAR PARA ADMINISTRADOR (DISEÑO SIMPLE DE GESTIÓN) -->
-            <aside th:if="${isAdmin}" class="filter-sidebar glass-card"
-                style="width: 260px; padding: 1.5rem; position: sticky; top: 2rem;">
-                <form method="get" action="/web/animales" hx-get="/web/animales" hx-target="#contenido-dinamico">
-                    <div class="filter-group" style="gap: 0.5rem;">
-                        <span class="filter-label" style="font-size: 0.7rem;"><i data-lucide="dog"
-                                style="width: 14px;"></i> Especie</span>
-                        <select name="especie" class="form-select" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
-                            <option value="" th:text="#{animal.filter.any}">Cualquiera</option>
-                            <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="${#strings.capitalize(#strings.toLowerCase(e))}"
-                                th:selected="${selectedEspecie == e}"></option>
-                        </select>
-                    </div>
-                    <div class="filter-group" style="margin-top: 1rem; gap: 0.5rem;">
-                        <span class="filter-label" style="font-size: 0.7rem;"><i data-lucide="maximize-2"
-                                style="width: 14px;"></i> Tamaño</span>
-                        <select name="tamano" class="form-select" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
-                            <option value="" th:text="#{animal.filter.any}">Cualquiera</option>
-                            <option value="PEQUEÑO" th:selected="${selectedTamano == 'PEQUEÑO'}">Pequeño</option>
-                            <option value="MEDIANO" th:selected="${selectedTamano == 'MEDIANO'}">Mediano</option>
-                            <option value="GRANDE" th:selected="${selectedTamano == 'GRANDE'}">Grande</option>
-                        </select>
-                    </div>
-                    <div class="filter-group" style="margin-top: 1.5rem;">
-                        <button type="submit" class="btn btn-primary"
-                            style="width: 100%; justify-content: center; padding: 0.5rem; font-size: 0.9rem;">Filtrar</button>
-                        <a th:href="@{/web/animales}" class="btn btn-secondary"
-                            style="width:100%; justify-content:center; margin-top: 0.5rem; padding: 0.5rem; font-size: 0.9rem;">Limpiar</a>
-                    </div>
-                </form>
-            </aside>
 
             <!-- 2. SIDEBAR PARA USUARIOS (DISEÑO COMPACTO) -->
             <aside th:if="${!isAdmin}" class="filter-sidebar"
@@ -142,25 +112,81 @@
             </aside>
 
             <!-- Main Content Area -->
-            <div class="main-content-area" style="padding: 0 0 0 3rem; flex: 1;">
+            <div class="main-content-area" th:style="${isAdmin ? 'padding: 0; flex: 1;' : 'padding: 0 0 0 3rem; flex: 1;'}">
 
                 <!-- 1. VISTA PREMIUM PARA ADMINISTRADOR (TABLA CENTRADA) -->
                 <div th:if="${isAdmin}" class="table-wrapper"
                     style="background: transparent; border: none; box-shadow: none;">
 
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding: 0 1rem;">
-                        <h2 style="font-weight: 800; color: var(--text-main); margin: 0;" th:text="#{animal.list.title.admin}">Gestión de Animales</h2>
-                        <div style="display: flex; gap: 1rem;">
-                            <a th:href="@{/web/animales/pdf}" target="_blank" class="btn btn-secondary"
-                                style="padding: 0.8rem 1.5rem; border-radius: 15px; font-weight: 700;">
-                                <i data-lucide="download"></i>
-                                PDF
-                            </a>
-                            <a th:href="@{/web/animales/nuevo}" class="btn btn-primary"
-                                style="padding: 0.8rem 2rem; border-radius: 15px; font-weight: 700; box-shadow: 0 10px 20px rgba(45, 157, 88, 0.2);">
-                                <i data-lucide="plus-circle"></i>
-                                Nuevo Animal
+                    <div style="margin-bottom: 2.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                            <h2 style="font-weight: 800; color: var(--text-main); margin: 0; font-size: 1.85rem; letter-spacing: -0.02em;" th:text="#{animal.list.title.admin}">Gestión de Animales</h2>
+                            <div style="display: flex; gap: 0.75rem;">
+                                <a th:href="@{/web/animales/pdf}" target="_blank" class="btn"
+                                    style="padding: 0.7rem 1.25rem; border-radius: 14px; font-weight: 700; background: white; border: 1px solid #e2e8f0; color: #64748b; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm);">
+                                    <i data-lucide="download" style="width: 18px;"></i>
+                                    <span>Exportar</span>
+                                </a>
+                                <a th:href="@{/web/animales/nuevo}" class="btn btn-primary"
+                                    style="padding: 0.7rem 1.5rem; border-radius: 14px; font-weight: 700; box-shadow: 0 10px 20px rgba(45, 157, 88, 0.2); display: flex; align-items: center; gap: 8px;">
+                                    <i data-lucide="plus" style="width: 18px;"></i>
+                                    <span>Nuevo Animal</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Barra de Herramientas Premium Mejorada -->
+                        <div style="background: white; padding: 1rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 1rem; width: 100%;">
+                            
+                            <!-- Buscador con más peso -->
+                            <div style="flex: 3; position: relative;">
+                                <i data-lucide="search" style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); width: 20px; color: #94a3b8; z-index: 10;"></i>
+                                <input type="text" name="q" th:value="${q}"
+                                       placeholder="Buscar por nombre, raza, ID o Chip..." 
+                                       hx-get="/web/animales" hx-trigger="keyup changed delay:300ms" 
+                                       hx-target="#animal-grid-admin" hx-select="#animal-grid-admin"
+                                       hx-swap="outerHTML"
+                                       hx-include="[name='especie'], [name='tamano']"
+                                       style="width: 100%; height: 52px; padding: 0 1.5rem 0 3.25rem; border-radius: 14px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.95rem; transition: all 0.3s; outline: none;">
+                            </div>
+
+                            <!-- Filtro Especie -->
+                            <div style="flex: 1.2; position: relative;">
+                                <i data-lucide="dog" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 18px; color: #94a3b8; z-index: 10;"></i>
+                                <select name="especie" 
+                                        hx-get="/web/animales" hx-trigger="change" 
+                                        hx-target="#animal-grid-admin" hx-select="#animal-grid-admin"
+                                        hx-swap="outerHTML"
+                                        hx-include="[name='q'], [name='tamano']"
+                                        style="width: 100%; height: 52px; padding: 0 2rem 0 2.75rem; border-radius: 14px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; color: var(--text-main); font-weight: 600; cursor: pointer; appearance: none; outline: none;">
+                                    <option value="" th:text="#{animal.filter.any}">Especie: Todas</option>
+                                    <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="${#strings.capitalize(#strings.toLowerCase(e))}" th:selected="${selectedEspecie == e}"></option>
+                                </select>
+                                <i data-lucide="chevron-down" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); width: 16px; color: #94a3b8; pointer-events: none;"></i>
+                            </div>
+
+                            <!-- Filtro Tamaño -->
+                            <div style="flex: 1.2; position: relative;">
+                                <i data-lucide="maximize-2" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 18px; color: #94a3b8; z-index: 10;"></i>
+                                <select name="tamano" 
+                                        hx-get="/web/animales" hx-trigger="change" 
+                                        hx-target="#animal-grid-admin" hx-select="#animal-grid-admin"
+                                        hx-swap="outerHTML"
+                                        hx-include="[name='q'], [name='especie']"
+                                        style="width: 100%; height: 52px; padding: 0 2rem 0 2.75rem; border-radius: 14px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; color: var(--text-main); font-weight: 600; cursor: pointer; appearance: none; outline: none;">
+                                    <option value="" th:text="#{animal.filter.any}">Tamaño: Todos</option>
+                                    <option value="PEQUEÑO" th:selected="${selectedTamano == 'PEQUEÑO'}">Pequeño</option>
+                                    <option value="MEDIANO" th:selected="${selectedTamano == 'MEDIANO'}">Mediano</option>
+                                    <option value="GRANDE" th:selected="${selectedTamano == 'GRANDE'}">Grande</option>
+                                </select>
+                                <i data-lucide="chevron-down" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); width: 16px; color: #94a3b8; pointer-events: none;"></i>
+                            </div>
+
+                            <!-- Botón Limpiar -->
+                            <a th:href="@{/web/animales}" hx-get="/web/animales" hx-target="#contenido-dinamico" hx-push-url="true"
+                               style="display: flex; align-items: center; justify-content: center; min-width: 52px; height: 52px; background: #fff1f2; color: #ef4444; border-radius: 14px; transition: all 0.2s; border: 1px solid #fee2e2;" 
+                               title="Limpiar Filtros">
+                                <i data-lucide="rotate-ccw" style="width: 20px;"></i>
                             </a>
                         </div>
                     </div>

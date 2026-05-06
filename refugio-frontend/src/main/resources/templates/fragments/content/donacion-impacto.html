@@ -2,8 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="impact">
-    <!-- Hero Section -->
-    <div class="donation-hero">
+    <!-- Hero Section (Sólo usuarios) -->
+    <div class="donation-hero" th:if="${!isAdmin}">
         <div class="donation-hero-image">
             <img th:src="@{/images/donation_hero.png}" alt="Rescued Animals">
         </div>
@@ -17,8 +17,8 @@
         </div>
     </div>
 
-    <!-- Impact Grid -->
-    <div class="impact-grid">
+    <!-- Impact Grid (Sólo usuarios) -->
+    <div class="impact-grid" th:if="${!isAdmin}">
         <div class="impact-card glass-panel">
             <span class="impact-icon">🦴</span>
             <span class="impact-amount">10€</span>
@@ -57,8 +57,8 @@
         </div>
     </div>
 
-    <!-- Testimonials -->
-    <div class="testimonial-section">
+    <!-- Testimonials (Sólo usuarios) -->
+    <div class="testimonial-section" th:if="${!isAdmin}">
         <div class="testimonial-card">
             <p class="testimonial-quote">"Gracias a las donaciones, pudieron operar a mi perro antes de que yo lo conociera. Ahora es el miembro más feliz de la familia."</p>
             <div class="testimonial-author">

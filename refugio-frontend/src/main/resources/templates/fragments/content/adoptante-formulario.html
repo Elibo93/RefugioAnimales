@@ -1,106 +1,165 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
-
 <head>
     <meta charset="UTF-8">
 </head>
-
 <body>
     <div th:fragment="content">
-
-        <div class="page-header" style="text-align:center; margin-bottom: 2rem;">
-            <h1 class="page-title" style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-                <div class="premium-modal-icon-wrapper" style="margin: 0; width: 48px; height: 48px; background: #e0f2fe; color: #0369a1;">
-                    <i data-lucide="home"></i>
-                </div>
+        <!-- HEADER PREMIUM -->
+        <div class="page-header" style="text-align:center; margin-bottom: 3rem; animation: fadeInDown 0.5s ease-out;">
+            <div class="premium-modal-icon-wrapper" style="margin: 0 auto 1.5rem; width: 64px; height: 64px; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); color: #0369a1; border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(3, 105, 161, 0.1);">
+                <i data-lucide="award" style="width: 32px; height: 32px;"></i>
+            </div>
+            <h1 class="page-title" style="font-size: 2.25rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.75rem;">
                 <span th:text="${adoptante.get('id') == null ? #messages.msg('adoptante.form.title') : #messages.msg('adoptante.modal.edit.title')}">Registrar Adoptante</span>
             </h1>
-            <p style="color:var(--text-muted); margin-top:0.5rem;" 
+            <p style="color:var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto;" 
                th:text="${adoptante.get('id') == null ? #messages.msg('adoptante.form.subtitle.create') : #messages.msg('adoptante.form.subtitle.edit')}">
                 Cree manualmente un perfil de adoptante
             </p>
         </div>
 
-        <div class="card" style="max-width:800px; margin:0 auto;">
-            <form id="adoptanteForm" 
-                  th:action="${adoptante.get('id') == null ? '/web/adoptantes/nuevo' : '/web/adoptantes/' + adoptante.get('id') + '/editar'}" 
-                  method="post">
+        <div style="max-width: 800px; margin: 0 auto; padding-bottom: 5rem;">
+            <div class="card" style="padding: 2.5rem; border-radius: 24px; border: 1px solid var(--border); background: white; box-shadow: var(--shadow-xl);">
+                <form id="adoptanteForm" 
+                      th:action="${adoptante.get('id') == null ? '/web/adoptantes/nuevo' : '/web/adoptantes/' + adoptante.get('id') + '/editar'}" 
+                      method="post">
 
-                <input type="hidden" name="usuarioId" th:value="${adoptante.get('usuarioId')}">
+                    <input type="hidden" name="usuarioId" th:value="${adoptante.get('usuarioId')}">
 
-                <!-- Datos del Usuario (Solo lectura en edición) -->
-                <div th:if="${adoptante.get('id') != null}" class="form-group" style="margin-bottom: 2rem; padding: 1.5rem; background: rgba(var(--primary-rgb), 0.05); border-radius: 16px; display: flex; align-items: center; gap: 1rem;">
-                    <div style="background: var(--primary); color: white; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                        <i data-lucide="user"></i>
+                    <!-- SECCIÓN 1: USUARIO VINCULADO -->
+                    <div class="form-section" style="margin-bottom: 2.5rem;">
+                        <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="user-check" style="width: 18px;"></i>
+                            Identidad del Usuario
+                        </h2>
+
+                        <!-- Vista Edición: Solo lectura -->
+                        <div th:if="${adoptante.get('id') != null}" style="padding: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.5rem;">
+                            <div style="background: white; color: var(--primary); width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0;">
+                                <i data-lucide="user" style="width: 28px;"></i>
+                            </div>
+                            <div>
+                                <span style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 2px; font-weight: 600; text-transform: uppercase;">Adoptante Vinculado</span>
+                                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-main);" th:text="${nombreCompleto}">Nombre del Adoptante</h3>
+                            </div>
+                        </div>
+
+                        <!-- Vista Creación: Buscador Inteligente -->
+                        <div th:if="${adoptante.get('id') == null}" class="form-group" style="position: relative;">
+                            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">
+                                <i data-lucide="search" style="width: 18px; color: var(--primary);"></i>
+                                Buscar Usuario
+                            </label>
+                            <div style="position: relative;">
+                                <input type="text" id="user-search" 
+                                        name="q"
+                                        class="form-control"
+                                        placeholder="Nombre, email o ID..." 
+                                        autocomplete="off"
+                                        hx-get="/web/personas/buscar?context=adoptante"
+                                        hx-trigger="keyup changed delay:300ms, focus"
+                                        hx-target="#user-suggestions"
+                                        style="width: 100%; height: 54px; padding-left: 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; transition: all 0.3s;">
+                                <input type="hidden" name="usuarioId" id="usuarioId-input" required th:value="${param.usuarioId}">
+                            </div>
+                            <div id="user-suggestions" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 100;"></div>
+                            <p style="font-size:0.85rem; color:var(--text-muted); margin-top: 0.75rem; display: flex; align-items: center; gap: 6px;">
+                                <i data-lucide="info" style="width: 14px;"></i>
+                                El usuario debe estar registrado en el sistema antes de convertirlo en adoptante.
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Adoptante</p>
-                        <h3 style="margin: 0; font-weight: 800; color: var(--text-main);" th:text="${nombreCompleto}">Nombre del Adoptante</h3>
+
+                    <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 2rem 0;">
+
+                    <!-- SECCIÓN 2: DATOS LEGALES -->
+                    <div class="form-section">
+                        <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="file-text" style="width: 18px;"></i>
+                            Información Legal y Contacto
+                        </h2>
+
+                        <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                    <i data-lucide="id-card" style="width: 16px; color: #64748b;"></i>
+                                    DNI / NIE
+                                </label>
+                                <input type="text" name="dni" required placeholder="12345678A"
+                                       th:value="${adoptante.get('dni')}"
+                                       th:readonly="${adoptante.get('id') != null}"
+                                       th:style="${adoptante.get('id') != null ? 'width: 100%; background: #f1f5f9; cursor: not-allowed; border-color: #e2e8f0;' : 'width: 100%; border-radius: 12px; height: 48px;'}"
+                                       class="form-control"
+                                       pattern="([0-9]{8}[A-Z])|([XYZ][0-9]{7}[A-Z])" 
+                                       title="Debe ser un DNI (12345678A) o NIE (X1234567G) válido">
+                            </div>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                    <i data-lucide="calendar" style="width: 16px; color: #64748b;"></i>
+                                    Fecha de Nacimiento
+                                </label>
+                                <input type="date" name="fechaNacimiento" required
+                                       th:value="${adoptante.get('fechaNacimiento')}"
+                                       th:readonly="${adoptante.get('id') != null}"
+                                       th:style="${adoptante.get('id') != null ? 'background: #f1f5f9; cursor: not-allowed; border-color: #e2e8f0;' : 'border-radius: 12px; height: 48px;'}"
+                                       class="form-control"
+                                       th:max="${#calendars.format(#calendars.create(#calendars.year(#calendars.createNow()) - 18, #calendars.month(#calendars.createNow()), #calendars.day(#calendars.createNow())), 'yyyy-MM-dd')}">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                <i data-lucide="map-pin" style="width: 16px; color: #64748b;"></i>
+                                Dirección Completa
+                            </label>
+                            <input type="text" name="direccion" required placeholder="Calle, Portal, Piso, Código Postal y Ciudad"
+                                   th:value="${adoptante.get('direccion')}"
+                                   class="form-control"
+                                   style="width: 100%; border-radius: 12px; height: 48px;">
+                        </div>
+
+                        <div th:if="${isAdmin and adoptante.get('id') != null}" class="form-group" style="margin-bottom: 1.5rem;">
+                            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                <i data-lucide="shield-check" style="width: 16px; color: #64748b;"></i>
+                                Estado de Validación
+                            </label>
+                            <select name="estadoValidacion" class="form-control" style="width: 100%; border-radius: 12px; height: 48px;">
+                                <option th:each="e : ${estados}" th:value="${e}" th:text="${e}" th:selected="${e == adoptante.get('estadoValidacion')}"></option>
+                            </select>
+                        </div>
                     </div>
-                </div>
 
-                <div th:if="${adoptante.get('id') == null}" class="form-group" style="margin-bottom:1.5rem; position: relative;">
-                    <label>Introduzca un usuario</label>
-                    <div style="position: relative;">
-                        <input type="text" id="user-search" 
-                                name="q"
-                                class="form-control"
-                                placeholder="Nombre, apellido, ID, teléfono o correo..." 
-                                autocomplete="off"
-                                hx-get="/web/personas/buscar?context=adoptante"
-                                hx-trigger="keyup changed delay:500ms"
-                                hx-target="#user-suggestions">
-                        <input type="hidden" name="usuarioId" id="usuarioId-input" required th:value="${param.usuarioId}">
+                    <!-- ACCIONES -->
+                    <div class="modal-actions" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #f1f5f9; display: flex; gap: 1rem; justify-content: flex-end;">
+                        <a th:href="@{/web/adoptantes}" class="btn btn-outline" style="border-radius: 14px; padding: 0.75rem 2rem; font-weight: 600; color: #64748b; border: 2px solid #e2e8f0; transition: all 0.2s;">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="btn-submit" style="border-radius: 14px; padding: 0.75rem 2.5rem; font-weight: 700; background: var(--primary); border: none; box-shadow: 0 4px 6px -1px rgba(var(--primary-rgb), 0.2); display: flex; align-items: center; gap: 10px;">
+                            <i data-lucide="save" style="width: 20px;"></i>
+                            <span id="btn-text" th:text="${adoptante.get('id') == null ? #messages.msg('generic.btn.create') : #messages.msg('generic.btn.save')}">Registrar Adoptante</span>
+                        </button>
                     </div>
-                    <div id="user-suggestions" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 100;"></div>
-                    <p style="font-size:0.85rem; color:var(--text-muted); margin-top: 0.5rem;">El usuario debe existir previamente en el sistema.</p>
-                </div>
-
-                <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
-                    <div class="form-group">
-                        <label>DNI / NIE</label>
-                        <input type="text" name="dni" required placeholder="12345678A"
-                               th:value="${adoptante.get('dni')}"
-                               th:readonly="${adoptante.get('id') != null}"
-                               th:style="${adoptante.get('id') != null ? 'background: rgba(0,0,0,0.02); cursor: not-allowed;' : ''}"
-                               pattern="([0-9]{8}[A-Z])|([XYZ][0-9]{7}[A-Z])" 
-                               title="Debe ser un DNI (12345678A) o NIE (X1234567G) válido">
-                    </div>
-                    <div class="form-group">
-                        <label>Fecha de Nacimiento</label>
-                        <input type="date" name="fechaNacimiento" required
-                               th:value="${adoptante.get('fechaNacimiento')}"
-                               th:readonly="${adoptante.get('id') != null}"
-                               th:style="${adoptante.get('id') != null ? 'background: rgba(0,0,0,0.02); cursor: not-allowed;' : ''}"
-                               th:max="${#calendars.format(#calendars.create(#calendars.year(#calendars.createNow()) - 18, #calendars.month(#calendars.createNow()), #calendars.day(#calendars.createNow())), 'yyyy-MM-dd')}">
-                        <p th:if="${adoptante.get('id') == null}" style="font-size:0.75rem; color:var(--text-muted); margin-top:0.25rem;">Debe ser mayor de 18 años.</p>
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label>Dirección</label>
-                    <input type="text" name="direccion" required placeholder="Calle Ejemplo, Portal 2, Piso 4C, 28001 Madrid"
-                           th:value="${adoptante.get('direccion')}">
-                </div>
-
-                <div th:if="${isAdmin and adoptante.get('id') != null}" class="form-group" style="margin-bottom: 1.5rem;">
-                    <label>Estado de Validación</label>
-                    <select name="estadoValidacion" class="form-control">
-                        <option th:each="e : ${estados}" th:value="${e}" th:text="${e}" th:selected="${e == adoptante.get('estadoValidacion')}"></option>
-                    </select>
-                </div>
-
-                <div class="modal-actions" style="margin-top:2rem;">
-                    <a th:href="@{/web/adoptantes}" class="btn btn-secondary" style="justify-content:center;">Cancelar</a>
-                    <button type="submit" class="btn btn-primary" id="btn-submit" style="justify-content:center;">
-                        <i data-lucide="check-circle"></i>
-                        <span id="btn-text" th:text="${adoptante.get('id') == null ? #messages.msg('generic.btn.create') : #messages.msg('generic.btn.save')}">Registrar Adoptante</span>
-                    </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
+        
+        <script>
+            if (window.lucide) {
+                lucide.createIcons();
+            }
 
+            function selectUser(userId, userName, alreadyRegistered, adoptanteId) {
+                if (alreadyRegistered) {
+                    alert('Este usuario ya está registrado como adoptante.');
+                    return;
+                }
+                
+                document.getElementById('usuarioId-input').value = userId;
+                document.getElementById('user-search').value = userName;
+                document.getElementById('user-suggestions').innerHTML = '';
+            }
+        </script>
     </div>
 </body>
-
 </html>

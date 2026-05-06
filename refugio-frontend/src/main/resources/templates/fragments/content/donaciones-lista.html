@@ -1,75 +1,107 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
-
-<head>
-    <meta charset="UTF-8">
-</head>
-
 <body>
     <div th:fragment="content">
-        <!-- Impact Section at the top -->
+        <!-- Impact Section (Ahora filtrado dentro del fragmento para admin/user) -->
         <div th:replace="~{fragments/content/donacion-impacto :: impact}"></div>
 
-        <!-- Integrated Donation Form -->
-        <div th:replace="~{fragments/content/donacion-formulario :: content}"></div>
+        <!-- Integrated Donation Form (Oculto para admin para una vista de lista pura) -->
+        <div th:if="${isAdmin == null or !isAdmin}" th:replace="~{fragments/content/donacion-formulario :: content}"></div>
 
-        <div class="table-wrapper glass-panel" style="margin-top: 4rem; padding: 3rem; border-radius: 24px;"
-            th:if="${isAdmin}">
-            <div class="actions-bar" style="background:transparent; border-bottom: none; padding-bottom: 2rem;">
-                <h2 style="font-size: 2rem; font-weight: 800; color: var(--text-main);"
-                    th:text="#{donacion.list.title}">Donaciones Recientes</h2>
-                <div style="display:flex; gap:10px;">
-                    <a class="btn btn-secondary" th:href="@{/web/donaciones/pdf}" target="_blank"
-                        th:text="#{generic.link.export.pdf}" th:if="${isVoluntario}">
-                        Exportar PDF
+        <!-- Panel de Lista para Admin -->
+        <div class="table-wrapper" style="margin-top: 2rem; padding: 2rem; background: transparent; border: none; box-shadow: none;" th:if="${isAdmin}">
+            
+            <!-- Cabecera de Auditoría -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h2 style="font-weight: 800; color: var(--text-main); margin: 0; font-size: 1.85rem; letter-spacing: -0.02em;" th:text="#{donacion.list.title}">Registro de Donaciones</h2>
+                    <p style="color: var(--text-muted); margin-top: 0.25rem;">Historial completo e inmutable de aportaciones al refugio</p>
+                </div>
+                <div style="display: flex; gap: 0.75rem;">
+                    <a th:href="@{/web/donaciones/pdf}" target="_blank" class="btn"
+                        style="padding: 0.7rem 1.25rem; border-radius: 14px; font-weight: 700; background: white; border: 1px solid #e2e8f0; color: #64748b; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm);">
+                        <i data-lucide="download" style="width: 18px;"></i>
+                        <span>Exportar Informe</span>
                     </a>
                 </div>
             </div>
-            <table id="tabladonaciones">
+
+            <!-- Tabla Premium Read-Only -->
+            <table style="width: 100%; border-collapse: separate; border-spacing: 0 12px; table-layout: fixed;">
                 <thead>
-                    <tr>
-                        <th th:text="#{donacion.table.header.usuario}">Donante</th>
-                        <th th:text="#{donacion.field.tipo}">Tipo</th>
-                        <th th:text="#{donacion.field.cantidad}">Cantidad</th>
-                        <th th:text="#{donacion.table.header.fecha}">Fecha</th>
-                        <th th:text="#{donacion.field.descripcion}">Descripción</th>
-                        <th th:text="#{animal.table.header.action}" th:if="${isVoluntario}">
-                            Acción</th>
+                    <tr style="background: transparent;">
+                        <th style="padding: 0 1.5rem 0.75rem; text-align: left; font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; width: 25%;">Donante</th>
+                        <th style="padding: 0 1rem 0.75rem; text-align: center; font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; width: 15%;">Tipo</th>
+                        <th style="padding: 0 1rem 0.75rem; text-align: center; font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; width: 15%;">Cantidad</th>
+                        <th style="padding: 0 1rem 0.75rem; text-align: center; font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; width: 20%;">Fecha</th>
+                        <th style="padding: 0 1.5rem 0.75rem; text-align: left; font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; width: 25%;">Descripción</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="d : ${donaciones}" th:id="'row-' + ${d.get('id')}">
-                        <td style="font-weight:600;color:var(--primary);"
-                            th:with="u=${d.get('usuarioId') != null and usuariosMap != null ? usuariosMap[d.get('usuarioId')] : null}"
-                            th:text="${u != null ? (u.get('nombre') + (u.get('apellido') != null ? ' ' + u.get('apellido') : '')) : 'Donante Anónimo'}">
-                            Usuario
+                    <tr th:each="d : ${donaciones}" style="background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.02); border-radius: 16px; transition: transform 0.2s;">
+                        <!-- Donante -->
+                        <td style="padding: 1.25rem 1.5rem; border-radius: 16px 0 0 16px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 36px; height: 36px; border-radius: 50%; background: #f1f5f9; color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
+                                    <i data-lucide="user" style="width: 16px;"></i>
+                                </div>
+                                <div th:with="u=${d.get('usuarioId') != null and usuariosMap != null ? usuariosMap[d.get('usuarioId')] : null}">
+                                    <span style="display: block; font-weight: 700; color: var(--text-main); font-size: 0.95rem;" 
+                                          th:text="${u != null ? (u.get('nombre') + (u.get('apellido') != null ? ' ' + u.get('apellido') : '')) : 'Donante Anónimo'}"></span>
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);" th:text="${u != null ? u.get('email') : 'Sin email'}"></span>
+                                </div>
+                            </div>
                         </td>
-                        <td th:text="${d.get('tipo') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(d.get('tipo'), '_', ' '))) : ''}">DINERO</td>
-                        <td th:text="${d.get('cantidad')}">100.0</td>
-                        <td
-                            th:text="${d.get('fecha') != null ? d.get('fecha').toString().replace('T', ' ').substring(0, (d.get('fecha').toString().length() > 16 ? 16 : d.get('fecha').toString().length())) : '-'}">
-                            01/01/2024</td>
-                        <td th:text="${d.get('descripcion')}">Descripción</td>
-                        <td style="display:flex; gap:8px;" th:if="${isVoluntario}">
-                            <a class="btn-icon" th:href="@{/web/donaciones/{id}/editar(id=${d.get('id')})}">
-                                <i data-lucide="edit-2" style="width:16px;"></i>
-                            </a>
-                            <button class="btn-icon delete"
-                                th:hx-post="@{/web/donaciones/{id}/borrar(id=${d.get('id')})}"
-                                th:hx-target="'#row-' + ${d.get('id')}" hx-swap="outerHTML swap:0.3s"
-                                hx-confirm="¿Eliminar donación?">
-                                <i data-lucide="trash-2" style="width:16px;"></i>
-                            </button>
+
+                        <!-- Tipo -->
+                        <td style="padding: 1.25rem 1rem; text-align: center;">
+                            <span th:with="tipo=${d.get('tipo')}"
+                                  th:style="'padding: 6px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; ' + 
+                                            (${tipo == 'DINERO'} ? 'background: #ecfdf5; color: #059669;' : 
+                                             (${tipo == 'COMIDA'} ? 'background: #fff7ed; color: #ea580c;' : 'background: #f1f5f9; color: #64748b;'))"
+                                  th:text="${tipo != null ? #strings.replace(tipo, '_', ' ') : '-'}">
+                            </span>
+                        </td>
+
+                        <!-- Cantidad -->
+                        <td style="padding: 1.25rem 1rem; text-align: center;">
+                            <span style="font-weight: 800; color: var(--text-main); font-size: 1rem;" th:text="${d.get('cantidad')} + ' €'"></span>
+                        </td>
+
+                        <!-- Fecha -->
+                        <td style="padding: 1.25rem 1rem; text-align: center;">
+                            <div style="display: flex; flex-direction: column; align-items: center;">
+                                <span style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;" 
+                                      th:text="${d.get('fecha') != null ? #strings.substring(d.get('fecha').toString().replace('T', ' '), 0, 10) : '-'}"></span>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);" 
+                                      th:text="${d.get('fecha') != null ? #strings.substring(d.get('fecha').toString().replace('T', ' '), 11, 16) : ''}"></span>
+                            </div>
+                        </td>
+
+                        <!-- Descripción -->
+                        <td style="padding: 1.25rem 1.5rem; border-radius: 0 16px 16px 0;">
+                            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;" th:text="${d.get('descripcion')} ?: 'Sin descripción'"></p>
                         </td>
                     </tr>
                 </tbody>
             </table>
-            <div th:if="${#lists.isEmpty(donaciones)}" style="text-align:center;padding:3rem;color:var(--text-muted);">
-                <i data-lucide="inbox" style="width:48px; height:48px; margin-bottom:1rem; opacity:0.5;"></i>
-                <p th:text="#{donacion.list.empty}">No hay donaciones registradas.</p>
+
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(donaciones)}" style="text-align: center; padding: 5rem 2rem; background: white; border-radius: 24px; border: 2px dashed #e2e8f0;">
+                <div style="width: 64px; height: 64px; background: #f8fafc; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                    <i data-lucide="inbox" style="width: 32px; height: 32px; color: #cbd5e1;"></i>
+                </div>
+                <h3 style="font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">No hay donaciones registradas</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">El historial de aportaciones aparecerá aquí una vez se realicen donaciones.</p>
             </div>
         </div>
+
+        <!-- Script para iconos -->
+        <script th:if="${isAdmin}">
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        </script>
     </div>
 </body>
-
 </html>
