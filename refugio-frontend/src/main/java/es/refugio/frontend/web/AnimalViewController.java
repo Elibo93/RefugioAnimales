@@ -53,12 +53,14 @@ public class AnimalViewController {
                         String nombre = a.get("nombre") != null ? a.get("nombre").toString().toLowerCase() : "";
                         String especie = a.get("especie") != null ? a.get("especie").toString().toLowerCase() : "";
                         String raza = a.get("raza") != null ? a.get("raza").toString().toLowerCase() : "";
+                        String chipId = a.get("chipId") != null ? a.get("chipId").toString().toLowerCase() : "";
+                        String id = a.get("id") != null ? a.get("id").toString().toLowerCase() : "";
                         String estado = a.get("estado") != null ? a.get("estado").toString() : "";
                         
                         // Solo sugerimos animales que se pueden adoptar
                         boolean esApto = estado.equals("DISPONIBLE") || estado.equals("EN_TRATAMIENTO") || estado.equals("EN_ACOGIDA");
                         
-                        return esApto && (nombre.contains(search) || especie.contains(search) || raza.contains(search));
+                        return esApto && (nombre.contains(search) || especie.contains(search) || raza.contains(search) || chipId.contains(search) || id.contains(search));
                     })
                     .limit(10) // Limitamos a 10 para que sea rápido
                     .toList();
@@ -86,6 +88,7 @@ public class AnimalViewController {
             @RequestParam(required = false) List<String> edad,
             @RequestParam(required = false) String sexo,
             @RequestParam(required = false) Boolean urgencia,
+            @RequestParam(required = false) String q,
             HttpServletRequest request) {
 
         try {
@@ -104,9 +107,25 @@ public class AnimalViewController {
             if (edad != null)
                 edad.forEach(e -> url.append("edad=").append(e).append("&"));
 
-            Object[] animales = restTemplate.getForObject(url.toString(), Object[].class);
-            model.addAttribute(ModelAttribute.Animal_LIST.getName(),
-                    animales != null ? Arrays.asList(animales) : List.of());
+            Object[] arr = restTemplate.getForObject(url.toString(), Object[].class);
+            List<Map<String, Object>> animalesList = arr != null ? (List) Arrays.asList(arr) : List.of();
+
+            // Filtro por búsqueda de texto (q)
+            if (q != null && !q.trim().isEmpty()) {
+                String search = q.toLowerCase().trim();
+                animalesList = animalesList.stream()
+                    .filter(a -> {
+                        String nombre = a.get("nombre") != null ? a.get("nombre").toString().toLowerCase() : "";
+                        String especieA = a.get("especie") != null ? a.get("especie").toString().toLowerCase() : "";
+                        String raza = a.get("raza") != null ? a.get("raza").toString().toLowerCase() : "";
+                        String chipId = a.get("chipId") != null ? a.get("chipId").toString().toLowerCase() : "";
+                        String idStr = a.get("id") != null ? a.get("id").toString().toLowerCase() : "";
+                        return nombre.contains(search) || especieA.contains(search) || raza.contains(search) || chipId.contains(search) || idStr.contains(search);
+                    })
+                    .toList();
+            }
+
+            model.addAttribute(ModelAttribute.Animal_LIST.getName(), animalesList);
         } catch (Exception e) {
             model.addAttribute(ModelAttribute.Animal_LIST.getName(), List.of());
         }
@@ -135,6 +154,7 @@ public class AnimalViewController {
         model.addAttribute("selectedEdad", edad);
         model.addAttribute("selectedSexo", sexo);
         model.addAttribute("selectedUrgencia", urgencia);
+        model.addAttribute("q", q);
 
         if (successMessage != null)
             model.addAttribute("successMessage", successMessage);

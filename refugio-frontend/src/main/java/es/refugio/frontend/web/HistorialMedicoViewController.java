@@ -114,6 +114,19 @@ public class HistorialMedicoViewController {
         Object historial = restTemplate.getForObject(apiUrl + "/v1/historial-medico/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Historial.getName(), historial);
         model.addAttribute("animales", fetchList("/v1/animales"));
+
+        // Cargar datos del animal para el selector inteligente
+        if (historial instanceof Map) {
+            Object animalId = ((Map<?, ?>) historial).get("animalId");
+            if (animalId != null) {
+                try {
+                    Object animalData = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
+                    model.addAttribute("animalData", animalData);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         
         if ("true".equals(request.getHeader("HX-Request"))) {
             return FragmentoContenido.Historial_FORM.getPath() + " :: content";

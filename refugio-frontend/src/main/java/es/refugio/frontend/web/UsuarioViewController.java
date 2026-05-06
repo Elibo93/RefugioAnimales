@@ -298,7 +298,6 @@ public class UsuarioViewController {
 
         List<Object> todos = fetchList(authUrl + "/v1/usuarios");
         String query = q.toLowerCase();
-        System.out.println("DEBUG: Buscando usuarios con query: " + query + " y contexto: " + context);
         
         // Obtener lista de IDs ya registrados según el contexto
         List<Map<String, Object>> filtrados;
@@ -356,7 +355,13 @@ public class UsuarioViewController {
                     if ("solicitud".equalsIgnoreCase(context)) {
                         copy.put("adoptanteId", aId);
                         copy.put("yaRegistrado", false); // Siempre seleccionable
+                    } else if ("adopcion".equalsIgnoreCase(context)) {
+                        copy.put("adoptanteId", aId);
+                        // En adopción, queremos que SE PUEDA seleccionar si ya es adoptante
+                        // Por tanto yaRegistrado debe ser false para que el JS no bloquee la selección
+                        copy.put("yaRegistrado", false); 
                     } else {
+                        // Contexto 'adoptante' (crear nuevo): bloqueamos si ya existe
                         copy.put("adoptanteId", aId);
                         copy.put("yaRegistrado", aId != null);
                     }
@@ -392,25 +397,28 @@ public class UsuarioViewController {
     }
 
     private boolean matchesQuery(Map<String, Object> user, String query) {
+        String q = query.trim().toLowerCase();
         String id = String.valueOf(user.get("id"));
         String nombre = String.valueOf(user.get("nombre")).toLowerCase();
         String apellido = String.valueOf(user.get("apellido")).toLowerCase();
         String email = String.valueOf(user.get("email")).toLowerCase();
         String telefono = String.valueOf(user.get("telefono")).toLowerCase();
         
-        return id.contains(query) || 
-               nombre.contains(query) || 
-               apellido.contains(query) || 
-               email.contains(query) || 
-               telefono.contains(query);
+        return id.contains(q) || 
+               nombre.contains(q) || 
+               apellido.contains(q) || 
+               email.contains(q) || 
+               telefono.contains(q);
     }
 
     private List<Object> fetchList(String path) {
+        String finalUrl = path.startsWith("http") ? path : apiUrl + path;
         try {
-            // Si el path ya es absoluto (empieza por http), no prependemos apiUrl.
-            String finalUrl = path.startsWith("http") ? path : apiUrl + path;
             Object[] arr = restTemplate.getForObject(finalUrl, Object[].class);
             return arr != null ? Arrays.asList(arr) : List.of();
-        } catch (Exception e) { return List.of(); }
+        } catch (Exception e) { 
+            System.err.println("ERROR: Fallo al conectar con " + finalUrl + ": " + e.getMessage());
+            return List.of(); 
+        }
     }
 }
