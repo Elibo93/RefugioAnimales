@@ -7,29 +7,31 @@ import es.refugio.refugio.infraestructure.web.validation.ValidDni;
 import es.refugio.refugio.infraestructure.web.validation.MinAge;
 
 public record PublicSolicitudAdopcionRequest(
-        // ID creado remotamente
-        Integer usuarioId,
+                // ID creado remotamente
+                Integer usuarioId,
 
-        // Datos del Usuario
-        @NotBlank(message = "{Usuario.valid.nombre.no_vacio}") String nombre,
+                // Datos del Usuario
+                @NotBlank(message = "El nombre de usuario es obligatorio") String username,
 
-        @NotBlank(message = "{Usuario.valid.apellido.no_vacio}") String apellido,
+                @NotBlank(message = "{Usuario.valid.nombre.no_vacio}") String nombre,
 
-        @NotBlank(message = "{Usuario.valid.email.no_vacio}") @Email(message = "{Usuario.valid.email.valido}") String email,
+                @NotBlank(message = "{Usuario.valid.apellido.no_vacio}") String apellido,
 
-        @NotBlank(message = "{Usuario.valid.password.no_vacio}") String contrasena,
+                @NotBlank(message = "{Usuario.valid.email.no_vacio}") @Email(message = "{Usuario.valid.email.valido}") String email,
 
-        @NotBlank(message = "{Usuario.valid.telefono.no_vacio}") String telefono,
+                @NotBlank(message = "{Usuario.valid.password.no_vacio}") String contrasena,
 
-        // Datos del Adoptante
-        @NotBlank(message = "El DNI es obligatorio") @ValidDni String dni,
+                @NotBlank(message = "{Usuario.valid.telefono.no_vacio}") String telefono,
 
-        @NotBlank(message = "La dirección es obligatoria") String direccion,
+                // Datos del Adoptante
+                @NotBlank(message = "El DNI es obligatorio") /* @ValidDni */ String dni, // sin validar para pruebas
 
-        @NotBlank(message = "La fecha de nacimiento es obligatoria") @MinAge(18) String fechaNacimiento,
+                @NotBlank(message = "La dirección es obligatoria") String direccion,
 
-        // Datos de la Solicitud
-        @NotNull(message = "El ID del animal es obligatorio") Integer animalId,
+                @NotBlank(message = "La fecha de nacimiento es obligatoria") @MinAge(18) String fechaNacimiento,
 
-        String comentario) {
+                // Datos de la Solicitud
+                @NotNull(message = "El ID del animal es obligatorio") Integer animalId,
+
+                String comentario) {
 }

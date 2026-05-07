@@ -26,7 +26,7 @@
                         Solicitado el <span th:text="${#strings.substring(s.get('fecha'), 0, 10)}">2024-01-01</span>
                     </p>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span class="status-badge" th:classappend="${'badge-' + s.get('status').toString().toLowerCase()}" th:text="${s.get('status')}">
+                        <span class="status-badge" th:classappend="${'badge-' + s.get('estado').toString().toLowerCase()}" th:text="${s.get('estado')}">
                             PENDIENTE
                         </span>
                         <a th:href="@{/web/animales/{id}(id=${s.get('animalId')})}" class="btn-text" style="color: var(--primary); font-weight: 700; text-decoration: none; font-size: 0.9rem;">

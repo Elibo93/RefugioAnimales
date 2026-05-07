@@ -129,18 +129,15 @@ public class SolicitudAdopcionViewController {
         
         Integer currentUserId = (userIdObj instanceof Number) ? ((Number) userIdObj).intValue() : Integer.parseInt(userIdObj.toString());
 
-        // 2. Buscar perfil de adoptante para este usuario
-        List<Object> adoptantes = fetchList("/v1/adoptantes");
+        // 2. Buscar perfil de adoptante para este usuario usando el endpoint específico por usuarioId
         Integer adoptanteId = null;
-        for (Object obj : adoptantes) {
-            if (obj instanceof Map) {
-                Map<String, Object> a = (Map<String, Object>) obj;
-                Object uid = a.get("usuarioId");
-                if (uid != null && ((Number) uid).intValue() == currentUserId) {
-                    adoptanteId = ((Number) a.get("id")).intValue();
-                    break;
-                }
+        try {
+            Map<String, Object> adoptante = restTemplate.getForObject(apiUrl + "/v1/adoptantes/usuario/" + currentUserId, Map.class);
+            if (adoptante != null && adoptante.get("id") != null) {
+                adoptanteId = ((Number) adoptante.get("id")).intValue();
             }
+        } catch (Exception e) {
+            logger.warn("El usuario " + currentUserId + " no tiene un perfil de adoptante activo.");
         }
 
         // 3. Filtrar solicitudes si existe el adoptante
@@ -428,6 +425,9 @@ public class SolicitudAdopcionViewController {
 
     @PostMapping(WebRoutes.SOLICITUDES_CONVERTIR)
     public String procesarConversionYAdopcion(
+            @RequestParam String nombre,
+            @RequestParam String apellido,
+            @RequestParam String telefono,
             @RequestParam String dni,
             @RequestParam String direccion,
             @RequestParam String fechaNacimiento,
@@ -438,6 +438,9 @@ public class SolicitudAdopcionViewController {
             Model model) {
 
         Map<String, Object> body = new HashMap<>();
+        body.put("nombre", nombre);
+        body.put("apellido", apellido);
+        body.put("telefono", telefono);
         body.put("dni", dni);
         body.put("direccion", direccion);
         body.put("fechaNacimiento", fechaNacimiento);
@@ -472,6 +475,9 @@ public class SolicitudAdopcionViewController {
                 model.addAttribute("animal", Map.of("id", animalId, "nombre", "Animal"));
             }
             
+            model.addAttribute("nombre", nombre);
+            model.addAttribute("apellido", apellido);
+            model.addAttribute("telefono", telefono);
             model.addAttribute("dni", dni);
             model.addAttribute("direccion", direccion);
             model.addAttribute("fechaNacimiento", fechaNacimiento);
@@ -567,10 +573,11 @@ public class SolicitudAdopcionViewController {
 
     @PostMapping(WebRoutes.SOLICITUDES_PUBLICO_REGISTRO)
     public String procesarRegistroYAdopcion(
+            @RequestParam("userName") String userName,
             @RequestParam String nombre,
             @RequestParam String apellido,
             @RequestParam String email,
-            @RequestParam String contrasena,
+            @RequestParam("password") String password,
             @RequestParam String telefono,
             @RequestParam String dni,
             @RequestParam String direccion,
@@ -580,10 +587,11 @@ public class SolicitudAdopcionViewController {
             HttpServletResponse response,
             RedirectAttributes redirectAttributes) {
 
-        // 1. Crear usuario en Auth (sin nombre/apellido)
-        Map<String, Object> userBody = new HashMap<>();
+        // 1. Crear usuario en Auth
+        Map<String, Object> userBody = new java.util.LinkedHashMap<>();
         userBody.put("email", email);
-        userBody.put("contrasena", contrasena);
+        userBody.put("username", userName);
+        userBody.put("contrasena", password);
         userBody.put("rol", "ROLE_ADOPTANTE");
 
         Integer usuarioId = null;
@@ -597,18 +605,41 @@ public class SolicitudAdopcionViewController {
                 throw new Exception("No se pudo obtener el ID del usuario tras el registro");
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Error al registrar el usuario en Auth: " + e.getMessage());
+            String errorMsg = e.getMessage();
+            if (e instanceof org.springframework.web.client.HttpClientErrorException) {
+                var ex = (org.springframework.web.client.HttpClientErrorException) e;
+                try {
+                    Map<String, Object> errorMap = ex.getResponseBodyAs(Map.class);
+                    if (errorMap != null && errorMap.containsKey("username")) {
+                        errorMsg = (String) errorMap.get("username");
+                    } else if (errorMap != null && errorMap.containsKey("message")) {
+                        errorMsg = (String) errorMap.get("message");
+                    }
+                } catch (Exception ignored) {}
+            }
+            
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al registrar el usuario en Auth: " + errorMsg);
+            redirectAttributes.addFlashAttribute("userName", userName);
+            redirectAttributes.addFlashAttribute("nombre", nombre);
+            redirectAttributes.addFlashAttribute("apellido", apellido);
+            redirectAttributes.addFlashAttribute("email", email);
+            redirectAttributes.addFlashAttribute("telefono", telefono);
+            redirectAttributes.addFlashAttribute("dni", dni);
+            redirectAttributes.addFlashAttribute("direccion", direccion);
+            redirectAttributes.addFlashAttribute("fechaNacimiento", fechaNacimiento);
+            redirectAttributes.addFlashAttribute("comentario", comentario);
+            
             return "redirect:" + WebRoutes.SOLICITUDES_PUBLICO_REGISTRO + "?animalId=" + animalId;
         }
 
         // 2. Crear solicitud en Backend
-        Map<String, Object> body = new HashMap<>();
+        Map<String, Object> body = new java.util.LinkedHashMap<>();
         body.put("usuarioId", usuarioId);
+        body.put("username", userName);
         body.put("nombre", nombre);
         body.put("apellido", apellido);
         body.put("email", email);
-        body.put("contrasena", contrasena);
+        body.put("contrasena", password);
         body.put("telefono", telefono);
         body.put("dni", dni);
         body.put("direccion", direccion);
@@ -619,19 +650,36 @@ public class SolicitudAdopcionViewController {
         try {
             restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/publico/registro-y-adopcion", body,
                     Object.class);
+        } catch (org.springframework.web.client.RestClientResponseException e) {
+            String errorMsg = "Error al procesar la adopción.";
+            try {
+                Map<String, Object> errorMap = e.getResponseBodyAs(Map.class);
+                if (errorMap != null && errorMap.containsKey("message")) {
+                    errorMsg = (String) errorMap.get("message");
+                }
+            } catch (Exception ignored) {}
+            
+            redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
+            return "redirect:" + WebRoutes.SOLICITUDES_PUBLICO_REGISTRO + "?animalId=" + animalId;
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar la solicitud: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar la solicitud de adopción: " + e.getMessage());
             return "redirect:" + WebRoutes.SOLICITUDES_PUBLICO_REGISTRO + "?animalId=" + animalId;
         }
 
-        // 3. Auto-login tras registro exitoso (Relevo de Cookie JWT)
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
-            String loginBody = "email=" + email + "&password=" + contrasena;
-            HttpEntity<String> entity = new HttpEntity<>(loginBody, headers);
-            
-            ResponseEntity<String> loginResponse = restTemplate.postForEntity(authUrl + "/login", entity, String.class);
+            // 3. Auto-login tras registro exitoso (Relevo de Cookie JWT)
+            try {
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
+                
+                // Auth service requires 'username' parameter (mapped to email in CustomUserDetailsService)
+                String loginBody = "username=" + email + "&password=" + password;
+                HttpEntity<String> entity = new HttpEntity<>(loginBody, headers);
+                
+                // Stripping /api from authUrl to get the base for /login-post
+                String authBaseUrl = authUrl.substring(0, authUrl.lastIndexOf("/api"));
+                String loginUrl = authBaseUrl + "/login-post";
+                
+                ResponseEntity<String> loginResponse = restTemplate.postForEntity(loginUrl, entity, String.class);
             
             List<String> cookies = loginResponse.getHeaders().get(HttpHeaders.SET_COOKIE);
             if (cookies != null) {

@@ -318,6 +318,16 @@ public class SolicitudAdopcionController {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public Map<String, String> handleDataIntegrity(org.springframework.dao.DataIntegrityViolationException ex) {
+        String msg = ex.getMessage();
+        if (msg != null && msg.contains("perfiles_legales.dni")) {
+            return Map.of("message", "El DNI ya está registrado en el sistema. Por favor, use uno distinto.");
+        }
+        return Map.of("message", "Error de integridad de datos: Posible registro duplicado.");
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(IllegalStateException.class)
     public Map<String, String> handleIllegalState(IllegalStateException ex) {
         return Map.of("message", ex.getMessage());
