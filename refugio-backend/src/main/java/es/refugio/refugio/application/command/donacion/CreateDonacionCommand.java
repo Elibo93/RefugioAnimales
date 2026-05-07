@@ -1,16 +1,20 @@
 package es.refugio.refugio.application.command.donacion;
 
-import java.time.LocalDateTime;
-
 import es.refugio.refugio.domain.model.donacion.enums.FrecuenciaDonacion;
 import es.refugio.refugio.domain.model.donacion.enums.TipoDonacion;
+import lombok.Builder;
+import lombok.Data;
+import java.time.LocalDateTime;
 
-public record CreateDonacionCommand(
-        Integer usuarioId,
-        Integer objetivoId,
-        TipoDonacion tipo,
-        Double cantidad,
-        FrecuenciaDonacion frecuencia,
-        LocalDateTime fecha,
-        String descripcion) {
+@Data
+@Builder
+public class CreateDonacionCommand {
+    private final Integer usuarioId;
+    private final Integer objetivoId;
+    private final TipoDonacion tipo;
+    private final Double cantidad;
+    private final FrecuenciaDonacion frecuencia;
+    private final LocalDateTime fecha;
+    private final LocalDateTime proximaFechaPago;
+    private final String descripcion;
 }

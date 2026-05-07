@@ -190,8 +190,8 @@
                 </div>
             </th:block>
 
-            <!-- 4. MENÚ PARA PÚBLICO (NO AUTENTICADO) -->
-            <th:block th:if="${!isAuthenticated}">
+            <!-- 4. MENÚ PARA PÚBLICO (NO AUTENTICADO O ROL PÚBLICO) -->
+            <th:block th:if="${!isAuthenticated or isPublico}">
                 <div class="sidebar-section">
                     <div class="sidebar-menu">
                         <a th:href="@{/web/home}" class="sidebar-item"

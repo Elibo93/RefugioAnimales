@@ -21,6 +21,7 @@ public class EditDonacionUseCase {
                     donacion.setFrecuencia(command.frecuencia());
                     donacion.setCantidad(command.cantidad());
                     donacion.setFecha(command.fecha());
+                    donacion.setProximaFechaPago(command.proximaFechaPago());
                     donacion.setDescripcion(command.descripcion());
 
                     if (command.objetivoId() != null) {
@@ -34,4 +35,3 @@ public class EditDonacionUseCase {
                 .orElseThrow(() -> new DonacionNotFoundException(command.id().getValue()));
     }
 }
-

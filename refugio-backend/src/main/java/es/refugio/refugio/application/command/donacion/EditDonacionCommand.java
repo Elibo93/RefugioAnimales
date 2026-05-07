@@ -5,7 +5,9 @@ import java.time.LocalDateTime;
 import es.refugio.refugio.domain.model.donacion.DonacionId;
 import es.refugio.refugio.domain.model.donacion.enums.FrecuenciaDonacion;
 import es.refugio.refugio.domain.model.donacion.enums.TipoDonacion;
+import lombok.Builder;
 
+@Builder
 public record EditDonacionCommand(
         DonacionId id,
         Integer usuarioId,
@@ -14,5 +16,6 @@ public record EditDonacionCommand(
         Double cantidad,
         FrecuenciaDonacion frecuencia,
         LocalDateTime fecha,
+        LocalDateTime proximaFechaPago,
         String descripcion) {
 }

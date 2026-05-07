@@ -74,6 +74,8 @@ databaseChangeLog:
               - column: { name: fecha, type: DATETIME, constraints: { nullable: false } }
               - column: { name: descripcion, type: VARCHAR(500) }
               - column: { name: frecuencia, type: VARCHAR(20), defaultValue: UNICA }
+              - column: { name: proxima_fecha_pago, type: DATETIME }
+              - column: { name: objetivo_id, type: INT }
         - createTable:
             tableName: historial_medicos
             columns:
@@ -159,13 +161,13 @@ databaseChangeLog:
               - column: { name: fecha_inicio, type: DATETIME, defaultValueComputed: "now()" }
               - column: { name: fecha_limite, type: DATETIME }
               - column: { name: icono, type: VARCHAR(50) }
-        - addColumn:
-            tableName: donaciones
-            columns:
-              - column:
-                  name: objetivo_id
-                  type: INT
-                  constraints:
-                    foreignKeyName: fk_donaciones_objetivo
-                    referencedTableName: objetivos_donacion
-                    referencedColumnNames: id
+  - changeSet:
+      id: 008-add-fk-donaciones-objetivo
+      author: refugio
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: donaciones
+            baseColumnNames: objetivo_id
+            referencedTableName: objetivos_donacion
+            referencedColumnNames: id
+            constraintName: fk_donaciones_objetivo
