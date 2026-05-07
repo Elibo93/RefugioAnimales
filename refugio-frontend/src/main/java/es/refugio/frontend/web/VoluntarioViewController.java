@@ -188,6 +188,8 @@ public class VoluntarioViewController {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al crear el perfil de voluntario.");
         }
 
+        restTemplate.postForObject(apiUrl + "/v1/voluntarios", body, Object.class);
+        redirectAttributes.addFlashAttribute("successMessage", "¡Solicitud enviada con éxito! El equipo revisará tu perfil pronto.");
         return "redirect:" + WebRoutes.HOME;
     }
 

@@ -24,6 +24,11 @@ import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * Controlador para la gestión de donaciones en la capa de vista.
+ * Maneja la visualización de listas, formularios y la integración con la
+ * pasarela de pago.
+ */
 @Controller
 @RequiredArgsConstructor
 public class DonacionViewController {
@@ -37,13 +42,16 @@ public class DonacionViewController {
     @Value("${auth.api.url}")
     private String authUrl;
 
+    /**
+     * Lista todas las donaciones y prepara el modelo para la vista principal.
+     */
     @GetMapping(WebRoutes.DONACIONES_BASE)
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
         List<Object> donaciones = fetchList("/v1/donaciones");
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
         List<Object> objetivos = fetchList("/v1/objetivos-donacion");
 
-        // Build usuariosMap
+        // Construir mapa de usuarios para acceso rápido por ID en la vista
         Map<Integer, Object> usuariosMap = new HashMap<>();
         for (Object u : usuarios) {
             if (u instanceof Map) {
@@ -54,11 +62,24 @@ public class DonacionViewController {
             }
         }
 
+        // Obtener el total recaudado desde el backend
+        Double totalDinero = 0.0;
+        try {
+            Double callRes = restTemplate.getForObject(apiUrl + "/v1/donaciones/total", Double.class);
+            if (callRes != null) {
+                totalDinero = callRes;
+            }
+        } catch (Exception e) {
+            totalDinero = 0.0;
+        }
+
         model.addAttribute(ModelAttribute.Donacion_LIST.getName(), donaciones);
         model.addAttribute("usuarios", usuarios);
         model.addAttribute("usuariosMap", usuariosMap);
         model.addAttribute("objetivos", objetivos);
+        model.addAttribute("totalDinero", totalDinero);
 
+        // Preparar objeto para el formulario de nueva donación rápida
         Map<String, Object> nuevaDonacion = new HashMap<>();
         nuevaDonacion.put("fecha", LocalDateTime.now().toString());
         nuevaDonacion.put("id", null);
@@ -72,12 +93,43 @@ public class DonacionViewController {
         model.addAttribute("tipos", List.of("DINERO", "ALIMENTO", "MEDICAMENTO", "MATERIAL", "OTRO"));
         model.addAttribute("formActionUrl", "/web/donaciones/nueva");
 
-        if (successMessage != null)
+        if (successMessage != null) {
             model.addAttribute("successMessage", successMessage);
+        }
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
+    /**
+     * Muestra el formulario completo de nueva donación.
+     */
+    @GetMapping(WebRoutes.DONACIONES_NUEVA)
+    public String formulario(Model model) {
+        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+        List<Object> objetivos = fetchList("/v1/objetivos-donacion");
+
+        Map<String, Object> nuevaDonacion = new HashMap<>();
+        nuevaDonacion.put("fecha", LocalDateTime.now().toString());
+        nuevaDonacion.put("id", null);
+        nuevaDonacion.put("frecuencia", "UNICA");
+        nuevaDonacion.put("tipo", "DINERO");
+        nuevaDonacion.put("cantidad", null);
+        nuevaDonacion.put("descripcion", "");
+        nuevaDonacion.put("objetivoId", null);
+
+        model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), nuevaDonacion);
+        model.addAttribute("usuarios", usuarios);
+        model.addAttribute("objetivos", objetivos);
+        model.addAttribute("tipos", List.of("DINERO", "ALIMENTO", "MEDICAMENTO", "MATERIAL", "OTRO"));
+        model.addAttribute("formActionUrl", "/web/donaciones/nueva");
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_FORM.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    /**
+     * Procesa el envío del formulario y redirige a la pasarela de pago simulada.
+     */
     @PostMapping(WebRoutes.DONACIONES_NUEVA)
     public String crear(@RequestParam(required = false) Integer usuarioId,
             @RequestParam(required = false) Integer objetivoId,
@@ -85,6 +137,40 @@ public class DonacionViewController {
             @RequestParam Double cantidad,
             @RequestParam(defaultValue = "UNICA") String frecuencia,
             @RequestParam(required = false) String descripcion,
+            Model model) {
+
+        Map<String, Object> donacionTemp = new HashMap<>();
+        donacionTemp.put("usuarioId", usuarioId);
+        donacionTemp.put("objetivoId", objetivoId);
+        donacionTemp.put("tipo", tipo);
+        donacionTemp.put("cantidad", cantidad);
+        donacionTemp.put("frecuencia", frecuencia);
+        donacionTemp.put("descripcion", (descripcion != null) ? descripcion : "");
+        donacionTemp.put("proximaFechaPago", null); // Asegurar que la clave existe para evitar errores en Thymeleaf
+
+        if ("MENSUAL".equals(frecuencia)) {
+            LocalDateTime next = LocalDateTime.now().plusMonths(1);
+            String formattedDate = String.format("%02d/%02d/%d", next.getDayOfMonth(), next.getMonthValue(),
+                    next.getYear());
+            donacionTemp.put("proximaFechaPago", formattedDate);
+        }
+
+        model.addAttribute("donacion", donacionTemp);
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
+                FragmentoContenido.Donacion_PASARELA.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    /**
+     * Confirma el pago y persiste la donación en el backend.
+     */
+    @PostMapping("/web/donaciones/confirmar")
+    public String confirmarPago(@RequestParam(required = false) Integer usuarioId,
+            @RequestParam(required = false) Integer objetivoId,
+            @RequestParam String tipo,
+            @RequestParam Double cantidad,
+            @RequestParam String frecuencia,
+            @RequestParam String descripcion,
             Model model) {
 
         Map<String, Object> body = new HashMap<>();
@@ -97,11 +183,14 @@ public class DonacionViewController {
         body.put("fecha", LocalDateTime.now().toString());
 
         restTemplate.postForObject(apiUrl + "/v1/donaciones", body, Object.class);
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_GRACIAS.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    // Gestion de Objetivos para Admin
+    /**
+     * Muestra el formulario para crear un nuevo objetivo de donación (Solo Admin).
+     */
     @GetMapping("/web/donaciones/objetivos/nuevo")
     @PreAuthorize("hasRole('ADMIN')")
     public String formularioObjetivo(Model model) {
@@ -120,6 +209,9 @@ public class DonacionViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
+    /**
+     * Procesa la creación de un nuevo objetivo de donación.
+     */
     @PostMapping("/web/donaciones/objetivos/nuevo")
     @PreAuthorize("hasRole('ADMIN')")
     public String crearObjetivo(@RequestParam String titulo,
@@ -142,6 +234,9 @@ public class DonacionViewController {
         return "redirect:" + WebRoutes.DONACIONES_BASE;
     }
 
+    /**
+     * Muestra el formulario de edición para una donación existente.
+     */
     @GetMapping(WebRoutes.DONACIONES_EDITAR)
     @PreAuthorize("hasRole('ADMIN')")
     public String editarFormulario(@PathVariable Integer id, Model model) {
@@ -155,6 +250,9 @@ public class DonacionViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
+    /**
+     * Procesa la edición de una donación.
+     */
     @PostMapping(WebRoutes.DONACIONES_EDITAR)
     @PreAuthorize("hasRole('ADMIN')")
     public String procesarEdicion(@PathVariable Integer id,
@@ -180,16 +278,23 @@ public class DonacionViewController {
         return "redirect:" + WebRoutes.DONACIONES_BASE;
     }
 
+    /**
+     * Elimina una donación.
+     */
     @PostMapping(WebRoutes.DONACIONES_ELIMINAR)
     @ResponseBody
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         restTemplate.delete(apiUrl + "/v1/donaciones/" + id);
-        if ("true".equals(request.getHeader("HX-Request")))
+        if ("true".equals(request.getHeader("HX-Request"))) {
             return ResponseEntity.ok("");
+        }
         return ResponseEntity.status(302).header("Location", WebRoutes.DONACIONES_BASE).build();
     }
 
+    /**
+     * Genera un PDF con el listado de donaciones.
+     */
     @GetMapping(WebRoutes.DONACIONES_PDF)
     @PreAuthorize("hasRole('ADMIN')")
     public void exportarPDF(HttpServletResponse response) throws Exception {
@@ -197,8 +302,10 @@ public class DonacionViewController {
         Context context = new Context();
         context.setVariable("donaciones", donaciones);
         String html = templateEngine.process(ThymTemplates.Donacion_LIST_PDF.getPath(), context);
+
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=donaciones.pdf");
+
         OutputStream out = response.getOutputStream();
         ITextRenderer renderer = new ITextRenderer();
         renderer.setDocumentFromString(html);
@@ -207,6 +314,9 @@ public class DonacionViewController {
         out.close();
     }
 
+    /**
+     * Método auxiliar para obtener listas desde APIs externas o internas.
+     */
     private List<Object> fetchList(String path) {
         try {
             String finalUrl = path.startsWith("http") ? path : apiUrl + path;

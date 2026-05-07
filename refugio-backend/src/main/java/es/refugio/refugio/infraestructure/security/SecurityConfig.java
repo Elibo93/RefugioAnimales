@@ -37,7 +37,8 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.GET,
                                 "/api/v1/animales",
                                 "/api/v1/animales/**",
-                                "/api/v1/donaciones/total")
+                                "/api/v1/donaciones/total",
+                                "/api/v1/objetivos-donacion/**")
                         .permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST,
                                 "/api/v1/donaciones",

@@ -10,189 +10,121 @@
         <div id="formulario-donacion" class="glass-panel"
              th:if="${isAdmin == null or !isAdmin}"
              style="max-width:800px; margin:2rem auto; padding: 3rem; border-radius: 24px;">
+            
             <div class="page-header" style="text-align:center; margin-bottom: 2.5rem;">
-                <div class="premium-modal-icon-wrapper" style="margin: 0 auto 1.5rem; width: 64px; height: 64px; background: #fef3c7; color: #d97706;">
-                    <i data-lucide="coins" style="width: 32px; height: 32px;"></i>
+                <div class="premium-modal-icon-wrapper" style="margin: 0 auto 1.5rem; width: 64px; height: 64px; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                    <i data-lucide="heart" style="width: 32px; height: 32px;"></i>
                 </div>
                 <h2 style="font-size: 2.25rem; font-weight: 800; color: var(--text-main);"
-                    th:if="${donacion == null or donacion.get('id') == null}"
-                    th:text="#{donacion.form.title}">Registrar donación</h2>
+                    th:if="${donacion == null or donacion.get('id') == null}">Registrar donación</h2>
                 <h2 style="font-size: 2.25rem; font-weight: 800; color: var(--text-main);"
-                    th:unless="${donacion == null or donacion.get('id') == null}"
-                    th:text="#{donacion.modal.edit.title}">Editar donación</h2>
-                <p style="color: var(--text-muted); margin-top: 0.5rem;">Tu generosidad hace posible nuestra labor
-                    diaria</p>
+                    th:unless="${donacion == null or donacion.get('id') == null}">Editar donación</h2>
+                <p style="color: var(--text-muted); margin-top: 0.5rem;">Tu generosidad hace posible nuestra labor diaria</p>
             </div>
 
             <form th:action="${formActionUrl}" method="post">
-                <!-- Hidden field for Frequency -->
                 <input type="hidden" name="frecuencia" id="frecuencia-input"
                     th:value="${donacion != null and donacion.get('frecuencia') != null ? donacion.get('frecuencia') : 'UNICA'}">
 
-                <div class="form-grid">
+                <div class="form-grid" style="display: flex; flex-direction: column; gap: 1.5rem;">
 
                     <!-- 1. IDENTIFICACIÓN -->
-                    <div class="form-group" style="grid-column: 1/-1;">
-                        <label th:text="#{donacion.field.usuario}">Donante</label>
-
-                        <div th:if="${currentUserId != null}" class="alert alert-success glass-panel"
-                            style="padding: 1rem; border-radius: 12px; background: rgba(220, 252, 231, 0.5); color: #15803d; border: 1px solid #bbf7d0; display: flex; align-items: center; gap: 0.75rem;">
-                            <i data-lucide="user" style="width: 24px; height: 24px;"></i>
+                    <div class="form-group">
+                        <label style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">Donante</label>
+                        <div th:if="${currentUserId != null}" class="alert alert-success"
+                            style="padding: 1rem; border-radius: 12px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; display: flex; align-items: center; gap: 10px;">
+                            <i data-lucide="user" style="width: 20px;"></i>
                             <span style="font-weight: 600;" th:text="${currentUserName}">Nombre de Usuario</span>
                         </div>
-
-                        <div th:unless="${currentUserId != null}" class="alert alert-info glass-panel"
-                            style="padding: 1rem; border-radius: 12px; background: rgba(224, 242, 254, 0.5); color: #0369a1; border: 1px solid #bae6fd; display: flex; align-items: center; gap: 0.75rem;">
-                            <i data-lucide="info" style="width: 24px; height: 24px;"></i>
+                        <div th:unless="${currentUserId != null}" class="alert alert-info"
+                            style="padding: 1rem; border-radius: 12px; background: #f0f9ff; color: #075985; border: 1px solid #bae6fd; display: flex; align-items: center; gap: 10px;">
+                            <i data-lucide="info" style="width: 20px;"></i>
                             <span style="font-weight: 600;">Donación Anónima</span>
                         </div>
-
-                        <input type="hidden" name="usuarioId"
-                            th:value="${currentUserId}">
+                        <input type="hidden" name="usuarioId" th:value="${currentUserId}">
                     </div>
 
                     <!-- 2. SELECTOR DE TIPO -->
-                    <div class="form-group" style="grid-column: 1/-1;">
-                        <label th:text="#{donacion.field.tipo}">¿En qué quieres ayudarnos?</label>
+                    <div class="form-group">
+                        <label style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">Tipo de donación</label>
                         <div class="select-wrapper">
                             <select name="tipo" id="donation-type-select" required onchange="handleTypeChange()"
-                                style="font-size: 1.1rem; padding: 1rem; border-radius: 15px; border: 2px solid var(--primary); width:100%;">
-                                <option th:each="t : ${tipos}" th:value="${t}"
-                                    th:text="${t}"
+                                style="width: 100%; padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1rem; background: white;">
+                                <option th:each="t : ${tipos}" th:value="${t}" th:text="${t}"
                                     th:selected="${(donacion == null or donacion.get('tipo') == null) ? t == 'DINERO' : t == donacion.get('tipo')}"></option>
                             </select>
                         </div>
                     </div>
 
-                    <!-- 3. SELECTOR DE OBJETIVO (Solo para DINERO) -->
-                    <div id="panel-objetivo" class="form-group" style="grid-column: 1/-1; display: none;">
-                        <label>¿A qué causa quieres destinar tu ayuda?</label>
-                        <div class="select-wrapper">
-                            <select name="objetivoId" style="font-size: 1.1rem; padding: 1rem; border-radius: 15px; border: 2px solid #e2e8f0; width:100%;">
-                                <option value="">Donación general (Donde más se necesite)</option>
+                    <!-- 3. SELECTOR DE OBJETIVO -->
+                    <div id="panel-objetivo" class="form-group" style="display: none;">
+                        <label style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="target" style="width: 18px; color: var(--primary);"></i>
+                            ¿A qué objetivo destinas tu ayuda? (Opcional)
+                        </label>
+                        <div class="select-wrapper" style="position: relative;">
+                            <select name="objetivoId" id="objetivo-select"
+                                style="width: 100%; padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1rem; background: white; appearance: none;">
+                                <option value="">Donación general (El refugio decidirá dónde es más urgente)</option>
                                 <option th:each="obj : ${objetivos}" th:value="${obj.get('id')}" 
                                         th:text="${obj.get('titulo')}"
                                         th:selected="${donacion != null and donacion.get('objetivoId') == obj.get('id')}"></option>
                             </select>
+                            <i data-lucide="chevron-down" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); pointer-events: none; color: #94a3b8;"></i>
                         </div>
                     </div>
 
                     <!-- 4. CONFIGURACIÓN DE DINERO -->
-                    <div id="panel-dinero-extra" style="grid-column: 1/-1; display: none;">
-                        <div class="view-toggle" style="margin-bottom: 2rem;">
-                            <button type="button" id="btn-unica" class="toggle-btn active"
-                                onclick="setRecurrence('unica')">Donación única</button>
-                            <button type="button" id="btn-mensual" class="toggle-btn"
-                                onclick="setRecurrence('mensual')">Donación mensual</button>
+                    <div id="panel-dinero-extra" style="display: none;">
+                        <div class="view-toggle" style="display: flex; gap: 10px; background: #f1f5f9; padding: 5px; border-radius: 14px; margin-bottom: 1.5rem;">
+                            <button type="button" id="btn-unica" class="toggle-btn" style="flex: 1; padding: 0.8rem; border-radius: 10px; border: none; cursor: pointer; font-weight: 700;" onclick="setRecurrence('unica')">Donación única</button>
+                            <button type="button" id="btn-mensual" class="toggle-btn" style="flex: 1; padding: 0.8rem; border-radius: 10px; border: none; cursor: pointer; font-weight: 700;" onclick="setRecurrence('mensual')">Donación mensual</button>
                         </div>
 
                         <div class="form-group">
-                            <label>Selecciona una cantidad rápida</label>
-                            <div class="amount-selector">
-                                <button type="button" class="amount-btn" onclick="setAmount(10, this)">10€</button>
-                                <button type="button" class="amount-btn" onclick="setAmount(30, this)">30€</button>
-                                <button type="button" class="amount-btn" onclick="setAmount(50, this)">50€</button>
-                                <button type="button" class="amount-btn" onclick="setAmount(100, this)">100€</button>
-                                <button type="button" class="amount-btn" onclick="focusAmount(this)">Otra</button>
+                            <label style="display: block; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);">Selecciona una cantidad rápida</label>
+                            <div class="amount-selector" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 1rem;">
+                                <button type="button" class="amount-btn" style="padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-weight: 700; cursor: pointer;" onclick="setAmount(10, this)">10€</button>
+                                <button type="button" class="amount-btn" style="padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-weight: 700; cursor: pointer;" onclick="setAmount(30, this)">30€</button>
+                                <button type="button" class="amount-btn" style="padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-weight: 700; cursor: pointer;" onclick="setAmount(50, this)">50€</button>
+                                <button type="button" class="amount-btn" style="padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-weight: 700; cursor: pointer;" onclick="setAmount(100, this)">100€</button>
+                                <button type="button" class="amount-btn" style="padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-weight: 700; cursor: pointer;" onclick="focusAmount(this)">Otra</button>
                             </div>
                         </div>
                     </div>
 
                     <!-- 5. CAMPOS UNIFICADOS -->
-                    <div id="panel-unificado" class="dynamic-panel" style="grid-column: 1/-1; display: none;">
-                        <div class="form-grid">
-                            <div class="form-group" id="main-amount-container">
-                                <label id="label-cantidad">Cantidad</label>
-                                <div class="input-with-icon">
-                                    <i id="icon-cantidad" data-lucide="euro" class="input-icon"></i>
-                                    <input type="number" step="0.01" name="cantidad" id="input-cantidad"
-                                        th:value="${donacion != null ? donacion.get('cantidad') : ''}" required placeholder="0.00">
-                                </div>
+                    <div id="panel-unificado">
+                        <div class="form-group" style="margin-top: 1.5rem;">
+                            <label id="label-cantidad" style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">Importe de la donación (€)</label>
+                            <div class="input-with-icon" style="position: relative;">
+                                <i id="icon-cantidad" data-lucide="euro" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 20px;"></i>
+                                <input type="number" step="0.01" name="cantidad" id="input-cantidad"
+                                    th:value="${donacion != null ? donacion.get('cantidad') : ''}" required placeholder="0.00"
+                                    style="width: 100%; padding: 1rem 1rem 1rem 3rem; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1.1rem;">
                             </div>
+                        </div>
 
-                            <div class="form-group" style="grid-column: 1/-1;">
-                                <label id="label-descripcion">Mensaje o detalles</label>
-                                <textarea name="descripcion" id="input-descripcion" th:text="${donacion != null ? donacion.get('descripcion') : ''}"
-                                    required style="height: 120px;"
-                                    placeholder="Escribe un mensaje de apoyo..."></textarea>
-                            </div>
+                        <div class="form-group" style="margin-top: 1.5rem;">
+                            <label id="label-descripcion" style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">Mensaje o dedicatoria (opcional)</label>
+                            <textarea name="descripcion" id="input-descripcion" th:text="${donacion != null ? donacion.get('descripcion') : ''}"
+                                style="width: 100%; height: 120px; padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; font-family: inherit; font-size: 1rem;"
+                                placeholder="Escribe un mensaje de apoyo..."></textarea>
                         </div>
                     </div>
 
                 </div>
 
-                <div id="form-actions" class="modal-actions" style="margin-top:2.5rem; display: none;">
-                    <a th:href="@{/web/donaciones}" class="btn btn-secondary btn-lg"
-                        th:text="#{generic.btn.cancel}">Volver</a>
-                    <button type="submit" class="btn btn-primary btn-lg"
-                        style="box-shadow: 0 10px 15px -3px rgba(21, 128, 61, 0.3);">
-                        <i data-lucide="heart" style="width:20px;"></i>
+                <div id="form-actions" style="margin-top: 3rem; display: flex; gap: 1rem;">
+                    <a th:href="@{/web/donaciones}" class="btn" style="flex: 1; text-align: center; padding: 1rem; border-radius: 12px; background: #f1f5f9; color: #64748b; text-decoration: none; font-weight: 700;">Cancelar</a>
+                    <button type="submit" class="btn btn-primary" style="flex: 2; padding: 1rem; border-radius: 12px; background: #166534; color: white; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <i data-lucide="heart" style="width: 20px;"></i>
                         <span id="submit-text">Confirmar Donación</span>
                     </button>
                 </div>
             </form>
         </div>
-
-        <script>
-            // Función mejorada para manejar cambios de tipo
-            function handleTypeChange() {
-                const select = document.getElementById('donation-type-select');
-                const type = select.value;
-                const panelDinero = document.getElementById('panel-dinero-extra');
-                const panelObjetivo = document.getElementById('panel-objetivo');
-                const panelUnificado = document.getElementById('panel-unificado');
-                const actions = document.getElementById('form-actions');
-                const labelCant = document.getElementById('label-cantidad');
-                const labelDesc = document.getElementById('label-descripcion');
-                const iconCant = document.getElementById('icon-cantidad');
-                const inputCant = document.getElementById('input-cantidad');
-
-                if (type === 'DINERO') {
-                    panelDinero.style.display = 'block';
-                    panelObjetivo.style.display = 'block';
-                    labelCant.innerText = 'Cantidad';
-                    labelDesc.innerText = 'Mensaje de apoyo';
-                    iconCant.setAttribute('data-lucide', 'euro');
-                    inputCant.placeholder = '0.00';
-                } else {
-                    panelDinero.style.display = 'none';
-                    panelObjetivo.style.display = 'none';
-                    labelCant.innerText = 'Cantidad / Unidades';
-                    labelDesc.innerText = 'Descripción detallada';
-                    iconCant.setAttribute('data-lucide', 'package');
-                    inputCant.placeholder = 'Ej: 5 sacos, 2 cajas...';
-                }
-                
-                panelUnificado.style.display = 'block';
-                actions.style.display = 'flex';
-                if (window.lucide) lucide.createIcons();
-            }
-
-            function setRecurrence(type) {
-                document.getElementById('frecuencia-input').value = type.toUpperCase();
-                document.getElementById('btn-unica').classList.toggle('active', type === 'unica');
-                document.getElementById('btn-mensual').classList.toggle('active', type === 'mensual');
-            }
-
-            function setAmount(val, btn) {
-                document.getElementById('input-cantidad').value = val;
-                document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            }
-
-            function focusAmount(btn) {
-                document.getElementById('input-cantidad').focus();
-                document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            }
-
-            // Ejecución segura
-            (function() {
-                const init = () => { if (typeof handleTypeChange === 'function') handleTypeChange(); };
-                if (document.readyState === 'complete') setTimeout(init, 100);
-                else window.addEventListener('load', init);
-            })();
-        </script>
     </div>
 </body>
+
 </html>

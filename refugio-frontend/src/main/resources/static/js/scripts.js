@@ -93,6 +93,13 @@ document.addEventListener('DOMContentLoaded', () => {
 function refreshDynamicComponents() {
     if (window.lucide) lucide.createIcons();
     
+    // Inicialización de lógica de donaciones
+    if (document.getElementById('donation-type-select')) {
+        handleTypeChange();
+        const freqInput = document.getElementById('frecuencia-input');
+        if (freqInput) setRecurrence(freqInput.value.toLowerCase());
+    }
+    
     // Inicialización automática de cuadrículas con paginación
     if (document.getElementById('animal-grid-admin')) initPagination('animal-grid-admin');
     if (document.getElementById('animal-grid-cards')) initPagination('animal-grid-cards');
@@ -227,8 +234,10 @@ function filterByPriority(priority, btn) {
 function handleTypeChange() {
     const typeSelect = document.getElementById('donation-type-select');
     if (!typeSelect) return;
+    
     const type = typeSelect.value;
     const panelDineroExtra = document.getElementById('panel-dinero-extra');
+    const panelObjetivo = document.getElementById('panel-objetivo');
     const panelUnificado = document.getElementById('panel-unificado');
     const actions = document.getElementById('form-actions');
     const labelCant = document.getElementById('label-cantidad');
@@ -237,52 +246,51 @@ function handleTypeChange() {
     const labelDesc = document.getElementById('label-descripcion');
     const inputDesc = document.getElementById('input-descripcion');
 
-    if (panelDineroExtra) panelDineroExtra.style.display = 'none';
+    // Resetear visibilidad base
     if (panelUnificado) panelUnificado.style.display = 'block';
     if (actions) actions.style.display = 'flex';
 
-    if (inputCant) {
-        inputCant.step = "0.01";
-        inputCant.required = true;
-    }
-    if (inputDesc) inputDesc.required = (type !== 'DINERO');
-
     if (type === 'DINERO') {
-        if (panelDineroExtra) panelDineroExtra.style.display = 'block';
+        if (panelDineroExtra) panelDineroExtra.style.setProperty('display', 'block', 'important');
+        if (panelObjetivo) panelObjetivo.style.setProperty('display', 'block', 'important');
         if (labelCant) labelCant.textContent = 'Importe de la donación (€)';
         if (iconCant) iconCant.setAttribute('data-lucide', 'euro');
-        if (inputCant) inputCant.placeholder = '0.00';
+        if (inputCant) {
+            inputCant.placeholder = '0.00';
+            inputCant.type = 'number';
+            inputCant.step = '0.01';
+        }
         if (labelDesc) labelDesc.textContent = 'Mensaje o dedicatoria (opcional)';
-        if (inputDesc) inputDesc.placeholder = 'Escribe un mensaje de apoyo...';
     } else {
+        if (panelDineroExtra) panelDineroExtra.style.setProperty('display', 'none', 'important');
+        if (panelObjetivo) panelObjetivo.style.setProperty('display', 'none', 'important');
+        
         if (type === 'COMIDA') {
             if (labelCant) labelCant.textContent = 'Peso aproximado (Kg)';
             if (iconCant) iconCant.setAttribute('data-lucide', 'package');
             if (inputCant) {
                 inputCant.placeholder = 'Ej: 15';
-                inputCant.step = "0.5";
+                inputCant.type = 'number';
+                inputCant.step = '0.5';
             }
             if (labelDesc) labelDesc.textContent = 'Marca y tipo de alimento';
-            if (inputDesc) inputDesc.placeholder = 'Ej: Pienso para cachorros, latas húmedas...';
-        } else if (type === 'MEDICINAS') {
+        } else if (type === 'MEDICINAS' || type === 'MEDICAMENTO') {
             if (labelCant) labelCant.textContent = 'Unidades / Cajas';
             if (iconCant) iconCant.setAttribute('data-lucide', 'pill');
             if (inputCant) {
                 inputCant.placeholder = 'Ej: 2';
-                inputCant.step = "1";
+                inputCant.type = 'number';
+                inputCant.step = '1';
             }
             if (labelDesc) labelDesc.textContent = 'Nombre y uso del medicamento';
-            if (inputDesc) inputDesc.placeholder = 'Ej: Desparasitante, 3 cajas de Amoxicilina...';
-        } else { // OTRO
-            if (labelCant) labelCant.textContent = 'Cantidad (opcional)';
+        } else {
+            if (labelCant) labelCant.textContent = 'Cantidad / Unidades';
             if (iconCant) iconCant.setAttribute('data-lucide', 'gift');
             if (inputCant) {
-                inputCant.placeholder = 'Ej: 1';
-                inputCant.step = "1";
-                inputCant.required = false;
+                inputCant.placeholder = 'Ej: 5';
+                inputCant.type = 'text';
             }
             if (labelDesc) labelDesc.textContent = 'Descripción del material';
-            if (inputDesc) inputDesc.placeholder = 'Ej: Mantas, correas, juguetes...';
         }
     }
     if (window.lucide) lucide.createIcons();
@@ -292,28 +300,51 @@ function handleTypeChange() {
 function setAmount(val, btn) {
     const input = document.getElementById('input-cantidad');
     if (input) input.value = val;
-    updateButtons(btn);
+    
+    document.querySelectorAll('.amount-btn').forEach(b => {
+        b.style.borderColor = '#e2e8f0';
+        b.style.background = 'white';
+        b.style.color = 'inherit';
+    });
+    
+    if (btn) {
+        btn.style.borderColor = '#166534';
+        btn.style.background = '#f0fdf4';
+        btn.style.color = '#166534';
+    }
 }
 
 function focusAmount(btn) {
     const input = document.getElementById('input-cantidad');
     if (input) input.focus();
-    updateButtons(btn);
-}
-
-// Actualizar estado activo de los botones de cantidad
-function updateButtons(activeBtn) {
-    document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
-    if (activeBtn) activeBtn.classList.add('active');
+    setAmount('', null); // Limpiar selección previa
+    if (btn) {
+        btn.style.borderColor = '#166534';
+    }
 }
 
 // Establecer recurrencia de la donación
 function setRecurrence(type) {
-    document.querySelectorAll('.view-toggle .toggle-btn').forEach(b => b.classList.remove('active'));
-    const btn = document.getElementById(type === 'mensual' ? 'btn-mensual' : 'btn-unica');
-    if (btn) btn.classList.add('active');
-    const input = document.getElementById('frecuencia-input');
-    if (input) input.value = type.toUpperCase();
+    const freqInput = document.getElementById('frecuencia-input');
+    if (freqInput) freqInput.value = type.toUpperCase();
+    
+    const btnUnica = document.getElementById('btn-unica');
+    const btnMensual = document.getElementById('btn-mensual');
+    
+    if (btnUnica && btnMensual) {
+        if (type === 'unica') {
+            btnUnica.style.background = 'white';
+            btnUnica.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+            btnMensual.style.background = 'transparent';
+            btnMensual.style.boxShadow = 'none';
+        } else {
+            btnMensual.style.background = 'white';
+            btnMensual.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+            btnUnica.style.background = 'transparent';
+            btnUnica.style.boxShadow = 'none';
+        }
+    }
+
     const text = document.getElementById('submit-text');
     if (text) text.textContent = type === 'mensual' ? 'Confirmar Donación Mensual' : 'Confirmar Donación';
 }

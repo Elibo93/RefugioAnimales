@@ -76,12 +76,18 @@
                 <h1 class="hero-title" th:if="${!isAuthenticated}">No puedes comprar el amor, <br> pero puedes adoptarlo</h1>
                 <h1 class="hero-title" th:if="${isAuthenticated}">Hola, <span th:text="${currentUserName}">Usuario</span> <br> ¡Bienvenido de nuevo!</h1>
                 
+                <!-- Mensaje de éxito tras acciones (ej. enviar formulario de voluntario) -->
+                <div th:if="${successMessage}" class="glass-panel" style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); padding: 1rem 1.5rem; border-radius: 16px; margin: 1.5rem 0; display: flex; align-items: center; gap: 12px; animation: slideDown 0.5s ease-out;">
+                    <i data-lucide="check-circle" style="color: #22c55e; width: 24px; height: 24px;"></i>
+                    <span style="color: #14532d; font-weight: 600; font-size: 1.1rem;" th:text="${successMessage}">Mensaje de éxito</span>
+                </div>
+                
                 <div class="hero-ctas" style="margin-bottom: 4rem;">
                     <a th:href="@{/web/animales}" class="btn-hero btn-hero-primary">
                         <i data-lucide="heart"></i>
                         Conoce a nuestros amigos
                     </a>
-                    <a th:if="${!isAuthenticated}" th:href="@{/web/voluntarios/nuevo}" class="btn-hero btn-hero-secondary">
+                    <a th:if="${!isAuthenticated or isPublico}" th:href="@{/web/voluntarios/nuevo}" class="btn-hero btn-hero-secondary">
                         <i data-lucide="users"></i>
                         Quiero ser voluntario
                     </a>

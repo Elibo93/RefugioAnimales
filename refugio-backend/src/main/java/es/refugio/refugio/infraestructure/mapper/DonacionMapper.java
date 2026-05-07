@@ -16,37 +16,44 @@ import es.refugio.refugio.infraestructure.web.dto.donacion.DonacionResponse;
 public class DonacionMapper {
 
     public static CreateDonacionCommand toCommand(DonacionRequest req) {
-        return new CreateDonacionCommand(
-                req.usuarioId(),
-                req.objetivoId(),
-                req.tipo(),
-                req.cantidad(),
-                req.frecuencia(),
-                req.fecha(),
-                req.descripcion());
+        return CreateDonacionCommand.builder()
+                .usuarioId(req.usuarioId())
+                .objetivoId(req.objetivoId())
+                .tipo(req.tipo())
+                .cantidad(req.cantidad())
+                .frecuencia(req.frecuencia())
+                .fecha(req.fecha())
+                .proximaFechaPago(req.proximaFechaPago())
+                .descripcion(req.descripcion())
+                .build();
     }
 
     public static EditDonacionCommand toCommand(int id, DonacionRequest req) {
-        return new EditDonacionCommand(
-                new DonacionId(id),
-                req.usuarioId(),
-                req.objetivoId(),
-                req.tipo(),
-                req.cantidad(),
-                req.frecuencia(),
-                req.fecha(),
-                req.descripcion());
+        return EditDonacionCommand.builder()
+                .id(new DonacionId(id))
+                .usuarioId(req.usuarioId())
+                .objetivoId(req.objetivoId())
+                .tipo(req.tipo())
+                .cantidad(req.cantidad())
+                .frecuencia(req.frecuencia())
+                .fecha(req.fecha())
+                .proximaFechaPago(req.proximaFechaPago())
+                .descripcion(req.descripcion())
+                .build();
     }
 
     public static DonacionResponse toResponse(Donacion d) {
         return new DonacionResponse(
                 d.getId() != null ? d.getId().getValue() : null,
-                d.getUsuarioId() != null ? d.getUsuarioId().getValue() : null,
+              
+
+     d.getUsuarioId() != null ? d.getUsuarioId().getValue() : null,
                 d.getObjetivoId() != null ? d.getObjetivoId().getValue() : null,
                 d.getTipo() != null ? d.getTipo().name() : null,
                 d.getCantidad(),
                 d.getFrecuencia() != null ? d.getFrecuencia().name() : null,
                 d.getFecha(),
+                d.getProximaFechaPago(),
                 d.getDescripcion());
     }
 
@@ -68,6 +75,7 @@ public class DonacionMapper {
                 .cantidad(d.getCantidad())
                 .frecuencia(d.getFrecuencia())
                 .fecha(d.getFecha())
+                .proximaFechaPago(d.getProximaFechaPago())
                 .descripcion(d.getDescripcion())
                 .build();
     }
@@ -81,6 +89,7 @@ public class DonacionMapper {
                 .cantidad(e.getCantidad())
                 .frecuencia(e.getFrecuencia())
                 .fecha(e.getFecha())
+                .proximaFechaPago(e.getProximaFechaPago())
                 .descripcion(e.getDescripcion())
                 .build();
     }
