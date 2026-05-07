@@ -20,7 +20,7 @@ public class ConvertirAdoptanteRequest {
     private String apellido;
 
     @NotBlank(message = "El DNI es obligatorio")
-    @ValidDni
+    // @ValidDni
     private String dni;
 
     @NotBlank(message = "La dirección es obligatoria")

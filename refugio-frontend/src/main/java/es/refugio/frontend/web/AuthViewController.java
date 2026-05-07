@@ -53,7 +53,7 @@ public class AuthViewController {
             @RequestParam String email,
             @RequestParam String password,
             HttpServletResponse response) {
-        
+
         try {
             // 1. Create User in Auth
             Map<String, Object> authBody = new HashMap<>();
@@ -63,25 +63,30 @@ public class AuthViewController {
             authBody.put("rol", "ROLE_PUBLICO"); // Default role is Public/Sympathizer
 
             @SuppressWarnings("unchecked")
-            Map<String, Object> createdUser = restTemplate.postForObject(authUrl + "/v1/usuarios", authBody, Map.class);
-            
+            Map<String, Object> createdUser = restTemplate.postForObject(authUrl + "/v1/usuarios/publico", authBody, Map.class);
+
             if (createdUser == null || createdUser.get("id") == null) {
                 return "redirect:/registro?error=Error al crear usuario";
             }
-            
+
             // NOTE: We NO LONGER create a PerfilLegal here.
-            // Progressive Profiling: Legal profile will be created only when the user 
+            // Progressive Profiling: Legal profile will be created only when the user
             // decides to become a volunteer or adoptant.
 
             // 2. Auto-Login (Call Auth Login to get Cookie)
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
             
-            String loginBody = "email=" + email + "&password=" + password;
+            // Auth service requires 'username' parameter (mapped to email in CustomUserDetailsService)
+            String loginBody = "username=" + email + "&password=" + password;
             HttpEntity<String> entity = new HttpEntity<>(loginBody, headers);
             
-            ResponseEntity<String> loginResponse = restTemplate.postForEntity(authUrl + "/login", entity, String.class);
+            // Stripping /api from authUrl to get the base for /login-post
+            String authBaseUrl = authUrl.substring(0, authUrl.lastIndexOf("/api"));
+            String loginUrl = authBaseUrl + "/login-post";
             
+            ResponseEntity<String> loginResponse = restTemplate.postForEntity(loginUrl, entity, String.class);
+
             // Extract JWT_TOKEN cookie from loginResponse
             List<String> cookies = loginResponse.getHeaders().get(HttpHeaders.SET_COOKIE);
             if (cookies != null) {
@@ -98,7 +103,7 @@ public class AuthViewController {
             }
 
             return "redirect:/web/home?registroExitoso";
-            
+
         } catch (Exception e) {
             return "redirect:/registro?error=" + e.getMessage();
         }

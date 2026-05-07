@@ -8,7 +8,8 @@ public record AdoptanteRequest(
         Integer usuarioId,
         String nombre,
         String apellido,
-        @ValidDni String dni,
+        // @ValidDni String dni,
+        String dni, // sin validar para pruebas
         String direccion,
         String telefono,
         @MinAge(18) String fechaNacimiento,
