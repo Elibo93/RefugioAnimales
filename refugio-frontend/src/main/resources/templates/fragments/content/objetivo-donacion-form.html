@@ -1,0 +1,90 @@
+<div th:fragment="content" style="max-width: 700px; margin: 40px auto; padding: 30px; background: white; border-radius: 20px; box-shadow: var(--shadow-lg); border: 1px solid var(--border);">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <div style="width: 60px; height: 60px; background: #dcfce7; color: #16a34a; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+            <i data-lucide="target" style="width: 30px; height: 30px;"></i>
+        </div>
+        <h2 style="font-weight: 800; color: var(--text-main); font-size: 1.75rem;">Nuevo Objetivo de Donación</h2>
+        <p style="color: var(--text-muted);">Define una necesidad específica para motivar a los donantes</p>
+    </div>
+
+    <form th:action="${formActionUrl}" method="post" style="display: flex; flex-direction: column; gap: 20px;">
+        
+        <div class="form-group">
+            <label style="font-weight: 700; color: var(--text-main); margin-bottom: 8px; display: block;">Título del Objetivo</label>
+            <input type="text" name="titulo" required placeholder="Ej: Nueva área de juegos para perros" 
+                   style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; transition: border-color 0.2s;"
+                   onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e2e8f0'">
+        </div>
+
+        <div class="form-group">
+            <label style="font-weight: 700; color: var(--text-main); margin-bottom: 8px; display: block;">Descripción y Propósito</label>
+            <textarea name="descripcion" required placeholder="Explica detalladamente para qué se usará el dinero..." 
+                      style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; height: 120px; resize: none; outline: none;"
+                      onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="form-group">
+                <label style="font-weight: 700; color: var(--text-main); margin-bottom: 8px; display: block;">Cantidad Meta (€)</label>
+                <div style="position: relative;">
+                    <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 700;">€</span>
+                    <input type="number" name="montoObjetivo" required step="0.01" placeholder="1000.00"
+                           style="width: 100%; padding: 12px 12px 12px 35px; border: 2px solid #e2e8f0; border-radius: 12px; outline: none;">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label style="font-weight: 700; color: var(--text-main); margin-bottom: 8px; display: block;">Prioridad</label>
+                <select name="prioridad" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; background: white; outline: none;">
+                    <option th:each="p : ${prioridades}" th:value="${p}" th:text="${p}" th:selected="${p == 'MEDIA'}"></option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label style="font-weight: 700; color: var(--text-main); margin-bottom: 8px; display: block;">Icono Visual</label>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                <label style="cursor: pointer; text-align: center; border: 2px solid #f1f5f9; padding: 15px; border-radius: 12px; transition: all 0.2s;">
+                    <input type="radio" name="icono" value="heart" checked style="display: none;" onchange="updateIconSelection(this)">
+                    <span style="font-size: 1.5rem;">❤️</span>
+                    <span style="display: block; font-size: 0.7rem; margin-top: 5px; font-weight: 700;">Amor</span>
+                </label>
+                <label style="cursor: pointer; text-align: center; border: 2px solid #f1f5f9; padding: 15px; border-radius: 12px; transition: all 0.2s;">
+                    <input type="radio" name="icono" value="home" style="display: none;" onchange="updateIconSelection(this)">
+                    <span style="font-size: 1.5rem;">🏠</span>
+                    <span style="display: block; font-size: 0.7rem; margin-top: 5px; font-weight: 700;">Hogar</span>
+                </label>
+                <label style="cursor: pointer; text-align: center; border: 2px solid #f1f5f9; padding: 15px; border-radius: 12px; transition: all 0.2s;">
+                    <input type="radio" name="icono" value="truck" style="display: none;" onchange="updateIconSelection(this)">
+                    <span style="font-size: 1.5rem;">🚚</span>
+                    <span style="display: block; font-size: 0.7rem; margin-top: 5px; font-weight: 700;">Rescate</span>
+                </label>
+                <label style="cursor: pointer; text-align: center; border: 2px solid #f1f5f9; padding: 15px; border-radius: 12px; transition: all 0.2s;">
+                    <input type="radio" name="icono" value="target" style="display: none;" onchange="updateIconSelection(this)">
+                    <span style="font-size: 1.5rem;">🎯</span>
+                    <span style="display: block; font-size: 0.7rem; margin-top: 5px; font-weight: 700;">Meta</span>
+                </label>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 15px; margin-top: 20px;">
+            <a th:href="@{/web/donaciones}" class="btn" style="flex: 1; padding: 14px; text-align: center; border-radius: 12px; background: #f1f5f9; color: #64748b; font-weight: 700; text-decoration: none;">Cancelar</a>
+            <button type="submit" class="btn btn-primary" style="flex: 2; padding: 14px; border-radius: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Publicar Objetivo</button>
+        </div>
+    </form>
+
+    <script>
+        function updateIconSelection(input) {
+            document.querySelectorAll('input[name="icono"]').forEach(i => {
+                i.parentElement.style.borderColor = '#f1f5f9';
+                i.parentElement.style.background = 'transparent';
+            });
+            if (input.checked) {
+                input.parentElement.style.borderColor = 'var(--primary)';
+                input.parentElement.style.background = 'rgba(21, 128, 61, 0.05)';
+            }
+        }
+        // Initialize
+        updateIconSelection(document.querySelector('input[name="icono"]:checked'));
+    </script>
+</div>

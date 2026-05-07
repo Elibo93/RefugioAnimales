@@ -27,19 +27,29 @@ import java.util.Set;
 @Order(2)
 public class SeedPasswordInitializer implements CommandLineRunner {
 
-    private static final String DEFAULT_SEED_PASSWORD = "password";
+    private static final String DEFAULT_SEED_PASSWORD = "password123";
 
     // Emails exactos del data.sql — solo estos usuarios se gestionan aquí
     private static final Set<String> SEED_EMAILS = Set.of(
-        "laura.garcia@refugio.local",
-        "carlos.martin@refugio.local",
-        "marta.lopez@refugio.local",
-        "diego.romero@local",
-        "lucia.martinez@local",
-        "mario.gomez@local",
-        "sara.nadal@local",
-        "pablo.diaz@local",
-        "david.torres@local"
+        "laura@mail.com",
+        "carlos@mail.com",
+        "marta@mail.com",
+        "diego@mail.com",
+        "lucia@mail.com",
+        "mario@mail.com",
+        "sara@mail.com",
+        "pablo@mail.com",
+        "david@mail.com",
+        "elena@mail.com",
+        "javier@mail.com",
+        "ana@mail.com",
+        "sergio@mail.com",
+        "clara@mail.com",
+        "roberto@mail.com",
+        "sofia@mail.com",
+        "miguel@mail.com",
+        "isabel@mail.com",
+        "antonio@mail.com"
     );
 
     private final UsuarioEntityJpaRepository usuarioRepository;
@@ -57,14 +67,18 @@ public class SeedPasswordInitializer implements CommandLineRunner {
             }
 
             String contrasena = usuario.getContrasena();
-            boolean esValida = contrasena != null
+            
+            // Si la contraseña ya está encriptada y es "password123", no hacemos nada
+            // Verificamos si empieza por $2a$ (hash BCrypt común) y si hace match
+            boolean yaEstaCorrecta = contrasena != null 
+                    && contrasena.startsWith("$2a$") 
                     && passwordEncoder.matches(DEFAULT_SEED_PASSWORD, contrasena);
 
-            if (!esValida) {
+            if (!yaEstaCorrecta) {
                 usuario.setContrasena(passwordEncoder.encode(DEFAULT_SEED_PASSWORD));
                 usuarioRepository.save(usuario);
                 actualizados++;
-                log.info("[SeedPasswordInitializer] Contraseña recodificada para: {}", usuario.getEmail());
+                log.info("[SeedPasswordInitializer] Contraseña encriptada correctamente para: {}", usuario.getEmail());
             }
         }
 

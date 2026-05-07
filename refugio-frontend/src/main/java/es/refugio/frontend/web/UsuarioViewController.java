@@ -55,24 +55,52 @@ public class UsuarioViewController {
     public String crearPersona(@RequestParam String nombre,
             @RequestParam String apellido,
             @RequestParam String email,
+            @RequestParam String username,
             @RequestParam String telefono,
             @RequestParam String contrasena,
             @RequestParam(required = false, defaultValue = "ROLE_PUBLICO") String rol,
             Model model) {
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("nombre",    nombre);    body.put("apellido",   apellido);
-        body.put("email",     email);     body.put("telefono",   telefono);
-        body.put("contrasena", contrasena); body.put("rol", rol);
+        // 1. Crear usuario en Auth
+        Map<String, Object> userBody = new HashMap<>();
+        userBody.put("email",      email);
+        userBody.put("username",   username);
+        userBody.put("contrasena", contrasena);
+        userBody.put("rol",        rol);
 
-        restTemplate.postForObject(authUrl + "/v1/usuarios", body, Object.class);
+        Map<String, Object> createdUser = (Map<String, Object>) restTemplate.postForObject(authUrl + "/v1/usuarios", userBody, Map.class);
+        
+        // 2. Crear PerfilLegal en Backend (Solo si se han rellenado los datos mínimos)
+        if (createdUser != null && createdUser.get("id") != null) {
+            if ((nombre != null && !nombre.trim().isEmpty()) || (apellido != null && !apellido.trim().isEmpty())) {
+                Map<String, Object> profileBody = new HashMap<>();
+                profileBody.put("usuarioId", createdUser.get("id"));
+                profileBody.put("nombre",    nombre);
+                profileBody.put("apellido",  apellido);
+                profileBody.put("telefono",  telefono);
+                profileBody.put("direccion", ""); 
+                restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", profileBody, Object.class);
+            }
+        }
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_CREATED.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
     @GetMapping(WebRoutes.PERSONAS_EDITAR)
     public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
-        Object persona = restTemplate.getForObject(authUrl + "/v1/usuarios/" + id, Object.class);
+        Map<String, Object> user = (Map<String, Object>) restTemplate.getForObject(authUrl + "/v1/usuarios/" + id, Map.class);
+        Map<String, Object> persona = new HashMap<>();
+        if (user != null) persona.putAll(user);
+        
+        try {
+            Map<String, Object> legal = (Map<String, Object>) restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + id, Map.class);
+            if (legal != null) {
+                persona.put("nombre",   legal.get("nombre"));
+                persona.put("apellido", legal.get("apellido"));
+                persona.put("telefono", legal.get("telefono"));
+            }
+        } catch (Exception ignored) {}
+
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), persona);
         model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_ADMIN"));
 
@@ -89,16 +117,26 @@ public class UsuarioViewController {
             @RequestParam String nombre,
             @RequestParam String apellido,
             @RequestParam String email,
+            @RequestParam String username,
             @RequestParam String telefono,
             @RequestParam(required = false) String rol,
             RedirectAttributes redirectAttributes) {
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("nombre",   nombre);   body.put("apellido", apellido);
-        body.put("email",    email);    body.put("telefono", telefono);
-        if (rol != null) body.put("rol", rol);
+        // 1. Actualizar en Auth
+        Map<String, Object> userBody = new HashMap<>();
+        userBody.put("email", email);
+        userBody.put("username", username);
+        if (rol != null) userBody.put("rol", rol);
+        restTemplate.put(authUrl + "/v1/usuarios/" + id, userBody);
 
-        restTemplate.put(authUrl + "/v1/usuarios/" + id, body);
+        // 2. Actualizar PerfilLegal en Backend
+        Map<String, Object> profileBody = new HashMap<>();
+        profileBody.put("usuarioId", id);
+        profileBody.put("nombre",    nombre);
+        profileBody.put("apellido",  apellido);
+        profileBody.put("telefono",  telefono);
+        restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", profileBody, Object.class);
+        
         redirectAttributes.addFlashAttribute("successMessage", "Persona editada correctamente");
         return "redirect:" + WebRoutes.PERSONAS_BASE;
     }
@@ -116,7 +154,31 @@ public class UsuarioViewController {
                         @RequestParam(required = false) String rol,
                         @RequestParam(required = false) String successMessage) {
         
-        List<Object> todos = fetchList(authUrl + "/v1/usuarios");
+        List<Object> todosAuth = fetchList(authUrl + "/v1/usuarios");
+        List<Object> todosLegales = fetchList(apiUrl + "/v1/perfiles-legales");
+        
+        // Mergear datos
+        Map<String, Map<String, Object>> legalesMap = new HashMap<>();
+        for (Object l : todosLegales) {
+            if (l instanceof Map) {
+                Map<String, Object> lm = (Map<String, Object>) l;
+                legalesMap.put(String.valueOf(lm.get("usuarioId")), lm);
+            }
+        }
+
+        List<Object> todos = new ArrayList<>();
+        for (Object a : todosAuth) {
+            if (a instanceof Map) {
+                Map<String, Object> user = new HashMap<>((Map<String, Object>) a);
+                Map<String, Object> legal = legalesMap.get(String.valueOf(user.get("id")));
+                if (legal != null) {
+                    user.put("nombre",   legal.get("nombre"));
+                    user.put("apellido", legal.get("apellido"));
+                    user.put("telefono", legal.get("telefono"));
+                }
+                todos.add(user);
+            }
+        }
         
         // Por defecto, si no hay parámetro, mostramos TODOS los usuarios
         String activeRol = (rol == null || rol.trim().isEmpty()) ? "ALL" : rol.trim();
@@ -130,7 +192,6 @@ public class UsuarioViewController {
                         if (r == null) return false;
                         String userRol = String.valueOf(r).toUpperCase();
                         String target = activeRol.toUpperCase();
-                        // Coincidencia exacta o contenida (ej: ROLE_PUBLICO contiene PUBLICO)
                         return userRol.equals(target) || userRol.contains(target.replace("ROLE_", "")) || target.contains(userRol.replace("ROLE_", ""));
                     }
                     return false;
@@ -148,7 +209,21 @@ public class UsuarioViewController {
 
     @GetMapping(WebRoutes.PERSONAS_DETALLE)
     public String verDetalle(@PathVariable Integer id, Model model) {
-        Object persona = restTemplate.getForObject(authUrl + "/v1/usuarios/" + id, Object.class);
+        Map<String, Object> userAuth = (Map<String, Object>) restTemplate.getForObject(authUrl + "/v1/usuarios/" + id, Map.class);
+        Map<String, Object> persona = new HashMap<>();
+        if (userAuth != null) persona.putAll(userAuth);
+        
+        try {
+            Map<String, Object> legal = (Map<String, Object>) restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + id, Map.class);
+            if (legal != null) {
+                persona.put("nombre",   legal.get("nombre"));
+                persona.put("apellido", legal.get("apellido"));
+                persona.put("telefono", legal.get("telefono"));
+                persona.put("dni",      legal.get("dni"));
+                persona.put("direccion", legal.get("direccion"));
+            }
+        } catch (Exception ignored) {}
+
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), persona);
 
         // Fetch Adoptante info
@@ -173,7 +248,7 @@ public class UsuarioViewController {
             if (voluntario instanceof Map) {
                 Object vId = ((Map<?, ?>) voluntario).get("id");
                 if (vId != null) {
-                    // Fetch Tareas del voluntario (necesitamos filtrar en frontend o backend)
+                    // Fetch Tareas del voluntario
                     List<Object> todasTareas = fetchList("/v1/tareas");
                     List<Object> misTareas = todasTareas.stream()
                         .filter(t -> {
@@ -264,16 +339,16 @@ public class UsuarioViewController {
 
     @GetMapping(WebRoutes.PERSONAS_PDF)
     public void exportarPDF(HttpServletResponse response, @RequestParam(required = false) String rol) throws Exception {
-        List<Object> personas = fetchList(authUrl + "/v1/usuarios");
+        List<Object> personasAuth = fetchList(authUrl + "/v1/usuarios");
         
         if (rol != null && !rol.isEmpty() && !"ALL".equals(rol)) {
-            personas = personas.stream()
+            personasAuth = personasAuth.stream()
                 .filter(u -> u instanceof Map && String.valueOf(((Map<?, ?>) u).get("rol")).equals(rol))
                 .toList();
         }
 
         Context context = new Context();
-        context.setVariable("personas", personas);
+        context.setVariable("personas", personasAuth);
         String html = templateEngine.process(ThymTemplates.Persona_LIST_PDF.getPath(), context);
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=usuarios.pdf");
@@ -296,7 +371,31 @@ public class UsuarioViewController {
             return FragmentoContenido.USUARIO_SUGERENCIAS.getPath() + " :: suggestions";
         }
 
-        List<Object> todos = fetchList(authUrl + "/v1/usuarios");
+        List<Object> todosAuth = fetchList(authUrl + "/v1/usuarios");
+        List<Object> todosLegales = fetchList(apiUrl + "/v1/perfiles-legales");
+        
+        Map<String, Map<String, Object>> legalesMap = new HashMap<>();
+        for (Object l : todosLegales) {
+            if (l instanceof Map) {
+                Map<String, Object> lm = (Map<String, Object>) l;
+                legalesMap.put(String.valueOf(lm.get("usuarioId")), lm);
+            }
+        }
+
+        List<Map<String, Object>> todos = new ArrayList<>();
+        for (Object a : todosAuth) {
+            if (a instanceof Map) {
+                Map<String, Object> user = new HashMap<>((Map<String, Object>) a);
+                Map<String, Object> legal = legalesMap.get(String.valueOf(user.get("id")));
+                if (legal != null) {
+                    user.put("nombre",   legal.get("nombre"));
+                    user.put("apellido", legal.get("apellido"));
+                    user.put("telefono", legal.get("telefono"));
+                }
+                todos.add(user);
+            }
+        }
+
         String query = q.toLowerCase();
         
         // Obtener lista de IDs ya registrados según el contexto
@@ -320,7 +419,7 @@ public class UsuarioViewController {
                     Map<String, Object> copy = new HashMap<>(user);
                     Integer uId = toInteger(user.get("id"));
                     copy.put("yaRegistrado", uId != null && registradosIds.contains(uId));
-                    copy.put("adoptanteId", null); // No aplica en este contexto
+                    copy.put("adoptanteId", null);
                     return copy;
                 }).toList();
         } else if ("adoptante".equalsIgnoreCase(context) || "solicitud".equalsIgnoreCase(context) || "adopcion".equalsIgnoreCase(context)) {
@@ -354,14 +453,11 @@ public class UsuarioViewController {
                     
                     if ("solicitud".equalsIgnoreCase(context)) {
                         copy.put("adoptanteId", aId);
-                        copy.put("yaRegistrado", false); // Siempre seleccionable
+                        copy.put("yaRegistrado", false); 
                     } else if ("adopcion".equalsIgnoreCase(context)) {
                         copy.put("adoptanteId", aId);
-                        // En adopción, queremos que SE PUEDA seleccionar si ya es adoptante
-                        // Por tanto yaRegistrado debe ser false para que el JS no bloquee la selección
                         copy.put("yaRegistrado", false); 
                     } else {
-                        // Contexto 'adoptante' (crear nuevo): bloqueamos si ya existe
                         copy.put("adoptanteId", aId);
                         copy.put("yaRegistrado", aId != null);
                     }
@@ -399,12 +495,14 @@ public class UsuarioViewController {
     private boolean matchesQuery(Map<String, Object> user, String query) {
         String q = query.trim().toLowerCase();
         String id = String.valueOf(user.get("id"));
+        String username = String.valueOf(user.get("username")).toLowerCase();
         String nombre = String.valueOf(user.get("nombre")).toLowerCase();
         String apellido = String.valueOf(user.get("apellido")).toLowerCase();
         String email = String.valueOf(user.get("email")).toLowerCase();
         String telefono = String.valueOf(user.get("telefono")).toLowerCase();
         
         return id.contains(q) || 
+               username.contains(q) ||
                nombre.contains(q) || 
                apellido.contains(q) || 
                email.contains(q) || 

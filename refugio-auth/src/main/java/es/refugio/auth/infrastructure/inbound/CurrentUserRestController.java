@@ -55,11 +55,8 @@ public class CurrentUserRestController {
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("id", u.getId());
-        result.put("nombre", u.getNombre());
-        result.put("apellido", u.getApellido());
         result.put("email", u.getEmail());
         result.put("rol", rol);
-        result.put("nombreCompleto", u.getNombre() + " " + u.getApellido());
 
         return ResponseEntity.ok(result);
     }

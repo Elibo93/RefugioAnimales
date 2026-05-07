@@ -3,7 +3,7 @@
 <body>
 <div th:fragment="impact">
     <!-- Hero Section (Sólo usuarios) -->
-    <div class="donation-hero" th:if="${!isAdmin}">
+    <div class="donation-hero" th:if="${isAdmin == null or !isAdmin}">
         <div class="donation-hero-image">
             <img th:src="@{/images/donation_hero.png}" alt="Rescued Animals">
         </div>
@@ -18,7 +18,7 @@
     </div>
 
     <!-- Impact Grid (Sólo usuarios) -->
-    <div class="impact-grid" th:if="${!isAdmin}">
+    <div class="impact-grid" th:if="${isAdmin == null or !isAdmin}">
         <div class="impact-card glass-panel">
             <span class="impact-icon">🦴</span>
             <span class="impact-amount">10€</span>
@@ -38,27 +38,52 @@
 
     <!-- Transparency Section (Needs & Progress) -->
     <div class="glass-panel" style="padding: 3rem; border-radius: 24px; margin-bottom: 3rem;">
-        <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 2rem; text-align: center;">Nuestras necesidades actuales</h2>
-        <div class="needs-list">
-            <div class="need-item" style="background: rgba(21, 128, 61, 0.05);">
-                <div class="need-header">
-                    <span class="need-title">🏠 Arreglo del patio de gatos</span>
-                    <span class="text-primary" style="font-weight: 700;" 
-                          th:text="${(totalDinero != null and metaDinero != null) ? #numbers.formatDecimal(totalDinero, 1, 0) + '€ / ' + #numbers.formatDecimal(metaDinero, 1, 0) + '€' : 'Cargando...'}">600€ / 1000€</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2 style="font-size: 2rem; font-weight: 800; margin: 0;">Nuestras necesidades actuales</h2>
+            <a th:if="${isAdmin}" th:href="@{/web/donaciones/objetivos/nuevo}" class="btn btn-primary" style="display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="plus-circle" style="width: 18px;"></i>
+                Nuevo Objetivo
+            </a>
+        </div>
+
+        <div class="needs-list" style="display: flex; flex-direction: column; gap: 20px;">
+            <div th:each="obj : ${objetivos}" class="need-item" 
+                 th:style="'background: ' + (${obj.get('prioridad') == 'CRITICA'} ? 'rgba(239, 68, 68, 0.05)' : 'rgba(21, 128, 61, 0.05)') + '; border-radius: 16px; padding: 20px; border: 1px solid rgba(0,0,0,0.05);'">
+                
+                <div class="need-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.5rem;" th:text="${obj.get('icono') == 'home' ? '🏠' : (obj.get('icono') == 'truck' ? '🚚' : '🎯')}">🎯</span>
+                        <div>
+                            <span class="need-title" style="font-weight: 800; font-size: 1.1rem; color: var(--text-main); display: block;" th:text="${obj.get('titulo')}">Título del Objetivo</span>
+                            <span th:if="${obj.get('prioridad') == 'CRITICA'}" style="font-size: 0.7rem; background: #fee2e2; color: #dc2626; padding: 2px 8px; border-radius: 4px; font-weight: 800; text-transform: uppercase;">Urgente</span>
+                        </div>
+                    </div>
+                    <span class="text-primary" style="font-weight: 800; font-size: 1.1rem;" 
+                          th:text="${#numbers.formatDecimal(obj.get('montoRecaudado'), 1, 0)} + '€ / ' + ${#numbers.formatDecimal(obj.get('montoObjetivo'), 1, 0)} + '€'">600€ / 1000€</span>
                 </div>
-                <div class="progress-container">
-                    <div class="progress-bar" th:style="'width: ' + ${(totalDinero != null and metaDinero != null and metaDinero > 0) ? (totalDinero * 100 / metaDinero > 100 ? 100 : totalDinero * 100 / metaDinero) : 0} + '%;'"></div>
+
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;" th:text="${obj.get('descripcion')}">Descripción de la necesidad...</p>
+
+                <div class="progress-container" style="height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden; margin-bottom: 10px;">
+                    <div class="progress-bar" 
+                         th:style="'height: 100%; transition: width 0.5s; background: var(--primary); width: ' + ${obj.get('montoRecaudado') * 100 / obj.get('montoObjetivo') > 100 ? 100 : obj.get('montoRecaudado') * 100 / obj.get('montoObjetivo')} + '%;'"></div>
                 </div>
-                <div class="progress-info">
-                    <span th:text="${(totalDinero != null and metaDinero != null and metaDinero > 0) ? #numbers.formatDecimal(totalDinero * 100 / metaDinero > 100 ? 100 : totalDinero * 100 / metaDinero, 1, 0) + '% completado' : '0% completado'}">60% completado</span>
-                    <span th:text="${(totalDinero != null and metaDinero != null) ? (totalDinero >= metaDinero ? '¡Objetivo conseguido!' : 'Quedan ' + #numbers.formatDecimal(metaDinero - totalDinero, 1, 0) + '€') : ''}">Quedan 400€</span>
+
+                <div class="progress-info" style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">
+                    <span th:text="${#numbers.formatDecimal(obj.get('montoRecaudado') * 100 / obj.get('montoObjetivo') > 100 ? 100 : obj.get('montoRecaudado') * 100 / obj.get('montoObjetivo'), 1, 0)} + '% completado'">60% completado</span>
+                    <span th:text="${obj.get('montoRecaudado') >= obj.get('montoObjetivo') ? '¡Objetivo conseguido!' : 'Quedan ' + #numbers.formatDecimal(obj.get('montoObjetivo') - obj.get('montoRecaudado'), 1, 0) + '€'}">Quedan 400€</span>
                 </div>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(objetivos)}" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                No hay objetivos activos en este momento. Todas las donaciones irán al fondo general.
             </div>
         </div>
     </div>
 
     <!-- Testimonials (Sólo usuarios) -->
-    <div class="testimonial-section" th:if="${!isAdmin}">
+    <div class="testimonial-section" th:if="${isAdmin == null or !isAdmin}">
         <div class="testimonial-card">
             <p class="testimonial-quote">"Gracias a las donaciones, pudieron operar a mi perro antes de que yo lo conociera. Ahora es el miembro más feliz de la familia."</p>
             <div class="testimonial-author">

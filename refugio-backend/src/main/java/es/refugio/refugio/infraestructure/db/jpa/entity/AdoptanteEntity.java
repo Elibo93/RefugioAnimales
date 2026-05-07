@@ -20,11 +20,7 @@ public class AdoptanteEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "dni", nullable = false, unique = true, length = 20)
-    private String dni;
 
-    @Column(name = "direccion", nullable = false, length = 500)
-    private String direccion;
 
     @Column(name = "fecha_nacimiento", length = 50)
     private String fechaNacimiento;

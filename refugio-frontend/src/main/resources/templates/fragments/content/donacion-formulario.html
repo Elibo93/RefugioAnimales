@@ -24,11 +24,6 @@
                     diaria</p>
             </div>
 
-            <!-- Monthly / One-time Toggle -->
-            <div class="view-toggle">
-                <button type="button" class="toggle-btn active" onclick="setRecurrence('unica')">Donación única</button>
-                <button type="button" class="toggle-btn" onclick="setRecurrence('mensual')">Donación mensual</button>
-            </div>
             <form th:action="${formActionUrl}" method="post">
                 <!-- Hidden field for Frequency -->
                 <input type="hidden" name="frecuencia" id="frecuencia-input"
@@ -54,7 +49,6 @@
 
                         <input type="hidden" name="usuarioId"
                             th:value="${currentUserId}">
-
                     </div>
 
                     <!-- 2. SELECTOR DE TIPO -->
@@ -70,7 +64,20 @@
                         </div>
                     </div>
 
-                    <!-- 3. CONFIGURACIÓN DE DINERO (Solo se muestra para DINERO) -->
+                    <!-- 3. SELECTOR DE OBJETIVO (Solo para DINERO) -->
+                    <div id="panel-objetivo" class="form-group" style="grid-column: 1/-1; display: none;">
+                        <label>¿A qué causa quieres destinar tu ayuda?</label>
+                        <div class="select-wrapper">
+                            <select name="objetivoId" style="font-size: 1.1rem; padding: 1rem; border-radius: 15px; border: 2px solid #e2e8f0; width:100%;">
+                                <option value="">Donación general (Donde más se necesite)</option>
+                                <option th:each="obj : ${objetivos}" th:value="${obj.get('id')}" 
+                                        th:text="${obj.get('titulo')}"
+                                        th:selected="${donacion != null and donacion.get('objetivoId') == obj.get('id')}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 4. CONFIGURACIÓN DE DINERO -->
                     <div id="panel-dinero-extra" style="grid-column: 1/-1; display: none;">
                         <div class="view-toggle" style="margin-bottom: 2rem;">
                             <button type="button" id="btn-unica" class="toggle-btn active"
@@ -91,7 +98,7 @@
                         </div>
                     </div>
 
-                    <!-- 4. CAMPOS UNIFICADOS (Cantidad y Descripción) -->
+                    <!-- 5. CAMPOS UNIFICADOS -->
                     <div id="panel-unificado" class="dynamic-panel" style="grid-column: 1/-1; display: none;">
                         <div class="form-grid">
                             <div class="form-group" id="main-amount-container">
@@ -126,54 +133,60 @@
             </form>
         </div>
 
-        <style>
-            .dynamic-panel {
-                transition: all 0.4s ease;
-                animation: fadeInScale 0.4s ease-out;
-            }
-
-            @keyframes fadeInScale {
-                from {
-                    opacity: 0;
-                    transform: scale(0.98) translateY(10px);
-                }
-
-                to {
-                    opacity: 1;
-                    transform: scale(1) translateY(0);
-                }
-            }
-
-            .input-with-icon {
-                position: relative;
-            }
-
-            .input-icon {
-                position: absolute;
-                left: 1.25rem;
-                top: 50%;
-                transform: translateY(-50%);
-                color: var(--primary);
-                width: 20px;
-                transition: all 0.3s ease;
-            }
-
-            .input-with-icon input {
-                padding-left: 3.5rem !important;
-            }
-
-            .input-with-icon input:focus+.input-icon {
-                transform: translateY(-50%) scale(1.1);
-            }
-
-            .select-wrapper select:focus {
-                border-color: var(--primary-dark);
-                box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.1);
-            }
-        </style>
-
         <script>
-            // Ejecución segura para HTMX y carga normal (Llamando a la función global centralizada)
+            // Función mejorada para manejar cambios de tipo
+            function handleTypeChange() {
+                const select = document.getElementById('donation-type-select');
+                const type = select.value;
+                const panelDinero = document.getElementById('panel-dinero-extra');
+                const panelObjetivo = document.getElementById('panel-objetivo');
+                const panelUnificado = document.getElementById('panel-unificado');
+                const actions = document.getElementById('form-actions');
+                const labelCant = document.getElementById('label-cantidad');
+                const labelDesc = document.getElementById('label-descripcion');
+                const iconCant = document.getElementById('icon-cantidad');
+                const inputCant = document.getElementById('input-cantidad');
+
+                if (type === 'DINERO') {
+                    panelDinero.style.display = 'block';
+                    panelObjetivo.style.display = 'block';
+                    labelCant.innerText = 'Cantidad';
+                    labelDesc.innerText = 'Mensaje de apoyo';
+                    iconCant.setAttribute('data-lucide', 'euro');
+                    inputCant.placeholder = '0.00';
+                } else {
+                    panelDinero.style.display = 'none';
+                    panelObjetivo.style.display = 'none';
+                    labelCant.innerText = 'Cantidad / Unidades';
+                    labelDesc.innerText = 'Descripción detallada';
+                    iconCant.setAttribute('data-lucide', 'package');
+                    inputCant.placeholder = 'Ej: 5 sacos, 2 cajas...';
+                }
+                
+                panelUnificado.style.display = 'block';
+                actions.style.display = 'flex';
+                if (window.lucide) lucide.createIcons();
+            }
+
+            function setRecurrence(type) {
+                document.getElementById('frecuencia-input').value = type.toUpperCase();
+                document.getElementById('btn-unica').classList.toggle('active', type === 'unica');
+                document.getElementById('btn-mensual').classList.toggle('active', type === 'mensual');
+            }
+
+            function setAmount(val, btn) {
+                document.getElementById('input-cantidad').value = val;
+                document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+
+            function focusAmount(btn) {
+                document.getElementById('input-cantidad').focus();
+                document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+
+            // Ejecución segura
             (function() {
                 const init = () => { if (typeof handleTypeChange === 'function') handleTypeChange(); };
                 if (document.readyState === 'complete') setTimeout(init, 100);
@@ -182,5 +195,4 @@
         </script>
     </div>
 </body>
-
 </html>

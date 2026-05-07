@@ -26,6 +26,9 @@ public class ConvertirAdoptanteRequest {
     @NotBlank(message = "La dirección es obligatoria")
     private String direccion;
 
+    @NotBlank(message = "El teléfono es obligatorio")
+    private String telefono;
+
     @NotBlank(message = "La fecha de nacimiento es obligatoria")
     private String fechaNacimiento;
 

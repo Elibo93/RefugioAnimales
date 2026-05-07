@@ -16,6 +16,7 @@ public class Donacion {
 
     private DonacionId id;
     private UsuarioId usuarioId;
+    private ObjetivoDonacionId objetivoId;
     private TipoDonacion tipo;
     private Double cantidad;
     private FrecuenciaDonacion frecuencia;
@@ -23,4 +24,3 @@ public class Donacion {
     private String descripcion;
 
 }
-

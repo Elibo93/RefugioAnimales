@@ -42,8 +42,7 @@ public class AuthController {
 
         // Validación manual ya que hemos retirado las aserciones de BindingResult
         // vinculadas a vistas HTML
-        if (registroDto.getNombre() == null || registroDto.getNombre().isBlank() ||
-                registroDto.getEmail() == null || registroDto.getEmail().isBlank() ||
+        if (registroDto.getEmail() == null || registroDto.getEmail().isBlank() ||
                 registroDto.getPassword() == null || registroDto.getPassword().isBlank()) {
             response.sendRedirect("/registro?error=Campos requeridos vacios");
             return;
@@ -54,12 +53,16 @@ public class AuthController {
             return;
         }
 
+        if (registroDto.getUsername() == null || registroDto.getUsername().isBlank()) {
+            response.sendRedirect("/registro?error=El nombre de usuario es obligatorio");
+            return;
+        }
+
         UsuarioEntity newUser = UsuarioEntity.builder()
-                .nombre(registroDto.getNombre())
-                .apellido(registroDto.getApellido())
                 .email(registroDto.getEmail())
+                .username(registroDto.getUsername())
                 .contrasena(passwordEncoder.encode(registroDto.getPassword()))
-                .rol(registroDto.getRol() == null ? es.refugio.auth.domain.Rol.ROLE_VOLUNTARIO : registroDto.getRol())
+                .rol(registroDto.getRol() == null ? es.refugio.auth.domain.Rol.ROLE_PUBLICO : registroDto.getRol())
                 .createdAt(LocalDateTime.now())
                 .build();
         

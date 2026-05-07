@@ -9,8 +9,6 @@ import es.refugio.refugio.infraestructure.db.jpa.entity.AdoptanteEntity;
 @Repository
 public interface AdoptanteEntityJpaRepository extends JpaRepository<AdoptanteEntity, Integer> {
 
-    // Buscar un adoptante por su DNI (Útil para validaciones)
-    Optional<AdoptanteEntity> findByDni(String dni);
 
     // Buscar el perfil de adoptante asociado a un ID de usuario
     Optional<AdoptanteEntity> findByUsuarioId(Integer usuarioId);

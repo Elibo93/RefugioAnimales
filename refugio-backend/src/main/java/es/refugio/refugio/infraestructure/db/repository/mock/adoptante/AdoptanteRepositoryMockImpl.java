@@ -52,12 +52,6 @@ public class AdoptanteRepositoryMockImpl implements AdoptanteRepository {
         adoptantes.remove(id);
     }
 
-    @Override
-    public Optional<Adoptante> getByDni(String dni) {
-        return adoptantes.values().stream()
-                .filter(a -> a.getDni().equalsIgnoreCase(dni))
-                .findFirst();
-    }
 
     @Override
     public Optional<Adoptante> getByUsuarioId(UsuarioId usuarioId) {

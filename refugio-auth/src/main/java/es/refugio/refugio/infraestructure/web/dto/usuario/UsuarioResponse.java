@@ -8,17 +8,11 @@ public record UsuarioResponse(
         @Schema(description = "ID único del usuario", example = "23") 
         int id,
 
-        @Schema(description = "Nombre del usuario", example = "Juan") 
-        String nombre,
-
-        @Schema(description = "Apellido del usuario", example = "Rodriguez") 
-        String apellido,
-
         @Schema(description = "Email de acceso", example = "usuario@email.com") 
         String email,
 
-        @Schema(description = "Número de teléfono", example = "123456789") 
-        String telefono,
+        @Schema(description = "Nombre de usuario", example = "juan_perez") 
+        String username,
 
         @Schema(description = "Rol asignado en el sistema", example = "ROLE_ADOPTANTE") 
         Rol rol,

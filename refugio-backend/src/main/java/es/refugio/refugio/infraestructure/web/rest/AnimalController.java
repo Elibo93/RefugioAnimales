@@ -40,7 +40,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("api/v1/animales")
+@RequestMapping("/api/v1/animales")
 @RequiredArgsConstructor
 @Tag(name = "Animales", description = "Gestión de animales del refugio")
 public class AnimalController {

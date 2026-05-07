@@ -6,16 +6,22 @@ import es.refugio.refugio.infraestructure.web.validation.MinAge;
 
 public record AdoptanteRequest(
         Integer usuarioId,
+        String nombre,
+        String apellido,
         @ValidDni String dni,
         String direccion,
+        String telefono,
         @MinAge(18) String fechaNacimiento,
         String estadoValidacion) {
 
     public AdoptanteRequest(Adoptante t) {
         this(
                 t.getUsuarioId(),
-                t.getDni(),
-                t.getDireccion(),
+                "", // nombre
+                "", // apellido
+                "", // dni (fetch from PerfilLegal if needed)
+                "", // direccion (fetch from PerfilLegal if needed)
+                "", // telefono (fetch from PerfilLegal if needed)
                 t.getFechaNacimiento(),
                 t.getEstadoValidacion() != null ? t.getEstadoValidacion().name() : null);
     }

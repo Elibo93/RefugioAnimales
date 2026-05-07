@@ -41,8 +41,9 @@ public class DonacionViewController {
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
         List<Object> donaciones = fetchList("/v1/donaciones");
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+        List<Object> objetivos = fetchList("/v1/objetivos-donacion");
 
-        // Build usuariosMap: Map<userId, userObject>
+        // Build usuariosMap
         Map<Integer, Object> usuariosMap = new HashMap<>();
         for (Object u : usuarios) {
             if (u instanceof Map) {
@@ -53,19 +54,11 @@ public class DonacionViewController {
             }
         }
 
-        // Obtener el total recaudado en dinero desde el endpoint público
-        Double totalDinero = 0.0;
-        try {
-            Double callRes = restTemplate.getForObject(apiUrl + "/v1/donaciones/total", Double.class);
-            if (callRes != null)
-                totalDinero = callRes;
-        } catch (Exception e) {
-            totalDinero = 0.0;
-        }
-
         model.addAttribute(ModelAttribute.Donacion_LIST.getName(), donaciones);
         model.addAttribute("usuarios", usuarios);
         model.addAttribute("usuariosMap", usuariosMap);
+        model.addAttribute("objetivos", objetivos);
+
         Map<String, Object> nuevaDonacion = new HashMap<>();
         nuevaDonacion.put("fecha", LocalDateTime.now().toString());
         nuevaDonacion.put("id", null);
@@ -73,11 +66,10 @@ public class DonacionViewController {
         nuevaDonacion.put("tipo", "DINERO");
         nuevaDonacion.put("cantidad", null);
         nuevaDonacion.put("descripcion", "");
+        nuevaDonacion.put("objetivoId", null);
 
         model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), nuevaDonacion);
         model.addAttribute("tipos", List.of("DINERO", "ALIMENTO", "MEDICAMENTO", "MATERIAL", "OTRO"));
-        model.addAttribute("metaDinero", 1000.0);
-        model.addAttribute("totalDinero", totalDinero);
         model.addAttribute("formActionUrl", "/web/donaciones/nueva");
 
         if (successMessage != null)
@@ -86,27 +78,9 @@ public class DonacionViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    @GetMapping(WebRoutes.DONACIONES_NUEVA)
-    public String formulario(Model model) {
-        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
-
-        Map<String, Object> nuevaDonacion = new HashMap<>();
-        nuevaDonacion.put("fecha", LocalDateTime.now().toString());
-        nuevaDonacion.put("id", null);
-        nuevaDonacion.put("frecuencia", "UNICA");
-        nuevaDonacion.put("tipo", "DINERO");
-        nuevaDonacion.put("cantidad", null);
-        nuevaDonacion.put("descripcion", "");
-        model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), nuevaDonacion);
-        model.addAttribute("usuarios", usuarios);
-        model.addAttribute("tipos", List.of("DINERO", "ALIMENTO", "MEDICAMENTO", "MATERIAL", "OTRO"));
-        model.addAttribute("formActionUrl", "/web/donaciones/nueva");
-        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_FORM.getPath());
-        return ThymTemplates.MAIN_LAYOUT.getPath();
-    }
-
     @PostMapping(WebRoutes.DONACIONES_NUEVA)
     public String crear(@RequestParam(required = false) Integer usuarioId,
+            @RequestParam(required = false) Integer objetivoId,
             @RequestParam String tipo,
             @RequestParam Double cantidad,
             @RequestParam(defaultValue = "UNICA") String frecuencia,
@@ -115,6 +89,7 @@ public class DonacionViewController {
 
         Map<String, Object> body = new HashMap<>();
         body.put("usuarioId", usuarioId);
+        body.put("objetivoId", objetivoId);
         body.put("tipo", tipo);
         body.put("cantidad", cantidad);
         body.put("frecuencia", frecuencia);
@@ -126,12 +101,54 @@ public class DonacionViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
+    // Gestion de Objetivos para Admin
+    @GetMapping("/web/donaciones/objetivos/nuevo")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String formularioObjetivo(Model model) {
+        Map<String, Object> nuevoObjetivo = new HashMap<>();
+        nuevoObjetivo.put("titulo", "");
+        nuevoObjetivo.put("descripcion", "");
+        nuevoObjetivo.put("montoObjetivo", 0.0);
+        nuevoObjetivo.put("prioridad", "MEDIA");
+        nuevoObjetivo.put("estado", "ACTIVO");
+        nuevoObjetivo.put("icono", "heart");
+
+        model.addAttribute("objetivo", nuevoObjetivo);
+        model.addAttribute("prioridades", List.of("BAJA", "MEDIA", "ALTA", "CRITICA"));
+        model.addAttribute("formActionUrl", "/web/donaciones/objetivos/nuevo");
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), "fragments/content/objetivo-donacion-form");
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    @PostMapping("/web/donaciones/objetivos/nuevo")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String crearObjetivo(@RequestParam String titulo,
+            @RequestParam String descripcion,
+            @RequestParam Double montoObjetivo,
+            @RequestParam String prioridad,
+            @RequestParam String icono,
+            RedirectAttributes redirectAttributes) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("titulo", titulo);
+        body.put("descripcion", descripcion);
+        body.put("montoObjetivo", montoObjetivo);
+        body.put("prioridad", prioridad);
+        body.put("estado", "ACTIVO");
+        body.put("icono", icono);
+
+        restTemplate.postForObject(apiUrl + "/v1/objetivos-donacion", body, Object.class);
+        redirectAttributes.addFlashAttribute("successMessage", "Nuevo objetivo de donación creado");
+        return "redirect:" + WebRoutes.DONACIONES_BASE;
+    }
+
     @GetMapping(WebRoutes.DONACIONES_EDITAR)
     @PreAuthorize("hasRole('ADMIN')")
     public String editarFormulario(@PathVariable Integer id, Model model) {
         Object donacion = restTemplate.getForObject(apiUrl + "/v1/donaciones/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), donacion);
         model.addAttribute("usuarios", fetchList(authUrl + "/v1/usuarios"));
+        model.addAttribute("objetivos", fetchList("/v1/objetivos-donacion"));
         model.addAttribute("tipos", List.of("DINERO", "ALIMENTO", "MEDICAMENTO", "MATERIAL", "OTRO"));
         model.addAttribute("formActionUrl", "/web/donaciones/" + id + "/editar");
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_FORM.getPath());
@@ -142,6 +159,7 @@ public class DonacionViewController {
     @PreAuthorize("hasRole('ADMIN')")
     public String procesarEdicion(@PathVariable Integer id,
             @RequestParam Integer usuarioId,
+            @RequestParam(required = false) Integer objetivoId,
             @RequestParam String tipo,
             @RequestParam Double cantidad,
             @RequestParam(defaultValue = "UNICA") String frecuencia,
@@ -150,6 +168,7 @@ public class DonacionViewController {
 
         Map<String, Object> body = new HashMap<>();
         body.put("usuarioId", usuarioId);
+        body.put("objetivoId", objetivoId);
         body.put("tipo", tipo);
         body.put("cantidad", cantidad);
         body.put("frecuencia", frecuencia);

@@ -41,7 +41,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("api/v1/historial-medico")
+@RequestMapping("/api/v1/historial-medico")
 @RequiredArgsConstructor
 @Tag(name = "Historial Médico", description = "Registro del historial médico de los animales")
 public class HistorialMedicoController {

@@ -34,7 +34,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("api/v1/tareas")
+@RequestMapping("/api/v1/tareas")
 @RequiredArgsConstructor
 @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
 @Tag(name = "Tareas", description = "Gestión de tareas asignadas a los voluntarios")

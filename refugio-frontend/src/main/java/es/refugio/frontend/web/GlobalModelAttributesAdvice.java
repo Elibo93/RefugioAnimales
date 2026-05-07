@@ -37,6 +37,9 @@ public class GlobalModelAttributesAdvice {
     @Value("${auth.api.url}")
     private String authUrl;
 
+    @Value("${backend.api.url}")
+    private String apiUrl;
+
     @ModelAttribute("currentUri")
     public String currentUri(HttpServletRequest request) {
         return request.getRequestURI();
@@ -64,9 +67,21 @@ public class GlobalModelAttributesAdvice {
                 Object idObj = me.get("id");
                 if (idObj instanceof Map) idObj = ((Map<?, ?>) idObj).get("value");
                 model.addAttribute("currentUserId",   idObj);
-                model.addAttribute("currentUserName", me.get("nombreCompleto"));
                 model.addAttribute("currentUserRol",  me.get("rol"));
                 model.addAttribute("isAuthenticated", true);
+
+                // Fetch Name from Backend PerfilLegal
+                try {
+                    Map<String, Object> perfil = restTemplate.getForObject(
+                            apiUrl + "/v1/perfiles-legales/usuario/" + idObj, Map.class);
+                    if (perfil != null) {
+                        model.addAttribute("currentUserName", perfil.get("nombre") + " " + perfil.get("apellido"));
+                    } else {
+                        model.addAttribute("currentUserName", me.get("email")); // Fallback to email
+                    }
+                } catch (Exception e) {
+                    model.addAttribute("currentUserName", me.get("email")); // Fallback to email
+                }
 
                 String rol = String.valueOf(me.get("rol"));
                 model.addAttribute("isAdmin",      rol.contains("ADMIN"));

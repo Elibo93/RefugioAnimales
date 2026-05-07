@@ -36,7 +36,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("api/v1/donaciones")
+@RequestMapping("/api/v1/donaciones")
 @RequiredArgsConstructor
 @Tag(name = "Donaciones", description = "Registro y gestión de donaciones al refugio")
 public class DonacionController {
@@ -63,8 +63,8 @@ public class DonacionController {
                 if (request.tipo() == null) {
                     throw new IllegalArgumentException("El tipo de donación es obligatorio.");
                 }
-                String tipo = request.tipo().toUpperCase();
-                if (!tipo.equals("COMIDA") && !tipo.equals("OTRO")) {
+                String tipo = request.tipo().name();
+                if (!tipo.equals("COMIDA") && !tipo.equals("OTRO") && !tipo.equals("MATERIAL")) {
 
                     throw new AccessDeniedException(
                             "Los voluntarios solo pueden registrar donaciones físicas (COMIDA o MATERIAL/OTRO).");

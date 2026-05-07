@@ -12,9 +12,7 @@ import lombok.experimental.Accessors;
 public class EditUsuarioCommand {
 
     private UsuarioId id;
-    private String nombre;   
-    private String apellido;
     private String email;
-    private String telefono;
+    private String username;
     private Rol rol;
 }

@@ -38,11 +38,6 @@ public class AdoptanteJpaRepositoryImpl implements AdoptanteRepository {
         repository.deleteById(id.getValue());
     }
 
-    @Override
-    public Optional<Adoptante> getByDni(String dni) {
-        return repository.findByDni(dni)
-                .map(AdoptanteMapper::toDomain);
-    }
 
     @Override
     public Optional<Adoptante> getByUsuarioId(UsuarioId usuarioId) {
