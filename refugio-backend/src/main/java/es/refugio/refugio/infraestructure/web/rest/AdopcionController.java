@@ -47,7 +47,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("api/v1/adopciones")
+@RequestMapping("/api/v1/adopciones")
 @RequiredArgsConstructor
 @Tag(name = "Adopciones", description = "Gestión de adopciones de animales")
 public class AdopcionController {

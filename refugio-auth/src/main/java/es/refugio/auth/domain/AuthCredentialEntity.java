@@ -23,6 +23,9 @@ public class AuthCredentialEntity {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @Column(unique = true, nullable = false)
+    private String username;
+
     @Column(name = "contrasena", nullable = false)
     private String password;
 

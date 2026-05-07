@@ -33,6 +33,9 @@ public class DonacionEntity {
     @Column(name = "usuario_id", nullable = false)
     private Integer usuarioId;
 
+    @Column(name = "objetivo_id")
+    private Integer objetivoId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private TipoDonacion tipo;

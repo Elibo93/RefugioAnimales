@@ -20,17 +20,9 @@ public class CreateAdoptanteUseCase {
             return byUsuario.get();
         }
 
-        // Evitar duplicidad de DNI
-        var byDni = adoptanteRepository.getByDni(comando.dni());
-        if (byDni.isPresent()) {
-            throw new RuntimeException("El DNI " + comando.dni() + " ya está registrado con otra cuenta de usuario.");
-        }
-
         // Crear adoptante
         Adoptante adoptante = Adoptante.builder()
                 .usuarioId(comando.usuarioId())
-                .dni(comando.dni())
-                .direccion(comando.direccion())
                 .fechaNacimiento(comando.fechaNacimiento())
                 .estadoValidacion(EstadoValidacion.PENDIENTE)
                 .fechaRegistro(LocalDateTime.now())

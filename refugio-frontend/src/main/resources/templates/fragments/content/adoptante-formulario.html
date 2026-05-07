@@ -39,13 +39,24 @@
                             <div style="background: white; color: var(--primary); width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0;">
                                 <i data-lucide="user" style="width: 28px;"></i>
                             </div>
-                            <div>
+                            <div style="flex-grow: 1;">
                                 <span style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 2px; font-weight: 600; text-transform: uppercase;">Adoptante Vinculado</span>
-                                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-main);" th:text="${nombreCompleto}">Nombre del Adoptante</h3>
+                                
+                                <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
+                                    <div>
+                                        <label style="display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px; color: #64748b;">NOMBRE</label>
+                                        <input type="text" name="nombre" id="nombre-input-edit" required th:value="${nombreCompleto != null ? nombreCompleto.split(' ')[0] : ''}" 
+                                               style="width: 100%; height: 40px; border-radius: 8px; border: 1px solid #e2e8f0; padding: 0 10px;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px; color: #64748b;">APELLIDOS</label>
+                                        <input type="text" name="apellido" id="apellido-input-edit" required th:value="${nombreCompleto != null and nombreCompleto.contains(' ') ? nombreCompleto.substring(nombreCompleto.indexOf(' ') + 1) : ''}" 
+                                               style="width: 100%; height: 40px; border-radius: 8px; border: 1px solid #e2e8f0; padding: 0 10px;">
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Vista Creación: Buscador Inteligente -->
                         <div th:if="${adoptante.get('id') == null}" class="form-group" style="position: relative;">
                             <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">
                                 <i data-lucide="search" style="width: 18px; color: var(--primary);"></i>
@@ -64,10 +75,19 @@
                                 <input type="hidden" name="usuarioId" id="usuarioId-input" required th:value="${param.usuarioId}">
                             </div>
                             <div id="user-suggestions" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 100;"></div>
-                            <p style="font-size:0.85rem; color:var(--text-muted); margin-top: 0.75rem; display: flex; align-items: center; gap: 6px;">
-                                <i data-lucide="info" style="width: 14px;"></i>
-                                El usuario debe estar registrado en el sistema antes de convertirlo en adoptante.
-                            </p>
+                            
+                            <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem;">
+                                <div>
+                                    <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; color: var(--text-main);">Nombre Seleccionado</label>
+                                    <input type="text" name="nombre" id="nombre-input" required 
+                                           style="width: 100%; height: 48px; border-radius: 10px; border: 2px solid #e2e8f0; padding: 0 12px;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; color: var(--text-main);">Apellidos Seleccionados</label>
+                                    <input type="text" name="apellido" id="apellido-input" required 
+                                           style="width: 100%; height: 48px; border-radius: 10px; border: 2px solid #e2e8f0; padding: 0 12px;">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -87,9 +107,8 @@
                                     DNI / NIE
                                 </label>
                                 <input type="text" name="dni" required placeholder="12345678A"
-                                       th:value="${adoptante.get('dni')}"
-                                       th:readonly="${adoptante.get('id') != null}"
-                                       th:style="${adoptante.get('id') != null ? 'width: 100%; background: #f1f5f9; cursor: not-allowed; border-color: #e2e8f0;' : 'width: 100%; border-radius: 12px; height: 48px;'}"
+                                       th:value="${userDni ?: adoptante.get('dni')}"
+                                       style="width: 100%; border-radius: 12px; height: 48px;"
                                        class="form-control"
                                        pattern="([0-9]{8}[A-Z])|([XYZ][0-9]{7}[A-Z])" 
                                        title="Debe ser un DNI (12345678A) o NIE (X1234567G) válido">
@@ -114,7 +133,7 @@
                                 Dirección Completa
                             </label>
                             <input type="text" name="direccion" required placeholder="Calle, Portal, Piso, Código Postal y Ciudad"
-                                   th:value="${adoptante.get('direccion')}"
+                                   th:value="${userDireccion ?: adoptante.get('direccion')}"
                                    class="form-control"
                                    style="width: 100%; border-radius: 12px; height: 48px;">
                         </div>
@@ -157,6 +176,12 @@
                 
                 document.getElementById('usuarioId-input').value = userId;
                 document.getElementById('user-search').value = userName;
+                
+                // Populate name/apellido
+                const parts = userName.split(' ');
+                document.getElementById('nombre-input').value = parts[0] || '';
+                document.getElementById('apellido-input').value = parts.slice(1).join(' ') || '';
+                
                 document.getElementById('user-suggestions').innerHTML = '';
             }
         </script>

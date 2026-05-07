@@ -14,11 +14,9 @@ import lombok.NoArgsConstructor;
 public class Usuario {
 
     private UsuarioId id;
-    private String nombre;
-    private String apellido;
     private String email;
+    private String username;
     private String contrasena;
-    private String telefono;
     private Rol rol;
     private LocalDateTime createdAt;
 

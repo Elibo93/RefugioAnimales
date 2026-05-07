@@ -43,6 +43,7 @@ public class AdoptanteViewController {
     public String listar(Model model) {
         List<Object> adoptantes = fetchList("/v1/adoptantes");
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+        List<Object> perfilesLegales = fetchList("/v1/perfiles-legales");
 
         Map<String, Object> usuariosMap = new HashMap<>();
         for (Object u : usuarios) {
@@ -54,8 +55,19 @@ public class AdoptanteViewController {
             }
         }
 
+        Map<String, Object> perfilesMap = new HashMap<>();
+        for (Object p : perfilesLegales) {
+            if (p instanceof Map) {
+                Object uId = ((Map<?, ?>) p).get("usuarioId");
+                if (uId instanceof Number) {
+                    perfilesMap.put(String.valueOf(((Number) uId).intValue()), p);
+                }
+            }
+        }
+
         model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.Adoptante_LIST.getName(), adoptantes);
         model.addAttribute("usuariosMap", usuariosMap);
+        model.addAttribute("perfilesMap", perfilesMap);
         model.addAttribute("currentUri", WebRoutes.ADOPTANTES_BASE);
         model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.FRAGMENTO_CONTENIDO.getName(), es.refugio.frontend.web.enums.FragmentoContenido.Adoptante_LIST.getPath());
         return es.refugio.frontend.web.enums.ThymTemplates.MAIN_LAYOUT.getPath();
@@ -95,7 +107,20 @@ public class AdoptanteViewController {
                 Object uId = adoptante.get("usuarioId");
                 Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + uId, Map.class);
                 if (user != null) {
-                    model.addAttribute("nombreCompleto", user.get("nombre") + " " + user.get("apellido"));
+                    model.addAttribute("userEmail", user.get("email"));
+                }
+                
+                // Fetch PerfilLegal
+                try {
+                    Map<String, Object> perfil = restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + uId, Map.class);
+                    if (perfil != null) {
+                        model.addAttribute("nombreCompleto", perfil.get("nombre") + " " + perfil.get("apellido"));
+                        model.addAttribute("userPhone", perfil.get("telefono"));
+                        model.addAttribute("userDni", perfil.get("dni"));
+                        model.addAttribute("userDireccion", perfil.get("direccion"));
+                    }
+                } catch (Exception e) {
+                    logger.warn("No se encontró PerfilLegal para usuario " + uId);
                 }
             }
 
@@ -116,6 +141,8 @@ public class AdoptanteViewController {
     @PostMapping(WebRoutes.ADOPTANTES_NUEVO)
     public String guardarNuevo(
             @RequestParam Integer usuarioId,
+            @RequestParam String nombre,
+            @RequestParam String apellido,
             @RequestParam String dni,
             @RequestParam String direccion,
             @RequestParam String fechaNacimiento,
@@ -123,6 +150,8 @@ public class AdoptanteViewController {
         try {
             Map<String, Object> body = new HashMap<>();
             body.put("usuarioId", usuarioId);
+            body.put("nombre", nombre);
+            body.put("apellido", apellido);
             body.put("dni", dni);
             body.put("direccion", direccion);
             body.put("fechaNacimiento", fechaNacimiento);
@@ -138,6 +167,8 @@ public class AdoptanteViewController {
     public String guardarEdicion(
             @PathVariable Integer id,
             @RequestParam Integer usuarioId,
+            @RequestParam String nombre,
+            @RequestParam String apellido,
             @RequestParam String dni,
             @RequestParam String direccion,
             @RequestParam String fechaNacimiento,
@@ -146,13 +177,22 @@ public class AdoptanteViewController {
         try {
             Map<String, Object> body = new HashMap<>();
             body.put("usuarioId", usuarioId);
-            body.put("dni", dni);
-            body.put("direccion", direccion);
             body.put("fechaNacimiento", fechaNacimiento);
             if (estadoValidacion != null) {
                 body.put("estadoValidacion", estadoValidacion);
             }
             restTemplate.put(apiUrl + "/v1/adoptantes/" + id, body);
+
+            // 2. Actualizar PerfilLegal
+            Map<String, Object> bodyPerfil = new HashMap<>();
+            bodyPerfil.put("usuarioId", usuarioId);
+            bodyPerfil.put("nombre", nombre);
+            bodyPerfil.put("apellido", apellido);
+            bodyPerfil.put("dni", dni);
+            bodyPerfil.put("direccion", direccion);
+            // El teléfono se mantiene o se añade campo al form si es necesario
+            restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
+
             redirectAttributes.addFlashAttribute("successMessage", "Perfil de adoptante actualizado correctamente");
             return "redirect:" + WebRoutes.ADOPTANTES_BASE;
         } catch (org.springframework.web.client.RestClientResponseException e) {
@@ -194,6 +234,7 @@ public class AdoptanteViewController {
     public String exportPdf(Model model) {
         List<Object> adoptantes = fetchList("/v1/adoptantes");
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+        List<Object> perfilesLegales = fetchList("/v1/perfiles-legales");
 
         Map<String, Object> usuariosMap = new HashMap<>();
         for (Object u : usuarios) {
@@ -204,8 +245,20 @@ public class AdoptanteViewController {
                 }
             }
         }
+
+        Map<String, Object> perfilesMap = new HashMap<>();
+        for (Object p : perfilesLegales) {
+            if (p instanceof Map) {
+                Object uId = ((Map<?, ?>) p).get("usuarioId");
+                if (uId instanceof Number) {
+                    perfilesMap.put(String.valueOf(((Number) uId).intValue()), p);
+                }
+            }
+        }
+
         model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.Adoptante_LIST.getName(), adoptantes);
         model.addAttribute("usuariosMap", usuariosMap);
+        model.addAttribute("perfilesMap", perfilesMap);
         return es.refugio.frontend.web.enums.ThymTemplates.Adoptante_LIST_PDF.getPath();
     }
 

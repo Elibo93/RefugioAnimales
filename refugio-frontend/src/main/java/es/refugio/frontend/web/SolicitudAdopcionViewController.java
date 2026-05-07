@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -80,13 +82,17 @@ public class SolicitudAdopcionViewController {
                 Object id = ((Map<?, ?>) a).get("id");
                 Object uid = ((Map<?, ?>) a).get("usuarioId");
                 if (id instanceof Number && uid instanceof Number) {
-                    Map<String, Object> user = usuariosMap.get(String.valueOf(((Number) uid).intValue()));
-                    if (user != null) {
-                        Object nombre = user.get("nombre");
-                        Object apellido = user.get("apellido");
-                        adoptanteNombres.put(String.valueOf(((Number) id).intValue()),
-                                ((nombre != null ? nombre.toString() : "") + " "
-                                        + (apellido != null ? apellido.toString() : "")).trim());
+                    try {
+                        Map<String, Object> perfil = restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + uid, Map.class);
+                        if (perfil != null) {
+                            Object nombre = perfil.get("nombre");
+                            Object apellido = perfil.get("apellido");
+                            adoptanteNombres.put(String.valueOf(((Number) id).intValue()),
+                                    ((nombre != null ? nombre.toString() : "") + " "
+                                            + (apellido != null ? apellido.toString() : "")).trim());
+                        }
+                    } catch (Exception e) {
+                        logger.warn("No se encontró PerfilLegal para adoptante con usuario " + uid);
                     }
                 }
             }
@@ -235,9 +241,13 @@ public class SolicitudAdopcionViewController {
             try {
                 Map<String, Object> adoptante = restTemplate.getForObject(apiUrl + "/v1/adoptantes/" + sol.get("adoptanteId"), Map.class);
                 if (adoptante != null && adoptante.get("usuarioId") != null) {
-                    Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + adoptante.get("usuarioId"), Map.class);
-                    if (user != null) {
-                        model.addAttribute("nombreAdoptante", user.get("nombre") + " " + user.get("apellido"));
+                    try {
+                        Map<String, Object> perfil = restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + adoptante.get("usuarioId"), Map.class);
+                        if (perfil != null) {
+                            model.addAttribute("nombreAdoptante", perfil.get("nombre") + " " + perfil.get("apellido"));
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al cargar PerfilLegal para editar solicitud: " + e.getMessage());
                     }
                 }
             } catch (Exception e) {
@@ -570,13 +580,10 @@ public class SolicitudAdopcionViewController {
             HttpServletResponse response,
             RedirectAttributes redirectAttributes) {
 
-        // 1. Crear usuario en Auth
+        // 1. Crear usuario en Auth (sin nombre/apellido)
         Map<String, Object> userBody = new HashMap<>();
-        userBody.put("nombre", nombre);
-        userBody.put("apellido", apellido);
         userBody.put("email", email);
         userBody.put("contrasena", contrasena);
-        userBody.put("telefono", telefono);
         userBody.put("rol", "ROLE_ADOPTANTE");
 
         Integer usuarioId = null;
@@ -617,16 +624,33 @@ public class SolicitudAdopcionViewController {
             return "redirect:" + WebRoutes.SOLICITUDES_PUBLICO_REGISTRO + "?animalId=" + animalId;
         }
 
-        // 3. Auto-login tras registro exitoso
+        // 3. Auto-login tras registro exitoso (Relevo de Cookie JWT)
         try {
-            SecurityContextHolder.getContext().setAuthentication(
-                    new UsernamePasswordAuthenticationToken(email, null,
-                            List.of(new SimpleGrantedAuthority("ROLE_ADOPTANTE"))));
-
-            logger.info("Registro exitoso para usuario ID: " + usuarioId);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
+            String loginBody = "email=" + email + "&password=" + contrasena;
+            HttpEntity<String> entity = new HttpEntity<>(loginBody, headers);
+            
+            ResponseEntity<String> loginResponse = restTemplate.postForEntity(authUrl + "/login", entity, String.class);
+            
+            List<String> cookies = loginResponse.getHeaders().get(HttpHeaders.SET_COOKIE);
+            if (cookies != null) {
+                for (String cookieStr : cookies) {
+                    if (cookieStr.startsWith("JWT_TOKEN=")) {
+                        String value = cookieStr.substring(10, cookieStr.indexOf(";"));
+                        jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("JWT_TOKEN", value);
+                        cookie.setHttpOnly(true);
+                        cookie.setPath("/");
+                        cookie.setMaxAge(86400);
+                        response.addCookie(cookie);
+                    }
+                }
+            }
         } catch (Exception e) {
-            logger.error("Error al establecer el contexto de autenticación local: " + e.getMessage());
+            logger.error("Error en auto-login tras registro: " + e.getMessage());
         }
+        
+        logger.info("Registro exitoso para usuario ID: " + usuarioId);
 
         redirectAttributes.addFlashAttribute("successMessage",
                 "¡Registro y solicitud completados! Por favor, inicie sesión con su nuevo usuario.");

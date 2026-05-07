@@ -46,22 +46,22 @@
                 </thead>
                 <tbody>
                     <tr th:each="a : ${adoptantes}" th:id="'row-' + ${a.get('id')}"
-                        th:with="u=${usuariosMap != null ? usuariosMap['' + a.get('usuarioId')] : null}"
-                        th:attr="data-id=${a.get('id')}, data-uid=${a.get('usuarioId')}, data-nombre=${u != null ? u.get('nombre') : ''}, data-apellido=${u != null ? u.get('apellido') : ''}, data-dni=${a.get('dni')}, data-dir=${a.get('direccion')}, data-fnac=${a.get('fechaNacimiento')}">
+                        th:with="u=${usuariosMap != null ? usuariosMap['' + a.get('usuarioId')] : null}, p=${perfilesMap != null ? perfilesMap['' + a.get('usuarioId')] : null}"
+                        th:attr="data-id=${a.get('id')}, data-uid=${a.get('usuarioId')}, data-nombre=${p != null ? p.get('nombre') : ''}, data-apellido=${p != null ? p.get('apellido') : ''}, data-dni=${p != null ? p.get('dni') : ''}, data-dir=${p != null ? p.get('direccion') : ''}, data-fnac=${a.get('fechaNacimiento')}">
 
                         <td th:text="${a.get('id')}">1</td>
                         <td>
                             <a th:href="@{/web/personas/{id}(id=${a.get('usuarioId')})}" 
                                style="font-weight:600; color:var(--primary); text-decoration: none; display: block;" 
-                               th:text="${u != null ? u.get('nombre') : 'Usuario anónimo'}">Juan</a>
+                               th:text="${p != null ? p.get('nombre') : 'Usuario anónimo'}">Juan</a>
                         </td>
                         <td>
                             <a th:href="@{/web/personas/{id}(id=${a.get('usuarioId')})}" 
                                style="color:var(--text-main); text-decoration: none; display: block;" 
-                               th:text="${u != null ? u.get('apellido') : ''}">Pérez</a>
+                               th:text="${p != null ? p.get('apellido') : ''}">Pérez</a>
                         </td>
-                        <td th:text="${a.get('dni')}">12345678Z</td>
-                        <td th:text="${a.get('direccion')}">Calle Falsa 123</td>
+                        <td th:text="${p != null ? p.get('dni') : ''}">12345678Z</td>
+                        <td th:text="${p != null ? p.get('direccion') : ''}">Calle Falsa 123</td>
                         <td>
                             <span class="badge-soon" th:classappend="${a.get('estadoValidacion') != null ? (a.get('estadoValidacion').toString() == 'APROBADO' ? 'success' : (a.get('estadoValidacion').toString() == 'RECHAZADO' ? 'danger' : 'warning')) : 'warning'}"
                                 th:text="${a.get('estadoValidacion')}">PENDIENTE</span>

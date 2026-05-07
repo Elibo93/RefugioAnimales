@@ -7,6 +7,7 @@ import es.refugio.refugio.application.command.donacion.CreateDonacionCommand;
 import es.refugio.refugio.application.command.donacion.EditDonacionCommand;
 import es.refugio.refugio.domain.model.donacion.Donacion;
 import es.refugio.refugio.domain.model.donacion.DonacionId;
+import es.refugio.refugio.domain.model.donacion.ObjetivoDonacionId;
 import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.infraestructure.db.jpa.entity.DonacionEntity;
 import es.refugio.refugio.infraestructure.web.dto.donacion.DonacionRequest;
@@ -17,6 +18,7 @@ public class DonacionMapper {
     public static CreateDonacionCommand toCommand(DonacionRequest req) {
         return new CreateDonacionCommand(
                 req.usuarioId(),
+                req.objetivoId(),
                 req.tipo(),
                 req.cantidad(),
                 req.frecuencia(),
@@ -28,6 +30,7 @@ public class DonacionMapper {
         return new EditDonacionCommand(
                 new DonacionId(id),
                 req.usuarioId(),
+                req.objetivoId(),
                 req.tipo(),
                 req.cantidad(),
                 req.frecuencia(),
@@ -39,6 +42,7 @@ public class DonacionMapper {
         return new DonacionResponse(
                 d.getId() != null ? d.getId().getValue() : null,
                 d.getUsuarioId() != null ? d.getUsuarioId().getValue() : null,
+                d.getObjetivoId() != null ? d.getObjetivoId().getValue() : null,
                 d.getTipo() != null ? d.getTipo().name() : null,
                 d.getCantidad(),
                 d.getFrecuencia() != null ? d.getFrecuencia().name() : null,
@@ -51,10 +55,15 @@ public class DonacionMapper {
         if (d.getUsuarioId() != null) {
             usuarioId = d.getUsuarioId().getValue();
         }
+        Integer objetivoId = null;
+        if (d.getObjetivoId() != null) {
+            objetivoId = d.getObjetivoId().getValue();
+        }
 
         return DonacionEntity.builder()
                 .id(d.getId() != null ? d.getId().getValue() : null)
                 .usuarioId(usuarioId)
+                .objetivoId(objetivoId)
                 .tipo(d.getTipo())
                 .cantidad(d.getCantidad())
                 .frecuencia(d.getFrecuencia())
@@ -67,6 +76,7 @@ public class DonacionMapper {
         return Donacion.builder()
                 .id(e.getId() != null ? new DonacionId(e.getId()) : null)
                 .usuarioId(e.getUsuarioId() != null ? new UsuarioId(e.getUsuarioId()) : null)
+                .objetivoId(e.getObjetivoId() != null ? new ObjetivoDonacionId(e.getObjetivoId()) : null)
                 .tipo(e.getTipo())
                 .cantidad(e.getCantidad())
                 .frecuencia(e.getFrecuencia())

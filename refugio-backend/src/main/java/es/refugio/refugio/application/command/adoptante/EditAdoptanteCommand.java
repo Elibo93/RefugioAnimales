@@ -12,8 +12,6 @@ import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
  */
 public record EditAdoptanteCommand(
         AdoptanteId id,
-        String dni,
-        String direccion,
         String fechaNacimiento, // <--- Añadido para mantener la consistencia
         String estadoValidacion
 ) {

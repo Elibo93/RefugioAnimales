@@ -28,27 +28,21 @@ public class UsuarioEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, length = 255)
-    private String nombre;
-
-    @Column(nullable = false, length = 255)
-    private String apellido;
-
     @Column(nullable = false, unique = true, length = 255)
     private String email;
 
+    @Column(nullable = false, unique = true, length = 100)
+    private String username;
+
     @Column(name = "contrasena", nullable = false, length = 255)
     private String contrasena;
-
-    @Column(length = 20)
-    private String telefono;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private Rol rol;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME")
+    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 
 }

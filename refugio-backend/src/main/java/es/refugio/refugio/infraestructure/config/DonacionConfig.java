@@ -11,10 +11,16 @@ import es.refugio.refugio.application.usecase.donacion.CreateDonacionUseCase;
 import es.refugio.refugio.application.usecase.donacion.DeleteDonacionUseCase;
 import es.refugio.refugio.application.usecase.donacion.EditDonacionUseCase;
 import es.refugio.refugio.application.usecase.donacion.FindDonacionUseCase;
+import es.refugio.refugio.application.usecase.donacion.CreateObjetivoDonacionUseCase;
+import es.refugio.refugio.application.usecase.donacion.FindObjetivoDonacionUseCase;
 import es.refugio.refugio.domain.repository.DonacionRepository;
+import es.refugio.refugio.domain.repository.ObjetivoDonacionRepository;
 
 import es.refugio.refugio.infraestructure.db.jpa.repository.donacion.DonacionEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.donacion.DonacionJpaRepositoryImpl;
+import es.refugio.refugio.infraestructure.db.jpa.repository.donacion.ObjetivoDonacionEntityJpaRepository;
+import es.refugio.refugio.infraestructure.db.jpa.repository.donacion.ObjetivoDonacionJpaRepositoryImpl;
+import es.refugio.refugio.infraestructure.mapper.ObjetivoDonacionMapper;
 
 @Configuration
 public class DonacionConfig {
@@ -25,8 +31,17 @@ public class DonacionConfig {
     }
 
     @Bean
-    public CreateDonacionUseCase createDonacionUseCase(DonacionRepository repository) {
-        return new CreateDonacionUseCase(repository);
+    public ObjetivoDonacionRepository objetivoDonacionRepository(
+            ObjetivoDonacionEntityJpaRepository jpaRepository,
+            ObjetivoDonacionMapper mapper) {
+        return new ObjetivoDonacionJpaRepositoryImpl(jpaRepository);
+    }
+
+    @Bean
+    public CreateDonacionUseCase createDonacionUseCase(
+            DonacionRepository repository,
+            ObjetivoDonacionRepository objetivoRepository) {
+        return new CreateDonacionUseCase(repository, objetivoRepository);
     }
 
     @Bean
@@ -62,5 +77,15 @@ public class DonacionConfig {
     @Bean
     public DeleteDonacionService deleteDonacionService(DeleteDonacionUseCase useCase) {
         return new DeleteDonacionService(useCase);
+    }
+
+    @Bean
+    public CreateObjetivoDonacionUseCase createObjetivoDonacionUseCase(ObjetivoDonacionRepository repository) {
+        return new CreateObjetivoDonacionUseCase(repository);
+    }
+
+    @Bean
+    public FindObjetivoDonacionUseCase findObjetivoDonacionUseCase(ObjetivoDonacionRepository repository) {
+        return new FindObjetivoDonacionUseCase(repository);
     }
 }

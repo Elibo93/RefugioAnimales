@@ -8,7 +8,6 @@ import es.refugio.refugio.domain.model.usuario.UsuarioId;
 
 public interface AdoptanteRepository extends CRUDRepository<Adoptante, AdoptanteId> {
 
-    Optional<Adoptante> getByDni(String dni);
 
     Optional<Adoptante> getByUsuarioId(UsuarioId usuarioId);
 

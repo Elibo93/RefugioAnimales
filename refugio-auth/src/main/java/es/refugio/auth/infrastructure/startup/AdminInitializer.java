@@ -24,9 +24,8 @@ public class AdminInitializer implements CommandLineRunner {
         if (usuarioRepository.findByEmail("admin@refugio.es").isEmpty()) {
             log.info("No se encontró el usuario administrador. Creando usuario administrador por defecto...");
             UsuarioEntity admin = UsuarioEntity.builder()
-                    .nombre("Admin")
-                    .apellido("Sistema")
                     .email("admin@refugio.es")
+                    .username("admin")
                     .contrasena(passwordEncoder.encode("admin123"))
                     .rol(Rol.ROLE_ADMIN)
                     .createdAt(LocalDateTime.now())
@@ -38,10 +37,9 @@ public class AdminInitializer implements CommandLineRunner {
         if (usuarioRepository.findByEmail("anonimo@refugio.es").isEmpty()) {
             log.info("Creando usuario anónimo para donaciones sin registro...");
             UsuarioEntity anonimo = UsuarioEntity.builder()
-                    .nombre("Anónimo")
-                    .apellido("Sistema")
                     .email("anonimo@refugio.es")
-                    .contrasena(passwordEncoder.encode("anonimo123")) // No se usará para login normalmente
+                    .username("anonimo")
+                    .contrasena(passwordEncoder.encode("anonimo123"))
                     .rol(Rol.ROLE_PUBLICO)
                     .createdAt(LocalDateTime.now())
                     .build();

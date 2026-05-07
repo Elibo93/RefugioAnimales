@@ -24,6 +24,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.refugio.refugio.domain.model.perfil_legal.PerfilLegal;
+import es.refugio.refugio.domain.repository.PerfilLegalRepository;
 import es.refugio.refugio.domain.model.adoptante.Adoptante;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.domain.model.animal.AnimalId;
@@ -57,7 +59,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("api/v1/solicitudes-adopcion")
+@RequestMapping("/api/v1/solicitudes-adopcion")
 @RequiredArgsConstructor
 @Tag(name = "Solicitudes de Adopción", description = "Gestión de solicitudes de adopción")
 public class SolicitudAdopcionController {
@@ -70,6 +72,7 @@ public class SolicitudAdopcionController {
     private final AprobarSolicitudAdopcionService aprobarSolicitudAdopcionService;
     private final RechazarSolicitudAdopcionService rechazarSolicitudAdopcionService;
     private final FindAdoptanteService findAdoptanteService;
+    private final PerfilLegalRepository perfilLegalRepository;
 
     @Operation(summary = "Crear solicitud de adopción")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Solicitud creada"),
@@ -95,11 +98,20 @@ public class SolicitudAdopcionController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
+        // 1. Asegurar PerfilLegal
+        perfilLegalRepository.findByUsuarioId(usuarioId)
+                .orElseGet(() -> perfilLegalRepository.save(PerfilLegal.builder()
+                        .usuarioId(usuarioId)
+                        .nombre(request.nombre())
+                        .apellido(request.apellido())
+                        .dni(request.dni())
+                        .direccion(request.direccion())
+                        .telefono(request.telefono()) 
+                        .build()));
+
         // 2. Crear Adoptante
         var adoptanteCommand = new CreateAdoptanteCommand(
                 usuarioId,
-                request.dni(),
-                request.direccion(),
                 request.fechaNacimiento());
         var adoptante = createAdoptanteService.createAdoptante(adoptanteCommand);
 
@@ -126,11 +138,20 @@ public class SolicitudAdopcionController {
                 .getContext().getAuthentication().getPrincipal();
         Integer usuarioId = userDetails.getId();
 
-        // 1. Crear perfil de Adoptante
+        // 1. Asegurar PerfilLegal
+        perfilLegalRepository.findByUsuarioId(usuarioId)
+                .orElseGet(() -> perfilLegalRepository.save(PerfilLegal.builder()
+                        .usuarioId(usuarioId)
+                        .nombre(request.nombre())
+                        .apellido(request.apellido())
+                        .dni(request.dni())
+                        .direccion(request.direccion())
+                        .telefono(request.telefono()) 
+                        .build()));
+
+        // 2. Crear perfil de Adoptante
         var adoptanteCommand = new CreateAdoptanteCommand(
                 usuarioId,
-                request.dni(),
-                request.direccion(),
                 request.fechaNacimiento());
         var adoptante = createAdoptanteService.createAdoptante(adoptanteCommand);
 

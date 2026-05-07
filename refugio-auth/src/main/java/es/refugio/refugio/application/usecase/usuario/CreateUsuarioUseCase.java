@@ -15,15 +15,13 @@ public class CreateUsuarioUseCase {
 
     public Usuario create(CreateUsuarioCommand comando) {
         Usuario usuario = Usuario.builder()
-                .nombre(comando.nombre())
-                .apellido(comando.apellido())
                 .email(comando.email())
+                .username(comando.username())
                 .contrasena(passwordEncoder.encode(comando.contrasena()))  // ← BCrypt siempre
-                .telefono(comando.telefono())
                 .rol(comando.rol())
                 .createdAt(LocalDateTime.now())
                 .build();
 
         return usuarioRepository.save(usuario);
     }
-}
+}

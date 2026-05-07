@@ -8,8 +8,6 @@ package es.refugio.refugio.application.command.adoptante;
  */
 public record CreateAdoptanteCommand(
         Integer usuarioId,
-        String dni,
-        String direccion,
         String fechaNacimiento
 ) {
 }

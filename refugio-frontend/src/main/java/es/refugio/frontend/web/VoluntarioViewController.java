@@ -46,6 +46,7 @@ public class VoluntarioViewController {
     public String listar(Model model) {
         List<Object> voluntarios = fetchList("/v1/voluntarios");
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+        List<Object> perfilesLegales = fetchList("/v1/perfiles-legales");
 
         // Mapa auxiliar para asociar voluntarios con sus datos de usuario por ID
         Map<String, Object> usuariosMap = new HashMap<>();
@@ -58,8 +59,19 @@ public class VoluntarioViewController {
             }
         }
 
+        Map<String, Object> perfilesMap = new HashMap<>();
+        for (Object p : perfilesLegales) {
+            if (p instanceof Map) {
+                Object uId = ((Map<?, ?>) p).get("usuarioId");
+                if (uId instanceof Number) {
+                    perfilesMap.put(String.valueOf(((Number) uId).intValue()), p);
+                }
+            }
+        }
+
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), voluntarios);
         model.addAttribute("usuariosMap", usuariosMap);
+        model.addAttribute("perfilesMap", perfilesMap);
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_BASE);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -90,9 +102,20 @@ public class VoluntarioViewController {
                 Object uId = voluntario.get("usuarioId");
                 Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + uId, Map.class);
                 if (user != null) {
-                    model.addAttribute("nombreCompleto", user.get("nombre") + " " + user.get("apellido"));
-                    model.addAttribute("userPhone", user.get("telefono"));
                     model.addAttribute("userEmail", user.get("email"));
+                }
+                
+                // Fetch PerfilLegal
+                try {
+                    Map<String, Object> perfil = restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + uId, Map.class);
+                    if (perfil != null) {
+                        model.addAttribute("nombreCompleto", perfil.get("nombre") + " " + perfil.get("apellido"));
+                        model.addAttribute("userPhone", perfil.get("telefono"));
+                        model.addAttribute("userDni", perfil.get("dni"));
+                        model.addAttribute("userDireccion", perfil.get("direccion"));
+                    }
+                } catch (Exception e) {
+                    logger.warn("No se encontró PerfilLegal para usuario " + uId);
                 }
             }
         } catch (Exception e) {
@@ -124,19 +147,47 @@ public class VoluntarioViewController {
             @RequestParam(required = false) String especialidad,
             RedirectAttributes redirectAttributes) {
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("disponibilidad", disponibilidad);
-        if (idUsuario != null) body.put("usuarioId", idUsuario);
-        if (nombre    != null) body.put("nombre",    nombre);
-        if (apellido  != null) body.put("apellido",  apellido);
-        if (email     != null) body.put("email",     email);
-        if (dni       != null) body.put("dni",       dni);
-        if (telefono  != null) body.put("telefono",  telefono);
-        if (contrasena != null) body.put("contrasena", contrasena);
-        if (especialidad != null) body.put("especialidad", especialidad);
+        Integer finalUsuarioId = idUsuario;
 
-        restTemplate.postForObject(apiUrl + "/v1/voluntarios", body, Object.class);
-        redirectAttributes.addFlashAttribute("successMessage", "¡Bienvenido al equipo voluntario!");
+        // 1. Si no hay usuarioId, registramos al usuario primero
+        if (finalUsuarioId == null) {
+            Map<String, Object> userBody = new HashMap<>();
+            userBody.put("email", email);
+            userBody.put("contrasena", contrasena);
+            userBody.put("rol", "ROLE_VOLUNTARIO");
+
+            try {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> createdUser = restTemplate.postForObject(authUrl + "/v1/usuarios", userBody, Map.class);
+                if (createdUser != null && createdUser.get("id") != null) {
+                    finalUsuarioId = (Integer) createdUser.get("id");
+                }
+            } catch (Exception e) {
+                logger.error("Error al registrar usuario para voluntario: " + e.getMessage());
+                redirectAttributes.addFlashAttribute("errorMessage", "Error al crear la cuenta de usuario.");
+                return "redirect:" + WebRoutes.VOLUNTARIOS_NUEVO;
+            }
+        }
+
+        // 2. Registrar el perfil de voluntario y PerfilLegal
+        Map<String, Object> body = new HashMap<>();
+        body.put("usuarioId", finalUsuarioId);
+        body.put("nombre", nombre);
+        body.put("apellido", apellido);
+        body.put("disponibilidad", disponibilidad);
+        body.put("especialidad", especialidad);
+        body.put("dni", dni);
+        body.put("telefono", telefono);
+        body.put("direccion", ""); // Se puede dejar vacío o añadir campo al form
+
+        try {
+            restTemplate.postForObject(apiUrl + "/v1/voluntarios", body, Object.class);
+            redirectAttributes.addFlashAttribute("successMessage", "¡Bienvenido al equipo voluntario!");
+        } catch (Exception e) {
+            logger.error("Error al registrar perfil de voluntario: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al crear el perfil de voluntario.");
+        }
+
         return "redirect:" + WebRoutes.HOME;
     }
 
@@ -144,9 +195,13 @@ public class VoluntarioViewController {
     @PreAuthorize("hasRole('ADMIN')")
     public String editarVoluntario(@PathVariable Integer id,
             @RequestParam Integer usuarioId,
+            @RequestParam String nombre,
+            @RequestParam String apellido,
             @RequestParam String disponibilidad,
             @RequestParam String email,
             @RequestParam String telefono,
+            @RequestParam(required = false) String dni,
+            @RequestParam(required = false) String direccion,
             @RequestParam(required = false) String especialidad,
             RedirectAttributes redirectAttributes) {
 
@@ -156,16 +211,30 @@ public class VoluntarioViewController {
         bodyVol.put("especialidad",   especialidad);
         restTemplate.put(apiUrl + "/v1/voluntarios/" + id, bodyVol);
 
-        // 2. Sincronización de datos de contacto en el servicio de autenticación
+        // 2. Actualización de PerfilLegal
+        try {
+            Map<String, Object> bodyPerfil = new HashMap<>();
+            bodyPerfil.put("usuarioId", usuarioId);
+            bodyPerfil.put("nombre", nombre != null ? nombre : ""); // Necesitamos el nombre en el form
+            bodyPerfil.put("apellido", apellido != null ? apellido : ""); 
+            bodyPerfil.put("dni", dni);
+            bodyPerfil.put("telefono", telefono);
+            bodyPerfil.put("direccion", direccion);
+            restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
+        } catch (Exception e) {
+            logger.error("Error al sincronizar PerfilLegal: " + e.getMessage());
+        }
+
+        // 3. Sincronización de datos básicos en el servicio de autenticación
         try {
             Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + usuarioId, Map.class);
             if (user != null) {
                 Map<String, Object> bodyUser = new HashMap<>(user);
-                bodyUser.put("telefono", telefono);
                 bodyUser.put("email", email);
                 
-                // Se envía una contraseña genérica para superar la validación @NotBlank de Auth,
-                // ya que el caso de uso de edición no actualiza la contraseña.
+                // No enviamos teléfono a auth ya que ahora se gestiona en PerfilLegal
+                bodyUser.remove("telefono");
+
                 if (bodyUser.get("contrasena") == null) {
                     bodyUser.put("contrasena", "secret_placeholder"); 
                 }
@@ -199,8 +268,21 @@ public class VoluntarioViewController {
     @PreAuthorize("hasRole('ADMIN')")
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<Object> voluntarios = fetchList("/v1/voluntarios");
+        List<Object> perfilesLegales = fetchList("/v1/perfiles-legales");
+
+        Map<String, Object> perfilesMap = new HashMap<>();
+        for (Object p : perfilesLegales) {
+            if (p instanceof Map) {
+                Object uId = ((Map<?, ?>) p).get("usuarioId");
+                if (uId instanceof Number) {
+                    perfilesMap.put(String.valueOf(((Number) uId).intValue()), p);
+                }
+            }
+        }
+
         Context context = new Context();
         context.setVariable("voluntarios", voluntarios);
+        context.setVariable("perfilesMap", perfilesMap);
         String html = templateEngine.process(ThymTemplates.Voluntario_LIST_PDF.getPath(), context);
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=voluntarios.pdf");

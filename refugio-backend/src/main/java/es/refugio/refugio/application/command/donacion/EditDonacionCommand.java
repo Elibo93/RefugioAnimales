@@ -1,16 +1,18 @@
 package es.refugio.refugio.application.command.donacion;
 
 import java.time.LocalDateTime;
+
 import es.refugio.refugio.domain.model.donacion.DonacionId;
+import es.refugio.refugio.domain.model.donacion.enums.FrecuenciaDonacion;
+import es.refugio.refugio.domain.model.donacion.enums.TipoDonacion;
 
 public record EditDonacionCommand(
         DonacionId id,
         Integer usuarioId,
-        String tipo,
+        Integer objetivoId,
+        TipoDonacion tipo,
         Double cantidad,
-        String frecuencia,
+        FrecuenciaDonacion frecuencia,
         LocalDateTime fecha,
-        String descripcion
-) {
+        String descripcion) {
 }
-

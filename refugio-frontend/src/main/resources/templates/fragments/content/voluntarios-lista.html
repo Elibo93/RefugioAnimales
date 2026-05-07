@@ -35,42 +35,42 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="p : ${voluntarios}" th:id="'row-' + ${p.get('id')}"
-                        th:with="u=${usuariosMap != null ? usuariosMap['' + p.get('usuarioId')] : null}">
+                    <tr th:each="p_item : ${voluntarios}" th:id="'row-' + ${p_item.get('id')}"
+                        th:with="u=${usuariosMap != null ? usuariosMap['' + p_item.get('usuarioId')] : null}, p=${perfilesMap != null ? perfilesMap['' + p_item.get('usuarioId')] : null}">
 
-                        <td th:text="${p.get('id')}">1</td>
+                        <td th:text="${p_item.get('id')}">1</td>
                         <td>
-                            <a th:href="@{/web/voluntarios/{id}(id=${p.get('id')})}"
+                            <a th:href="@{/web/voluntarios/{id}(id=${p_item.get('id')})}"
                                 style="font-weight:600; color:var(--primary); text-decoration: none; display: block;"
-                                th:text="${u != null ? u.get('nombre') : ''}">Juan</a>
+                                th:text="${p != null ? p.get('nombre') : ''}">Juan</a>
                         </td>
                         <td>
-                            <a th:href="@{/web/voluntarios/{id}(id=${p.get('id')})}"
+                            <a th:href="@{/web/voluntarios/{id}(id=${p_item.get('id')})}"
                                 style="color:var(--text-main); text-decoration: none; display: block;"
-                                th:text="${u != null ? u.get('apellido') : ''}">Pérez</a>
+                                th:text="${p != null ? p.get('apellido') : ''}">Pérez</a>
                         </td>
                         <td>
                             <span class="badge" style="background:#E0F2FE; color:#0369A1; font-size:0.85rem;"
-                                  th:text="${p.get('especialidad') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(p.get('especialidad'), '_', ' '))) : 'General'}">Especialidad</span>
+                                  th:text="${p_item.get('especialidad') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(p_item.get('especialidad'), '_', ' '))) : 'General'}">Especialidad</span>
                         </td>
                         <td><span class="badge-soon" style="background:#F3E8FF; color:#9333EA;"
-                                th:text="${p.get('disponibilidad')}">Tarde</span></td>
+                                th:text="${p_item.get('disponibilidad')}">Tarde</span></td>
                         <td>
                             <div style="display:flex; gap:8px;">
-                                <a class="btn-icon" th:href="@{/web/tareas/nueva(voluntarioId=${p.get('id')})}"
+                                <a class="btn-icon" th:href="@{/web/tareas/nueva(voluntarioId=${p_item.get('id')})}"
                                     title="Asignar Tarea">
                                     <i data-lucide="clipboard-list" style="width:16px; color:var(--secondary);"></i>
                                 </a>
                                 <a class="btn-icon" 
-                                   th:hx-get="@{/web/voluntarios/{id}/editar(id=${p.get('id')})}"
+                                   th:hx-get="@{/web/voluntarios/{id}/editar(id=${p_item.get('id')})}"
                                    hx-target="#contenido-dinamico" 
                                    hx-push-url="true"
                                    title="Editar">
                                     <i data-lucide="edit-2" style="width:16px;"></i>
                                 </a>
                                 <button class="btn-icon delete"
-                                    th:hx-post="@{/web/voluntarios/{id}/borrar(id=${p.get('id')})}"
-                                    th:hx-target="'#row-' + ${p.get('id')}" hx-swap="outerHTML swap:0.3s"
+                                    th:hx-post="@{/web/voluntarios/{id}/borrar(id=${p_item.get('id')})}"
+                                    th:hx-target="'#row-' + ${p_item.get('id')}" hx-swap="outerHTML swap:0.3s"
                                     hx-confirm="¿Eliminar voluntario?">
                                     <i data-lucide="trash-2" style="width:16px;"></i>
                                 </button>
