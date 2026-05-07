@@ -12,10 +12,10 @@ public record DonacionRequest(
                 Double cantidad,
                 FrecuenciaDonacion frecuencia,
                 
-                @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+                @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS")
                 LocalDateTime fecha,
                 
-                @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+                @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS")
                 LocalDateTime proximaFechaPago,
                 
                 String descripcion) {
