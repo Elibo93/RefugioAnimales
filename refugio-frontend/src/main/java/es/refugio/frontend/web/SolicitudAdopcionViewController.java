@@ -49,7 +49,6 @@ public class SolicitudAdopcionViewController {
     @Value("${auth.api.url}")
     private String authUrl;
 
-
     @GetMapping(WebRoutes.SOLICITUDES_BASE)
     @PreAuthorize("hasRole('ADMIN')")
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
@@ -83,7 +82,8 @@ public class SolicitudAdopcionViewController {
                 Object uid = ((Map<?, ?>) a).get("usuarioId");
                 if (id instanceof Number && uid instanceof Number) {
                     try {
-                        Map<String, Object> perfil = restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + uid, Map.class);
+                        Map<String, Object> perfil = restTemplate
+                                .getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + uid, Map.class);
                         if (perfil != null) {
                             Object nombre = perfil.get("nombre");
                             Object apellido = perfil.get("apellido");
@@ -114,7 +114,8 @@ public class SolicitudAdopcionViewController {
         model.addAttribute("animalesMap", animalesMap);
         model.addAttribute("adoptanteNombres", adoptanteNombres);
         model.addAttribute("adoptanteUsuarioIds", adoptanteUsuarioIds);
-        if (successMessage != null) model.addAttribute("successMessage", successMessage);
+        if (successMessage != null)
+            model.addAttribute("successMessage", successMessage);
         model.addAttribute("currentUri", WebRoutes.SOLICITUDES_BASE);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -123,16 +124,21 @@ public class SolicitudAdopcionViewController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ADOPTANTE')")
     @GetMapping(WebRoutes.SOLICITUDES_MIS_ADOPTADOS)
     public String misAdoptados(Model model) {
-        // 1. Obtener ID del usuario actual del modelo (inyectado por GlobalModelAttributesAdvice)
+        // 1. Obtener ID del usuario actual del modelo (inyectado por
+        // GlobalModelAttributesAdvice)
         Object userIdObj = model.getAttribute("currentUserId");
-        if (userIdObj == null) return "redirect:/login";
-        
-        Integer currentUserId = (userIdObj instanceof Number) ? ((Number) userIdObj).intValue() : Integer.parseInt(userIdObj.toString());
+        if (userIdObj == null)
+            return "redirect:/login";
 
-        // 2. Buscar perfil de adoptante para este usuario usando el endpoint específico por usuarioId
+        Integer currentUserId = (userIdObj instanceof Number) ? ((Number) userIdObj).intValue()
+                : Integer.parseInt(userIdObj.toString());
+
+        // 2. Buscar perfil de adoptante para este usuario usando el endpoint específico
+        // por usuarioId
         Integer adoptanteId = null;
         try {
-            Map<String, Object> adoptante = restTemplate.getForObject(apiUrl + "/v1/adoptantes/usuario/" + currentUserId, Map.class);
+            Map<String, Object> adoptante = restTemplate
+                    .getForObject(apiUrl + "/v1/adoptantes/usuario/" + currentUserId, Map.class);
             if (adoptante != null && adoptante.get("id") != null) {
                 adoptanteId = ((Number) adoptante.get("id")).intValue();
             }
@@ -143,7 +149,7 @@ public class SolicitudAdopcionViewController {
         // 3. Filtrar solicitudes si existe el adoptante
         List<Object> todas = fetchList("/v1/solicitudes-adopcion");
         List<Object> misSolicitudes = new java.util.ArrayList<>();
-        
+
         if (adoptanteId != null) {
             for (Object obj : todas) {
                 if (obj instanceof Map) {
@@ -158,9 +164,11 @@ public class SolicitudAdopcionViewController {
 
         // 4. Si no hay solicitudes, mostrar vista vacía con mensaje personalizado
         if (misSolicitudes.isEmpty()) {
-            model.addAttribute("mensajeVacio", "Vaya, parece que aún no te has hecho con ninguno de nuestros amiguitos");
+            model.addAttribute("mensajeVacio",
+                    "Vaya, parece que aún no te has hecho con ninguno de nuestros amiguitos");
             model.addAttribute("currentUri", WebRoutes.SOLICITUDES_MIS_ADOPTADOS);
-            model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.MIS_ADOPTADOS_VACIO.getPath());
+            model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
+                    FragmentoContenido.MIS_ADOPTADOS_VACIO.getPath());
             return ThymTemplates.MAIN_LAYOUT.getPath();
         }
 
@@ -170,19 +178,22 @@ public class SolicitudAdopcionViewController {
         for (Object a : animales) {
             if (a instanceof Map) {
                 Object id = ((Map<?, ?>) a).get("id");
-                if (id instanceof Number) animalesMap.put(id.toString(), a);
+                if (id instanceof Number)
+                    animalesMap.put(id.toString(), a);
             }
         }
 
         model.addAttribute(ModelAttribute.Solicitud_LIST.getName(), misSolicitudes);
         model.addAttribute("animalesMap", animalesMap);
         model.addAttribute("currentUri", WebRoutes.SOLICITUDES_MIS_ADOPTADOS);
-        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.MIS_ADOPTADOS_LISTA.getPath());
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
+                FragmentoContenido.MIS_ADOPTADOS_LISTA.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
     @GetMapping(WebRoutes.SOLICITUDES_NUEVA)
-    public String formulario(Model model, @RequestParam(required = false) Integer animalId, HttpServletRequest request) {
+    public String formulario(Model model, @RequestParam(required = false) Integer animalId,
+            HttpServletRequest request) {
         Map<String, Object> solicitud = new HashMap<>();
         solicitud.put("fecha", LocalDateTime.now().toString());
         if (animalId != null)
@@ -193,11 +204,11 @@ public class SolicitudAdopcionViewController {
         model.addAttribute("adoptantes", fetchList("/v1/adoptantes"));
         model.addAttribute("estados", List.of("PENDIENTE", "APROBADA", "RECHAZADA", "EN_REVISION"));
         model.addAttribute("currentUri", WebRoutes.SOLICITUDES_NUEVA);
-        
+
         if ("true".equals(request.getHeader("HX-Request"))) {
             return FragmentoContenido.Solicitud_FORM.getPath() + " :: content";
         }
-        
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_FORM.getPath());
         model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -233,13 +244,15 @@ public class SolicitudAdopcionViewController {
         Object solicitud = restTemplate.getForObject(apiUrl + "/v1/solicitudes-adopcion/" + id, Object.class);
         Map<String, Object> sol = (Map<String, Object>) solicitud;
         model.addAttribute(ModelAttribute.SINGLE_Solicitud.getName(), sol);
-        
+
         if (sol != null && sol.get("adoptanteId") != null) {
             try {
-                Map<String, Object> adoptante = restTemplate.getForObject(apiUrl + "/v1/adoptantes/" + sol.get("adoptanteId"), Map.class);
+                Map<String, Object> adoptante = restTemplate
+                        .getForObject(apiUrl + "/v1/adoptantes/" + sol.get("adoptanteId"), Map.class);
                 if (adoptante != null && adoptante.get("usuarioId") != null) {
                     try {
-                        Map<String, Object> perfil = restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + adoptante.get("usuarioId"), Map.class);
+                        Map<String, Object> perfil = restTemplate.getForObject(
+                                apiUrl + "/v1/perfiles-legales/usuario/" + adoptante.get("usuarioId"), Map.class);
                         if (perfil != null) {
                             model.addAttribute("nombreAdoptante", perfil.get("nombre") + " " + perfil.get("apellido"));
                         }
@@ -254,7 +267,8 @@ public class SolicitudAdopcionViewController {
 
         if (sol != null && sol.get("animalId") != null) {
             try {
-                Map<String, Object> animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + sol.get("animalId"), Map.class);
+                Map<String, Object> animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + sol.get("animalId"),
+                        Map.class);
                 model.addAttribute("animalData", animal);
             } catch (Exception e) {
                 logger.error("Error al cargar datos del animal para editar solicitud: " + e.getMessage());
@@ -264,11 +278,11 @@ public class SolicitudAdopcionViewController {
         model.addAttribute("animales", fetchList("/v1/animales"));
         model.addAttribute("estados", List.of("PENDIENTE", "APROBADA", "RECHAZADA", "EN_REVISION"));
         model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
-        
+
         if ("true".equals(request.getHeader("HX-Request"))) {
             return FragmentoContenido.Solicitud_FORM.getPath() + " :: content";
         }
-        
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -447,13 +461,14 @@ public class SolicitudAdopcionViewController {
         body.put("animalId", animalId);
         body.put("comentario", comentario);
 
-        logger.info("Enviando solicitud de conversión y adopción al backend: " + apiUrl + "/v1/solicitudes-adopcion/convertir-y-adopcion");
+        logger.info("Enviando solicitud de conversión y adopción al backend: " + apiUrl
+                + "/v1/solicitudes-adopcion/convertir-y-adopcion");
         try {
             restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/convertir-y-adopcion", body, Object.class);
         } catch (org.springframework.web.client.RestClientResponseException e) {
             Map<String, Object> responseBody = e.getResponseBodyAs(Map.class);
             String errorMsg = "Error al procesar la adopción. Es posible que el DNI ya esté en uso.";
-            
+
             if (responseBody != null) {
                 if (responseBody.containsKey("message")) {
                     errorMsg = (String) responseBody.get("message");
@@ -466,15 +481,16 @@ public class SolicitudAdopcionViewController {
                     errorMsg = responseBody.values().iterator().next().toString();
                 }
             }
-            
-            // Si hay error, volvemos a mostrar el formulario de conversión con los datos introducidos
+
+            // Si hay error, volvemos a mostrar el formulario de conversión con los datos
+            // introducidos
             try {
                 Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
                 model.addAttribute("animal", animal);
             } catch (Exception ignored) {
                 model.addAttribute("animal", Map.of("id", animalId, "nombre", "Animal"));
             }
-            
+
             model.addAttribute("nombre", nombre);
             model.addAttribute("apellido", apellido);
             model.addAttribute("telefono", telefono);
@@ -483,8 +499,9 @@ public class SolicitudAdopcionViewController {
             model.addAttribute("fechaNacimiento", fechaNacimiento);
             model.addAttribute("comentario", comentario);
             model.addAttribute("errorMessage", errorMsg);
-            
-            model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_CONVERSION.getPath());
+
+            model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
+                    FragmentoContenido.Solicitud_CONVERSION.getPath());
             return ThymTemplates.MAIN_LAYOUT.getPath();
         }
 
@@ -507,26 +524,26 @@ public class SolicitudAdopcionViewController {
                 if (newRol != null) {
                     Map<String, String> patchBody = new HashMap<>();
                     patchBody.put("rol", newRol);
-                    
+
                     // Usar exchange para obtener la respuesta con el nuevo token
                     var responseEntity = restTemplate.exchange(
-                        authUrl + "/v1/usuarios/" + usuarioId + "/rol",
-                        org.springframework.http.HttpMethod.PUT,
-                        new org.springframework.http.HttpEntity<>(patchBody),
-                        Map.class
-                    );
+                            authUrl + "/v1/usuarios/" + usuarioId + "/rol",
+                            org.springframework.http.HttpMethod.PUT,
+                            new org.springframework.http.HttpEntity<>(patchBody),
+                            Map.class);
 
                     if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
                         String newToken = (String) responseEntity.getBody().get("token");
                         if (newToken != null) {
                             // 1. Actualizar la cookie en el navegador
-                            jakarta.servlet.http.Cookie authCookie = new jakarta.servlet.http.Cookie("JWT_TOKEN", newToken);
+                            jakarta.servlet.http.Cookie authCookie = new jakarta.servlet.http.Cookie("JWT_TOKEN",
+                                    newToken);
                             authCookie.setHttpOnly(true);
                             authCookie.setPath("/");
                             authCookie.setMaxAge(86400);
                             response.addCookie(authCookie);
                             logger.info("Cookie JWT_TOKEN actualizada en el frontend con el nuevo rol " + newRol);
-                            
+
                             // 2. Actualizar contexto de seguridad local para la petición actual
                             List<SimpleGrantedAuthority> authoritiesList = new java.util.ArrayList<>();
                             authoritiesList.add(new SimpleGrantedAuthority(newRol));
@@ -534,7 +551,7 @@ public class SolicitudAdopcionViewController {
                                 authoritiesList.add(new SimpleGrantedAuthority("ROLE_VOLUNTARIO"));
                                 authoritiesList.add(new SimpleGrantedAuthority("ROLE_ADOPTANTE"));
                             }
-                            
+
                             var auth = new UsernamePasswordAuthenticationToken(me.get("email"), null, authoritiesList);
                             SecurityContextHolder.getContext().setAuthentication(auth);
                         }
@@ -546,7 +563,7 @@ public class SolicitudAdopcionViewController {
         }
 
         redirectAttributes.addFlashAttribute("successMessage",
-                "Solicitud enviada con éxito. Tu perfil ha sido actualizado a Adoptante.");
+                "Solicitud enviada con éxito.En breve nos pondremos en contacto contigo.");
         return "redirect:" + WebRoutes.HOME;
     }
 
@@ -615,9 +632,10 @@ public class SolicitudAdopcionViewController {
                     } else if (errorMap != null && errorMap.containsKey("message")) {
                         errorMsg = (String) errorMap.get("message");
                     }
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
-            
+
             redirectAttributes.addFlashAttribute("errorMessage", "Error al registrar el usuario en Auth: " + errorMsg);
             redirectAttributes.addFlashAttribute("userName", userName);
             redirectAttributes.addFlashAttribute("nombre", nombre);
@@ -628,7 +646,7 @@ public class SolicitudAdopcionViewController {
             redirectAttributes.addFlashAttribute("direccion", direccion);
             redirectAttributes.addFlashAttribute("fechaNacimiento", fechaNacimiento);
             redirectAttributes.addFlashAttribute("comentario", comentario);
-            
+
             return "redirect:" + WebRoutes.SOLICITUDES_PUBLICO_REGISTRO + "?animalId=" + animalId;
         }
 
@@ -657,30 +675,33 @@ public class SolicitudAdopcionViewController {
                 if (errorMap != null && errorMap.containsKey("message")) {
                     errorMsg = (String) errorMap.get("message");
                 }
-            } catch (Exception ignored) {}
-            
+            } catch (Exception ignored) {
+            }
+
             redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
             return "redirect:" + WebRoutes.SOLICITUDES_PUBLICO_REGISTRO + "?animalId=" + animalId;
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar la solicitud de adopción: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Error al procesar la solicitud de adopción: " + e.getMessage());
             return "redirect:" + WebRoutes.SOLICITUDES_PUBLICO_REGISTRO + "?animalId=" + animalId;
         }
 
-            // 3. Auto-login tras registro exitoso (Relevo de Cookie JWT)
-            try {
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
-                
-                // Auth service requires 'username' parameter (mapped to email in CustomUserDetailsService)
-                String loginBody = "username=" + email + "&password=" + password;
-                HttpEntity<String> entity = new HttpEntity<>(loginBody, headers);
-                
-                // Stripping /api from authUrl to get the base for /login-post
-                String authBaseUrl = authUrl.substring(0, authUrl.lastIndexOf("/api"));
-                String loginUrl = authBaseUrl + "/login-post";
-                
-                ResponseEntity<String> loginResponse = restTemplate.postForEntity(loginUrl, entity, String.class);
-            
+        // 3. Auto-login tras registro exitoso (Relevo de Cookie JWT)
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
+
+            // Auth service requires 'username' parameter (mapped to email in
+            // CustomUserDetailsService)
+            String loginBody = "username=" + email + "&password=" + password;
+            HttpEntity<String> entity = new HttpEntity<>(loginBody, headers);
+
+            // Stripping /api from authUrl to get the base for /login-post
+            String authBaseUrl = authUrl.substring(0, authUrl.lastIndexOf("/api"));
+            String loginUrl = authBaseUrl + "/login-post";
+
+            ResponseEntity<String> loginResponse = restTemplate.postForEntity(loginUrl, entity, String.class);
+
             List<String> cookies = loginResponse.getHeaders().get(HttpHeaders.SET_COOKIE);
             if (cookies != null) {
                 for (String cookieStr : cookies) {
@@ -697,11 +718,11 @@ public class SolicitudAdopcionViewController {
         } catch (Exception e) {
             logger.error("Error en auto-login tras registro: " + e.getMessage());
         }
-        
+
         logger.info("Registro exitoso para usuario ID: " + usuarioId);
 
         redirectAttributes.addFlashAttribute("successMessage",
-                "¡Registro y solicitud completados! Por favor, inicie sesión con su nuevo usuario.");
+                "¡Registro y solicitud completados!");
         return "redirect:" + WebRoutes.HOME;
     }
 
