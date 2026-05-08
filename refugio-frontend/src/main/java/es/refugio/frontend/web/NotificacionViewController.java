@@ -26,16 +26,26 @@ public class NotificacionViewController {
     private String apiUrl;
 
     @GetMapping("/web/notificaciones")
-    public String listar(Model model, HttpServletRequest request) {
-        Object userId = model.getAttribute("currentUserId");
+    public String listar(Model model, 
+                        @org.springframework.web.bind.annotation.ModelAttribute("currentUserId") Object userId,
+                        HttpServletRequest request) {
+        
+        System.out.println(">>>> DEBUG NOTIFICACIONES: userId = " + userId);
+        
         if (userId != null) {
             try {
-                Object[] arr = restTemplate.getForObject(apiUrl + "/api/v1/notificaciones/usuario/" + userId, Object[].class);
+                String url = apiUrl + "/v1/notificaciones/usuario/" + userId;
+                Object[] arr = restTemplate.getForObject(url, Object[].class);
                 List<Object> notificaciones = arr != null ? Arrays.asList(arr) : List.of();
+                System.out.println(">>>> DEBUG NOTIFICACIONES: Encontradas " + notificaciones.size());
                 model.addAttribute("notificaciones", notificaciones);
             } catch (Exception e) {
+                System.err.println(">>>> ERROR NOTIFICACIONES: " + e.getMessage());
                 model.addAttribute("notificaciones", List.of());
             }
+        } else {
+            System.err.println(">>>> WARN NOTIFICACIONES: userId es NULL");
+            model.addAttribute("notificaciones", List.of());
         }
 
         model.addAttribute("currentUri", WebRoutes.NOTIFICACIONES_BASE);
@@ -51,9 +61,10 @@ public class NotificacionViewController {
     @PostMapping("/web/notificaciones/{id}/leer")
     @ResponseBody
     public String marcarComoLeida(@PathVariable Integer id) {
+        System.out.println(">>>> DEBUG: Leer " + id);
         try {
-            restTemplate.exchange(apiUrl + "/api/v1/notificaciones/" + id + "/leer", HttpMethod.PUT, null, Void.class);
-            return ""; // Respuesta vacía para HTMX si es necesario
+            restTemplate.exchange(apiUrl + "/v1/notificaciones/" + id + "/leer", HttpMethod.PUT, null, Void.class);
+            return "";
         } catch (Exception e) {
             return "Error";
         }
@@ -61,16 +72,27 @@ public class NotificacionViewController {
 
     @GetMapping("/web/notificaciones/count")
     @ResponseBody
-    public String obtenerConteoNoLeidas(Model model) {
-        Object userId = model.getAttribute("currentUserId");
+    public String obtenerConteoNoLeidas(@org.springframework.web.bind.annotation.ModelAttribute("currentUserId") Object userId) {
         if (userId != null) {
             try {
-                Long count = restTemplate.getForObject(apiUrl + "/api/v1/notificaciones/usuario/" + userId + "/no-leidas/count", Long.class);
+                Long count = restTemplate.getForObject(apiUrl + "/v1/notificaciones/usuario/" + userId + "/no-leidas/count", Long.class);
                 if (count != null && count > 0) {
                     return "<span class='notification-badge'>" + count + "</span>";
                 }
             } catch (Exception e) {}
         }
         return "";
+    }
+
+    @DeleteMapping("/web/notificaciones/{id}")
+    @ResponseBody
+    public String eliminar(@PathVariable Integer id) {
+        System.out.println(">>>> DEBUG: Eliminar " + id);
+        try {
+            restTemplate.delete(apiUrl + "/v1/notificaciones/" + id);
+            return ""; 
+        } catch (Exception e) {
+            return "Error";
+        }
     }
 }

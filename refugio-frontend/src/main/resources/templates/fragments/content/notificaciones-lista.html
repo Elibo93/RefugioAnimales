@@ -1,95 +1,69 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<body>
-    <div th:fragment="content">
-        <div class="content-header" style="margin-bottom: 2rem;">
-            <div class="header-info">
-                <h1 style="font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, #0f172a 0%, #334155 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                    Tu Buzón
-                </h1>
-                <p style="color: #64748b; font-size: 1.1rem; margin-top: 0.5rem; font-weight: 500;">
-                    Mantente al día con las novedades de tus solicitudes y tareas.
-                </p>
-            </div>
-        </div>
-
-        <div class="notifications-container" style="max-width: 800px; margin: 0 auto;">
-            <div th:if="${#lists.isEmpty(notificaciones)}" 
-                 style="text-align: center; padding: 4rem 2rem; background: white; border-radius: 24px; border: 2px dashed #e2e8f0;">
-                <div style="background: #f1f5f9; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
-                    <i data-lucide="bell-off" style="width: 32px; color: #94a3b8;"></i>
-                </div>
-                <h3 style="font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">No tienes notificaciones</h3>
-                <p style="color: #64748b;">Te avisaremos cuando haya novedades importantes para ti.</p>
-            </div>
-
-            <div th:each="notif : ${notificaciones}" 
-                 th:id="'notif-' + ${notif.id}"
-                 th:classappend="${notif.leida ? 'notif-read' : 'notif-unread'}"
-                 style="background: white; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; border: 1px solid #e2e8f0; transition: all 0.3s ease; display: flex; gap: 1.25rem; align-items: flex-start; position: relative;">
-                
-                <!-- Icono según tipo -->
-                <div class="notif-icon" th:switch="${notif.tipo}"
-                     style="width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <i th:case="'ADOPCION'" data-lucide="heart" style="color: #e11d48;"></i>
-                    <i th:case="'TAREA'" data-lucide="clipboard-check" style="color: #0891b2;"></i>
-                    <i th:case="*" data-lucide="bell" style="color: #64748b;"></i>
-                </div>
-
-                <div class="notif-content" style="flex: 1;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.25rem;">
-                        <h4 style="margin: 0; font-weight: 700; color: #1e293b; font-size: 1.1rem;" th:text="${notif.titulo}">Título</h4>
-                        <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 500;" 
-                              th:text="${#temporals.format(notif.fecha, 'dd MMM, HH:mm')}">Fecha</span>
-                    </div>
-                    <p style="color: #475569; margin: 0; line-height: 1.5;" th:text="${notif.mensaje}">Mensaje</p>
-                    
-                    <div style="margin-top: 1rem; display: flex; gap: 1rem; align-items: center;">
-                        <a th:if="${notif.enlace != null}" th:href="${notif.enlace}" 
-                           class="btn-notif-action" style="font-size: 0.85rem; font-weight: 700; color: #2563eb; text-decoration: none; display: flex; align-items: center; gap: 0.4rem;">
-                            Ver más <i data-lucide="arrow-right" style="width: 14px;"></i>
-                        </a>
-                        
-                        <button th:if="${!notif.leida}" 
-                                th:attr="hx-post=@{/web/notificaciones/{id}/leer(id=${notif.id})}"
-                                hx-swap="outerHTML"
-                                th:hx-target="'#notif-' + ${notif.id}"
-                                style="background: none; border: none; font-size: 0.85rem; color: #94a3b8; cursor: pointer; font-weight: 600; padding: 0; transition: color 0.2s;">
-                            Marcar como leída
-                        </button>
-                    </div>
-                </div>
-
-                <div th:if="${!notif.leida}" class="unread-dot" 
-                     style="width: 10px; height: 10px; background: #2563eb; border-radius: 50%; position: absolute; top: 1.5rem; right: 1rem;"></div>
-            </div>
-        </div>
-
-        <style>
-            .notif-unread {
-                border-left: 4px solid #2563eb !important;
-                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);
-            }
-            .notif-read {
-                opacity: 0.7;
-                background: #f8fafc !important;
-            }
-            .notif-icon {
-                background: #f1f5f9;
-            }
-            .notif-unread .notif-icon {
-                background: #eff6ff;
-            }
-            .btn-notif-action:hover {
-                text-decoration: underline !important;
-            }
-        </style>
-        
-        <script>
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-        </script>
+<div th:fragment="content">
+    <div class="notif-header">
+        <h1 class="notif-title">Tu Buzón</h1>
+        <p class="notif-subtitle">Mantente al día con las novedades de tus solicitudes y tareas.</p>
     </div>
-</body>
-</html>
+
+    <div class="notifications-container">
+        <!-- Estado vacío -->
+        <div th:if="${#lists.isEmpty(notificaciones)}" class="notif-empty-state">
+            <div class="notif-empty-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+            </div>
+            <h3 class="notif-empty-title">No tienes notificaciones</h3>
+            <p class="notif-empty-text">Te avisaremos cuando haya novedades importantes para ti.</p>
+        </div>
+
+        <!-- Lista de notificaciones -->
+        <div th:each="notif : ${notificaciones}" 
+             th:id="'notif-' + ${notif.id}"
+             th:class="${notif.leida} ? 'notif-card notif-read' : 'notif-card notif-unread'">
+            
+            <!-- Indicador visual de no leída (punto) -->
+            <div th:if="${!notif.leida}" class="notif-status-dot"></div>
+
+            <!-- Contenedor del Icono -->
+            <div class="notif-icon-container">
+                <!-- SVG Tarea -->
+                <svg th:if="${notif.tipo == 'TAREA'}" class="icon-tarea" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M9 14l2 2 4-4"/></svg>
+                <!-- SVG Adopción -->
+                <svg th:if="${notif.tipo == 'ADOPCION'}" class="icon-adopcion" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                <!-- SVG General -->
+                <svg th:if="${notif.tipo != 'TAREA' and notif.tipo != 'ADOPCION'}" class="icon-general" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            </div>
+
+            <!-- Cuerpo de la notificación -->
+            <div class="notif-body">
+                <div class="notif-info-row">
+                    <h4 class="notif-card-title" th:text="${notif.titulo}">Título</h4>
+                    <span class="notif-date" th:text="${notif.fecha}">Fecha</span>
+                </div>
+                <p class="notif-message" th:text="${notif.mensaje}">Mensaje</p>
+
+                <!-- Botones de Acción -->
+                <div class="notif-actions">
+                    <button th:if="${!notif.leida}" 
+                            th:attr="hx-post=@{/web/notificaciones/{id}/leer(id=${notif.id})}"
+                            hx-trigger="click" hx-swap="none"
+                            onclick="event.stopPropagation(); const card = this.closest('.notif-card'); card.classList.add('notif-read'); card.classList.remove('notif-unread'); this.remove();"
+                            class="btn-mark-read">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Marcar como leída
+                    </button>
+
+                    <button th:attr="hx-delete=@{/web/notificaciones/{id}(id=${notif.id})}"
+                            hx-trigger="click" hx-target="closest .notif-card" hx-swap="delete"
+                            onclick="event.stopPropagation();"
+                            class="btn-delete-notif">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                        Eliminar
+                    </button>
+                    
+                    <a th:if="${notif.enlace != null}" th:href="${notif.enlace}" class="btn-mark-read" style="margin-left: auto;">
+                        Ver detalle →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
