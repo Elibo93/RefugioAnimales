@@ -30,21 +30,16 @@ public class NotificacionViewController {
                         @org.springframework.web.bind.annotation.ModelAttribute("currentUserId") Object userId,
                         HttpServletRequest request) {
         
-        System.out.println(">>>> DEBUG NOTIFICACIONES: userId = " + userId);
-        
         if (userId != null) {
             try {
                 String url = apiUrl + "/v1/notificaciones/usuario/" + userId;
                 Object[] arr = restTemplate.getForObject(url, Object[].class);
                 List<Object> notificaciones = arr != null ? Arrays.asList(arr) : List.of();
-                System.out.println(">>>> DEBUG NOTIFICACIONES: Encontradas " + notificaciones.size());
                 model.addAttribute("notificaciones", notificaciones);
             } catch (Exception e) {
-                System.err.println(">>>> ERROR NOTIFICACIONES: " + e.getMessage());
                 model.addAttribute("notificaciones", List.of());
             }
         } else {
-            System.err.println(">>>> WARN NOTIFICACIONES: userId es NULL");
             model.addAttribute("notificaciones", List.of());
         }
 
@@ -61,7 +56,6 @@ public class NotificacionViewController {
     @PostMapping("/web/notificaciones/{id}/leer")
     @ResponseBody
     public String marcarComoLeida(@PathVariable Integer id) {
-        System.out.println(">>>> DEBUG: Leer " + id);
         try {
             restTemplate.exchange(apiUrl + "/v1/notificaciones/" + id + "/leer", HttpMethod.PUT, null, Void.class);
             return "";
@@ -87,7 +81,6 @@ public class NotificacionViewController {
     @DeleteMapping("/web/notificaciones/{id}")
     @ResponseBody
     public String eliminar(@PathVariable Integer id) {
-        System.out.println(">>>> DEBUG: Eliminar " + id);
         try {
             restTemplate.delete(apiUrl + "/v1/notificaciones/" + id);
             return ""; 
