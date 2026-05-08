@@ -161,9 +161,42 @@
                     </div>
                 </div>
             </th:block>
+            
+            <!-- 2.5 MENÚ PARA VOLUNTARIO-ADOPTANTE -->
+            <th:block th:if="${isVoluntario and isAdoptante and !isAdmin}">
+                <div class="sidebar-section">
+                    <div class="sidebar-menu">
+                        <a th:href="@{/web/home}" class="sidebar-item"
+                            th:classappend="${currentUri == '/web/home' or currentUri == '/'} ? 'active' : ''">
+                            <i data-lucide="home"></i><span>Inicio</span>
+                        </a>
+                        <a th:href="@{/web/animales}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/animales')} ? 'active' : ''">
+                            <i data-lucide="dog"></i><span>Animales</span>
+                        </a>
+                        <a th:href="@{/web/solicitudes/mis-adoptados}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/solicitudes/mis-adoptados')} ? 'active' : ''">
+                            <i data-lucide="heart"></i>
+                            <span>Mis Adoptados</span>
+                        </a>
+                        <a th:href="@{/web/tareas}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/tareas')} ? 'active' : ''">
+                            <i data-lucide="check-square"></i><span>Mis Tareas</span>
+                        </a>
+                        <a th:href="@{/web/historiales}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/historiales')} ? 'active' : ''">
+                            <i data-lucide="stethoscope"></i><span>Historiales</span>
+                        </a>
+                        <a th:href="@{/web/donaciones}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/donaciones')} ? 'active' : ''">
+                            <i data-lucide="coins"></i><span th:text="#{menu.colaborar}">Colaborar</span>
+                        </a>
+                    </div>
+                </div>
+            </th:block>
 
             <!-- 3. MENÚ PARA VOLUNTARIO (PROVISIONAL) -->
-            <th:block th:if="${isVoluntario and !isAdmin}">
+            <th:block th:if="${isVoluntario and !isAdmin and !isAdoptante}">
                 <div class="sidebar-section">
                     <div class="sidebar-menu">
                         <a th:href="@{/web/home}" class="sidebar-item"

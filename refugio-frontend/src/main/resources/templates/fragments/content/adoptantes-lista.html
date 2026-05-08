@@ -6,7 +6,12 @@
 </head>
 
 <body>
-    <div th:fragment="content">
+    <!-- 
+  PÁGINA: Listado de Adoptantes
+  DESCRIPCIÓN: Vista de gestión que enumera a todos los usuarios registrados como adoptantes. 
+               Permite el acceso rápido a sus perfiles y solicitudes asociadas.
+-->
+<div th:fragment="content">
         <!-- Mensajes de Feedback -->
         <div th:if="${successMessage}" class="alert alert-success"
             style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-radius: 12px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;">

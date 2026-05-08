@@ -44,7 +44,7 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 - [ ] **Notificaciones:** Tareas nuevas y recordatorios de fechas de vencimiento.
 
 ### 5) Backend: Lógica de Adopción y Roles
-- [ ] **Dualidad de Roles:** Permitir que un usuario sea Adoptante y Voluntario simultáneamente.
+- [✅] **Dualidad de Roles:** Permitir que un usuario sea Adoptante y Voluntario simultáneamente.
 - [ ] **Validaciones:**
   - Impedir adopciones duplicadas del mismo animal.
   - Acceso a funciones de voluntario solo tras aprobación del admin.
@@ -63,7 +63,7 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 - [ ] **Exportaciones:** Arreglar PDF de todas las listas. Implementar exportación de contratos. Añadir Excel si es posible.
 
 ### 9) Donaciones y Seguridad
-- [ ] **Pagos:** Simulación de pasarela de pago (modo prueba).
+- [✅] **Pagos:** Simulación de pasarela de pago (modo prueba).
 - [ ] **OAuth:** Registro/Login con Google y Apple (Opcional).
 
 ### 10) Calidad y DevOps
@@ -71,5 +71,14 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 - [ ] **Docker:** Unificar toda la infraestructura (Gateway, Auth, Backend, Frontend, DB) en un `docker-compose.yml`.
 - [ ] **Código:** Refactorizar controladores, unificar mappers y completar JavaDoc.
 
+
+### 11) Restaurar validaciones de DNI
+- [] Falta la validación de DNI
+- [] Archivos modificados para que funcione:
+- [] AdoptanteRequest.java
+- [] PublicSolicitudAdopcionRequest.java
+- [] ConvertAdoptanteRequest.java
+- [] ConvertirAdoptanteRequest.java
 ---
 *Este documento es una guía viva para el desarrollo del TFG - Refugio de Animales.*
+- []

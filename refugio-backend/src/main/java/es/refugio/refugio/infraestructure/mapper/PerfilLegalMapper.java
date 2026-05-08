@@ -1,6 +1,7 @@
 package es.refugio.refugio.infraestructure.mapper;
 
 import es.refugio.refugio.domain.model.perfil_legal.PerfilLegal;
+import es.refugio.refugio.domain.model.perfil_legal.PerfilLegalId;
 import es.refugio.refugio.infraestructure.db.jpa.entity.PerfilLegalEntity;
 import es.refugio.refugio.infraestructure.web.dto.perfil_legal.PerfilLegalRequest;
 import es.refugio.refugio.infraestructure.web.dto.perfil_legal.PerfilLegalResponse;
@@ -25,6 +26,7 @@ public class PerfilLegalMapper {
         if (entity == null) return null;
 
         return PerfilLegal.builder()
+                .id(new PerfilLegalId(entity.getId()))
                 .usuarioId(entity.getUsuarioId())
                 .nombre(entity.getNombre())
                 .apellido(entity.getApellido())
@@ -39,6 +41,7 @@ public class PerfilLegalMapper {
         if (domain == null) return null;
 
         return PerfilLegalEntity.builder()
+                .id(domain.getId() != null ? domain.getId().getValue() : null)
                 .usuarioId(domain.getUsuarioId())
                 .nombre(domain.getNombre())
                 .apellido(domain.getApellido())

@@ -6,7 +6,12 @@
 </head>
 
 <body>
-    <div th:fragment="content">
+    <!-- 
+  PÁGINA: Formulario de Donación
+  DESCRIPCIÓN: Interfaz para que los usuarios elijan una cantidad y un proyecto al que donar. 
+               Paso previo a la pasarela de pago.
+-->
+<div th:fragment="content">
         <div id="formulario-donacion" class="glass-panel"
              th:if="${isAdmin == null or !isAdmin}"
              style="max-width:800px; margin:2rem auto; padding: 3rem; border-radius: 24px;">

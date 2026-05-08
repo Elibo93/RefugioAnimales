@@ -20,9 +20,11 @@ import es.refugio.refugio.application.service.voluntario.CreateVoluntarioService
 import es.refugio.refugio.application.service.voluntario.DeleteVoluntarioService;
 import es.refugio.refugio.application.service.voluntario.EditVoluntarioService;
 import es.refugio.refugio.application.service.voluntario.FindVoluntarioService;
+import es.refugio.refugio.domain.model.perfil_legal.PerfilLegal;
 import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
 import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
+import es.refugio.refugio.domain.repository.PerfilLegalRepository;
 import es.refugio.refugio.infraestructure.mapper.VoluntarioMapper;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioRequest;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioResponse;
@@ -47,7 +49,8 @@ public class VoluntarioController {
     private final DeleteVoluntarioService deleteVoluntarioService;
 
     @Operation(summary = "Crear voluntario", description = "Registra un nuevo voluntario vinculado a un usuario")
-    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Voluntario creado"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
+    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Voluntario creado"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<VoluntarioResponse> create(@Valid @RequestBody VoluntarioRequest request) {
         CreateVoluntarioCommand command = VoluntarioMapper.toCommand(request);
@@ -56,7 +59,8 @@ public class VoluntarioController {
     }
 
     @Operation(summary = "Actualizar voluntario")
-    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Voluntario actualizado"), @ApiResponse(responseCode = "404", description = "No encontrado") })
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Voluntario actualizado"),
+            @ApiResponse(responseCode = "404", description = "No encontrado") })
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<VoluntarioResponse> update(@PathVariable Integer id,
