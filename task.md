@@ -1,0 +1,3 @@
+- [ ] Añadir campo username a solicitud-registro-form.html
+- [ ] Añadir visualización de errores a solicitud-registro-form.html
+- [ ] Actualizar SolicitudAdopcionViewController.java para procesar el username

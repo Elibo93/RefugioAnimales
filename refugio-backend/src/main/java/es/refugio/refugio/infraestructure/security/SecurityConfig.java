@@ -43,7 +43,8 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.POST,
                                 "/api/v1/donaciones",
                                 "/api/v1/voluntarios",
-                                "/api/v1/solicitudes-adopcion/publico/registro-y-adopcion")
+                                "/api/v1/solicitudes-adopcion/publico/registro-y-adopcion",
+                                "/api/v1/animales/*/visitas")
                         .permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex

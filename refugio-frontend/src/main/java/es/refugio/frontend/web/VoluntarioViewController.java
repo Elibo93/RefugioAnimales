@@ -14,6 +14,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.http.HttpEntity;
 
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
@@ -43,9 +48,9 @@ public class VoluntarioViewController {
 
     @GetMapping(WebRoutes.VOLUNTARIOS_BASE)
     @PreAuthorize("hasRole('ADMIN')")
-    public String listar(Model model, 
-                        @RequestParam(required = false) String q,
-                        HttpServletRequest request) {
+    public String listar(Model model,
+            @RequestParam(required = false) String q,
+            HttpServletRequest request) {
         List<Object> voluntarios = fetchList("/v1/voluntarios");
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
         List<Object> perfilesLegales = fetchList("/v1/perfiles-legales");
@@ -75,24 +80,24 @@ public class VoluntarioViewController {
         if (q != null && !q.trim().isEmpty()) {
             String query = q.toLowerCase();
             voluntarios = voluntarios.stream()
-                .filter(v -> {
-                    if (v instanceof Map) {
-                        Map<?, ?> vm = (Map<?, ?>) v;
-                        String uId = String.valueOf(vm.get("usuarioId"));
-                        Map<?, ?> user = (Map<?, ?>) usuariosMap.get(uId);
-                        Map<?, ?> legal = (Map<?, ?>) perfilesMap.get(uId);
-                        
-                        String username = user != null ? String.valueOf(user.get("username")).toLowerCase() : "";
-                        String email = user != null ? String.valueOf(user.get("email")).toLowerCase() : "";
-                        String nombre = legal != null ? String.valueOf(legal.get("nombre")).toLowerCase() : "";
-                        String apellido = legal != null ? String.valueOf(legal.get("apellido")).toLowerCase() : "";
-                        String dni = legal != null ? String.valueOf(legal.get("dni")).toLowerCase() : "";
-                        
-                        return username.contains(query) || email.contains(query) || 
-                               nombre.contains(query) || apellido.contains(query) || dni.contains(query);
-                    }
-                    return false;
-                }).toList();
+                    .filter(v -> {
+                        if (v instanceof Map) {
+                            Map<?, ?> vm = (Map<?, ?>) v;
+                            String uId = String.valueOf(vm.get("usuarioId"));
+                            Map<?, ?> user = (Map<?, ?>) usuariosMap.get(uId);
+                            Map<?, ?> legal = (Map<?, ?>) perfilesMap.get(uId);
+
+                            String username = user != null ? String.valueOf(user.get("username")).toLowerCase() : "";
+                            String email = user != null ? String.valueOf(user.get("email")).toLowerCase() : "";
+                            String nombre = legal != null ? String.valueOf(legal.get("nombre")).toLowerCase() : "";
+                            String apellido = legal != null ? String.valueOf(legal.get("apellido")).toLowerCase() : "";
+                            String dni = legal != null ? String.valueOf(legal.get("dni")).toLowerCase() : "";
+
+                            return username.contains(query) || email.contains(query) ||
+                                    nombre.contains(query) || apellido.contains(query) || dni.contains(query);
+                        }
+                        return false;
+                    }).toList();
         }
 
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), voluntarios);
@@ -123,7 +128,8 @@ public class VoluntarioViewController {
         for (Object p : perfiles) {
             if (p instanceof Map) {
                 Object uId = ((Map<?, ?>) p).get("usuarioId");
-                if (uId instanceof Number) perfilesMap.put(((Number) uId).intValue(), (Map<String, Object>) p);
+                if (uId instanceof Number)
+                    perfilesMap.put(((Number) uId).intValue(), (Map<String, Object>) p);
             }
         }
 
@@ -131,7 +137,8 @@ public class VoluntarioViewController {
         for (Object u : usuarios) {
             if (u instanceof Map) {
                 Object id = ((Map<?, ?>) u).get("id");
-                if (id instanceof Number) usuariosMap.put(((Number) id).intValue(), (Map<String, Object>) u);
+                if (id instanceof Number)
+                    usuariosMap.put(((Number) id).intValue(), (Map<String, Object>) u);
             }
         }
 
@@ -142,26 +149,34 @@ public class VoluntarioViewController {
             if (v instanceof Map) {
                 Map<String, Object> vm = (Map<String, Object>) v;
                 Object uIdRaw = vm.get("usuarioId");
-                if (uIdRaw instanceof Map) uIdRaw = ((Map<?, ?>) uIdRaw).get("value");
-                
+                if (uIdRaw instanceof Map)
+                    uIdRaw = ((Map<?, ?>) uIdRaw).get("value");
+
                 if (uIdRaw instanceof Number) {
                     int uId = ((Number) uIdRaw).intValue();
                     Map<String, Object> perfil = perfilesMap.get(uId);
                     Map<String, Object> user = usuariosMap.get(uId);
 
-                    String nombre = perfil != null && perfil.get("nombre") != null ? String.valueOf(perfil.get("nombre")) : "";
-                    String apellido = perfil != null && perfil.get("apellido") != null ? String.valueOf(perfil.get("apellido")) : "";
+                    String nombre = perfil != null && perfil.get("nombre") != null
+                            ? String.valueOf(perfil.get("nombre"))
+                            : "";
+                    String apellido = perfil != null && perfil.get("apellido") != null
+                            ? String.valueOf(perfil.get("apellido"))
+                            : "";
                     String email = user != null && user.get("email") != null ? String.valueOf(user.get("email")) : "";
-                    String username = user != null && user.get("username") != null ? String.valueOf(user.get("username")) : "";
+                    String username = user != null && user.get("username") != null
+                            ? String.valueOf(user.get("username"))
+                            : "";
 
-                    if (nombre.toLowerCase().contains(query) || apellido.toLowerCase().contains(query) || 
-                        email.toLowerCase().contains(query) || username.toLowerCase().contains(query)) {
-                        
+                    if (nombre.toLowerCase().contains(query) || apellido.toLowerCase().contains(query) ||
+                            email.toLowerCase().contains(query) || username.toLowerCase().contains(query)) {
+
                         Map<String, Object> suggestion = new HashMap<>();
                         Object vId = vm.get("id");
-                        if (vId instanceof Map) vId = ((Map<?, ?>) vId).get("value");
-                        
-                        suggestion.put("id", vId); 
+                        if (vId instanceof Map)
+                            vId = ((Map<?, ?>) vId).get("value");
+
+                        suggestion.put("id", vId);
                         suggestion.put("nombre", nombre);
                         suggestion.put("apellido", apellido);
                         suggestion.put("email", email);
@@ -180,11 +195,11 @@ public class VoluntarioViewController {
     public String formulario(Model model, HttpServletRequest request) {
         model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), new HashMap<String, Object>());
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_NUEVO);
-        
+
         if ("true".equals(request.getHeader("HX-Request"))) {
             return FragmentoContenido.Voluntario_FORM.getPath() + " :: content";
         }
-        
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -196,17 +211,18 @@ public class VoluntarioViewController {
         try {
             Map<String, Object> voluntario = restTemplate.getForObject(apiUrl + "/v1/voluntarios/" + id, Map.class);
             model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), voluntario);
-            
+
             if (voluntario != null && voluntario.get("usuarioId") != null) {
                 Object uId = voluntario.get("usuarioId");
                 Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + uId, Map.class);
                 if (user != null) {
                     model.addAttribute("userEmail", user.get("email"));
                 }
-                
+
                 // Fetch PerfilLegal
                 try {
-                    Map<String, Object> perfil = restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + uId, Map.class);
+                    Map<String, Object> perfil = restTemplate
+                            .getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + uId, Map.class);
                     if (perfil != null) {
                         model.addAttribute("nombreCompleto", perfil.get("nombre") + " " + perfil.get("apellido"));
                         model.addAttribute("userPhone", perfil.get("telefono"));
@@ -224,15 +240,14 @@ public class VoluntarioViewController {
 
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_EDITAR);
         model.addAttribute("isAdmin", true);
-        
+
         if ("true".equals(request.getHeader("HX-Request"))) {
             return FragmentoContenido.Voluntario_FORM.getPath() + " :: content";
         }
-        
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
-
 
     @PostMapping(WebRoutes.VOLUNTARIOS_NUEVO)
     public String crearVoluntario(
@@ -247,6 +262,7 @@ public class VoluntarioViewController {
             @RequestParam(required = false) String fechaNacimiento,
             @RequestParam(required = false) String contrasena,
             @RequestParam(required = false) String especialidad,
+            HttpServletResponse response,
             RedirectAttributes redirectAttributes) {
 
         Integer finalUsuarioId = idUsuario;
@@ -259,17 +275,24 @@ public class VoluntarioViewController {
             userBody.put("rol", "ROLE_VOLUNTARIO");
 
             try {
+                String targetUrl = authUrl + "/v1/usuarios";
+                logger.info("Registrando usuario en Auth: " + targetUrl);
                 @SuppressWarnings("unchecked")
-                Map<String, Object> createdUser = restTemplate.postForObject(authUrl + "/v1/usuarios", userBody, Map.class);
+                Map<String, Object> createdUser = restTemplate.postForObject(targetUrl, userBody, Map.class);
                 if (createdUser != null && createdUser.get("id") != null) {
-                    finalUsuarioId = (Integer) createdUser.get("id");
+                    Object idObj = createdUser.get("id");
+                    if (idObj instanceof Map) {
+                        finalUsuarioId = (Integer) ((Map<?, ?>) idObj).get("value");
+                    } else if (idObj instanceof Number) {
+                        finalUsuarioId = ((Number) idObj).intValue();
+                    }
                 }
             } catch (Exception e) {
                 logger.error("Error al registrar usuario para voluntario: " + e.getMessage());
                 redirectAttributes.addFlashAttribute("errorMessage", "Error al crear la cuenta de usuario.");
                 return "redirect:" + WebRoutes.VOLUNTARIOS_NUEVO;
             }
-        }        // 2. Asegurar PerfilLegal (Identidad)
+        } // 2. Asegurar PerfilLegal (Identidad)
         Map<String, Object> bodyPerfil = new HashMap<>();
         bodyPerfil.put("usuarioId", finalUsuarioId);
         bodyPerfil.put("nombre", nombre);
@@ -278,14 +301,14 @@ public class VoluntarioViewController {
         bodyPerfil.put("telefono", (telefono != null && !telefono.isEmpty()) ? telefono : "000000000");
         bodyPerfil.put("direccion", (direccion != null) ? direccion : "");
         bodyPerfil.put("fechaNacimiento", (fechaNacimiento != null) ? fechaNacimiento : "2000-01-01");
-        
+
         try {
             restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
         } catch (Exception e) {
             logger.error("Error al sincronizar PerfilLegal en creación: " + e.getMessage());
         }
 
-        // 3. Registrar el perfil de voluntario (Rol operativo)
+        // 2. Registrar el perfil de voluntario (Solo datos operativos)
         Map<String, Object> bodyVol = new HashMap<>();
         bodyVol.put("usuarioId", finalUsuarioId);
         bodyVol.put("disponibilidad", disponibilidad);
@@ -293,10 +316,76 @@ public class VoluntarioViewController {
 
         try {
             restTemplate.postForObject(apiUrl + "/v1/voluntarios", bodyVol, Object.class);
-            redirectAttributes.addFlashAttribute("successMessage", "¡Solicitud enviada con éxito! El equipo revisará tu perfil pronto.");
+
+            // 3. Actualizar Rol en Auth si el usuario ya existe
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (finalUsuarioId != null && auth != null && auth.isAuthenticated()) {
+                try {
+                    String currentRol = auth.getAuthorities().stream()
+                            .map(a -> a.getAuthority())
+                            .filter(r -> r.startsWith("ROLE_"))
+                            .findFirst().orElse("ROLE_PUBLICO");
+
+                    boolean isAdoptante = auth.getAuthorities().stream()
+                            .anyMatch(a -> a.getAuthority().equals("ROLE_ADOPTANTE"));
+
+                    String newRol = null;
+                    if (isAdoptante) {
+                        newRol = "ROLE_VOLUNTARIO_ADOPTANTE";
+                    } else if ("ROLE_PUBLICO".equals(currentRol)) {
+                        newRol = "ROLE_VOLUNTARIO";
+                    }
+
+                    if (newRol != null && !currentRol.equals(newRol)) {
+                        Map<String, String> patchBody = new HashMap<>();
+                        patchBody.put("rol", newRol);
+
+                        String targetUrl = authUrl + "/v1/usuarios/" + finalUsuarioId + "/rol";
+                        logger.info("Actualizando rol en Auth: " + targetUrl + " -> " + newRol);
+
+                        var resp = restTemplate.exchange(
+                                targetUrl,
+                                org.springframework.http.HttpMethod.PUT,
+                                new HttpEntity<>(patchBody),
+                                Map.class);
+
+                        if (resp.getStatusCode().is2xxSuccessful() && resp.getBody() != null) {
+                            String newToken = (String) resp.getBody().get("token");
+                            if (newToken != null) {
+                                // Actualizar Cookie
+                                jakarta.servlet.http.Cookie authCookie = new jakarta.servlet.http.Cookie("JWT_TOKEN",
+                                        newToken);
+                                authCookie.setHttpOnly(true);
+                                authCookie.setPath("/");
+                                authCookie.setMaxAge(86400);
+                                response.addCookie(authCookie);
+
+                                // Actualizar Contexto Local
+                                List<SimpleGrantedAuthority> authorities = new java.util.ArrayList<>();
+                                authorities.add(new SimpleGrantedAuthority(newRol));
+                                if ("ROLE_VOLUNTARIO_ADOPTANTE".equals(newRol)) {
+                                    authorities.add(new SimpleGrantedAuthority("ROLE_VOLUNTARIO"));
+                                    authorities.add(new SimpleGrantedAuthority("ROLE_ADOPTANTE"));
+                                }
+                                var newAuth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), null,
+                                        authorities);
+                                SecurityContextHolder.getContext().setAuthentication(newAuth);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.error("Error al actualizar rol de voluntario: " + e.getMessage());
+                }
+            }
+
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "¡Bienvenido al equipo voluntario! Solicitud enviada con éxito.");
         } catch (Exception e) {
-            logger.error("Error al registrar perfil de voluntario: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al crear el perfil de voluntario.");
+            String errorMsg = "Error al crear el perfil: " + e.getMessage();
+            if (e.getCause() != null)
+                errorMsg += " (Causa: " + e.getCause().getMessage() + ")";
+            logger.error(errorMsg);
+            redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
         }
         return "redirect:" + WebRoutes.HOME;
     }
@@ -319,44 +408,44 @@ public class VoluntarioViewController {
         // 1. Actualización de disponibilidad en el servicio de backend
         Map<String, Object> bodyVol = new HashMap<>();
         bodyVol.put("disponibilidad", disponibilidad);
-        bodyVol.put("especialidad",   especialidad);
+        bodyVol.put("especialidad", especialidad);
         restTemplate.put(apiUrl + "/v1/voluntarios/" + id, bodyVol);
 
         // 2. Actualización de PerfilLegal
         try {
             Map<String, Object> bodyPerfil = new HashMap<>();
             bodyPerfil.put("usuarioId", usuarioId);
-            bodyPerfil.put("nombre", nombre != null ? nombre : ""); // Necesitamos el nombre en el form
-            bodyPerfil.put("apellido", apellido != null ? apellido : ""); 
+            bodyPerfil.put("nombre", nombre);
+            bodyPerfil.put("apellido", apellido);
             bodyPerfil.put("dni", dni);
             bodyPerfil.put("telefono", telefono);
             bodyPerfil.put("direccion", direccion);
             bodyPerfil.put("fechaNacimiento", fechaNacimiento);
             restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
         } catch (Exception e) {
-            logger.error("Error al sincronizar PerfilLegal: " + e.getMessage());
+            logger.error("Error al actualizar PerfilLegal: " + e.getMessage());
         }
 
-        // 3. Sincronización de datos básicos en el servicio de autenticación
+        // 3. Actualización de datos de usuario en Auth
         try {
             Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + usuarioId, Map.class);
             if (user != null) {
                 Map<String, Object> bodyUser = new HashMap<>(user);
                 bodyUser.put("email", email);
-                
+
                 // No enviamos teléfono a auth ya que ahora se gestiona en PerfilLegal
                 bodyUser.remove("telefono");
 
                 if (bodyUser.get("contrasena") == null) {
-                    bodyUser.put("contrasena", "secret_placeholder"); 
+                    bodyUser.put("contrasena", "secret_placeholder");
                 }
                 restTemplate.put(authUrl + "/v1/usuarios/" + usuarioId, bodyUser);
             }
         } catch (Exception e) {
-            logger.error("Error al sincronizar datos en el servicio de Auth: " + e.getMessage());
+            logger.error("Error al actualizar usuario en Auth: " + e.getMessage());
         }
 
-        redirectAttributes.addFlashAttribute("successMessage", "Voluntario editado correctamente");
+        redirectAttributes.addFlashAttribute("successMessage", "Voluntario actualizado correctamente.");
         return "redirect:" + WebRoutes.VOLUNTARIOS_BASE;
     }
 
@@ -366,7 +455,8 @@ public class VoluntarioViewController {
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         try {
             restTemplate.delete(apiUrl + "/v1/voluntarios/" + id);
-            if ("true".equals(request.getHeader("HX-Request"))) return ResponseEntity.ok("");
+            if ("true".equals(request.getHeader("HX-Request")))
+                return ResponseEntity.ok("");
         } catch (Exception e) {
             if ("true".equals(request.getHeader("HX-Request"))) {
                 return ResponseEntity.unprocessableEntity()
@@ -411,12 +501,14 @@ public class VoluntarioViewController {
     @SuppressWarnings("unchecked")
     public String verDetalle(@PathVariable Integer id, Model model) {
         try {
-            Map<String, Object> voluntario = (Map<String, Object>) restTemplate.getForObject(apiUrl + "/v1/voluntarios/" + id, Map.class);
+            Map<String, Object> voluntario = (Map<String, Object>) restTemplate
+                    .getForObject(apiUrl + "/v1/voluntarios/" + id, Map.class);
             if (voluntario != null && voluntario.containsKey("usuarioId")) {
                 return "redirect:/web/personas/" + voluntario.get("usuarioId");
             }
-        } catch (Exception ignored) {}
-        
+        } catch (Exception ignored) {
+        }
+
         return "redirect:" + WebRoutes.VOLUNTARIOS_BASE;
     }
 
@@ -425,6 +517,8 @@ public class VoluntarioViewController {
             String finalUrl = path.startsWith("http") ? path : apiUrl + path;
             Object[] arr = restTemplate.getForObject(finalUrl, Object[].class);
             return arr != null ? Arrays.asList(arr) : List.of();
-        } catch (Exception e) { return List.of(); }
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 }

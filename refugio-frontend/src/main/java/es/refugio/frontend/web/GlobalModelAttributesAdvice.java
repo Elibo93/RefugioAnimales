@@ -70,10 +70,14 @@ public class GlobalModelAttributesAdvice {
                     model.addAttribute("currentUserName", me.get("email")); // Fallback to email
                 }
 
-                String rol = String.valueOf(me.get("rol"));
-                model.addAttribute("isAdmin",      rol.contains("ADMIN"));
-                model.addAttribute("isVoluntario", rol.contains("VOLUNTARIO") || rol.contains("ADMIN"));
-                model.addAttribute("isAdoptante",  rol.contains("ADOPTANTE"));
+                String rol = me.get("rol") != null ? String.valueOf(me.get("rol")).toUpperCase() : "";
+                boolean isAdmin = rol.contains("ADMIN");
+                boolean isVol = rol.contains("VOLUNTARIO") || isAdmin;
+                boolean isAdop = rol.contains("ADOPTANTE");
+
+                model.addAttribute("isAdmin",      isAdmin);
+                model.addAttribute("isVoluntario", isVol);
+                model.addAttribute("isAdoptante",  isAdop);
                 model.addAttribute("isPublico",    rol.contains("PUBLICO"));
             } else {
                 setAnonymous(model);

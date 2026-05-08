@@ -63,11 +63,17 @@ public class UsuarioController {
     }
 
     @PostMapping("/publico")
-    public ResponseEntity<UsuarioResponse> createUsuarioPublic(
+    public ResponseEntity<?> createUsuarioPublic(
             @jakarta.validation.Valid @RequestBody UsuarioRequest usuarioRequest) {
-        CreateUsuarioCommand comando = UsuarioMapper.toCommand(usuarioRequest);
-        Usuario usuario = createUsuarioService.createUsuario(comando);
-        return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioMapper.toResponse(usuario));
+        try {
+            CreateUsuarioCommand comando = UsuarioMapper.toCommand(usuarioRequest);
+            Usuario usuario = createUsuarioService.createUsuario(comando);
+            return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioMapper.toResponse(usuario));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error interno: " + e.getMessage()));
+        }
     }
 
     @org.springframework.web.bind.annotation.PutMapping("/{id}/rol")

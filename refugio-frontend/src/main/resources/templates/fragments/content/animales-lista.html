@@ -7,7 +7,12 @@
 
 <body>
 
-    <div th:fragment="content">
+    <!-- 
+  PÁGINA: Listado de Animales (Gestión)
+  DESCRIPCIÓN: Vista administrativa para el mantenimiento de los animales del refugio. 
+               Permite filtrar, ver detalles y acceder a las opciones de edición y alta.
+-->
+<div th:fragment="content">
         <div th:class="${isAdmin ? '' : 'animal-catalog-layout'}" style="margin-top: 1rem;">
             <!-- 1. SIDEBAR PARA ADMINISTRADOR (DISEÑO SIMPLE DE GESTIÓN) -->
 
