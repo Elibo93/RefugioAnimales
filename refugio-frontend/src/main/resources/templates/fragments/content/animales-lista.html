@@ -191,58 +191,85 @@
                         </div>
                     </div>
 
-                    <table style="width: 100%; border-collapse: separate; border-spacing: 0 12px; table-layout: fixed;">
-                        <thead>
-                            <tr>
-                                <th style="width: 10%; text-align: center;">ID</th>
-                                <th style="width: 25%; text-align: center;">NOMBRE</th>
-                                <th style="width: 15%; text-align: center;">ESPECIE</th>
-                                <th style="width: 15%; text-align: center;">EDAD</th>
-                                <th style="width: 15%; text-align: center;">ESTADO</th>
-                                <th style="width: 20%; text-align: center;">ACCIONES</th>
-                            </tr>
-                        </thead>
-                        <tbody id="animal-grid-admin">
-                            <tr th:each="a : ${animales}" class="animal-row-item" th:id="'card-' + ${a.get('id')}"
-                                style="background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); height: 90px;">
-                                <td style="text-align: center; border-radius: 15px 0 0 15px;">
-                                    <img th:src="${a.get('foto') != null ? a.get('foto') : '/images/placeholder-animal.png'}"
-                                        style="width: 60px; height: 60px; object-fit: cover; border-radius: 12px;">
-                                </td>
-                                <td style="text-align: center;">
-                                    <a th:href="@{/web/animales/{id}(id=${a.get('id')})}"
-                                        style="font-weight: 800; color: var(--text-main); text-decoration: none;"
-                                        th:text="${a.get('nombre')}">Rocky</a>
-                                </td>
-                                <td style="text-align: center;">
-                                    <span th:text="${a.get('especie') != null ? #strings.capitalize(#strings.toLowerCase(a.get('especie'))) : ''}" 
-                                          style="font-weight: 500; color: var(--text-main);">Perro</span>
-                                </td>
-                                <td th:text="${a.get('edad') != null ? a.get('edad') + ' años' : '-'}"
-                                    style="text-align: center;">2 años</td>
-                                <td style="text-align: center;">
-                                    <span class="badge-soon"
-                                        th:classappend="${a.get('estado') == 'DISPONIBLE' ? 'success' : (a.get('estado') == 'RESERVADO' ? 'warning' : (a.get('estado') == 'ADOPTADO' ? 'primary' : 'info'))}"
-                                        th:text="${a.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(a.get('estado'), '_', ' '))) : ''}">Disponible</span>
-                                </td>
-                                <td style="text-align: center; border-radius: 0 15px 15px 0;">
-                                    <div style="display: flex; gap: 8px; justify-content: center;">
-                                        <a class="btn-icon" th:href="@{/web/historiales(animalId=${a.get('id')})}"
-                                            title="Historial"><i data-lucide="stethoscope" style="width: 16px;"></i></a>
-                                        <a class="btn-icon" 
-                                           th:hx-get="@{/web/animales/{id}/editar(id=${a.get('id')})}"
-                                           hx-target="#contenido-dinamico"
-                                           hx-push-url="true"
-                                           title="Editar"><i data-lucide="edit-2" style="width: 16px;"></i></a>
-                                        <button class="btn-icon delete"
-                                            th:attr="hx-post=@{/web/animales/{id}/borrar(id=${a.get('id')})}, hx-target='#card-' + ${a.get('id')}"
-                                            hx-swap="outerHTML swap:0.3s" hx-confirm="¿Eliminar?"><i
-                                                data-lucide="trash-2" style="width: 16px;"></i></button>
+                    <!-- LISTA PREMIUM DE ANIMALES (ADMIN) -->
+                    <div class="premium-list-container" id="animal-grid-admin">
+                        <!-- Encabezados -->
+                        <div class="list-header" style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
+                            <div style="flex: 1.2; text-align: center;">Animal</div>
+                            <div style="flex: 2;">Nombre / Raza</div>
+                            <div style="flex: 1; text-align: center;">Especie</div>
+                            <div style="flex: 1; text-align: center;">Edad</div>
+                            <div style="flex: 1.2; text-align: center;">Estado</div>
+                            <div style="flex: 1.8; text-align: center;">Acciones</div>
+                        </div>
+
+                        <div class="list-body" style="display: flex; flex-direction: column; gap: 12px;">
+                            <div th:each="a : ${animales}" class="premium-row-card" th:id="'card-' + ${a.get('id')}">
+                                <!-- Foto / ID -->
+                                <div class="row-cell" style="flex: 1.2; justify-content: center;">
+                                    <div style="position: relative; width: 60px; height: 60px;">
+                                        <img th:src="${a.get('foto') != null ? a.get('foto') : '/images/placeholder-animal.png'}"
+                                             style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                                        <div style="position: absolute; top: -10px; right: -10px; background: white; padding: 2px 6px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; border: 1px solid #e2e8f0; color: var(--text-muted);" 
+                                             th:text="${'#' + a.get('id')}">#1</div>
                                     </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                </div>
+
+                                <!-- Nombre / Raza -->
+                                <div class="row-cell" style="flex: 2;">
+                                    <div style="overflow: hidden;">
+                                        <a th:href="@{/web/animales/{id}(id=${a.get('id')})}"
+                                           style="display: block; font-weight: 800; color: var(--text-main); font-size: 1rem; text-decoration: none;"
+                                           th:text="${a.get('nombre')}">Rocky</a>
+                                        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" 
+                                              th:text="${a.get('raza') ?: 'Raza desconocida'}">Pastor Alemán</span>
+                                    </div>
+                                </div>
+
+                                <!-- Especie -->
+                                <div class="row-cell" style="flex: 1; justify-content: center;">
+                                    <div style="display: flex; align-items: center; gap: 6px; font-weight: 600; color: var(--text-main); font-size: 0.9rem;">
+                                        <i th:data-lucide="${a.get('especie') == 'PERRO' ? 'dog' : 'cat'}" style="width: 16px; color: var(--text-muted);"></i>
+                                        <span th:text="${a.get('especie') != null ? #strings.capitalize(#strings.toLowerCase(a.get('especie'))) : ''}">Perro</span>
+                                    </div>
+                                </div>
+
+                                <!-- Edad -->
+                                <div class="row-cell" style="flex: 1; justify-content: center; font-weight: 700; color: var(--text-main);" 
+                                     th:text="${a.get('edad') != null ? a.get('edad') + ' años' : '-'}">2 años</div>
+
+                                <!-- Estado -->
+                                <div class="row-cell" style="flex: 1.2; justify-content: center;">
+                                    <span class="badge-premium"
+                                          th:classappend="${a.get('estado') == 'DISPONIBLE' ? 'success' : (a.get('estado') == 'RESERVADO' ? 'warning' : (a.get('estado') == 'ADOPTADO' ? 'primary' : 'info'))}"
+                                          th:text="${a.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(a.get('estado'), '_', ' '))) : ''}">Disponible</span>
+                                </div>
+
+                                <!-- Acciones -->
+                                <div class="row-cell" style="flex: 1.8; justify-content: center; gap: 8px;">
+                                    <a class="btn-icon" th:href="@{/web/historiales(animalId=${a.get('id')})}" title="Historial Médico">
+                                        <i data-lucide="stethoscope" style="width: 16px; color: #10b981;"></i>
+                                    </a>
+                                    <a class="btn-icon" 
+                                       th:hx-get="@{/web/animales/{id}/editar(id=${a.get('id')})}"
+                                       hx-target="#contenido-dinamico" hx-push-url="true" title="Editar">
+                                        <i data-lucide="edit-2" style="width: 16px;"></i>
+                                    </a>
+                                    <button class="btn-icon delete"
+                                            th:attr="hx-post=@{/web/animales/{id}/borrar(id=${a.get('id')})}, hx-target='#card-' + ${a.get('id')}"
+                                            hx-swap="outerHTML swap:0.3s" hx-confirm="¿Eliminar?">
+                                        <i data-lucide="trash-2" style="width: 16px;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div th:if="${#lists.isEmpty(animales)}" style="text-align:center; padding:5rem 2rem; background:white; border-radius:24px; border: 1px solid var(--border); margin-top: 1rem;">
+                            <i data-lucide="dog" style="width:48px; height:48px; margin-bottom:1rem; color: var(--text-muted); opacity: 0.3;"></i>
+                            <p style="color: var(--text-muted); font-weight: 600;">No hay animales que coincidan con la búsqueda.</p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 2. VISTA DE TARJETAS (PARA VOLUNTARIOS, ADOPTANTES Y PÚBLICO) -->

@@ -1,37 +1,21 @@
 package es.refugio.refugio.infraestructure.web.dto.adoptante;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import es.refugio.refugio.infraestructure.web.validation.ValidDni;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO para convertir un usuario público en adoptante y crear su primera solicitud.
+ * Los datos personales (nombre, DNI, etc.) deben estar ya presentes en el PerfilLegal
+ * o ser gestionados a través del endpoint de perfil legal.
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConvertirAdoptanteRequest {
-    @NotBlank(message = "El nombre es obligatorio")
-    private String nombre;
-
-    @NotBlank(message = "El apellido es obligatorio")
-    private String apellido;
-
-    @NotBlank(message = "El DNI es obligatorio")
-    @ValidDni
-    private String dni;
-
-    @NotBlank(message = "La dirección es obligatoria")
-    private String direccion;
-
-    @NotBlank(message = "El teléfono es obligatorio")
-    private String telefono;
-
-    @NotBlank(message = "La fecha de nacimiento es obligatoria")
-    private String fechaNacimiento;
-
     @NotNull(message = "El ID del animal es obligatorio")
     private Integer animalId;
 

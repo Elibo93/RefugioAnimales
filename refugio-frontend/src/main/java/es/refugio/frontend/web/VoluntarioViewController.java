@@ -43,7 +43,9 @@ public class VoluntarioViewController {
 
     @GetMapping(WebRoutes.VOLUNTARIOS_BASE)
     @PreAuthorize("hasRole('ADMIN')")
-    public String listar(Model model) {
+    public String listar(Model model, 
+                        @RequestParam(required = false) String q,
+                        HttpServletRequest request) {
         List<Object> voluntarios = fetchList("/v1/voluntarios");
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
         List<Object> perfilesLegales = fetchList("/v1/perfiles-legales");
@@ -69,12 +71,109 @@ public class VoluntarioViewController {
             }
         }
 
+        // Filtrado por Búsqueda (q)
+        if (q != null && !q.trim().isEmpty()) {
+            String query = q.toLowerCase();
+            voluntarios = voluntarios.stream()
+                .filter(v -> {
+                    if (v instanceof Map) {
+                        Map<?, ?> vm = (Map<?, ?>) v;
+                        String uId = String.valueOf(vm.get("usuarioId"));
+                        Map<?, ?> user = (Map<?, ?>) usuariosMap.get(uId);
+                        Map<?, ?> legal = (Map<?, ?>) perfilesMap.get(uId);
+                        
+                        String username = user != null ? String.valueOf(user.get("username")).toLowerCase() : "";
+                        String email = user != null ? String.valueOf(user.get("email")).toLowerCase() : "";
+                        String nombre = legal != null ? String.valueOf(legal.get("nombre")).toLowerCase() : "";
+                        String apellido = legal != null ? String.valueOf(legal.get("apellido")).toLowerCase() : "";
+                        String dni = legal != null ? String.valueOf(legal.get("dni")).toLowerCase() : "";
+                        
+                        return username.contains(query) || email.contains(query) || 
+                               nombre.contains(query) || apellido.contains(query) || dni.contains(query);
+                    }
+                    return false;
+                }).toList();
+        }
+
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), voluntarios);
         model.addAttribute("usuariosMap", usuariosMap);
         model.addAttribute("perfilesMap", perfilesMap);
+        model.addAttribute("query", q);
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_BASE);
+
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Voluntario_LIST.getPath() + " :: list-body";
+        }
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    @GetMapping("/web/voluntarios/sugerencias")
+    public String sugerencias(@RequestParam(required = false) String q, Model model) {
+        if (q == null || q.trim().isEmpty()) {
+            return FragmentoContenido.VOLUNTARIO_SUGERENCIAS.getPath() + " :: suggestions";
+        }
+
+        List<Object> voluntarios = fetchList("/v1/voluntarios");
+        List<Object> perfiles = fetchList("/v1/perfiles-legales");
+        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+
+        Map<Integer, Map<String, Object>> perfilesMap = new HashMap<>();
+        for (Object p : perfiles) {
+            if (p instanceof Map) {
+                Object uId = ((Map<?, ?>) p).get("usuarioId");
+                if (uId instanceof Number) perfilesMap.put(((Number) uId).intValue(), (Map<String, Object>) p);
+            }
+        }
+
+        Map<Integer, Map<String, Object>> usuariosMap = new HashMap<>();
+        for (Object u : usuarios) {
+            if (u instanceof Map) {
+                Object id = ((Map<?, ?>) u).get("id");
+                if (id instanceof Number) usuariosMap.put(((Number) id).intValue(), (Map<String, Object>) u);
+            }
+        }
+
+        String query = q.toLowerCase();
+        List<Map<String, Object>> voluntariosEncontrados = new java.util.ArrayList<>();
+
+        for (Object v : voluntarios) {
+            if (v instanceof Map) {
+                Map<String, Object> vm = (Map<String, Object>) v;
+                Object uIdRaw = vm.get("usuarioId");
+                if (uIdRaw instanceof Map) uIdRaw = ((Map<?, ?>) uIdRaw).get("value");
+                
+                if (uIdRaw instanceof Number) {
+                    int uId = ((Number) uIdRaw).intValue();
+                    Map<String, Object> perfil = perfilesMap.get(uId);
+                    Map<String, Object> user = usuariosMap.get(uId);
+
+                    String nombre = perfil != null && perfil.get("nombre") != null ? String.valueOf(perfil.get("nombre")) : "";
+                    String apellido = perfil != null && perfil.get("apellido") != null ? String.valueOf(perfil.get("apellido")) : "";
+                    String email = user != null && user.get("email") != null ? String.valueOf(user.get("email")) : "";
+                    String username = user != null && user.get("username") != null ? String.valueOf(user.get("username")) : "";
+
+                    if (nombre.toLowerCase().contains(query) || apellido.toLowerCase().contains(query) || 
+                        email.toLowerCase().contains(query) || username.toLowerCase().contains(query)) {
+                        
+                        Map<String, Object> suggestion = new HashMap<>();
+                        Object vId = vm.get("id");
+                        if (vId instanceof Map) vId = ((Map<?, ?>) vId).get("value");
+                        
+                        suggestion.put("id", vId); 
+                        suggestion.put("nombre", nombre);
+                        suggestion.put("apellido", apellido);
+                        suggestion.put("email", email);
+                        suggestion.put("username", username);
+                        voluntariosEncontrados.add(suggestion);
+                    }
+                }
+            }
+        }
+
+        model.addAttribute("voluntariosEncontrados", voluntariosEncontrados);
+        return FragmentoContenido.VOLUNTARIO_SUGERENCIAS.getPath() + " :: suggestions";
     }
 
     @GetMapping(WebRoutes.VOLUNTARIOS_NUEVO)
@@ -113,6 +212,7 @@ public class VoluntarioViewController {
                         model.addAttribute("userPhone", perfil.get("telefono"));
                         model.addAttribute("userDni", perfil.get("dni"));
                         model.addAttribute("userDireccion", perfil.get("direccion"));
+                        model.addAttribute("userFechaNacimiento", perfil.get("fechaNacimiento"));
                     }
                 } catch (Exception e) {
                     logger.warn("No se encontró PerfilLegal para usuario " + uId);
@@ -143,6 +243,8 @@ public class VoluntarioViewController {
             @RequestParam(required = false) String email,
             @RequestParam(required = false) String dni,
             @RequestParam(required = false) String telefono,
+            @RequestParam(required = false) String direccion,
+            @RequestParam(required = false) String fechaNacimiento,
             @RequestParam(required = false) String contrasena,
             @RequestParam(required = false) String especialidad,
             RedirectAttributes redirectAttributes) {
@@ -167,29 +269,35 @@ public class VoluntarioViewController {
                 redirectAttributes.addFlashAttribute("errorMessage", "Error al crear la cuenta de usuario.");
                 return "redirect:" + WebRoutes.VOLUNTARIOS_NUEVO;
             }
+        }        // 2. Asegurar PerfilLegal (Identidad)
+        Map<String, Object> bodyPerfil = new HashMap<>();
+        bodyPerfil.put("usuarioId", finalUsuarioId);
+        bodyPerfil.put("nombre", nombre);
+        bodyPerfil.put("apellido", apellido);
+        bodyPerfil.put("dni", dni);
+        bodyPerfil.put("telefono", (telefono != null && !telefono.isEmpty()) ? telefono : "000000000");
+        bodyPerfil.put("direccion", (direccion != null) ? direccion : "");
+        bodyPerfil.put("fechaNacimiento", (fechaNacimiento != null) ? fechaNacimiento : "2000-01-01");
+        
+        try {
+            restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
+        } catch (Exception e) {
+            logger.error("Error al sincronizar PerfilLegal en creación: " + e.getMessage());
         }
 
-        // 2. Registrar el perfil de voluntario y PerfilLegal
-        Map<String, Object> body = new HashMap<>();
-        body.put("usuarioId", finalUsuarioId);
-        body.put("nombre", nombre);
-        body.put("apellido", apellido);
-        body.put("disponibilidad", disponibilidad);
-        body.put("especialidad", especialidad);
-        body.put("dni", dni);
-        body.put("telefono", telefono);
-        body.put("direccion", ""); // Se puede dejar vacío o añadir campo al form
+        // 3. Registrar el perfil de voluntario (Rol operativo)
+        Map<String, Object> bodyVol = new HashMap<>();
+        bodyVol.put("usuarioId", finalUsuarioId);
+        bodyVol.put("disponibilidad", disponibilidad);
+        bodyVol.put("especialidad", especialidad);
 
         try {
-            restTemplate.postForObject(apiUrl + "/v1/voluntarios", body, Object.class);
-            redirectAttributes.addFlashAttribute("successMessage", "¡Bienvenido al equipo voluntario!");
+            restTemplate.postForObject(apiUrl + "/v1/voluntarios", bodyVol, Object.class);
+            redirectAttributes.addFlashAttribute("successMessage", "¡Solicitud enviada con éxito! El equipo revisará tu perfil pronto.");
         } catch (Exception e) {
             logger.error("Error al registrar perfil de voluntario: " + e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", "Error al crear el perfil de voluntario.");
         }
-
-        restTemplate.postForObject(apiUrl + "/v1/voluntarios", body, Object.class);
-        redirectAttributes.addFlashAttribute("successMessage", "¡Solicitud enviada con éxito! El equipo revisará tu perfil pronto.");
         return "redirect:" + WebRoutes.HOME;
     }
 
@@ -204,6 +312,7 @@ public class VoluntarioViewController {
             @RequestParam String telefono,
             @RequestParam(required = false) String dni,
             @RequestParam(required = false) String direccion,
+            @RequestParam(required = false) String fechaNacimiento,
             @RequestParam(required = false) String especialidad,
             RedirectAttributes redirectAttributes) {
 
@@ -222,6 +331,7 @@ public class VoluntarioViewController {
             bodyPerfil.put("dni", dni);
             bodyPerfil.put("telefono", telefono);
             bodyPerfil.put("direccion", direccion);
+            bodyPerfil.put("fechaNacimiento", fechaNacimiento);
             restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
         } catch (Exception e) {
             logger.error("Error al sincronizar PerfilLegal: " + e.getMessage());

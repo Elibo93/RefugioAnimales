@@ -437,16 +437,31 @@ public class SolicitudAdopcionViewController {
             HttpServletResponse response,
             Model model) {
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("dni", dni);
-        body.put("direccion", direccion);
-        body.put("fechaNacimiento", fechaNacimiento);
-        body.put("animalId", animalId);
-        body.put("comentario", comentario);
+        // 1. Obtener usuarioId del contexto
+        Map<String, Object> me = restTemplate.getForObject(authUrl + "/v1/me", Map.class);
+        if (me == null || !me.containsKey("id")) {
+             return "redirect:/login";
+        }
+        Integer usuarioId = ((Number) me.get("id")).intValue();
 
-        logger.info("Enviando solicitud de conversión y adopción al backend: " + apiUrl + "/v1/solicitudes-adopcion/convertir-y-adopcion");
+        // 2. Asegurar/Actualizar PerfilLegal (Fuente de verdad)
+        Map<String, Object> bodyPerfil = new HashMap<>();
+        bodyPerfil.put("usuarioId", usuarioId);
+        bodyPerfil.put("nombre", (String) me.get("nombre"));
+        bodyPerfil.put("apellido", (String) me.get("apellido"));
+        bodyPerfil.put("dni", dni);
+        bodyPerfil.put("direccion", direccion);
+        bodyPerfil.put("fechaNacimiento", fechaNacimiento);
+        restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
+
+        // 3. Procesar Conversión y Adopción (Rol y Solicitud)
+        Map<String, Object> bodySolicitud = new HashMap<>();
+        bodySolicitud.put("animalId", animalId);
+        bodySolicitud.put("comentario", comentario);
+
+        logger.info("Enviando solicitud de conversión y adopción al backend");
         try {
-            restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/convertir-y-adopcion", body, Object.class);
+            restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/convertir-y-adopcion", bodySolicitud, Object.class);
         } catch (org.springframework.web.client.RestClientResponseException e) {
             Map<String, Object> responseBody = e.getResponseBodyAs(Map.class);
             String errorMsg = "Error al procesar la adopción. Es posible que el DNI ya esté en uso.";
@@ -484,11 +499,10 @@ public class SolicitudAdopcionViewController {
 
         // Actualizar el rol en el microservicio de Auth
         try {
-            Map<String, Object> me = restTemplate.getForObject(authUrl + "/v1/me", Map.class);
             if (me != null && me.containsKey("id")) {
                 String currentRol = (String) me.get("rol");
                 Object rawId = me.get("id");
-                Integer usuarioId = (rawId instanceof Number) ? ((Number) rawId).intValue()
+                Integer usuarioIdAuth = (rawId instanceof Number) ? ((Number) rawId).intValue()
                         : Integer.parseInt(rawId.toString());
 
                 String newRol = null;
@@ -504,7 +518,7 @@ public class SolicitudAdopcionViewController {
                     
                     // Usar exchange para obtener la respuesta con el nuevo token
                     var responseEntity = restTemplate.exchange(
-                        authUrl + "/v1/usuarios/" + usuarioId + "/rol",
+                        authUrl + "/v1/usuarios/" + usuarioIdAuth + "/rol",
                         org.springframework.http.HttpMethod.PUT,
                         new org.springframework.http.HttpEntity<>(patchBody),
                         Map.class
@@ -580,7 +594,7 @@ public class SolicitudAdopcionViewController {
             HttpServletResponse response,
             RedirectAttributes redirectAttributes) {
 
-        // 1. Crear usuario en Auth (sin nombre/apellido)
+        // 1. Crear usuario en Auth
         Map<String, Object> userBody = new HashMap<>();
         userBody.put("email", email);
         userBody.put("contrasena", contrasena);
@@ -602,29 +616,37 @@ public class SolicitudAdopcionViewController {
             return "redirect:" + WebRoutes.SOLICITUDES_PUBLICO_REGISTRO + "?animalId=" + animalId;
         }
 
-        // 2. Crear solicitud en Backend
-        Map<String, Object> body = new HashMap<>();
-        body.put("usuarioId", usuarioId);
-        body.put("nombre", nombre);
-        body.put("apellido", apellido);
-        body.put("email", email);
-        body.put("contrasena", contrasena);
-        body.put("telefono", telefono);
-        body.put("dni", dni);
-        body.put("direccion", direccion);
-        body.put("fechaNacimiento", fechaNacimiento);
-        body.put("animalId", animalId);
-        body.put("comentario", comentario);
+        // 2. Crear PerfilLegal en Backend (Identidad)
+        Map<String, Object> bodyPerfil = new HashMap<>();
+        bodyPerfil.put("usuarioId", usuarioId);
+        bodyPerfil.put("nombre", nombre);
+        bodyPerfil.put("apellido", apellido);
+        bodyPerfil.put("dni", dni);
+        bodyPerfil.put("direccion", direccion);
+        bodyPerfil.put("telefono", telefono);
+        bodyPerfil.put("fechaNacimiento", fechaNacimiento);
+        
+        try {
+            restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
+        } catch (Exception e) {
+            logger.error("Error al crear perfil legal: " + e.getMessage());
+        }
+
+        // 3. Crear solicitud simplificada en Backend (Rol y Proceso)
+        Map<String, Object> bodySolicitud = new HashMap<>();
+        bodySolicitud.put("usuarioId", usuarioId);
+        bodySolicitud.put("animalId", animalId);
+        bodySolicitud.put("comentario", comentario);
 
         try {
-            restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/publico/registro-y-adopcion", body,
+            restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/publico/registro-y-adopcion", bodySolicitud,
                     Object.class);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar la solicitud: " + e.getMessage());
             return "redirect:" + WebRoutes.SOLICITUDES_PUBLICO_REGISTRO + "?animalId=" + animalId;
         }
 
-        // 3. Auto-login tras registro exitoso (Relevo de Cookie JWT)
+        // 4. Auto-login tras registro exitoso (Relevo de Cookie JWT)
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);

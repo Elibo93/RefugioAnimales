@@ -20,5 +20,8 @@ public record PerfilLegalRequest(
     String dni,
     
     String telefono,
-    String direccion
+    String direccion,
+    
+    @es.refugio.refugio.infraestructure.web.validation.MinAge(18)
+    String fechaNacimiento
 ) {}

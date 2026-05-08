@@ -40,7 +40,9 @@ public class AdoptanteViewController {
 
     @GetMapping(WebRoutes.ADOPTANTES_BASE)
     @PreAuthorize("hasRole('ADMIN')")
-    public String listar(Model model) {
+    public String listar(Model model, 
+                        @RequestParam(required = false) String q,
+                        HttpServletRequest request) {
         List<Object> adoptantes = fetchList("/v1/adoptantes");
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
         List<Object> perfilesLegales = fetchList("/v1/perfiles-legales");
@@ -65,10 +67,40 @@ public class AdoptanteViewController {
             }
         }
 
+        // Filtrado por Búsqueda (q)
+        if (q != null && !q.trim().isEmpty()) {
+            String query = q.toLowerCase();
+            adoptantes = adoptantes.stream()
+                .filter(a -> {
+                    if (a instanceof Map) {
+                        Map<?, ?> am = (Map<?, ?>) a;
+                        String uId = String.valueOf(am.get("usuarioId"));
+                        Map<?, ?> user = (Map<?, ?>) usuariosMap.get(uId);
+                        Map<?, ?> legal = (Map<?, ?>) perfilesMap.get(uId);
+                        
+                        String username = user != null ? String.valueOf(user.get("username")).toLowerCase() : "";
+                        String email = user != null ? String.valueOf(user.get("email")).toLowerCase() : "";
+                        String nombre = legal != null ? String.valueOf(legal.get("nombre")).toLowerCase() : "";
+                        String apellido = legal != null ? String.valueOf(legal.get("apellido")).toLowerCase() : "";
+                        String dni = legal != null ? String.valueOf(legal.get("dni")).toLowerCase() : "";
+                        
+                        return username.contains(query) || email.contains(query) || 
+                               nombre.contains(query) || apellido.contains(query) || dni.contains(query);
+                    }
+                    return false;
+                }).toList();
+        }
+
         model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.Adoptante_LIST.getName(), adoptantes);
         model.addAttribute("usuariosMap", usuariosMap);
         model.addAttribute("perfilesMap", perfilesMap);
+        model.addAttribute("query", q);
         model.addAttribute("currentUri", WebRoutes.ADOPTANTES_BASE);
+
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return es.refugio.frontend.web.enums.FragmentoContenido.Adoptante_LIST.getPath() + " :: list-body";
+        }
+
         model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.FRAGMENTO_CONTENIDO.getName(), es.refugio.frontend.web.enums.FragmentoContenido.Adoptante_LIST.getPath());
         return es.refugio.frontend.web.enums.ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -118,6 +150,7 @@ public class AdoptanteViewController {
                         model.addAttribute("userPhone", perfil.get("telefono"));
                         model.addAttribute("userDni", perfil.get("dni"));
                         model.addAttribute("userDireccion", perfil.get("direccion"));
+                        model.addAttribute("userFechaNacimiento", perfil.get("fechaNacimiento"));
                     }
                 } catch (Exception e) {
                     logger.warn("No se encontró PerfilLegal para usuario " + uId);
@@ -145,19 +178,31 @@ public class AdoptanteViewController {
             @RequestParam String apellido,
             @RequestParam String dni,
             @RequestParam String direccion,
+            @RequestParam(required = false) String telefono,
             @RequestParam String fechaNacimiento,
-            Model model) {
+            RedirectAttributes redirectAttributes) {
         try {
-            Map<String, Object> body = new HashMap<>();
-            body.put("usuarioId", usuarioId);
-            body.put("nombre", nombre);
-            body.put("apellido", apellido);
-            body.put("dni", dni);
-            body.put("direccion", direccion);
-            body.put("fechaNacimiento", fechaNacimiento);
-            restTemplate.postForObject(apiUrl + "/v1/adoptantes", body, Object.class);
+            // 1. Crear/Actualizar PerfilLegal (Fuente de verdad para identidad)
+            Map<String, Object> bodyPerfil = new HashMap<>();
+            bodyPerfil.put("usuarioId", usuarioId);
+            bodyPerfil.put("nombre", nombre);
+            bodyPerfil.put("apellido", apellido);
+            bodyPerfil.put("dni", dni);
+            bodyPerfil.put("direccion", direccion);
+            bodyPerfil.put("telefono", (telefono != null && !telefono.isEmpty()) ? telefono : "000000000");
+            bodyPerfil.put("fechaNacimiento", fechaNacimiento);
+            restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
+
+            // 2. Crear Perfil de Adoptante (Rol operativo)
+            Map<String, Object> bodyAdoptante = new HashMap<>();
+            bodyAdoptante.put("usuarioId", usuarioId);
+            restTemplate.postForObject(apiUrl + "/v1/adoptantes", bodyAdoptante, Object.class);
+
+            redirectAttributes.addFlashAttribute("successMessage", "Adoptante creado correctamente");
             return "redirect:" + WebRoutes.ADOPTANTES_BASE;
         } catch (Exception e) {
+            logger.error("Error al crear adoptante: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al crear adoptante: " + e.getMessage());
             return "redirect:" + WebRoutes.ADOPTANTES_BASE;
         }
     }
@@ -177,7 +222,6 @@ public class AdoptanteViewController {
         try {
             Map<String, Object> body = new HashMap<>();
             body.put("usuarioId", usuarioId);
-            body.put("fechaNacimiento", fechaNacimiento);
             if (estadoValidacion != null) {
                 body.put("estadoValidacion", estadoValidacion);
             }
@@ -190,6 +234,7 @@ public class AdoptanteViewController {
             bodyPerfil.put("apellido", apellido);
             bodyPerfil.put("dni", dni);
             bodyPerfil.put("direccion", direccion);
+            bodyPerfil.put("fechaNacimiento", fechaNacimiento);
             // El teléfono se mantiene o se añade campo al form si es necesario
             restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
 

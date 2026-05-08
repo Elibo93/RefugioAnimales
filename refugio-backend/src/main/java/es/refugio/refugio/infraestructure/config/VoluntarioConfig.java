@@ -24,8 +24,8 @@ public class VoluntarioConfig {
     }
 
     @Bean
-    public CreateVoluntarioUseCase createVoluntarioUseCase(VoluntarioRepository repository) {
-        return new CreateVoluntarioUseCase(repository);
+    public CreateVoluntarioUseCase createVoluntarioUseCase(VoluntarioRepository repository, es.refugio.refugio.domain.repository.PerfilLegalRepository perfilLegalRepository) {
+        return new CreateVoluntarioUseCase(repository, perfilLegalRepository);
     }
 
     @Bean

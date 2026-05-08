@@ -16,7 +16,6 @@ public class Adoptante {
 
     private AdoptanteId id;
     private Integer usuarioId; // Relación con la entidad Usuario (FK)
-    private String fechaNacimiento;
     private EstadoValidacion estadoValidacion;
     // Relaciones (IDs de las entidades relacionadas)
     private LocalDateTime fechaRegistro;

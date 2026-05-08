@@ -15,7 +15,6 @@ public class EditAdoptanteUseCase {
     public Adoptante update(EditAdoptanteCommand command) {
         return adoptanteRepository.getById(command.id())
                 .map(t -> {
-                    t.setFechaNacimiento(command.fechaNacimiento());
                     t.setEstadoValidacion(command.estadoValidacion() != null
                             ? EstadoValidacion.valueOf(command.estadoValidacion().toUpperCase())
                             : null);

@@ -17,21 +17,14 @@ public class AdoptanteMapper {
 
     public static CreateAdoptanteCommand toCommand(AdoptanteRequest request) {
         return new CreateAdoptanteCommand(
-                request.usuarioId(),
-                request.fechaNacimiento());
+                request.usuarioId());
     }
 
-    public static EditAdoptanteCommand toEditCommand(AdoptanteId id, AdoptanteRequest request) {
-        return new EditAdoptanteCommand(
-                id,
-                request.fechaNacimiento(),
-                request.estadoValidacion());
-    }
+
 
     public static EditAdoptanteCommand toEditCommand(AdoptanteId id, AdoptanteUpdateRequest request) {
         return new EditAdoptanteCommand(
                 id,
-                request.fechaNacimiento(),
                 request.estadoValidacion());
     }
 
@@ -39,7 +32,6 @@ public class AdoptanteMapper {
         return new AdoptanteResponse(
                 adoptante.getId() != null ? adoptante.getId().getValue() : 0,
                 adoptante.getUsuarioId(),
-                adoptante.getFechaNacimiento(),
                 adoptante.getEstadoValidacion() != null ? adoptante.getEstadoValidacion().name() : null,
                 adoptante.getFechaRegistro());
     }
@@ -47,7 +39,6 @@ public class AdoptanteMapper {
     public static AdoptanteEntity toEntity(Adoptante t) {
         return AdoptanteEntity.builder()
                 .id(t.getId() != null ? t.getId().getValue() : null)
-                .fechaNacimiento(t.getFechaNacimiento())
                 .estadoValidacion(t.getEstadoValidacion() != null ? t.getEstadoValidacion().name() : null)
                 .fechaRegistro(t.getFechaRegistro())
                 .usuarioId(t.getUsuarioId())
@@ -58,7 +49,6 @@ public class AdoptanteMapper {
         return Adoptante.builder()
                 .id(e.getId() != null ? new AdoptanteId(e.getId()) : null)
                 .usuarioId(e.getUsuarioId())
-                .fechaNacimiento(e.getFechaNacimiento())
                 .estadoValidacion(e.getEstadoValidacion() != null
                         ? EstadoValidacion.valueOf(e.getEstadoValidacion().toUpperCase())
                         : null)

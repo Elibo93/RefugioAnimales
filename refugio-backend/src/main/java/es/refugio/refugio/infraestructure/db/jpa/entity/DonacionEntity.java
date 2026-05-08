@@ -2,13 +2,8 @@ package es.refugio.refugio.infraestructure.db.jpa.entity;
 
 import java.time.LocalDateTime;
 
-import es.refugio.refugio.domain.model.donacion.enums.FrecuenciaDonacion;
-import es.refugio.refugio.domain.model.donacion.enums.TipoDonacion;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,16 +31,14 @@ public class DonacionEntity {
     @Column(name = "objetivo_id")
     private Integer objetivoId;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private TipoDonacion tipo;
+    private String tipo;
 
     @Column(nullable = false)
     private Double cantidad;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private FrecuenciaDonacion frecuencia;
+    private String frecuencia;
 
     @Column(nullable = false, columnDefinition = "DATETIME")
     private LocalDateTime fecha;
