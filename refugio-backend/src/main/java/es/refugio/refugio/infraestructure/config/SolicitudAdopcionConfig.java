@@ -76,8 +76,9 @@ public class SolicitudAdopcionConfig {
             SolicitudAdopcionRepository solicitudRepo,
             AnimalRepository animalRepo,
             AdoptanteRepository adoptanteRepo,
-            AdopcionRepository adopcionRepo) {
-        return new AprobarSolicitudAdopcionUseCase(solicitudRepo, animalRepo, adoptanteRepo, adopcionRepo);
+            AdopcionRepository adopcionRepo,
+            es.refugio.refugio.application.service.NotificacionService notificacionService) {
+        return new AprobarSolicitudAdopcionUseCase(solicitudRepo, animalRepo, adoptanteRepo, adopcionRepo, notificacionService);
     }
 
     @Bean
@@ -88,8 +89,10 @@ public class SolicitudAdopcionConfig {
     @Bean
     public RechazarSolicitudAdopcionUseCase rechazarSolicitudAdopcionUseCase(
             SolicitudAdopcionRepository solicitudRepo,
-            AdoptanteRepository adoptanteRepo) {
-        return new RechazarSolicitudAdopcionUseCase(solicitudRepo, adoptanteRepo);
+            AdoptanteRepository adoptanteRepo,
+            AnimalRepository animalRepo,
+            es.refugio.refugio.application.service.NotificacionService notificacionService) {
+        return new RechazarSolicitudAdopcionUseCase(solicitudRepo, adoptanteRepo, animalRepo, notificacionService);
     }
 
     @Bean
