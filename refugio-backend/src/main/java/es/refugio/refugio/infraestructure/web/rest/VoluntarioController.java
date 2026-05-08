@@ -56,20 +56,20 @@ public class VoluntarioController {
         // Asegurar PerfilLegal
         perfilLegalRepository.findByUsuarioId(request.usuarioId())
                 .map(existing -> {
-                    existing.setNombre(request.nombre());
-                    existing.setApellido(request.apellido());
-                    existing.setDni(request.dni());
-                    existing.setTelefono(request.telefono());
-                    existing.setDireccion(request.direccion());
+                    if (request.nombre() != null) existing.setNombre(request.nombre());
+                    if (request.apellido() != null) existing.setApellido(request.apellido());
+                    if (request.dni() != null) existing.setDni(request.dni());
+                    if (request.telefono() != null) existing.setTelefono(request.telefono());
+                    if (request.direccion() != null) existing.setDireccion(request.direccion());
                     return perfilLegalRepository.save(existing);
                 })
                 .orElseGet(() -> perfilLegalRepository.save(PerfilLegal.builder()
                         .usuarioId(request.usuarioId())
-                        .nombre(request.nombre())
-                        .apellido(request.apellido())
-                        .dni(request.dni())
-                        .telefono(request.telefono())
-                        .direccion(request.direccion())
+                        .nombre(request.nombre() != null ? request.nombre() : "")
+                        .apellido(request.apellido() != null ? request.apellido() : "")
+                        .dni(request.dni() != null ? request.dni() : "")
+                        .telefono(request.telefono() != null ? request.telefono() : "")
+                        .direccion(request.direccion() != null ? request.direccion() : "")
                         .build()));
 
         CreateVoluntarioCommand command = VoluntarioMapper.toCommand(request);
