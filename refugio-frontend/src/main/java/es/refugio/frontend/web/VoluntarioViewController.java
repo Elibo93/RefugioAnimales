@@ -14,6 +14,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.http.HttpEntity;
 
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
@@ -145,6 +150,7 @@ public class VoluntarioViewController {
             @RequestParam(required = false) String telefono,
             @RequestParam(required = false) String contrasena,
             @RequestParam(required = false) String especialidad,
+            HttpServletResponse response,
             RedirectAttributes redirectAttributes) {
 
         Integer finalUsuarioId = idUsuario;
@@ -157,10 +163,17 @@ public class VoluntarioViewController {
             userBody.put("rol", "ROLE_VOLUNTARIO");
 
             try {
+                String targetUrl = authUrl + "/v1/usuarios";
+                logger.info("Registrando usuario en Auth: " + targetUrl);
                 @SuppressWarnings("unchecked")
-                Map<String, Object> createdUser = restTemplate.postForObject(authUrl + "/v1/usuarios", userBody, Map.class);
+                Map<String, Object> createdUser = restTemplate.postForObject(targetUrl, userBody, Map.class);
                 if (createdUser != null && createdUser.get("id") != null) {
-                    finalUsuarioId = (Integer) createdUser.get("id");
+                    Object idObj = createdUser.get("id");
+                    if (idObj instanceof Map) {
+                        finalUsuarioId = (Integer) ((Map<?, ?>) idObj).get("value");
+                    } else if (idObj instanceof Number) {
+                        finalUsuarioId = ((Number) idObj).intValue();
+                    }
                 }
             } catch (Exception e) {
                 logger.error("Error al registrar usuario para voluntario: " + e.getMessage());
@@ -178,18 +191,79 @@ public class VoluntarioViewController {
         body.put("especialidad", especialidad);
         body.put("dni", dni);
         body.put("telefono", telefono);
-        body.put("direccion", ""); // Se puede dejar vacío o añadir campo al form
+        // body.put("direccion", ""); // No enviar para no sobrescribir con vacío
 
         try {
             restTemplate.postForObject(apiUrl + "/v1/voluntarios", body, Object.class);
-            redirectAttributes.addFlashAttribute("successMessage", "¡Bienvenido al equipo voluntario!");
+            
+            // 3. Actualizar Rol en Auth si el usuario ya existe
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (finalUsuarioId != null && auth != null && auth.isAuthenticated()) {
+                try {
+                    String currentRol = auth.getAuthorities().stream()
+                            .map(a -> a.getAuthority())
+                            .filter(r -> r.startsWith("ROLE_"))
+                            .findFirst().orElse("ROLE_PUBLICO");
+                            
+                    boolean isAdoptante = auth.getAuthorities().stream()
+                            .anyMatch(a -> a.getAuthority().equals("ROLE_ADOPTANTE"));
+                    
+                    String newRol = null;
+                    if (isAdoptante) {
+                        newRol = "ROLE_VOLUNTARIO_ADOPTANTE";
+                    } else if ("ROLE_PUBLICO".equals(currentRol)) {
+                        newRol = "ROLE_VOLUNTARIO";
+                    }
+                    
+                        if (newRol != null && !currentRol.equals(newRol)) {
+                            Map<String, String> patchBody = new HashMap<>();
+                            patchBody.put("rol", newRol);
+                            
+                            String targetUrl = authUrl + "/v1/usuarios/" + finalUsuarioId + "/rol";
+                            logger.info("Actualizando rol en Auth: " + targetUrl + " -> " + newRol);
+                            
+                            var resp = restTemplate.exchange(
+                                targetUrl,
+                                org.springframework.http.HttpMethod.PUT,
+                                new HttpEntity<>(patchBody),
+                                Map.class
+                            );
+                        
+                        if (resp.getStatusCode().is2xxSuccessful() && resp.getBody() != null) {
+                            String newToken = (String) resp.getBody().get("token");
+                            if (newToken != null) {
+                                // Actualizar Cookie
+                                jakarta.servlet.http.Cookie authCookie = new jakarta.servlet.http.Cookie("JWT_TOKEN", newToken);
+                                authCookie.setHttpOnly(true);
+                                authCookie.setPath("/");
+                                authCookie.setMaxAge(86400);
+                                response.addCookie(authCookie);
+                                
+                                // Actualizar Contexto Local
+                                List<SimpleGrantedAuthority> authorities = new java.util.ArrayList<>();
+                                authorities.add(new SimpleGrantedAuthority(newRol));
+                                if ("ROLE_VOLUNTARIO_ADOPTANTE".equals(newRol)) {
+                                    authorities.add(new SimpleGrantedAuthority("ROLE_VOLUNTARIO"));
+                                    authorities.add(new SimpleGrantedAuthority("ROLE_ADOPTANTE"));
+                                }
+                                var newAuth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), null, authorities);
+                                SecurityContextHolder.getContext().setAuthentication(newAuth);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.error("Error al actualizar rol de voluntario: " + e.getMessage());
+                }
+            }
+            
+            redirectAttributes.addFlashAttribute("successMessage", "¡Bienvenido al equipo voluntario! Solicitud enviada con éxito.");
         } catch (Exception e) {
-            logger.error("Error al registrar perfil de voluntario: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al crear el perfil de voluntario.");
+            String errorMsg = "Error al crear el perfil: " + e.getMessage();
+            if (e.getCause() != null) errorMsg += " (Causa: " + e.getCause().getMessage() + ")";
+            logger.error(errorMsg);
+            redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
         }
 
-        restTemplate.postForObject(apiUrl + "/v1/voluntarios", body, Object.class);
-        redirectAttributes.addFlashAttribute("successMessage", "¡Solicitud enviada con éxito! El equipo revisará tu perfil pronto.");
         return "redirect:" + WebRoutes.HOME;
     }
 

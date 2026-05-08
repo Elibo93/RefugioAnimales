@@ -390,10 +390,8 @@ public class SolicitudAdopcionViewController {
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             boolean isAdoptante = auth.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals("ROLE_ADOPTANTE"));
-            boolean isStaff = auth.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_VOLUNTARIO") || a.getAuthority().equals("ROLE_ADMIN"));
 
-            if (isAdoptante || isStaff) {
+            if (isAdoptante) {
                 return "redirect:" + WebRoutes.SOLICITUDES_DIRECTA_FORM + "?animalId=" + animalId;
             } else {
                 return "redirect:" + WebRoutes.SOLICITUDES_CONVERTIR + "?animalId=" + animalId;
