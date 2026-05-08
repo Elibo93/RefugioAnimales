@@ -38,11 +38,11 @@ public class TareaViewController {
 
     @GetMapping(WebRoutes.TAREAS_BASE)
     public String listar(Model model, @RequestParam(required = false) String successMessage) {
-        List<Object> tareas      = fetchList("/v1/tareas");
+        List<Object> tareas = fetchList("/v1/tareas");
         List<Object> voluntarios = fetchList("/v1/voluntarios");
-        List<Object> usuarios    = fetchList(authUrl + "/v1/usuarios");
+        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
 
-        // Determinar rol y ID del usuario actual desde el modelo (inyectado por GlobalModelAttributesAdvice)
+        // Determinar rol y ID del usuario actual desde el modelo
         Object isAdminObj = model.getAttribute("isAdmin");
         boolean isAdmin = isAdminObj != null && (Boolean) isAdminObj;
         Object currentUserId = model.getAttribute("currentUserId");
@@ -50,20 +50,21 @@ public class TareaViewController {
         Integer myVoluntarioId = null;
         if (!isAdmin && currentUserId != null) {
             try {
-                Map<?, ?> vMap = (Map<?, ?>) restTemplate.getForObject(apiUrl + "/v1/voluntarios/usuario/" + currentUserId, Map.class);
+                Map<?, ?> vMap = (Map<?, ?>) restTemplate
+                        .getForObject(apiUrl + "/v1/voluntarios/usuario/" + currentUserId, Map.class);
                 if (vMap != null) {
                     Object vId = vMap.get("id");
-                    if (vId instanceof Map) vId = ((Map<?, ?>) vId).get("value");
+                    if (vId instanceof Map)
+                        vId = ((Map<?, ?>) vId).get("value");
                     if (vId instanceof Number) {
                         myVoluntarioId = ((Number) vId).intValue();
                     }
                 }
             } catch (Exception ignored) {
-                // Si falla (por ejemplo no tiene registro de voluntario), myVoluntarioId seguirá siendo null
             }
         }
 
-        // Filtrar tareas estrictamente si el usuario no es admin
+        // Filtrar tareas si el usuario no es admin
         if (!isAdmin) {
             List<Object> misTareas = new ArrayList<>();
             if (myVoluntarioId != null) {
@@ -73,9 +74,11 @@ public class TareaViewController {
                         if (vIdsObj instanceof List) {
                             for (Object vid : (List<?>) vIdsObj) {
                                 Object vidRaw = vid;
-                                if (vidRaw instanceof Map) vidRaw = ((Map<?, ?>) vidRaw).get("value");
-                                
-                                if (vidRaw instanceof Number && ((Number) vidRaw).intValue() == myVoluntarioId.intValue()) {
+                                if (vidRaw instanceof Map)
+                                    vidRaw = ((Map<?, ?>) vidRaw).get("value");
+
+                                if (vidRaw instanceof Number
+                                        && ((Number) vidRaw).intValue() == myVoluntarioId.intValue()) {
                                     misTareas.add(t);
                                     break;
                                 }
@@ -84,14 +87,16 @@ public class TareaViewController {
                     }
                 }
             }
-            tareas = misTareas; // Si es voluntario y no tiene asignadas, la lista será vacía, no la total.
+            tareas = misTareas;
         }
 
         Map<Integer, Map<String, Object>> usuariosMap = new HashMap<>();
         for (Object u : usuarios) {
             if (u instanceof Map) {
-                Object id = ((Map<?, ?>) u).get("id");
-                if (id instanceof Number) usuariosMap.put(((Number) id).intValue(), (Map<String, Object>) u);
+                Object idObj = ((Map<?, ?>) u).get("id");
+                if (idObj instanceof Map) idObj = ((Map<?, ?>) idObj).get("value");
+                if (idObj instanceof Number)
+                    usuariosMap.put(((Number) idObj).intValue(), (Map<String, Object>) u);
             }
         }
 
@@ -100,13 +105,11 @@ public class TareaViewController {
             if (v instanceof Map) {
                 Object vId = ((Map<?, ?>) v).get("id");
                 Object uId = ((Map<?, ?>) v).get("usuarioId");
-                
+
                 if (vId instanceof Number && uId instanceof Number) {
                     Map<String, Object> user = usuariosMap.get(((Number) uId).intValue());
                     if (user != null) {
-                        String n = String.valueOf(user.get("nombre"));
-                        String a = String.valueOf(user.get("apellido"));
-                        voluntarioNombres.put(String.valueOf(vId), (n + " " + a).trim());
+                        voluntarioNombres.put(String.valueOf(vId), String.valueOf(user.get("email")));
                     }
                 }
             }
@@ -119,7 +122,7 @@ public class TareaViewController {
                 if (vId instanceof Map) vId = ((Map<?, ?>) vId).get("value");
                 Object uId = ((Map<?, ?>) v).get("usuarioId");
                 if (uId instanceof Map) uId = ((Map<?, ?>) uId).get("value");
-                
+
                 if (vId instanceof Number && uId instanceof Number) {
                     voluntarioUsuarioIds.put(vId.toString(), uId.toString());
                 }
@@ -129,52 +132,57 @@ public class TareaViewController {
         model.addAttribute(ModelAttribute.Tarea_LIST.getName(), tareas);
         model.addAttribute("voluntarioNombres", voluntarioNombres);
         model.addAttribute("voluntarioUsuarioIds", voluntarioUsuarioIds);
-        if (successMessage != null) model.addAttribute("successMessage", successMessage);
+        if (successMessage != null)
+            model.addAttribute("successMessage", successMessage);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Tarea_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
     @GetMapping(WebRoutes.TAREAS_NUEVA)
-    public String formulario(Model model, @RequestParam(required = false) Integer voluntarioId, HttpServletRequest request) {
+    public String formulario(Model model, @RequestParam(required = false) Integer voluntarioId,
+            HttpServletRequest request) {
         Map<String, Object> tarea = new HashMap<>();
         tarea.put("fecha", LocalDateTime.now().toString());
-        
+
         if (voluntarioId != null) {
             tarea.put("voluntarioIds", List.of(voluntarioId));
-            // Buscar nombre del voluntario para mostrarlo en el título
             try {
-                Map<String, Object> v = (Map<String, Object>) restTemplate.getForObject(apiUrl + "/v1/voluntarios/" + voluntarioId, Object.class);
+                Map<String, Object> v = (Map<String, Object>) restTemplate
+                        .getForObject(apiUrl + "/v1/voluntarios/" + voluntarioId, Object.class);
                 if (v != null && v.get("usuarioId") != null) {
-                    Map<String, Object> u = (Map<String, Object>) restTemplate.getForObject(authUrl + "/v1/usuarios/" + v.get("usuarioId"), Object.class);
+                    Map<String, Object> u = (Map<String, Object>) restTemplate
+                            .getForObject(authUrl + "/v1/usuarios/" + v.get("usuarioId"), Object.class);
                     if (u != null) {
                         model.addAttribute("voluntarioPreseleccionado", u);
                     }
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
             model.addAttribute("returnUrl", WebRoutes.VOLUNTARIOS_BASE);
         } else {
             model.addAttribute("returnUrl", WebRoutes.TAREAS_BASE);
         }
-        
+
         model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
         model.addAttribute("voluntarios", fetchList("/v1/voluntarios"));
         model.addAttribute("estados", List.of("PENDIENTE", "EN_PROCESO", "COMPLETADA", "CANCELADA"));
-        
-        // Cargar mapa de usuarios para el selector si no hay preseleccionado
+
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
         Map<Integer, Map<String, Object>> usuariosMap = new HashMap<>();
         for (Object u : usuarios) {
             if (u instanceof Map) {
-                Object id = ((Map<?, ?>) u).get("id");
-                if (id instanceof Number) usuariosMap.put(((Number) id).intValue(), (Map<String, Object>) u);
+                Object idObj = ((Map<?, ?>) u).get("id");
+                if (idObj instanceof Map) idObj = ((Map<?, ?>) idObj).get("value");
+                if (idObj instanceof Number)
+                    usuariosMap.put(((Number) idObj).intValue(), (Map<String, Object>) u);
             }
         }
         model.addAttribute("usuariosMap", usuariosMap);
-        
+
         if ("true".equals(request.getHeader("HX-Request"))) {
             return FragmentoContenido.Tarea_FORM.getPath() + " :: content";
         }
-        
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Tarea_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -188,10 +196,10 @@ public class TareaViewController {
             RedirectAttributes redirectAttributes) {
 
         Map<String, Object> body = new HashMap<>();
-        body.put("descripcion",   descripcion);
-        body.put("estado",        estado);
-        body.put("fecha",         LocalDateTime.now().toString());
-        body.put("fechaLimite",   fechaLimite != null && !fechaLimite.isEmpty() ? fechaLimite : null);
+        body.put("descripcion", descripcion);
+        body.put("estado", estado);
+        body.put("fecha", LocalDateTime.now().toString());
+        body.put("fechaLimite", fechaLimite != null && !fechaLimite.isEmpty() ? fechaLimite : null);
         body.put("instrucciones", instrucciones);
         body.put("voluntarioIds", voluntarioIds != null ? voluntarioIds : List.of());
 
@@ -206,11 +214,11 @@ public class TareaViewController {
         model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
         model.addAttribute("voluntarios", fetchList("/v1/voluntarios"));
         model.addAttribute("estados", List.of("PENDIENTE", "EN_PROCESO", "COMPLETADA", "CANCELADA"));
-        
+
         if ("true".equals(request.getHeader("HX-Request"))) {
             return FragmentoContenido.Tarea_FORM.getPath() + " :: content";
         }
-        
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Tarea_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -225,10 +233,10 @@ public class TareaViewController {
             RedirectAttributes redirectAttributes) {
 
         Map<String, Object> body = new HashMap<>();
-        body.put("descripcion",   descripcion);
-        body.put("estado",        estado);
-        body.put("fecha",         LocalDateTime.now().toString());
-        body.put("fechaLimite",   fechaLimite != null && !fechaLimite.isEmpty() ? fechaLimite : null);
+        body.put("descripcion", descripcion);
+        body.put("estado", estado);
+        body.put("fecha", LocalDateTime.now().toString());
+        body.put("fechaLimite", fechaLimite != null && !fechaLimite.isEmpty() ? fechaLimite : null);
         body.put("instrucciones", instrucciones);
         body.put("voluntarioIds", voluntarioIds != null ? voluntarioIds : List.of());
 
@@ -241,7 +249,8 @@ public class TareaViewController {
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         restTemplate.delete(apiUrl + "/v1/tareas/" + id);
-        if ("true".equals(request.getHeader("HX-Request"))) return ResponseEntity.ok("");
+        if ("true".equals(request.getHeader("HX-Request")))
+            return ResponseEntity.ok("");
         return ResponseEntity.status(302).header("Location", WebRoutes.TAREAS_BASE).build();
     }
 
@@ -266,6 +275,8 @@ public class TareaViewController {
             String finalUrl = path.startsWith("http") ? path : apiUrl + path;
             Object[] arr = restTemplate.getForObject(finalUrl, Object[].class);
             return arr != null ? Arrays.asList(arr) : List.of();
-        } catch (Exception e) { return List.of(); }
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 }

@@ -32,8 +32,41 @@
             </a>
         </div>
         <div class="header-right">
-            <!-- empty for now or placeholders -->
+            <div th:if="${isAuthenticated}" class="header-actions" style="display: flex; align-items: center; gap: 1rem;">
+                <!-- Notification Bell -->
+                <a th:href="@{/web/notificaciones}" class="notification-btn" 
+                   title="Notificaciones"
+                   style="position: relative; width: 44px; height: 44px; border-radius: 14px; background: white; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; color: #64748b; transition: all 0.2s; text-decoration: none;">
+                    <i data-lucide="bell" style="width: 22px;"></i>
+                    <!-- Badge dinámico con HTMX Polling cada 30 segundos -->
+                    <div id="notif-badge-container" 
+                         hx-get="/web/notificaciones/count" 
+                         hx-trigger="load, every 30s" 
+                         style="position: absolute; top: -5px; right: -5px;">
+                    </div>
+                </a>
+            </div>
         </div>
+
+        <style>
+            .notification-btn:hover {
+                color: #2563eb;
+                border-color: #bfdbfe;
+                background: #f0f9ff;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+            }
+            .notification-badge {
+                background: #e11d48;
+                color: white;
+                font-size: 0.7rem;
+                font-weight: 800;
+                padding: 2px 6px;
+                border-radius: 20px;
+                border: 2px solid white;
+                box-shadow: 0 2px 4px rgba(225, 29, 72, 0.3);
+            }
+        </style>
     </div>
 </header>
 

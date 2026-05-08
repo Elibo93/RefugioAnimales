@@ -58,7 +58,7 @@
                             <option value="">— Sin asignar —</option>
                             <option th:each="v : ${voluntarios}" th:value="${v.get('id')}"
                                 th:with="u=${usuariosMap != null ? usuariosMap[v.get('usuarioId')] : null}"
-                                th:text="${u != null ? u.get('nombre') + ' ' + u.get('apellido') : 'Voluntario ' + v.get('id')}"
+                                th:text="${u != null ? u.get('email') : 'Voluntario ' + v.get('id')}"
                                 th:selected="${tarea.get('voluntarioIds') != null and tarea.get('voluntarioIds').contains(v.get('id'))}">
                             </option>
                         </select>

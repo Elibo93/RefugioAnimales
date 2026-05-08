@@ -1,6 +1,5 @@
 package es.refugio.refugio.application.usecase.solicitud_adopcion;
 
-import es.refugio.refugio.domain.error.AnimalNotFoundException;
 import es.refugio.refugio.domain.error.SolicitudAdopcionEstadoInvalidoException;
 import es.refugio.refugio.domain.error.SolicitudAdopcionNotFoundException;
 import es.refugio.refugio.domain.model.adopcion.Adopcion;
@@ -36,6 +35,7 @@ public class AprobarSolicitudAdopcionUseCase {
     private final AnimalRepository animalRepository;
     private final AdoptanteRepository adoptanteRepository;
     private final AdopcionRepository adopcionRepository;
+    private final es.refugio.refugio.application.service.NotificacionService notificacionService;
 
     @Transactional
     public Adopcion aprobar(SolicitudAdopcionId solicitudId) {
@@ -53,18 +53,29 @@ public class AprobarSolicitudAdopcionUseCase {
         solicitudAdopcionRepository.save(solicitud);
 
         // 3 — Actualizar animal → RESERVADO
-        animalRepository.getById(solicitud.getAnimalId())
+        String animalNombre = animalRepository.getById(solicitud.getAnimalId())
                 .map(animal -> {
                     animal.setEstado(EstadoAnimal.RESERVADO);
-                    return animalRepository.save(animal);
+                    animalRepository.save(animal);
+                    return animal.getNombre();
                 })
-                .orElseThrow(() -> new AnimalNotFoundException(solicitud.getAnimalId().getValue()));
+                .orElse("el animal");
 
-        // 4 — Actualizar adoptante → APROBADO
+        // 4 — Actualizar adoptante → APROBADO e informar
         adoptanteRepository.getById(solicitud.getAdoptanteId())
-                .map(adoptante -> {
+                .ifPresent(adoptante -> {
                     adoptante.setEstadoValidacion(EstadoValidacion.APROBADO);
-                    return adoptanteRepository.save(adoptante);
+                    adoptanteRepository.save(adoptante);
+                    
+                    if (adoptante.getUsuarioId() != null) {
+                        notificacionService.enviar(
+                            adoptante.getUsuarioId(),
+                            "Solicitud de Adopción Aprobada",
+                            "¡Buenas noticias! Tu solicitud para adoptar a " + animalNombre + " ha sido aprobada.",
+                            "ADOPCION",
+                            "/web/solicitudes/mis-adoptados"
+                        );
+                    }
                 });
         // No lanzamos error si el adoptante no existe; la solicitud puede precederle
 

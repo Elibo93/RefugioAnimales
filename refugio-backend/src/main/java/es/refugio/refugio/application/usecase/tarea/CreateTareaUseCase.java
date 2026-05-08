@@ -6,12 +6,16 @@ import es.refugio.refugio.domain.model.tarea.Tarea;
 import es.refugio.refugio.domain.model.tarea.enums.EstadoTarea;
 import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
 import es.refugio.refugio.domain.repository.TareaRepository;
+import es.refugio.refugio.domain.repository.VoluntarioRepository;
+import es.refugio.refugio.application.service.NotificacionService;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class CreateTareaUseCase {
 
     private final TareaRepository tareaRepository;
+    private final VoluntarioRepository voluntarioRepository;
+    private final NotificacionService notificacionService;
 
     public Tarea create(CreateTareaCommand command) {
         EstadoTarea estadoEnum = EstadoTarea.valueOf(command.estado().toUpperCase());
@@ -27,6 +31,25 @@ public class CreateTareaUseCase {
                     null)
                 .build();
                 
-        return tareaRepository.save(tarea);
+        Tarea saved = tareaRepository.save(tarea);
+
+        // Enviar notificaciones a los voluntarios asignados
+        if (saved.getVoluntarios() != null) {
+            saved.getVoluntarios().forEach(volId -> {
+                voluntarioRepository.getById(volId).ifPresent(vol -> {
+                    if (vol.getUsuarioId() != null) {
+                        notificacionService.enviar(
+                            vol.getUsuarioId().getValue(),
+                            "Nueva Tarea Asignada",
+                            "Se te ha asignado la tarea: " + saved.getDescripcion(),
+                            "TAREA",
+                            "/web/tareas"
+                        );
+                    }
+                });
+            });
+        }
+
+        return saved;
     }
 }

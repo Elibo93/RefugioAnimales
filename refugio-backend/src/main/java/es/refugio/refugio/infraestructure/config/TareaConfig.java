@@ -24,8 +24,10 @@ public class TareaConfig {
     }
 
     @Bean
-    public CreateTareaUseCase createTareaUseCase(TareaRepository repository) {
-        return new CreateTareaUseCase(repository);
+    public CreateTareaUseCase createTareaUseCase(TareaRepository repository, 
+                                               es.refugio.refugio.domain.repository.VoluntarioRepository voluntarioRepository,
+                                               es.refugio.refugio.application.service.NotificacionService notificacionService) {
+        return new CreateTareaUseCase(repository, voluntarioRepository, notificacionService);
     }
 
     @Bean
