@@ -18,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
@@ -417,6 +418,34 @@ public class SolicitudAdopcionViewController {
         } catch (Exception e) {
             model.addAttribute("animal", Map.of("id", animalId, "nombre", "Animal"));
         }
+
+        // Pre-cargar datos del perfil legal si existen (ej. para voluntarios)
+        // Usamos SecurityContextHolder para mayor fiabilidad
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            try {
+                Map<String, Object> me = restTemplate.getForObject(authUrl + "/v1/me", Map.class);
+                if (me != null && me.get("id") != null) {
+                    Object idObj = me.get("id");
+                    if (idObj instanceof Map) idObj = ((Map<?, ?>) idObj).get("value");
+                    
+                    if (idObj != null) {
+                        Map<String, Object> perfil = restTemplate.getForObject(
+                                apiUrl + "/v1/perfiles-legales/usuario/" + idObj, Map.class);
+                        if (perfil != null) {
+                            model.addAttribute("nombre", perfil.get("nombre"));
+                            model.addAttribute("apellido", perfil.get("apellido"));
+                            model.addAttribute("telefono", perfil.get("telefono"));
+                            model.addAttribute("dni", perfil.get("dni"));
+                            model.addAttribute("direccion", perfil.get("direccion"));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("No se pudo pre-cargar el perfil legal: " + e.getMessage());
+            }
+        }
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
                 FragmentoContenido.Solicitud_CONVERSION.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
