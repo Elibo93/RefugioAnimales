@@ -55,22 +55,22 @@ public class DonacionViewController {
         Map<Integer, Object> usuariosMap = new HashMap<>();
         for (Object u : usuarios) {
             if (u instanceof Map) {
-                Object id = ((Map<?, ?>) u).get("id");
-                if (id instanceof Number) {
-                    usuariosMap.put(((Number) id).intValue(), u);
+                Object idObj = ((Map<?, ?>) u).get("id");
+                if (idObj instanceof Number) {
+                    usuariosMap.put(((Number) idObj).intValue(), u);
                 }
             }
         }
 
-        // Obtener el total recaudado desde el backend
-        Double totalDinero = 0.0;
+        double totalDinero = 0;
         try {
-            Double callRes = restTemplate.getForObject(apiUrl + "/v1/donaciones/total", Double.class);
-            if (callRes != null) {
-                totalDinero = callRes;
-            }
+            Double total = restTemplate.getForObject(apiUrl + "/v1/donaciones/total", Double.class);
+            totalDinero = total != null ? total : 0;
         } catch (Exception e) {
-            totalDinero = 0.0;
+        }
+
+        if (successMessage != null && !successMessage.isEmpty()) {
+            model.addAttribute("successMessage", successMessage);
         }
 
         model.addAttribute(ModelAttribute.Donacion_LIST.getName(), donaciones);
@@ -139,6 +139,17 @@ public class DonacionViewController {
             @RequestParam(required = false) String descripcion,
             Model model) {
 
+        // Si no hay usuarioId, buscamos el usuario anónimo del sistema
+        if (usuarioId == null) {
+            List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+            for (Object u : usuarios) {
+                if (u instanceof Map && "anonimo@refugio.es".equals(((Map<?, ?>) u).get("email"))) {
+                    usuarioId = (Integer) ((Map<?, ?>) u).get("id");
+                    break;
+                }
+            }
+        }
+
         Map<String, Object> donacionTemp = new HashMap<>();
         donacionTemp.put("usuarioId", usuarioId);
         donacionTemp.put("objetivoId", objetivoId);
@@ -172,6 +183,17 @@ public class DonacionViewController {
             @RequestParam String frecuencia,
             @RequestParam String descripcion,
             Model model) {
+
+        // Asegurar que tenemos un usuarioId (si sigue siendo null, buscamos el anónimo)
+        if (usuarioId == null) {
+            List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+            for (Object u : usuarios) {
+                if (u instanceof Map && "anonimo@refugio.es".equals(((Map<?, ?>) u).get("email"))) {
+                    usuarioId = (Integer) ((Map<?, ?>) u).get("id");
+                    break;
+                }
+            }
+        }
 
         Map<String, Object> body = new HashMap<>();
         body.put("usuarioId", usuarioId);

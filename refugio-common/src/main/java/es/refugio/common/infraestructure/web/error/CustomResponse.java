@@ -15,7 +15,14 @@ public class CustomResponse {
 	private final LocalDateTime date;
 	private final HttpStatus status;
 	private final String message;
+	private final java.util.Map<String, Object> details;
 
+    public CustomResponse(LocalDateTime date, HttpStatus status, String message) {
+        this.date = date;
+        this.status = status;
+        this.message = message;
+        this.details = null;
+    }
 }
 
 

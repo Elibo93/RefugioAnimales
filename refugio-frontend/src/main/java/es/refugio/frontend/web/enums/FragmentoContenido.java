@@ -14,6 +14,7 @@ public enum FragmentoContenido {
 
     Voluntario_LIST("fragments/content/voluntarios-lista"),
     Voluntario_FORM("fragments/content/voluntario-formulario"),
+    VOLUNTARIO_SUGERENCIAS("fragments/content/voluntarios-sugerencias"),
 
     Adoptante_LIST("fragments/content/adoptantes-lista"),
     Adoptante_FORM("fragments/content/adoptante-formulario"),

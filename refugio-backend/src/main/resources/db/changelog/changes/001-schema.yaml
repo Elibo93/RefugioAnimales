@@ -13,6 +13,7 @@ databaseChangeLog:
               - column: { name: dni, type: VARCHAR(20), constraints: { nullable: false, unique: true } }
               - column: { name: telefono, type: VARCHAR(20), constraints: { nullable: false } }
               - column: { name: direccion, type: VARCHAR(255) }
+              - column: { name: fecha_nacimiento, type: VARCHAR(50) }
 
   - changeSet:
       id: 002-create-animales
@@ -32,7 +33,7 @@ databaseChangeLog:
               - column: { name: edad, type: INT }
               - column: { name: tamano, type: VARCHAR(50) }
               - column: { name: descripcion, type: VARCHAR(1000) }
-              - column: { name: foto, type: VARCHAR(255) }
+              - column: { name: foto, type: LONGTEXT }
               - column: { name: fecha_ingreso, type: DATETIME, constraints: { nullable: false } }
               - column: { name: peso, type: DOUBLE }
               - column: { name: nivel_energia, type: INT }
@@ -47,7 +48,6 @@ databaseChangeLog:
             tableName: adoptantes
             columns:
               - column: { name: id, type: INT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
-              - column: { name: fecha_nacimiento, type: VARCHAR(50) }
               - column: { name: estado_validacion, type: VARCHAR(50), constraints: { nullable: false } }
               - column: { name: fecha_registro, type: DATETIME, constraints: { nullable: false } }
               - column: { name: usuario_id, type: INT, constraints: { nullable: false, unique: true } }

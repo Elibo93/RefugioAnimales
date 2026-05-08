@@ -20,93 +20,77 @@
                         <span th:text="#{generic.link.create}">+ Nueva solicitud</span>
                     </a>
                 </div>
-            </div>
-            <table id="tablasolicitudes">
-                <thead>
-                    <tr>
-                        <th th:text="#{persona.table.header.id}">ID</th>
-                        <th th:text="#{solicitud.table.header.animal}">Animal</th>
-                        <th th:text="#{solicitud.table.header.adoptante}">Solicitante</th>
-                        <th th:text="#{solicitud.table.header.estado}">Estado</th>
-                        <th style="min-width: 200px;">Comentario</th>
-                        <th th:text="#{adopcion.table.header.date}">Fecha</th>
-                        <th th:text="#{animal.table.header.action}">Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="s : ${solicitudes}" th:id="'row-' + ${s.get('id')}">
-                        <td th:text="${s.get('id')}">1</td>
-                        <td>
-                            <a th:href="@{/web/animales/{id}(id=${s.get('animalId')})}" 
-                               style="font-weight:600; color:var(--secondary); text-decoration: none;"
-                               th:with="a=${s.get('animalId') != null and animalesMap != null ? animalesMap['' + s.get('animalId')] : null}"
-                               th:text="${a != null ? a.get('nombre') : 'Desconocido'}">Animal</a>
-                        </td>
-                        <td>
-                            <a th:href="@{/web/personas/{id}(id=${adoptanteUsuarioIds != null ? adoptanteUsuarioIds['' + s.get('adoptanteId')] : '0'})}" 
-                               style="font-weight:600; color:var(--primary); text-decoration: none;"
-                               th:with="n=${s.get('adoptanteId') != null and adoptanteNombres != null ? adoptanteNombres['' + s.get('adoptanteId')] : null}"
-                               th:text="${n != null ? n : 'Anónimo'}">Adoptante</a>
-                        </td>
-                        <td>
-                            <span class="badge-soon"
+            </div>            <!-- LISTA PREMIUM DE SOLICITUDES -->
+            <div class="premium-list-container" style="margin-top: 1.5rem;">
+                <div class="list-header" style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
+                    <div style="flex: 0.5; text-align: center;">ID</div>
+                    <div style="flex: 3;">Animal y Solicitante</div>
+                    <div style="flex: 1.2; text-align: center;">Estado</div>
+                    <div style="flex: 2.5;">Comentario</div>
+                    <div style="flex: 1.2; text-align: center;">Fecha</div>
+                    <div style="flex: 2; text-align: center;">Acciones</div>
+                </div>
+
+                <div class="list-body" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div th:each="s : ${solicitudes}" class="premium-row-card" th:id="'row-' + ${s.get('id')}">
+                        <div class="row-cell" style="flex: 0.5; justify-content: center; font-weight: 700; color: var(--text-muted);" th:text="${s.get('id')}">1</div>
+
+                        <div class="row-cell" style="flex: 3;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="task-icon-box" style="background: #f1f5f9;">
+                                    <i data-lucide="file-text" style="width: 18px; color: #64748b;"></i>
+                                </div>
+                                <div style="display: flex; flex-direction: column;">
+                                    <a th:href="@{/web/animales/{id}(id=${s.get('animalId')})}" 
+                                       style="font-weight: 800; color: var(--secondary); text-decoration: none;"
+                                       th:with="a=${s.get('animalId') != null and animalesMap != null ? animalesMap['' + s.get('animalId')] : null}"
+                                       th:text="${a != null ? a.get('nombre') : 'Animal'}">Rocky</a>
+                                    <a th:href="@{/web/personas/{id}(id=${adoptanteUsuarioIds != null ? adoptanteUsuarioIds['' + s.get('adoptanteId')] : '0'})}" 
+                                       style="font-size: 0.85rem; color: var(--text-main); font-weight: 600; text-decoration: none;"
+                                       th:with="n=${s.get('adoptanteId') != null and adoptanteNombres != null ? adoptanteNombres['' + s.get('adoptanteId')] : null}"
+                                       th:text="${'por ' + (n != null ? n : 'Anónimo')}">por Juan</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row-cell" style="flex: 1.2; justify-content: center;">
+                            <span class="badge-premium"
                                 th:classappend="${s.get('estado') != null ? (s.get('estado').toString() == 'APROBADA' ? 'success' : (s.get('estado').toString() == 'RECHAZADA' ? 'danger' : 'warning')) : 'warning'}"
                                 th:text="${s.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(s.get('estado'), '_', ' '))) : 'Pendiente'}">PENDIENTE</span>
-                        </td>
-                        <td>
-                            <div style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); font-size: 0.9rem;"
-                                 th:text="${s.get('comentario') != null and s.get('comentario') != '' ? s.get('comentario') : '-'}">
-                                Razón de la adopción...
-                            </div>
-                        </td>
-                        <td
-                            th:text="${s.get('fecha') != null ? s.get('fecha').toString().replace('T', ' ').substring(0, (s.get('fecha').toString().length() > 10 ? 10 : s.get('fecha').toString().length())) : '-'}">
-                            01/01/2024</td>
-                        <td style="display:flex; gap:8px; align-items: center;">
-                            <a class="btn-icon" 
-                                    th:hx-get="@{/web/solicitudes/{id}/editar(id=${s.get('id')})}"
-                                    hx-target="#contenido-dinamico"
-                                    hx-push-url="true"
-                                    title="Editar">
-                                <i data-lucide="edit-2" style="width:16px;"></i>
+                        </div>
+
+                        <div class="row-cell" style="flex: 2.5; color: var(--text-muted); font-size: 0.9rem; font-style: italic; border-left: 2px solid #f1f5f9; padding-left: 1rem;" 
+                             th:text="${s.get('comentario') != null and s.get('comentario') != '' ? s.get('comentario') : 'Sin comentarios'}">Razón...</div>
+
+                        <div class="row-cell" style="flex: 1.2; justify-content: center; font-size: 0.85rem; color: var(--text-muted); font-weight: 500;"
+                             th:text="${s.get('fecha') != null ? s.get('fecha').toString().substring(0, 10) : '-'}">01/01/24</div>
+
+                        <div class="row-cell" style="flex: 2; justify-content: center; gap: 8px;">
+                            <a class="btn-icon" th:hx-get="@{/web/solicitudes/{id}/editar(id=${s.get('id')})}" hx-target="#contenido-dinamico" hx-push-url="true" title="Editar">
+                                <i data-lucide="edit-2" style="width: 16px;"></i>
                             </a>
-                            <button class="btn-icon delete"
-                                th:hx-post="@{/web/solicitudes/{id}/borrar(id=${s.get('id')})}"
-                                th:hx-target="'#row-' + ${s.get('id')}" hx-swap="outerHTML swap:0.3s"
-                                hx-confirm="¿Eliminar solicitud?">
-                                <i data-lucide="trash-2" style="width:16px;"></i>
+                            <button class="btn-icon delete" th:hx-post="@{/web/solicitudes/{id}/borrar(id=${s.get('id')})}" th:hx-target="'#row-' + ${s.get('id')}" hx-swap="outerHTML swap:0.3s" hx-confirm="¿Eliminar?">
+                                <i data-lucide="trash-2" style="width: 16px;"></i>
                             </button>
 
-                            <div th:if="${isAdmin and s.get('estado') != null and s.get('estado').toString() == 'PENDIENTE'}" 
-                                 style="width:1px; height:16px; background:var(--border-color); margin:0 4px;"></div>
+                            <!-- Quick Admin Actions -->
+                            <div th:if="${isAdmin and s.get('estado') != null and s.get('estado').toString() == 'PENDIENTE'}" style="display: flex; gap: 4px; margin-left: 4px; padding-left: 8px; border-left: 1px solid #e2e8f0;">
+                                <form th:action="@{/web/solicitudes/{id}/aprobar(id=${s.get('id')})}" method="post">
+                                    <button type="submit" class="btn-icon" style="color: #22c55e; background: #f0fdf4;" title="Aprobar"><i data-lucide="check" style="width: 14px;"></i></button>
+                                </form>
+                                <form th:action="@{/web/solicitudes/{id}/rechazar(id=${s.get('id')})}" method="post">
+                                    <button type="submit" class="btn-icon" style="color: #ef4444; background: #fef2f2;" title="Rechazar"><i data-lucide="x" style="width: 14px;"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                            <!-- Botones admin para aprobar o rechazar rápido -->
-                            <form
-                                th:if="${isAdmin and s.get('estado') != null and s.get('estado').toString() == 'PENDIENTE'}"
-                                th:action="@{/web/solicitudes/{id}/aprobar(id=${s.get('id')})}" method="post"
-                                style="margin:0; display: flex; align-items: center;">
-                                <button type="submit" class="btn-icon"
-                                    style="color: green; background-color: rgba(30,220,100,0.1);" title="Aprobar">
-                                    <i data-lucide="check" style="width:16px;"></i>
-                                </button>
-                            </form>
-                            <form
-                                th:if="${isAdmin and s.get('estado') != null and s.get('estado').toString() == 'PENDIENTE'}"
-                                th:action="@{/web/solicitudes/{id}/rechazar(id=${s.get('id')})}" method="post"
-                                style="margin:0; display: flex; align-items: center;">
-                                <button type="submit" class="btn-icon"
-                                    style="color: red; background-color: rgba(220,30,30,0.1);" title="Rechazar">
-                                    <i data-lucide="x" style="width:16px;"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <div th:if="${#lists.isEmpty(solicitudes)}" style="text-align:center;padding:3rem;color:var(--text-muted);">
-                <i data-lucide="inbox" style="width:48px; height:48px; margin-bottom:1rem; opacity:0.5;"></i>
-                <p th:text="#{solicitud.list.empty}">No hay solicitudes registradas.</p>
-            </div>
+                <div th:if="${#lists.isEmpty(solicitudes)}" style="text-align:center; padding:5rem; background:white; border-radius:24px; border:1px solid var(--border); margin-top: 1rem;">
+                    <i data-lucide="inbox" style="width:48px; height:48px; margin-bottom:1rem; color: var(--text-muted); opacity: 0.3;"></i>
+                    <p style="color: var(--text-muted); font-weight: 600;" th:text="#{solicitud.list.empty}">No hay solicitudes registradas.</p>
+                </div>
+            </div> </div>
         </div>
     </div>
 </body>

@@ -13,17 +13,22 @@ import es.refugio.refugio.domain.model.usuario.UsuarioId;
 public class CreateAdoptanteUseCase {
 
     private final AdoptanteRepository adoptanteRepository;
+    private final es.refugio.refugio.domain.repository.PerfilLegalRepository perfilLegalRepository;
 
     public Adoptante create(CreateAdoptanteCommand comando) {
+        // 1. Verificar si ya es adoptante (Idempotencia)
         var byUsuario = adoptanteRepository.getByUsuarioId(new UsuarioId(comando.usuarioId()));
         if (byUsuario.isPresent()) {
             return byUsuario.get();
         }
 
+        // 2. Verificar PerfilLegal (Identidad)
+        perfilLegalRepository.findByUsuarioId(comando.usuarioId())
+                .orElseThrow(() -> new IllegalStateException("El usuario debe tener un perfil legal completo antes de ser adoptante"));
+
         // Crear adoptante
         Adoptante adoptante = Adoptante.builder()
                 .usuarioId(comando.usuarioId())
-                .fechaNacimiento(comando.fechaNacimiento())
                 .estadoValidacion(EstadoValidacion.PENDIENTE)
                 .fechaRegistro(LocalDateTime.now())
                 .solicitudesIds(new ArrayList<>())

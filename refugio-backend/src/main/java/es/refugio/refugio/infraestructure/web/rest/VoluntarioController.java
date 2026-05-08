@@ -28,8 +28,6 @@ import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioRequest;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioResponse;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioUpdateRequest;
 
-import es.refugio.refugio.domain.model.perfil_legal.PerfilLegal;
-import es.refugio.refugio.domain.repository.PerfilLegalRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,31 +45,11 @@ public class VoluntarioController {
     private final FindVoluntarioService findVoluntarioService;
     private final EditVoluntarioService editVoluntarioService;
     private final DeleteVoluntarioService deleteVoluntarioService;
-    private final PerfilLegalRepository perfilLegalRepository;
 
     @Operation(summary = "Crear voluntario", description = "Registra un nuevo voluntario vinculado a un usuario")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Voluntario creado"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<VoluntarioResponse> create(@Valid @RequestBody VoluntarioRequest request) {
-        // Asegurar PerfilLegal
-        perfilLegalRepository.findByUsuarioId(request.usuarioId())
-                .map(existing -> {
-                    existing.setNombre(request.nombre());
-                    existing.setApellido(request.apellido());
-                    existing.setDni(request.dni());
-                    existing.setTelefono(request.telefono());
-                    existing.setDireccion(request.direccion());
-                    return perfilLegalRepository.save(existing);
-                })
-                .orElseGet(() -> perfilLegalRepository.save(PerfilLegal.builder()
-                        .usuarioId(request.usuarioId())
-                        .nombre(request.nombre())
-                        .apellido(request.apellido())
-                        .dni(request.dni())
-                        .telefono(request.telefono())
-                        .direccion(request.direccion())
-                        .build()));
-
         CreateVoluntarioCommand command = VoluntarioMapper.toCommand(request);
         Voluntario voluntario = createVoluntarioService.createVoluntario(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(VoluntarioMapper.toResponse(voluntario));

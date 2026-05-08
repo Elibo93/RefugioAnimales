@@ -119,7 +119,7 @@
                                     Fecha de Nacimiento
                                 </label>
                                 <input type="date" name="fechaNacimiento" required
-                                       th:value="${adoptante.get('fechaNacimiento')}"
+                                       th:value="${userFechaNacimiento}"
                                        th:readonly="${adoptante.get('id') != null}"
                                        th:style="${adoptante.get('id') != null ? 'background: #f1f5f9; cursor: not-allowed; border-color: #e2e8f0;' : 'border-radius: 12px; height: 48px;'}"
                                        class="form-control"
