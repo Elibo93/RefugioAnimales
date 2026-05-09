@@ -10,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -196,6 +198,36 @@ public class VoluntarioViewController {
         model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), new HashMap<String, Object>());
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_NUEVO);
 
+        // Si el usuario está autenticado, intentamos cargar su PerfilLegal para pre-rellenar o verificar si le falta
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            try {
+                // Obtener ID del usuario desde el modelo (inyectado por GlobalModelAttributesAdvice)
+                Object currentUserId = model.getAttribute("currentUserId");
+                if (currentUserId != null) {
+                    Map<String, Object> perfil = restTemplate.exchange(
+                            apiUrl + "/v1/perfiles-legales/usuario/" + currentUserId,
+                            HttpMethod.GET,
+                            null,
+                            new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+                    if (perfil != null) {
+                        model.addAttribute("perfilLegal", perfil);
+                        // Atributos individuales para compatibilidad con el template actual
+                        model.addAttribute("userPhone", perfil.get("telefono"));
+                        model.addAttribute("userDni", perfil.get("dni"));
+                        model.addAttribute("userDireccion", perfil.get("direccion"));
+                        model.addAttribute("userFechaNacimiento", perfil.get("fechaNacimiento"));
+                        model.addAttribute("userNombre", perfil.get("nombre"));
+                        model.addAttribute("userApellido", perfil.get("apellido"));
+                        model.addAttribute("nombreCompleto", perfil.get("nombre") + " " + perfil.get("apellido"));
+                        model.addAttribute("perfilExistente", true);
+                    }
+                }
+            } catch (Exception e) {
+                logger.info("El usuario no tiene perfil legal aún: " + e.getMessage());
+            }
+        }
+
         if ("true".equals(request.getHeader("HX-Request"))) {
             return FragmentoContenido.Voluntario_FORM.getPath() + " :: content";
         }
@@ -206,23 +238,33 @@ public class VoluntarioViewController {
 
     @GetMapping(WebRoutes.VOLUNTARIOS_EDITAR)
     @PreAuthorize("hasRole('ADMIN')")
-    @SuppressWarnings("unchecked")
     public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
         try {
-            Map<String, Object> voluntario = restTemplate.getForObject(apiUrl + "/v1/voluntarios/" + id, Map.class);
+            Map<String, Object> voluntario = restTemplate.exchange(
+                    apiUrl + "/v1/voluntarios/" + id,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
             model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), voluntario);
 
             if (voluntario != null && voluntario.get("usuarioId") != null) {
                 Object uId = voluntario.get("usuarioId");
-                Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + uId, Map.class);
+                Map<String, Object> user = restTemplate.exchange(
+                        authUrl + "/v1/usuarios/" + uId,
+                        HttpMethod.GET,
+                        null,
+                        new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
                 if (user != null) {
                     model.addAttribute("userEmail", user.get("email"));
                 }
 
                 // Fetch PerfilLegal
                 try {
-                    Map<String, Object> perfil = restTemplate
-                            .getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + uId, Map.class);
+                    Map<String, Object> perfil = restTemplate.exchange(
+                            apiUrl + "/v1/perfiles-legales/usuario/" + uId,
+                            HttpMethod.GET,
+                            null,
+                            new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
                     if (perfil != null) {
                         model.addAttribute("nombreCompleto", perfil.get("nombre") + " " + perfil.get("apellido"));
                         model.addAttribute("userPhone", perfil.get("telefono"));
@@ -267,6 +309,37 @@ public class VoluntarioViewController {
 
         Integer finalUsuarioId = idUsuario;
 
+        // SEGURIDAD: Si el usuario está autenticado, verificamos que no esté intentando suplantar a otro
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAuthenticated = auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal());
+        
+        if (isAuthenticated) {
+            try {
+                Map<String, Object> me = restTemplate.exchange(
+                        authUrl + "/v1/me",
+                        HttpMethod.GET,
+                        null,
+                        new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+                if (me != null) {
+                    Object realIdObj = me.get("id");
+                    if (realIdObj instanceof Map) realIdObj = ((Map<?, ?>) realIdObj).get("value");
+                    Integer realUserId = ((Number) realIdObj).intValue();
+                    String rol = (String) me.get("rol");
+                    boolean isAdmin = rol != null && rol.contains("ADMIN");
+
+                    // Si no es admin y el ID enviado no coincide con el suyo, forzamos el suyo real
+                    if (!isAdmin) {
+                        if (finalUsuarioId != null && !finalUsuarioId.equals(realUserId)) {
+                            logger.warn("Intento de suplantación detectado: Usuario {} intentó registrar voluntario para {}", realUserId, finalUsuarioId);
+                        }
+                        finalUsuarioId = realUserId;
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Error al verificar identidad en creación de voluntario: " + e.getMessage());
+            }
+        }
+
         // 1. Si no hay usuarioId, registramos al usuario primero
         if (finalUsuarioId == null) {
             Map<String, Object> userBody = new HashMap<>();
@@ -277,8 +350,11 @@ public class VoluntarioViewController {
             try {
                 String targetUrl = authUrl + "/v1/usuarios";
                 logger.info("Registrando usuario en Auth: " + targetUrl);
-                @SuppressWarnings("unchecked")
-                Map<String, Object> createdUser = restTemplate.postForObject(targetUrl, userBody, Map.class);
+                Map<String, Object> createdUser = restTemplate.exchange(
+                        targetUrl,
+                        HttpMethod.POST,
+                        new HttpEntity<>(userBody),
+                        new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
                 if (createdUser != null && createdUser.get("id") != null) {
                     Object idObj = createdUser.get("id");
                     if (idObj instanceof Map) {
@@ -318,7 +394,7 @@ public class VoluntarioViewController {
             restTemplate.postForObject(apiUrl + "/v1/voluntarios", bodyVol, Object.class);
 
             // 3. Actualizar Rol en Auth si el usuario ya existe
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            auth = SecurityContextHolder.getContext().getAuthentication();
             if (finalUsuarioId != null && auth != null && auth.isAuthenticated()) {
                 try {
                     String currentRol = auth.getAuthorities().stream()
@@ -345,9 +421,9 @@ public class VoluntarioViewController {
 
                         var resp = restTemplate.exchange(
                                 targetUrl,
-                                org.springframework.http.HttpMethod.PUT,
+                                HttpMethod.PUT,
                                 new HttpEntity<>(patchBody),
-                                Map.class);
+                                new ParameterizedTypeReference<Map<String, Object>>() {});
 
                         if (resp.getStatusCode().is2xxSuccessful() && resp.getBody() != null) {
                             String newToken = (String) resp.getBody().get("token");
@@ -428,7 +504,11 @@ public class VoluntarioViewController {
 
         // 3. Actualización de datos de usuario en Auth
         try {
-            Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + usuarioId, Map.class);
+            Map<String, Object> user = restTemplate.exchange(
+                    authUrl + "/v1/usuarios/" + usuarioId,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
             if (user != null) {
                 Map<String, Object> bodyUser = new HashMap<>(user);
                 bodyUser.put("email", email);
@@ -498,11 +578,13 @@ public class VoluntarioViewController {
 
     @GetMapping(WebRoutes.VOLUNTARIOS_DETALLE)
     @PreAuthorize("hasRole('ADMIN')")
-    @SuppressWarnings("unchecked")
     public String verDetalle(@PathVariable Integer id, Model model) {
         try {
-            Map<String, Object> voluntario = (Map<String, Object>) restTemplate
-                    .getForObject(apiUrl + "/v1/voluntarios/" + id, Map.class);
+            Map<String, Object> voluntario = restTemplate.exchange(
+                    apiUrl + "/v1/voluntarios/" + id,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
             if (voluntario != null && voluntario.containsKey("usuarioId")) {
                 return "redirect:/web/personas/" + voluntario.get("usuarioId");
             }

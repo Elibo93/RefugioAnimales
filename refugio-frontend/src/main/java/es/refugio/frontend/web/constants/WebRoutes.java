@@ -84,4 +84,9 @@ public interface WebRoutes {
     String TAREAS_EDITAR   = "/web/tareas/{id}/editar";
     String TAREAS_ELIMINAR = "/web/tareas/{id}/borrar";
     String TAREAS_PDF      = "/web/tareas/pdf";
+
+    // NOTIFICACIONES
+    String NOTIFICACIONES_BASE = "/web/notificaciones";
+    String NOTIFICACIONES_LEER = "/web/notificaciones/{id}/leer";
+    String NOTIFICACIONES_COUNT = "/web/notificaciones/count";
 }

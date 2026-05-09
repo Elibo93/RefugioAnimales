@@ -243,13 +243,21 @@
                 <div th:if="${#lists.isEmpty(tareas)}" 
                      style="background: white; padding: 4rem 2rem; border-radius: 16px; border: 1px dashed var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; text-align: center; margin-top: 1rem;">
                     <div style="background: var(--bg-main); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                        <i data-lucide="search-x" style="width: 32px; color: var(--text-muted);"></i>
+                        <i th:if="${hasFilters}" data-lucide="search-x" style="width: 32px; color: var(--text-muted);"></i>
+                        <i th:if="${!hasFilters}" data-lucide="check-circle" style="width: 32px; color: var(--success);"></i>
                     </div>
                     <div>
-                        <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">No se encontraron tareas</h3>
-                        <p style="margin: 5px 0 0; color: var(--text-muted); font-size: 0.9rem;">Prueba con otros filtros de prioridad o estado.</p>
+                        <h3 style="margin: 0; color: var(--text-main); font-weight: 700;" 
+                            th:text="${hasFilters ? 'No se encontraron tareas' : (isAdmin ? 'No hay tareas creadas' : 'No tienes tareas asignadas')}">
+                            No se encontraron tareas
+                        </h3>
+                        <p style="margin: 5px 0 0; color: var(--text-muted); font-size: 0.9rem;"
+                           th:text="${hasFilters ? 'Prueba con otros filtros de prioridad o estado.' : (isAdmin ? 'El refugio está al día. Crea una nueva tarea para empezar.' : '¡Buen trabajo! Has completado todas tus tareas o aún no tienes ninguna asignada.')}">
+                            Prueba con otros filtros de prioridad o estado.
+                        </p>
                     </div>
-                    <a th:href="@{/web/tareas}" 
+                    <a th:if="${hasFilters}"
+                       th:href="@{/web/tareas}" 
                        hx-get="/web/tareas" 
                        hx-target=".content-body"
                        hx-swap="outerHTML"

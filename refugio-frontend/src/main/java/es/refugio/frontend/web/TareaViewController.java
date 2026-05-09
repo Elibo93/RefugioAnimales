@@ -45,9 +45,13 @@ public class TareaViewController {
                         @RequestParam(required = false) String estado,
                         @RequestParam(required = false) String successMessage,
                         HttpServletRequest request) {
-        List<Object> tareas = fetchList("/v1/tareas");
+        
+        List<Object> allTareas = fetchList("/v1/tareas");
+        List<Object> tareas = new ArrayList<>(allTareas);
+        List<Object> voluntarios = fetchList("/v1/voluntarios");
+        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
 
-        // Determinar rol y ID del usuario actual
+        // Determinar rol y ID del usuario actual desde el modelo
         Object isAdminObj = model.getAttribute("isAdmin");
         boolean isAdmin = isAdminObj != null && (Boolean) isAdminObj;
         Object currentUserId = model.getAttribute("currentUserId");
@@ -59,15 +63,17 @@ public class TareaViewController {
                         .getForObject(apiUrl + "/v1/voluntarios/usuario/" + currentUserId, Map.class);
                 if (vMap != null) {
                     Object vId = vMap.get("id");
-                    if (vId instanceof Map) vId = ((Map<?, ?>) vId).get("value");
+                    if (vId instanceof Map)
+                        vId = ((Map<?, ?>) vId).get("value");
                     if (vId instanceof Number) {
                         myVoluntarioId = ((Number) vId).intValue();
                     }
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
-        // Filtrar tareas por usuario (si no es admin)
+        // Filtrar tareas si el usuario no es admin
         if (!isAdmin) {
             List<Object> misTareas = new ArrayList<>();
             if (myVoluntarioId != null) {
@@ -77,8 +83,11 @@ public class TareaViewController {
                         if (vIdsObj instanceof List) {
                             for (Object vid : (List<?>) vIdsObj) {
                                 Object vidRaw = vid;
-                                if (vidRaw instanceof Map) vidRaw = ((Map<?, ?>) vidRaw).get("value");
-                                if (vidRaw instanceof Number && ((Number) vidRaw).intValue() == myVoluntarioId.intValue()) {
+                                if (vidRaw instanceof Map)
+                                    vidRaw = ((Map<?, ?>) vidRaw).get("value");
+
+                                if (vidRaw instanceof Number
+                                        && ((Number) vidRaw).intValue() == myVoluntarioId.intValue()) {
                                     misTareas.add(t);
                                     break;
                                 }
@@ -90,26 +99,56 @@ public class TareaViewController {
             tareas = misTareas;
         }
 
-        // --- FILTRADO ADICIONAL (Prioridad y Estado) ---
-        if (prioridad != null && !prioridad.isEmpty() && !"ALL".equalsIgnoreCase(prioridad)) {
-            tareas = tareas.stream()
-                .filter(t -> t instanceof Map && prioridad.equalsIgnoreCase(String.valueOf(((Map<?, ?>) t).get("prioridad"))))
-                .toList();
+        // Aplicar filtros si existen (para el mensaje de "no resultados")
+        boolean hasFilters = (prioridad != null && !"ALL".equals(prioridad)) || (estado != null && !"ALL".equals(estado));
+        if (hasFilters) {
+            tareas = tareas.stream().filter(t -> {
+                Map<?, ?> tm = (Map<?, ?>) t;
+                boolean matchP = prioridad == null || "ALL".equals(prioridad) || prioridad.equals(tm.get("prioridad"));
+                boolean matchE = estado == null || "ALL".equals(estado) || estado.equals(tm.get("estado"));
+                return matchP && matchE;
+            }).toList();
         }
-        if (estado != null && !estado.isEmpty() && !"ALL".equalsIgnoreCase(estado)) {
-            tareas = tareas.stream()
-                .filter(t -> t instanceof Map && estado.equalsIgnoreCase(String.valueOf(((Map<?, ?>) t).get("estado"))))
-                .toList();
+
+        model.addAttribute("selectedPrioridad", prioridad != null ? prioridad : "ALL");
+        model.addAttribute("selectedEstado", estado != null ? estado : "ALL");
+        model.addAttribute("hasFilters", hasFilters);
+        model.addAttribute("totalTareasCount", isAdmin ? allTareas.size() : tareas.size()); // Aproximación
+
+        Map<Integer, Map<String, Object>> usuariosMap = new HashMap<>();
+        for (Object u : usuarios) {
+            if (u instanceof Map) {
+                Object idObj = ((Map<?, ?>) u).get("id");
+                if (idObj instanceof Map)
+                    idObj = ((Map<?, ?>) idObj).get("value");
+                if (idObj instanceof Number)
+                    usuariosMap.put(((Number) idObj).intValue(), (Map<String, Object>) u);
+            }
+        }
+
+        Map<String, String> voluntarioUsuarioIds = new HashMap<>();
+        for (Object v : voluntarios) {
+            if (v instanceof Map) {
+                Object vId = ((Map<?, ?>) v).get("id");
+                if (vId instanceof Map)
+                    vId = ((Map<?, ?>) vId).get("value");
+                Object uId = ((Map<?, ?>) v).get("usuarioId");
+                if (uId instanceof Map)
+                    uId = ((Map<?, ?>) uId).get("value");
+
+                if (vId instanceof Number && uId instanceof Number) {
+                    voluntarioUsuarioIds.put(vId.toString(), uId.toString());
+                }
+            }
         }
 
         Map<String, String> voluntarioNombres = fetchVoluntarioNombres();
         model.addAttribute(ModelAttribute.Tarea_LIST.getName(), tareas);
         model.addAttribute("voluntarioNombres", voluntarioNombres);
-        model.addAttribute("selectedPrioridad", prioridad != null ? prioridad : "ALL");
-        model.addAttribute("selectedEstado", estado != null ? estado : "ALL");
-        
-        if (successMessage != null) model.addAttribute("successMessage", successMessage);
-        
+        model.addAttribute("voluntarioUsuarioIds", voluntarioUsuarioIds);
+        if (successMessage != null)
+            model.addAttribute("successMessage", successMessage);
+
         if ("true".equals(request.getHeader("HX-Request"))) {
             return FragmentoContenido.Tarea_LIST.getPath() + " :: content-body";
         }
@@ -127,18 +166,17 @@ public class TareaViewController {
         if (voluntarioId != null) {
             tarea.put("voluntarioIds", List.of(voluntarioId));
             try {
-                Map<String, Object> v = (Map<String, Object>) restTemplate.getForObject(apiUrl + "/v1/voluntarios/" + voluntarioId, Map.class);
+                Map<String, Object> v = (Map<String, Object>) restTemplate
+                        .getForObject(apiUrl + "/v1/voluntarios/" + voluntarioId, Object.class);
                 if (v != null && v.get("usuarioId") != null) {
-                    Object uId = v.get("usuarioId");
-                    Map<String, Object> perfil = restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + uId, Map.class);
-                    if (perfil != null) {
-                        model.addAttribute("voluntarioPreseleccionado", perfil);
-                    } else {
-                        Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + uId, Map.class);
-                        model.addAttribute("voluntarioPreseleccionado", user);
+                    Map<String, Object> u = (Map<String, Object>) restTemplate
+                            .getForObject(authUrl + "/v1/usuarios/" + v.get("usuarioId"), Object.class);
+                    if (u != null) {
+                        model.addAttribute("voluntarioPreseleccionado", u);
                     }
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
             model.addAttribute("returnUrl", WebRoutes.VOLUNTARIOS_BASE);
         } else {
             model.addAttribute("returnUrl", WebRoutes.TAREAS_BASE);
@@ -146,7 +184,19 @@ public class TareaViewController {
 
         model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
         model.addAttribute("estados", List.of("PENDIENTE", "EN_PROCESO", "COMPLETADA", "CANCELADA"));
-        model.addAttribute("voluntarioNombres", fetchVoluntarioNombres());
+
+        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+        Map<Integer, Map<String, Object>> usuariosMap = new HashMap<>();
+        for (Object u : usuarios) {
+            if (u instanceof Map) {
+                Object idObj = ((Map<?, ?>) u).get("id");
+                if (idObj instanceof Map)
+                    idObj = ((Map<?, ?>) idObj).get("value");
+                if (idObj instanceof Number)
+                    usuariosMap.put(((Number) idObj).intValue(), (Map<String, Object>) u);
+            }
+        }
+        model.addAttribute("usuariosMap", usuariosMap);
 
         if ("true".equals(request.getHeader("HX-Request"))) {
             return FragmentoContenido.Tarea_FORM.getPath() + " :: content";
@@ -273,19 +323,24 @@ public class TareaViewController {
                 if (v instanceof Map) {
                     Map<?, ?> vm = (Map<?, ?>) v;
                     Object vIdRaw = vm.get("id");
-                    if (vIdRaw instanceof Map) vIdRaw = ((Map<?, ?>) vIdRaw).get("value");
+                    if (vIdRaw instanceof Map)
+                        vIdRaw = ((Map<?, ?>) vIdRaw).get("value");
                     Object uIdRaw = vm.get("usuarioId");
-                    if (uIdRaw instanceof Map) uIdRaw = ((Map<?, ?>) uIdRaw).get("value");
+                    if (uIdRaw instanceof Map)
+                        uIdRaw = ((Map<?, ?>) uIdRaw).get("value");
 
                     if (vIdRaw instanceof Number && uIdRaw instanceof Number) {
                         String nombre = perfilMap.get(((Number) uIdRaw).intValue());
-                        if (nombre == null) nombre = userMap.get(((Number) uIdRaw).intValue());
-                        if (nombre == null) nombre = "Voluntario " + vIdRaw;
+                        if (nombre == null)
+                            nombre = userMap.get(((Number) uIdRaw).intValue());
+                        if (nombre == null)
+                            nombre = "Voluntario " + vIdRaw;
                         nombres.put(vIdRaw.toString(), nombre.trim());
                     }
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return nombres;
     }
 

@@ -24,6 +24,8 @@ public class RechazarSolicitudAdopcionUseCase {
 
     private final SolicitudAdopcionRepository solicitudAdopcionRepository;
     private final AdoptanteRepository adoptanteRepository;
+    private final es.refugio.refugio.domain.repository.AnimalRepository animalRepository;
+    private final es.refugio.refugio.application.service.NotificacionService notificacionService;
 
     @Transactional
     public SolicitudAdopcion rechazar(SolicitudAdopcionId solicitudId, String comentario) {
@@ -43,11 +45,26 @@ public class RechazarSolicitudAdopcionUseCase {
         }
         SolicitudAdopcion solicitudActualizada = solicitudAdopcionRepository.save(solicitud);
 
-        // 3 — Actualizar adoptante → RECHAZADO
+        // Obtener nombre del animal para la notificación
+        String animalNombre = animalRepository.getById(solicitud.getAnimalId())
+                .map(es.refugio.refugio.domain.model.animal.Animal::getNombre)
+                .orElse("el animal");
+
+        // 3 — Actualizar adoptante → RECHAZADO e informar
         adoptanteRepository.getById(solicitud.getAdoptanteId())
-                .map(adoptante -> {
+                .ifPresent(adoptante -> {
                     adoptante.setEstadoValidacion(EstadoValidacion.RECHAZADO);
-                    return adoptanteRepository.save(adoptante);
+                    adoptanteRepository.save(adoptante);
+                    
+                    if (adoptante.getUsuarioId() != null) {
+                        notificacionService.enviar(
+                            adoptante.getUsuarioId(),
+                            "Solicitud de Adopción Rechazada",
+                            "Lo sentimos, tu solicitud para adoptar a " + animalNombre + " ha sido rechazada.",
+                            "ADOPCION",
+                            "/web/solicitudes/publico/opciones"
+                        );
+                    }
                 });
 
         return solicitudActualizada;

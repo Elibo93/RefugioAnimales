@@ -29,6 +29,8 @@ import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.domain.model.animal.AnimalId;
 import es.refugio.refugio.domain.model.solicitud_adopcion.SolicitudAdopcion;
 import es.refugio.refugio.domain.model.solicitud_adopcion.SolicitudAdopcionId;
+import es.refugio.refugio.domain.model.perfil_legal.PerfilLegal;
+import es.refugio.refugio.domain.repository.PerfilLegalRepository;
 import es.refugio.refugio.application.service.adoptante.FindAdoptanteService;
 import es.refugio.refugio.application.service.adoptante.CreateAdoptanteService;
 import es.refugio.refugio.application.service.solicitud_adopcion.CreateSolicitudAdopcionService;
@@ -70,6 +72,7 @@ public class SolicitudAdopcionController {
     private final AprobarSolicitudAdopcionService aprobarSolicitudAdopcionService;
     private final RechazarSolicitudAdopcionService rechazarSolicitudAdopcionService;
     private final FindAdoptanteService findAdoptanteService;
+    private final PerfilLegalRepository perfilLegalRepository;
 
     @Operation(summary = "Crear solicitud de adopción")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Solicitud creada"),
@@ -93,6 +96,21 @@ public class SolicitudAdopcionController {
         Integer usuarioId = request.usuarioId();
         if (usuarioId == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        // 1. Asegurar PerfilLegal (Necesario para que CreateAdoptante no falle)
+        // Solo lo creamos si no existe ya
+        if (perfilLegalRepository.findByUsuarioId(usuarioId).isEmpty()) {
+            PerfilLegal perfil = PerfilLegal.builder()
+                    .usuarioId(usuarioId)
+                    .nombre(request.nombre())
+                    .apellido(request.apellido())
+                    .dni(request.dni())
+                    .telefono(request.telefono())
+                    .direccion(request.direccion())
+                    .fechaNacimiento(request.fechaNacimiento())
+                    .build();
+            perfilLegalRepository.save(perfil);
         }
 
         // 2. Crear Adoptante
@@ -121,6 +139,26 @@ public class SolicitudAdopcionController {
         es.refugio.refugio.infraestructure.security.CustomUserDetails userDetails = (es.refugio.refugio.infraestructure.security.CustomUserDetails) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
         Integer usuarioId = userDetails.getId();
+
+        // 1. Asegurar/Actualizar PerfilLegal (Atomicidad)
+        PerfilLegal perfil = PerfilLegal.builder()
+                .usuarioId(usuarioId)
+                .nombre(request.nombre())
+                .apellido(request.apellido())
+                .dni(request.dni())
+                .telefono(request.telefono())
+                .direccion(request.direccion())
+                .fechaNacimiento(request.fechaNacimiento())
+                .build();
+        
+        perfilLegalRepository.findByUsuarioId(usuarioId)
+            .ifPresentOrElse(
+                existing -> {
+                    perfil.setId(existing.getId());
+                    perfilLegalRepository.save(perfil);
+                },
+                () -> perfilLegalRepository.save(perfil)
+            );
 
         // 2. Crear perfil de Adoptante
         var adoptanteCommand = new CreateAdoptanteCommand(usuarioId);

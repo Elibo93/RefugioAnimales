@@ -42,91 +42,92 @@
                     <i data-lucide="user" style="width: 18px;"></i>
                     <span>Información del Adoptante</span>
                 </h3>
+                <p th:if="${perfilExistente}" style="margin: 4px 0 0; font-size: 0.85rem; color: var(--primary); font-weight: 500;">
+                    <i data-lucide="info" style="width: 14px; vertical-align: middle; margin-right: 4px;"></i>
+                    Revise su información legal antes de continuar.
+                </p>
                 <div style="height: 1px; background: rgba(0,0,0,0.05); margin-top: 0.5rem;"></div>
             </div>
 
-            <!-- Nombre -->
-            <div class="form-group" th:if="${nombre == null or nombre == ''}">
-                <label>Nombre</label>
-                <div class="input-with-icon">
-                    <i data-lucide="user"></i>
-                    <input type="text" name="nombre" th:value="${nombre}" placeholder="Tu nombre" required>
+            <!-- Ficha de Perfil (Si ya existe) -->
+            <div th:if="${perfilExistente}" style="grid-column: span 2; padding: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
+                <div style="background: white; color: var(--primary); width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0;">
+                    <i data-lucide="user" style="width: 28px;"></i>
                 </div>
-            </div>
-            <div class="form-group" th:if="${nombre != null and nombre != ''}" style="opacity: 0.8;">
-                <label>Nombre</label>
-                <div style="padding: 0.75rem 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; font-weight: 600; color: #475569;" th:text="${nombre}"></div>
+                <div>
+                    <span style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600;">Tu Perfil</span>
+                    <h3 style="margin: 0; font-weight: 800; color: var(--text-main);" th:text="${nombre + ' ' + apellido}">Nombre Completo</h3>
+                    <p style="margin: 4px 0 0; font-size: 0.8rem; color: var(--primary); font-weight: 500;">
+                        <i data-lucide="check-circle" style="width: 12px; vertical-align: middle; margin-right: 4px;"></i>
+                        Información legal confirmada.
+                    </p>
+                </div>
+                <!-- Campos ocultos para que el POST reciba los datos necesarios -->
                 <input type="hidden" name="nombre" th:value="${nombre}">
-            </div>
-
-            <!-- Apellido -->
-            <div class="form-group" th:if="${apellido == null or apellido == ''}">
-                <label>Apellido</label>
-                <div class="input-with-icon">
-                    <i data-lucide="user"></i>
-                    <input type="text" name="apellido" th:value="${apellido}" placeholder="Tus apellidos" required>
-                </div>
-            </div>
-            <div class="form-group" th:if="${apellido != null and apellido != ''}" style="opacity: 0.8;">
-                <label>Apellido</label>
-                <div style="padding: 0.75rem 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; font-weight: 600; color: #475569;" th:text="${apellido}"></div>
                 <input type="hidden" name="apellido" th:value="${apellido}">
-            </div>
-
-            <!-- Teléfono -->
-            <div class="form-group" th:if="${telefono == null or telefono == ''}">
-                <label>Teléfono</label>
-                <div class="input-with-icon">
-                    <i data-lucide="phone"></i>
-                    <input type="tel" name="telefono" th:value="${telefono}" placeholder="+34 XXX XX XX XX" required>
-                </div>
-            </div>
-            <div class="form-group" th:if="${telefono != null and telefono != ''}" style="opacity: 0.8;">
-                <label>Teléfono</label>
-                <div style="padding: 0.75rem 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; font-weight: 600; color: #475569;" th:text="${telefono}"></div>
-                <input type="hidden" name="telefono" th:value="${telefono}">
-            </div>
-
-            <!-- DNI -->
-            <div class="form-group" th:if="${dni == null or dni == ''}">
-                <label>DNI / NIE</label>
-                <div class="input-with-icon">
-                    <i data-lucide="id-card"></i>
-                    <input type="text" name="dni" th:value="${dni}" 
-                           placeholder="12345678X" 
-                           pattern="([0-9]{8}[A-Z])|([XYZ][0-9]{7}[A-Z])"
-                           title="Debe ser un DNI (8 números y letra) o NIE (Letra X, Y o Z, 7 números y letra)"
-                           required>
-                </div>
-            </div>
-            <div class="form-group" th:if="${dni != null and dni != ''}" style="opacity: 0.8;">
-                <label>DNI / NIE</label>
-                <div style="padding: 0.75rem 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; font-weight: 600; color: #475569;" th:text="${dni}"></div>
                 <input type="hidden" name="dni" th:value="${dni}">
-            </div>
-
-            <!-- Fecha de Nacimiento (Suele faltar en voluntarios, así que se suele pedir) -->
-            <div class="form-group">
-                <label>Fecha de Nacimiento</label>
-                <div class="input-with-icon">
-                    <i data-lucide="calendar"></i>
-                    <input type="date" name="fechaNacimiento" th:value="${fechaNacimiento}" required>
-                </div>
-            </div>
-
-            <!-- Dirección -->
-            <div class="form-group" style="grid-column: 1 / -1;" th:if="${direccion == null or direccion == ''}">
-                <label>Dirección completa</label>
-                <div class="input-with-icon">
-                    <i data-lucide="map-pin"></i>
-                    <input type="text" name="direccion" th:value="${direccion}" placeholder="Calle, Número, Piso, Ciudad..." required>
-                </div>
-            </div>
-            <div class="form-group" style="grid-column: 1 / -1; opacity: 0.8;" th:if="${direccion != null and direccion != ''}">
-                <label>Dirección completa</label>
-                <div style="padding: 0.75rem 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; font-weight: 600; color: #475569;" th:text="${direccion}"></div>
+                <input type="hidden" name="telefono" th:value="${telefono}">
                 <input type="hidden" name="direccion" th:value="${direccion}">
+                <input type="hidden" name="fechaNacimiento" th:value="${fechaNacimiento}">
             </div>
+
+            <th:block th:if="${!perfilExistente}">
+                <!-- Nombre -->
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <div class="input-with-icon">
+                        <i data-lucide="user"></i>
+                        <input type="text" name="nombre" th:value="${nombre}" placeholder="Tu nombre" required>
+                    </div>
+                </div>
+
+                <!-- Apellido -->
+                <div class="form-group">
+                    <label>Apellido</label>
+                    <div class="input-with-icon">
+                        <i data-lucide="user"></i>
+                        <input type="text" name="apellido" th:value="${apellido}" placeholder="Tus apellidos" required>
+                    </div>
+                </div>
+
+                <!-- Teléfono -->
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <div class="input-with-icon">
+                        <i data-lucide="phone"></i>
+                        <input type="tel" name="telefono" th:value="${telefono}" placeholder="+34 XXX XX XX XX" required>
+                    </div>
+                </div>
+
+                <!-- DNI -->
+                <div class="form-group">
+                    <label>DNI / NIE</label>
+                    <div class="input-with-icon">
+                        <i data-lucide="id-card"></i>
+                        <input type="text" name="dni" th:value="${dni}" 
+                               placeholder="12345678X" 
+                               required>
+                    </div>
+                </div>
+
+                <!-- Fecha de Nacimiento -->
+                <div class="form-group">
+                    <label>Fecha de Nacimiento</label>
+                    <div class="input-with-icon">
+                        <i data-lucide="calendar"></i>
+                        <input type="date" name="fechaNacimiento" th:value="${fechaNacimiento}" required>
+                    </div>
+                </div>
+
+                <!-- Dirección -->
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Dirección completa</label>
+                    <div class="input-with-icon">
+                        <i data-lucide="map-pin"></i>
+                        <input type="text" name="direccion" th:value="${direccion}" placeholder="Calle, Número, Piso, Ciudad..." required>
+                    </div>
+                </div>
+            </th:block>
 
             <!-- Sección: La Adopción -->
             <div style="grid-column: 1 / -1; margin: 2rem 0 1rem;">

@@ -42,7 +42,8 @@ public enum FragmentoContenido {
 
     HOME_VIEW("fragments/content/index"),
     MIS_ADOPTADOS_VACIO("fragments/content/mis-adoptados-vacio"),
-    MIS_ADOPTADOS_LISTA("fragments/content/mis-adoptados-lista");
+    MIS_ADOPTADOS_LISTA("fragments/content/mis-adoptados-lista"),
+    Notificacion_LIST("fragments/content/notificaciones-lista");
 
     private final String path;
 
