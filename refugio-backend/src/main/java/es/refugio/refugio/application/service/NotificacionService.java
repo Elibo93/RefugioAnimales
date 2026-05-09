@@ -27,4 +27,18 @@ public class NotificacionService {
                 .build();
         repository.save(notif);
     }
+
+    @Transactional
+    public void enviarARol(String rol, String titulo, String mensaje, String tipo, String enlace) {
+        NotificacionEntity notif = NotificacionEntity.builder()
+                .rol(rol)
+                .titulo(titulo)
+                .mensaje(mensaje)
+                .fecha(LocalDateTime.now())
+                .leida(false)
+                .tipo(tipo)
+                .enlace(enlace)
+                .build();
+        repository.save(notif);
+    }
 }

@@ -1,4 +1,6 @@
 package es.refugio.refugio.application.usecase.donacion;
+ 
+import es.refugio.refugio.application.service.NotificacionService;
 
 import es.refugio.refugio.application.command.donacion.CreateDonacionCommand;
 import es.refugio.refugio.domain.model.donacion.Donacion;
@@ -15,6 +17,7 @@ public class CreateDonacionUseCase {
 
     private final DonacionRepository donacionRepository;
     private final ObjetivoDonacionRepository objetivoRepository;
+    private final NotificacionService notificacionService;
 
     public Donacion create(CreateDonacionCommand command) {
         Integer targetUserId = command.getUsuarioId();
@@ -42,9 +45,22 @@ public class CreateDonacionUseCase {
         if (command.getObjetivoId() != null) {
             objetivoRepository.getById(new ObjetivoDonacionId(command.getObjetivoId()))
                     .ifPresent(objetivo -> {
-                        double nuevoMonto = objetivo.getMontoRecaudado() + command.getCantidad();
+                        double anterior = objetivo.getMontoRecaudado() != null ? objetivo.getMontoRecaudado() : 0.0;
+                        double nuevoMonto = anterior + command.getCantidad();
                         objetivo.setMontoRecaudado(nuevoMonto);
                         objetivoRepository.save(objetivo);
+
+                        // Notificación especial si se alcanza el objetivo
+                        if (objetivo.getMontoObjetivo() != null && anterior < objetivo.getMontoObjetivo() && nuevoMonto >= objetivo.getMontoObjetivo()) {
+                            try {
+                                String titulo = "🎯 ¡Objetivo Alcanzado!";
+                                String mensaje = String.format("¡Felicidades! Se ha completado el objetivo: '%s'. Se han recaudado %.2f€.", 
+                                        objetivo.getTitulo(), nuevoMonto);
+                                notificacionService.enviarARol("ROLE_ADMIN", titulo, mensaje, "OBJETIVO_CUMPLIDO", "/web/donaciones");
+                            } catch (Exception e) {
+                                // No bloqueamos la donación si falla la notificación
+                            }
+                        }
                     });
         }
 

@@ -32,6 +32,7 @@ public enum FragmentoContenido {
 
     Solicitud_LIST("fragments/content/solicitudes-adopcion-lista"),
     Solicitud_FORM("fragments/content/solicitud-adopcion-formulario"),
+    Solicitud_DETALLE("fragments/content/solicitud-adopcion-detalle"),
 
     Tarea_LIST("fragments/content/tareas-lista"),
     Tarea_FORM("fragments/content/tarea-formulario"),

@@ -66,22 +66,12 @@
                              th:text="${s.get('fecha') != null ? s.get('fecha').toString().substring(0, 10) : '-'}">01/01/24</div>
 
                         <div class="row-cell" style="flex: 2; justify-content: center; gap: 8px;">
-                            <a class="btn-icon" th:hx-get="@{/web/solicitudes/{id}/editar(id=${s.get('id')})}" hx-target="#contenido-dinamico" hx-push-url="true" title="Editar">
-                                <i data-lucide="edit-2" style="width: 16px;"></i>
+                            <a class="btn-icon" th:href="@{/web/solicitudes/{id}/detalle(id=${s.get('id')})}" title="Ver Detalle">
+                                <i data-lucide="eye" style="width: 16px;"></i>
                             </a>
                             <button class="btn-icon delete" th:hx-post="@{/web/solicitudes/{id}/borrar(id=${s.get('id')})}" th:hx-target="'#row-' + ${s.get('id')}" hx-swap="outerHTML swap:0.3s" hx-confirm="¿Eliminar?">
                                 <i data-lucide="trash-2" style="width: 16px;"></i>
                             </button>
-
-                            <!-- Quick Admin Actions -->
-                            <div th:if="${isAdmin and s.get('estado') != null and s.get('estado').toString() == 'PENDIENTE'}" style="display: flex; gap: 4px; margin-left: 4px; padding-left: 8px; border-left: 1px solid #e2e8f0;">
-                                <form th:action="@{/web/solicitudes/{id}/aprobar(id=${s.get('id')})}" method="post">
-                                    <button type="submit" class="btn-icon" style="color: #22c55e; background: #f0fdf4;" title="Aprobar"><i data-lucide="check" style="width: 14px;"></i></button>
-                                </form>
-                                <form th:action="@{/web/solicitudes/{id}/rechazar(id=${s.get('id')})}" method="post">
-                                    <button type="submit" class="btn-icon" style="color: #ef4444; background: #fef2f2;" title="Rechazar"><i data-lucide="x" style="width: 14px;"></i></button>
-                                </form>
-                            </div>
                         </div>
                     </div>
                 </div>

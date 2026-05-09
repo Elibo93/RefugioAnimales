@@ -53,6 +53,7 @@ public class GlobalModelAttributesAdvice {
             if (me != null) {
                 Object idObj = me.get("id");
                 if (idObj instanceof Map) idObj = ((Map<?, ?>) idObj).get("value");
+                System.out.println("DEBUG: Usuario identificado: " + me.get("email") + " con ID: " + idObj + " y ROL: " + me.get("rol"));
                 model.addAttribute("currentUserId",   idObj);
                 model.addAttribute("currentUserRol",  me.get("rol"));
                 model.addAttribute("isAuthenticated", true);
@@ -83,6 +84,7 @@ public class GlobalModelAttributesAdvice {
                 setAnonymous(model);
             }
         } catch (Exception e) {
+            System.err.println("DEBUG ERROR: Error en GlobalModelAttributesAdvice: " + e.getMessage());
             setAnonymous(model);
         }
     }
