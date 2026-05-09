@@ -32,8 +32,9 @@ public class SolicitudAdopcionConfig {
 
     @Bean
     public CreateSolicitudAdopcionUseCase createSolicitudAdopcionUseCase(SolicitudAdopcionRepository repository,
-            AnimalRepository animalRepository) {
-        return new CreateSolicitudAdopcionUseCase(repository, animalRepository);
+            AnimalRepository animalRepository,
+            es.refugio.refugio.application.service.NotificacionService notificacionService) {
+        return new CreateSolicitudAdopcionUseCase(repository, animalRepository, notificacionService);
     }
 
     @Bean
@@ -42,8 +43,11 @@ public class SolicitudAdopcionConfig {
     }
 
     @Bean
-    public EditSolicitudAdopcionUseCase editSolicitudAdopcionUseCase(SolicitudAdopcionRepository repository) {
-        return new EditSolicitudAdopcionUseCase(repository);
+    public EditSolicitudAdopcionUseCase editSolicitudAdopcionUseCase(SolicitudAdopcionRepository repository,
+            AdoptanteRepository adoptanteRepository,
+            AnimalRepository animalRepository,
+            es.refugio.refugio.application.service.NotificacionService notificacionService) {
+        return new EditSolicitudAdopcionUseCase(repository, adoptanteRepository, animalRepository, notificacionService);
     }
 
     @Bean

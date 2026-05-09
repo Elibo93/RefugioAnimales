@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 public class CreateVoluntarioUseCase {
 
     private final VoluntarioRepository voluntarioRepository;
+    private final es.refugio.refugio.application.service.NotificacionService notificacionService;
 
     public Voluntario create(CreateVoluntarioCommand command) {
         Voluntario voluntario = Voluntario.builder()
@@ -16,6 +17,28 @@ public class CreateVoluntarioUseCase {
                 .disponibilidad(command.disponibilidad())
                 .build();
 
-        return voluntarioRepository.save(voluntario);
+        Voluntario saved = voluntarioRepository.save(voluntario);
+
+        // Notificar a los Administradores (por ROL)
+        notificacionService.enviarARol(
+            "ROLE_ADMIN", 
+            "Nueva Petición de Voluntariado", 
+            "Un usuario ha solicitado unirse como voluntario.", 
+            "SISTEMA", 
+            "/web/voluntarios/" + saved.getId().getValue()
+        );
+
+        // Notificar al propio Voluntario (Personalizado por ID)
+        if (command.usuarioId() != null) {
+            notificacionService.enviar(
+                command.usuarioId().getValue(),
+                "Bienvenido al Refugio",
+                "¡Felicidades! Has sido aceptado como voluntario. Ya puedes ver tus tareas asignadas.",
+                "SISTEMA",
+                "/web/tareas"
+            );
+        }
+
+        return saved;
     }
 }

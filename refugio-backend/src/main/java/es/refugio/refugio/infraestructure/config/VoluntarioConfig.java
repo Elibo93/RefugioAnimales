@@ -24,8 +24,9 @@ public class VoluntarioConfig {
     }
 
     @Bean
-    public CreateVoluntarioUseCase createVoluntarioUseCase(VoluntarioRepository repository) {
-        return new CreateVoluntarioUseCase(repository);
+    public CreateVoluntarioUseCase createVoluntarioUseCase(VoluntarioRepository repository,
+            es.refugio.refugio.application.service.NotificacionService notificacionService) {
+        return new CreateVoluntarioUseCase(repository, notificacionService);
     }
 
     @Bean

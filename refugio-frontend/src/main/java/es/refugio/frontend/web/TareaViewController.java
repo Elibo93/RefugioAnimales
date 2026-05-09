@@ -270,6 +270,11 @@ public class TareaViewController {
         out.close();
     }
 
+    @GetMapping("/web/tareas/{id}")
+    public String redireccionDetalle(@PathVariable Integer id) {
+        return "redirect:/web/tareas/" + id + "/editar";
+    }
+
     private List<Object> fetchList(String path) {
         try {
             String finalUrl = path.startsWith("http") ? path : apiUrl + path;

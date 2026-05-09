@@ -13,12 +13,24 @@ import lombok.RequiredArgsConstructor;
 public class EditTareaUseCase {
 
     private final TareaRepository tareaRepository;
+    private final es.refugio.refugio.application.service.NotificacionService notificacionService;
 
     public Tarea update(EditTareaCommand command) {
         return tareaRepository.getById(command.id())
                 .map(tarea -> {
                     EstadoTarea estadoEnum = EstadoTarea.valueOf(command.estado().toUpperCase());
                     
+                    // Si la tarea se marca como COMPLETADA, notificar a los Administradores
+                    if (estadoEnum == EstadoTarea.COMPLETADA && tarea.getEstado() != EstadoTarea.COMPLETADA) {
+                        notificacionService.enviarARol(
+                            "ROLE_ADMIN",
+                            "Tarea Finalizada",
+                            "Un voluntario ha marcado la tarea '" + tarea.getDescripcion() + "' como realizada.",
+                            "TAREA",
+                            "/web/tareas"
+                        );
+                    }
+
                     tarea.setDescripcion(command.descripcion());
                     tarea.setFecha(command.fecha());
                     tarea.setEstado(estadoEnum);

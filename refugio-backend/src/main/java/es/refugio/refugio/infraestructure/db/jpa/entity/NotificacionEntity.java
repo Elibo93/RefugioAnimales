@@ -17,8 +17,11 @@ public class NotificacionEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "usuario_id", nullable = false)
+    @Column(name = "usuario_id", nullable = true)
     private Integer usuarioId;
+
+    @Column(length = 50)
+    private String rol; // Opcional: Para notificaciones por rol (e.g. ROLE_ADMIN)
 
     @Column(nullable = false)
     private String titulo;
