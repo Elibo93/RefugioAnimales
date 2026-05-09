@@ -95,6 +95,14 @@
                         <!-- ID Oculto para el formulario -->
                         <input type="hidden" name="voluntarioIds" id="selected-volunteer-id" 
                                th:value="${voluntarioPreseleccionado != null ? voluntarioPreseleccionado.get('id') : (tarea.get('voluntarioIds') != null and !tarea.get('voluntarioIds').isEmpty() ? tarea.get('voluntarioIds')[0] : '')}">
+                        <select name="voluntarioIds">
+                            <option value="">— Sin asignar —</option>
+                            <option th:each="v : ${voluntarios}" th:value="${v.get('id')}"
+                                th:with="u=${usuariosMap != null ? usuariosMap[v.get('usuarioId')] : null}"
+                                th:text="${u != null ? u.get('email') : 'Voluntario ' + v.get('id')}"
+                                th:selected="${tarea.get('voluntarioIds') != null and tarea.get('voluntarioIds').contains(v.get('id'))}">
+                            </option>
+                        </select>
                     </div>
 
                     <script th:inline="javascript">

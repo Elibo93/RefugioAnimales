@@ -13,6 +13,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -83,8 +85,11 @@ public class SolicitudAdopcionViewController {
                 Object uid = ((Map<?, ?>) a).get("usuarioId");
                 if (id instanceof Number && uid instanceof Number) {
                     try {
-                        Map<String, Object> perfil = restTemplate
-                                .getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + uid, Map.class);
+                        Map<String, Object> perfil = restTemplate.exchange(
+                                apiUrl + "/v1/perfiles-legales/usuario/" + uid,
+                                HttpMethod.GET,
+                                null,
+                                new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
                         if (perfil != null) {
                             Object nombre = perfil.get("nombre");
                             Object apellido = perfil.get("apellido");
@@ -138,8 +143,11 @@ public class SolicitudAdopcionViewController {
         // por usuarioId
         Integer adoptanteId = null;
         try {
-            Map<String, Object> adoptante = restTemplate
-                    .getForObject(apiUrl + "/v1/adoptantes/usuario/" + currentUserId, Map.class);
+            Map<String, Object> adoptante = restTemplate.exchange(
+                    apiUrl + "/v1/adoptantes/usuario/" + currentUserId,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
             if (adoptante != null && adoptante.get("id") != null) {
                 adoptanteId = ((Number) adoptante.get("id")).intValue();
             }
@@ -242,18 +250,27 @@ public class SolicitudAdopcionViewController {
     @GetMapping(WebRoutes.SOLICITUDES_EDITAR)
     @PreAuthorize("hasRole('ADMIN')")
     public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
-        Object solicitud = restTemplate.getForObject(apiUrl + "/v1/solicitudes-adopcion/" + id, Object.class);
-        Map<String, Object> sol = (Map<String, Object>) solicitud;
+        Map<String, Object> sol = restTemplate.exchange(
+                apiUrl + "/v1/solicitudes-adopcion/" + id,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
         model.addAttribute(ModelAttribute.SINGLE_Solicitud.getName(), sol);
 
         if (sol != null && sol.get("adoptanteId") != null) {
             try {
-                Map<String, Object> adoptante = restTemplate
-                        .getForObject(apiUrl + "/v1/adoptantes/" + sol.get("adoptanteId"), Map.class);
+                Map<String, Object> adoptante = restTemplate.exchange(
+                        apiUrl + "/v1/adoptantes/" + sol.get("adoptanteId"),
+                        HttpMethod.GET,
+                        null,
+                        new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
                 if (adoptante != null && adoptante.get("usuarioId") != null) {
                     try {
-                        Map<String, Object> perfil = restTemplate.getForObject(
-                                apiUrl + "/v1/perfiles-legales/usuario/" + adoptante.get("usuarioId"), Map.class);
+                        Map<String, Object> perfil = restTemplate.exchange(
+                                apiUrl + "/v1/perfiles-legales/usuario/" + adoptante.get("usuarioId"),
+                                HttpMethod.GET,
+                                null,
+                                new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
                         if (perfil != null) {
                             model.addAttribute("nombreAdoptante", perfil.get("nombre") + " " + perfil.get("apellido"));
                         }
@@ -268,8 +285,11 @@ public class SolicitudAdopcionViewController {
 
         if (sol != null && sol.get("animalId") != null) {
             try {
-                Map<String, Object> animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + sol.get("animalId"),
-                        Map.class);
+                Map<String, Object> animal = restTemplate.exchange(
+                        apiUrl + "/v1/animales/" + sol.get("animalId"),
+                        HttpMethod.GET,
+                        null,
+                        new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
                 model.addAttribute("animalData", animal);
             } catch (Exception e) {
                 logger.error("Error al cargar datos del animal para editar solicitud: " + e.getMessage());
@@ -424,21 +444,30 @@ public class SolicitudAdopcionViewController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             try {
-                Map<String, Object> me = restTemplate.getForObject(authUrl + "/v1/me", Map.class);
+                Map<String, Object> me = restTemplate.exchange(
+                        authUrl + "/v1/me",
+                        HttpMethod.GET,
+                        null,
+                        new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
                 if (me != null && me.get("id") != null) {
                     Object idObj = me.get("id");
                     if (idObj instanceof Map)
                         idObj = ((Map<?, ?>) idObj).get("value");
 
                     if (idObj != null) {
-                        Map<String, Object> perfil = restTemplate.getForObject(
-                                apiUrl + "/v1/perfiles-legales/usuario/" + idObj, Map.class);
+                        Map<String, Object> perfil = restTemplate.exchange(
+                                apiUrl + "/v1/perfiles-legales/usuario/" + idObj,
+                                HttpMethod.GET,
+                                null,
+                                new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
                         if (perfil != null) {
                             model.addAttribute("nombre", perfil.get("nombre"));
                             model.addAttribute("apellido", perfil.get("apellido"));
                             model.addAttribute("telefono", perfil.get("telefono"));
                             model.addAttribute("dni", perfil.get("dni"));
                             model.addAttribute("direccion", perfil.get("direccion"));
+                            model.addAttribute("fechaNacimiento", perfil.get("fechaNacimiento"));
+                            model.addAttribute("perfilExistente", true);
                         }
                     }
                 }
@@ -457,6 +486,28 @@ public class SolicitudAdopcionViewController {
         try {
             Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
             model.addAttribute("animal", animal);
+
+            // Cargar datos del perfil para la ficha
+            Map<String, Object> me = restTemplate.getForObject(authUrl + "/v1/me", Map.class);
+            if (me != null && me.get("id") != null) {
+                Object idObj = me.get("id");
+                if (idObj instanceof Map) idObj = ((Map<?, ?>) idObj).get("value");
+                
+                try {
+                    Map<String, Object> perfil = restTemplate.exchange(
+                            apiUrl + "/v1/perfiles-legales/usuario/" + idObj,
+                            HttpMethod.GET,
+                            null,
+                            new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+                    if (perfil != null) {
+                        model.addAttribute("nombre", perfil.get("nombre"));
+                        model.addAttribute("apellido", perfil.get("apellido"));
+                        model.addAttribute("perfilExistente", true);
+                    }
+                } catch (Exception e) {
+                    logger.warn("No se encontró perfil legal para la ficha de adopción directa");
+                }
+            }
         } catch (Exception e) {
             model.addAttribute("animal", Map.of("id", animalId, "nombre", "Animal"));
         }
@@ -486,33 +537,24 @@ public class SolicitudAdopcionViewController {
         }
         Integer usuarioId = ((Number) me.get("id")).intValue();
 
-        // 2. Asegurar/Actualizar PerfilLegal (Fuente de verdad de Identidad)
-        Map<String, Object> bodyPerfil = new HashMap<>();
-        bodyPerfil.put("usuarioId", usuarioId);
-        bodyPerfil.put("nombre", nombre);
-        bodyPerfil.put("apellido", apellido);
-        bodyPerfil.put("dni", dni);
-        bodyPerfil.put("telefono", telefono);
-        bodyPerfil.put("direccion", direccion);
-        bodyPerfil.put("fechaNacimiento", fechaNacimiento);
-        
-        try {
-            restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
-        } catch (Exception e) {
-            logger.error("Error al guardar perfil legal en conversión: " + e.getMessage());
-            // Continuamos, el backend podría tener ya los datos, pero lo ideal es que este paso funcione
-        }
-
-        // 3. Procesar Conversión y Adopción (Rol operativo y Solicitud)
+        // 3. Procesar Conversión y Adopción (Unificado: PerfilLegal + Adoptante + Solicitud)
         Map<String, Object> bodySolicitud = new HashMap<>();
         bodySolicitud.put("animalId", animalId);
         bodySolicitud.put("comentario", comentario);
+        
+        // Incluimos los datos del perfil para que el backend los actualice/cree atómicamente
+        bodySolicitud.put("nombre", nombre);
+        bodySolicitud.put("apellido", apellido);
+        bodySolicitud.put("dni", dni);
+        bodySolicitud.put("direccion", direccion);
+        bodySolicitud.put("telefono", telefono);
+        bodySolicitud.put("fechaNacimiento", fechaNacimiento);
 
         logger.info("Enviando solicitud de conversión y adopción para usuario: " + usuarioId);
         try {
             restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/convertir-y-adopcion", bodySolicitud, Object.class);
         } catch (org.springframework.web.client.RestClientResponseException e) {
-            Map<String, Object> responseBody = e.getResponseBodyAs(Map.class);
+            Map<String, Object> responseBody = e.getResponseBodyAs(new ParameterizedTypeReference<Map<String, Object>>() {});
             String errorMsg = "Error al procesar la adopción. Es posible que el DNI ya esté en uso.";
 
             if (responseBody != null) {
@@ -573,9 +615,9 @@ public class SolicitudAdopcionViewController {
                     // Usar exchange para obtener la respuesta con el nuevo token
                     var responseEntity = restTemplate.exchange(
                             authUrl + "/v1/usuarios/" + usuarioIdAuth + "/rol",
-                            org.springframework.http.HttpMethod.PUT,
+                            HttpMethod.PUT,
                             new org.springframework.http.HttpEntity<>(patchBody),
-                            Map.class);
+                            new ParameterizedTypeReference<Map<String, Object>>() {});
 
                     if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
                         String newToken = (String) responseEntity.getBody().get("token");
@@ -658,7 +700,11 @@ public class SolicitudAdopcionViewController {
 
         Integer usuarioId = null;
         try {
-            Map respUser = restTemplate.postForObject(authUrl + "/v1/usuarios/publico", userBody, Map.class);
+            Map<String, Object> respUser = restTemplate.exchange(
+                    authUrl + "/v1/usuarios/publico",
+                    HttpMethod.POST,
+                    new HttpEntity<>(userBody),
+                    new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
             if (respUser != null && respUser.get("id") != null) {
                 Object rawId = respUser.get("id");
                 usuarioId = (rawId instanceof Number) ? ((Number) rawId).intValue()
@@ -667,21 +713,30 @@ public class SolicitudAdopcionViewController {
                 throw new Exception("No se pudo obtener el ID del usuario tras el registro");
             }
         } catch (Exception e) {
-            String errorMsg = e.getMessage();
-            if (e instanceof org.springframework.web.client.HttpClientErrorException) {
-                var ex = (org.springframework.web.client.HttpClientErrorException) e;
+            String errorMsg = "Error inesperado al contactar con el servicio de autenticación.";
+            if (e instanceof org.springframework.web.client.RestClientResponseException) {
+                var ex = (org.springframework.web.client.RestClientResponseException) e;
                 try {
                     Map<String, Object> errorMap = ex.getResponseBodyAs(Map.class);
-                    if (errorMap != null && errorMap.containsKey("username")) {
-                        errorMsg = (String) errorMap.get("username");
-                    } else if (errorMap != null && errorMap.containsKey("message")) {
-                        errorMsg = (String) errorMap.get("message");
+                    if (errorMap != null) {
+                        if (errorMap.containsKey("message")) {
+                            errorMsg = (String) errorMap.get("message");
+                        } else if (errorMap.containsKey("username")) {
+                            errorMsg = (String) errorMap.get("username");
+                        } else if (errorMap.containsKey("error")) {
+                            errorMsg = (String) errorMap.get("error");
+                        }
+                    } else {
+                        errorMsg = ex.getStatusText();
                     }
                 } catch (Exception ignored) {
+                    errorMsg = ex.getMessage();
                 }
+            } else {
+                errorMsg = e.getMessage();
             }
 
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al registrar el usuario en Auth: " + errorMsg);
+            redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
             redirectAttributes.addFlashAttribute("userName", userName);
             redirectAttributes.addFlashAttribute("nombre", nombre);
             redirectAttributes.addFlashAttribute("apellido", apellido);
@@ -695,45 +750,41 @@ public class SolicitudAdopcionViewController {
             return "redirect:" + WebRoutes.SOLICITUDES_PUBLICO_REGISTRO + "?animalId=" + animalId;
         }
 
-        // 2. Crear PerfilLegal en Backend (Identidad)
-        Map<String, Object> bodyPerfil = new HashMap<>();
-        bodyPerfil.put("usuarioId", usuarioId);
-        bodyPerfil.put("nombre", nombre);
-        bodyPerfil.put("apellido", apellido);
-        bodyPerfil.put("dni", dni);
-        bodyPerfil.put("direccion", direccion);
-        bodyPerfil.put("telefono", telefono);
-        bodyPerfil.put("fechaNacimiento", fechaNacimiento);
-
-        try {
-            restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
-        } catch (Exception e) {
-            logger.error("Error al crear perfil legal: " + e.getMessage());
-        }
-
-        // 3. Crear solicitud en Backend (Rol operativo y Proceso)
+        // 2. Crear solicitud en Backend (Unificado: PerfilLegal + Adoptante + Solicitud)
         Map<String, Object> bodySolicitud = new HashMap<>();
         bodySolicitud.put("usuarioId", usuarioId);
         bodySolicitud.put("animalId", animalId);
         bodySolicitud.put("comentario", comentario);
+        
+        // Datos del perfil para la creación automática en el backend
+        bodySolicitud.put("nombre", nombre);
+        bodySolicitud.put("apellido", apellido);
+        bodySolicitud.put("dni", dni);
+        bodySolicitud.put("direccion", direccion);
+        bodySolicitud.put("telefono", telefono);
+        bodySolicitud.put("fechaNacimiento", fechaNacimiento);
 
         try {
             restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/publico/registro-y-adopcion", bodySolicitud, Object.class);
-        } catch (org.springframework.web.client.RestClientResponseException e) {
-            String errorMsg = "Error al procesar la adopción.";
-            try {
-                Map<String, Object> errorMap = e.getResponseBodyAs(Map.class);
-                if (errorMap != null && errorMap.containsKey("message")) {
-                    errorMsg = (String) errorMap.get("message");
+        } catch (Exception e) {
+            String errorMsg = "Error inesperado al procesar la adopción en el backend.";
+            if (e instanceof org.springframework.web.client.RestClientResponseException) {
+                var ex = (org.springframework.web.client.RestClientResponseException) e;
+                try {
+                    Map<String, Object> errorMap = ex.getResponseBodyAs(Map.class);
+                    if (errorMap != null && errorMap.containsKey("message")) {
+                        errorMsg = (String) errorMap.get("message");
+                    } else {
+                        errorMsg = ex.getStatusText();
+                    }
+                } catch (Exception ignored) {
+                    errorMsg = ex.getMessage();
                 }
-            } catch (Exception ignored) {
+            } else {
+                errorMsg = e.getMessage();
             }
 
             redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
-            return "redirect:" + WebRoutes.SOLICITUDES_PUBLICO_REGISTRO + "?animalId=" + animalId;
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Error al procesar la solicitud de adopción: " + e.getMessage());
             return "redirect:" + WebRoutes.SOLICITUDES_PUBLICO_REGISTRO + "?animalId=" + animalId;
         }
 

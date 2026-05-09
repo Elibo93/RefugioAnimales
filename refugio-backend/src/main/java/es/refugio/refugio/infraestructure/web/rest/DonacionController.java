@@ -56,20 +56,21 @@ public class DonacionController {
                 && !auth.getPrincipal().equals("anonymousUser");
 
         if (isAuthenticated) {
-            boolean isVolunteer = auth.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_VOLUNTARIO"));
+            boolean isAdmin = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-            if (isVolunteer) {
-                if (request.tipo() == null) {
-                    throw new IllegalArgumentException("El tipo de donación es obligatorio.");
-                }
-                String tipo = request.tipo().name();
-                if (!tipo.equals("COMIDA") && !tipo.equals("OTRO") && !tipo.equals("MATERIAL")) {
+            if (!isAdmin) {
+                // Si no es admin, verificar que el usuarioId coincida con el del token
+                es.refugio.refugio.infraestructure.security.CustomUserDetails userDetails = (es.refugio.refugio.infraestructure.security.CustomUserDetails) auth.getPrincipal();
+                Integer currentUserId = userDetails.getId();
 
-                    throw new AccessDeniedException(
-                            "Los voluntarios solo pueden registrar donaciones físicas (COMIDA o MATERIAL/OTRO).");
+                if (!request.usuarioId().equals(currentUserId)) {
+                    throw new AccessDeniedException("Solo los administradores pueden registrar donaciones para otros usuarios.");
                 }
             }
+        } else {
+            // Si no está autenticado, solo permitimos donaciones anónimas (usuarioId debe corresponder al anónimo)
+            // Nota: Aquí se podría validar contra el ID del usuario anónimo real si fuera necesario.
         }
 
         CreateDonacionCommand command = DonacionMapper.toCommand(request);

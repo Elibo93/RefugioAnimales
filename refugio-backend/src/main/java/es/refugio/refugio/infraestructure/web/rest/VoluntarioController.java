@@ -20,11 +20,9 @@ import es.refugio.refugio.application.service.voluntario.CreateVoluntarioService
 import es.refugio.refugio.application.service.voluntario.DeleteVoluntarioService;
 import es.refugio.refugio.application.service.voluntario.EditVoluntarioService;
 import es.refugio.refugio.application.service.voluntario.FindVoluntarioService;
-import es.refugio.refugio.domain.model.perfil_legal.PerfilLegal;
 import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
 import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
-import es.refugio.refugio.domain.repository.PerfilLegalRepository;
 import es.refugio.refugio.infraestructure.mapper.VoluntarioMapper;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioRequest;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioResponse;

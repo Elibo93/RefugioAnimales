@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -41,10 +40,10 @@ public class UsuarioViewController {
     private String apiUrl;
 
     @GetMapping(WebRoutes.PERSONAS_BASE)
-    public String listarPersonas(@RequestParam(required = false) String q, 
-                               @RequestParam(required = false) String rol,
-                               Model model, HttpServletRequest request) {
-        
+    public String listarPersonas(@RequestParam(required = false) String q,
+            @RequestParam(required = false) String rol,
+            Model model, HttpServletRequest request) {
+
         List<Object> personasAuth = fetchList(authUrl + "/v1/usuarios");
         List<Object> perfilesLegales = fetchList(apiUrl + "/v1/perfiles-legales");
 
@@ -53,7 +52,8 @@ public class UsuarioViewController {
             if (p instanceof Map) {
                 Map<String, Object> pm = (Map<String, Object>) p;
                 Object uId = pm.get("usuarioId");
-                if (uId instanceof Number) perfilesMap.put(((Number) uId).intValue(), pm);
+                if (uId instanceof Number)
+                    perfilesMap.put(((Number) uId).intValue(), pm);
             }
         }
 
@@ -64,10 +64,10 @@ public class UsuarioViewController {
             if (u instanceof Map) {
                 Map<String, Object> um = (Map<String, Object>) u;
                 Integer id = ((Number) um.get("id")).intValue();
-                
+
                 Map<String, Object> persona = new HashMap<>(um);
                 Map<String, Object> perfil = perfilesMap.get(id);
-                
+
                 if (perfil != null) {
                     persona.put("nombre", perfil.get("nombre"));
                     persona.put("apellido", perfil.get("apellido"));
@@ -78,22 +78,25 @@ public class UsuarioViewController {
 
                 // Filtrado por rol
                 if (rol != null && !rol.isEmpty() && !"ALL".equals(rol)) {
-                    if (!String.valueOf(um.get("rol")).equals(rol)) continue;
+                    if (!String.valueOf(um.get("rol")).equals(rol))
+                        continue;
                 }
 
                 // Filtrado por búsqueda
                 if (query != null && !query.isEmpty()) {
-                    String nombre = String.valueOf(persona.get("nombre") != null ? persona.get("nombre") : "").toLowerCase();
-                    String apellido = String.valueOf(persona.get("apellido") != null ? persona.get("apellido") : "").toLowerCase();
+                    String nombre = String.valueOf(persona.get("nombre") != null ? persona.get("nombre") : "")
+                            .toLowerCase();
+                    String apellido = String.valueOf(persona.get("apellido") != null ? persona.get("apellido") : "")
+                            .toLowerCase();
                     String email = String.valueOf(persona.get("email")).toLowerCase();
                     String username = String.valueOf(persona.get("username")).toLowerCase();
-                    
-                    if (!nombre.contains(query) && !apellido.contains(query) && 
-                        !email.contains(query) && !username.contains(query)) {
+
+                    if (!nombre.contains(query) && !apellido.contains(query) &&
+                            !email.contains(query) && !username.contains(query)) {
                         continue;
                     }
                 }
-                
+
                 personasCompletas.add(persona);
             }
         }
@@ -115,7 +118,7 @@ public class UsuarioViewController {
     public String crearPersonaForm(Model model, HttpServletRequest request) {
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), new HashMap<String, Object>());
         model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_ADMIN"));
-        
+
         if ("true".equals(request.getHeader("HX-Request"))) {
             return FragmentoContenido.Persona_FORM.getPath() + " :: content";
         }
@@ -147,7 +150,7 @@ public class UsuarioViewController {
             Map<String, Object> createdUser = restTemplate.postForObject(authUrl + "/v1/usuarios", userBody, Map.class);
             if (createdUser != null && createdUser.get("id") != null) {
                 Integer usuarioId = ((Number) createdUser.get("id")).intValue();
-                
+
                 // Crear PerfilLegal
                 Map<String, Object> legalBody = new HashMap<>();
                 legalBody.put("usuarioId", usuarioId);
@@ -156,8 +159,9 @@ public class UsuarioViewController {
                 legalBody.put("dni", dni);
                 legalBody.put("telefono", telefono);
                 legalBody.put("direccion", direccion);
-                legalBody.put("fechaNacimiento", (fechaNacimiento != null && !fechaNacimiento.isEmpty()) ? fechaNacimiento : "2000-01-01");
-                
+                legalBody.put("fechaNacimiento",
+                        (fechaNacimiento != null && !fechaNacimiento.isEmpty()) ? fechaNacimiento : "2000-01-01");
+
                 restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", legalBody, Object.class);
             }
             redirectAttributes.addFlashAttribute("successMessage", "Usuario creado con éxito");
@@ -172,19 +176,22 @@ public class UsuarioViewController {
     public String editarPersonaForm(@PathVariable Integer id, Model model, HttpServletRequest request) {
         Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + id, Map.class);
         Map<String, Object> persona = new HashMap<>();
-        if (user != null) persona.putAll(user);
-        
+        if (user != null)
+            persona.putAll(user);
+
         try {
-            Map<String, Object> legal = (Map<String, Object>) restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + id, Map.class);
+            Map<String, Object> legal = (Map<String, Object>) restTemplate
+                    .getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + id, Map.class);
             if (legal != null) {
-                persona.put("nombre",   legal.get("nombre"));
+                persona.put("nombre", legal.get("nombre"));
                 persona.put("apellido", legal.get("apellido"));
                 persona.put("telefono", legal.get("telefono"));
-                persona.put("dni",      legal.get("dni"));
+                persona.put("dni", legal.get("dni"));
                 persona.put("direccion", legal.get("direccion"));
                 persona.put("fechaNacimiento", legal.get("fechaNacimiento"));
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), persona);
         model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_ADMIN"));
@@ -213,7 +220,8 @@ public class UsuarioViewController {
         Map<String, Object> userBody = new HashMap<>();
         userBody.put("email", email);
         userBody.put("username", username);
-        if (rol != null) userBody.put("rol", rol);
+        if (rol != null)
+            userBody.put("rol", rol);
         restTemplate.put(authUrl + "/v1/usuarios/" + id, userBody);
 
         // 2. Actualizar PerfilLegal
@@ -234,7 +242,7 @@ public class UsuarioViewController {
     public String borrar(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
             logger.info("Iniciando borrado coordinado para usuario ID: {}", id);
-            
+
             // 1. Borrar PerfilLegal en el Backend primero (integridad)
             try {
                 restTemplate.delete(apiUrl + "/v1/perfiles-legales/usuario/" + id);
@@ -246,7 +254,7 @@ public class UsuarioViewController {
             // 2. Borrar Usuario en Auth
             restTemplate.delete(authUrl + "/v1/usuarios/" + id);
             logger.info("Usuario ID {} eliminado con éxito de Auth", id);
-            
+
             redirectAttributes.addFlashAttribute("successMessage", "Usuario y datos legales eliminados con éxito");
         } catch (Exception e) {
             logger.error("Error crítico al borrar usuario {}: {}", id, e.getMessage());
@@ -257,21 +265,25 @@ public class UsuarioViewController {
 
     @GetMapping(WebRoutes.PERSONAS_DETALLE)
     public String verDetalle(@PathVariable Integer id, Model model) {
-        Map<String, Object> userAuth = (Map<String, Object>) restTemplate.getForObject(authUrl + "/v1/usuarios/" + id, Map.class);
+        Map<String, Object> userAuth = (Map<String, Object>) restTemplate.getForObject(authUrl + "/v1/usuarios/" + id,
+                Map.class);
         Map<String, Object> persona = new HashMap<>();
-        if (userAuth != null) persona.putAll(userAuth);
-        
+        if (userAuth != null)
+            persona.putAll(userAuth);
+
         try {
-            Map<String, Object> legal = (Map<String, Object>) restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + id, Map.class);
+            Map<String, Object> legal = (Map<String, Object>) restTemplate
+                    .getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + id, Map.class);
             if (legal != null) {
-                persona.put("nombre",   legal.get("nombre"));
+                persona.put("nombre", legal.get("nombre"));
                 persona.put("apellido", legal.get("apellido"));
                 persona.put("telefono", legal.get("telefono"));
-                persona.put("dni",      legal.get("dni"));
+                persona.put("dni", legal.get("dni"));
                 persona.put("direccion", legal.get("direccion"));
                 persona.put("fechaNacimiento", legal.get("fechaNacimiento"));
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), persona);
 
@@ -282,15 +294,15 @@ public class UsuarioViewController {
             if (adoptante instanceof Map) {
                 Map<String, Object> am = (Map<String, Object>) adoptante;
                 Object aIdRaw = am.get("id");
-                Integer aId = (aIdRaw instanceof Map) ? (Integer)((Map)aIdRaw).get("value") : (Integer)aIdRaw;
+                Integer aId = (aIdRaw instanceof Map) ? (Integer) ((Map) aIdRaw).get("value") : (Integer) aIdRaw;
 
                 if (aId != null) {
                     List<Object> solicitudes = fetchList("/v1/solicitudes-adopcion/adoptante/" + aId);
                     List<Object> adopciones = fetchList("/v1/adopciones/adoptante/" + aId);
-                    
+
                     List<Map<String, Object>> vinculos = new ArrayList<>();
                     Map<String, String> animalNames = new HashMap<>();
-                    
+
                     for (Object s : solicitudes) {
                         if (s instanceof Map) {
                             Map<String, Object> sm = (Map<String, Object>) s;
@@ -319,38 +331,40 @@ public class UsuarioViewController {
                     model.addAttribute("animalNames", animalNames);
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         // Fetch Voluntario info
         try {
             Object voluntario = restTemplate.getForObject(apiUrl + "/v1/voluntarios/usuario/" + id, Object.class);
             model.addAttribute("voluntario", voluntario);
-            
+
             if (voluntario instanceof Map) {
                 Map<String, Object> vm = (Map<String, Object>) voluntario;
                 Object vIdRaw = vm.get("id");
-                Integer vId = (vIdRaw instanceof Map) ? (Integer)((Map)vIdRaw).get("value") : (Integer)vIdRaw;
-                
+                Integer vId = (vIdRaw instanceof Map) ? (Integer) ((Map) vIdRaw).get("value") : (Integer) vIdRaw;
+
                 if (vId != null) {
                     List<Object> todasTareas = fetchList("/v1/tareas");
                     List<Object> misTareas = todasTareas.stream()
-                        .filter(t -> {
-                            if (t instanceof Map) {
-                                Object vIds = ((Map<?, ?>) t).get("voluntarioIds");
-                                if (vIds instanceof List) {
-                                    return ((List<?>) vIds).stream().anyMatch(vid -> {
-                                        Object vidVal = (vid instanceof Map) ? ((Map)vid).get("value") : vid;
-                                        return vId.equals(vidVal);
-                                    });
+                            .filter(t -> {
+                                if (t instanceof Map) {
+                                    Object vIds = ((Map<?, ?>) t).get("voluntarioIds");
+                                    if (vIds instanceof List) {
+                                        return ((List<?>) vIds).stream().anyMatch(vid -> {
+                                            Object vidVal = (vid instanceof Map) ? ((Map) vid).get("value") : vid;
+                                            return vId.equals(vidVal);
+                                        });
+                                    }
                                 }
-                            }
-                            return false;
-                        })
-                        .toList();
+                                return false;
+                            })
+                            .toList();
                     model.addAttribute("tareas", misTareas);
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_DETALLE.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -359,11 +373,11 @@ public class UsuarioViewController {
     @GetMapping(WebRoutes.PERSONAS_PDF)
     public void exportarPDF(HttpServletResponse response, @RequestParam(required = false) String rol) throws Exception {
         List<Object> personasAuth = fetchList(authUrl + "/v1/usuarios");
-        
+
         if (rol != null && !rol.isEmpty() && !"ALL".equals(rol)) {
             personasAuth = personasAuth.stream()
-                .filter(u -> u instanceof Map && String.valueOf(((Map<?, ?>) u).get("rol")).equals(rol))
-                .toList();
+                    .filter(u -> u instanceof Map && String.valueOf(((Map<?, ?>) u).get("rol")).equals(rol))
+                    .toList();
         }
 
         Context context = new Context();
@@ -384,7 +398,7 @@ public class UsuarioViewController {
             @RequestParam(required = false, defaultValue = "") String q,
             @RequestParam(required = false) String context,
             Model model) {
-            
+
         if (q.trim().isEmpty()) {
             model.addAttribute("usuariosEncontrados", List.of());
             return FragmentoContenido.USUARIO_SUGERENCIAS.getPath() + " :: suggestions";
@@ -399,7 +413,8 @@ public class UsuarioViewController {
             if (p instanceof Map) {
                 Map<String, Object> pm = (Map<String, Object>) p;
                 Object uId = pm.get("usuarioId");
-                if (uId instanceof Number) perfilesMap.put(((Number) uId).intValue(), pm);
+                if (uId instanceof Number)
+                    perfilesMap.put(((Number) uId).intValue(), pm);
             }
         }
 
@@ -409,11 +424,12 @@ public class UsuarioViewController {
                 Map<String, Object> am = (Map<String, Object>) a;
                 Object uIdRaw = am.get("usuarioId");
                 Object aIdRaw = am.get("id");
-                
-                Integer uId = (uIdRaw instanceof Map) ? (Integer)((Map)uIdRaw).get("value") : (Integer)uIdRaw;
-                Integer aId = (aIdRaw instanceof Map) ? (Integer)((Map)aIdRaw).get("value") : (Integer)aIdRaw;
-                
-                if (uId != null && aId != null) adoptantesMap.put(uId, aId);
+
+                Integer uId = (uIdRaw instanceof Map) ? (Integer) ((Map) uIdRaw).get("value") : (Integer) uIdRaw;
+                Integer aId = (aIdRaw instanceof Map) ? (Integer) ((Map) aIdRaw).get("value") : (Integer) aIdRaw;
+
+                if (uId != null && aId != null)
+                    adoptantesMap.put(uId, aId);
             }
         }
 
@@ -425,12 +441,16 @@ public class UsuarioViewController {
                 Map<String, Object> um = (Map<String, Object>) u;
                 Integer uId = ((Number) um.get("id")).intValue();
                 Map<String, Object> perfil = perfilesMap.get(uId);
-                
-                String nombre = perfil != null && perfil.get("nombre") != null ? String.valueOf(perfil.get("nombre")) : "";
-                String apellido = perfil != null && perfil.get("apellido") != null ? String.valueOf(perfil.get("apellido")) : "";
+
+                String nombre = perfil != null && perfil.get("nombre") != null ? String.valueOf(perfil.get("nombre"))
+                        : "";
+                String apellido = perfil != null && perfil.get("apellido") != null
+                        ? String.valueOf(perfil.get("apellido"))
+                        : "";
                 String email = String.valueOf(um.get("email"));
-                
-                if (nombre.toLowerCase().contains(query) || apellido.toLowerCase().contains(query) || email.toLowerCase().contains(query)) {
+
+                if (nombre.toLowerCase().contains(query) || apellido.toLowerCase().contains(query)
+                        || email.toLowerCase().contains(query)) {
                     Map<String, Object> result = new HashMap<>(um);
                     result.put("nombre", nombre);
                     result.put("apellido", apellido);
@@ -455,9 +475,11 @@ public class UsuarioViewController {
     }
 
     private void fetchAnimalName(Object animalId, Map<String, String> names) {
-        if (animalId == null) return;
+        if (animalId == null)
+            return;
         String idStr = String.valueOf(animalId);
-        if (names.containsKey(idStr)) return;
+        if (names.containsKey(idStr))
+            return;
 
         try {
             Map<String, Object> animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Map.class);

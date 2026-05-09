@@ -14,6 +14,14 @@ public record PublicSolicitudAdopcionRequest(
         @NotNull(message = "El ID del animal es obligatorio") 
         Integer animalId,
 
-        String comentario
+        String comentario,
+
+        // Datos del Perfil Legal para creación automática
+        String nombre,
+        String apellido,
+        String dni,
+        String telefono,
+        String direccion,
+        String fechaNacimiento
 ) {
 }
