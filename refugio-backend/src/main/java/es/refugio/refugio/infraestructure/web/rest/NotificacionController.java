@@ -53,17 +53,13 @@ public class NotificacionController {
     private Integer obtenerIdUsuarioActual() {
         org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) {
-            System.out.println("DEBUG AUTH: Auth is NULL");
             return null;
         }
         
         Object principal = auth.getPrincipal();
-        System.out.println("DEBUG AUTH: Principal=" + principal + " (" + principal.getClass().getSimpleName() + ")");
         
         if (principal instanceof es.refugio.refugio.infraestructure.security.CustomUserDetails) {
-            Integer id = ((es.refugio.refugio.infraestructure.security.CustomUserDetails) principal).getId();
-            System.out.println("DEBUG AUTH: Resolved ID from CustomUserDetails: " + id);
-            return id;
+            return ((es.refugio.refugio.infraestructure.security.CustomUserDetails) principal).getId();
         }
         
         if (principal instanceof String) {
@@ -72,7 +68,7 @@ public class NotificacionController {
             try {
                 return Integer.parseInt(s);
             } catch (Exception e) {
-                System.out.println("DEBUG AUTH: Could not parse String principal '" + s + "'");
+                return null;
             }
         }
         

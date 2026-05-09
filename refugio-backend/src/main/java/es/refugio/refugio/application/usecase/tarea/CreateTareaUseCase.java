@@ -35,12 +35,10 @@ public class CreateTareaUseCase {
 
         // Enviar notificaciones a los voluntarios asignados
         if (command.voluntarioIds() != null) {
-            System.out.println("DEBUG TAREA: Notificando a " + command.voluntarioIds().size() + " voluntarios.");
             command.voluntarioIds().forEach(vIdInt -> {
                 VoluntarioId volId = new VoluntarioId(vIdInt);
-                voluntarioRepository.getById(volId).ifPresentOrElse(vol -> {
+                voluntarioRepository.getById(volId).ifPresent(vol -> {
                     if (vol.getUsuarioId() != null) {
-                        System.out.println("DEBUG TAREA: Enviando notificación a UsuarioID=" + vol.getUsuarioId().getValue());
                         notificacionService.enviar(
                             vol.getUsuarioId().getValue(),
                             "Nueva Tarea Asignada",
@@ -48,15 +46,9 @@ public class CreateTareaUseCase {
                             "TAREA",
                             "/web/tareas"
                         );
-                    } else {
-                        System.out.println("DEBUG TAREA: El voluntario " + vIdInt + " no tiene UsuarioID asociado.");
                     }
-                }, () -> {
-                    System.out.println("DEBUG TAREA: No se encontró el voluntario con ID=" + vIdInt);
                 });
             });
-        } else {
-            System.out.println("DEBUG TAREA: No hay voluntarios para notificar.");
         }
 
         return saved;
