@@ -20,5 +20,6 @@ public class SolicitudAdopcion {
     private LocalDateTime fecha;
     private EstadoSolicitud estado;
     private String comentario;
+    private String comentarioAdmin;
 
 }

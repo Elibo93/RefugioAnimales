@@ -315,6 +315,8 @@ public class SolicitudAdopcionViewController {
             @RequestParam Integer adoptanteId,
             @RequestParam String estado,
             @RequestParam String comentario,
+            @RequestParam(required = false) String comentarioAdmin,
+            @RequestParam(required = false) String redireccion,
             RedirectAttributes redirectAttributes) {
 
         Map<String, Object> body = new HashMap<>();
@@ -322,10 +324,15 @@ public class SolicitudAdopcionViewController {
         body.put("adoptanteId", adoptanteId);
         body.put("estado", estado);
         body.put("comentario", comentario);
+        body.put("comentarioAdmin", comentarioAdmin);
         body.put("fecha", LocalDateTime.now().toString());
 
         restTemplate.put(apiUrl + "/v1/solicitudes-adopcion/" + id, body);
-        redirectAttributes.addFlashAttribute("successMessage", "Solicitud editada correctamente");
+        redirectAttributes.addFlashAttribute("successMessage", "Solicitud actualizada correctamente");
+        
+        if ("detalle".equals(redireccion)) {
+            return "redirect:/web/solicitudes/" + id + "/detalle";
+        }
         return "redirect:" + WebRoutes.SOLICITUDES_BASE;
     }
 
@@ -340,7 +347,7 @@ public class SolicitudAdopcionViewController {
     }
 
     @PostMapping(WebRoutes.SOLICITUDES_APROBAR)
-    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public String aprobarSolicitud(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
             Map<String, Object> existing = restTemplate.getForObject(apiUrl + "/v1/solicitudes-adopcion/" + id,
@@ -358,7 +365,7 @@ public class SolicitudAdopcionViewController {
     }
 
     @PostMapping(WebRoutes.SOLICITUDES_RECHAZAR)
-    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public String rechazarSolicitud(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
             Map<String, Object> existing = restTemplate.getForObject(apiUrl + "/v1/solicitudes-adopcion/" + id,
@@ -433,14 +440,26 @@ public class SolicitudAdopcionViewController {
     @GetMapping(WebRoutes.SOLICITUDES_CONVERTIR)
     public String formularioConversion(Model model, @RequestParam Integer animalId) {
         try {
-            Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
+            Map<String, Object> animal = restTemplate.exchange(
+                    apiUrl + "/v1/animales/" + animalId,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
             model.addAttribute("animal", animal);
         } catch (Exception e) {
             model.addAttribute("animal", Map.of("id", animalId, "nombre", "Animal"));
         }
 
-        // Pre-cargar datos del perfil legal si existen (ej. para voluntarios)
-        // Usamos SecurityContextHolder para mayor fiabilidad
+        // Inicializar variables por defecto para evitar errores de renderizado
+        model.addAttribute("perfilExistente", false);
+        model.addAttribute("nombre", "");
+        model.addAttribute("apellido", "");
+        model.addAttribute("telefono", "");
+        model.addAttribute("dni", "");
+        model.addAttribute("direccion", "");
+        model.addAttribute("fechaNacimiento", "");
+
+        // Pre-cargar datos del perfil legal si existen
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             try {
@@ -461,12 +480,12 @@ public class SolicitudAdopcionViewController {
                                 null,
                                 new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
                         if (perfil != null) {
-                            model.addAttribute("nombre", perfil.get("nombre"));
-                            model.addAttribute("apellido", perfil.get("apellido"));
-                            model.addAttribute("telefono", perfil.get("telefono"));
-                            model.addAttribute("dni", perfil.get("dni"));
-                            model.addAttribute("direccion", perfil.get("direccion"));
-                            model.addAttribute("fechaNacimiento", perfil.get("fechaNacimiento"));
+                            model.addAttribute("nombre", perfil.get("nombre") != null ? perfil.get("nombre") : "");
+                            model.addAttribute("apellido", perfil.get("apellido") != null ? perfil.get("apellido") : "");
+                            model.addAttribute("telefono", perfil.get("telefono") != null ? perfil.get("telefono") : "");
+                            model.addAttribute("dni", perfil.get("dni") != null ? perfil.get("dni") : "");
+                            model.addAttribute("direccion", perfil.get("direccion") != null ? perfil.get("direccion") : "");
+                            model.addAttribute("fechaNacimiento", perfil.get("fechaNacimiento") != null ? perfil.get("fechaNacimiento") : "");
                             model.addAttribute("perfilExistente", true);
                         }
                     }
@@ -488,7 +507,11 @@ public class SolicitudAdopcionViewController {
             model.addAttribute("animal", animal);
 
             // Cargar datos del perfil para la ficha
-            Map<String, Object> me = restTemplate.getForObject(authUrl + "/v1/me", Map.class);
+            Map<String, Object> me = restTemplate.exchange(
+                    authUrl + "/v1/me",
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
             if (me != null && me.get("id") != null) {
                 Object idObj = me.get("id");
                 if (idObj instanceof Map) idObj = ((Map<?, ?>) idObj).get("value");
@@ -500,8 +523,8 @@ public class SolicitudAdopcionViewController {
                             null,
                             new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
                     if (perfil != null) {
-                        model.addAttribute("nombre", perfil.get("nombre"));
-                        model.addAttribute("apellido", perfil.get("apellido"));
+                        model.addAttribute("nombre", perfil.get("nombre") != null ? perfil.get("nombre") : "");
+                        model.addAttribute("apellido", perfil.get("apellido") != null ? perfil.get("apellido") : "");
                         model.addAttribute("perfilExistente", true);
                     }
                 } catch (Exception e) {
@@ -826,6 +849,70 @@ public class SolicitudAdopcionViewController {
         redirectAttributes.addFlashAttribute("successMessage",
                 "¡Registro y solicitud completados!");
         return "redirect:" + WebRoutes.HOME;
+    }
+
+    @GetMapping(WebRoutes.SOLICITUDES_DETALLE)
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
+    public String verDetalle(@PathVariable Integer id, Model model) {
+        Map<String, Object> sol = restTemplate.exchange(
+                apiUrl + "/v1/solicitudes-adopcion/" + id,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+        model.addAttribute(ModelAttribute.SINGLE_Solicitud.getName(), sol);
+
+        if (sol != null && sol.get("adoptanteId") != null) {
+            try {
+                Map<String, Object> adoptante = restTemplate.exchange(
+                        apiUrl + "/v1/adoptantes/" + sol.get("adoptanteId"),
+                        HttpMethod.GET,
+                        null,
+                        new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+                if (adoptante != null && adoptante.get("usuarioId") != null) {
+                    model.addAttribute("adoptanteData", adoptante);
+                    try {
+                        Map<String, Object> perfil = restTemplate.exchange(
+                                apiUrl + "/v1/perfiles-legales/usuario/" + adoptante.get("usuarioId"),
+                                HttpMethod.GET,
+                                null,
+                                new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+                        model.addAttribute("perfilAdoptante", perfil);
+                    } catch (Exception e) {
+                        logger.error("Error al cargar PerfilLegal para detalle: " + e.getMessage());
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Error al cargar adoptante para detalle: " + e.getMessage());
+            }
+        }
+
+        if (sol != null && sol.get("animalId") != null) {
+            try {
+                Map<String, Object> animal = restTemplate.exchange(
+                        apiUrl + "/v1/animales/" + sol.get("animalId"),
+                        HttpMethod.GET,
+                        null,
+                        new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+                model.addAttribute("animalData", animal);
+            } catch (Exception e) {
+                logger.error("Error al cargar animal para detalle: " + e.getMessage());
+            }
+        }
+
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_DETALLE.getPath());
+        
+        // Aseguramos que el ID del usuario actual esté disponible para comparaciones de propiedad
+        Object userIdObj = model.getAttribute("currentUserId");
+        if (userIdObj != null) {
+            model.addAttribute("currentUserId", userIdObj);
+        }
+        
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    @GetMapping("/web/solicitudes/{id}")
+    public String redireccionDetalle(@PathVariable Integer id) {
+        return "redirect:/web/solicitudes/" + id + "/detalle";
     }
 
     private List<Object> fetchList(String path) {

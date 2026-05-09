@@ -51,5 +51,8 @@ public class SolicitudAdopcionEntity {
 
     @Column(name = "comentario", length = 1000)
     private String comentario;
+    
+    @Column(name = "comentario_admin", length = 1000)
+    private String comentarioAdmin;
 
 }

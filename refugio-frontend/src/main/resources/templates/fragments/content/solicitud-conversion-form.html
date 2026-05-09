@@ -56,7 +56,7 @@
                 </div>
                 <div>
                     <span style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600;">Tu Perfil</span>
-                    <h3 style="margin: 0; font-weight: 800; color: var(--text-main);" th:text="${nombre + ' ' + apellido}">Nombre Completo</h3>
+                    <h3 style="margin: 0; font-weight: 800; color: var(--text-main);" th:text="|${nombre} ${apellido}|">Nombre Completo</h3>
                     <p style="margin: 4px 0 0; font-size: 0.8rem; color: var(--primary); font-weight: 500;">
                         <i data-lucide="check-circle" style="width: 12px; vertical-align: middle; margin-right: 4px;"></i>
                         Información legal confirmada.
@@ -71,7 +71,7 @@
                 <input type="hidden" name="fechaNacimiento" th:value="${fechaNacimiento}">
             </div>
 
-            <th:block th:if="${!perfilExistente}">
+            <th:block th:unless="${perfilExistente}">
                 <!-- Nombre -->
                 <div class="form-group">
                     <label>Nombre</label>

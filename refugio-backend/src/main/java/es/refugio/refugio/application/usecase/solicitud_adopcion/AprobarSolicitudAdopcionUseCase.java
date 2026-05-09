@@ -44,7 +44,7 @@ public class AprobarSolicitudAdopcionUseCase {
         SolicitudAdopcion solicitud = solicitudAdopcionRepository.getById(solicitudId)
                 .orElseThrow(() -> new SolicitudAdopcionNotFoundException(solicitudId.getValue()));
 
-        if (solicitud.getEstado() != EstadoSolicitud.PENDIENTE) {
+        if (solicitud.getEstado() != EstadoSolicitud.PENDIENTE && solicitud.getEstado() != EstadoSolicitud.EN_REVISION) {
             throw new SolicitudAdopcionEstadoInvalidoException(solicitud.getEstado().name());
         }
 
@@ -73,7 +73,7 @@ public class AprobarSolicitudAdopcionUseCase {
                             "Solicitud de Adopción Aprobada",
                             "¡Buenas noticias! Tu solicitud para adoptar a " + animalNombre + " ha sido aprobada.",
                             "ADOPCION",
-                            "/web/solicitudes/mis-adoptados"
+                            "/web/solicitudes/" + solicitud.getId().getValue() + "/detalle"
                         );
                     }
                 });

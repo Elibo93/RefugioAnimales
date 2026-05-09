@@ -34,7 +34,7 @@ public class RechazarSolicitudAdopcionUseCase {
         SolicitudAdopcion solicitud = solicitudAdopcionRepository.getById(solicitudId)
                 .orElseThrow(() -> new SolicitudAdopcionNotFoundException(solicitudId.getValue()));
 
-        if (solicitud.getEstado() != EstadoSolicitud.PENDIENTE) {
+        if (solicitud.getEstado() != EstadoSolicitud.PENDIENTE && solicitud.getEstado() != EstadoSolicitud.EN_REVISION) {
             throw new SolicitudAdopcionEstadoInvalidoException(solicitud.getEstado().name());
         }
 
@@ -62,7 +62,7 @@ public class RechazarSolicitudAdopcionUseCase {
                             "Solicitud de Adopción Rechazada",
                             "Lo sentimos, tu solicitud para adoptar a " + animalNombre + " ha sido rechazada.",
                             "ADOPCION",
-                            "/web/solicitudes/publico/opciones"
+                            "/web/solicitudes/" + solicitud.getId().getValue() + "/detalle"
                         );
                     }
                 });

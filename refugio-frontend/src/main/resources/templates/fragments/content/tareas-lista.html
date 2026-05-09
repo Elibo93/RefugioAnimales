@@ -7,6 +7,23 @@
 
 <body>
     <div th:fragment="content">
+        <style>
+            .status-dots-container .dot-radio { position: relative; cursor: pointer; display: block; width: 18px; height: 18px; }
+            .status-dots-container .dot-radio input { position: absolute; opacity: 0; cursor: pointer; }
+            .status-dots-container .checkmark { position: absolute; top: 0; left: 0; height: 18px; width: 18px; border-radius: 50%; border: 2px solid #e2e8f0; transition: all 0.2s ease; }
+            
+            .dot-radio.pending .checkmark { border-color: #f59e0b; background: transparent; }
+            .dot-radio.pending input:checked ~ .checkmark { background: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2); }
+            
+            .dot-radio.in-progress .checkmark { border-color: #3b82f6; background: transparent; }
+            .dot-radio.in-progress input:checked ~ .checkmark { background: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+            
+            .dot-radio.completed .checkmark { border-color: #10b981; background: transparent; }
+            .dot-radio.completed input:checked ~ .checkmark { background: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+            
+            .dot-radio.cancelled .checkmark { border-color: #94a3b8; background: transparent; }
+            .dot-radio.cancelled input:checked ~ .checkmark { background: #94a3b8; box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.2); }
+        </style>
         <div class="table-wrapper">
             <div class="actions-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: nowrap;">
                 <div style="display:flex; align-items:center; gap:20px; flex: 1;">
@@ -23,6 +40,7 @@
                                     th:hx-get="@{/web/tareas}"
                                     hx-trigger="change"
                                     hx-target=".content-body"
+                                    hx-select=".content-body"
                                     hx-swap="outerHTML"
                                     th:attr="hx-vals='{&quot;estado&quot;: &quot;' + ${selectedEstado} + '&quot;}'">
                                 <option value="ALL" th:selected="${selectedPrioridad == 'ALL'}">Todas las prioridades</option>
@@ -41,6 +59,7 @@
                                     th:hx-get="@{/web/tareas}"
                                     hx-trigger="change"
                                     hx-target=".content-body"
+                                    hx-select=".content-body"
                                     hx-swap="outerHTML"
                                     th:attr="hx-vals='{&quot;prioridad&quot;: &quot;' + ${selectedPrioridad} + '&quot;}'">
                                 <option value="ALL" th:selected="${selectedEstado == 'ALL'}">Todos los estados</option>
@@ -89,7 +108,7 @@
                     </div>
 
                     <div class="list-rows" style="display: flex; flex-direction: column; gap: 12px;">
-                        <div th:each="t, iterStat : ${tareas}" th:id="'row-' + ${t.get('id')}" class="premium-row-card">
+                        <div th:each="t, iterStat : ${tareas}" th:id="'row-' + ${t.get('id')}" class="premium-row-card" style="gap: 1rem;">
                             <!-- ID -->
                             <div class="row-cell" style="width: 40px; justify-content: center; font-weight: 700; color: var(--text-muted);"
                                 th:text="${iterStat.count}">1</div>
@@ -174,70 +193,112 @@
                     </div>
                 </div>
 
-                <!-- TABLA PARA VOLUNTARIOS -->
-                <div th:if="${!isAdmin}" class="volunteer-tasks-view" style="margin-top: 1.5rem;">
-                    <table id="tablatareas-voluntario">
-                        <thead>
-                            <tr>
-                                <th style="width:40px;">#</th>
-                                <th th:text="#{tarea.table.header.descripcion}">Descripción</th>
-                                <th>Prioridad / Vencimiento</th>
-                                <th style="text-align:center;">Estado</th>
-                                <th style="text-align:right;">Guardar</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="t, iterStat : ${tareas}" th:id="'row-vol-' + ${t.get('id')}" class="task-row">
-                                <td th:text="${iterStat.count}">1</td>
-                                <td style="font-weight:600; color:var(--primary);">
-                                    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                                        <span th:text="${t.get('descripcion')}"></span>
+                <!-- LISTA PREMIUM PARA VOLUNTARIOS (Grid System) -->
+                <div th:if="${!isAdmin}" class="premium-list-container" style="margin-top: 1.5rem;">
+                    <!-- Encabezados con Grid -->
+                    <div class="list-header" style="background: transparent; padding: 0 1.5rem 1rem; display: grid; grid-template-columns: 50px 2fr 1.2fr 2fr 100px; gap: 1rem; align-items: center;">
+                        <div style="text-align: center; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">#</div>
+                        <div style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Descripción</div>
+                        <div style="text-align: center; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Prioridad / Fecha</div>
+                        <div style="text-align: center; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Estado</div>
+                        <div></div> <!-- Columna vacía para Acción -->
+                    </div>
+
+                    <div class="list-rows" style="display: flex; flex-direction: column; gap: 12px;">
+                        <div th:each="t, iterStat : ${tareas}" th:id="'row-vol-' + ${t.get('id')}" class="premium-row-card" 
+                             style="display: grid; grid-template-columns: 50px 2fr 1.2fr 2fr 100px; gap: 1rem; padding: 1rem 1.5rem; align-items: center;">
+                            
+                            <!-- ID -->
+                            <div style="text-align: center; font-weight: 700; color: var(--text-muted);" th:text="${iterStat.count}">1</div>
+
+                            <!-- Descripción -->
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div class="task-icon-box" style="background: var(--bg-main); width: 36px; height: 36px;">
+                                        <i data-lucide="clipboard-check" style="width: 16px; color: var(--primary);"></i>
+                                    </div>
+                                    <div>
+                                        <span style="display: block; font-weight: 800; color: var(--text-main); font-size: 0.95rem;"
+                                            th:text="${t.get('descripcion')}">Descripción</span>
                                         <span th:if="${t.get('instrucciones') != null and !t.get('instrucciones').isEmpty()}"
-                                            th:title="${t.get('instrucciones')}" style="cursor:help;">
-                                            <i data-lucide="info" style="width:16px; color:var(--text-muted);"></i>
+                                            style="font-size: 0.7rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
+                                            <i data-lucide="info" style="width: 10px;"></i>
+                                            <span th:text="${#strings.abbreviate(t.get('instrucciones'), 40)}"></span>
                                         </span>
                                     </div>
-                                </td>
-                                <td>
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <i th:if="${t.get('prioridad') == 'ALTA'}" data-lucide="zap" style="color:var(--danger); width:16px;"></i>
-                                        <i th:if="${t.get('prioridad') == 'MEDIA'}" data-lucide="activity" style="color:var(--warning); width:16px;"></i>
-                                        <i th:if="${t.get('prioridad') == 'BAJA'}" data-lucide="arrow-down-circle" style="color:var(--success); width:16px;"></i>
-                                        <span th:if="${t.get('fechaLimite') != null}" style="font-size:0.85rem;" 
-                                              th:text="${t.get('fechaLimite').toString().substring(8,10) + '/' + t.get('fechaLimite').toString().substring(5,7)}"></span>
+                                </div>
+                            </div>
+
+                            <!-- Prioridad / Fecha -->
+                            <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
+                                <span th:if="${t.get('prioridad') == 'ALTA'}" class="priority-tag high">ALTA</span>
+                                <span th:if="${t.get('prioridad') == 'MEDIA'}" class="priority-tag medium">MEDIA</span>
+                                <span th:if="${t.get('prioridad') == 'BAJA'}" class="priority-tag low">BAJA</span>
+                                <div th:if="${t.get('fechaLimite') != null}"
+                                    style="font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
+                                    <i data-lucide="calendar" style="width: 12px;"></i>
+                                    <span th:text="${t.get('fechaLimite').toString().substring(8,10) + '/' + t.get('fechaLimite').toString().substring(5,7)}"></span>
+                                </div>
+                            </div>
+
+                            <!-- Estado Selector (Estilo Radio Dots con Etiquetas Arriba) -->
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                                <div class="status-dots-container" style="display: flex; gap: 16px; align-items: flex-end;">
+                                    <!-- Pendiente -->
+                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                        <span style="font-size: 0.55rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Pendiente</span>
+                                        <label class="dot-radio pending" title="Pendiente">
+                                            <input type="radio" th:name="'estado-' + ${t.get('id')}" value="PENDIENTE" 
+                                                   th:checked="${t.get('estado') == 'PENDIENTE'}"
+                                                   th:onchange="'document.getElementById(\'input-estado-\' + ' + ${t.get('id')} + ').value = this.value; document.getElementById(\'btn-save-\' + ' + ${t.get('id')} + ').style.display = \'flex\''">
+                                            <span class="checkmark"></span>
+                                        </label>
                                     </div>
-                                </td>
-                                <td>
-                                    <div class="status-radio-group" style="display: flex; gap: 8px; justify-content: center;">
-                                        <div class="radio-item" title="Pendiente">
-                                            <input type="radio" name="estado" value="PENDIENTE" th:checked="${t.get('estado') == 'PENDIENTE'}" th:form="'form-tarea-' + ${t.get('id')}"
-                                                   th:onchange="'document.getElementById(\'btn-save-' + ${t.get('id')} + '\').style.display = \'inline-block\''">
-                                        </div>
-                                        <div class="radio-item" title="En Proceso">
-                                            <input type="radio" name="estado" value="EN_PROCESO" th:checked="${t.get('estado') == 'EN_PROCESO'}" th:form="'form-tarea-' + ${t.get('id')}"
-                                                   th:onchange="'document.getElementById(\'btn-save-' + ${t.get('id')} + '\').style.display = \'inline-block\''">
-                                        </div>
-                                        <div class="radio-item" title="Completada">
-                                            <input type="radio" name="estado" value="COMPLETADA" th:checked="${t.get('estado') == 'COMPLETADA'}" th:form="'form-tarea-' + ${t.get('id')}"
-                                                   th:onchange="'document.getElementById(\'btn-save-' + ${t.get('id')} + '\').style.display = \'inline-block\''">
-                                        </div>
+                                    <!-- En Proceso -->
+                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                        <span style="font-size: 0.55rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">En Proceso</span>
+                                        <label class="dot-radio in-progress" title="En Proceso">
+                                            <input type="radio" th:name="'estado-' + ${t.get('id')}" value="EN_PROCESO" 
+                                                   th:checked="${t.get('estado') == 'EN_PROCESO'}"
+                                                   th:onchange="'document.getElementById(\'input-estado-\' + ' + ${t.get('id')} + ').value = this.value; document.getElementById(\'btn-save-\' + ' + ${t.get('id')} + ').style.display = \'flex\''">
+                                            <span class="checkmark"></span>
+                                        </label>
                                     </div>
-                                </td>
-                                <td style="text-align:right;">
-                                    <form th:id="'form-tarea-' + ${t.get('id')}" th:action="@{/web/tareas/{id}/editar(id=${t.get('id')})}" method="post" style="display:none;">
-                                        <input type="hidden" name="descripcion" th:value="${t.get('descripcion')}">
-                                        <input type="hidden" name="fechaLimite" th:value="${t.get('fechaLimite')}">
-                                        <input type="hidden" name="instrucciones" th:value="${t.get('instrucciones')}">
-                                        <th:block th:if="${t.get('voluntarioIds') != null}">
-                                            <input th:each="vid : ${t.get('voluntarioIds')}" type="hidden" name="voluntarioIds" th:value="${vid}">
-                                        </th:block>
-                                    </form>
-                                    <button type="submit" th:id="'btn-save-' + ${t.get('id')}" th:form="'form-tarea-' + ${t.get('id')}" class="btn btn-primary" style="display:none; font-size:0.7rem; padding:4px 8px; height:auto;">Guardar</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                    <!-- Completada -->
+                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                        <span style="font-size: 0.55rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Completada</span>
+                                        <label class="dot-radio completed" title="Completada">
+                                            <input type="radio" th:name="'estado-' + ${t.get('id')}" value="COMPLETADA" 
+                                                   th:checked="${t.get('estado') == 'COMPLETADA'}"
+                                                   th:onchange="'document.getElementById(\'input-estado-\' + ' + ${t.get('id')} + ').value = this.value; document.getElementById(\'btn-save-\' + ' + ${t.get('id')} + ').style.display = \'flex\''">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Acciones -->
+                            <div style="display: flex; justify-content: flex-end;">
+                                <form th:id="'form-tarea-' + ${t.get('id')}" th:action="@{/web/tareas/{id}/editar(id=${t.get('id')})}" method="post" style="display:none;">
+                                    <input type="hidden" name="descripcion" th:value="${t.get('descripcion')}">
+                                    <input type="hidden" name="fechaLimite" th:value="${t.get('fechaLimite')}">
+                                    <input type="hidden" name="instrucciones" th:value="${t.get('instrucciones')}">
+                                    <input type="hidden" th:id="'input-estado-' + ${t.get('id')}" name="estado" th:value="${t.get('estado')}">
+                                    <th:block th:if="${t.get('voluntarioIds') != null}">
+                                        <input th:each="vid : ${t.get('voluntarioIds')}" type="hidden" name="voluntarioIds" th:value="${vid}">
+                                    </th:block>
+                                </form>
+                                <button type="submit" th:id="'btn-save-' + ${t.get('id')}" th:form="'form-tarea-' + ${t.get('id')}" 
+                                        class="btn btn-primary" 
+                                        style="display:none; height: 32px; padding: 0 12px; font-size: 0.8rem; align-items: center; gap: 6px; border-radius: 8px;">
+                                    <i data-lucide="save" style="width: 14px;"></i>
+                                    Guardar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+  </div>
 
                 <!-- Mensaje si no hay resultados -->
                 <div th:if="${#lists.isEmpty(tareas)}" 
@@ -259,8 +320,8 @@
                     <a th:if="${hasFilters}"
                        th:href="@{/web/tareas}" 
                        hx-get="/web/tareas" 
-                       hx-target=".content-body"
-                       hx-swap="outerHTML"
+                       hx-target="#contenido-dinamico"
+                       hx-push-url="true"
                        class="btn-premium secondary" style="height: 40px; padding: 0 1.5rem;">
                         Ver todas las tareas
                     </a>

@@ -1,46 +1,31 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Iconos de Lucide
-    if (window.lucide) {
-        lucide.createIcons();
-    }
-
-    // Reinicializar componentes dinámicos tras intercambios de HTMX
-    document.body.addEventListener('htmx:afterSettle', () => {
-        refreshDynamicComponents();
-    });
-
-    // Carga inicial
-    refreshDynamicComponents();
-
-    // Auto-cierre de notificaciones (Toasts)
-    const toasts = document.querySelectorAll('.toast');
-    if (toasts.length > 0) {
-        setTimeout(() => {
-            toasts.forEach(toast => {
-                toast.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(-20px)';
-                setTimeout(() => toast.remove(), 500);
-            });
-        }, 3000);
-    }
-
-    // Lógica del Sidebar (Menú lateral)
+    // 1. Lógica del Sidebar (Menú lateral) - PRIORITARIO
     const openSidebarBtn = document.getElementById('open-sidebar');
     const closeSidebarBtn = document.getElementById('close-sidebar');
     const sidebar = document.getElementById('app-sidebar');
     const sidebarOverlay = document.getElementById('sidebar-overlay');
 
     if (openSidebarBtn && sidebar && sidebarOverlay) {
+        console.log("DEBUG: Sidebar elementos encontrados, registrando eventos.");
         const toggleSidebar = () => {
             sidebar.classList.toggle('active');
             sidebarOverlay.classList.toggle('active');
             document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
         };
 
-        openSidebarBtn.addEventListener('click', toggleSidebar);
+        openSidebarBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleSidebar();
+        });
         if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', toggleSidebar);
         sidebarOverlay.addEventListener('click', toggleSidebar);
+    } else {
+        console.warn("DEBUG: No se han encontrado elementos del sidebar:", {openSidebarBtn, sidebar, sidebarOverlay});
+    }
+
+    // 2. Iconos de Lucide
+    if (window.lucide) {
+        lucide.createIcons();
     }
 
     // Lógica de Desplegables (Dropdowns)
@@ -83,6 +68,14 @@ document.addEventListener('DOMContentLoaded', () => {
             suggestions.innerHTML = '';
         }
     });
+
+    // 4. Inicialización global de componentes
+    refreshDynamicComponents();
+});
+
+// 5. Soporte para HTMX: Refrescar componentes tras cada carga de fragmento
+document.addEventListener('htmx:afterSettle', () => {
+    refreshDynamicComponents();
 });
 
 

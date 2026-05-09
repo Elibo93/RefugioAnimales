@@ -9,5 +9,6 @@ import java.time.LocalDateTime;
 public record SolicitudAdopcionUpdateRequest(
         LocalDateTime fecha,
         String estado,
-        String comentario
+        String comentario,
+        String comentarioAdmin
 ) {}

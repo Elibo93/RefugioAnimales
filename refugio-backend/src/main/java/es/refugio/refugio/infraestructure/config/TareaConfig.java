@@ -36,8 +36,9 @@ public class TareaConfig {
     }
 
     @Bean
-    public EditTareaUseCase editTareaUseCase(TareaRepository repository) {
-        return new EditTareaUseCase(repository);
+    public EditTareaUseCase editTareaUseCase(TareaRepository repository,
+            es.refugio.refugio.application.service.NotificacionService notificacionService) {
+        return new EditTareaUseCase(repository, notificacionService);
     }
 
     @Bean

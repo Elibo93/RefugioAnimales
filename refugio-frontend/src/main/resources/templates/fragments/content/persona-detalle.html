@@ -141,11 +141,12 @@
                                 </div>
                                 <div style="flex: 1;">
                                     <span style="display: block; font-weight: 700; color: var(--text-main); font-size: 0.95rem;" th:text="${t.get('descripcion')}">Tarea</span>
-                                    <span style="font-size: 0.8rem; color: var(--text-muted);" th:text="${'Programada: ' + t.get('fecha').toString().substring(0,10)}">2024-01-01</span>
+                                    <span style="font-size: 0.8rem; color: var(--text-muted);" 
+                                          th:text="${t.get('fechaLimite') != null ? 'Límite: ' + t.get('fechaLimite').toString().substring(0,10) : 'Sin fecha'}">2024-01-01</span>
                                 </div>
                                 <span class="badge-premium" 
                                       th:classappend="${t.get('estado') == 'COMPLETADA' ? 'success' : (t.get('estado') == 'CANCELADA' ? 'danger' : (t.get('estado') == 'EN_PROCESO' ? 'info' : 'warning'))}"
-                                      th:text="${t.get('estado')}">Pendiente</span>
+                                      th:text="${t.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(t.get('estado'), '_', ' '))) : 'Pendiente'}">Pendiente</span>
                             </div>
                         </div>
                     </div>
@@ -174,7 +175,7 @@
                             </div>
                             <div style="flex: 1;">
                                 <div style="display: flex; align-items: center; gap: 8px;">
-                                    <a th:href="@{/web/animales/{id}(id=${v.get('animalId')})}" 
+                                    <a th:href="${v.get('tipoVinculo') == 'SOLICITUD'} ? @{/web/solicitudes/{id}/detalle(id=${v.get('id')})} : @{/web/animales/{id}(id=${v.get('animalId')})}" 
                                        style="font-weight: 800; color: var(--text-main); font-size: 1.05rem; text-decoration: none;"
                                        th:text="${animalNames != null ? animalNames['' + v.get('animalId')] : 'Animal #' + v.get('animalId')}">Nombre Animal</a>
                                     <span style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 6px; background: #f3f4f6; color: #6b7280;" 
@@ -184,9 +185,9 @@
                                       th:text="${v.get('fechaVinculo') != null ? v.get('fechaVinculo').toString().substring(0,10) : 'Fecha pendiente'}">2024-01-01</span>
                             </div>
                             <span class="badge-premium" 
-                                  th:classappend="${v.get('estadoVinculo') == 'ADOPTADO' or v.get('estadoVinculo') == 'APROBADA' ? 'success' : (v.get('estadoVinculo') == 'RECHAZADA' ? 'danger' : 'warning')}" 
-                                  th:text="${v.get('estadoVinculo')}">Estado</span>
-                            <a th:href="@{/web/animales/{id}(id=${v.get('animalId')})}" class="btn-icon">
+                                  th:classappend="${v.get('estadoVinculo') == 'ADOPTADO' or v.get('estadoVinculo') == 'APROBADA' or v.get('estadoVinculo') == 'FINALIZADA' ? 'success' : (v.get('estadoVinculo') == 'RECHAZADA' ? 'danger' : 'warning')}" 
+                                  th:text="${v.get('estadoVinculo') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(v.get('estadoVinculo'), '_', ' '))) : 'Pendiente'}">Estado</span>
+                            <a th:href="${v.get('tipoVinculo') == 'SOLICITUD'} ? @{/web/solicitudes/{id}/detalle(id=${v.get('id')})} : @{/web/animales/{id}(id=${v.get('animalId')})}" class="btn-icon">
                                 <i data-lucide="arrow-right" style="width: 16px;"></i>
                             </a>
                         </div>

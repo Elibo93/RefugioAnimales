@@ -40,12 +40,12 @@ public class TareaViewController {
     private String authUrl;
 
     @GetMapping(WebRoutes.TAREAS_BASE)
-    public String listar(Model model, 
-                        @RequestParam(required = false) String prioridad,
-                        @RequestParam(required = false) String estado,
-                        @RequestParam(required = false) String successMessage,
-                        HttpServletRequest request) {
-        
+    public String listar(Model model,
+            @RequestParam(required = false) String prioridad,
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) String successMessage,
+            HttpServletRequest request) {
+
         List<Object> allTareas = fetchList("/v1/tareas");
         List<Object> tareas = new ArrayList<>(allTareas);
         List<Object> voluntarios = fetchList("/v1/voluntarios");
@@ -100,7 +100,8 @@ public class TareaViewController {
         }
 
         // Aplicar filtros si existen (para el mensaje de "no resultados")
-        boolean hasFilters = (prioridad != null && !"ALL".equals(prioridad)) || (estado != null && !"ALL".equals(estado));
+        boolean hasFilters = (prioridad != null && !"ALL".equals(prioridad))
+                || (estado != null && !"ALL".equals(estado));
         if (hasFilters) {
             tareas = tareas.stream().filter(t -> {
                 Map<?, ?> tm = (Map<?, ?>) t;
@@ -150,7 +151,7 @@ public class TareaViewController {
             model.addAttribute("successMessage", successMessage);
 
         if ("true".equals(request.getHeader("HX-Request"))) {
-            return FragmentoContenido.Tarea_LIST.getPath() + " :: content-body";
+            return FragmentoContenido.Tarea_LIST.getPath() + " :: content";
         }
 
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Tarea_LIST.getPath());
@@ -171,8 +172,23 @@ public class TareaViewController {
                 if (v != null && v.get("usuarioId") != null) {
                     Map<String, Object> u = (Map<String, Object>) restTemplate
                             .getForObject(authUrl + "/v1/usuarios/" + v.get("usuarioId"), Object.class);
+                    Map<String, Object> p = null;
+                    try {
+                        p = (Map<String, Object>) restTemplate
+                                .getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + v.get("usuarioId"), Object.class);
+                    } catch (Exception ignored) {}
+
                     if (u != null) {
-                        model.addAttribute("voluntarioPreseleccionado", u);
+                        Map<String, Object> displayVol = new HashMap<>(u);
+                        displayVol.put("id", voluntarioId); // Importante: usar el ID del voluntario
+                        if (p != null) {
+                            displayVol.put("nombre", p.get("nombre"));
+                            displayVol.put("apellido", p.get("apellido"));
+                        } else {
+                            displayVol.put("nombre", u.get("username"));
+                            displayVol.put("apellido", "");
+                        }
+                        model.addAttribute("voluntarioPreseleccionado", displayVol);
                     }
                 }
             } catch (Exception ignored) {
@@ -344,11 +360,19 @@ public class TareaViewController {
         return nombres;
     }
 
+    @GetMapping("/web/tareas/{id}")
+    public String redireccionDetalle(@PathVariable Integer id) {
+        return "redirect:/web/tareas/" + id + "/editar";
+    }
+
     private List<Object> fetchList(String path) {
         try {
             String finalUrl = path.startsWith("http") ? path : apiUrl + path;
-            Object[] arr = restTemplate.getForObject(finalUrl, Object[].class);
-            return arr != null ? Arrays.asList(arr) : List.of();
+            org.springframework.core.ParameterizedTypeReference<List<Object>> typeRef = 
+                new org.springframework.core.ParameterizedTypeReference<List<Object>>() {};
+            org.springframework.http.ResponseEntity<List<Object>> response = 
+                restTemplate.exchange(finalUrl, org.springframework.http.HttpMethod.GET, null, typeRef);
+            return response.getBody() != null ? response.getBody() : List.of();
         } catch (Exception e) {
             return List.of();
         }

@@ -297,8 +297,8 @@ public class UsuarioViewController {
                 Integer aId = (aIdRaw instanceof Map) ? (Integer) ((Map) aIdRaw).get("value") : (Integer) aIdRaw;
 
                 if (aId != null) {
-                    List<Object> solicitudes = fetchList("/v1/solicitudes-adopcion/adoptante/" + aId);
-                    List<Object> adopciones = fetchList("/v1/adopciones/adoptante/" + aId);
+                    List<Object> solicitudes = fetchList(apiUrl + "/v1/solicitudes-adopcion/adoptante/" + aId);
+                    List<Object> adopciones = fetchList(apiUrl + "/v1/adopciones/adoptante/" + aId);
 
                     List<Map<String, Object>> vinculos = new ArrayList<>();
                     Map<String, String> animalNames = new HashMap<>();
@@ -307,6 +307,7 @@ public class UsuarioViewController {
                         if (s instanceof Map) {
                             Map<String, Object> sm = (Map<String, Object>) s;
                             Map<String, Object> v = new HashMap<>();
+                            v.put("id", sm.get("id"));
                             v.put("animalId", sm.get("animalId"));
                             v.put("tipoVinculo", "SOLICITUD");
                             v.put("estadoVinculo", sm.get("estado"));
@@ -319,6 +320,7 @@ public class UsuarioViewController {
                         if (ad instanceof Map) {
                             Map<String, Object> adm = (Map<String, Object>) ad;
                             Map<String, Object> v = new HashMap<>();
+                            v.put("id", adm.get("id"));
                             v.put("animalId", adm.get("animalId"));
                             v.put("tipoVinculo", "ADOPCIÓN");
                             v.put("estadoVinculo", "FINALIZADA");
@@ -345,7 +347,7 @@ public class UsuarioViewController {
                 Integer vId = (vIdRaw instanceof Map) ? (Integer) ((Map) vIdRaw).get("value") : (Integer) vIdRaw;
 
                 if (vId != null) {
-                    List<Object> todasTareas = fetchList("/v1/tareas");
+                    List<Object> todasTareas = fetchList(apiUrl + "/v1/tareas");
                     List<Object> misTareas = todasTareas.stream()
                             .filter(t -> {
                                 if (t instanceof Map) {

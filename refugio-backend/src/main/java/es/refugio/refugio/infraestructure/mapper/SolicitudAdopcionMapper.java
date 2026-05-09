@@ -32,7 +32,8 @@ public class SolicitudAdopcionMapper {
                 new SolicitudAdopcionId(id),
                 req.fecha(),
                 req.estado(),
-                req.comentario()
+                req.comentario(),
+                null // Request normal no suele llevar comentario admin inicial
         );
     }
 
@@ -41,7 +42,8 @@ public class SolicitudAdopcionMapper {
                 new SolicitudAdopcionId(id),
                 req.fecha(),
                 req.estado(),
-                req.comentario()
+                req.comentario(),
+                req.comentarioAdmin()
         );
     }
 
@@ -52,7 +54,8 @@ public class SolicitudAdopcionMapper {
                 s.getAdoptanteId() != null ? s.getAdoptanteId().getValue() : null,
                 s.getFecha(),
                 s.getEstado() != null ? s.getEstado().name() : null,
-                s.getComentario()
+                s.getComentario(),
+                s.getComentarioAdmin()
         );
     }
 
@@ -74,6 +77,7 @@ public class SolicitudAdopcionMapper {
                 .fecha(s.getFecha())
                 .estado(s.getEstado())
                 .comentario(s.getComentario())
+                .comentarioAdmin(s.getComentarioAdmin())
                 .build();
     }
 
@@ -85,6 +89,7 @@ public class SolicitudAdopcionMapper {
                 .fecha(e.getFecha())
                 .estado(e.getEstado())
                 .comentario(e.getComentario())
+                .comentarioAdmin(e.getComentarioAdmin())
                 .build();
     }
 
