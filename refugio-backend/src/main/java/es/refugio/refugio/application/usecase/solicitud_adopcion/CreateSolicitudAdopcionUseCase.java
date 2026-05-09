@@ -15,6 +15,7 @@ public class CreateSolicitudAdopcionUseCase {
 
     private final SolicitudAdopcionRepository solicitudAdopcionRepository;
     private final AnimalRepository animalRepository;
+    private final es.refugio.refugio.application.service.NotificacionService notificacionService;
 
     public SolicitudAdopcion create(CreateSolicitudAdopcionCommand command) {
         AnimalId animalId = new AnimalId(command.animalId());
@@ -49,6 +50,15 @@ public class CreateSolicitudAdopcionUseCase {
         // Reservar animal tras recibir solicitud
         animal.setEstado(EstadoAnimal.RESERVADO);
         animalRepository.save(animal);
+
+        // Notificar a los Administradores (por ROL)
+        notificacionService.enviarARol(
+            "ROLE_ADMIN", 
+            "Nueva Solicitud de Adopción", 
+            "Se ha recibido una nueva solicitud para adoptar a " + animal.getNombre(), 
+            "ADOPCION", 
+            "/web/solicitudes/" + savedSolicitud.getId().getValue() + "/editar"
+        );
 
         return savedSolicitud;
     }

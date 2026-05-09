@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-add-rol-to-notificaciones-v4
+      author: refugio
+      changes:
+        - addColumn:
+            tableName: notificaciones
+            columns:
+              - column:
+                  name: rol
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: true
+        - dropNotNullConstraint:
+            tableName: notificaciones
+            columnName: usuario_id
+            columnDataType: INT

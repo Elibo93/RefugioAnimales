@@ -17,7 +17,19 @@
         <!-- Lista de notificaciones -->
         <div th:each="notif : ${notificaciones}" 
              th:id="'notif-' + ${notif.id}"
-             th:class="${notif.leida} ? 'notif-card notif-read' : 'notif-card notif-unread'">
+             th:class="${notif.leida} ? 'notif-card notif-read' : 'notif-card notif-unread'"
+             th:attr="hx-post=${!notif.leida} ? @{/web/notificaciones/{id}/leer(id=${notif.id})} : null"
+             hx-trigger="click" hx-swap="none"
+             th:data-enlace="${notif.enlace}"
+             onclick="const enlace = this.getAttribute('data-enlace'); 
+                      this.classList.add('notif-read'); 
+                      this.classList.remove('notif-unread'); 
+                      const notifDot = this.querySelector('.notif-status-dot'); 
+                      if(notifDot) notifDot.remove();
+                      if(enlace && enlace !== 'null' && enlace !== '') {
+                          window.location.href = enlace;
+                      }"
+             style="cursor: pointer;">
             
             <!-- Indicador visual de no leída (punto) -->
             <div th:if="${!notif.leida}" class="notif-status-dot"></div>
@@ -45,7 +57,7 @@
                     <button th:if="${!notif.leida}" 
                             th:attr="hx-post=@{/web/notificaciones/{id}/leer(id=${notif.id})}"
                             hx-trigger="click" hx-swap="none"
-                            onclick="event.stopPropagation(); const card = this.closest('.notif-card'); card.classList.add('notif-read'); card.classList.remove('notif-unread'); this.remove();"
+                            onclick="event.stopPropagation(); const card = this.closest('.notif-card'); card.classList.add('notif-read'); card.classList.remove('notif-unread'); const d = card.querySelector('.notif-status-dot'); if(d) d.remove(); setTimeout(() => this.remove(), 100);"
                             class="btn-mark-read">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                         Marcar como leída
@@ -59,9 +71,9 @@
                         Eliminar
                     </button>
                     
-                    <a th:if="${notif.enlace != null}" th:href="${notif.enlace}" class="btn-mark-read" style="margin-left: auto;">
+                    <span th:if="${notif.enlace != null}" class="btn-mark-read" style="margin-left: auto;">
                         Ver detalle →
-                    </a>
+                    </span>
                 </div>
             </div>
         </div>

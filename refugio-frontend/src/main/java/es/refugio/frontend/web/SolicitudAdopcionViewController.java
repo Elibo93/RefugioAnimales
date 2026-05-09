@@ -753,6 +753,11 @@ public class SolicitudAdopcionViewController {
         return "redirect:" + WebRoutes.HOME;
     }
 
+    @GetMapping("/web/solicitudes/{id}")
+    public String redireccionDetalle(@PathVariable Integer id) {
+        return "redirect:/web/solicitudes/" + id + "/editar";
+    }
+
     private List<Object> fetchList(String path) {
         try {
             String finalUrl = path.startsWith("http") ? path : apiUrl + path;
