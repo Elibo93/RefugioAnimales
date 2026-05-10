@@ -1,52 +1,69 @@
-![Portada](/img/portada.png)
+# 🐾 Refugio de Animales: Gestión Integral 4.0
 
-#### Contexto de la aplicación (Análisis)
-  - [**Mundo real del problema**](doc/mundoReal.md)
-  - [**Qué apps existen actualmente**](doc/appsExistentes.md)  
-  - [**Por qué mi aplicación es mejor**](doc/miAppEsMejor.md) 
-    - **Casos de uso - F**
-        - [Actores externos:](doc/actoresExternos.md)  
-    - **Requisitos F y NF:**
+<img src="refugio-frontend/src/main/resources/static/images/icono_con_eslogan.png" width="450" alt="Logo Refugio de Animales con Eslogan">
 
-      - [Requisitos funcionales (F)](doc/requisitosF.md)
-      - [Requisitos no funcionales (NF)](doc/requisitosNF.md)
+---
 
-#### Diseño
-  - **GUI (Interfaz Gráfica)**
-    - [UI (Vistas)](doc/UI.md)
-    - [UX (Usabilidad)](doc/UX.md)
-    - [IxD (Interacción)](doc/IxD.md)
-    - [Diagrama de navegación](doc/diagramaNavegacion.md)
-    - [Reutilización](doc/reutilizacion.md)
+<img src="https://img.shields.io/badge/Versi%C3%B3n-1.2.0--Stable-brightgreen" alt="Versión"><br>
+<img src="https://img.shields.io/badge/Stack-Microservicios--Spring--HTMX-blue" alt="Tecnologías"><br>
+<img src="https://img.shields.io/badge/Despliegue-Docker--Compose-orange" alt="Despliegue">
 
-  - **Arquitectura**
-    - [Despliegue](doc/despliegue.md)
-    - [Componentes](doc/componenentes.md)
-  - [**Diseño de los servicios REST**](doc/diseñoServiciosREST.md)
-  - [**Seguridad**](doc/seguridad.md)
-  - [**Base de datos**](doc/db.md)
-  - [**Paquetes, Interfaces y Clases**](doc/packIntClass.md)
-  - [**Plan de pruebas**](doc/planPruebas.md)
+---
 
-#### Implementación
-  - [**Entorno de Desarrollo**](doc/entornoDesarrollo.md)
-  
-    - [Implantación/Puesta en producción](doc/implantacion.md)
-  - [**Gestión de la Configuración**](doc/gestiónPerfiles.md)
+Bienvenido a la plataforma de gestión de **Refugio de Animales**, una solución tecnológica diseñada para transformar la operativa diaria de los centros de acogida. Mediante una arquitectura de microservicios robusta y una interfaz dinámica, conectamos a animales en busca de hogar con adoptantes responsables y voluntarios comprometidos.
 
-#### Capturas de la ejecución de la funcionalidad
-  - [**Ejecución de las pruebas**](doc/ejecucionPruebas.md)
+---
 
-#### [Información sobre la versión de las herramientas utilizadas](doc/infoVersion.md)
+## 🗺️ Índice de Documentación Integral
 
-#### [Elementos destacables del desarrollo](doc/elementosDestacables.md)
+### 🔍 Fase 1: Análisis y Definición
+*   [**Mundo Real**](doc/mundoReal.md): Análisis del contexto y problemática actual.
+*   [**Apps Existentes**](doc/appsExistentes.md): Estudio de mercado y soluciones de la competencia.
+*   [**Mi App Es Mejor**](doc/miAppEsMejor.md): Valor diferencial y propuesta de innovación.
+*   [**Actores Externos**](doc/actoresExternos.md): Roles de usuario y flujos de interacción.
+*   [**Requisitos Funcionales**](doc/requisitosF.md): Catálogo de funcionalidades del sistema.
+*   [**Requisitos No Funcionales**](doc/requisitosNF.md): Restricciones técnicas y de calidad.
+*   [**Información de Versión**](doc/infoVersion.md): Control de versiones y estado del proyecto.
 
-#### [Manual de usuario](doc/manual.md) 
+### 📐 Fase 2: Diseño de Experiencia e Interfaz (UX/UI)
+*   [**Diseño UX**](doc/UX.md): Estrategia de experiencia de usuario.
+*   [**Diseño UI**](doc/UI.md): Guía de estilo e interfaz visual.
+*   [**Interacción (IxD)**](doc/IxD.md): Diseño de interacciones y microanimaciones.
+*   [**Diagrama de Navegación**](doc/diagramaNavegacion.md): Mapa de pantallas y flujos de usuario.
+*   [**Elementos Destacables**](doc/elementosDestacables.md): Características visuales clave.
 
-#### Conclusiones (sobre la marcha)
-  - [**Diego**](doc/diego.md)
-  - [**Elisabeth**](doc/elisabeth.md)
+### ⚙️ Fase 3: Arquitectura y Diseño Técnico
+*   [**Base de Datos (DB)**](doc/db.md): Modelo E-R, tablas e integridad referencial.
+*   [**Entorno de Desarrollo**](doc/entornoDesarrollo.md): Stack tecnológico y configuración del entorno.
+*   [**Diseño de Servicios REST**](doc/diseñoServiciosREST.md): Documentación de la API de comunicación.
+*   [**Componentes**](doc/componenentes.md): Estructura modular del software.
+*   [**Gestión de Perfiles**](doc/gestiónPerfiles.md): Lógica de permisos y seguridad de usuarios.
+*   [**Seguridad**](doc/seguridad.md): Auditoría y protocolos de protección de datos.
+*   [**Paquetes e Interacción de Clases**](doc/packIntClass.md): Diagramas técnicos de bajo nivel.
 
-#### [Bibliografía](doc/bibliografia.md)
+### 🚀 Fase 4: Despliegue y Pruebas
+*   [**Despliegue**](doc/despliegue.md): Orquestación con Docker y configuración de red.
+*   [**Implantación**](doc/implantacion.md): Estrategia de puesta en producción.
+*   [**Plan de Pruebas**](doc/planPruebas.md): Estrategia de testing (Unitario, Integración, UI).
+*   [**Ejecución de Pruebas**](doc/ejecucionPruebas.md): Resultados y validación del sistema.
+*   [**Manual de Usuario**](doc/manual.md): Guía de uso para administradores y voluntarios.
 
-#### [Anexos](doc/anexos.md)
+### 📚 Fase 5: Anexos y Autores
+*   [**Elisabeth**](doc/elisabeth.md) / [**Diego**](doc/diego.md): Documentación específica de autores.
+*   [**Reutilización**](doc/reutilizacion.md): Código y librerías externas utilizadas.
+*   [**Bibliografía**](doc/bibliografia.md): Fuentes de consulta y referencias.
+*   [**Anexos**](doc/anexos.md): Información complementaria y capturas extra.
+
+---
+
+## 🌟 Funcionalidades Destacadas
+
+*   **Centro de Notificaciones**: Alertas en tiempo real para voluntarios y administradores.
+*   **Gestión Médica**: Historial clínico detallado por cada animal.
+*   **Módulo de Donaciones**: Pasarela segura para apoyo económico.
+*   **Asignación de Tareas**: Sistema de gestión operativa para el staff del refugio.
+*   **Fichas con Imagen**: Almacenamiento eficiente de fotos en el sistema de archivos.
+
+---
+
+© 2026 - Refugio de Animales Team. Gestión con alma. 🐾
