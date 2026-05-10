@@ -1,12 +1,41 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Lógica del Sidebar (Menú lateral) - PRIORITARIO
+    // 1. Listeners Globales (Solo se registran una vez)
+    
+    // Auto-ocultar sugerencias de usuario al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        const suggestions = document.getElementById('user-suggestions');
+        const searchInput = document.getElementById('user-search');
+        if (suggestions && searchInput && !suggestions.contains(e.target) && e.target !== searchInput) {
+            suggestions.innerHTML = '';
+        }
+        
+        // Cerrar dropdowns al hacer clic fuera
+        const dropdownContainer = document.querySelector('.dropdown-container');
+        const dropdownMenu = document.querySelector('.dropdown-menu');
+        if (dropdownMenu && dropdownContainer && !dropdownContainer.contains(e.target)) {
+            dropdownMenu.classList.remove('active');
+        }
+    });
+
+    // Inicialización global de componentes
+    refreshDynamicComponents();
+});
+
+// === FUNCIONES GLOBALES ===
+
+// Actualización general de componentes dinámicos
+function refreshDynamicComponents() {
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+
+    // 1. Lógica del Sidebar (Menú lateral)
     const openSidebarBtn = document.getElementById('open-sidebar');
     const closeSidebarBtn = document.getElementById('close-sidebar');
     const sidebar = document.getElementById('app-sidebar');
     const sidebarOverlay = document.getElementById('sidebar-overlay');
 
-    if (openSidebarBtn && sidebar && sidebarOverlay) {
-        console.log("DEBUG: Sidebar elementos encontrados, registrando eventos.");
+    if (openSidebarBtn && sidebar && sidebarOverlay && !openSidebarBtn.dataset.listenerRegistered) {
         const toggleSidebar = () => {
             sidebar.classList.toggle('active');
             sidebarOverlay.classList.toggle('active');
@@ -19,78 +48,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', toggleSidebar);
         sidebarOverlay.addEventListener('click', toggleSidebar);
-    } else {
-        console.warn("DEBUG: No se han encontrado elementos del sidebar:", {openSidebarBtn, sidebar, sidebarOverlay});
+        openSidebarBtn.dataset.listenerRegistered = "true";
     }
 
-    // 2. Iconos de Lucide
-    if (window.lucide) {
-        lucide.createIcons();
-    }
-
-    // Lógica de Desplegables (Dropdowns)
+    // 2. Lógica de Desplegables (Dropdowns)
     const dropdownTrigger = document.querySelector('.dropdown-trigger');
     const dropdownMenu = document.querySelector('.dropdown-menu');
-    const dropdownContainer = document.querySelector('.dropdown-container');
-
-    if (dropdownTrigger && dropdownMenu) {
+    if (dropdownTrigger && dropdownMenu && !dropdownTrigger.dataset.listenerRegistered) {
         dropdownTrigger.addEventListener('click', (e) => {
             e.stopPropagation();
             dropdownMenu.classList.toggle('active');
         });
-
-        document.addEventListener('click', (e) => {
-            if (dropdownContainer && !dropdownContainer.contains(e.target)) {
-                dropdownMenu.classList.remove('active');
-            }
-        });
+        dropdownTrigger.dataset.listenerRegistered = "true";
     }
 
-    // Lógica de Submenús en el Sidebar
-    const submenuToggles = document.querySelectorAll('.submenu-toggle');
-    submenuToggles.forEach(toggle => {
-        toggle.addEventListener('click', () => {
-            const group = toggle.closest('.sidebar-item-group');
-            const submenu = group.querySelector('.sidebar-submenu');
-            
-            group.classList.toggle('open');
-            if (submenu) {
-                submenu.classList.toggle('open');
-            }
-        });
-    });
-
-    // Auto-ocultar sugerencias de usuario al hacer clic fuera
-    document.addEventListener('click', (e) => {
-        const suggestions = document.getElementById('user-suggestions');
-        const searchInput = document.getElementById('user-search');
-        if (suggestions && searchInput && !suggestions.contains(e.target) && e.target !== searchInput) {
-            suggestions.innerHTML = '';
+    // 3. Lógica de Submenús en el Sidebar
+    document.querySelectorAll('.submenu-toggle').forEach(toggle => {
+        if (!toggle.dataset.listenerRegistered) {
+            toggle.addEventListener('click', () => {
+                const group = toggle.closest('.sidebar-item-group');
+                const submenu = group.querySelector('.sidebar-submenu');
+                group.classList.toggle('open');
+                if (submenu) submenu.classList.toggle('open');
+            });
+            toggle.dataset.listenerRegistered = "true";
         }
     });
 
-    // 4. Inicialización global de componentes
-    refreshDynamicComponents();
-});
-
-// 5. Soporte para HTMX gestionado en fragments/scripts.html (con lógica de exclusión para notificaciones)
-
-
-
-// === FUNCIONES GLOBALES ===
-
-// Actualización general de componentes dinámicos
-function refreshDynamicComponents() {
-    if (window.lucide) lucide.createIcons();
-    
-    // Inicialización de lógica de donaciones
-    if (document.getElementById('donation-type-select')) {
-        handleTypeChange();
-        const freqInput = document.getElementById('frecuencia-input');
-        if (freqInput) setRecurrence(freqInput.value.toLowerCase());
-    }
-    
-    // Inicialización automática de cuadrículas con paginación
+    // 4. Inicialización automática de cuadrículas con paginación
     if (document.getElementById('animal-grid-admin')) initPagination('animal-grid-admin');
     if (document.getElementById('animal-grid-cards')) initPagination('animal-grid-cards');
     if (document.getElementById('historial-grid')) initPagination('historial-grid');
@@ -99,7 +84,7 @@ function refreshDynamicComponents() {
     if (document.querySelectorAll('.story-card').length > 0) startCarouselAutoPlay();
 }
 
-// Lógica de Modales
+// Lógica de Modales (Sin cambios)
 function closeModal() {
     const modalHost = document.getElementById('modal-host');
     if (modalHost) {
@@ -108,7 +93,7 @@ function closeModal() {
     }
 }
 
-// Lógica de Carrusel
+// Lógica de Carrusel (Sin cambios importantes)
 let carouselInterval = null;
 let isCarouselMoving = false;
 
@@ -145,13 +130,15 @@ function moveCarousel(direction, isAuto = false) {
     if (window.lucide) lucide.createIcons();
 }
 
-// Lógica de Paginación
+// Lógica de Paginación OPTIMIZADA (No rompe el layout)
 function initPagination(gridId, itemsPerPage = 8) {
     const runInit = () => {
         const grid = document.getElementById(gridId);
-        if (!grid) return;
+        if (!grid || grid.dataset.paginated === "true") return; // Evitar re-paginar si ya está OK
+        
         const items = Array.from(grid.querySelectorAll('.animal-row-item, .animal-card-item, .list-item'));
         if (!items.length) return;
+        
         const totalPages = Math.ceil(items.length / itemsPerPage);
         let currentPage = 1;
         const controls = document.getElementById('pagination-controls');
@@ -159,30 +146,40 @@ function initPagination(gridId, itemsPerPage = 8) {
         const nextBtn = document.getElementById('nextPage');
         const pageNumSpan = document.getElementById('currentPageNum');
         const totalPagesSpan = document.getElementById('totalPagesNum');
+        
         if (totalPagesSpan) totalPagesSpan.textContent = totalPages;
+        
         if (items.length <= itemsPerPage) {
             if (controls) controls.style.display = 'none';
-            items.forEach(i => i.style.display = (grid.tagName === 'TBODY' ? 'table-row' : 'block'));
             return;
         } else if (controls) {
             controls.style.display = 'flex';
         }
+        
         function showPage(page) {
             currentPage = page;
             const start = (page - 1) * itemsPerPage;
             const end = start + itemsPerPage;
+            
             items.forEach((item, index) => {
-                const displayStyle = (grid.tagName === 'TBODY' ? 'table-row' : 'block');
-                item.style.display = (index >= start && index < end) ? displayStyle : 'none';
+                const isVisible = (index >= start && index < end);
+                if (isVisible) {
+                    item.style.removeProperty('display'); // Dejamos que el CSS mande (Flex/Grid)
+                } else {
+                    item.style.display = 'none';
+                }
             });
+            
             if (pageNumSpan) pageNumSpan.textContent = page;
             if (prevBtn) prevBtn.disabled = (page === 1);
             if (nextBtn) nextBtn.disabled = (page === totalPages);
-            if (window.lucide) lucide.createIcons();
         }
+        
         if (prevBtn) prevBtn.onclick = () => { if (currentPage > 1) showPage(currentPage - 1); };
         if (nextBtn) nextBtn.onclick = () => { if (currentPage < totalPages) showPage(currentPage + 1); };
+        
         showPage(1);
+        grid.dataset.paginated = "true";
     };
     setTimeout(runInit, 100);
 }

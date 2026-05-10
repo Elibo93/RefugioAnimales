@@ -28,22 +28,34 @@
 
         // Reinicialización de componentes tras actualizaciones de HTMX
         document.body.addEventListener('htmx:afterSettle', (evt) => {
-            const targetId = evt.detail.target ? evt.detail.target.id : '';
+            const target = evt.detail.target;
+            const targetId = target ? target.id : '';
+            const targetClass = target ? target.className : '';
+            
+            console.log(`DEBUG HTMX: afterSettle en #${targetId} .${targetClass}`);
 
             // Bloquear scroll si hay un modal abierto
             if (targetId === 'modal-host') {
-                if (evt.detail.target.innerHTML.trim() !== '') {
+                if (target.innerHTML.trim() !== '') {
                     document.body.classList.add('modal-open');
                 }
             }
 
-            // Solo refrescar componentes si el cambio NO es en las notificaciones
-            // Esto evita que la paginación vuelva a la página 1 cada 30 segundos
-            if (typeof refreshDynamicComponents === 'function' && targetId !== 'notif-badge-container') {
+            // Excluir explícitamente el badge de notificaciones y cualquier elemento dentro de él
+            const isNotification = targetId === 'notif-badge-container' || 
+                                 (target && typeof target.closest === 'function' && target.closest('#notif-badge-container')) ||
+                                 targetClass.includes('notification-badge');
+
+            if (typeof refreshDynamicComponents === 'function' && !isNotification) {
+                console.log("DEBUG HTMX: Ejecutando refreshDynamicComponents");
                 refreshDynamicComponents();
-            } else if (window.lucide) {
-                // Si son solo notificaciones, al menos refrescamos los iconos
-                lucide.createIcons();
+            } else if (window.lucide && target) {
+                // Si es una actualización menor, solo refrescamos iconos DENTRO del elemento afectado
+                lucide.createIcons({
+                    attrs: { 'class': 'lucide' },
+                    nameAttr: 'data-lucide',
+                    root: target
+                });
             }
         });
 
