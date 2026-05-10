@@ -7,12 +7,16 @@ Este documento detalla los diferentes perfiles que interactúan con la plataform
 
 Para entender cómo se relacionan los actores con el sistema, este es el esquema de dependencias:
 
-*   **Visitante** ➜ Consulta el **Catálogo** y se **Registra** para convertirse en Adoptante o Voluntario.
-*   **Administrador** ➜ Supervisa a **Usuarios/Voluntarios** y gestiona las **Solicitudes**.
-*   **Administrador** ➜ Asigna **Tareas** específicas a los **Voluntarios**.
-*   **Voluntario** ➜ Actualiza el **Estado/Salud** del **Animal** y completa sus **Tareas**.
-*   **Adoptante** ➜ Consulta el **Catálogo** y envía **Solicitudes de Adopción**.
-*   **Sistema** ➜ Envía **Notificaciones** automáticas a todos los perfiles según sus acciones.
+Para entender cómo se relacionan los actores con el sistema, se presenta la siguiente matriz de responsabilidades:
+
+| Actor | Acción Principal | Interactúa con... |
+| :--- | :--- | :--- |
+| **Visitante** | Consulta y Registro | Catálogo y Sistema de Usuarios |
+| **Administrador** | Supervisión y Gestión | Usuarios, Voluntarios y Solicitudes |
+| **Administrador** | Asignación Operativa | Tareas y Calendario de Voluntarios |
+| **Voluntario** | Cuidado y Operatividad | Animales (Salud/Estado) y Tareas |
+| **Adoptante** | Búsqueda y Adopción | Catálogo y Gestión de Solicitudes |
+| **Sistema** | Automatización | Notificaciones Automáticas (Todos los roles) |
 
 ---
 
