@@ -35,7 +35,7 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 
 ### 3) Frontend: Panel del Adoptante
 - [✅] **"Mis Adoptados":** Lista de sus animales. Si no hay ninguno, mostrar mensaje: *"Vaya, parece que aún no te has hecho con ninguno de nuestros amiguitos"* + botón "Adopta ahora".
-- [ ] **Notificaciones:** Estados de solicitudes (aprobada/rechazada) y sugerencias de animales.
+- [✅] **Notificaciones:** Estados de solicitudes (aprobada/rechazada) y sugerencias de animales.
 - [ ] **Encuesta:** Formulario de preferencias para activar recomendaciones inteligentes.
 
 ### 4) Frontend/Backend: Panel del Voluntario y Tareas
@@ -51,7 +51,7 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 - [ ] **Contratos:** Sistema automático de generación y asociación de contratos legales al formalizar la adopción.
 
 ### 6) Backend: Notificaciones y Administración
-- [ ] **Buzón Admin:** Notificar nuevas solicitudes de voluntariado, adopción y donaciones.
+- [✅] **Buzón Admin:** Notificar nuevas solicitudes de voluntariado, adopción y donaciones.
 - [ ] **Lógica de Histórico:** Guardar quién cambió el estado de una tarea y cuándo.
 
 ### 7) Sistema de Logros (Gamificación)
