@@ -46,7 +46,7 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 ### 5) Backend: Lógica de Adopción y Roles
 - [✅] **Dualidad de Roles:** Permitir que un usuario sea Adoptante y Voluntario simultáneamente.
 - [ ] **Validaciones:**
-  - Impedir adopciones duplicadas del mismo animal.
+  -[✅] Impedir adopciones duplicadas del mismo animal.
   - Acceso a funciones de voluntario solo tras aprobación del admin.
 - [ ] **Contratos:** Sistema automático de generación y asociación de contratos legales al formalizar la adopción.
 
