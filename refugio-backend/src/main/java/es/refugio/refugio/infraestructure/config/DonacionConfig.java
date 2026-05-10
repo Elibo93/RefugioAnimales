@@ -15,6 +15,7 @@ import es.refugio.refugio.application.usecase.donacion.CreateObjetivoDonacionUse
 import es.refugio.refugio.application.usecase.donacion.FindObjetivoDonacionUseCase;
 import es.refugio.refugio.domain.repository.DonacionRepository;
 import es.refugio.refugio.domain.repository.ObjetivoDonacionRepository;
+import es.refugio.refugio.application.service.NotificacionService;
 
 import es.refugio.refugio.infraestructure.db.jpa.repository.donacion.DonacionEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.donacion.DonacionJpaRepositoryImpl;
@@ -40,8 +41,9 @@ public class DonacionConfig {
     @Bean
     public CreateDonacionUseCase createDonacionUseCase(
             DonacionRepository repository,
-            ObjetivoDonacionRepository objetivoRepository) {
-        return new CreateDonacionUseCase(repository, objetivoRepository);
+            ObjetivoDonacionRepository objetivoRepository,
+            NotificacionService notificacionService) {
+        return new CreateDonacionUseCase(repository, objetivoRepository, notificacionService);
     }
 
     @Bean

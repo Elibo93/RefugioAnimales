@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Header de la página -->
+        <div class="page-header" style="margin-bottom: 2.5rem; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <h1 class="page-title" style="display: flex; align-items: center; gap: 12px; margin: 0;">
+                    <div class="premium-modal-icon-wrapper" style="margin: 0; width: 48px; height: 48px; background: var(--primary-light); color: var(--primary);">
+                        <i data-lucide="file-search"></i>
+                    </div>
+                    <span>Revisión de Solicitud</span>
+                </h1>
+                <p th:if="${isAdmin}" style="color: var(--text-muted); margin-top: 4px; margin-left: 60px;">ID de Solicitud: #<span th:text="${solicitud.get('id')}"></span></p>
+            </div>
+            
+            <div style="display: flex; gap: 12px;">
+                <span class="animal-status-badge" 
+                      style="padding: 6px 16px; height: auto; font-size: 0.85rem; text-transform: none;"
+                      th:classappend="${'badge-' + solicitud.get('estado').toString().toLowerCase()}"
+                      th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(solicitud.get('estado'), '_', ' ')))}">
+                    Estado
+                </span>
+            </div>
+        </div>
+
+        <div class="grid-layout" style="display: grid; grid-template-columns: 1fr 350px; gap: 2rem;">
+            
+            <!-- Columna Principal: Datos del Adoptante y Comentario -->
+            <div class="main-column" style="display: flex; flex-direction: column; gap: 2rem;">
+                
+                <!-- Feedback del Administrador (NUEVO) -->
+                <div class="card premium-card" style="padding: 2rem; border-left: 4px solid var(--primary);">
+                    <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="shield-check" style="color: var(--primary);"></i>
+                        Notas del Administrador
+                    </h2>
+                    
+                    <!-- Modo Edición (Solo ADMIN) -->
+                    <form th:if="${isAdmin}" 
+                          th:action="@{/web/solicitudes/{id}/editar(id=${solicitud.get('id')})}" method="POST">
+                        <input type="hidden" name="animalId" th:value="${solicitud.get('animalId')}">
+                        <input type="hidden" name="adoptanteId" th:value="${solicitud.get('adoptanteId')}">
+                        <input type="hidden" name="estado" th:value="${solicitud.get('estado')}">
+                        <input type="hidden" name="comentario" th:value="${solicitud.get('comentario')}">
+                        <input type="hidden" name="redireccion" value="detalle">
+                        
+                        <textarea name="comentarioAdmin" rows="3" 
+                                  style="width: 100%; padding: 1rem; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-main); font-family: inherit; margin-bottom: 1rem;"
+                                  placeholder="Escribe aquí notas internas o el motivo del rechazo..."
+                                  th:text="${solicitud.get('comentarioAdmin')}"></textarea>
+                        <button type="submit" class="btn btn-secondary" style="height: 40px; font-size: 0.85rem;">
+                            <i data-lucide="save" style="width: 14px;"></i>
+                            Guardar Nota
+                        </button>
+                    </form>
+
+                    <!-- Modo Lectura (No es Admin) -->
+                    <div th:unless="${isAdmin}" 
+                         style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; border: 1px solid #e2e8f0;">
+                        <p style="margin: 0; color: var(--text-main); line-height: 1.6;" 
+                           th:text="${solicitud.get('comentarioAdmin') != null and !solicitud.get('comentarioAdmin').isEmpty() ? solicitud.get('comentarioAdmin') : 'No hay notas del administrador todavía.'}">
+                            Notas...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Ficha del Adoptante -->
+                <div class="card premium-card" style="padding: 2rem;">
+                    <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="user" style="color: var(--primary);"></i>
+                        Información del Adoptante
+                    </h2>
+                    
+                    <div th:if="${perfilAdoptante != null}" class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <div class="detail-item">
+                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Nombre Completo</label>
+                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="|${perfilAdoptante.get('nombre')} ${perfilAdoptante.get('apellido')}|">Nombre</span>
+                        </div>
+                        <div class="detail-item">
+                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">DNI / NIE</label>
+                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.get('dni')}">DNI</span>
+                        </div>
+                        <div class="detail-item">
+                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Teléfono</label>
+                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.get('telefono')}">Teléfono</span>
+                        </div>
+                        <div class="detail-item">
+                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Fecha Nacimiento</label>
+                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.get('fechaNacimiento')}">Fecha</span>
+                        </div>
+                        <div class="detail-item" style="grid-column: span 2;">
+                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Dirección</label>
+                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.get('direccion')}">Dirección</span>
+                        </div>
+                    </div>
+                    
+                    <div th:unless="${perfilAdoptante != null}" style="padding: 2rem; text-align: center; background: #fef2f2; border-radius: 16px; border: 1px dashed #f87171;">
+                        <i data-lucide="alert-triangle" style="width: 32px; height: 32px; color: #ef4444; margin-bottom: 12px;"></i>
+                        <p style="margin: 0; color: #991b1b; font-weight: 600;">No se han encontrado los datos legales de este adoptante.</p>
+                    </div>
+                </div>
+
+                <!-- Comentario de la Solicitud -->
+                <div class="card" style="padding: 2rem;">
+                    <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="message-square" style="color: var(--primary);"></i>
+                        Motivación para la Adopción
+                    </h2>
+                    <div style="background: var(--bg-main); padding: 1.5rem; border-radius: 16px; border-left: 4px solid var(--primary);">
+                        <p style="margin: 0; font-size: 1.05rem; line-height: 1.6; color: var(--text-main); font-style: italic;" 
+                           th:text="${solicitud.get('comentario') != null and !solicitud.get('comentario').isEmpty() ? solicitud.get('comentario') : 'El adoptante no ha incluido comentarios adicionales.'}">
+                            Comentario...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Acciones Rápidas (SOLO ADMIN) -->
+                <div th:if="${isAdmin and (solicitud.get('estado') == 'PENDIENTE' or solicitud.get('estado') == 'EN_REVISION')}" 
+                     class="card" style="padding: 2rem; background: var(--bg-main); border: 2px solid var(--border);">
+                    <div style="display: flex; gap: 1rem;">
+                        <form th:action="@{/web/solicitudes/{id}/aprobar(id=${solicitud.get('id')})}" method="POST" style="flex: 1;">
+                            <button type="submit" class="btn btn-primary" style="width: 100%; height: 56px; justify-content: center; font-size: 1rem; border-radius: 16px;">
+                                <i data-lucide="check-circle"></i>
+                                Aprobar Adopción
+                            </button>
+                        </form>
+                        
+                        <form th:action="@{/web/solicitudes/{id}/rechazar(id=${solicitud.get('id')})}" method="POST" style="flex: 1;">
+                            <button type="submit" class="btn btn-danger" style="width: 100%; height: 56px; justify-content: center; font-size: 1rem; border-radius: 16px;">
+                                <i data-lucide="x-circle"></i>
+                                Rechazar Solicitud
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div style="margin-top: 1rem;">
+                        <form th:if="${solicitud.get('estado') == 'PENDIENTE'}"
+                              th:action="@{/web/solicitudes/{id}/editar(id=${solicitud.get('id')})}" method="POST">
+                            <input type="hidden" name="animalId" th:value="${solicitud.get('animalId')}">
+                            <input type="hidden" name="adoptanteId" th:value="${solicitud.get('adoptanteId')}">
+                            <input type="hidden" name="estado" value="EN_REVISION">
+                            <input type="hidden" name="comentario" th:value="${solicitud.get('comentario')}">
+                            <input type="hidden" name="comentarioAdmin" th:value="${solicitud.get('comentarioAdmin')}">
+                            <input type="hidden" name="redireccion" value="detalle">
+                            <button type="submit" class="btn btn-secondary" style="width: 100%; height: 48px; justify-content: center; border-radius: 12px;">
+                                <i data-lucide="clock"></i>
+                                Poner en Revisión
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Lateral: Información del Animal -->
+            <div class="side-column" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div class="card premium-card" style="padding: 0; overflow: hidden;">
+                    <div style="position: relative; height: 250px;">
+                        <img th:src="${animalData != null and animalData.get('foto') != null ? animalData.get('foto') : '/images/placeholder-animal.png'}" 
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; background: linear-gradient(transparent, rgba(0,0,0,0.8));">
+                            <h3 style="margin: 0; color: white; font-size: 1.5rem; font-weight: 800;" th:text="${animalData != null ? animalData.get('nombre') : 'Animal'}">Nombre</h3>
+                            <span style="color: rgba(255,255,255,0.9); font-size: 0.9rem;" th:text="${animalData != null ? animalData.get('especie') : ''}">Especie</span>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 1.5rem;">
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                                <span style="color: var(--text-muted);">Sexo</span>
+                                <span style="font-weight: 700;" th:text="${animalData != null ? animalData.get('sexo') : '-'}">Macho</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                                <span style="color: var(--text-muted);">Edad</span>
+                                <span style="font-weight: 700;" th:text="${animalData != null ? animalData.get('edad') : '-'}">2 años</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                                <span style="color: var(--text-muted);">Tamaño</span>
+                                <span style="font-weight: 700;" th:text="${animalData != null ? animalData.get('tamano') : '-'}">Mediano</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                            <a th:href="@{/web/animales/{id}(id=${solicitud.get('animalId')})}" class="btn btn-secondary" style="width: 100%; justify-content: center; font-size: 0.85rem;">
+                                <i data-lucide="external-link" style="width: 14px;"></i>
+                                Ver Ficha Animal
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card" style="padding: 1rem;">
+                    <a th:if="${isAdmin}" 
+                       th:href="@{/web/solicitudes}" class="btn btn-secondary" style="width: 100%; justify-content: center; height: 48px; border-radius: 12px;">
+                        <i data-lucide="arrow-left"></i>
+                        Volver a la Lista
+                    </a>
+                    <a th:unless="${isAdmin}" 
+                       th:href="@{/web/solicitudes/mis-adoptados}" class="btn btn-secondary" style="width: 100%; justify-content: center; height: 48px; border-radius: 12px;">
+                        <i data-lucide="arrow-left"></i>
+                        Mis Solicitudes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

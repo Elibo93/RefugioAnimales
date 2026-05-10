@@ -31,31 +31,53 @@
                             Identidad del Voluntario
                         </h2>
 
-                        <!-- CASO A: Invitado (Registro completo) -->
-                        <div th:if="${!isAuthenticated and voluntario.get('id') == null}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
-                            <div style="grid-column: span 2; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start;">
+                        <!-- CASO A: Invitado O Usuario logueado sin PerfilLegal (Registro de identidad) -->
+                        <div th:if="${(voluntario.get('id') == null) and (!isAuthenticated or (isAuthenticated and perfilLegal == null))}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                            <!-- ID del usuario si ya está autenticado pero le falta el perfil -->
+                            <input type="hidden" name="idUsuario" th:if="${isAuthenticated}" th:value="${currentUserId}">
+
+                            <div th:if="${!isAuthenticated}" style="grid-column: span 2; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start;">
                                 <i data-lucide="info" style="color: #0284c7; width: 22px;"></i>
                                 <p style="margin: 0; font-size: 0.95rem; color: #0369a1; line-height: 1.6;">
                                     Al enviar este formulario se creará tu cuenta de usuario. Una vez aprobada tu solicitud, podrás acceder a la gestión.
                                 </p>
+                            </div>
+                            <div th:if="${isAuthenticated and perfilLegal == null}" style="grid-column: span 2; background: #fff7ed; border: 1px solid #ffedd5; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start;">
+                                <i data-lucide="alert-circle" style="color: #ea580c; width: 22px;"></i>
+                                <p style="margin: 0; font-size: 0.95rem; color: #9a3412; line-height: 1.6;">
+                                    Necesitamos completar tu información legal antes de registrarte como voluntario. Por favor, rellena los siguientes campos.
+                                </p>
+                            </div>
+
+                            <div class="form-group">
+                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Nombre</label>
+                                <input type="text" name="nombre" required placeholder="Ej: Juan" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                            </div>
+                            <div class="form-group">
+                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Apellidos</label>
+                                <input type="text" name="apellido" required placeholder="Ej: Pérez García" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
                             </div>
                             <div class="form-group">
                                 <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">DNI</label>
                                 <input type="text" name="dni" required placeholder="12345678X" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
                             </div>
                             <div class="form-group">
+                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Fecha de Nacimiento</label>
+                                <input type="date" name="fechaNacimiento" required style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                            </div>
+                            <div class="form-group">
+                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Teléfono</label>
+                                <input type="text" name="telefono" required placeholder="Ej: 600000000" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                            </div>
+                            <div class="form-group" th:if="${!isAuthenticated}">
                                 <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Email</label>
                                 <input type="email" name="email" required placeholder="tu@email.com" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
                             </div>
-                            <div class="form-group">
-                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Nombre</label>
-                                <input type="text" name="nombre" required style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
-                            </div>
-                            <div class="form-group">
-                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Apellidos</label>
-                                <input type="text" name="apellido" required style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
-                            </div>
                             <div class="form-group" style="grid-column: span 2;">
+                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Dirección</label>
+                                <input type="text" name="direccion" placeholder="Calle, número, piso..." style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                            </div>
+                            <div class="form-group" style="grid-column: span 1;" th:if="${!isAuthenticated}">
                                 <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Contraseña</label>
                                 <input type="password" name="contrasena" required placeholder="Mínimo 6 caracteres" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
                             </div>
@@ -73,8 +95,8 @@
                             </div>
                         </div>
 
-                        <!-- CASO C: Edición o Usuario Logueado (Solo lectura/confirmación) -->
-                        <div th:if="${voluntario.get('id') != null or (isAuthenticated and !isAdmin)}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                        <!-- CASO C: Edición o Usuario Logueado con PerfilLegal (Solo lectura/confirmación) -->
+                        <div th:if="${voluntario.get('id') != null or (isAuthenticated and !isAdmin and perfilLegal != null)}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
                              <div style="grid-column: span 2; padding: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.5rem;">
                                 <div style="background: white; color: #0891b2; width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0;">
                                     <i data-lucide="user" style="width: 28px;"></i>
@@ -82,10 +104,23 @@
                                 <div>
                                     <span style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600;" th:text="${voluntario.get('id') != null ? 'Editando Voluntario' : 'Tu Perfil'}">Perfil</span>
                                     <h3 style="margin: 0; font-weight: 800; color: var(--text-main);" th:text="${nombreCompleto ?: currentUserName}">Nombre</h3>
+                                    <p th:if="${perfilExistente and voluntario.get('id') == null}" style="margin: 4px 0 0; font-size: 0.8rem; color: #0891b2; font-weight: 500;">
+                                        <i data-lucide="check-circle" style="width: 12px; vertical-align: middle; margin-right: 4px;"></i>
+                                        Información legal confirmada.
+                                    </p>
                                 </div>
                             </div>
-                            <!-- ID del usuario oculto si es nuevo -->
-                            <input type="hidden" name="idUsuario" th:if="${voluntario.get('id') == null}" th:value="${currentUserId}">
+                            
+                             <!-- Datos legales ocultos (para preservarlos sin mostrarlos) -->
+
+                             <!-- ID del usuario y datos legales ocultos (para preservarlos sin mostrarlos) -->
+                             <input type="hidden" name="idUsuario" th:if="${voluntario.get('id') == null}" th:value="${currentUserId}">
+                             <input type="hidden" name="nombre" th:value="${userNombre}">
+                             <input type="hidden" name="apellido" th:value="${userApellido}">
+                             <input type="hidden" name="dni" th:value="${userDni}">
+                             <input type="hidden" name="telefono" th:value="${userPhone}">
+                             <input type="hidden" name="direccion" th:value="${userDireccion}">
+                             <input type="hidden" name="fechaNacimiento" th:value="${userFechaNacimiento}">
                         </div>
                     </div>
 
@@ -99,12 +134,19 @@
                         </h2>
 
                         <div class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
-                            <!-- Teléfono: Solo se pide si NO está autenticado -->
-                            <div class="form-group" th:if="${!isAuthenticated}">
-                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Teléfono</label>
-                                <input type="text" name="telefono" th:value="${userPhone ?: voluntario.get('telefono')}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
-                            </div>
-                            <div class="form-group">
+                            <!-- Teléfono y Fecha Nacimiento: Solo se piden aquí si es EDICIÓN por ADMIN, ya que arriba no aparecen -->
+                            <th:block th:if="${voluntario.get('id') != null and isAdmin}">
+                                <div class="form-group">
+                                    <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Teléfono</label>
+                                    <input type="text" name="telefono" th:value="${userPhone ?: voluntario.get('telefono')}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                </div>
+                                <div class="form-group">
+                                    <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Fecha de Nacimiento</label>
+                                    <input type="date" name="fechaNacimiento" th:value="${userFechaNacimiento}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                </div>
+                            </th:block>
+
+                            <div class="form-group" style="grid-column: span 2;">
                                 <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Área de Interés</label>
                                 <select id="especialidadSelect" name="especialidad" required onchange="handleEspecialidadChange()"
                                         style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; appearance: none; background: white url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem;">

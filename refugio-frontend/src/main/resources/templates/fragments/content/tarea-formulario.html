@@ -52,22 +52,79 @@
                                   th:text="${tarea.get('instrucciones')}"></textarea>
                     </div>
 
-                    <div class="form-group" style="grid-column: 1 / -1;" th:if="${voluntarioPreseleccionado == null}">
+                    <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Voluntario asignado <span style="color:var(--text-muted); font-size:0.8rem; font-weight:400;">(opcional)</span></label>
-                        <select name="voluntarioIds">
-                            <option value="">— Sin asignar —</option>
-                            <option th:each="v : ${voluntarios}" th:value="${v.get('id')}"
-                                th:with="u=${usuariosMap != null ? usuariosMap[v.get('usuarioId')] : null}"
-                                th:text="${u != null ? u.get('email') : 'Voluntario ' + v.get('id')}"
-                                th:selected="${tarea.get('voluntarioIds') != null and tarea.get('voluntarioIds').contains(v.get('id'))}">
-                            </option>
-                        </select>
+                        
+                        <!-- Buscador de Voluntarios -->
+                        <div id="volunteer-search-container" style="position: relative;" th:styleappend="${tarea.get('voluntarioIds') != null and !tarea.get('voluntarioIds').isEmpty() ? 'display: none;' : ''}">
+                            <div style="position: relative;">
+                                <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; color: var(--text-muted);"></i>
+                                <input type="text" 
+                                       id="volunteer-search-input"
+                                       placeholder="Buscar voluntario por nombre, apellido o email..." 
+                                       style="padding-left: 40px;"
+                                       hx-get="/web/voluntarios/sugerencias"
+                                       hx-trigger="keyup[target.value.length >= 2] delay:300ms, search"
+                                       hx-target="#volunteer-suggestions"
+                                       name="q">
+                            </div>
+                            <div id="volunteer-suggestions"></div>
+                        </div>
+
+                        <!-- Voluntario Seleccionado -->
+                        <div id="selected-volunteer-tag" 
+                             style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); border: 1px solid var(--border); padding: 12px 16px; border-radius: 12px; margin-top: 5px;"
+                             th:styleappend="${(tarea.get('voluntarioIds') == null or tarea.get('voluntarioIds').isEmpty()) and voluntarioPreseleccionado == null ? 'display: none;' : ''}">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="background: var(--primary-light); color: var(--primary); width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                    <i data-lucide="user" style="width: 18px;"></i>
+                                </div>
+                                <div>
+                                    <span id="selected-volunteer-name" style="display: block; font-weight: 700; color: var(--text-main);"
+                                          th:text="${voluntarioPreseleccionado != null ? (voluntarioPreseleccionado.get('nombre') + ' ' + (voluntarioPreseleccionado.get('apellido') ?: '')) : (tarea.get('voluntarioIds') != null and !tarea.get('voluntarioIds').isEmpty() ? (voluntarioNombres != null ? voluntarioNombres[tarea.get('voluntarioIds')[0].toString()] : 'Voluntario asignado') : '')}">
+                                        Nombre del Voluntario
+                                    </span>
+                                    <small style="color: var(--text-muted); font-size: 0.75rem;">Voluntario asignado a esta tarea</small>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-icon delete" onclick="removeVolunteer()" style="width: 32px; height: 32px;">
+                                <i data-lucide="x" style="width: 16px;"></i>
+                            </button>
+                        </div>
+
+                        <!-- ID Oculto para el formulario -->
+                        <input type="hidden" name="voluntarioIds" id="selected-volunteer-id" 
+                               th:value="${voluntarioPreseleccionado != null ? voluntarioPreseleccionado.get('id') : (tarea.get('voluntarioIds') != null and !tarea.get('voluntarioIds').isEmpty() ? tarea.get('voluntarioIds')[0] : '')}">
                     </div>
 
-                    <!-- Hidden input if pre-selected -->
-                    <div th:if="${voluntarioPreseleccionado != null}">
-                        <input type="hidden" name="voluntarioIds" th:each="vid : ${tarea.get('voluntarioIds')}" th:value="${vid}">
-                    </div>
+                    <script th:inline="javascript">
+                        function selectVolunteer(id, name) {
+                            document.getElementById('selected-volunteer-id').value = id;
+                            document.getElementById('selected-volunteer-name').innerText = name;
+                            document.getElementById('volunteer-search-container').style.display = 'none';
+                            document.getElementById('selected-volunteer-tag').style.display = 'flex';
+                            document.getElementById('volunteer-suggestions').innerHTML = '';
+                            document.getElementById('volunteer-search-input').value = '';
+                        }
+
+                        function removeVolunteer() {
+                            document.getElementById('selected-volunteer-id').value = '';
+                            document.getElementById('selected-volunteer-tag').style.display = 'none';
+                            document.getElementById('volunteer-search-container').style.display = 'block';
+                            setTimeout(() => {
+                                document.getElementById('volunteer-search-input').focus();
+                            }, 100);
+                        }
+
+                        // Cerrar sugerencias al hacer click fuera
+                        document.addEventListener('click', function(e) {
+                            const suggestions = document.getElementById('volunteer-suggestions');
+                            const searchInput = document.getElementById('volunteer-search-input');
+                            if (suggestions && !suggestions.contains(e.target) && e.target !== searchInput) {
+                                suggestions.innerHTML = '';
+                            }
+                        });
+                    </script>
 
                 </div>
 

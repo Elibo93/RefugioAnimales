@@ -1,10 +1,15 @@
 package es.refugio.frontend.web;
 
+import es.refugio.frontend.web.constants.WebRoutes;
+import es.refugio.frontend.web.enums.FragmentoContenido;
+import es.refugio.frontend.web.enums.ModelAttribute;
+import es.refugio.frontend.web.enums.ThymTemplates;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,11 +20,6 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
-import es.refugio.frontend.web.constants.WebRoutes;
-import es.refugio.frontend.web.enums.FragmentoContenido;
-import es.refugio.frontend.web.enums.ModelAttribute;
-import es.refugio.frontend.web.enums.ThymTemplates;
-
 import java.io.OutputStream;
 import java.util.*;
 
@@ -28,78 +28,170 @@ import java.util.*;
 @PreAuthorize("hasRole('ADMIN')")
 public class UsuarioViewController {
 
+    private static final Logger logger = LoggerFactory.getLogger(UsuarioViewController.class);
+
     private final RestTemplate restTemplate;
     private final TemplateEngine templateEngine;
-
-    @Value("${backend.api.url}")
-    private String apiUrl;
 
     @Value("${auth.api.url}")
     private String authUrl;
 
+    @Value("${backend.api.url}")
+    private String apiUrl;
+
+    @GetMapping(WebRoutes.PERSONAS_BASE)
+    public String listarPersonas(@RequestParam(required = false) String q,
+            @RequestParam(required = false) String rol,
+            Model model, HttpServletRequest request) {
+
+        List<Object> personasAuth = fetchList(authUrl + "/v1/usuarios");
+        List<Object> perfilesLegales = fetchList(apiUrl + "/v1/perfiles-legales");
+
+        Map<Integer, Map<String, Object>> perfilesMap = new HashMap<>();
+        for (Object p : perfilesLegales) {
+            if (p instanceof Map) {
+                Map<String, Object> pm = (Map<String, Object>) p;
+                Object uId = pm.get("usuarioId");
+                if (uId instanceof Number)
+                    perfilesMap.put(((Number) uId).intValue(), pm);
+            }
+        }
+
+        List<Map<String, Object>> personasCompletas = new ArrayList<>();
+        String query = q != null ? q.toLowerCase() : null;
+
+        for (Object u : personasAuth) {
+            if (u instanceof Map) {
+                Map<String, Object> um = (Map<String, Object>) u;
+                Integer id = ((Number) um.get("id")).intValue();
+
+                Map<String, Object> persona = new HashMap<>(um);
+                Map<String, Object> perfil = perfilesMap.get(id);
+
+                if (perfil != null) {
+                    persona.put("nombre", perfil.get("nombre"));
+                    persona.put("apellido", perfil.get("apellido"));
+                    persona.put("dni", perfil.get("dni"));
+                    persona.put("telefono", perfil.get("telefono"));
+                    persona.put("direccion", perfil.get("direccion"));
+                }
+
+                // Filtrado por rol
+                if (rol != null && !rol.isEmpty() && !"ALL".equals(rol)) {
+                    if (!String.valueOf(um.get("rol")).equals(rol))
+                        continue;
+                }
+
+                // Filtrado por búsqueda
+                if (query != null && !query.isEmpty()) {
+                    String nombre = String.valueOf(persona.get("nombre") != null ? persona.get("nombre") : "")
+                            .toLowerCase();
+                    String apellido = String.valueOf(persona.get("apellido") != null ? persona.get("apellido") : "")
+                            .toLowerCase();
+                    String email = String.valueOf(persona.get("email")).toLowerCase();
+                    String username = String.valueOf(persona.get("username")).toLowerCase();
+
+                    if (!nombre.contains(query) && !apellido.contains(query) &&
+                            !email.contains(query) && !username.contains(query)) {
+                        continue;
+                    }
+                }
+
+                personasCompletas.add(persona);
+            }
+        }
+
+        model.addAttribute(ModelAttribute.Persona_LIST.getName(), personasCompletas);
+        model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_ADMIN"));
+        model.addAttribute("selectedRol", rol);
+        model.addAttribute("query", q);
+
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Persona_LIST.getPath() + " :: list-body";
+        }
+
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_LIST.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
 
     @GetMapping(WebRoutes.PERSONAS_NUEVO)
-    public String formulario(Model model, HttpServletRequest request) {
-        model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), new HashMap<>());
+    public String crearPersonaForm(Model model, HttpServletRequest request) {
+        model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), new HashMap<String, Object>());
         model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_ADMIN"));
-        
+
         if ("true".equals(request.getHeader("HX-Request"))) {
             return FragmentoContenido.Persona_FORM.getPath() + " :: content";
         }
-        
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
     @PostMapping(WebRoutes.PERSONAS_NUEVO)
-    public String crearPersona(@RequestParam String nombre,
-            @RequestParam String apellido,
+    public String procesarCreacion(@RequestParam String username,
             @RequestParam String email,
-            @RequestParam String username,
-            @RequestParam String telefono,
             @RequestParam String contrasena,
-            @RequestParam(required = false, defaultValue = "ROLE_PUBLICO") String rol,
-            Model model) {
+            @RequestParam String rol,
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) String apellido,
+            @RequestParam(required = false) String dni,
+            @RequestParam(required = false) String telefono,
+            @RequestParam(required = false) String direccion,
+            @RequestParam(required = false) String fechaNacimiento,
+            RedirectAttributes redirectAttributes) {
 
-        // 1. Crear usuario en Auth
         Map<String, Object> userBody = new HashMap<>();
-        userBody.put("email",      email);
-        userBody.put("username",   username);
+        userBody.put("username", username);
+        userBody.put("email", email);
         userBody.put("contrasena", contrasena);
-        userBody.put("rol",        rol);
+        userBody.put("rol", rol);
 
-        Map<String, Object> createdUser = (Map<String, Object>) restTemplate.postForObject(authUrl + "/v1/usuarios", userBody, Map.class);
-        
-        // 2. Crear PerfilLegal en Backend (Solo si se han rellenado los datos mínimos)
-        if (createdUser != null && createdUser.get("id") != null) {
-            if ((nombre != null && !nombre.trim().isEmpty()) || (apellido != null && !apellido.trim().isEmpty())) {
-                Map<String, Object> profileBody = new HashMap<>();
-                profileBody.put("usuarioId", createdUser.get("id"));
-                profileBody.put("nombre",    nombre);
-                profileBody.put("apellido",  apellido);
-                profileBody.put("telefono",  telefono);
-                profileBody.put("direccion", ""); 
-                restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", profileBody, Object.class);
+        try {
+            Map<String, Object> createdUser = restTemplate.postForObject(authUrl + "/v1/usuarios", userBody, Map.class);
+            if (createdUser != null && createdUser.get("id") != null) {
+                Integer usuarioId = ((Number) createdUser.get("id")).intValue();
+
+                // Crear PerfilLegal
+                Map<String, Object> legalBody = new HashMap<>();
+                legalBody.put("usuarioId", usuarioId);
+                legalBody.put("nombre", nombre);
+                legalBody.put("apellido", apellido);
+                legalBody.put("dni", dni);
+                legalBody.put("telefono", telefono);
+                legalBody.put("direccion", direccion);
+                legalBody.put("fechaNacimiento",
+                        (fechaNacimiento != null && !fechaNacimiento.isEmpty()) ? fechaNacimiento : "2000-01-01");
+
+                restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", legalBody, Object.class);
             }
+            redirectAttributes.addFlashAttribute("successMessage", "Usuario creado con éxito");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al crear usuario: " + e.getMessage());
         }
-        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_CREATED.getPath());
-        return ThymTemplates.MAIN_LAYOUT.getPath();
+
+        return "redirect:" + WebRoutes.PERSONAS_BASE;
     }
 
     @GetMapping(WebRoutes.PERSONAS_EDITAR)
-    public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
-        Map<String, Object> user = (Map<String, Object>) restTemplate.getForObject(authUrl + "/v1/usuarios/" + id, Map.class);
+    public String editarPersonaForm(@PathVariable Integer id, Model model, HttpServletRequest request) {
+        Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + id, Map.class);
         Map<String, Object> persona = new HashMap<>();
-        if (user != null) persona.putAll(user);
-        
+        if (user != null)
+            persona.putAll(user);
+
         try {
-            Map<String, Object> legal = (Map<String, Object>) restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + id, Map.class);
+            Map<String, Object> legal = (Map<String, Object>) restTemplate
+                    .getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + id, Map.class);
             if (legal != null) {
-                persona.put("nombre",   legal.get("nombre"));
+                persona.put("nombre", legal.get("nombre"));
                 persona.put("apellido", legal.get("apellido"));
                 persona.put("telefono", legal.get("telefono"));
+                persona.put("dni", legal.get("dni"));
+                persona.put("direccion", legal.get("direccion"));
+                persona.put("fechaNacimiento", legal.get("fechaNacimiento"));
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), persona);
         model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_ADMIN"));
@@ -119,6 +211,8 @@ public class UsuarioViewController {
             @RequestParam String email,
             @RequestParam String username,
             @RequestParam String telefono,
+            @RequestParam String dni,
+            @RequestParam String fechaNacimiento,
             @RequestParam(required = false) String rol,
             RedirectAttributes redirectAttributes) {
 
@@ -126,212 +220,153 @@ public class UsuarioViewController {
         Map<String, Object> userBody = new HashMap<>();
         userBody.put("email", email);
         userBody.put("username", username);
-        if (rol != null) userBody.put("rol", rol);
+        if (rol != null)
+            userBody.put("rol", rol);
         restTemplate.put(authUrl + "/v1/usuarios/" + id, userBody);
 
-        // 2. Actualizar PerfilLegal en Backend
-        Map<String, Object> profileBody = new HashMap<>();
-        profileBody.put("usuarioId", id);
-        profileBody.put("nombre",    nombre);
-        profileBody.put("apellido",  apellido);
-        profileBody.put("telefono",  telefono);
-        restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", profileBody, Object.class);
-        
-        redirectAttributes.addFlashAttribute("successMessage", "Persona editada correctamente");
+        // 2. Actualizar PerfilLegal
+        Map<String, Object> legalBody = new HashMap<>();
+        legalBody.put("usuarioId", id);
+        legalBody.put("nombre", nombre);
+        legalBody.put("apellido", apellido);
+        legalBody.put("dni", dni);
+        legalBody.put("telefono", telefono);
+        legalBody.put("fechaNacimiento", fechaNacimiento);
+        restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", legalBody, Object.class);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Perfil actualizado con éxito");
         return "redirect:" + WebRoutes.PERSONAS_BASE;
     }
 
     @PostMapping(WebRoutes.PERSONAS_ELIMINAR)
-    @ResponseBody
-    public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
-        restTemplate.delete(authUrl + "/v1/usuarios/" + id);
-        if ("true".equals(request.getHeader("HX-Request"))) return ResponseEntity.ok("");
-        return ResponseEntity.status(302).header("Location", WebRoutes.PERSONAS_BASE).build();
-    }
+    public String borrar(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            logger.info("Iniciando borrado coordinado para usuario ID: {}", id);
 
-    @GetMapping(WebRoutes.PERSONAS_BASE)
-    public String listar(Model model, 
-                        @RequestParam(required = false) String rol,
-                        @RequestParam(required = false) String successMessage) {
-        
-        List<Object> todosAuth = fetchList(authUrl + "/v1/usuarios");
-        List<Object> todosLegales = fetchList(apiUrl + "/v1/perfiles-legales");
-        
-        // Mergear datos
-        Map<String, Map<String, Object>> legalesMap = new HashMap<>();
-        for (Object l : todosLegales) {
-            if (l instanceof Map) {
-                Map<String, Object> lm = (Map<String, Object>) l;
-                legalesMap.put(String.valueOf(lm.get("usuarioId")), lm);
+            // 1. Borrar PerfilLegal en el Backend primero (integridad)
+            try {
+                restTemplate.delete(apiUrl + "/v1/perfiles-legales/usuario/" + id);
+                logger.info("PerfilLegal eliminado con éxito para usuario {}", id);
+            } catch (Exception e) {
+                logger.warn("No se pudo eliminar el PerfilLegal del usuario {} o no existía. Continuando...", id);
             }
-        }
 
-        List<Object> todos = new ArrayList<>();
-        for (Object a : todosAuth) {
-            if (a instanceof Map) {
-                Map<String, Object> user = new HashMap<>((Map<String, Object>) a);
-                Map<String, Object> legal = legalesMap.get(String.valueOf(user.get("id")));
-                if (legal != null) {
-                    user.put("nombre",   legal.get("nombre"));
-                    user.put("apellido", legal.get("apellido"));
-                    user.put("telefono", legal.get("telefono"));
-                }
-                todos.add(user);
-            }
-        }
-        
-        // Por defecto, si no hay parámetro, mostramos TODOS los usuarios
-        String activeRol = (rol == null || rol.trim().isEmpty()) ? "ALL" : rol.trim();
-        List<Object> filtrados = todos;
+            // 2. Borrar Usuario en Auth
+            restTemplate.delete(authUrl + "/v1/usuarios/" + id);
+            logger.info("Usuario ID {} eliminado con éxito de Auth", id);
 
-        if (!"ALL".equalsIgnoreCase(activeRol)) {
-            filtrados = todos.stream()
-                .filter(u -> {
-                    if (u instanceof Map) {
-                        Object r = ((Map<?, ?>) u).get("rol");
-                        if (r == null) return false;
-                        String userRol = String.valueOf(r).toUpperCase();
-                        String target = activeRol.toUpperCase();
-                        return userRol.equals(target) || userRol.contains(target.replace("ROLE_", "")) || target.contains(userRol.replace("ROLE_", ""));
-                    }
-                    return false;
-                })
-                .toList();
+            redirectAttributes.addFlashAttribute("successMessage", "Usuario y datos legales eliminados con éxito");
+        } catch (Exception e) {
+            logger.error("Error crítico al borrar usuario {}: {}", id, e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al borrar usuario: " + e.getMessage());
         }
-
-        model.addAttribute(ModelAttribute.Persona_LIST.getName(), filtrados);
-        model.addAttribute("selectedRol", activeRol);
-        
-        if (successMessage != null) model.addAttribute("successMessage", successMessage);
-        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_LIST.getPath());
-        return ThymTemplates.MAIN_LAYOUT.getPath();
+        return "redirect:" + WebRoutes.PERSONAS_BASE;
     }
 
     @GetMapping(WebRoutes.PERSONAS_DETALLE)
     public String verDetalle(@PathVariable Integer id, Model model) {
-        Map<String, Object> userAuth = (Map<String, Object>) restTemplate.getForObject(authUrl + "/v1/usuarios/" + id, Map.class);
+        Map<String, Object> userAuth = (Map<String, Object>) restTemplate.getForObject(authUrl + "/v1/usuarios/" + id,
+                Map.class);
         Map<String, Object> persona = new HashMap<>();
-        if (userAuth != null) persona.putAll(userAuth);
-        
+        if (userAuth != null)
+            persona.putAll(userAuth);
+
         try {
-            Map<String, Object> legal = (Map<String, Object>) restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + id, Map.class);
+            Map<String, Object> legal = (Map<String, Object>) restTemplate
+                    .getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + id, Map.class);
             if (legal != null) {
-                persona.put("nombre",   legal.get("nombre"));
+                persona.put("nombre", legal.get("nombre"));
                 persona.put("apellido", legal.get("apellido"));
                 persona.put("telefono", legal.get("telefono"));
-                persona.put("dni",      legal.get("dni"));
+                persona.put("dni", legal.get("dni"));
                 persona.put("direccion", legal.get("direccion"));
+                persona.put("fechaNacimiento", legal.get("fechaNacimiento"));
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), persona);
 
-        // Fetch Adoptante info
+        // Fetch Adoptante info & Animal Links
         try {
             Object adoptante = restTemplate.getForObject(apiUrl + "/v1/adoptantes/usuario/" + id, Object.class);
             model.addAttribute("adoptante", adoptante);
-            
             if (adoptante instanceof Map) {
-                Object aId = ((Map<?, ?>) adoptante).get("id");
+                Map<String, Object> am = (Map<String, Object>) adoptante;
+                Object aIdRaw = am.get("id");
+                Integer aId = (aIdRaw instanceof Map) ? (Integer) ((Map) aIdRaw).get("value") : (Integer) aIdRaw;
+
                 if (aId != null) {
-                    // Fetch Adopciones
-                    model.addAttribute("adopciones", fetchList("/v1/adopciones/adoptante/" + aId));
+                    List<Object> solicitudes = fetchList(apiUrl + "/v1/solicitudes-adopcion/adoptante/" + aId);
+                    List<Object> adopciones = fetchList(apiUrl + "/v1/adopciones/adoptante/" + aId);
+
+                    List<Map<String, Object>> vinculos = new ArrayList<>();
+                    Map<String, String> animalNames = new HashMap<>();
+
+                    for (Object s : solicitudes) {
+                        if (s instanceof Map) {
+                            Map<String, Object> sm = (Map<String, Object>) s;
+                            Map<String, Object> v = new HashMap<>();
+                            v.put("id", sm.get("id"));
+                            v.put("animalId", sm.get("animalId"));
+                            v.put("tipoVinculo", "SOLICITUD");
+                            v.put("estadoVinculo", sm.get("estado"));
+                            v.put("fechaVinculo", sm.get("fechaSolicitud"));
+                            vinculos.add(v);
+                            fetchAnimalName(sm.get("animalId"), animalNames);
+                        }
+                    }
+                    for (Object ad : adopciones) {
+                        if (ad instanceof Map) {
+                            Map<String, Object> adm = (Map<String, Object>) ad;
+                            Map<String, Object> v = new HashMap<>();
+                            v.put("id", adm.get("id"));
+                            v.put("animalId", adm.get("animalId"));
+                            v.put("tipoVinculo", "ADOPCIÓN");
+                            v.put("estadoVinculo", "FINALIZADA");
+                            v.put("fechaVinculo", adm.get("fechaAdopcion"));
+                            vinculos.add(v);
+                            fetchAnimalName(adm.get("animalId"), animalNames);
+                        }
+                    }
+                    model.addAttribute("vinculosAnimales", vinculos);
+                    model.addAttribute("animalNames", animalNames);
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         // Fetch Voluntario info
         try {
             Object voluntario = restTemplate.getForObject(apiUrl + "/v1/voluntarios/usuario/" + id, Object.class);
             model.addAttribute("voluntario", voluntario);
-            
+
             if (voluntario instanceof Map) {
-                Object vId = ((Map<?, ?>) voluntario).get("id");
+                Map<String, Object> vm = (Map<String, Object>) voluntario;
+                Object vIdRaw = vm.get("id");
+                Integer vId = (vIdRaw instanceof Map) ? (Integer) ((Map) vIdRaw).get("value") : (Integer) vIdRaw;
+
                 if (vId != null) {
-                    // Fetch Tareas del voluntario
-                    List<Object> todasTareas = fetchList("/v1/tareas");
+                    List<Object> todasTareas = fetchList(apiUrl + "/v1/tareas");
                     List<Object> misTareas = todasTareas.stream()
-                        .filter(t -> {
-                            if (t instanceof Map) {
-                                Object vIds = ((Map<?, ?>) t).get("voluntarioIds");
-                                if (vIds instanceof List) return ((List<?>) vIds).contains(vId);
-                            }
-                            return false;
-                        }).toList();
+                            .filter(t -> {
+                                if (t instanceof Map) {
+                                    Object vIds = ((Map<?, ?>) t).get("voluntarioIds");
+                                    if (vIds instanceof List) {
+                                        return ((List<?>) vIds).stream().anyMatch(vid -> {
+                                            Object vidVal = (vid instanceof Map) ? ((Map) vid).get("value") : vid;
+                                            return vId.equals(vidVal);
+                                        });
+                                    }
+                                }
+                                return false;
+                            })
+                            .toList();
                     model.addAttribute("tareas", misTareas);
                 }
             }
-        } catch (Exception ignored) {}
-
-        // 1. Cargar nombres de animales para referencia rápida
-        Map<String, String> animalNames = new HashMap<>();
-        try {
-            List<Object> animalesArr = fetchList("/v1/animales");
-            if (animalesArr != null) {
-                for (Object a : animalesArr) {
-                    if (a instanceof Map) {
-                        Map<?, ?> am = (Map<?, ?>) a;
-                        animalNames.put(String.valueOf(am.get("id")), String.valueOf(am.get("nombre")));
-                    }
-                }
-            }
-        } catch (Exception ignored) {}
-        model.addAttribute("animalNames", animalNames);
-
-        // 2. Fetch Adoptante and its links (Adopciones/Solicitudes)
-        List<Map<String, Object>> vinculos = new ArrayList<>();
-        try {
-            Object adoptante = restTemplate.getForObject(apiUrl + "/v1/adoptantes/usuario/" + id, Object.class);
-            model.addAttribute("adoptante", adoptante);
-            
-            if (adoptante instanceof Map) {
-                Map<?, ?> adoptanteMap = (Map<?, ?>) adoptante;
-                Object aId = adoptanteMap.get("id");
-                
-                if (aId != null) {
-                    // Cargar Adopciones
-                    List<Object> adps = fetchList("/v1/adopciones/adoptante/" + aId);
-                    if (adps != null) {
-                        for (Object o : adps) {
-                            if (o instanceof Map) {
-                                Map<String, Object> v = new HashMap<>((Map<String, Object>) o);
-                                v.put("tipoVinculo", "ADOPCIÓN");
-                                v.put("estadoVinculo", "ADOPTADO");
-                                v.put("fechaVinculo", v.get("fechaAdopcion"));
-                                vinculos.add(v);
-                            }
-                        }
-                    }
-                    
-                    // Cargar Solicitudes
-                    List<Object> sols = fetchList("/v1/solicitudes-adopcion/adoptante/" + aId);
-                    if (sols != null) {
-                        for (Object o : sols) {
-                            if (o instanceof Map) {
-                                Map<String, Object> v = new HashMap<>((Map<String, Object>) o);
-                                v.put("tipoVinculo", "SOLICITUD");
-                                v.put("estadoVinculo", v.get("estado"));
-                                v.put("fechaVinculo", v.get("fecha"));
-                                
-                                boolean yaExiste = vinculos.stream().anyMatch(existing -> 
-                                    String.valueOf(existing.get("animalId")).equals(String.valueOf(v.get("animalId"))) &&
-                                    "ADOPTADO".equals(existing.get("estadoVinculo"))
-                                );
-                                if (!yaExiste) vinculos.add(v);
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception ignored) {}
-
-        // Ordenar y añadir al modelo
-        vinculos.sort((v1, v2) -> {
-            String f1 = String.valueOf(v1.get("fechaVinculo") != null ? v1.get("fechaVinculo") : "");
-            String f2 = String.valueOf(v2.get("fechaVinculo") != null ? v2.get("fechaVinculo") : "");
-            return f2.compareTo(f1);
-        });
-        model.addAttribute("vinculosAnimales", vinculos);
+        } catch (Exception ignored) {
+        }
 
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_DETALLE.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -340,11 +375,11 @@ public class UsuarioViewController {
     @GetMapping(WebRoutes.PERSONAS_PDF)
     public void exportarPDF(HttpServletResponse response, @RequestParam(required = false) String rol) throws Exception {
         List<Object> personasAuth = fetchList(authUrl + "/v1/usuarios");
-        
+
         if (rol != null && !rol.isEmpty() && !"ALL".equals(rol)) {
             personasAuth = personasAuth.stream()
-                .filter(u -> u instanceof Map && String.valueOf(((Map<?, ?>) u).get("rol")).equals(rol))
-                .toList();
+                    .filter(u -> u instanceof Map && String.valueOf(((Map<?, ?>) u).get("rol")).equals(rol))
+                    .toList();
         }
 
         Context context = new Context();
@@ -365,158 +400,96 @@ public class UsuarioViewController {
             @RequestParam(required = false, defaultValue = "") String q,
             @RequestParam(required = false) String context,
             Model model) {
-            
+
         if (q.trim().isEmpty()) {
             model.addAttribute("usuariosEncontrados", List.of());
             return FragmentoContenido.USUARIO_SUGERENCIAS.getPath() + " :: suggestions";
         }
 
-        List<Object> todosAuth = fetchList(authUrl + "/v1/usuarios");
-        List<Object> todosLegales = fetchList(apiUrl + "/v1/perfiles-legales");
-        
-        Map<String, Map<String, Object>> legalesMap = new HashMap<>();
-        for (Object l : todosLegales) {
-            if (l instanceof Map) {
-                Map<String, Object> lm = (Map<String, Object>) l;
-                legalesMap.put(String.valueOf(lm.get("usuarioId")), lm);
+        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+        List<Object> perfiles = fetchList(apiUrl + "/v1/perfiles-legales");
+        List<Object> adoptantes = fetchList(apiUrl + "/v1/adoptantes");
+
+        Map<Integer, Map<String, Object>> perfilesMap = new HashMap<>();
+        for (Object p : perfiles) {
+            if (p instanceof Map) {
+                Map<String, Object> pm = (Map<String, Object>) p;
+                Object uId = pm.get("usuarioId");
+                if (uId instanceof Number)
+                    perfilesMap.put(((Number) uId).intValue(), pm);
             }
         }
 
-        List<Map<String, Object>> todos = new ArrayList<>();
-        for (Object a : todosAuth) {
+        Map<Integer, Integer> adoptantesMap = new HashMap<>();
+        for (Object a : adoptantes) {
             if (a instanceof Map) {
-                Map<String, Object> user = new HashMap<>((Map<String, Object>) a);
-                Map<String, Object> legal = legalesMap.get(String.valueOf(user.get("id")));
-                if (legal != null) {
-                    user.put("nombre",   legal.get("nombre"));
-                    user.put("apellido", legal.get("apellido"));
-                    user.put("telefono", legal.get("telefono"));
-                }
-                todos.add(user);
+                Map<String, Object> am = (Map<String, Object>) a;
+                Object uIdRaw = am.get("usuarioId");
+                Object aIdRaw = am.get("id");
+
+                Integer uId = (uIdRaw instanceof Map) ? (Integer) ((Map) uIdRaw).get("value") : (Integer) uIdRaw;
+                Integer aId = (aIdRaw instanceof Map) ? (Integer) ((Map) aIdRaw).get("value") : (Integer) aIdRaw;
+
+                if (uId != null && aId != null)
+                    adoptantesMap.put(uId, aId);
             }
         }
 
         String query = q.toLowerCase();
-        
-        // Obtener lista de IDs ya registrados según el contexto
-        List<Map<String, Object>> filtrados;
-        
-        if ("voluntario".equalsIgnoreCase(context)) {
-            List<Object> registrados = fetchList("/v1/voluntarios");
-            Set<Integer> registradosIds = new HashSet<>();
-            for (Object r : registrados) {
-                if (r instanceof Map) {
-                    Integer uid = toInteger(((Map<?, ?>) r).get("usuarioId"));
-                    if (uid != null) registradosIds.add(uid);
+        List<Map<String, Object>> encontrados = new ArrayList<>();
+
+        for (Object u : usuarios) {
+            if (u instanceof Map) {
+                Map<String, Object> um = (Map<String, Object>) u;
+                Integer uId = ((Number) um.get("id")).intValue();
+                Map<String, Object> perfil = perfilesMap.get(uId);
+
+                String nombre = perfil != null && perfil.get("nombre") != null ? String.valueOf(perfil.get("nombre"))
+                        : "";
+                String apellido = perfil != null && perfil.get("apellido") != null
+                        ? String.valueOf(perfil.get("apellido"))
+                        : "";
+                String email = String.valueOf(um.get("email"));
+
+                if (nombre.toLowerCase().contains(query) || apellido.toLowerCase().contains(query)
+                        || email.toLowerCase().contains(query)) {
+                    Map<String, Object> result = new HashMap<>(um);
+                    result.put("nombre", nombre);
+                    result.put("apellido", apellido);
+                    result.put("adoptanteId", adoptantesMap.get(uId));
+                    encontrados.add(result);
                 }
             }
-            filtrados = todos.stream()
-                .filter(u -> u instanceof Map)
-                .map(u -> (Map<String, Object>) u)
-                .filter(user -> matchesQuery(user, query))
-                .limit(8)
-                .map(user -> {
-                    Map<String, Object> copy = new HashMap<>(user);
-                    Integer uId = toInteger(user.get("id"));
-                    copy.put("yaRegistrado", uId != null && registradosIds.contains(uId));
-                    copy.put("adoptanteId", null);
-                    return copy;
-                }).toList();
-        } else if ("adoptante".equalsIgnoreCase(context) || "solicitud".equalsIgnoreCase(context) || "adopcion".equalsIgnoreCase(context)) {
-            List<Object> registrados = fetchList("/v1/adoptantes");
-            Map<Integer, Integer> userToAdoptante = new HashMap<>();
-            for (Object r : registrados) {
-                if (r instanceof Map) {
-                    Integer uid = toInteger(((Map<?, ?>) r).get("usuarioId"));
-                    Integer aid = toInteger(((Map<?, ?>) r).get("id"));
-                    if (uid != null && aid != null) {
-                        userToAdoptante.put(uid, aid);
-                    }
-                }
-            }
-            filtrados = todos.stream()
-                .filter(u -> u instanceof Map)
-                .map(u -> (Map<String, Object>) u)
-                .filter(user -> {
-                    boolean matches = matchesQuery(user, query);
-                    if ("solicitud".equalsIgnoreCase(context)) {
-                        Integer uId = toInteger(user.get("id"));
-                        return matches && uId != null && userToAdoptante.containsKey(uId);
-                    }
-                    return matches;
-                })
-                .limit(8)
-                .map(user -> {
-                    Map<String, Object> copy = new HashMap<>(user);
-                    Integer uId = toInteger(user.get("id"));
-                    Integer aId = uId != null ? userToAdoptante.get(uId) : null;
-                    
-                    if ("solicitud".equalsIgnoreCase(context)) {
-                        copy.put("adoptanteId", aId);
-                        copy.put("yaRegistrado", false); 
-                    } else if ("adopcion".equalsIgnoreCase(context)) {
-                        copy.put("adoptanteId", aId);
-                        copy.put("yaRegistrado", false); 
-                    } else {
-                        copy.put("adoptanteId", aId);
-                        copy.put("yaRegistrado", aId != null);
-                    }
-                    return copy;
-                }).toList();
-        } else {
-            filtrados = todos.stream()
-                .filter(u -> u instanceof Map)
-                .map(u -> (Map<String, Object>) u)
-                .filter(user -> matchesQuery(user, query))
-                .limit(8)
-                .map(user -> {
-                    Map<String, Object> copy = new HashMap<>(user);
-                    copy.put("yaRegistrado", false);
-                    copy.put("adoptanteId", null);
-                    return copy;
-                }).toList();
         }
-            
-        model.addAttribute("usuariosEncontrados", filtrados);
-        model.addAttribute("contexto", context);
+
+        model.addAttribute("usuariosEncontrados", encontrados);
+        model.addAttribute("context", context);
         return FragmentoContenido.USUARIO_SUGERENCIAS.getPath() + " :: suggestions";
     }
 
-    private Integer toInteger(Object obj) {
-        if (obj == null) return null;
-        if (obj instanceof Number) return ((Number) obj).intValue();
+    private List<Object> fetchList(String url) {
         try {
-            return Integer.parseInt(obj.toString());
+            Object[] arr = restTemplate.getForObject(url, Object[].class);
+            return arr != null ? Arrays.asList(arr) : Collections.emptyList();
         } catch (Exception e) {
-            return null;
+            return Collections.emptyList();
         }
     }
 
-    private boolean matchesQuery(Map<String, Object> user, String query) {
-        String q = query.trim().toLowerCase();
-        String id = String.valueOf(user.get("id"));
-        String username = String.valueOf(user.get("username")).toLowerCase();
-        String nombre = String.valueOf(user.get("nombre")).toLowerCase();
-        String apellido = String.valueOf(user.get("apellido")).toLowerCase();
-        String email = String.valueOf(user.get("email")).toLowerCase();
-        String telefono = String.valueOf(user.get("telefono")).toLowerCase();
-        
-        return id.contains(q) || 
-               username.contains(q) ||
-               nombre.contains(q) || 
-               apellido.contains(q) || 
-               email.contains(q) || 
-               telefono.contains(q);
-    }
+    private void fetchAnimalName(Object animalId, Map<String, String> names) {
+        if (animalId == null)
+            return;
+        String idStr = String.valueOf(animalId);
+        if (names.containsKey(idStr))
+            return;
 
-    private List<Object> fetchList(String path) {
-        String finalUrl = path.startsWith("http") ? path : apiUrl + path;
         try {
-            Object[] arr = restTemplate.getForObject(finalUrl, Object[].class);
-            return arr != null ? Arrays.asList(arr) : List.of();
-        } catch (Exception e) { 
-            System.err.println("ERROR: Fallo al conectar con " + finalUrl + ": " + e.getMessage());
-            return List.of(); 
+            Map<String, Object> animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Map.class);
+            if (animal != null) {
+                names.put(idStr, String.valueOf(animal.get("nombre")));
+            }
+        } catch (Exception e) {
+            names.put(idStr, "Animal #" + idStr);
         }
     }
 }

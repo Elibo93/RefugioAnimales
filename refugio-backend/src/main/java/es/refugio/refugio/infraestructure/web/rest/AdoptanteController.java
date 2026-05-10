@@ -37,8 +37,6 @@ import es.refugio.refugio.infraestructure.mapper.AdoptanteMapper;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteRequest;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteResponse;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteUpdateRequest;
-import es.refugio.refugio.domain.model.perfil_legal.PerfilLegal;
-import es.refugio.refugio.domain.repository.PerfilLegalRepository;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.ConvertirAdoptanteRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -56,24 +54,12 @@ public class AdoptanteController {
     private final ApproveAdoptanteService approveService;
     private final RejectAdoptanteService rejectService;
     private final CreateSolicitudAdopcionService solicitudService;
-    private final PerfilLegalRepository perfilLegalRepository;
 
     @Operation(summary = "Crear adoptante", description = "Registra un nuevo adoptante vinculado a un usuario")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Adoptante creado"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<AdoptanteResponse> createAdoptante(@Valid @RequestBody AdoptanteRequest request) {
-        // Asegurar PerfilLegal
-        perfilLegalRepository.findByUsuarioId(request.usuarioId())
-                .orElseGet(() -> perfilLegalRepository.save(PerfilLegal.builder()
-                        .usuarioId(request.usuarioId())
-                        .nombre(request.nombre())
-                        .apellido(request.apellido())
-                        .dni(request.dni())
-                        .direccion(request.direccion())
-                        .telefono(request.telefono()) 
-                        .build()));
-
         CreateAdoptanteCommand command = AdoptanteMapper.toCommand(request);
         Adoptante adoptante = createService.createAdoptante(command);
 
@@ -171,21 +157,8 @@ public class AdoptanteController {
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Integer usuarioId = userDetails.getId();
 
-        // 1. Asegurar PerfilLegal
-        perfilLegalRepository.findByUsuarioId(usuarioId)
-                .orElseGet(() -> perfilLegalRepository.save(PerfilLegal.builder()
-                        .usuarioId(usuarioId)
-                        .nombre(request.getNombre())
-                        .apellido(request.getApellido())
-                        .dni(request.getDni())
-                        .direccion(request.getDireccion())
-                        .telefono(request.getTelefono()) 
-                        .build()));
-
         // 2. Crear Perfil de Adoptante
-        Adoptante adoptante = createService.createAdoptante(new CreateAdoptanteCommand(
-                usuarioId,
-                request.getFechaNacimiento()));
+        Adoptante adoptante = createService.createAdoptante(new CreateAdoptanteCommand(usuarioId));
 
         // 3. Crear Solicitud de Adopción
         solicitudService.create(new CreateSolicitudAdopcionCommand(

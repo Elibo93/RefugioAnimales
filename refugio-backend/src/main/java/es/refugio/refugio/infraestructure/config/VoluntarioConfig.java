@@ -12,6 +12,8 @@ import es.refugio.refugio.application.usecase.voluntario.DeleteVoluntarioUseCase
 import es.refugio.refugio.application.usecase.voluntario.EditVoluntarioUseCase;
 import es.refugio.refugio.application.usecase.voluntario.FindVoluntarioUseCase;
 import es.refugio.refugio.domain.repository.VoluntarioRepository;
+import es.refugio.refugio.domain.repository.PerfilLegalRepository;
+import es.refugio.refugio.application.service.NotificacionService;
 import es.refugio.refugio.infraestructure.db.jpa.repository.voluntario.VoluntarioEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.voluntario.VoluntarioJpaRepositoryImpl;
 
@@ -25,8 +27,8 @@ public class VoluntarioConfig {
 
     @Bean
     public CreateVoluntarioUseCase createVoluntarioUseCase(VoluntarioRepository repository,
-            es.refugio.refugio.application.service.NotificacionService notificacionService) {
-        return new CreateVoluntarioUseCase(repository, notificacionService);
+            PerfilLegalRepository perfilLegalRepository, NotificacionService notificacionService) {
+        return new CreateVoluntarioUseCase(repository, perfilLegalRepository, notificacionService);
     }
 
     @Bean

@@ -24,6 +24,7 @@ public class EditSolicitudAdopcionUseCase {
                     solicitud.setFecha(command.fecha());
                     solicitud.setEstado(estadoEnum);
                     solicitud.setComentario(command.comentario());
+                    solicitud.setComentarioAdmin(command.comentarioAdmin());
                     
                     SolicitudAdopcion saved = solicitudAdopcionRepository.save(solicitud);
 
@@ -41,7 +42,7 @@ public class EditSolicitudAdopcionUseCase {
                                     "Actualización de Solicitud",
                                     mensaje,
                                     "ADOPCION",
-                                    "/web/solicitudes/mis-adoptados"
+                                    "/web/solicitudes/" + solicitud.getId().getValue() + "/detalle"
                                 );
                             }
                         });

@@ -18,6 +18,7 @@ public class PerfilLegalMapper {
                 .dni(request.dni())
                 .telefono(request.telefono())
                 .direccion(request.direccion())
+                .fechaNacimiento(request.fechaNacimiento())
                 .build();
     }
 
@@ -32,6 +33,7 @@ public class PerfilLegalMapper {
                 .dni(entity.getDni())
                 .telefono(entity.getTelefono())
                 .direccion(entity.getDireccion())
+                .fechaNacimiento(entity.getFechaNacimiento())
                 .build();
     }
 
@@ -46,6 +48,7 @@ public class PerfilLegalMapper {
                 .dni(domain.getDni())
                 .telefono(domain.getTelefono())
                 .direccion(domain.getDireccion())
+                .fechaNacimiento(domain.getFechaNacimiento())
                 .build();
     }
 
@@ -58,7 +61,8 @@ public class PerfilLegalMapper {
                 perfil.getApellido(),
                 perfil.getDni(),
                 perfil.getTelefono(),
-                perfil.getDireccion()
+                perfil.getDireccion(),
+                perfil.getFechaNacimiento()
         );
     }
 }

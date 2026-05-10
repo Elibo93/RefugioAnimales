@@ -14,11 +14,7 @@ public class FindDonacionUseCase {
     private final DonacionRepository donacionRepository;
 
     public List<Donacion> findAll() {
-        List<Donacion> donaciones = donacionRepository.getAll();
-        if (donaciones.isEmpty()) {
-            throw new DonacionNotFoundException();
-        }
-        return donaciones;
+        return donacionRepository.getAll();
     }
 
     public Donacion findById(DonacionId id) {

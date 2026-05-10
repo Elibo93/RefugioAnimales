@@ -57,7 +57,7 @@ public class CreateSolicitudAdopcionUseCase {
             "Nueva Solicitud de Adopción", 
             "Se ha recibido una nueva solicitud para adoptar a " + animal.getNombre(), 
             "ADOPCION", 
-            "/web/solicitudes/" + savedSolicitud.getId().getValue() + "/editar"
+            "/web/solicitudes/" + savedSolicitud.getId().getValue() + "/detalle"
         );
 
         return savedSolicitud;

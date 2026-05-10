@@ -40,4 +40,7 @@ public class PerfilLegalEntity {
 
     @Column(length = 255)
     private String direccion;
+
+    @Column(name = "fecha_nacimiento", nullable = false, length = 50)
+    private String fechaNacimiento;
 }

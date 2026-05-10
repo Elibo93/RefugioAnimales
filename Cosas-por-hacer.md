@@ -23,7 +23,7 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
   - **Adopciones:** Solicitudes y Adopciones Procesadas.
   - **Gestión:** Animales e Historiales Médicos.
 
-- [ ] **Listados:**
+- [✅] **Listados:**
   - ✅ Cambiar estética de animales a formato lista simple con miniatura.
   - ✅ Botón de "Asignar Tareas" en lista de voluntarios.
   - ✅Botón de "Ver Historial Médico" en lista de animales.
@@ -40,7 +40,7 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 
 ### 4) Frontend/Backend: Panel del Voluntario y Tareas
 - [✅] **"Mis Tareas":** Lista de tareas asignadas con estados: **Pendiente, Propuesta, Aceptada, En progreso, Finalizada, Rechazada, Cancelada**.
-- [ ] **Gestión de Propuestas:** El voluntario debe poder aceptar o rechazar tareas enviadas por el admin.
+- [✅] **Gestión de Propuestas:** El voluntario debe poder aceptar o rechazar tareas enviadas por el admin.
 - [ ] **Notificaciones:** Tareas nuevas y recordatorios de fechas de vencimiento.
 
 ### 5) Backend: Lógica de Adopción y Roles

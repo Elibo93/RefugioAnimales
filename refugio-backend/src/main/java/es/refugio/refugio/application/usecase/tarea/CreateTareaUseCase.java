@@ -1,6 +1,7 @@
 package es.refugio.refugio.application.usecase.tarea;
 
 import java.util.stream.Collectors;
+import java.util.Objects;
 import es.refugio.refugio.application.command.tarea.CreateTareaCommand;
 import es.refugio.refugio.domain.model.tarea.Tarea;
 import es.refugio.refugio.domain.model.tarea.enums.EstadoTarea;
@@ -27,7 +28,10 @@ public class CreateTareaUseCase {
                 .fechaLimite(command.fechaLimite())
                 .instrucciones(command.instrucciones())
                 .voluntarios(command.voluntarioIds() != null ? 
-                    command.voluntarioIds().stream().map(VoluntarioId::new).collect(Collectors.toList()) : 
+                    command.voluntarioIds().stream()
+                        .filter(Objects::nonNull)
+                        .map(VoluntarioId::new)
+                        .collect(Collectors.toList()) : 
                     null)
                 .build();
                 

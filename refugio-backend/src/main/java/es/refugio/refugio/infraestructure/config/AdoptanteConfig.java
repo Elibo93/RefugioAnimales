@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class AdoptanteConfig {
 
     private final AdoptanteEntityJpaRepository adoptanteEntityJpaRepository;
+    private final es.refugio.refugio.domain.repository.PerfilLegalRepository perfilLegalRepository;
 
     // --- REPOSITORIO ---
     @Bean
@@ -35,7 +36,7 @@ public class AdoptanteConfig {
     // --- CREATE (POST) ---
     @Bean
     public CreateAdoptanteUseCase createAdoptanteUseCase() {
-        return new CreateAdoptanteUseCase(adoptanteRepository());
+        return new CreateAdoptanteUseCase(adoptanteRepository(), perfilLegalRepository);
     }
 
     @Bean

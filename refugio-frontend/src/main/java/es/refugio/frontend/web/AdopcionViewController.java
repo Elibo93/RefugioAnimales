@@ -50,6 +50,7 @@ public class AdopcionViewController {
         List<Object> adoptantes = fetchList("/v1/adoptantes");
         List<Object> animales   = fetchList("/v1/animales");
         List<Object> usuarios   = fetchList(authUrl + "/v1/usuarios");
+        List<Object> perfiles   = fetchList("/v1/personas"); // Real legal profiles
 
         Map<String, Map<String, Object>> usuariosMap = new HashMap<>();
         for (Object u : usuarios) {
@@ -57,6 +58,16 @@ public class AdopcionViewController {
                 Object id = ((Map<?, ?>) u).get("id");
                 if (id instanceof Number) {
                     usuariosMap.put(String.valueOf(((Number) id).intValue()), (Map<String, Object>) u);
+                }
+            }
+        }
+
+        Map<String, Map<String, Object>> perfilesMap = new HashMap<>();
+        for (Object p : perfiles) {
+            if (p instanceof Map) {
+                Object uid = ((Map<?, ?>) p).get("usuarioId");
+                if (uid instanceof Number) {
+                    perfilesMap.put(String.valueOf(((Number) uid).intValue()), (Map<String, Object>) p);
                 }
             }
         }
@@ -113,6 +124,8 @@ public class AdopcionViewController {
         model.addAttribute("adoptanteNombres",                       adoptanteNombres);
         model.addAttribute("adoptanteUsuarioIds",                    adoptanteUsuarioIds);
         model.addAttribute("animalesMap",                            animalesMap);
+        model.addAttribute("usuariosMap",                            usuariosMap);
+        model.addAttribute("perfilesMap",                            perfilesMap);
         model.addAttribute("selectedAdoptanteId", adoptanteId);
         model.addAttribute("selectedanimalId",    animalId);   // lowercase 'a' to match template
 

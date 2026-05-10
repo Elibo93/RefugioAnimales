@@ -9,5 +9,6 @@ public record PerfilLegalResponse(
     String apellido,
     String dni,
     String telefono,
-    String direccion
+    String direccion,
+    String fechaNacimiento
 ) {}

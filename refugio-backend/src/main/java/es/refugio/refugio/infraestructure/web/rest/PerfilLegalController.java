@@ -25,7 +25,7 @@ public class PerfilLegalController {
 
     @Operation(summary = "Obtener perfil legal por Usuario ID")
     @GetMapping("/usuario/{usuarioId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE', 'ROLE_PUBLICO', 'PUBLICO')")
     public ResponseEntity<PerfilLegalResponse> getByUsuarioId(@PathVariable Integer usuarioId) {
         return repository.findByUsuarioId(usuarioId)
                 .map(PerfilLegalMapper::toResponse)
@@ -36,7 +36,7 @@ public class PerfilLegalController {
     @Operation(summary = "Crear o actualizar perfil legal")
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<PerfilLegalResponse> save(@RequestBody PerfilLegalRequest request) {
+    public ResponseEntity<PerfilLegalResponse> save(@jakarta.validation.Valid @RequestBody PerfilLegalRequest request) {
         PerfilLegal domain = PerfilLegalMapper.toDomain(request);
         
         return repository.findByUsuarioId(domain.getUsuarioId())

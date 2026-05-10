@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-add-comentario-admin-solicitud
+      author: antigravity
+      changes:
+        - addColumn:
+            tableName: solicitudes_adopcion
+            columns:
+              - column:
+                  name: comentario_admin
+                  type: TEXT
+                  remarks: "Comentario o feedback dejado por el administrador sobre la solicitud"
