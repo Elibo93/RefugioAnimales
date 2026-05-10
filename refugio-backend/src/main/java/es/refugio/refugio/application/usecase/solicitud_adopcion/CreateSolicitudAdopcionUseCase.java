@@ -51,24 +51,13 @@ public class CreateSolicitudAdopcionUseCase {
         animal.setEstado(EstadoAnimal.RESERVADO);
         animalRepository.save(animal);
 
-<<<<<<< Updated upstream
         // Notificar a los Administradores (por ROL)
         notificacionService.enviarARol(
-            "ROLE_ADMIN", 
-            "Nueva Solicitud de Adopción", 
-            "Se ha recibido una nueva solicitud para adoptar a " + animal.getNombre(), 
-            "ADOPCION", 
-            "/web/solicitudes/" + savedSolicitud.getId().getValue() + "/detalle"
-=======
-        // Notificar al Administrador (ID 1 por convención)
-        notificacionService.enviar(
-            1, 
-            "Nueva Solicitud de Adopción", 
-            "Se ha recibido una nueva solicitud para adoptar a " + animal.getNombre(), 
-            "ADOPCION", 
-            "/web/solicitudes"
->>>>>>> Stashed changes
-        );
+                "ROLE_ADMIN",
+                "Nueva Solicitud de Adopción",
+                "Se ha recibido una nueva solicitud para adoptar a " + animal.getNombre(),
+                "ADOPCION",
+                "/web/solicitudes/" + savedSolicitud.getId().getValue() + "/detalle");
 
         return savedSolicitud;
     }

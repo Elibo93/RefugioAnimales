@@ -24,9 +24,9 @@ public class TareaConfig {
     }
 
     @Bean
-    public CreateTareaUseCase createTareaUseCase(TareaRepository repository, 
-                                               es.refugio.refugio.domain.repository.VoluntarioRepository voluntarioRepository,
-                                               es.refugio.refugio.application.service.NotificacionService notificacionService) {
+    public CreateTareaUseCase createTareaUseCase(TareaRepository repository,
+            es.refugio.refugio.domain.repository.VoluntarioRepository voluntarioRepository,
+            es.refugio.refugio.application.service.NotificacionService notificacionService) {
         return new CreateTareaUseCase(repository, voluntarioRepository, notificacionService);
     }
 
@@ -37,11 +37,7 @@ public class TareaConfig {
 
     @Bean
     public EditTareaUseCase editTareaUseCase(TareaRepository repository,
-<<<<<<< Updated upstream
             es.refugio.refugio.application.service.NotificacionService notificacionService) {
-=======
-                                           es.refugio.refugio.application.service.NotificacionService notificacionService) {
->>>>>>> Stashed changes
         return new EditTareaUseCase(repository, notificacionService);
     }
 

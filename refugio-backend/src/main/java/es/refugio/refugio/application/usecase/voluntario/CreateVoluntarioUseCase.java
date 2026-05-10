@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 public class CreateVoluntarioUseCase {
 
     private final VoluntarioRepository voluntarioRepository;
-<<<<<<< Updated upstream
     private final es.refugio.refugio.domain.repository.PerfilLegalRepository perfilLegalRepository;
-=======
->>>>>>> Stashed changes
     private final es.refugio.refugio.application.service.NotificacionService notificacionService;
 
     public Voluntario create(CreateVoluntarioCommand command) {
@@ -35,7 +32,6 @@ public class CreateVoluntarioUseCase {
 
         Voluntario saved = voluntarioRepository.save(voluntario);
 
-<<<<<<< Updated upstream
         // Notificar a los Administradores (por ROL)
         notificacionService.enviarARol(
                 "ROLE_ADMIN",
@@ -52,26 +48,6 @@ public class CreateVoluntarioUseCase {
                     "¡Felicidades! Has sido aceptado como voluntario. Ya puedes ver tus tareas asignadas.",
                     "SISTEMA",
                     "/web/tareas");
-=======
-        // Notificar al Administrador (ID 1 por convención)
-        notificacionService.enviar(
-            1, 
-            "Nueva Petición de Voluntariado", 
-            "Un usuario ha solicitado unirse como voluntario.", 
-            "SISTEMA", 
-            "/web/voluntarios"
-        );
-
-        // Notificar al propio Voluntario (Aceptación)
-        if (command.usuarioId() != null) {
-            notificacionService.enviar(
-                command.usuarioId().getValue(),
-                "Bienvenido al Refugio",
-                "¡Felicidades! Has sido aceptado como voluntario. Ya puedes ver tus tareas asignadas.",
-                "SISTEMA",
-                "/web/tareas"
-            );
->>>>>>> Stashed changes
         }
 
         return saved;
