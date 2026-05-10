@@ -41,7 +41,7 @@ public class AdopcionMapper {
                 a.getId() != null ? a.getId().getValue() : null,
                 a.getAnimalId() != null ? a.getAnimalId().getValue() : null,
                 a.getAdoptanteId() != null ? a.getAdoptanteId().getValue() : null,
-                // Si tienes un Dto nuevo que soporte la solicitud, añadelo, si no el Request se queda igual
+                a.getSolicitudAdopcionId(),
                 a.getFechaAdopcion(),
                 a.getEstado() != null ? a.getEstado().name() : null,
                 a.getContrato());

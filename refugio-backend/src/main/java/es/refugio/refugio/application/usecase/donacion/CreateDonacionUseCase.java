@@ -56,7 +56,7 @@ public class CreateDonacionUseCase {
                                 String titulo = "🎯 ¡Objetivo Alcanzado!";
                                 String mensaje = String.format("¡Felicidades! Se ha completado el objetivo: '%s'. Se han recaudado %.2f€.", 
                                         objetivo.getTitulo(), nuevoMonto);
-                                notificacionService.enviarARol("ROLE_ADMIN", titulo, mensaje, "OBJETIVO_CUMPLIDO", "/web/donaciones");
+                                notificacionService.enviar(1, titulo, mensaje, "OBJETIVO_CUMPLIDO", "/web/donaciones");
                             } catch (Exception e) {
                                 // No bloqueamos la donación si falla la notificación
                             }

@@ -116,10 +116,38 @@ public class SolicitudAdopcionViewController {
             }
         }
 
+        // Cargar mapa de Adopciones para botones de contrato
+        Map<String, Integer> solicitudToAdopcionMap = new HashMap<>();
+        try {
+            List<Map<String, Object>> allAdopciones = restTemplate.exchange(
+                    apiUrl + "/v1/adopciones",
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<List<Map<String, Object>>>() {}).getBody();
+            
+            if (allAdopciones != null && solicitudes != null) {
+                for (Object sObj : solicitudes) {
+                    if (sObj instanceof Map) {
+                        Map<String, Object> s = (Map<String, Object>) sObj;
+                        if ("APROBADA".equals(s.get("estado"))) {
+                            String key = s.get("adoptanteId") + "_" + s.get("animalId");
+                            allAdopciones.stream()
+                                .filter(ad -> key.equals(ad.get("adoptanteId") + "_" + ad.get("animalId")))
+                                .findFirst()
+                                .ifPresent(ad -> solicitudToAdopcionMap.put(String.valueOf(s.get("id")), (Integer) ad.get("id")));
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Error al cargar mapa de adopciones para lista: " + e.getMessage());
+        }
+
         model.addAttribute(ModelAttribute.Solicitud_LIST.getName(), solicitudes);
         model.addAttribute("animalesMap", animalesMap);
         model.addAttribute("adoptanteNombres", adoptanteNombres);
         model.addAttribute("adoptanteUsuarioIds", adoptanteUsuarioIds);
+        model.addAttribute("solicitudToAdopcionMap", solicitudToAdopcionMap);
         if (successMessage != null)
             model.addAttribute("successMessage", successMessage);
         model.addAttribute("currentUri", WebRoutes.SOLICITUDES_BASE);
@@ -350,16 +378,12 @@ public class SolicitudAdopcionViewController {
     @PreAuthorize("hasRole('ADMIN')")
     public String aprobarSolicitud(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
-            Map<String, Object> existing = restTemplate.getForObject(apiUrl + "/v1/solicitudes-adopcion/" + id,
-                    Map.class);
-            if (existing != null) {
-                Map<String, Object> body = new HashMap<>(existing);
-                body.put("estado", "APROBADA");
-                restTemplate.put(apiUrl + "/v1/solicitudes-adopcion/" + id, body);
-                redirectAttributes.addFlashAttribute("successMessage", "Solicitud aprobada");
-            }
+            // Llamamos al endpoint específico de aprobación que crea la Adopción automáticamente
+            restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/" + id + "/aprobar", null, Object.class);
+            redirectAttributes.addFlashAttribute("successMessage", "Solicitud aprobada y adopción registrada correctamente.");
         } catch (Exception e) {
             logger.error("Error al aprobar solicitud: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar la aprobación.");
         }
         return "redirect:" + WebRoutes.SOLICITUDES_BASE;
     }
@@ -852,7 +876,7 @@ public class SolicitudAdopcionViewController {
     }
 
     @GetMapping(WebRoutes.SOLICITUDES_DETALLE)
-    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
     public String verDetalle(@PathVariable Integer id, Model model) {
         Map<String, Object> sol = restTemplate.exchange(
                 apiUrl + "/v1/solicitudes-adopcion/" + id,
@@ -879,6 +903,27 @@ public class SolicitudAdopcionViewController {
                         model.addAttribute("perfilAdoptante", perfil);
                     } catch (Exception e) {
                         logger.error("Error al cargar PerfilLegal para detalle: " + e.getMessage());
+                    }
+
+                    // Si la solicitud está APROBADA, buscamos la adopción para el contrato
+                    if ("APROBADA".equals(sol.get("estado"))) {
+                        try {
+                            List<Map<String, Object>> adopciones = restTemplate.exchange(
+                                    apiUrl + "/v1/adopciones/adoptante/" + sol.get("adoptanteId"),
+                                    HttpMethod.GET,
+                                    null,
+                                    new ParameterizedTypeReference<List<Map<String, Object>>>() {}).getBody();
+                            
+                            if (adopciones != null) {
+                                String animalIdStr = String.valueOf(sol.get("animalId"));
+                                adopciones.stream()
+                                    .filter(a -> animalIdStr.equals(String.valueOf(a.get("animalId"))))
+                                    .findFirst()
+                                    .ifPresent(a -> model.addAttribute("adopcionId", a.get("id")));
+                            }
+                        } catch (Exception e) {
+                            logger.error("Error al buscar adopción para contrato: " + e.getMessage());
+                        }
                     }
                 }
             } catch (Exception e) {

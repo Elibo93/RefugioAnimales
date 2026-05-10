@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Contrato de Adopción</title>
+    <style>
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; line-height: 1.5; padding: 40px; }
+        .header { text-align: center; border-bottom: 2px solid #4a90e2; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { color: #4a90e2; margin: 0; text-transform: uppercase; font-size: 24px; }
+        .header p { margin: 5px 0 0; color: #777; font-size: 14px; }
+        .section { margin-bottom: 25px; }
+        .section-title { font-weight: bold; font-size: 16px; border-bottom: 1px solid #eee; margin-bottom: 10px; color: #444; }
+        .data-grid { width: 100%; margin-top: 10px; }
+        .data-label { font-weight: bold; width: 30%; color: #666; }
+        .data-value { width: 70%; }
+        .clauses { font-size: 12px; text-align: justify; color: #555; }
+        .footer { margin-top: 50px; }
+        .signature-box { width: 45%; display: inline-block; text-align: center; border-top: 1px solid #333; padding-top: 10px; margin-top: 80px; }
+        .signature-box.right { float: right; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Contrato de Adopción Responsable</h1>
+        <p>Refugio de Animales - Huellas de Esperanza</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">1. DATOS DEL ADOPTANTE</div>
+        <table class="data-grid">
+            <tr>
+                <td class="data-label">Nombre Completo:</td>
+                <td class="data-value" th:text="${adoptanteNombre + ' ' + adoptanteApellido}">Juan Pérez</td>
+            </tr>
+            <tr>
+                <td class="data-label">DNI / NIE:</td>
+                <td class="data-value" th:text="${adoptanteDni}">12345678Z</td>
+            </tr>
+            <tr>
+                <td class="data-label">Teléfono:</td>
+                <td class="data-value" th:text="${adoptanteTelefono}">600 000 000</td>
+            </tr>
+            <tr>
+                <td class="data-label">Dirección:</td>
+                <td class="data-value" th:text="${adoptanteDireccion}">Calle Falsa 123, Madrid</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. DATOS DEL ANIMAL</div>
+        <table class="data-grid">
+            <tr>
+                <td class="data-label">Nombre del Animal:</td>
+                <td class="data-value" th:text="${animalNombre}">Balto</td>
+            </tr>
+            <tr>
+                <td class="data-label">Especie / Raza:</td>
+                <td class="data-value" th:text="${animalEspecie + ' / ' + animalRaza}">Perro / Husky</td>
+            </tr>
+            <tr>
+                <td class="data-label">Código Chip:</td>
+                <td class="data-value" th:text="${animalChip}">CHIP123456</td>
+            </tr>
+            <tr>
+                <td class="data-label">Edad Aproximada:</td>
+                <td class="data-value" th:text="${animalEdad + ' años'}">2 años</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. CLÁUSULAS DEL CONTRATO</div>
+        <div class="clauses">
+            <p>1. El adoptante se compromete a cuidar del animal, proporcionándole alimento, cobijo y atención veterinaria necesaria.</p>
+            <p>2. Queda terminantemente prohibido el maltrato, abandono o venta del animal adoptado.</p>
+            <p>3. El refugio se reserva el derecho de realizar visitas de seguimiento para comprobar el bienestar del animal.</p>
+            <p>4. En caso de no poder seguir haciéndose cargo del animal, el adoptante deberá contactar con el refugio antes de tomar cualquier otra medida.</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>En cumplimiento con la normativa vigente, ambas partes firman el presente contrato en fecha: <span th:text="${fechaActual}">10/05/2026</span></p>
+        
+        <div class="signature-box">
+            Firma del Adoptante<br/>
+            (DNI: <span th:text="${adoptanteDni}"></span>)
+        </div>
+        
+        <div class="signature-box right">
+            Firma del Refugio<br/>
+            Responsable Administrativo
+        </div>
+    </div>
+</body>
+</html>
