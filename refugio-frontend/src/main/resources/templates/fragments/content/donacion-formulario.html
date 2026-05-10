@@ -13,7 +13,6 @@
 -->
 <div th:fragment="content">
         <div id="formulario-donacion" class="glass-panel"
-             th:if="${isAdmin == null or !isAdmin}"
              style="max-width:800px; margin:2rem auto; padding: 3rem; border-radius: 24px;">
             
             <div class="page-header" style="text-align:center; margin-bottom: 2.5rem;">
@@ -27,6 +26,13 @@
                 <p style="color: var(--text-muted); margin-top: 0.5rem;">Tu generosidad hace posible nuestra labor diaria</p>
             </div>
 
+            <!-- Mensaje de Error -->
+            <div th:if="${errorMessage}" class="alert alert-danger" 
+                 style="margin-bottom: 2rem; padding: 1.25rem; border-radius: 20px; border: 1px solid #fee2e2; background: #fef2f2; color: #991b1b; display: flex; align-items: center; gap: 1rem;">
+                <i data-lucide="alert-circle"></i>
+                <span th:text="${errorMessage}"></span>
+            </div>
+
             <form th:action="${formActionUrl}" method="post">
                 <input type="hidden" name="frecuencia" id="frecuencia-input"
                     th:value="${donacion != null and donacion.get('frecuencia') != null ? donacion.get('frecuencia') : 'UNICA'}">
@@ -36,17 +42,31 @@
                     <!-- 1. IDENTIFICACIÓN -->
                     <div class="form-group">
                         <label style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">Donante</label>
-                        <div th:if="${currentUserId != null}" class="alert alert-success"
-                            style="padding: 1rem; border-radius: 12px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; display: flex; align-items: center; gap: 10px;">
-                            <i data-lucide="user" style="width: 20px;"></i>
-                            <span style="font-weight: 600;" th:text="${currentUserName}">Nombre de Usuario</span>
+                        
+                        <!-- Si es Admin, puede elegir usuario -->
+                        <div th:if="${isAdmin}" class="select-wrapper">
+                            <select name="usuarioId" required style="width: 100%; padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1rem; background: white;">
+                                <option value="" disabled th:selected="${currentUserId == null}">Selecciona un donante...</option>
+                                <option th:each="u : ${usuarios}" th:value="${u.get('id')}" th:text="${u.get('username') + ' (' + u.get('email') + ')'}"
+                                        th:selected="${u.get('id') == currentUserId}"></option>
+                            </select>
                         </div>
-                        <div th:unless="${currentUserId != null}" class="alert alert-info"
-                            style="padding: 1rem; border-radius: 12px; background: #f0f9ff; color: #075985; border: 1px solid #bae6fd; display: flex; align-items: center; gap: 10px;">
-                            <i data-lucide="info" style="width: 20px;"></i>
-                            <span style="font-weight: 600;">Donación Anónima</span>
+
+                        <!-- Si no es Admin, vemos su nombre o anónimo -->
+                        <div th:unless="${isAdmin}">
+                            <div th:if="${currentUserId != null}" class="alert alert-success"
+                                style="padding: 1rem; border-radius: 12px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; display: flex; align-items: center; gap: 10px;">
+                                <i data-lucide="user" style="width: 20px;"></i>
+                                <span style="font-weight: 600;" th:text="${currentUserName}">Nombre de Usuario</span>
+                                <input type="hidden" name="usuarioId" th:value="${currentUserId}">
+                            </div>
+                            <div th:unless="${currentUserId != null}" class="alert alert-info"
+                                style="padding: 1rem; border-radius: 12px; background: #f0f9ff; color: #075985; border: 1px solid #bae6fd; display: flex; align-items: center; gap: 10px;">
+                                <i data-lucide="info" style="width: 20px;"></i>
+                                <span style="font-weight: 600;">Donación Anónima</span>
+                                <input type="hidden" name="usuarioId" th:value="${currentUserId}">
+                            </div>
                         </div>
-                        <input type="hidden" name="usuarioId" th:value="${currentUserId}">
                     </div>
 
                     <!-- 2. SELECTOR DE TIPO -->

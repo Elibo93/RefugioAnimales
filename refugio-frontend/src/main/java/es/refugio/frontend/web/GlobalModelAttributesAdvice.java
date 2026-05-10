@@ -65,10 +65,10 @@ public class GlobalModelAttributesAdvice {
                     if (perfil != null) {
                         model.addAttribute("currentUserName", perfil.get("nombre") + " " + perfil.get("apellido"));
                     } else {
-                        model.addAttribute("currentUserName", me.get("email")); // Fallback to email
+                        model.addAttribute("currentUserName", me.get("username")); // Fallback to username
                     }
                 } catch (Exception e) {
-                    model.addAttribute("currentUserName", me.get("email")); // Fallback to email
+                    model.addAttribute("currentUserName", me.get("username")); // Fallback to username
                 }
 
                 String rol = me.get("rol") != null ? String.valueOf(me.get("rol")).toUpperCase() : "";

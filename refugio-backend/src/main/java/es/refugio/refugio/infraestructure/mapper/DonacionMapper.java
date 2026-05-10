@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import es.refugio.refugio.application.command.donacion.CreateDonacionCommand;
 import es.refugio.refugio.application.command.donacion.EditDonacionCommand;
+import es.refugio.refugio.domain.model.donacion.enums.FrecuenciaDonacion;
+import es.refugio.refugio.domain.model.donacion.enums.TipoDonacion;
 import es.refugio.refugio.domain.model.donacion.Donacion;
 import es.refugio.refugio.domain.model.donacion.DonacionId;
 import es.refugio.refugio.domain.model.donacion.ObjetivoDonacionId;
@@ -71,9 +73,9 @@ public class DonacionMapper {
                 .id(d.getId() != null ? d.getId().getValue() : null)
                 .usuarioId(usuarioId)
                 .objetivoId(objetivoId)
-                .tipo(d.getTipo())
+                .tipo(d.getTipo() != null ? d.getTipo().name() : null)
                 .cantidad(d.getCantidad())
-                .frecuencia(d.getFrecuencia())
+                .frecuencia(d.getFrecuencia() != null ? d.getFrecuencia().name() : null)
                 .fecha(d.getFecha())
                 .proximaFechaPago(d.getProximaFechaPago())
                 .descripcion(d.getDescripcion())
@@ -85,13 +87,31 @@ public class DonacionMapper {
                 .id(e.getId() != null ? new DonacionId(e.getId()) : null)
                 .usuarioId(e.getUsuarioId() != null ? new UsuarioId(e.getUsuarioId()) : null)
                 .objetivoId(e.getObjetivoId() != null ? new ObjetivoDonacionId(e.getObjetivoId()) : null)
-                .tipo(e.getTipo())
+                .tipo(mapTipo(e.getTipo()))
                 .cantidad(e.getCantidad())
-                .frecuencia(e.getFrecuencia())
+                .frecuencia(mapFrecuencia(e.getFrecuencia()))
                 .fecha(e.getFecha())
                 .proximaFechaPago(e.getProximaFechaPago())
                 .descripcion(e.getDescripcion())
                 .build();
+    }
+
+    private static TipoDonacion mapTipo(String tipo) {
+        if (tipo == null) return null;
+        try {
+            return TipoDonacion.valueOf(tipo);
+        } catch (IllegalArgumentException e) {
+            return TipoDonacion.OTRO;
+        }
+    }
+
+    private static FrecuenciaDonacion mapFrecuencia(String frecuencia) {
+        if (frecuencia == null) return null;
+        try {
+            return FrecuenciaDonacion.valueOf(frecuencia);
+        } catch (IllegalArgumentException e) {
+            return FrecuenciaDonacion.UNICA;
+        }
     }
 
     public static List<Donacion> toDomain(List<DonacionEntity> entities) {

@@ -43,53 +43,68 @@
                 </div>
             </div>
 
-            <table id="tablaadopciones">
-                <thead>
-                    <tr>
-                        <th th:text="#{adopcion.table.header.id}">ID</th>
-                        <th th:text="#{adopcion.table.header.persona}">persona</th>
-                        <th th:text="#{adopcion.table.header.animal}">animal</th>
-                        <th th:text="#{adopcion.table.header.date}">Fecha</th>
-                        <th th:text="#{adopcion.table.header.action}">Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-adopciones-body">
-                    <tr th:each="i : ${adopciones}" th:id="'row-' + ${i.get('id')}">
-                        <td th:text="${i.get('id')}">1</td>
-                        <td>
-                            <a th:href="@{/web/personas/{id}(id=${adoptanteUsuarioIds != null ? adoptanteUsuarioIds['' + i.get('adoptanteId')] : '0'})}" 
-                               style="font-weight:600; color:var(--primary); text-decoration: none;"
-                               th:text="${adoptanteNombres != null and i.get('adoptanteId') != null ? adoptanteNombres['' + i.get('adoptanteId')] : (i.get('adoptanteId') != null ? i.get('adoptanteId') : 'Desconocido')}">
-                                Juan Pérez
-                            </a>
-                        </td>
-                        <td>
-                            <a th:href="@{/web/animales/{id}(id=${i.get('animalId')})}" 
-                               style="color:var(--secondary); font-weight:600; text-decoration: none;"
-                               th:text="${animalesMap != null and i.get('animalId') != null and animalesMap['' + i.get('animalId')] != null ? animalesMap['' + i.get('animalId')].get('nombre') : (i.get('animalId') != null ? i.get('animalId') : '-')}">
-                                Animal
-                            </a>
-                        </td>
-                        <td th:text="${i.get('fechaAdopcion') != null ? i.get('fechaAdopcion') : '-'}">01/01/2023</td>
-                        <td style="display:flex; gap:8px;">
-                            <a class="btn-icon" th:href="@{/web/adopciones/{id}/editar(id=${i.get('id')})}">
-                                <i data-lucide="edit-2" style="width:16px;"></i>
+            <!-- LISTA PREMIUM DE ADOPCIONES -->
+            <div class="premium-list-container" style="margin-top: 1.5rem;">
+                <div class="list-header" style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
+                    <div style="flex: 0.5; text-align: center;">ID</div>
+                    <div style="flex: 2;">Adoptante</div>
+                    <div style="flex: 2;">Animal</div>
+                    <div style="flex: 1.5; text-align: center;">Fecha de Adopción</div>
+                    <div style="flex: 1.2; text-align: center;">Acciones</div>
+                </div>
+
+                <div class="list-body" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div th:each="i : ${adopciones}" class="premium-row-card" th:id="'row-' + ${i.get('id')}">
+                        <div class="row-cell" style="flex: 0.5; justify-content: center; font-weight: 700; color: var(--text-muted);" th:text="${i.get('id')}">1</div>
+                        
+                        <div class="row-cell" style="flex: 2;">
+                            <div style="display: flex; align-items: center; gap: 12px;" 
+                                 th:with="usuarioId=${adoptanteUsuarioIds != null ? adoptanteUsuarioIds['' + i.get('adoptanteId')] : null}, 
+                                          perfilObj=${perfilesMap != null and usuarioId != null ? perfilesMap['' + usuarioId] : null},
+                                          usuarioObj=${usuariosMap != null and usuarioId != null ? usuariosMap['' + usuarioId] : null}">
+                                <div class="task-icon-box" style="background: #dcfce7;">
+                                    <i data-lucide="user" style="width: 18px; color: #22c55e;"></i>
+                                </div>
+                                <a th:href="@{/web/personas/{id}(id=${usuarioId != null ? usuarioId : '0'})}" 
+                                   style="font-weight: 800; color: var(--text-main); text-decoration: none;"
+                                   th:text="${perfilObj != null and perfilObj.get('nombre') != null ? (perfilObj.get('nombre') + ' ' + (perfilObj.get('apellido') ?: '')) : 
+                                            (usuarioObj != null and usuarioObj.get('nombre') != null ? (usuarioObj.get('nombre') + ' ' + (usuarioObj.get('apellido') ?: '')) : 
+                                            (usuarioObj != null ? usuarioObj.get('username') : 'Adoptante #' + i.get('adoptanteId')))}">Juan Pérez</a>
+                            </div>
+                        </div>
+
+                        <div class="row-cell" style="flex: 2;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="task-icon-box" style="background: #fef9c3;">
+                                    <i data-lucide="dog" style="width: 18px; color: #ca8a04;"></i>
+                                </div>
+                                <a th:href="@{/web/animales/{id}(id=${i.get('animalId')})}" 
+                                   style="font-weight: 800; color: var(--secondary); text-decoration: none;"
+                                   th:text="${animalesMap != null and i.get('animalId') != null and animalesMap['' + i.get('animalId')] != null ? animalesMap['' + i.get('animalId')].get('nombre') : 'Animal'}">Rocky</a>
+                            </div>
+                        </div>
+
+                        <div class="row-cell" style="flex: 1.5; justify-content: center; font-weight: 600; color: var(--text-muted);" 
+                             th:text="${i.get('fechaAdopcion') != null ? i.get('fechaAdopcion') : '-'}">01/01/2023</div>
+
+                        <div class="row-cell" style="flex: 1.2; justify-content: center; gap: 8px;">
+                            <a class="btn-icon" th:href="@{/web/adopciones/{id}/editar(id=${i.get('id')})}" title="Editar">
+                                <i data-lucide="edit-2" style="width: 16px;"></i>
                             </a>
                             <button class="btn-icon delete"
                                 th:hx-post="@{/web/adopciones/{id}/borrar(id=${i.get('id')})}"
                                 th:hx-target="'#row-' + ${i.get('id')}" hx-swap="outerHTML swap:0.3s"
                                 hx-confirm="¿Eliminar inscripción?">
-                                <i data-lucide="trash-2" style="width:16px;"></i>
+                                <i data-lucide="trash-2" style="width: 16px;"></i>
                             </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                        </div>
+                    </div>
+                </div>
 
-            <div th:if="${#lists.isEmpty(adopciones)}"
-                style="text-align:center; padding:3rem; color:var(--text-muted);">
-                <i data-lucide="inbox" style="width:48px; height:48px; margin-bottom:1rem; opacity:0.5;"></i>
-                <p th:text="#{adopcion.list.empty}">No hay adopciones registradas.</p>
+                <div th:if="${#lists.isEmpty(adopciones)}" style="text-align:center; padding:5rem; background:white; border-radius:24px; border:1px solid var(--border); margin-top: 1rem;">
+                    <i data-lucide="heart-off" style="width:48px; height:48px; margin-bottom:1rem; color: var(--text-muted); opacity: 0.3;"></i>
+                    <p style="color: var(--text-muted); font-weight: 600;" th:text="#{adopcion.list.empty}">No hay adopciones registradas.</p>
+                </div>
             </div>
         </div>
 

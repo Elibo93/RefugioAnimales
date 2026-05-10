@@ -21,55 +21,59 @@
                     </a>
                 </div>
             </div>
-            <table id="tablahistoriales">
-                <thead>
-                    <tr>
-                        <th th:text="#{persona.table.header.id}">ID</th>
-                        <th th:text="#{historial.table.header.animal}">Animal</th>
-                        <th th:text="#{historial.table.header.fecha}">Fecha</th>
-                        <th th:text="#{historial.table.header.veterinario}">Veterinario</th>
-                        <th th:text="#{animal.table.header.action}">Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="h : ${historiales}" th:id="'row-' + ${h.get('id')}">
-                        <td th:text="${h.get('id')}">1</td>
-                        <td style="font-weight:600;color:var(--primary);"
-                            th:with="a=${h.get('animalId') != null and animalesMap != null ? animalesMap[h.get('animalId')] : null}"
-                            th:text="${a != null ? a.get('nombre') : 'Desconocido'}">Animal</td>
-                        <td
-                            th:text="${h.get('fecha') != null ? h.get('fecha').toString().replace('T', ' ').substring(0, (h.get('fecha').toString().length() > 10 ? 10 : h.get('fecha').toString().length())) : '-'}">
-                            01/01/2024</td>
-                        <td th:text="${h.get('veterinario')}">Dr. Smith</td>
-                        <td class="actions-cell">
-                            <!-- Botón de Ver Detalle -->
-                            <button class="btn-icon" 
-                                    th:hx-get="@{/web/historiales/{id}/detalle(id=${h.get('id')})}"
-                                    hx-target="#modal-host"
-                                    title="Ver Detalles">
+            <!-- LISTA PREMIUM DE HISTORIALES MÉDICOS -->
+            <div class="premium-list-container" style="margin-top: 1.5rem;">
+                <div class="list-header" style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
+                    <div style="flex: 0.5; text-align: center;">ID</div>
+                    <div style="flex: 2;">Animal</div>
+                    <div style="flex: 1.2; text-align: center;">Fecha Consulta</div>
+                    <div style="flex: 2;">Veterinario / Especialista</div>
+                    <div style="flex: 1.5; text-align: center;">Acciones</div>
+                </div>
+
+                <div class="list-body" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div th:each="h : ${historiales}" class="premium-row-card" th:id="'row-' + ${h.get('id')}">
+                        <div class="row-cell" style="flex: 0.5; justify-content: center; font-weight: 700; color: var(--text-muted);" th:text="${h.get('id')}">1</div>
+
+                        <div class="row-cell" style="flex: 2;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="task-icon-box" style="background: #ecfdf5;">
+                                    <i data-lucide="stethoscope" style="width: 18px; color: #10b981;"></i>
+                                </div>
+                                <div style="font-weight: 800; color: var(--primary);"
+                                     th:with="a=${h.get('animalId') != null and animalesMap != null ? animalesMap[h.get('animalId')] : null}"
+                                     th:text="${a != null ? a.get('nombre') : 'Desconocido'}">Animal</div>
+                            </div>
+                        </div>
+
+                        <div class="row-cell" style="flex: 1.2; justify-content: center; font-weight: 600; color: var(--text-muted);"
+                             th:text="${h.get('fecha') != null ? h.get('fecha').toString().substring(0, 10) : '-'}">01/01/24</div>
+
+                        <div class="row-cell" style="flex: 2;">
+                            <div style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text-main);">
+                                <i data-lucide="user-plus" style="width: 14px; color: var(--text-muted);"></i>
+                                <span th:text="${h.get('veterinario')}">Dr. Smith</span>
+                            </div>
+                        </div>
+
+                        <div class="row-cell" style="flex: 1.5; justify-content: center; gap: 8px;">
+                            <button class="btn-icon" th:hx-get="@{/web/historiales/{id}/detalle(id=${h.get('id')})}" hx-target="#modal-host" title="Ver Detalles">
                                 <i data-lucide="eye"></i>
                             </button>
-                            
-                            <a class="btn-icon" 
-                               th:hx-get="@{/web/historiales/{id}/editar(id=${h.get('id')})}" 
-                               hx-target="#contenido-dinamico"
-                               hx-push-url="true"
-                               title="Editar">
+                            <a class="btn-icon" th:hx-get="@{/web/historiales/{id}/editar(id=${h.get('id')})}" hx-target="#contenido-dinamico" hx-push-url="true" title="Editar">
                                 <i data-lucide="edit-2"></i>
                             </a>
-                            <button class="btn-icon delete"
-                                th:hx-post="@{/web/historiales/{id}/borrar(id=${h.get('id')})}"
-                                th:hx-target="'#row-' + ${h.get('id')}" hx-swap="outerHTML swap:0.3s"
-                                hx-confirm="¿Eliminar historial médico?">
-                                <i data-lucide="trash-2" style="width:16px;"></i>
+                            <button class="btn-icon delete" th:hx-post="@{/web/historiales/{id}/borrar(id=${h.get('id')})}" th:hx-target="'#row-' + ${h.get('id')}" hx-swap="outerHTML swap:0.3s" hx-confirm="¿Eliminar?">
+                                <i data-lucide="trash-2"></i>
                             </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <div th:if="${#lists.isEmpty(historiales)}" style="text-align:center;padding:3rem;color:var(--text-muted);">
-                <i data-lucide="inbox" style="width:48px; height:48px; margin-bottom:1rem; opacity:0.5;"></i>
-                <p th:text="#{historial.list.empty}">No hay historiales registrados.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(historiales)}" style="text-align:center; padding:5rem; background:white; border-radius:24px; border:1px solid var(--border); margin-top: 1rem;">
+                    <i data-lucide="stethoscope" style="width:48px; height:48px; margin-bottom:1rem; color: var(--text-muted); opacity: 0.3;"></i>
+                    <p style="color: var(--text-muted); font-weight: 600;" th:text="#{historial.list.empty}">No hay historiales médicos registrados.</p>
+                </div>
             </div>
         </div>
 

@@ -28,8 +28,6 @@ import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioRequest;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioResponse;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioUpdateRequest;
 
-import es.refugio.refugio.domain.model.perfil_legal.PerfilLegal;
-import es.refugio.refugio.domain.repository.PerfilLegalRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,38 +45,20 @@ public class VoluntarioController {
     private final FindVoluntarioService findVoluntarioService;
     private final EditVoluntarioService editVoluntarioService;
     private final DeleteVoluntarioService deleteVoluntarioService;
-    private final PerfilLegalRepository perfilLegalRepository;
 
     @Operation(summary = "Crear voluntario", description = "Registra un nuevo voluntario vinculado a un usuario")
-    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Voluntario creado"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
+    @ApiResponses({ @ApiResponse(responseCode = "201", description = "Voluntario creado"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<VoluntarioResponse> create(@Valid @RequestBody VoluntarioRequest request) {
-        // Asegurar PerfilLegal
-        perfilLegalRepository.findByUsuarioId(request.usuarioId())
-                .map(existing -> {
-                    if (request.nombre() != null) existing.setNombre(request.nombre());
-                    if (request.apellido() != null) existing.setApellido(request.apellido());
-                    if (request.dni() != null) existing.setDni(request.dni());
-                    if (request.telefono() != null) existing.setTelefono(request.telefono());
-                    if (request.direccion() != null) existing.setDireccion(request.direccion());
-                    return perfilLegalRepository.save(existing);
-                })
-                .orElseGet(() -> perfilLegalRepository.save(PerfilLegal.builder()
-                        .usuarioId(request.usuarioId())
-                        .nombre(request.nombre() != null ? request.nombre() : "")
-                        .apellido(request.apellido() != null ? request.apellido() : "")
-                        .dni(request.dni() != null ? request.dni() : "")
-                        .telefono(request.telefono() != null ? request.telefono() : "")
-                        .direccion(request.direccion() != null ? request.direccion() : "")
-                        .build()));
-
         CreateVoluntarioCommand command = VoluntarioMapper.toCommand(request);
         Voluntario voluntario = createVoluntarioService.createVoluntario(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(VoluntarioMapper.toResponse(voluntario));
     }
 
     @Operation(summary = "Actualizar voluntario")
-    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Voluntario actualizado"), @ApiResponse(responseCode = "404", description = "No encontrado") })
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Voluntario actualizado"),
+            @ApiResponse(responseCode = "404", description = "No encontrado") })
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<VoluntarioResponse> update(@PathVariable Integer id,

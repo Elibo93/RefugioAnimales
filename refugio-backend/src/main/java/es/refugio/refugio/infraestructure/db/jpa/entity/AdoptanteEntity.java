@@ -20,11 +20,6 @@ public class AdoptanteEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-
-
-    @Column(name = "fecha_nacimiento", length = 50)
-    private String fechaNacimiento;
-
     @Column(name = "estado_validacion", nullable = false, length = 50)
     private String estadoValidacion;
 

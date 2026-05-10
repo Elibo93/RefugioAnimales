@@ -99,6 +99,29 @@
 
                             <div class="form-group">
                                 <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                    <i data-lucide="credit-card" style="width: 16px; color: #64748b;"></i>
+                                    <span>DNI / NIE</span>
+                                </label>
+                                <input type="text" name="dni" th:value="${persona.get('dni')}"
+                                    class="form-control"
+                                    placeholder="12345678X"
+                                    style="width: 100%; border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; transition: all 0.2s;">
+                            </div>
+                        </div>
+
+                        <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                    <i data-lucide="calendar" style="width: 16px; color: #64748b;"></i>
+                                    <span>Fecha de Nacimiento</span>
+                                </label>
+                                <input type="date" name="fechaNacimiento" th:value="${persona.get('fechaNacimiento')}"
+                                    class="form-control"
+                                    style="width: 100%; border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; transition: all 0.2s;">
+                            </div>
+
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
                                     <i data-lucide="shield" style="width: 16px; color: #64748b;"></i>
                                     <span th:text="#{persona.table.header.rol}">Rol</span>
                                 </label>

@@ -68,6 +68,14 @@ document.addEventListener('DOMContentLoaded', () => {
             suggestions.innerHTML = '';
         }
     });
+
+    // 4. Inicialización global de componentes
+    refreshDynamicComponents();
+});
+
+// 5. Soporte para HTMX: Refrescar componentes tras cada carga de fragmento
+document.addEventListener('htmx:afterSettle', () => {
+    refreshDynamicComponents();
 });
 
 
@@ -204,13 +212,15 @@ function filterByPriority(priority, btn) {
         container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
     }
-    const rows = document.querySelectorAll('.task-row');
-    rows.forEach(row => {
-        const rowPriority = row.getAttribute('data-priority');
+    // Buscamos tanto filas de tabla como tarjetas premium
+    const elements = document.querySelectorAll('.task-row, .premium-row-card');
+    elements.forEach(el => {
+        const rowPriority = el.getAttribute('data-priority');
         if (priority === 'ALL' || rowPriority === priority) {
-            row.style.display = 'table-row';
+            // Si es una fila de tabla (TR), usamos table-row; si es una tarjeta (DIV), usamos flex
+            el.style.display = (el.tagName === 'TR') ? 'table-row' : 'flex';
         } else {
-            row.style.display = 'none';
+            el.style.display = 'none';
         }
     });
 }

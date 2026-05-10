@@ -66,6 +66,7 @@ public interface WebRoutes {
     // SOLICITUDES ADOPCIÓN
     String SOLICITUDES_BASE         = "/web/solicitudes";
     String SOLICITUDES_NUEVA        = "/web/solicitudes/nueva";
+    String SOLICITUDES_DETALLE      = "/web/solicitudes/{id}/detalle";
     String SOLICITUDES_EDITAR       = "/web/solicitudes/{id}/editar";
     String SOLICITUDES_ELIMINAR     = "/web/solicitudes/{id}/borrar";
     String SOLICITUDES_PDF          = "/web/solicitudes/pdf";

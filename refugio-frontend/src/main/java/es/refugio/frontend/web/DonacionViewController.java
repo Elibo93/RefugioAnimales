@@ -55,23 +55,25 @@ public class DonacionViewController {
         Map<Integer, Object> usuariosMap = new HashMap<>();
         for (Object u : usuarios) {
             if (u instanceof Map) {
-                Object id = ((Map<?, ?>) u).get("id");
-                if (id instanceof Number) {
-                    usuariosMap.put(((Number) id).intValue(), u);
+                Object idObj = ((Map<?, ?>) u).get("id");
+                if (idObj instanceof Number) {
+                    usuariosMap.put(((Number) idObj).intValue(), u);
                 }
             }
         }
 
-        // Obtener el total recaudado desde el backend
-        Double totalDinero = 0.0;
+        double totalDinero = 0;
         try {
-            Double callRes = restTemplate.getForObject(apiUrl + "/v1/donaciones/total", Double.class);
-            if (callRes != null) {
-                totalDinero = callRes;
-            }
+            Double total = restTemplate.getForObject(apiUrl + "/v1/donaciones/total", Double.class);
+            totalDinero = total != null ? total : 0;
         } catch (Exception e) {
-            totalDinero = 0.0;
         }
+
+        if (successMessage != null && !successMessage.isEmpty()) {
+            model.addAttribute("successMessage", successMessage);
+        }
+
+        // El contexto de usuario (isAdmin, currentUserId, currentUserName) lo provee GlobalModelAttributesAdvice
 
         model.addAttribute(ModelAttribute.Donacion_LIST.getName(), donaciones);
         model.addAttribute("usuarios", usuarios);
@@ -90,7 +92,7 @@ public class DonacionViewController {
         nuevaDonacion.put("objetivoId", null);
 
         model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), nuevaDonacion);
-        model.addAttribute("tipos", List.of("DINERO", "ALIMENTO", "MEDICAMENTO", "MATERIAL", "OTRO"));
+        model.addAttribute("tipos", List.of("DINERO", "COMIDA", "MEDICINAS", "OTRO"));
         model.addAttribute("formActionUrl", "/web/donaciones/nueva");
 
         if (successMessage != null) {
@@ -118,10 +120,12 @@ public class DonacionViewController {
         nuevaDonacion.put("descripcion", "");
         nuevaDonacion.put("objetivoId", null);
 
+        // El contexto de usuario (isAdmin, currentUserId, currentUserName) lo provee GlobalModelAttributesAdvice
+
         model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), nuevaDonacion);
         model.addAttribute("usuarios", usuarios);
         model.addAttribute("objetivos", objetivos);
-        model.addAttribute("tipos", List.of("DINERO", "ALIMENTO", "MEDICAMENTO", "MATERIAL", "OTRO"));
+        model.addAttribute("tipos", List.of("DINERO", "COMIDA", "MEDICINAS", "OTRO"));
         model.addAttribute("formActionUrl", "/web/donaciones/nueva");
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -139,6 +143,17 @@ public class DonacionViewController {
             @RequestParam(required = false) String descripcion,
             Model model) {
 
+        // Si no hay usuarioId, buscamos el usuario anónimo del sistema
+        if (usuarioId == null) {
+            List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+            for (Object u : usuarios) {
+                if (u instanceof Map && "anonimo@refugio.es".equals(((Map<?, ?>) u).get("email"))) {
+                    usuarioId = (Integer) ((Map<?, ?>) u).get("id");
+                    break;
+                }
+            }
+        }
+
         Map<String, Object> donacionTemp = new HashMap<>();
         donacionTemp.put("usuarioId", usuarioId);
         donacionTemp.put("objetivoId", objetivoId);
@@ -153,6 +168,44 @@ public class DonacionViewController {
             String formattedDate = String.format("%02d/%02d/%d", next.getDayOfMonth(), next.getMonthValue(),
                     next.getYear());
             donacionTemp.put("proximaFechaPago", formattedDate);
+        }
+
+        if (!"DINERO".equals(tipo)) {
+            // Si no es dinero (comida, material, etc.), registramos directamente sin pasarela
+            Map<String, Object> body = new HashMap<>();
+            body.put("usuarioId", usuarioId);
+            body.put("objetivoId", objetivoId);
+            body.put("tipo", tipo);
+            body.put("cantidad", cantidad);
+            body.put("frecuencia", frecuencia);
+            body.put("descripcion", (descripcion != null) ? descripcion : "");
+            body.put("fecha", LocalDateTime.now().toString());
+
+            try {
+                restTemplate.postForObject(apiUrl + "/v1/donaciones", body, Object.class);
+                model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_GRACIAS.getPath());
+                return ThymTemplates.MAIN_LAYOUT.getPath();
+            } catch (Exception e) {
+                String errorMsg = "Error al registrar la donación física.";
+                if (e instanceof org.springframework.web.client.RestClientResponseException) {
+                    org.springframework.web.client.RestClientResponseException re = (org.springframework.web.client.RestClientResponseException) e;
+                    try {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> errorMap = re.getResponseBodyAs(Map.class);
+                        if (errorMap != null && errorMap.containsKey("message")) {
+                            errorMsg = (String) errorMap.get("message");
+                        }
+                    } catch (Exception ignored) {}
+                } else {
+                    errorMsg = e.getMessage();
+                }
+                model.addAttribute("errorMessage", errorMsg);
+                // Volver al formulario con los datos
+                model.addAttribute("donacion", donacionTemp);
+                model.addAttribute("tipos", List.of("DINERO", "COMIDA", "MEDICINAS", "OTRO"));
+                model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_FORM.getPath());
+                return ThymTemplates.MAIN_LAYOUT.getPath();
+            }
         }
 
         model.addAttribute("donacion", donacionTemp);
@@ -173,6 +226,17 @@ public class DonacionViewController {
             @RequestParam String descripcion,
             Model model) {
 
+        // Asegurar que tenemos un usuarioId (si sigue siendo null, buscamos el anónimo)
+        if (usuarioId == null) {
+            List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+            for (Object u : usuarios) {
+                if (u instanceof Map && "anonimo@refugio.es".equals(((Map<?, ?>) u).get("email"))) {
+                    usuarioId = (Integer) ((Map<?, ?>) u).get("id");
+                    break;
+                }
+            }
+        }
+
         Map<String, Object> body = new HashMap<>();
         body.put("usuarioId", usuarioId);
         body.put("objetivoId", objetivoId);
@@ -182,7 +246,33 @@ public class DonacionViewController {
         body.put("descripcion", descripcion);
         body.put("fecha", LocalDateTime.now().toString());
 
-        restTemplate.postForObject(apiUrl + "/v1/donaciones", body, Object.class);
+        try {
+            restTemplate.postForObject(apiUrl + "/v1/donaciones", body, Object.class);
+        } catch (org.springframework.web.client.RestClientResponseException e) {
+            String errorMsg = "Error al procesar la donación.";
+            try {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> errorMap = e.getResponseBodyAs(Map.class);
+                if (errorMap != null && errorMap.containsKey("message")) {
+                    errorMsg = (String) errorMap.get("message");
+                } else {
+                    errorMsg = e.getStatusText();
+                }
+            } catch (Exception ignored) {
+                errorMsg = e.getMessage();
+            }
+            model.addAttribute("errorMessage", errorMsg);
+            model.addAttribute("donacion", body);
+            model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
+                    FragmentoContenido.Donacion_PASARELA.getPath());
+            return ThymTemplates.MAIN_LAYOUT.getPath();
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Error inesperado: " + e.getMessage());
+            model.addAttribute("donacion", body);
+            model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
+                    FragmentoContenido.Donacion_PASARELA.getPath());
+            return ThymTemplates.MAIN_LAYOUT.getPath();
+        }
 
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_GRACIAS.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -244,7 +334,7 @@ public class DonacionViewController {
         model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), donacion);
         model.addAttribute("usuarios", fetchList(authUrl + "/v1/usuarios"));
         model.addAttribute("objetivos", fetchList("/v1/objetivos-donacion"));
-        model.addAttribute("tipos", List.of("DINERO", "ALIMENTO", "MEDICAMENTO", "MATERIAL", "OTRO"));
+        model.addAttribute("tipos", List.of("DINERO", "COMIDA", "MEDICINAS", "OTRO"));
         model.addAttribute("formActionUrl", "/web/donaciones/" + id + "/editar");
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();

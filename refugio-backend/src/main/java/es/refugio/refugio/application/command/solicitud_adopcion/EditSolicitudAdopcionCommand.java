@@ -10,6 +10,7 @@ public record EditSolicitudAdopcionCommand(
         SolicitudAdopcionId id,
         LocalDateTime fecha,
         String estado,
-        String comentario
+        String comentario,
+        String comentarioAdmin
 ) {
 }

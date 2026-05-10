@@ -1,175 +1,226 @@
-<div th:fragment="content" class="fade-in" style="max-width: 1000px; margin: 0 auto; padding: 20px;">
+<div th:fragment="content" class="fade-in" style="max-width: 1100px; margin: 0 auto; padding: 20px;">
     
-    <!-- Ficha Unificada de Persona -->
-    <div class="unified-profile-card glass-card" style="background: var(--bg-main); border: 1px solid var(--border-color); overflow: hidden; border-radius: 24px; box-shadow: var(--shadow-lg);">
+    <!-- HEADER PREMIUM: IDENTIDAD VISUAL -->
+    <div class="profile-header-card" style="background: white; border-radius: 32px; overflow: hidden; box-shadow: var(--shadow-lg); margin-bottom: 2rem; border: 1px solid var(--border);">
+        <div style="height: 160px; background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%); position: relative;">
+            <!-- Decoración sutil -->
+            <div style="position: absolute; right: -50px; top: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
+            <div style="position: absolute; left: 10%; bottom: -10px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 20px; transform: rotate(15deg);"></div>
+        </div>
         
-        <!-- Header Principal: Identidad -->
-        <div class="profile-header-banner" style="background: linear-gradient(135deg, var(--primary), #4f46e5); padding: 50px 40px; position: relative;">
-            <div style="display: flex; align-items: center; gap: 30px;">
-                <div class="avatar-box" style="width: 120px; height: 120px; border-radius: 30px; background: white; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); border: 4px solid rgba(255,255,255,0.3);">
-                    <div style="width: 100%; height: 100%; border-radius: 22px; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; color: white; font-weight: 800;">
-                        <span th:text="${persona.get('nombre').substring(0,1)}">U</span>
+        <div style="padding: 0 40px 40px; position: relative;">
+            <div style="display: flex; align-items: flex-end; gap: 30px; margin-top: -80px;">
+                <!-- Avatar Dinámico -->
+                <div style="width: 160px; height: 160px; border-radius: 40px; background: white; padding: 8px; box-shadow: var(--shadow-lg);">
+                    <div style="width: 100%; height: 100%; border-radius: 32px; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-size: 4rem; font-weight: 800; color: var(--primary);">
+                        <span th:text="${persona.get('nombre') != null ? persona.get('nombre').substring(0,1).toUpperCase() : persona.get('username').substring(0,1).toUpperCase()}">U</span>
                     </div>
                 </div>
-                <div class="identity-info" style="color: white;">
-                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 5px;">
-                        <h1 th:text="${persona.get('nombre') + ' ' + (persona.get('apellido') ?: '')}" style="margin: 0; font-size: 2.4rem; font-weight: 800; color: white;">Nombre Apellido</h1>
-                        <span class="badge-soon" th:classappend="${persona.get('rol') == 'ROLE_ADMIN' ? 'danger' : (persona.get('rol') == 'ROLE_VOLUNTARIO' ? 'secondary' : 'primary')}" 
-                              style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white;"
-                              th:text="${persona.get('rol')}">ROL</span>
+                
+                <div style="flex: 1; padding-bottom: 10px;">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 8px;">
+                        <h1 th:text="${persona.get('nombre') != null ? (persona.get('nombre') + ' ' + (persona.get('apellido') ?: '')) : persona.get('username')}" 
+                            style="margin: 0; font-size: 2.5rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em;">Nombre Completo</h1>
+                        <span class="badge-premium" 
+                              th:classappend="${persona.get('rol').toString().contains('ADMIN') ? 'danger' : (persona.get('rol').toString().contains('VOLUNTARIO') ? 'info' : (persona.get('rol').toString().contains('ADOPTANTE') ? 'primary' : 'success'))}"
+                              th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(persona.get('rol').toString().replace('ROLE_', ''), '_', ' ')))}">Rol</span>
                     </div>
-                    <div style="display: flex; gap: 20px; opacity: 0.9; font-size: 1rem;">
-                        <span style="display: flex; align-items: center; gap: 8px;"><i data-lucide="mail" style="width: 18px;"></i> <span th:text="${persona.get('email')}">email@ejemplo.com</span></span>
-                        <span style="display: flex; align-items: center; gap: 8px;"><i data-lucide="phone" style="width: 18px;"></i> <span th:text="${persona.get('telefono') ?: 'Sin teléfono'}">600 000 000</span></span>
+                    <p style="color: var(--text-muted); font-size: 1.1rem; font-weight: 500; margin: 0; display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="at-sign" style="width: 18px;"></i>
+                        <span th:text="${persona.get('username')}">@usuario</span>
+                    </p>
+                </div>
+
+                <div style="padding-bottom: 15px;">
+                    <a th:href="@{/web/personas/{id}/editar(id=${persona.get('id')})}" class="btn btn-primary" style="display: flex; align-items: center; gap: 8px; border-radius: 14px;">
+                        <i data-lucide="edit-3" style="width: 18px;"></i>
+                        Editar Perfil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GRID DE INFORMACIÓN -->
+    <div style="display: grid; grid-template-columns: 1fr 1.8fr; gap: 2rem;">
+        
+        <!-- COLUMNA IZQUIERDA: DATOS DE CONTACTO Y CUENTA -->
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+            
+            <!-- Bloque: Datos de Cuenta -->
+            <div class="glass-card" style="background: white; padding: 30px; border-radius: 24px; border: 1px solid var(--border);">
+                <h3 style="font-size: 0.9rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <i data-lucide="shield-check" style="width: 18px; color: var(--primary);"></i>
+                    Seguridad y Cuenta
+                </h3>
+                
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div>
+                        <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">Correo Electrónico</span>
+                        <div style="display: flex; align-items: center; gap: 10px; color: var(--text-main); font-weight: 600;">
+                            <i data-lucide="mail" style="width: 16px; opacity: 0.6;"></i>
+                            <span th:text="${persona.get('email')}">email@ejemplo.com</span>
+                        </div>
+                    </div>
+                    <div>
+                        <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">Teléfono de Contacto</span>
+                        <div style="display: flex; align-items: center; gap: 10px; color: var(--text-main); font-weight: 600;">
+                            <i data-lucide="phone" style="width: 16px; opacity: 0.6;"></i>
+                            <span th:text="${persona.get('telefono') ?: 'No proporcionado'}">600...</span>
+                        </div>
+                    </div>
+                    <div>
+                        <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">Fecha de Registro</span>
+                        <div style="display: flex; align-items: center; gap: 10px; color: var(--text-main); font-weight: 600;">
+                            <i data-lucide="calendar-plus" style="width: 16px; opacity: 0.6;"></i>
+                            <span th:text="${persona.get('createdAt') != null ? persona.get('createdAt').toString().substring(0,10) : 'No disponible'}">2024-01-01</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <a th:href="@{/web/personas/{id}/editar(id=${persona.get('id')})}" class="btn btn-secondary" style="position: absolute; top: 30px; right: 30px; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px);">
-                <i data-lucide="edit" style="width: 18px; margin-right: 8px;"></i> Editar Perfil
-            </a>
+
+            <!-- Bloque: Información Legal -->
+            <div class="glass-card" style="background: white; padding: 30px; border-radius: 24px; border: 1px solid var(--border);">
+                <h3 style="font-size: 0.9rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <i data-lucide="file-text" style="width: 18px; color: var(--primary);"></i>
+                    Perfil Legal
+                </h3>
+                
+                <div th:if="${persona.get('dni') == null}" style="text-align: center; padding: 10px; background: var(--bg-body); border-radius: 12px; border: 1px dashed var(--border);">
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Perfil legal no completado.</p>
+                </div>
+
+                <div th:if="${persona.get('dni') != null}" style="display: flex; flex-direction: column; gap: 20px;">
+                    <div>
+                        <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">DNI / Documento</span>
+                        <span style="color: var(--text-main); font-weight: 700; font-size: 1.1rem;" th:text="${persona.get('dni')}">12345678X</span>
+                    </div>
+                    <div>
+                        <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">Dirección Residencia</span>
+                        <span style="color: var(--text-main); font-weight: 500; font-size: 0.95rem; line-height: 1.4;" th:text="${persona.get('direccion') ?: 'No especificada'}">Madrid, España</span>
+                    </div>
+                    <div>
+                        <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">Fecha de Nacimiento</span>
+                        <div style="display: flex; align-items: center; gap: 10px; color: var(--text-main); font-weight: 600;">
+                            <i data-lucide="cake" style="width: 16px; opacity: 0.6;"></i>
+                            <span th:text="${persona.get('fechaNacimiento') ?: 'No proporcionada'}">2000-01-01</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="profile-body" style="padding: 40px;">
+        <!-- COLUMNA DERECHA: ACTIVIDAD Y VÍNCULOS -->
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
             
-            <!-- SECCIÓN: Datos de Adoptante (Solo si es adoptante) -->
-            <div th:if="${adoptante != null}" class="role-section" style="margin-bottom: 40px; padding-bottom: 40px; border-bottom: 1px solid var(--border-color);">
+            <!-- SECCIÓN VOLUNTARIADO -->
+            <div th:if="${voluntario != null}" class="glass-card" style="background: white; padding: 35px; border-radius: 24px; border: 1px solid var(--border);">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px;">
-                    <h3 style="margin: 0; display: flex; align-items: center; gap: 12px; color: var(--primary); font-size: 1.4rem;">
-                        <i data-lucide="heart"></i> Información de Adoptante
+                    <h3 style="margin: 0; display: flex; align-items: center; gap: 12px; color: var(--primary); font-size: 1.3rem; font-weight: 800;">
+                        <i data-lucide="heart-handshake" style="width: 24px;"></i>
+                        Actividad de Voluntariado
                     </h3>
-                    <span class="badge-soon success" style="padding: 5px 15px;">PERFIL VALIDADO ✓</span>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
-                    <div style="padding: 15px; background: var(--bg-secondary); border-radius: 15px;">
-                        <span style="display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">DNI</span>
-                        <strong th:text="${adoptante.get('dni')}">12345678X</strong>
-                    </div>
-                    <div style="padding: 15px; background: var(--bg-secondary); border-radius: 15px;">
-                        <span style="display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Fecha Nacimiento</span>
-                        <strong th:text="${adoptante.get('fechaNacimiento')}">01/01/1990</strong>
-                    </div>
-                    <div style="padding: 15px; background: var(--bg-secondary); border-radius: 15px;">
-                        <span style="display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Ubicación</span>
-                        <strong th:text="${adoptante.get('direccion') ?: 'No especificada'}">Madrid</strong>
+                    <div style="text-align: right;">
+                        <span style="display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Disponibilidad</span>
+                        <span style="color: var(--primary); font-weight: 700;" th:text="${voluntario.get('disponibilidad') ?: 'No definida'}">Fines de semana</span>
                     </div>
                 </div>
 
-                <h4 style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 15px;">Animales Adoptados</h4>
-                <div th:if="${#lists.isEmpty(vinculosAnimales)}" style="padding: 20px; text-align: center; border: 1px dashed var(--border-color); border-radius: 15px; color: var(--text-muted);">
-                    No hay solicitudes ni animales registrados.
-                </div>
-                <div th:if="${!#lists.isEmpty(vinculosAnimales)}" style="display: flex; flex-direction: column; gap: 10px;">
-                    <div th:each="v : ${vinculosAnimales}" style="display: flex; align-items: center; justify-content: space-between; padding: 15px; background: var(--bg-secondary); border-radius: 15px; border: 1px solid var(--border-color);">
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <div style="width: 40px; height: 40px; border-radius: 10px; background: white; display: flex; align-items: center; justify-content: center; color: var(--primary);">
-                                <i th:data-lucide="${v.get('estadoVinculo') == 'ADOPTADO' ? 'dog' : 'file-text'}"></i>
-                            </div>
-                            <div>
-                                <a th:href="@{/web/animales/{id}(id=${v.get('animalId')})}" style="text-decoration: none; color: inherit;">
-                                    <strong style="display: block; font-size: 1rem; color: var(--primary);" th:text="${animalNames != null ? animalNames['' + v.get('animalId')] : 'Animal #' + v.get('animalId')}">Nombre</strong>
-                                </a>
-                                <span style="font-size: 0.8rem; color: var(--text-muted);" th:text="${(v.get('tipoVinculo') ?: 'TRÁMITE') + ' - ' + (v.get('fechaVinculo') != null ? v.get('fechaVinculo').toString().substring(0,10) : 'Fecha N/A')}">01/01/2024</span>
+                <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 15px;">Últimas Tareas Asignadas</h4>
+                    
+                    <div th:if="${#lists.isEmpty(tareas)}" style="padding: 30px; text-align: center; background: var(--bg-body); border-radius: 16px; border: 1px dashed var(--border);">
+                        <p style="color: var(--text-muted); margin: 0;">Sin tareas registradas recientemente.</p>
+                    </div>
+
+                    <div th:if="${!#lists.isEmpty(tareas)}" style="display: flex; flex-direction: column; gap: 12px;">
+                        <div th:each="t : ${tareas}" class="premium-row-card" style="padding: 15px; background: var(--bg-body); border: 1px solid var(--border); border-radius: 16px;">
+                            <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
+                                <div class="task-icon-box" style="background: white; border: 1px solid var(--border);">
+                                    <i data-lucide="clipboard-list" style="width: 18px; color: var(--primary);"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <span style="display: block; font-weight: 700; color: var(--text-main); font-size: 0.95rem;" th:text="${t.get('descripcion')}">Tarea</span>
+                                    <span style="font-size: 0.8rem; color: var(--text-muted);" 
+                                          th:text="${t.get('fechaLimite') != null ? 'Límite: ' + t.get('fechaLimite').toString().substring(0,10) : 'Sin fecha'}">2024-01-01</span>
+                                </div>
+                                <span class="badge-premium" 
+                                      th:classappend="${t.get('estado') == 'COMPLETADA' ? 'success' : (t.get('estado') == 'CANCELADA' ? 'danger' : (t.get('estado') == 'EN_PROCESO' ? 'info' : 'warning'))}"
+                                      th:text="${t.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(t.get('estado'), '_', ' '))) : 'Pendiente'}">Pendiente</span>
                             </div>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <span class="badge-soon" 
-                                  th:classappend="${v.get('estadoVinculo') == 'ADOPTADO' or v.get('estadoVinculo') == 'APROBADA' ? 'success' : (v.get('estadoVinculo') == 'RECHAZADA' ? 'danger' : 'warning')}" 
-                                  th:text="${v.get('estadoVinculo')}">ESTADO</span>
-                            <a th:href="@{/web/animales/{id}(id=${v.get('animalId')})}" class="btn-icon" style="background: white;">
-                                <i data-lucide="chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN ADOPCIONES Y SOLICITUDES -->
+            <div th:if="${adoptante != null}" class="glass-card" style="background: white; padding: 35px; border-radius: 24px; border: 1px solid var(--border);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px;">
+                    <h3 style="margin: 0; display: flex; align-items: center; gap: 12px; color: #7e22ce; font-size: 1.3rem; font-weight: 800;">
+                        <i data-lucide="dog" style="width: 24px;"></i>
+                        Historial de Adopciones
+                    </h3>
+                </div>
+
+                <div th:if="${#lists.isEmpty(vinculosAnimales)}" style="padding: 30px; text-align: center; background: var(--bg-body); border-radius: 16px; border: 1px dashed var(--border);">
+                    <p style="color: var(--text-muted); margin: 0;">No se han encontrado registros de adopción o solicitudes.</p>
+                </div>
+
+                <div th:if="${!#lists.isEmpty(vinculosAnimales)}" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div th:each="v : ${vinculosAnimales}" class="premium-row-card" style="padding: 15px; background: var(--bg-body); border: 1px solid var(--border); border-radius: 16px;">
+                        <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
+                            <div class="task-icon-box" style="background: white; border: 1px solid var(--border); width: 45px; height: 45px;">
+                                <i th:data-lucide="${v.get('tipoVinculo') == 'ADOPCIÓN' ? 'award' : 'file-search'}" 
+                                   th:style="'width: 20px; color: ' + (${v.get('tipoVinculo') == 'ADOPCIÓN' ? '#7e22ce' : '#ea580c'})"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <a th:href="${v.get('tipoVinculo') == 'SOLICITUD'} ? @{/web/solicitudes/{id}/detalle(id=${v.get('id')})} : @{/web/animales/{id}(id=${v.get('animalId')})}" 
+                                       style="font-weight: 800; color: var(--text-main); font-size: 1.05rem; text-decoration: none;"
+                                       th:text="${animalNames != null ? animalNames['' + v.get('animalId')] : 'Animal #' + v.get('animalId')}">Nombre Animal</a>
+                                    <span style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 6px; background: #f3f4f6; color: #6b7280;" 
+                                          th:text="${v.get('tipoVinculo')}">SOLICITUD</span>
+                                </div>
+                                <span style="font-size: 0.8rem; color: var(--text-muted);" 
+                                      th:text="${v.get('fechaVinculo') != null ? v.get('fechaVinculo').toString().substring(0,10) : 'Fecha pendiente'}">2024-01-01</span>
+                            </div>
+                            <span class="badge-premium" 
+                                  th:classappend="${v.get('estadoVinculo') == 'ADOPTADO' or v.get('estadoVinculo') == 'APROBADA' or v.get('estadoVinculo') == 'FINALIZADA' ? 'success' : (v.get('estadoVinculo') == 'RECHAZADA' ? 'danger' : 'warning')}" 
+                                  th:text="${v.get('estadoVinculo') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(v.get('estadoVinculo'), '_', ' '))) : 'Pendiente'}">Estado</span>
+                            <a th:href="${v.get('tipoVinculo') == 'SOLICITUD'} ? @{/web/solicitudes/{id}/detalle(id=${v.get('id')})} : @{/web/animales/{id}(id=${v.get('animalId')})}" class="btn-icon">
+                                <i data-lucide="arrow-right" style="width: 16px;"></i>
                             </a>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- SECCIÓN: Datos de Voluntario (Solo si es voluntario) -->
-            <div th:if="${voluntario != null}" class="role-section" style="margin-bottom: 40px; padding-bottom: 40px; border-bottom: 1px solid var(--border-color);">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px;">
-                    <h3 style="margin: 0; display: flex; align-items: center; gap: 12px; color: var(--secondary); font-size: 1.4rem;">
-                        <i data-lucide="shield"></i> Gestión de Voluntariado
-                    </h3>
-                    <div style="text-align: right;">
-                        <span style="display: block; font-size: 0.75rem; color: var(--text-muted);">DISPONIBILIDAD</span>
-                        <strong style="color: var(--secondary);" th:text="${voluntario.get('disponibilidad') ?: 'No especificada'}">Fines de semana</strong>
-                    </div>
+            <!-- SECCIÓN: Acciones para perfiles incompletos -->
+            <div th:if="${adoptante == null and voluntario == null}" style="text-align: center; padding: 40px; background: var(--primary-light); border-radius: 32px; border: 2px dashed var(--primary); opacity: 0.8;">
+                <div style="width: 70px; height: 70px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: var(--shadow-md);">
+                    <i data-lucide="user-plus" style="width: 30px; color: var(--primary);"></i>
                 </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h4 style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; margin: 0;">Historial de Tareas</h4>
-                    <!-- Filtros de Tareas -->
-                    <div id="task-filters" style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button onclick="filterListItems('btn-filter', 'task-item', 'ALL')" class="btn-filter active" data-filter="ALL">Todas</button>
-                        <button onclick="filterListItems('btn-filter', 'task-item', 'PENDIENTE')" class="btn-filter" data-filter="PENDIENTE">Pendientes</button>
-                        <button onclick="filterListItems('btn-filter', 'task-item', 'EN_PROCESO')" class="btn-filter" data-filter="EN_PROCESO">En Proceso</button>
-                        <button onclick="filterListItems('btn-filter', 'task-item', 'COMPLETADA')" class="btn-filter" data-filter="COMPLETADA">Completadas</button>
-                        <button onclick="filterListItems('btn-filter', 'task-item', 'CANCELADA')" class="btn-filter" data-filter="CANCELADA">Canceladas</button>
-                    </div>
-                </div>
-
-                <div th:if="${#lists.isEmpty(tareas)}" style="padding: 20px; text-align: center; border: 1px dashed var(--border-color); border-radius: 15px; color: var(--text-muted);">
-                    Sin tareas asignadas.
-                </div>
-                <div th:if="${!#lists.isEmpty(tareas)}" id="tasks-container" style="display: flex; flex-direction: column; gap: 10px;">
-                    <div th:each="t : ${tareas}" 
-                         class="task-item" 
-                         th:data-status="${t.get('estado')}"
-                         style="padding: 15px; background: var(--bg-secondary); border-radius: 15px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <div style="width: 40px; height: 40px; border-radius: 10px; background: white; display: flex; align-items: center; justify-content: center; color: var(--secondary);">
-                                <i data-lucide="clipboard-list"></i>
-                            </div>
-                            <div>
-                                <strong style="display: block; font-size: 1rem;" th:text="${t.get('descripcion')}">Descripción</strong>
-                                <span style="font-size: 0.8rem; color: var(--text-muted);" th:text="${'Programada: ' + t.get('fecha').toString().substring(0,10)}">2024-05-10</span>
-                            </div>
-                        </div>
-                        <span class="badge-soon" 
-                              th:classappend="${t.get('estado') == 'COMPLETADA' ? 'success' : (t.get('estado') == 'CANCELADA' ? 'danger' : (t.get('estado') == 'EN_PROCESO' ? 'info' : 'warning'))}" 
-                              th:text="${t.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(t.get('estado'), '_', ' '))) : ''}">ESTADO</span>
-                    </div>
-                </div>
-            </div>
-
-            <style>
-                .btn-filter {
-                    padding: 4px 12px;
-                    border-radius: 20px;
-                    border: 1px solid var(--border-color);
-                    background: var(--bg-secondary);
-                    color: var(--text-muted);
-                    font-size: 0.75rem;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                }
-                .btn-filter.active {
-                    background: var(--secondary);
-                    color: white;
-                    border-color: var(--secondary);
-                }
-                .btn-filter:hover:not(.active) {
-                    background: var(--border-color);
-                }
-            </style>
-
-
-
-            </div>
-
-            <!-- SECCIÓN: Perfil Público (Solo si no tiene roles operativos) -->
-            <div th:if="${adoptante == null and voluntario == null}" style="text-align: center; padding: 20px 0;">
-                <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-                    <i data-lucide="user" style="width: 30px; height: 30px; color: var(--primary);"></i>
-                </div>
-                <h3 style="margin-bottom: 10px;">Perfil de Usuario General</h3>
-                <p style="color: var(--text-muted); margin-bottom: 25px;">Este usuario no tiene perfiles adicionales registrados.</p>
-                <div style="display: flex; gap: 10px; justify-content: center;">
-                    <a th:href="@{/web/adoptantes/nuevo(usuarioId=${persona.get('id')})}" class="btn btn-primary">Registrar como Adoptante</a>
-                    <a th:href="@{/web/voluntarios/nuevo(usuarioId=${persona.get('id')})}" class="btn btn-secondary">Dar de Alta Voluntario</a>
+                <h3 style="font-weight: 800; color: var(--primary); margin-bottom: 10px;">Perfil Operativo Pendiente</h3>
+                <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto 25px; font-size: 0.95rem;">
+                    Este usuario actualmente solo tiene una cuenta de acceso. Puedes registrarlo como adoptante o voluntario para habilitar sus funciones operativas.
+                </p>
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <a th:href="@{/web/adoptantes/nuevo(usuarioId=${persona.get('id')})}" class="btn btn-primary" style="padding: 10px 20px;">
+                        <i data-lucide="heart" style="width: 16px; margin-right: 8px;"></i>
+                        Registrar Adoptante
+                    </a>
+                    <a th:href="@{/web/voluntarios/nuevo(usuarioId=${persona.get('id')})}" class="btn btn-secondary" style="padding: 10px 20px;">
+                        <i data-lucide="shield-check" style="width: 16px; margin-right: 8px;"></i>
+                        Alta Voluntario
+                    </a>
                 </div>
             </div>
 
         </div>
     </div>
+    
+    <script>
+        if (window.lucide) lucide.createIcons();
+    </script>
+</div>/div>
 </div>

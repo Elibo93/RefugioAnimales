@@ -69,10 +69,22 @@ public class UsuarioController {
             CreateUsuarioCommand comando = UsuarioMapper.toCommand(usuarioRequest);
             Usuario usuario = createUsuarioService.createUsuario(comando);
             return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioMapper.toResponse(usuario));
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            String msg = e.getMostSpecificCause().getMessage();
+            String userFriendlyMsg = "Error: El nombre de usuario o el email ya están registrados.";
+            
+            if (msg != null && msg.contains("usuarios.UKm2dvbwfge291euvmk6vkkocao")) {
+                 userFriendlyMsg = "El nombre de usuario ya está en uso.";
+            } else if (msg != null && msg.contains("email")) {
+                 userFriendlyMsg = "El correo electrónico ya está registrado.";
+            }
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", userFriendlyMsg));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "Error interno: " + e.getMessage()));
+                    .body(Map.of("message", "Error interno al registrar el usuario: " + e.getMessage()));
         }
     }
 

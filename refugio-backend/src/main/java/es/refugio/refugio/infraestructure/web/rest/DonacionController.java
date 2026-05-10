@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
+import es.refugio.refugio.infraestructure.security.CustomUserDetails;
 
 import es.refugio.refugio.application.command.donacion.CreateDonacionCommand;
 import es.refugio.refugio.application.command.donacion.EditDonacionCommand;
@@ -28,6 +29,8 @@ import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.infraestructure.mapper.DonacionMapper;
 import es.refugio.refugio.infraestructure.web.dto.donacion.DonacionRequest;
 import es.refugio.refugio.infraestructure.web.dto.donacion.DonacionResponse;
+import es.refugio.refugio.application.service.NotificacionService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,6 +48,7 @@ public class DonacionController {
     private final FindDonacionService findDonacionService;
     private final EditDonacionService editDonacionService;
     private final DeleteDonacionService deleteDonacionService;
+    private final NotificacionService notificacionService;
 
     @Operation(summary = "Registrar donación")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Donación registrada"),
@@ -56,24 +60,62 @@ public class DonacionController {
                 && !auth.getPrincipal().equals("anonymousUser");
 
         if (isAuthenticated) {
-            boolean isVolunteer = auth.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_VOLUNTARIO"));
+            boolean isAdmin = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-            if (isVolunteer) {
-                if (request.tipo() == null) {
-                    throw new IllegalArgumentException("El tipo de donación es obligatorio.");
-                }
-                String tipo = request.tipo().name();
-                if (!tipo.equals("COMIDA") && !tipo.equals("OTRO") && !tipo.equals("MATERIAL")) {
+            if (!isAdmin) {
+                // Si no es admin, verificar que el usuarioId coincida con el del token
+                CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+                Integer currentUserId = userDetails.getId();
 
+                if (!request.usuarioId().equals(currentUserId)) {
                     throw new AccessDeniedException(
-                            "Los voluntarios solo pueden registrar donaciones físicas (COMIDA o MATERIAL/OTRO).");
+                            "Solo los administradores pueden registrar donaciones para otros usuarios.");
                 }
             }
+        } else {
+            // Si no está autenticado, solo permitimos donaciones anónimas (usuarioId debe
+            // corresponder al anónimo)
+            // Nota: Aquí se podría validar contra el ID del usuario anónimo real si fuera
+            // necesario.
         }
 
         CreateDonacionCommand command = DonacionMapper.toCommand(request);
         Donacion donacion = createDonacionService.create(command);
+
+        // Notificar al Admin
+        try {
+            String donorName = "Un donante anónimo";
+            if (isAuthenticated) {
+                Object principal = auth.getPrincipal();
+                if (principal instanceof CustomUserDetails) {
+                    donorName = ((CustomUserDetails) principal).getUsername();
+                }
+            }
+
+            String unidad = donacion.getTipo() != null && "DINERO".equalsIgnoreCase(donacion.getTipo().name()) ? "€"
+                    : "uds/kg";
+            String titulo = "❤️ ¡Nueva Donación Recibida!";
+            String mensaje = String.format("%s ha donado %s %s en concepto de %s.",
+                    donorName,
+                    donacion.getCantidad(),
+                    unidad,
+                    donacion.getTipo());
+
+            notificacionService.enviarARol("ROLE_ADMIN", titulo, mensaje, "DONACION", "/web/donaciones");
+
+            // Notificar al Donante (si está autenticado)
+            if (isAuthenticated && request.usuarioId() != null) {
+                String tituloUser = "❤️ ¡Gracias por tu donación!";
+                String mensajeUser = String.format(
+                        "Hemos recibido tu donación de %s %s. Tu apoyo es fundamental para seguir cuidando de nuestros animales.",
+                        donacion.getCantidad(), unidad);
+                notificacionService.enviar(request.usuarioId(), tituloUser, mensajeUser, "DONACION", "/web/donaciones");
+            }
+        } catch (Exception e) {
+            // No bloqueamos la donación si falla la notificación
+        }
+
         return ResponseEntity.status(HttpStatus.CREATED).body(DonacionMapper.toResponse(donacion));
     }
 
