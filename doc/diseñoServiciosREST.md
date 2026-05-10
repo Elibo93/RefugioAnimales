@@ -42,6 +42,15 @@ Gestionado por el microservicio `refugio-auth`.
 
 ---
 
+### 3. Búsqueda y Filtros Avanzados
+| Método | Endpoint | Descripción | Roles |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/animales/buscar` | Búsqueda dinámica por múltiples criterios. | Público |
+| `GET` | `/api/v1/animales/favoritos` | TOP animales con más interacciones. | Público |
+| `GET` | `/api/v1/personas/buscar` | Búsqueda parcial de perfiles por nombre. | `ADMIN` |
+
+---
+
 ### 3. Procesos de Adopción
 | Método | Endpoint | Descripción | Roles |
 | :--- | :--- | :--- | :--- |
