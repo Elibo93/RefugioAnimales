@@ -20,6 +20,9 @@ public record AnimalRequest(
         Integer nivelEnergia,
         Boolean urgencia
 ) {
+    public AnimalRequest withFoto(String nuevaFoto) {
+        return new AnimalRequest(nombre, especie, especiePersonalizada, raza, sexo, chipId, estado, edad, tamano, descripcion, nuevaFoto, fechaIngreso, peso, nivelEnergia, urgencia);
+    }
     
     public AnimalRequest(Animal t) {
         this(

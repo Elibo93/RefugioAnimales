@@ -4,11 +4,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
@@ -207,6 +210,7 @@ public class AnimalViewController {
             @RequestParam(required = false) Integer nivelEnergia,
             @RequestParam(required = false) Boolean urgencia,
             @RequestParam(required = false) String fechaIngreso,
+            @RequestParam(value = "fotoArchivo", required = false) MultipartFile fotoArchivo,
             RedirectAttributes redirectAttributes,
             HttpServletRequest request) {
 
@@ -239,7 +243,25 @@ public class AnimalViewController {
         }
 
         try {
-            restTemplate.postForObject(apiUrl + "/v1/animales", body, Object.class);
+            // Preparar el MultiValueMap para enviar multipart al Backend
+            MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+            
+            // Parte 1: El JSON del animal
+            HttpHeaders jsonHeaders = new HttpHeaders();
+            jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> animalEntity = new HttpEntity<>(body, jsonHeaders);
+            parts.add("animal", animalEntity);
+            
+            // Parte 2: El archivo (si existe)
+            if (fotoArchivo != null && !fotoArchivo.isEmpty()) {
+                parts.add("fotoArchivo", fotoArchivo.getResource());
+            }
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(parts, headers);
+
+            restTemplate.postForObject(apiUrl + "/v1/animales", requestEntity, Object.class);
             redirectAttributes.addFlashAttribute("successMessage", "Animal creado correctamente");
         } catch (org.springframework.web.client.HttpClientErrorException e) {
             System.err.println(
@@ -288,6 +310,7 @@ public class AnimalViewController {
             @RequestParam(required = false) Integer nivelEnergia,
             @RequestParam(required = false) Boolean urgencia,
             @RequestParam(required = false) String fechaIngreso,
+            @RequestParam(value = "fotoArchivo", required = false) MultipartFile fotoArchivo,
             RedirectAttributes redirectAttributes) {
 
         Map<String, Object> body = new HashMap<>();
@@ -307,7 +330,25 @@ public class AnimalViewController {
             body.put("fechaIngreso", fechaIngreso);
         }
 
-        restTemplate.put(apiUrl + "/v1/animales/" + id, body);
+        try {
+            MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+            HttpHeaders jsonHeaders = new HttpHeaders();
+            jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> animalEntity = new HttpEntity<>(body, jsonHeaders);
+            parts.add("animal", animalEntity);
+            
+            if (fotoArchivo != null && !fotoArchivo.isEmpty()) {
+                parts.add("fotoArchivo", fotoArchivo.getResource());
+            }
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(parts, headers);
+
+            restTemplate.put(apiUrl + "/v1/animales/" + id, requestEntity);
+        } catch (Exception e) {
+            System.err.println("Error editando animal: " + e.getMessage());
+        }
         redirectAttributes.addFlashAttribute("successMessage", "Animal editado correctamente");
         return "redirect:" + WebRoutes.ANIMALES_BASE;
     }

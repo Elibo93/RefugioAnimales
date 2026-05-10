@@ -14,10 +14,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import es.refugio.refugio.application.command.animal.CreateAnimalCommand;
@@ -32,6 +33,7 @@ import es.refugio.refugio.infraestructure.mapper.AnimalMapper;
 import es.refugio.refugio.infraestructure.web.dto.animal.AnimalRequest;
 import es.refugio.refugio.infraestructure.web.dto.animal.AnimalResponse;
 
+import es.refugio.refugio.application.service.storage.FileStorageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,14 +51,23 @@ public class AnimalController {
     private final FindAnimalService findAnimalService;
     private final EditAnimalService editAnimalService;
     private final DeleteAnimalService deleteAnimalService;
+    private final FileStorageService fileStorageService;
 
     @Operation(summary = "Crear animal", description = "Registra un nuevo animal en el refugio")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Animal creado"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos") })
-    @PostMapping
+    @PostMapping(consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<AnimalResponse> createAnimal(@Valid @RequestBody AnimalRequest request) {
-        CreateAnimalCommand comando = AnimalMapper.toCommand(request);
+    public ResponseEntity<AnimalResponse> createAnimal(
+            @RequestPart("animal") @Valid AnimalRequest request,
+            @RequestPart(value = "fotoArchivo", required = false) MultipartFile fotoArchivo) {
+
+        String fotoUrl = request.foto();
+        if (fotoArchivo != null && !fotoArchivo.isEmpty()) {
+            fotoUrl = fileStorageService.storeFile(fotoArchivo, request.nombre());
+        }
+
+        CreateAnimalCommand comando = AnimalMapper.toCommand(request.withFoto(fotoUrl));
         Animal animal = createAnimalService.createAnimal(comando);
         return ResponseEntity.status(HttpStatus.CREATED).body(AnimalMapper.toResponse(animal));
     }
@@ -64,11 +75,18 @@ public class AnimalController {
     @Operation(summary = "Actualizar animal", description = "Modifica los datos de un animal existente")
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "Animal actualizado"),
             @ApiResponse(responseCode = "404", description = "Animal no encontrado") })
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = { "multipart/form-data" })
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public ResponseEntity<AnimalResponse> updateAnimal(@PathVariable Integer id,
-            @Valid @RequestBody AnimalRequest request) {
-        EditAnimalCommand comando = AnimalMapper.toCommand(id, request);
+            @RequestPart("animal") @Valid AnimalRequest request,
+            @RequestPart(value = "fotoArchivo", required = false) MultipartFile fotoArchivo) {
+
+        String fotoUrl = request.foto();
+        if (fotoArchivo != null && !fotoArchivo.isEmpty()) {
+            fotoUrl = fileStorageService.storeFile(fotoArchivo, request.nombre());
+        }
+
+        EditAnimalCommand comando = AnimalMapper.toCommand(id, request.withFoto(fotoUrl));
         Animal animal = editAnimalService.update(comando);
         return ResponseEntity.ok(AnimalMapper.toResponse(animal));
     }

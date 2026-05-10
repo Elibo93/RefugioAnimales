@@ -28,16 +28,22 @@
 
         // Reinicialización de componentes tras actualizaciones de HTMX
         document.body.addEventListener('htmx:afterSettle', (evt) => {
+            const targetId = evt.detail.target ? evt.detail.target.id : '';
+
             // Bloquear scroll si hay un modal abierto
-            if (evt.detail.target && evt.detail.target.id === 'modal-host') {
+            if (targetId === 'modal-host') {
                 if (evt.detail.target.innerHTML.trim() !== '') {
                     document.body.classList.add('modal-open');
                 }
             }
 
-            // Actualización centralizada (Lucide, Paginación, etc.)
-            if (typeof refreshDynamicComponents === 'function') {
+            // Solo refrescar componentes si el cambio NO es en las notificaciones
+            // Esto evita que la paginación vuelva a la página 1 cada 30 segundos
+            if (typeof refreshDynamicComponents === 'function' && targetId !== 'notif-badge-container') {
                 refreshDynamicComponents();
+            } else if (window.lucide) {
+                // Si son solo notificaciones, al menos refrescamos los iconos
+                lucide.createIcons();
             }
         });
 

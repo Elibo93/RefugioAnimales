@@ -59,7 +59,7 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 - [ ] **Voluntarios:** Méritos por antigüedad y cantidad de tareas completadas.
 
 ### 8) Gestión Multimedia y Archivos
-- [ ] **Imágenes:** Subida de fotos desde el equipo local y almacenamiento (BD o filesystem).
+- [✅] **Imágenes:** Subida de fotos desde el equipo local y almacenamiento (BD o filesystem).
 - [ ] **Exportaciones:** Arreglar PDF de todas las listas. Implementar exportación de contratos. Añadir Excel si es posible.
 
 ### 9) Donaciones y Seguridad
