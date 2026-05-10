@@ -28,17 +28,13 @@ public class NotificacionViewController {
 
     @GetMapping("/web/notificaciones")
     public String listar(Model model, 
-                        @org.springframework.web.bind.annotation.ModelAttribute("currentUserId") Object userId,
                         HttpServletRequest request) {
-        System.out.println("DEBUG: Cargando buzón para userId: " + userId);
         try {
             String url = apiUrl + "/v1/notificaciones/me";
             Object[] arr = restTemplate.getForObject(url, Object[].class);
             List<Object> notificaciones = arr != null ? Arrays.asList(arr) : List.of();
-            System.out.println("DEBUG: Recibidas " + notificaciones.size() + " notificaciones del backend.");
             model.addAttribute("notificaciones", notificaciones);
         } catch (Exception e) {
-            System.err.println("Error al obtener notificaciones: " + e.getMessage());
             model.addAttribute("notificaciones", List.of());
         }
 
@@ -66,7 +62,7 @@ public class NotificacionViewController {
 
     @GetMapping("/web/notificaciones/count")
     @ResponseBody
-    public String obtenerConteoNoLeidas(@org.springframework.web.bind.annotation.ModelAttribute("currentUserId") Object userId) {
+    public String obtenerConteoNoLeidas() {
         try {
             Long count = restTemplate.getForObject(apiUrl + "/v1/notificaciones/me/count", Long.class);
             if (count != null && count > 0) {

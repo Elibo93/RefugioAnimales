@@ -48,6 +48,7 @@ public interface WebRoutes {
     String ADOPCIONES_EDITAR   = "/web/adopciones/{id}/editar";
     String ADOPCIONES_ELIMINAR = "/web/adopciones/{id}/borrar";
     String ADOPCIONES_PDF      = "/web/adopciones/pdf";
+    String ADOPCIONES_CONTRATO = "/web/adopciones/{id}/contrato";
 
     // DONACIONES
     String DONACIONES_BASE     = "/web/donaciones";

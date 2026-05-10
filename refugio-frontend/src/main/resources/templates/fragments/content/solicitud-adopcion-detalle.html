@@ -17,9 +17,17 @@
                 <p th:if="${isAdmin}" style="color: var(--text-muted); margin-top: 4px; margin-left: 60px;">ID de Solicitud: #<span th:text="${solicitud.get('id')}"></span></p>
             </div>
             
-            <div style="display: flex; gap: 12px;">
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <a th:if="${adopcionId != null}" 
+                   th:href="@{/web/adopciones/{id}/contrato(id=${adopcionId})}" 
+                   target="_blank"
+                   class="btn btn-primary" 
+                   style="padding: 10px 24px; font-size: 1rem; border-radius: 14px; background: #2563eb; border: none; color: white; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">
+                    <i data-lucide="file-signature" style="width: 20px;"></i>
+                    <span style="font-weight: 700;">Descargar Contrato Legal</span>
+                </a>
                 <span class="animal-status-badge" 
-                      style="padding: 6px 16px; height: auto; font-size: 0.85rem; text-transform: none;"
+                      style="padding: 8px 20px; height: auto; font-size: 0.9rem; text-transform: none; border-radius: 12px;"
                       th:classappend="${'badge-' + solicitud.get('estado').toString().toLowerCase()}"
                       th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(solicitud.get('estado'), '_', ' ')))}">
                     Estado

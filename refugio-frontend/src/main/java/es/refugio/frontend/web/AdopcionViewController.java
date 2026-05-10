@@ -241,6 +241,11 @@ public class AdopcionViewController {
         out.close();
     }
 
+    @GetMapping(WebRoutes.ADOPCIONES_CONTRATO)
+    public ResponseEntity<byte[]> descargarContrato(@PathVariable Integer id) {
+        return restTemplate.getForEntity(apiUrl + "/v1/reports/adopcion/" + id + "/contrato", byte[].class);
+    }
+
     private List<Object> fetchList(String path) {
         try {
             String finalUrl = path.startsWith("http") ? path : apiUrl + path;

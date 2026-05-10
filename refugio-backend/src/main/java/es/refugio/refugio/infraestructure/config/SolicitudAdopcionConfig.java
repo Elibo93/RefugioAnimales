@@ -46,8 +46,9 @@ public class SolicitudAdopcionConfig {
     public EditSolicitudAdopcionUseCase editSolicitudAdopcionUseCase(SolicitudAdopcionRepository repository,
             AdoptanteRepository adoptanteRepository,
             AnimalRepository animalRepository,
+            AdopcionRepository adopcionRepository,
             es.refugio.refugio.application.service.NotificacionService notificacionService) {
-        return new EditSolicitudAdopcionUseCase(repository, adoptanteRepository, animalRepository, notificacionService);
+        return new EditSolicitudAdopcionUseCase(repository, adoptanteRepository, animalRepository, adopcionRepository, notificacionService);
     }
 
     @Bean

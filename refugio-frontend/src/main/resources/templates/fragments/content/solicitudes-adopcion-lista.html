@@ -66,6 +66,14 @@
                              th:text="${s.get('fecha') != null ? s.get('fecha').toString().substring(0, 10) : '-'}">01/01/24</div>
 
                         <div class="row-cell" style="flex: 2; justify-content: center; gap: 8px;">
+                            <a th:if="${solicitudToAdopcionMap != null and solicitudToAdopcionMap.containsKey(s.get('id').toString())}" 
+                               class="btn-icon" 
+                               th:href="@{/web/adopciones/{id}/contrato(id=${solicitudToAdopcionMap.get(s.get('id').toString())})}" 
+                               title="Descargar Contrato" 
+                               target="_blank" 
+                               style="color: #2563eb;">
+                                <i data-lucide="file-signature" style="width: 16px;"></i>
+                            </a>
                             <a class="btn-icon" th:href="@{/web/solicitudes/{id}/detalle(id=${s.get('id')})}" title="Ver Detalle">
                                 <i data-lucide="eye" style="width: 16px;"></i>
                             </a>

@@ -88,6 +88,9 @@
                              th:text="${i.get('fechaAdopcion') != null ? i.get('fechaAdopcion') : '-'}">01/01/2023</div>
 
                         <div class="row-cell" style="flex: 1.2; justify-content: center; gap: 8px;">
+                            <a class="btn-icon" th:href="@{/web/adopciones/{id}/contrato(id=${i.get('id')})}" title="Descargar Contrato" target="_blank" style="color: #4a90e2;">
+                                <i data-lucide="file-signature" style="width: 16px;"></i>
+                            </a>
                             <a class="btn-icon" th:href="@{/web/adopciones/{id}/editar(id=${i.get('id')})}" title="Editar">
                                 <i data-lucide="edit-2" style="width: 16px;"></i>
                             </a>
