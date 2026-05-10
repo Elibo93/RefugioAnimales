@@ -73,10 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshDynamicComponents();
 });
 
-// 5. Soporte para HTMX: Refrescar componentes tras cada carga de fragmento
-document.addEventListener('htmx:afterSettle', () => {
-    refreshDynamicComponents();
-});
+// 5. Soporte para HTMX gestionado en fragments/scripts.html (con lógica de exclusión para notificaciones)
 
 
 

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
@@ -36,8 +37,9 @@ public class RestTemplateConfig {
                 new MappingJackson2HttpMessageConverter(objectMapper);
         StringHttpMessageConverter stringConverter =
                 new StringHttpMessageConverter(StandardCharsets.UTF_8);
+        AllEncompassingFormHttpMessageConverter formConverter = new AllEncompassingFormHttpMessageConverter();
 
-        restTemplate.setMessageConverters(List.of(jsonConverter, stringConverter));
+        restTemplate.setMessageConverters(List.of(jsonConverter, stringConverter, formConverter));
 
         // Añadir el interceptor de sesión
         restTemplate.setInterceptors(List.of(sessionCookieRelayInterceptor));
