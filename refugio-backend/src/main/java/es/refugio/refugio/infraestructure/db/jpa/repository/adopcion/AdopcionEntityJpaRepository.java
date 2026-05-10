@@ -16,4 +16,5 @@ public interface AdopcionEntityJpaRepository extends JpaRepository<AdopcionEntit
     Optional<AdopcionEntity> findByAdoptanteIdAndAnimalId(Integer adoptanteId, Integer animalId);
 
     boolean existsByAdoptanteIdAndAnimalId(Integer adoptanteId, Integer animalId);
+    boolean existsByAnimalId(Integer animalId);
 }

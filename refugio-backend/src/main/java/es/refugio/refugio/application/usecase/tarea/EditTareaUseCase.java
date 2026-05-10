@@ -19,6 +19,7 @@ public class EditTareaUseCase {
     public Tarea update(EditTareaCommand command) {
         return tareaRepository.getById(command.id())
                 .map(tarea -> {
+                    EstadoTarea estadoPrevio = tarea.getEstado();
                     EstadoTarea estadoEnum = EstadoTarea.valueOf(command.estado().toUpperCase());
                     
                     // Si la tarea se marca como COMPLETADA, notificar a los Administradores
@@ -44,7 +45,20 @@ public class EditTareaUseCase {
                             .collect(Collectors.toList()) : 
                         null);
                     
-                    return tareaRepository.save(tarea);
+                    Tarea saved = tareaRepository.save(tarea);
+
+                    // Notificar al Admin si el voluntario marca la tarea como realizada
+                    if (estadoEnum == EstadoTarea.COMPLETADA && estadoPrevio != EstadoTarea.COMPLETADA) {
+                        notificacionService.enviar(
+                            1,
+                            "Tarea Completada",
+                            "Un voluntario ha marcado como realizada la tarea: " + saved.getDescripcion(),
+                            "TAREA",
+                            "/web/tareas"
+                        );
+                    }
+
+                    return saved;
                 })
                 .orElseThrow(() -> new TareaNotFoundException(command.id().getValue()));
     }

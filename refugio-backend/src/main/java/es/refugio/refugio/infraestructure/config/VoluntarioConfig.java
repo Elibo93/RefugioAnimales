@@ -27,8 +27,13 @@ public class VoluntarioConfig {
 
     @Bean
     public CreateVoluntarioUseCase createVoluntarioUseCase(VoluntarioRepository repository,
+<<<<<<< Updated upstream
             PerfilLegalRepository perfilLegalRepository, NotificacionService notificacionService) {
         return new CreateVoluntarioUseCase(repository, perfilLegalRepository, notificacionService);
+=======
+                                                         es.refugio.refugio.application.service.NotificacionService notificacionService) {
+        return new CreateVoluntarioUseCase(repository, notificacionService);
+>>>>>>> Stashed changes
     }
 
     @Bean

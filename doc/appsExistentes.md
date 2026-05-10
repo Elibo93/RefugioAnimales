@@ -1,21 +1,47 @@
-### Apps Existentes y Referentes
+# 🔍 Análisis de Aplicaciones Existentes
 ---
 
-Existen soluciones en el mercado para la gestión de refugios, pero a menudo presentan barreras de coste o rigidez. Nuestro sistema se posiciona como una alternativa modular y de código abierto.
+El mercado de software para refugios cuenta con soluciones que van desde herramientas gratuitas para pequeñas protectoras hasta robustos sistemas SaaS corporativos. A continuación, se analizan los principales referentes.
 
-#### Shelterluv / PetPoint
-Herramientas muy potentes y estandarizadas en EE.UU. Su limitación principal es la **dependencia de servicios externos** y costes por transacción que pueden ser inasumibles para refugios pequeños o locales con organización propia.
+## 📊 Comparativa de Soluciones
 
-#### Petfinder (Integraciones)
-Es el gran catálogo de búsqueda, pero no es una herramienta de **gestión interna**. Muchos refugios acaban usando Excels paralelos porque Petfinder no gestiona voluntarios, medicación o turnos de limpieza.
+| Herramienta | Enfoque | Coste | Punto Débil |
+| :--- | :--- | :--- | :--- |
+| **Miwuki (España)** | Red de adopción y gestión | Gratuito | Dependencia de su plataforma de difusión. |
+| **ShelterManager** | Gestión profesional total | Suscripción | Curva de aprendizaje elevada y diseño anticuado. |
+| **Shelterluv** | Comercial (USA) | Pago por transacción | Costes inasumibles para refugios pequeños. |
+| **PetPoint** | Institucional | Variable | Rigidez en la personalización de procesos. |
 
-#### Soluciones Genéricas (Trello/Google Sheets)
-Muy usadas pero con nula **trazabilidad y seguridad**. Es fácil borrar un historial médico por error o perder el contacto de un adoptante. Carecen de la validación estructural que ofrece nuestro sistema con **MySQL** y **Spring Boot**.
-
----
-
-**Nuestra solución** aporta la robustez de un software profesional con la flexibilidad de adaptarse a las necesidades específicas (locales) del refugio, integrando gestión de salud, voluntarios y procesos legales en una sola plataforma segura y dockerizada.
 
 ---
 
-[Volver](/README.md)
+## 🔝 Referentes Principales
+
+### 1. Miwuki Pet Center (Referente Nacional)
+Es la plataforma más extendida en España. Ofrece una herramienta gratuita para que las protectoras suban sus animales y gestionen las adopciones.
+*   **Fortaleza:** Gran visibilidad para los animales (marketplace de adopción).
+*   **Debilidad:** Al ser una plataforma cerrada, el refugio no tiene control total sobre sus datos o la personalización de los flujos de trabajo internos (como las tareas de voluntarios).
+
+### 2. ShelterManager (Referente Técnico)
+Una de las herramientas más completas a nivel global, utilizada por refugios profesionales.
+*   **Fortaleza:** Gestión clínica muy detallada, control de donaciones y exportaciones avanzadas.
+*   **Debilidad:** Su interfaz es poco intuitiva (legacy design) y requiere una configuración compleja.
+
+### 3. Shelterluv / PetPoint (Referente Comercial)
+Sistemas SaaS muy potentes en el mercado anglosajón.
+*   **Fortaleza:** Automatización de cobros y contratos legales.
+*   **Debilidad:** Modelo de negocio basado en comisiones por adopción, lo que limita la autonomía del refugio.
+
+---
+
+## ✨ Diferenciación de Nuestro Sistema
+
+Nuestro proyecto no busca competir como un SaaS global, sino ofrecer una **solución soberana** para el refugio:
+1.  **Arquitectura de Microservicios:** Permite escalar solo lo que el refugio necesita (ej. separar el servicio de notificaciones).
+2.  **Gestión de Voluntariado Dinámica:** A diferencia de Petfinder o Miwuki, nuestro sistema pone el foco en la **operativa diaria** (asignación de tareas, turnos y comunicación interna).
+3.  **Privacidad:** Los datos residen en la infraestructura del refugio, sin dependencias de terceros para la gestión crítica.
+
+---
+
+[⬅️ Volver al README](/README.md)
+

@@ -85,4 +85,9 @@ public class AdopcionRepositoryMockImpl implements AdopcionRepository {
         }
         return getAll();
     }
+    @Override
+    public boolean existsByAnimalId(AnimalId animalId) {
+        return adopciones.values().stream()
+                .anyMatch(a -> a.getAnimalId().equals(animalId));
+    }
 }

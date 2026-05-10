@@ -6,29 +6,35 @@
 <div th:fragment="content" class="container" style="max-width: 800px; margin: 4rem auto;">
     <div class="glass-panel" style="padding: 3rem; border-radius: 32px;">
         <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2.5rem;">
-            <div style="background: var(--primary-light); color: var(--primary); width: 64px; height: 64px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+            <div
+                style="background: var(--primary-light); color: var(--primary); width: 64px; height: 64px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
                 <i data-lucide="user-check" style="width: 32px; height: 32px;"></i>
             </div>
             <div>
-                <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;">Completa tu perfil de adoptante</h1>
-                <p style="color: var(--text-muted); margin: 0;">¡Ya casi estás! Solo necesitamos unos datos adicionales para procesar tu solicitud.</p>
+                <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;">Completa
+                    tu perfil de adoptante</h1>
+                <p style="color: var(--text-muted); margin: 0;">¡Ya casi estás! Solo necesitamos unos datos adicionales
+                    para procesar tu solicitud.</p>
             </div>
         </div>
 
-        <div class="glass-card" style="padding: 2rem; margin-bottom: 2.5rem; background: rgba(var(--primary-rgb), 0.02); border: 1px solid var(--primary-light);">
+        <div class="glass-card"
+            style="padding: 2rem; margin-bottom: 2.5rem; background: rgba(var(--primary-rgb), 0.02); border: 1px solid var(--primary-light);">
             <div style="display: flex; align-items: center; gap: 1rem;">
-                <img th:src="${animal.get('foto') != null ? animal.get('foto') : '/images/placeholder-animal.png'}" 
-                     style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">
+                <img th:src="${animal.get('foto') != null ? animal.get('foto') : '/images/placeholder-animal.png'}"
+                    style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">
                 <div>
-                    <span style="font-size: 0.8rem; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Solicitud para</span>
+                    <span
+                        style="font-size: 0.8rem; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Solicitud
+                        para</span>
                     <h3 style="margin: 0; font-weight: 800;" th:text="${animal.get('nombre')}">Nombre del Animal</h3>
                 </div>
             </div>
         </div>
-        
+
         <!-- Mensaje de Error -->
-        <div th:if="${errorMessage}" class="alert alert-danger" 
-             style="margin-bottom: 2rem; padding: 1.25rem; border-radius: 20px; border: 1px solid #fee2e2; background: #fef2f2; color: #991b1b; display: flex; align-items: center; gap: 1rem; animation: slideIn 0.3s ease-out;">
+        <div th:if="${errorMessage}" class="alert alert-danger"
+            style="margin-bottom: 2rem; padding: 1.25rem; border-radius: 20px; border: 1px solid #fee2e2; background: #fef2f2; color: #991b1b; display: flex; align-items: center; gap: 1rem; animation: slideIn 0.3s ease-out;">
             <i data-lucide="alert-circle" style="width: 24px; height: 24px;"></i>
             <span th:text="${errorMessage}" style="font-weight: 500;">Ocurrió un error al procesar la solicitud.</span>
         </div>
@@ -38,11 +44,13 @@
 
             <!-- Sección: Datos Personales -->
             <div style="grid-column: 1 / -1; margin-bottom: 1rem;">
-                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                <h3
+                    style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
                     <i data-lucide="user" style="width: 18px;"></i>
                     <span>Información del Adoptante</span>
                 </h3>
-                <p th:if="${perfilExistente}" style="margin: 4px 0 0; font-size: 0.85rem; color: var(--primary); font-weight: 500;">
+                <p th:if="${perfilExistente}"
+                    style="margin: 4px 0 0; font-size: 0.85rem; color: var(--primary); font-weight: 500;">
                     <i data-lucide="info" style="width: 14px; vertical-align: middle; margin-right: 4px;"></i>
                     Revise su información legal antes de continuar.
                 </p>
@@ -50,15 +58,19 @@
             </div>
 
             <!-- Ficha de Perfil (Si ya existe) -->
-            <div th:if="${perfilExistente}" style="grid-column: span 2; padding: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
-                <div style="background: white; color: var(--primary); width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0;">
+            <div th:if="${perfilExistente}"
+                style="grid-column: span 2; padding: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
+                <div
+                    style="background: white; color: var(--primary); width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0;">
                     <i data-lucide="user" style="width: 28px;"></i>
                 </div>
                 <div>
                     <span style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600;">Tu Perfil</span>
-                    <h3 style="margin: 0; font-weight: 800; color: var(--text-main);" th:text="|${nombre} ${apellido}|">Nombre Completo</h3>
+                    <h3 style="margin: 0; font-weight: 800; color: var(--text-main);" th:text="|${nombre} ${apellido}|">
+                        Nombre Completo</h3>
                     <p style="margin: 4px 0 0; font-size: 0.8rem; color: var(--primary); font-weight: 500;">
-                        <i data-lucide="check-circle" style="width: 12px; vertical-align: middle; margin-right: 4px;"></i>
+                        <i data-lucide="check-circle"
+                            style="width: 12px; vertical-align: middle; margin-right: 4px;"></i>
                         Información legal confirmada.
                     </p>
                 </div>
@@ -95,7 +107,8 @@
                     <label>Teléfono</label>
                     <div class="input-with-icon">
                         <i data-lucide="phone"></i>
-                        <input type="tel" name="telefono" th:value="${telefono}" placeholder="+34 XXX XX XX XX" required>
+                        <input type="tel" name="telefono" th:value="${telefono}" placeholder="+34 XXX XX XX XX"
+                            required>
                     </div>
                 </div>
 
@@ -104,9 +117,7 @@
                     <label>DNI / NIE</label>
                     <div class="input-with-icon">
                         <i data-lucide="id-card"></i>
-                        <input type="text" name="dni" th:value="${dni}" 
-                               placeholder="12345678X" 
-                               required>
+                        <input type="text" name="dni" th:value="${dni}" placeholder="12345678X" required>
                     </div>
                 </div>
 
@@ -124,14 +135,16 @@
                     <label>Dirección completa</label>
                     <div class="input-with-icon">
                         <i data-lucide="map-pin"></i>
-                        <input type="text" name="direccion" th:value="${direccion}" placeholder="Calle, Número, Piso, Ciudad..." required>
+                        <input type="text" name="direccion" th:value="${direccion}"
+                            placeholder="Calle, Número, Piso, Ciudad..." required>
                     </div>
                 </div>
             </th:block>
 
             <!-- Sección: La Adopción -->
             <div style="grid-column: 1 / -1; margin: 2rem 0 1rem;">
-                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                <h3
+                    style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
                     <i data-lucide="heart" style="width: 18px;"></i>
                     <span>Sobre la adopción</span>
                 </h3>
@@ -140,19 +153,21 @@
 
             <div class="form-group" style="grid-column: 1 / -1;">
                 <label>¿Por qué quieres adoptar a <span th:text="${animal.get('nombre')}"></span>?</label>
-                <textarea name="comentario" rows="4" th:text="${comentario}" placeholder="Cuéntanos un poco sobre tu hogar y por qué has elegido a este peludo..."></textarea>
+                <textarea name="comentario" rows="4" th:text="${comentario}"
+                    placeholder="Cuéntanos un poco sobre tu hogar y por qué has elegido a este peludo..."></textarea>
             </div>
 
             <div style="grid-column: 1 / -1; margin-top: 2rem; display: flex; gap: 1rem;">
-                <a th:href="@{/web/home}" class="btn btn-secondary" style="flex: 1; justify-content: center; height: 56px; border-radius: 16px;">
+                <a th:href="@{/web/home}" class="btn btn-secondary"
+                    style="flex: 1; justify-content: center; height: 56px; border-radius: 16px;">
                     Cancelar
                 </a>
-                <button type="submit" class="btn btn-primary" style="flex: 2; justify-content: center; height: 56px; border-radius: 16px;">
+                <button type="submit" class="btn btn-primary"
+                    style="flex: 2; justify-content: center; height: 56px; border-radius: 16px;">
                     <i data-lucide="send"></i>
-                    <span>Enviar Solicitud y Actualizar Perfil</span>
+                    <span>Enviar Solicitud</span>
                 </button>
             </div>
         </form>
     </div>
 </div>
-

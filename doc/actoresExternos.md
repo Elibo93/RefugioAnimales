@@ -1,49 +1,66 @@
-### Casos de uso – F (Actores externos)
----
-<p align="center">
-  <img src="/img/actores_refugio.png" width="550">
-</p>
-
-Este apartado define cómo interactúan los diferentes perfiles con el sistema del refugio. La lógica del sistema se apoya en las entidades principales del modelo de datos, adaptando la experiencia según el tipo de usuario.
-
+# 🎭 Actores del Sistema y Casos de Uso
 ---
 
-#### Adoptante (Público)
-Usuario externo registrado en el sistema con rol de adoptante.
+Este documento detalla los diferentes perfiles que interactúan con la plataforma del **Refugio de Animales**, sus responsabilidades y los casos de uso asociados a cada rol.
 
-* Consultar el **catálogo de animales** (Entidad: Animal).
-* Filtrar por **características** como especie, edad o estado.
-* Enviar **solicitudes de adopción** (Entidad: SolicitudAdopcion).
-* Consultar el estado de sus **solicitudes** (pendiente, aprobada, rechazada).
-* Visualizar sus **adopciones realizadas** (Entidad: Adopcion).
+## 🗺️ Flujo de Interacción
+
+Para entender cómo se relacionan los actores con el sistema, este es el esquema de dependencias:
+
+*   **Visitante** ➜ Consulta el **Catálogo** y se **Registra** para convertirse en Adoptante o Voluntario.
+*   **Administrador** ➜ Supervisa a **Usuarios/Voluntarios** y gestiona las **Solicitudes**.
+*   **Administrador** ➜ Asigna **Tareas** específicas a los **Voluntarios**.
+*   **Voluntario** ➜ Actualiza el **Estado/Salud** del **Animal** y completa sus **Tareas**.
+*   **Adoptante** ➜ Consulta el **Catálogo** y envía **Solicitudes de Adopción**.
+*   **Sistema** ➜ Envía **Notificaciones** automáticas a todos los perfiles según sus acciones.
 
 ---
 
-#### Voluntario (Operativo)
-Usuario interno con rol de voluntario encargado del cuidado de los animales.
+## 👤 Perfiles de Usuario
 
-* Consultar la **lista de animales** del refugio (Entidad: Animal).
-* Registrar información relevante sobre el estado del animal.
-* Añadir entradas al **historial médico** (Entidad: HistorialMedico).
-* Colaborar en el seguimiento del estado general de los animales.
+### 1. Visitante (Público no registrado)
+Es cualquier usuario que accede a la web sin haber iniciado sesión.
+*   **Consulta de Catálogo:** Visualización de los animales disponibles para adopción.
+*   **Búsqueda y Filtros:** Uso de filtros básicos para conocer a los animales del refugio.
+*   **Información del Refugio:** Acceso a datos de contacto, ubicación y cómo colaborar.
+*   **Registro:** Posibilidad de crear una cuenta para convertirse en **Adoptante** o solicitar ser **Voluntario**.
+
+### 2. Administrador (Gestión Global)
+Es el responsable de la integridad del sistema y la supervisión de la operativa diaria.
+*   **Gestión de Inventario:** Altas, bajas y modificaciones de animales y sus perfiles.
+*   **Supervisión de Miembros:** Gestión de usuarios, validación de nuevos voluntarios y adoptantes.
+*   **Control de Adopciones:** Revisión de solicitudes, aprobación/rechazo y formalización de contratos.
+*   **Gestión de Operativa:** Asignación de tareas específicas a voluntarios.
+*   **Buzón de Notificaciones:** Centro de control para nuevas solicitudes y donaciones recibidas.
+*   **Finanzas:** Registro y seguimiento de donaciones y pasarela de pagos.
+
+### 2. Voluntario (Operativo)
+Perfil interno encargado del bienestar directo de los animales.
+*   **Cuidado Animal:** Registro de incidencias y actualización del estado de salud de los animales.
+*   **Historial Médico:** Creación y mantenimiento de entradas médicas detalladas.
+*   **Sistema de Tareas:** Gestión de su lista de tareas personal (aceptar, rechazar y marcar progreso).
+*   **Dualidad:** Un voluntario puede ser también adoptante, manteniendo ambos paneles de gestión activos.
+
+### 3. Adoptante (Usuario Público)
+Cualquier ciudadano interesado en la adopción responsable.
+*   **Catálogo Interactivo:** Búsqueda y filtrado de animales por especie, edad, tamaño o estado.
+*   **Proceso de Adopción:** Envío de solicitudes y seguimiento del estado de las mismas en tiempo real.
+*   **Panel Personal:** Sección "Mis Adoptados" para ver el histórico de animales a su cargo.
+*   **Notificaciones:** Recepción de alertas sobre el estado de sus solicitudes y sugerencias personalizadas.
 
 ---
 
-#### Administración (Gestión)
-Usuario con rol administrador, responsable de la gestión global del sistema.
+## 🔐 Seguridad y Acceso
 
-* Gestión completa de **animales** (altas, bajas, modificaciones) (Entidad: Animal).
-* Gestión de **usuarios** (Entidad: Usuario).
-* Validación de **adoptantes** (Entidad: Adoptante).
-* Gestión y revisión de **solicitudes de adopción** (Entidad: SolicitudAdopcion).
-* Formalización de **adopciones** (Entidad: Adopcion).
-* Control del **historial médico** de los animales (Entidad: HistorialMedico).
-* Registro y seguimiento de **donaciones** (Entidad: Donacion).
+El sistema implementa un control de acceso robusto basado en **Spring Security** y **JWT** (JSON Web Tokens), asegurando que cada actor acceda únicamente a sus recursos:
 
----
-
-Todos los accesos están protegidos mediante **Spring Security**, garantizando el control de acceso basado en roles (ADMIN, VOLUNTARIO, ADOPTANTE). De este modo, se asegura que cada usuario solo pueda interactuar con la información correspondiente a su perfil.
+| Rol | Nivel de Acceso | Tecnologías |
+| :--- | :--- | :--- |
+| **PÚBLICO** | Lectura del Catálogo | Acceso Libre |
+| **ADMIN** | Acceso Total (Backoffice) | REST API, OAuth2 |
+| **VOLUNTARIO** | Gestión de Animales y Tareas | REST API |
+| **ADOPTANTE** | Perfil Público y Solicitudes | REST API |
 
 ---
 
-[Volver](/README.md)
+[⬅️ Volver al README](/README.md)
