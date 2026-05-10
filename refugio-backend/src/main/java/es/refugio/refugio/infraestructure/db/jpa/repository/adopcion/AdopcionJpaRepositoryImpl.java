@@ -74,4 +74,8 @@ public class AdopcionJpaRepositoryImpl implements AdopcionRepository {
             return AdopcionMapper.toDomain(jpaRepository.findAll());
         }
     }
+    @Override
+    public boolean existsByAnimalId(AnimalId animalId) {
+        return jpaRepository.existsByAnimalId(animalId.getValue());
+    }
 }

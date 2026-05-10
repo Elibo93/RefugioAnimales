@@ -37,7 +37,11 @@ public class TareaConfig {
 
     @Bean
     public EditTareaUseCase editTareaUseCase(TareaRepository repository,
+<<<<<<< Updated upstream
             es.refugio.refugio.application.service.NotificacionService notificacionService) {
+=======
+                                           es.refugio.refugio.application.service.NotificacionService notificacionService) {
+>>>>>>> Stashed changes
         return new EditTareaUseCase(repository, notificacionService);
     }
 

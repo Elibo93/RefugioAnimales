@@ -46,6 +46,7 @@ public class SecurityConfig {
                                 "/api/v1/solicitudes-adopcion/publico/registro-y-adopcion",
                                 "/api/v1/animales/*/visitas")
                         .permitAll()
+                        .requestMatchers("/api/v1/notificaciones/**").authenticated()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))

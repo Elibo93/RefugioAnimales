@@ -2,6 +2,7 @@ package es.refugio.refugio.application.usecase.solicitud_adopcion;
 
 import es.refugio.refugio.domain.error.SolicitudAdopcionEstadoInvalidoException;
 import es.refugio.refugio.domain.error.SolicitudAdopcionNotFoundException;
+import es.refugio.refugio.domain.error.AnimalYaAdoptadoException;
 import es.refugio.refugio.domain.model.adopcion.Adopcion;
 import es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion;
 import es.refugio.refugio.domain.model.adoptante.enums.EstadoValidacion;
@@ -20,13 +21,6 @@ import java.time.LocalDateTime;
 
 /**
  * Caso de uso orquestador: Aprueba una solicitud de adopción.
- *
- * Pasos que realiza en una única transacción:
- *  1. Busca y valida que la solicitud está en estado PENDIENTE
- *  2. Actualiza la solicitud → APROBADA
- *  3. Actualiza el animal → RESERVADO
- *  4. Actualiza el adoptante → APROBADO
- *  5. Crea la Adopcion con estado PENDIENTE_FIRMA
  */
 @RequiredArgsConstructor
 public class AprobarSolicitudAdopcionUseCase {
@@ -46,6 +40,11 @@ public class AprobarSolicitudAdopcionUseCase {
 
         if (solicitud.getEstado() != EstadoSolicitud.PENDIENTE && solicitud.getEstado() != EstadoSolicitud.EN_REVISION) {
             throw new SolicitudAdopcionEstadoInvalidoException(solicitud.getEstado().name());
+        }
+
+        // VALIDACIÓN: ¿El animal ya tiene una adopción?
+        if (adopcionRepository.existsByAnimalId(solicitud.getAnimalId())) {
+            throw new AnimalYaAdoptadoException(solicitud.getAnimalId().getValue());
         }
 
         // 2 — Actualizar solicitud → APROBADA
@@ -77,7 +76,6 @@ public class AprobarSolicitudAdopcionUseCase {
                         );
                     }
                 });
-        // No lanzamos error si el adoptante no existe; la solicitud puede precederle
 
         // 5 — Crear la Adopcion con estado PENDIENTE_FIRMA
         Adopcion nuevaAdopcion = Adopcion.builder()

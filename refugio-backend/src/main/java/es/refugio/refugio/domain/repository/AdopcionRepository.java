@@ -20,4 +20,5 @@ public interface AdopcionRepository extends CRUDRepository<Adopcion, AdopcionId>
     boolean existsByAdoptanteAndAnimal(AdoptanteId adoptanteId, AnimalId animalId);
 
     List<Adopcion> findByCriteria(AdoptanteId adoptanteId, AnimalId animalId);
+    boolean existsByAnimalId(AnimalId animalId);
 }
