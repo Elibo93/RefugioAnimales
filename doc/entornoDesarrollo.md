@@ -1,26 +1,29 @@
-### Entorno de Desarrollo - Gestión del Refugio
+### Entorno de Desarrollo y Stack Tecnológico
 ---
 
-Para la implementación del sistema del refugio, se ha seleccionado un stack tecnológico moderno, estable y profesional.
+Para la implementación del sistema del refugio, se ha seleccionado un ecosistema tecnológico moderno, basado en una arquitectura de microservicios distribuida para garantizar escalabilidad y mantenimiento independiente.
 
-#### Tecnologías Núcleo
-* **Java 17 (LTS):** Potencia, seguridad y soporte a largo plazo.
-* **Spring Boot 3.x:** Framework base para la inyección de dependencias y el servidor embebido.
+#### 🏗️ Arquitectura de Microservicios
+*   **Java 17 (LTS)**: Lenguaje base por su robustez y tipado fuerte.
+*   **Spring Boot 3.x**: Framework central para la inyección de dependencias y servicios REST.
+*   **Spring Cloud Netflix (Eureka)**: Servidor de descubrimiento para la orquestación de servicios.
+*   **Spring Cloud Gateway**: Punto de entrada único para el enrutamiento y seguridad.
 
-#### Persistencia y Gestión de Datos
-* **Spring Data JPA / Hibernate:** Abstracción total de la base de datos de animales.
-* **H2 Database:** Para desarrollo ágil y tests.
-* **MySQL:** Para el entorno de producción persistente.
+#### 🗄️ Persistencia y Gestión de Datos
+*   **Spring Data JPA / Hibernate**: ORM para la comunicación con las bases de datos.
+*   **MySQL 8.0**: Motor de base de datos relacional (uno por cada microservicio con datos).
+*   **Liquibase**: Sistema de control de versiones para la base de datos (migraciones seguras).
+*   **Docker & Docker Compose**: Contenedorización de la infraestructura de datos.
 
-#### Frontend y Documentación
-* **Thymeleaf:** Motor de plantillas para la administración web del refugio.
-* **SpringDoc OpenAPI (Swagger):** Documentación automática de la API.
+#### 🎨 Frontend y Experiencia de Usuario
+*   **Thymeleaf**: Motor de plantillas server-side.
+*   **HTMX**: Inyección de dinamismo y AJAX sin necesidad de frameworks pesados (React/Angular).
+*   **Vanilla CSS**: Diseño personalizado, moderno y responsive.
 
-#### Herramientas Profesionales
-* **Maven:** Gestión de dependencias y construcción del artefacto.
-* **JUnit 5 / Mockito:** Pruebas unitarias para asegurar la lógica de adopción.
-* **Docker / Docker Compose:** Contenerización de la infraestructura (App + DB).
+#### 🔐 Seguridad
+*   **Spring Security**: Control de acceso basado en roles (RBAC).
+*   **JWT (JSON Web Tokens)**: Gestión de sesiones stateless para la comunicación entre servicios.
 
 ---
 
-[Volver](/README.md)
+[Volver al README](/README.md)
