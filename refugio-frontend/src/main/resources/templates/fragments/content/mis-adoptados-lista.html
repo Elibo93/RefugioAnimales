@@ -1,41 +1,93 @@
 <div th:fragment="content">
-    <div class="actions-bar" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+    <div class="actions-bar" style="margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: flex-end;">
         <div>
-            <h1 class="page-title" style="margin: 0; font-weight: 800;">Mis Adoptados</h1>
-            <p style="color: var(--text-muted); margin: 0.5rem 0 0 0;">Seguimiento de tus solicitudes de adopción</p>
+            <h1 class="page-title" style="margin: 0; font-weight: 900; font-size: 2.5rem; letter-spacing: -0.02em;">Mis Adoptados</h1>
+            <p style="color: var(--text-muted); margin: 0.5rem 0 0 0; font-size: 1.1rem;">
+                Seguimiento en tiempo real de tus procesos de adopción
+            </p>
         </div>
-        <a th:href="@{/web/animales}" class="btn btn-secondary">
-            <i data-lucide="plus"></i>
-            <span>Nueva Adopción</span>
+        <a th:href="@{/web/animales}" class="btn btn-primary" style="height: 52px; border-radius: 14px; padding: 0 1.5rem; display: flex; align-items: center; gap: 0.8rem; box-shadow: 0 10px 20px rgba(45, 157, 88, 0.2);">
+            <div style="background: rgba(255,255,255,0.2); width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+            </div>
+            <span style="font-weight: 700;">Nueva Solicitud</span>
         </a>
     </div>
 
-    <div class="solicitudes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+    <div class="solicitudes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 2rem;">
         <th:block th:each="s : ${solicitudes}">
-            <div class="glass-card solicitud-card-user" style="padding: 1.5rem; display: flex; gap: 1.5rem; align-items: center;">
-                <div class="animal-thumb" style="flex-shrink: 0;">
-                    <img th:src="${animalesMap.get(s.get('animalId').toString()) != null ? animalesMap.get(s.get('animalId').toString()).get('foto') : '/images/placeholder-animal.png'}"
-                         style="width: 100px; height: 100px; object-fit: cover; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                </div>
-                <div class="solicitud-info" style="flex: 1;">
-                    <h3 style="margin: 0; font-weight: 800; color: var(--text-main);" 
-                        th:text="${animalesMap.get(s.get('animalId').toString()) != null ? animalesMap.get(s.get('animalId').toString()).get('nombre') : 'Animal'}">
-                        Nombre Animal
-                    </h3>
-                    <p style="margin: 0.2rem 0 0.8rem 0; font-size: 0.85rem; color: var(--text-muted);">
-                        Solicitado el <span th:text="${#strings.substring(s.get('fecha'), 0, 10)}">2024-01-01</span>
-                    </p>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span class="status-badge" th:classappend="${'badge-' + s.get('estado').toString().toLowerCase()}" th:text="${s.get('estado')}">
-                            PENDIENTE
-                        </span>
-                        <a th:href="@{/web/solicitudes/{id}/detalle(id=${s.get('id')})}" class="btn-text" style="color: var(--primary); font-weight: 700; text-decoration: none; font-size: 0.9rem;">
-                            Ver Detalle <i data-lucide="external-link" style="width: 14px; vertical-align: middle;"></i>
-                        </a>
+            <div class="glass-card solicitud-card-premium" 
+                 style="padding: 1.8rem; border-radius: 28px; border: 1px solid rgba(255,255,255,0.6); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; position: relative; overflow: hidden;"
+                 th:onclick="|window.location.href='/web/solicitudes/' + ${s.get('id')} + '/detalle'|">
+                
+                <!-- Efecto de brillo de fondo -->
+                <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%); opacity: 0.2; z-index: 0;"></div>
+
+                <div style="display: flex; gap: 1.8rem; align-items: flex-start; position: relative; z-index: 1;">
+                    <div class="animal-avatar" style="position: relative; flex-shrink: 0; margin-bottom: 8px; margin-right: 8px;">
+                        <img th:src="${animalesMap.get(s.get('animalId').toString()) != null ? animalesMap.get(s.get('animalId').toString()).get('foto') : '/images/placeholder-animal.png'}"
+                             style="width: 120px; height: 120px; object-fit: cover; border-radius: 22px; box-shadow: 0 12px 25px rgba(0,0,0,0.12); border: 4px solid white;">
+                        
+                        <div style="position: absolute; bottom: -8px; right: -8px; background: white; width: 40px; height: 40px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05); z-index: 2;">
+                            <i th:data-lucide="${animalesMap.get(s.get('animalId').toString())?.get('especie') == 'GATO' ? 'cat' : 'dog'}" 
+                               style="width: 22px; height: 22px; color: var(--primary);"></i>
+                        </div>
+                    </div>
+
+                    <div class="solicitud-content" style="flex: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                            <h3 style="margin: 0; font-weight: 800; font-size: 1.4rem; color: var(--text-main); line-height: 1.2;" 
+                                th:text="${animalesMap.get(s.get('animalId').toString()) != null ? animalesMap.get(s.get('animalId').toString()).get('nombre') : 'Animal'}">
+                                Nombre
+                            </h3>
+                            <span class="status-badge" th:classappend="${'badge-' + s.get('estado').toString().toLowerCase()}" 
+                                  style="padding: 0.5rem 0.8rem; border-radius: 12px; font-size: 0.7rem;">
+                                <span th:text="${s.get('estado')}">ESTADO</span>
+                            </span>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.2rem;">
+                            <i data-lucide="calendar" style="width: 16px;"></i>
+                            <span>Solicitado el <strong th:text="${#strings.substring(s.get('fecha'), 0, 10)}">2024-01-01</strong></span>
+                        </div>
+
+                        <div style="padding-top: 1.2rem; border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; gap: 0.4rem;">
+                                <div style="width: 8px; height: 8px; border-radius: 50%;" 
+                                     th:styleappend="${s.get('estado') == 'APROBADA' ? 'background: #10b981;' : (s.get('estado') == 'RECHAZADA' ? 'background: #ef4444;' : 'background: #f59e0b; animate: pulse 2s infinite;')}">
+                                </div>
+                                <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);" 
+                                      th:text="${s.get('estado') == 'APROBADA' ? 'Proceso Finalizado' : (s.get('estado') == 'RECHAZADA' ? 'Solicitud Cerrada' : 'En Gestión')}">
+                                    En Gestión
+                                </span>
+                            </div>
+                            
+                            <a th:href="@{/web/solicitudes/{id}/detalle(id=${s.get('id')})}" 
+                               class="btn-detail" 
+                               style="color: var(--primary); font-weight: 800; text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; transition: all 0.3s;">
+                                Ver detalles <i data-lucide="chevron-right" style="width: 18px;"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </th:block>
     </div>
 
+    <style>
+        .solicitud-card-premium:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            border-color: var(--primary-light) !important;
+        }
+        .solicitud-card-premium:hover .btn-detail {
+            gap: 0.8rem !important;
+        }
+        .solicitud-card-premium:hover .animal-avatar img {
+            transform: scale(1.05);
+        }
+        .animal-avatar img {
+            transition: transform 0.4s ease;
+        }
+    </style>
 </div>

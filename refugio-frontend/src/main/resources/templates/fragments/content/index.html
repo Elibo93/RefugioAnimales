@@ -145,28 +145,27 @@
             </div>
         </section>
 
-        <!-- 3. Contador de Impacto -->
         <div class="stats-panel-container">
             <div class="stats-card-main glass-panel">
                 <div class="stat-item-landing">
-                    <div class="stat-icon-emoji">🏠</div>
+                    <div class="stat-icon-premium"><i data-lucide="home"></i></div>
                     <div class="stat-number">+500</div>
                     <div class="stat-desc">Hogares encontrados</div>
                 </div>
                 <div class="stat-item-landing">
-                    <div class="stat-icon-emoji">🐾</div>
-                    <div class="stat-number" th:text="${animales != null ? #lists.size(animales) : 42}">42</div>
+                    <div class="stat-icon-premium"><i data-lucide="paw-print"></i></div>
+                    <div class="stat-number" th:text="${animales != null ? #lists.size(animales) : 35}">35</div>
                     <div class="stat-desc">Esperando hoy</div>
                 </div>
                 <div class="stat-item-landing">
-                    <div class="stat-icon-emoji">❤️</div>
+                    <div class="stat-icon-premium"><i data-lucide="heart"></i></div>
                     <div class="stat-number">120</div>
                     <div class="stat-desc">Voluntarios activos</div>
                 </div>
                 <div class="stat-item-landing">
-                    <div class="stat-icon-emoji">🦴</div>
+                    <div class="stat-icon-premium"><i data-lucide="utensils"></i></div>
                     <div class="stat-number">2T</div>
-                    <div class="stat-desc">Comida donada este año</div>
+                    <div class="stat-desc">Comida donada</div>
                 </div>
             </div>
         </div>
@@ -189,6 +188,13 @@
                             th:text="${a.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(a.get('estado'), '_', ' '))) : 'Disponible'}">
                             Disponible
                         </span>
+
+                        <!-- Badge de Solicitado -->
+                        <div th:if="${animalesSolicitadosIds.contains(a.get('id'))}" 
+                             style="position: absolute; top: 3.5rem; left: 1rem; background: #2d9d58; color: white; padding: 0.4rem 0.8rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10;">
+                            <i data-lucide="check" style="width: 12px; height: 12px;"></i>
+                            <span>SOLICITADO</span>
+                        </div>
 
                         <div class="card-info-overlay">
                             <div style="text-align: center; width: 100%;">

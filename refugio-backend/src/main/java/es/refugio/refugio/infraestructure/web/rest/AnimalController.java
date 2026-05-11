@@ -32,6 +32,9 @@ import es.refugio.refugio.domain.model.animal.AnimalId;
 import es.refugio.refugio.infraestructure.mapper.AnimalMapper;
 import es.refugio.refugio.infraestructure.web.dto.animal.AnimalRequest;
 import es.refugio.refugio.infraestructure.web.dto.animal.AnimalResponse;
+import es.refugio.refugio.domain.repository.SolicitudAdopcionRepository;
+import es.refugio.refugio.domain.model.solicitud_adopcion.enums.EstadoSolicitud;
+import java.util.stream.Collectors;
 
 import es.refugio.refugio.application.service.storage.FileStorageService;
 import jakarta.validation.Valid;
@@ -52,6 +55,7 @@ public class AnimalController {
     private final EditAnimalService editAnimalService;
     private final DeleteAnimalService deleteAnimalService;
     private final FileStorageService fileStorageService;
+    private final SolicitudAdopcionRepository solicitudAdopcionRepository;
 
     @Operation(summary = "Crear animal", description = "Registra un nuevo animal en el refugio")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Animal creado"),
@@ -101,6 +105,10 @@ public class AnimalController {
             @org.springframework.web.bind.annotation.RequestParam(required = false) List<String> edad,
             @org.springframework.web.bind.annotation.RequestParam(required = false) String sexo,
             @org.springframework.web.bind.annotation.RequestParam(required = false) Boolean urgencia) {
+        Map<Integer, Long> conteos = solicitudAdopcionRepository.getAll().stream()
+                .filter(s -> s.getEstado() == EstadoSolicitud.PENDIENTE || s.getEstado() == EstadoSolicitud.EN_REVISION)
+                .collect(Collectors.groupingBy(s -> s.getAnimalId().getValue(), Collectors.counting()));
+
         return findAnimalService.findAll()
                 .stream()
                 .filter(a -> estado == null || estado.isEmpty()
@@ -113,7 +121,7 @@ public class AnimalController {
                 .filter(a -> sexo == null || sexo.isEmpty()
                         || (a.getSexo() != null && a.getSexo().name().equalsIgnoreCase(sexo)))
                 .filter(a -> urgencia == null || (a.getUrgencia() != null && a.getUrgencia().equals(urgencia)))
-                .map(AnimalMapper::toResponse)
+                .map(a -> AnimalMapper.toResponse(a, conteos.getOrDefault(a.getId().getValue(), 0L).intValue()))
                 .toList();
     }
 
@@ -145,7 +153,11 @@ public class AnimalController {
             @ApiResponse(responseCode = "404", description = "Animal no encontrado") })
     @GetMapping("/{id}")
     public AnimalResponse getAnimalById(@PathVariable Integer id) {
-        return AnimalMapper.toResponse(findAnimalService.findById(new AnimalId(id)));
+        Animal a = findAnimalService.findById(new AnimalId(id));
+        long count = solicitudAdopcionRepository.getByAnimalId(a.getId()).stream()
+                .filter(s -> s.getEstado() == EstadoSolicitud.PENDIENTE || s.getEstado() == EstadoSolicitud.EN_REVISION)
+                .count();
+        return AnimalMapper.toResponse(a, (int) count);
     }
 
     @Operation(summary = "Eliminar animal")

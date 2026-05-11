@@ -24,6 +24,11 @@ import org.springframework.security.core.Authentication;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
+ 
+import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
 
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
@@ -33,9 +38,6 @@ import es.refugio.frontend.web.enums.ThymTemplates;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -530,6 +532,13 @@ public class SolicitudAdopcionViewController {
             Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
             model.addAttribute("animal", animal);
 
+            // Verificar si el usuario ya tiene una solicitud para este animal
+            @SuppressWarnings("unchecked")
+            Set<Integer> solicitados = (Set<Integer>) model.getAttribute("animalesSolicitadosIds");
+            if (solicitados != null && solicitados.contains(animalId)) {
+                return "redirect:" + WebRoutes.HOME + "?errorMessage=Ya tienes una solicitud pendiente para este animal.";
+            }
+
             // Cargar datos del perfil para la ficha
             Map<String, Object> me = restTemplate.exchange(
                     authUrl + "/v1/me",
@@ -716,6 +725,17 @@ public class SolicitudAdopcionViewController {
         } catch (org.springframework.web.client.HttpClientErrorException.Unauthorized e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Debe iniciar sesión para realizar esta acción.");
             return "redirect:" + WebRoutes.SOLICITUDES_OPCIONES + "?animalId=" + animalId;
+        } catch (org.springframework.web.client.HttpStatusCodeException e) {
+            String errorMsg = "Error al procesar la solicitud.";
+            try {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> errorMap = e.getResponseBodyAs(Map.class);
+                if (errorMap != null && errorMap.containsKey("message")) {
+                    errorMsg = (String) errorMap.get("message");
+                }
+            } catch (Exception ignored) {}
+            redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
+            return "redirect:" + WebRoutes.SOLICITUDES_DIRECTA_FORM + "?animalId=" + animalId;
         }
 
         redirectAttributes.addFlashAttribute("successMessage", "Solicitud enviada con éxito");

@@ -206,7 +206,11 @@
                 }
             }
 
-            function selectUser(userId, userName) {
+            function selectUser(userId, userName, alreadyRegistered) {
+                if (alreadyRegistered) {
+                    alert('Este usuario ya está registrado como voluntario.');
+                    return;
+                }
                 document.getElementById('usuarioId-input').value = userId;
                 document.getElementById('user-search').value = userName;
                 document.getElementById('user-suggestions').innerHTML = '';
