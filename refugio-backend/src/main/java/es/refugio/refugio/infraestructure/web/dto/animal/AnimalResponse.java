@@ -19,6 +19,7 @@ public record AnimalResponse(
         Double peso,
         Integer nivelEnergia,
         Boolean urgencia,
-        Integer visitas
+        Integer visitas,
+        Integer conteoSolicitudes
 ) {
 }

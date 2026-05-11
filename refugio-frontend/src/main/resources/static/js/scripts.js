@@ -80,6 +80,15 @@ function refreshDynamicComponents() {
     if (document.getElementById('animal-grid-cards')) initPagination('animal-grid-cards');
     if (document.getElementById('historial-grid')) initPagination('historial-grid');
     
+    // 5. Inicialización de Formulario de Donación
+    if (document.getElementById('donation-type-select')) {
+        handleTypeChange();
+        // Inicializar recurrencia visual si no hay valor previo
+        const freqInput = document.getElementById('frecuencia-input');
+        const freq = (freqInput && freqInput.value) ? freqInput.value.toLowerCase() : 'unica';
+        setRecurrence(freq);
+    }
+
     // Inicialización automática de carruseles
     if (document.querySelectorAll('.story-card').length > 0) startCarouselAutoPlay();
 }
@@ -370,4 +379,230 @@ function selectUser(id, fullName, isRegistered, adoptanteId) {
     if (searchInput) searchInput.value = fullName;
     if (idInput) idInput.value = id;
     if (suggestions) suggestions.innerHTML = '';
+}
+
+// === GESTIÓN DE CONTRASEÑA (MODAL) ===
+async function verifyPasswordGate(btn) {
+    const userId = btn.getAttribute('data-user-id');
+    
+    // Recuperar Token CSRF
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+    
+    const { value: password } = await Swal.fire({
+        title: 'Verificación de Seguridad',
+        html: `
+            <div style="text-align: center;">
+                <div style="width: 70px; height: 70px; background: var(--primary-light); border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+                    <i data-lucide="shield-check" style="width: 32px; color: var(--primary);"></i>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 25px;">
+                    Por seguridad, confirma tu identidad introduciendo tu contraseña actual.
+                </p>
+                <div style="position: relative; max-width: 320px; margin: 0 auto; display: block;">
+                    <input type="password" id="swal-input-password" class="swal2-input premium-modal-input" 
+                           placeholder="Tu contraseña actual" 
+                           style="width: 100%; margin: 0; padding-right: 50px; padding-left: 20px; border-radius: 16px; height: 55px; border: 2px solid #e2e8f0; transition: all 0.3s ease;">
+                    <button type="button" onclick="togglePasswordVisibility('swal-input-password', this)" 
+                            style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: #f8fafc; border: none; cursor: pointer; color: var(--text-muted); width: 35px; height: 35px; border-radius: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; transition: all 0.2s;">
+                        <i data-lucide="eye" style="width: 18px;"></i>
+                    </button>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Verificar ahora',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: 'var(--primary)',
+        cancelButtonColor: '#94a3b8',
+        padding: '2.5rem',
+        background: '#ffffff',
+        backdrop: 'rgba(15, 23, 42, 0.4) blur(10px)',
+        didOpen: () => {
+            if (window.lucide) {
+                lucide.createIcons({
+                    root: Swal.getHtmlContainer()
+                });
+            }
+            document.getElementById('swal-input-password').focus();
+        },
+        preConfirm: () => {
+            const val = document.getElementById('swal-input-password').value;
+            if (!val) {
+                Swal.showValidationMessage('La contraseña es obligatoria');
+            }
+            return val;
+        },
+        customClass: {
+            popup: 'premium-modal-radius',
+            title: 'premium-modal-title',
+            confirmButton: 'premium-modal-btn',
+            cancelButton: 'premium-modal-btn-outline'
+        }
+    });
+
+    if (password) {
+        Swal.fire({
+            title: 'Validando...',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); },
+            customClass: { popup: 'premium-modal-radius' }
+        });
+
+        try {
+            const headers = {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            };
+            if (csrfHeader && csrfToken) {
+                headers[csrfHeader] = csrfToken;
+            }
+
+            // Enviamos como Form Data para máxima compatibilidad con el controlador actual
+            const response = await fetch(`/web/personas/${userId}/verificar-password`, {
+                method: 'POST',
+                headers: headers,
+                body: `password=${encodeURIComponent(password)}`
+            });
+
+            if (response.ok) {
+                Swal.close();
+                openPasswordModal();
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('[DEBUG] Error en verificación:', response.status, errorData);
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Acceso Denegado',
+                    text: errorData.message || 'La contraseña actual no es correcta.',
+                    confirmButtonColor: '#ef4444',
+                    customClass: { popup: 'premium-modal-radius', confirmButton: 'premium-modal-btn' }
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de Conexión',
+                text: 'No se pudo contactar con el servicio de seguridad.',
+                confirmButtonColor: '#ef4444',
+                customClass: { popup: 'premium-modal-radius' }
+            });
+        }
+    }
+}
+
+function openPasswordModal() {
+    const modal = document.getElementById('passwordModal');
+    const btn = document.querySelector('#passwordForm button[type="submit"]');
+    if (modal) {
+        modal.style.display = 'flex';
+        // Resetear botón por seguridad al abrir
+        if (btn) {
+            btn.innerHTML = '<i data-lucide="check-circle" style="width: 20px;"></i> Actualizar Contraseña';
+            btn.disabled = false;
+        }
+        const input = document.getElementById('newPassword');
+        if (input) input.focus();
+        if (window.lucide) lucide.createIcons();
+    }
+}
+
+function closePasswordModal() {
+    const modal = document.getElementById('passwordModal');
+    const form = document.getElementById('passwordForm');
+    const errorDiv = document.getElementById('passwordError');
+    const btn = document.querySelector('#passwordForm button[type="submit"]');
+    
+    if (modal) modal.style.display = 'none';
+    if (form) form.reset();
+    if (errorDiv) errorDiv.style.display = 'none';
+    if (btn) {
+        btn.innerHTML = '<i data-lucide="check-circle" style="width: 20px;"></i> Actualizar Contraseña';
+        btn.disabled = false;
+    }
+    if (window.lucide) lucide.createIcons();
+}
+
+async function handlePasswordUpdatePremium(event) {
+    event.preventDefault();
+    const form = event.target;
+    const btn = form.querySelector('button[type="submit"]');
+    
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const errorDiv = document.getElementById('passwordError');
+    
+    const userId = form.getAttribute('data-user-id');
+
+    // 1. VALIDACIONES LOCALES
+    if (newPassword !== confirmPassword) {
+        errorDiv.innerText = "Las contraseñas no coinciden";
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        errorDiv.innerText = "La contraseña debe tener al menos 6 caracteres";
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    // 2. UI FEEDBACK
+    errorDiv.style.display = 'none';
+    btn.disabled = true;
+    btn.innerHTML = '<i class="animate-spin" data-lucide="loader-2"></i> Guardando...';
+    if (window.lucide) lucide.createIcons();
+
+    try {
+        const response = await fetch(`/web/personas/${userId}/cambiar-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `newPassword=${encodeURIComponent(newPassword)}`
+        });
+
+        if (response.ok) {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Seguridad actualizada!',
+                text: 'Tu contraseña ha sido cambiada correctamente.',
+                confirmButtonColor: '#4f46e5',
+                customClass: { popup: 'premium-swal' }
+            }).then(() => {
+                closePasswordModal();
+            });
+        } else {
+            const data = await response.json().catch(() => ({ message: "Error en el servidor" }));
+            errorDiv.innerText = data.message || "Error al actualizar la contraseña";
+            errorDiv.style.display = 'block';
+        }
+    } catch (error) {
+        errorDiv.innerText = "Error de conexión con el servidor";
+        errorDiv.style.display = 'block';
+    } finally {
+        // Siempre restauramos el botón si no se ha cerrado el modal
+        if (document.getElementById('passwordModal').style.display !== 'none') {
+            btn.disabled = false;
+            btn.innerHTML = '<i data-lucide="check-circle" style="width: 20px;"></i> Actualizar Contraseña';
+            if (window.lucide) lucide.createIcons();
+        }
+    }
+}
+
+function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    // Buscamos el icono (puede ser un <i> o un <svg> si Lucide ya lo reemplazó)
+    const icon = btn.querySelector('i, svg');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.setAttribute('data-lucide', 'eye-off');
+    } else {
+        input.type = 'password';
+        icon.setAttribute('data-lucide', 'eye');
+    }
+    
+    // Forzamos a Lucide a re-escanear el DOM para actualizar el icono
+    if (window.lucide) {
+        lucide.createIcons();
+    }
 }

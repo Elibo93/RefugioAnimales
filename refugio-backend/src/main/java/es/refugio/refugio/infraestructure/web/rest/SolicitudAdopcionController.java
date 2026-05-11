@@ -23,6 +23,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
+import es.refugio.refugio.infraestructure.security.CustomUserDetails;
 
 import es.refugio.refugio.domain.model.adoptante.Adoptante;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
@@ -228,7 +229,7 @@ public class SolicitudAdopcionController {
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Solicitud aprobada y Adopción creada"),
             @ApiResponse(responseCode = "400", description = "Estado inválido") })
     @PostMapping("/{id}/aprobar")
-    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AdopcionResponse> aprobarSolicitud(@PathVariable Integer id) {
         var adopcion = aprobarSolicitudAdopcionService.aprobar(new SolicitudAdopcionId(id));
         return ResponseEntity.status(HttpStatus.CREATED).body(AdopcionMapper.toResponse(adopcion));
@@ -238,7 +239,7 @@ public class SolicitudAdopcionController {
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "Solicitud rechazada"),
             @ApiResponse(responseCode = "400", description = "Estado inválido") })
     @PostMapping("/{id}/rechazar")
-    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SolicitudAdopcionResponse> rechazarSolicitud(@PathVariable Integer id,
             @RequestBody(required = false) Map<String, String> body) {
         String comentario = (body != null && body.containsKey("comentario")) ? body.get("comentario") : null;
@@ -272,6 +273,32 @@ public class SolicitudAdopcionController {
         return solicitudes.stream()
                 .map(SolicitudAdopcionMapper::toResponse)
                 .toList();
+    }
+
+    @Operation(summary = "Listar mis solicitudes", description = "Devuelve solo las solicitudes del usuario autenticado actual.")
+    @GetMapping("/mis-solicitudes")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
+    public List<SolicitudAdopcionResponse> getMisSolicitudes() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof CustomUserDetails)) {
+            return List.of();
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+        Integer usuarioId = userDetails.getId();
+
+        try {
+            // Intentamos buscar el perfil de adoptante del usuario
+            var adoptante = findAdoptanteService.findByUsuarioId(usuarioId);
+            if (adoptante == null) return List.of();
+
+            return findSolicitudAdopcionService.findByAdoptanteId(adoptante.getId()).stream()
+                    .map(SolicitudAdopcionMapper::toResponse)
+                    .toList();
+        } catch (Exception e) {
+            // Si no tiene perfil de adoptante, es normal que no tenga solicitudes
+            return List.of();
+        }
     }
 
     @Operation(summary = "Obtener solicitud por ID")

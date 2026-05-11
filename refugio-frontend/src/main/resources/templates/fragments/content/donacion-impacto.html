@@ -20,17 +20,23 @@
     <!-- Impact Grid (Sólo usuarios) -->
     <div class="impact-grid" th:if="${isAdmin == null or !isAdmin}">
         <div class="impact-card glass-panel">
-            <span class="impact-icon">🦴</span>
+            <div class="impact-icon-box">
+                <i data-lucide="utensils" style="width: 24px; color: var(--primary);"></i>
+            </div>
             <span class="impact-amount">10€</span>
             <p class="impact-text">Alimentas a un perro durante una semana completa con comida de alta calidad.</p>
         </div>
         <div class="impact-card glass-panel">
-            <span class="impact-icon">💉</span>
+            <div class="impact-icon-box">
+                <i data-lucide="syringe" style="width: 24px; color: var(--primary);"></i>
+            </div>
             <span class="impact-amount">30€</span>
             <p class="impact-text">Vacunas y desparasitas a un cachorro, dándole el mejor comienzo posible.</p>
         </div>
         <div class="impact-card glass-panel">
-            <span class="impact-icon">🏥</span>
+            <div class="impact-icon-box">
+                <i data-lucide="activity" style="width: 24px; color: var(--primary);"></i>
+            </div>
             <span class="impact-amount">100€</span>
             <p class="impact-text">Cubres una cirugía de urgencia o un tratamiento especializado vital.</p>
         </div>

@@ -8,7 +8,11 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 @RequiredArgsConstructor
@@ -80,6 +84,28 @@ public class GlobalModelAttributesAdvice {
                 model.addAttribute("isVoluntario", isVol);
                 model.addAttribute("isAdoptante",  isAdop);
                 model.addAttribute("isPublico",    rol.contains("PUBLICO"));
+
+                // 3. Atributos de solicitudes (para prevenir duplicados)
+                try {
+                    // Usamos el endpoint personal para que el badge "SOLICITADO" sea solo del usuario actual
+                    @SuppressWarnings("unchecked")
+                    List<Map<String, Object>> solicitudes = restTemplate.getForObject(apiUrl + "/v1/solicitudes-adopcion/mis-solicitudes", List.class);
+                    if (solicitudes != null) {
+                        Set<Integer> animalesSolicitadosIds = solicitudes.stream()
+                                .map(s -> {
+                                    Object val = s.get("animalId");
+                                    if (val instanceof Number) return ((Number) val).intValue();
+                                    return null;
+                                })
+                                .filter(id -> id != null)
+                                .collect(Collectors.toSet());
+                        model.addAttribute("animalesSolicitadosIds", animalesSolicitadosIds);
+                    } else {
+                        model.addAttribute("animalesSolicitadosIds", new HashSet<>());
+                    }
+                } catch (Exception e) {
+                    model.addAttribute("animalesSolicitadosIds", new HashSet<>());
+                }
             } else {
                 setAnonymous(model);
             }
@@ -98,5 +124,6 @@ public class GlobalModelAttributesAdvice {
         model.addAttribute("isVoluntario",    false);
         model.addAttribute("isAdoptante",     false);
         model.addAttribute("isPublico",       false);
+        model.addAttribute("animalesSolicitadosIds", new HashSet<>());
     }
 }

@@ -68,9 +68,12 @@ public class AnimalViewController {
                     .limit(10) // Limitamos a 10 para que sea rápido
                     .toList();
             } else {
-                // Si no hay búsqueda, mostramos los 10 primeros disponibles
+                // Si no hay búsqueda, mostramos los 10 primeros que se pueden adoptar
                 filtrados = todos.stream()
-                    .filter(a -> "DISPONIBLE".equals(a.get("estado")))
+                    .filter(a -> {
+                        String estado = a.get("estado") != null ? a.get("estado").toString() : "";
+                        return "DISPONIBLE".equals(estado) || "EN_TRATAMIENTO".equals(estado);
+                    })
                     .limit(10)
                     .toList();
             }
@@ -121,9 +124,9 @@ public class AnimalViewController {
                         String nombre = a.get("nombre") != null ? a.get("nombre").toString().toLowerCase() : "";
                         String especieA = a.get("especie") != null ? a.get("especie").toString().toLowerCase() : "";
                         String raza = a.get("raza") != null ? a.get("raza").toString().toLowerCase() : "";
-                        String chipId = a.get("chipId") != null ? a.get("chipId").toString().toLowerCase() : "";
-                        String idStr = a.get("id") != null ? a.get("id").toString().toLowerCase() : "";
-                        return nombre.contains(search) || especieA.contains(search) || raza.contains(search) || chipId.contains(search) || idStr.contains(search);
+                        
+                        // Solo permitimos buscar por nombre, especie o raza (datos amigables)
+                        return nombre.contains(search) || especieA.contains(search) || raza.contains(search);
                     })
                     .toList();
             }
@@ -273,7 +276,7 @@ public class AnimalViewController {
     }
 
     @GetMapping(WebRoutes.ANIMALES_EDITAR)
-    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
         System.out.println("DEBUG: Accediendo a formulario de edición para ID: " + id + ". HX-Request: "
                 + request.getHeader("HX-Request"));
@@ -295,7 +298,7 @@ public class AnimalViewController {
     }
 
     @PostMapping(WebRoutes.ANIMALES_EDITAR)
-    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public String procesarEdicion(@PathVariable Integer id,
             @RequestParam String nombre,
             @RequestParam String especie,
