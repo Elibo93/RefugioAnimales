@@ -29,25 +29,25 @@ public class EditSolicitudAdopcionUseCase {
     @Transactional
     public SolicitudAdopcion update(EditSolicitudAdopcionCommand command) {
         System.out.println("DEBUG: Iniciando actualización de solicitud ID=" + command.id().getValue());
-        
+
         return solicitudAdopcionRepository.getById(command.id())
                 .map(solicitud -> {
                     EstadoSolicitud estadoAnterior = solicitud.getEstado();
                     EstadoSolicitud estadoEnum = EstadoSolicitud.valueOf(command.estado().toUpperCase());
-                    
+
                     System.out.println("DEBUG: Estado anterior=" + estadoAnterior + ", Nuevo estado=" + estadoEnum);
 
                     solicitud.setFecha(command.fecha());
                     solicitud.setEstado(estadoEnum);
                     solicitud.setComentario(command.comentario());
                     solicitud.setComentarioAdmin(command.comentarioAdmin());
-                    
+
                     SolicitudAdopcion saved = solicitudAdopcionRepository.save(solicitud);
 
                     // LÓGICA DE APROBACIÓN AUTOMÁTICA AL EDITAR
                     if (estadoEnum == EstadoSolicitud.APROBADA && estadoAnterior != EstadoSolicitud.APROBADA) {
                         System.out.println("DEBUG: Detectada aprobación. Creando adopción...");
-                        
+
                         // 1. Validar si ya existe adopción para este animal
                         if (adopcionRepository.existsByAnimalId(solicitud.getAnimalId())) {
                             System.err.println("ERROR: El animal ya ha sido adoptado.");
@@ -62,9 +62,10 @@ public class EditSolicitudAdopcionUseCase {
                                 .fechaAdopcion(LocalDateTime.now())
                                 .estado(EstadoAdopcion.PENDIENTE_FIRMA)
                                 .build();
-                        
+
                         Adopcion savedAdopcion = adopcionRepository.save(nuevaAdopcion);
-                        System.out.println("DEBUG: Adopción guardada con ID=" + (savedAdopcion.getId() != null ? savedAdopcion.getId().getValue() : "PENDIENTE"));
+                        System.out.println("DEBUG: Adopción guardada con ID="
+                                + (savedAdopcion.getId() != null ? savedAdopcion.getId().getValue() : "PENDIENTE"));
 
                         // 3. Actualizar Animal a RESERVADO
                         animalRepository.getById(solicitud.getAnimalId()).ifPresent(animal -> {
@@ -89,18 +90,18 @@ public class EditSolicitudAdopcionUseCase {
                                         .map(es.refugio.refugio.domain.model.animal.Animal::getNombre)
                                         .orElse("tu animal favorito");
 
-                                String mensaje = "Tu solicitud de adopción para " + nombreAnimal + " ha pasado a estado: " + estadoEnum;
+                                String mensaje = "Tu solicitud de adopción para " + nombreAnimal
+                                        + " ha pasado a estado: " + estadoEnum;
                                 notificacionService.enviar(
-                                    adoptante.getUsuarioId(),
-                                    "Actualización de Solicitud",
-                                    mensaje,
-                                    "ADOPCION",
-                                    "/web/solicitudes/" + solicitud.getId().getValue() + "/detalle"
-                                );
+                                        adoptante.getUsuarioId(),
+                                        "Actualización de Solicitud",
+                                        mensaje,
+                                        "ADOPCION",
+                                        "/web/solicitudes/" + solicitud.getId().getValue() + "/detalle");
                             }
                         });
                     }
-                    
+
                     return saved;
                 })
                 .orElseThrow(() -> new SolicitudAdopcionNotFoundException(command.id().getValue()));

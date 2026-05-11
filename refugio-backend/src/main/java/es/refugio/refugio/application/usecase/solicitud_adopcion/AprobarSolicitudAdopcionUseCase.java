@@ -36,7 +36,8 @@ public class AprobarSolicitudAdopcionUseCase {
         SolicitudAdopcion solicitud = solicitudAdopcionRepository.getById(solicitudId)
                 .orElseThrow(() -> new SolicitudAdopcionNotFoundException(solicitudId.getValue()));
 
-        if (solicitud.getEstado() != EstadoSolicitud.PENDIENTE && solicitud.getEstado() != EstadoSolicitud.EN_REVISION) {
+        if (solicitud.getEstado() != EstadoSolicitud.PENDIENTE
+                && solicitud.getEstado() != EstadoSolicitud.EN_REVISION) {
             System.err.println("ERROR: Estado inválido para aprobar: " + solicitud.getEstado());
             throw new SolicitudAdopcionEstadoInvalidoException(solicitud.getEstado().name());
         }
@@ -68,15 +69,14 @@ public class AprobarSolicitudAdopcionUseCase {
                     adoptante.setEstadoValidacion(EstadoValidacion.APROBADO);
                     adoptanteRepository.save(adoptante);
                     System.out.println("DEBUG: Adoptante actualizado a APROBADO");
-                    
+
                     if (adoptante.getUsuarioId() != null) {
                         notificacionService.enviar(
-                            adoptante.getUsuarioId(),
-                            "Solicitud de Adopción Aprobada",
-                            "¡Buenas noticias! Tu solicitud para adoptar a " + animalNombre + " ha sido aprobada.",
-                            "ADOPCION",
-                            "/web/solicitudes/" + solicitud.getId().getValue() + "/detalle"
-                        );
+                                adoptante.getUsuarioId(),
+                                "Solicitud de Adopción Aprobada",
+                                "¡Buenas noticias! Tu solicitud para adoptar a " + animalNombre + " ha sido aprobada.",
+                                "ADOPCION",
+                                "/web/solicitudes/" + solicitud.getId().getValue() + "/detalle");
                     }
                 });
 
@@ -90,7 +90,8 @@ public class AprobarSolicitudAdopcionUseCase {
                 .build();
 
         Adopcion savedAdopcion = adopcionRepository.save(nuevaAdopcion);
-        System.out.println("DEBUG: Adopción creada con éxito. ID=" + (savedAdopcion.getId() != null ? savedAdopcion.getId().getValue() : "PENDIENTE"));
+        System.out.println("DEBUG: Adopción creada con éxito. ID="
+                + (savedAdopcion.getId() != null ? savedAdopcion.getId().getValue() : "PENDIENTE"));
 
         return savedAdopcion;
     }
