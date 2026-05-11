@@ -8,8 +8,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.http.MediaType;
+import java.util.ArrayList;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -38,8 +41,21 @@ public class RestTemplateConfig {
         StringHttpMessageConverter stringConverter =
                 new StringHttpMessageConverter(StandardCharsets.UTF_8);
         AllEncompassingFormHttpMessageConverter formConverter = new AllEncompassingFormHttpMessageConverter();
+        ByteArrayHttpMessageConverter byteConverter = new ByteArrayHttpMessageConverter();
+        
+        // Soportar application/pdf incluso si viene con charset inesperado
+        List<MediaType> mediaTypes = new ArrayList<>();
+        mediaTypes.add(MediaType.APPLICATION_PDF);
+        mediaTypes.add(MediaType.APPLICATION_OCTET_STREAM);
+        mediaTypes.add(MediaType.ALL);
+        byteConverter.setSupportedMediaTypes(mediaTypes);
 
-        restTemplate.setMessageConverters(List.of(jsonConverter, stringConverter, formConverter));
+        restTemplate.setMessageConverters(List.of(
+                jsonConverter,
+                stringConverter,
+                formConverter,
+                byteConverter
+        ));
 
         // Añadir el interceptor de sesión
         restTemplate.setInterceptors(List.of(sessionCookieRelayInterceptor));
