@@ -47,9 +47,6 @@ public class CreateSolicitudAdopcionUseCase {
 
         SolicitudAdopcion savedSolicitud = solicitudAdopcionRepository.save(solicitud);
 
-        // Reservar animal tras recibir solicitud
-        animal.setEstado(EstadoAnimal.RESERVADO);
-        animalRepository.save(animal);
 
         // Notificar a los Administradores (por ROL)
         notificacionService.enviarARol(

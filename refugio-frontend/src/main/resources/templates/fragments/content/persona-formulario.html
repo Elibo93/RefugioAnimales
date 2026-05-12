@@ -109,7 +109,8 @@
                             </div>
                         </div>
 
-                        <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <div class="form-grid" 
+                             th:style="${isAdmin} ? 'display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;' : 'display: block; margin-bottom: 1.5rem;'">
                             <div class="form-group">
                                 <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
                                     <i data-lucide="calendar" style="width: 16px; color: #64748b;"></i>
@@ -120,17 +121,19 @@
                                     style="width: 100%; border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; transition: all 0.2s;">
                             </div>
 
-                            <div class="form-group">
+                            <div class="form-group" th:if="${isAdmin}">
                                 <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
                                     <i data-lucide="shield" style="width: 16px; color: #64748b;"></i>
                                     <span th:text="#{persona.table.header.rol}">Rol</span>
                                 </label>
-                                <select name="rol" class="form-control" style="width: 100%; border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; transition: all 0.2s;">
+                                <select name="rol" class="form-control" 
+                                    style="width: 100%; border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; transition: all 0.2s;">
                                     <option th:each="r : ${roles}" th:value="${r}"
                                         th:text="${#strings.capitalize(r.replace('ROLE_', '').toLowerCase())}"
                                         th:selected="${persona.get('rol') == r}">Rol</option>
                                 </select>
                             </div>
+                            <input type="hidden" name="rol" th:if="${!isAdmin}" th:value="${persona.get('rol')}">
                         </div>
 
                         <div class="form-grid" style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 1.5rem;" th:if="${persona.get('id') == null}">
@@ -149,7 +152,7 @@
 
                     <!-- ACCIONES -->
                     <div class="modal-actions" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #f1f5f9; display: flex; gap: 1rem; justify-content: flex-end;">
-                        <a th:href="@{/web/personas}" class="btn btn-outline" style="border-radius: 14px; padding: 0.75rem 2rem; font-weight: 600; color: #64748b; border: 2px solid #e2e8f0; transition: all 0.2s; text-decoration: none; display: flex; align-items: center;" th:text="#{generic.btn.cancel}">
+                        <a th:href="@{${isAdmin ? '/web/personas' : '/web/personas/' + currentUserId}}" class="btn btn-outline" style="border-radius: 14px; padding: 0.75rem 2rem; font-weight: 600; color: #64748b; border: 2px solid #e2e8f0; transition: all 0.2s; text-decoration: none; display: flex; align-items: center;" th:text="#{generic.btn.cancel}">
                             Cancelar
                         </a>
                         <button type="submit" class="btn btn-primary" style="border-radius: 14px; padding: 0.75rem 2.5rem; font-weight: 700; background: var(--primary); border: none; box-shadow: 0 4px 6px -1px rgba(var(--primary-rgb), 0.2); display: flex; align-items: center; gap: 10px; cursor: pointer;">

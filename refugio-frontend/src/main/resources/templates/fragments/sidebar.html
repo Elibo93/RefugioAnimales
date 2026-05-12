@@ -23,14 +23,16 @@
         <div class="sidebar-content">
             <!-- User Profile Section -->
             <div class="sidebar-section">
-                <div class="user-profile-large" th:if="${isAuthenticated}">
-                    <div class="avatar-large"><i data-lucide="user"></i></div>
-                    <div class="user-info">
-                        <span class="user-fullname"
-                            th:text="${currentUserName != null ? currentUserName : 'Usuario'}">User</span>
-                        <span class="user-email" style="font-size: 0.75rem; color: var(--text-muted);">Conectado</span>
+                <a th:if="${isAuthenticated}" th:href="@{|/web/personas/${currentUserId}|}" class="user-profile-link" style="text-decoration: none;">
+                    <div class="user-profile-large">
+                        <div class="avatar-large"><i data-lucide="user"></i></div>
+                        <div class="user-info">
+                            <span class="user-fullname"
+                                th:text="${currentUserName != null ? currentUserName : 'Usuario'}">User</span>
+                            <span class="user-email" style="font-size: 0.75rem; color: var(--text-muted);">Ver mi perfil</span>
+                        </div>
                     </div>
-                </div>
+                </a>
 
                 <div class="user-profile-large" th:if="${!isAuthenticated}">
                     <a th:href="@{/login}" class="btn btn-primary" style="width: 100%; justify-content: center;">

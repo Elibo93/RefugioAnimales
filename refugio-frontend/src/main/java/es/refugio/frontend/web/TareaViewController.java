@@ -43,10 +43,60 @@ public class TareaViewController {
     public String listar(Model model,
             @RequestParam(required = false) String prioridad,
             @RequestParam(required = false) String estado,
+            @RequestParam(required = false, defaultValue = "false") boolean modoSeleccion,
+            @RequestParam(required = false) Integer voluntarioIdSeleccion,
             @RequestParam(required = false) String successMessage,
-            HttpServletRequest request) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        
+        // Indicar al navegador que la respuesta varía según si es HTMX o no para evitar problemas de caché al dar atrás
+        response.setHeader("Vary", "HX-Request");
+
+        // Si estamos en modo selección, obtenemos el nombre del voluntario para el banner
+        if (modoSeleccion && voluntarioIdSeleccion != null) {
+            try {
+                Map<String, Object> v = (Map<String, Object>) restTemplate.getForObject(apiUrl + "/v1/voluntarios/" + voluntarioIdSeleccion, Map.class);
+                if (v != null) {
+                    Object uId = v.get("usuarioId");
+                    if (uId instanceof Map) uId = ((Map<?,?>)uId).get("value");
+                    
+                    if (uId != null) {
+                        Map<String, Object> p = (Map<String, Object>) restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + uId, Map.class);
+                        if (p != null) {
+                            model.addAttribute("voluntarioNombreSeleccion", p.get("nombre") + " " + p.get("apellido"));
+                        }
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
 
         List<Object> allTareas = fetchList("/v1/tareas");
+        
+        // Identificar tareas ya asignadas al voluntario seleccionado
+        Set<Integer> assignedTaskIds = new java.util.HashSet<>();
+        if (modoSeleccion && voluntarioIdSeleccion != null) {
+            for (Object t : allTareas) {
+                if (t instanceof Map) {
+                    Map<?, ?> tm = (Map<?, ?>) t;
+                    Object vIds = tm.get("voluntarioIds");
+                    if (vIds instanceof List) {
+                        for (Object vid : (List<?>) vIds) {
+                            Integer vidInt = null;
+                            if (vid instanceof Number) vidInt = ((Number) vid).intValue();
+                            else if (vid instanceof Map) vidInt = ((Number)((Map<?,?>)vid).get("value")).intValue();
+                            
+                            if (voluntarioIdSeleccion.equals(vidInt)) {
+                                Object tId = tm.get("id");
+                                if (tId instanceof Number) assignedTaskIds.add(((Number)tId).intValue());
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        model.addAttribute("alreadyAssignedTaskIds", assignedTaskIds);
+
         List<Object> tareas = new ArrayList<>(allTareas);
         List<Object> voluntarios = fetchList("/v1/voluntarios");
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
@@ -147,6 +197,10 @@ public class TareaViewController {
         model.addAttribute(ModelAttribute.Tarea_LIST.getName(), tareas);
         model.addAttribute("voluntarioNombres", voluntarioNombres);
         model.addAttribute("voluntarioUsuarioIds", voluntarioUsuarioIds);
+        model.addAttribute("modoSeleccion", modoSeleccion);
+        model.addAttribute("voluntarioIdSeleccion", voluntarioIdSeleccion);
+        model.addAttribute("myVoluntarioId", myVoluntarioId);
+        
         if (successMessage != null)
             model.addAttribute("successMessage", successMessage);
 
@@ -199,7 +253,8 @@ public class TareaViewController {
         }
 
         model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
-        model.addAttribute("estados", List.of("PENDIENTE", "EN_PROCESO", "COMPLETADA", "CANCELADA"));
+        model.addAttribute("estados", List.of("PENDIENTE", "PROPUESTA", "ACEPTADA", "EN_PROCESO", "COMPLETADA", "FINALIZADA", "RECHAZADA", "CANCELADA"));
+        model.addAttribute("voluntarioNombres", fetchVoluntarioNombres());
 
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
         Map<Integer, Map<String, Object>> usuariosMap = new HashMap<>();
@@ -245,9 +300,27 @@ public class TareaViewController {
 
     @GetMapping(WebRoutes.TAREAS_EDITAR)
     public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
-        Object tarea = restTemplate.getForObject(apiUrl + "/v1/tareas/" + id, Object.class);
+        Map<String, Object> tarea = restTemplate.getForObject(apiUrl + "/v1/tareas/" + id, Map.class);
+        if (tarea != null) {
+            // Asegurarnos de que voluntarioIds existe y es una lista
+            Object vIds = tarea.get("voluntarioIds");
+            if (vIds == null) {
+                tarea.put("voluntarioIds", new ArrayList<>());
+            } else if (vIds instanceof List) {
+                // Normalizar si vienen como objetos complejos
+                List<Object> normalized = new ArrayList<>();
+                for (Object o : (List<?>) vIds) {
+                    if (o instanceof Map) {
+                        normalized.add(((Map<?,?>)o).get("value"));
+                    } else {
+                        normalized.add(o);
+                    }
+                }
+                tarea.put("voluntarioIds", normalized);
+            }
+        }
         model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
-        model.addAttribute("estados", List.of("PENDIENTE", "EN_PROCESO", "COMPLETADA", "CANCELADA"));
+        model.addAttribute("estados", List.of("PENDIENTE", "PROPUESTA", "ACEPTADA", "EN_PROCESO", "COMPLETADA", "FINALIZADA", "RECHAZADA", "CANCELADA"));
         model.addAttribute("returnUrl", WebRoutes.TAREAS_BASE);
         model.addAttribute("voluntarioNombres", fetchVoluntarioNombres());
 
@@ -266,6 +339,7 @@ public class TareaViewController {
             @RequestParam(required = false) String fechaLimite,
             @RequestParam(required = false) String instrucciones,
             @RequestParam(required = false) List<Integer> voluntarioIds,
+            @RequestParam(required = false) Integer voluntarioActorId,
             RedirectAttributes redirectAttributes) {
 
         Map<String, Object> body = new HashMap<>();
@@ -275,6 +349,7 @@ public class TareaViewController {
         body.put("fechaLimite", fechaLimite != null && !fechaLimite.isEmpty() ? fechaLimite : null);
         body.put("instrucciones", instrucciones);
         body.put("voluntarioIds", voluntarioIds != null ? voluntarioIds : List.of());
+        body.put("voluntarioActorId", voluntarioActorId);
 
         restTemplate.put(apiUrl + "/v1/tareas/" + id, body);
         redirectAttributes.addFlashAttribute("successMessage", "Tarea editada correctamente");
@@ -302,8 +377,55 @@ public class TareaViewController {
         ITextRenderer renderer = new ITextRenderer();
         renderer.setDocumentFromString(html);
         renderer.layout();
-        renderer.createPDF(out);
         out.close();
+    }
+
+    // --- MODO SELECCIÓN Y VINCULACIÓN ---
+
+    /**
+     * Vincula un voluntario a una tarea existente desde el modo selección.
+     */
+    @SuppressWarnings("unchecked")
+    @PostMapping("/web/tareas/{id}/vincular-seleccion")
+    public String vincularSeleccion(@PathVariable Integer id, 
+                                     @RequestParam Integer voluntarioId, 
+                                     @RequestParam(required = false) String prioridad,
+                                     @RequestParam(required = false) String estado,
+                                     @RequestParam(required = false) String message,
+                                     Model model,
+                                     HttpServletRequest request,
+                                     HttpServletResponse response) {
+        // 1. Obtener la tarea actual
+        Map<String, Object> tarea = (Map<String, Object>) restTemplate.getForObject(apiUrl + "/v1/tareas/" + id, Map.class);
+        
+        if (tarea != null) {
+            // 2. Añadir el nuevo voluntario a la lista existente
+            List<Integer> vIds = new ArrayList<>();
+            Object existingIds = tarea.get("voluntarioIds");
+            if (existingIds instanceof List) {
+                for (Object o : (List<?>) existingIds) {
+                    if (o instanceof Number) vIds.add(((Number) o).intValue());
+                    else if (o instanceof Map) vIds.add(((Number)((Map<?,?>)o).get("value")).intValue());
+                }
+            }
+            
+            if (!vIds.contains(voluntarioId)) {
+                vIds.add(voluntarioId);
+            }
+            
+            // 3. Actualizar la tarea
+            tarea.put("voluntarioIds", vIds);
+            tarea.put("estado", "PROPUESTA"); // Forzar estado de propuesta
+            restTemplate.put(apiUrl + "/v1/tareas/" + id, tarea);
+            
+            // 4. Preparar el Toast profesional vía HTMX Trigger
+            String toastMsg = (message != null && !message.isEmpty()) ? message : "Voluntario asignado correctamente";
+            response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"" + toastMsg + "\", \"type\": \"success\"}}");
+        }
+        
+        // 5. Salir del modo selección y volver a la lista de tareas
+        // Llamamos a listar para obtener los datos frescos y devolver el fragmento directamente
+        return listar(model, prioridad, estado, false, null, null, request, response);
     }
 
     private Map<String, String> fetchVoluntarioNombres() {

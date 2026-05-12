@@ -13,7 +13,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
@@ -25,7 +28,6 @@ import java.util.*;
 
 @Controller
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class UsuarioViewController {
 
     private static final Logger logger = LoggerFactory.getLogger(UsuarioViewController.class);
@@ -39,10 +41,13 @@ public class UsuarioViewController {
     @Value("${backend.api.url}")
     private String apiUrl;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(WebRoutes.PERSONAS_BASE)
     public String listarPersonas(@RequestParam(required = false) String q,
             @RequestParam(required = false) String rol,
             Model model, HttpServletRequest request) {
+
+        logger.info("Filtrando personas - Query: '{}', Rol: '{}'", q, rol);
 
         List<Object> personasAuth = fetchList(authUrl + "/v1/usuarios");
         List<Object> perfilesLegales = fetchList(apiUrl + "/v1/perfiles-legales");
@@ -50,6 +55,7 @@ public class UsuarioViewController {
         Map<Integer, Map<String, Object>> perfilesMap = new HashMap<>();
         for (Object p : perfilesLegales) {
             if (p instanceof Map) {
+                @SuppressWarnings("unchecked")
                 Map<String, Object> pm = (Map<String, Object>) p;
                 Object uId = pm.get("usuarioId");
                 if (uId instanceof Number)
@@ -62,6 +68,7 @@ public class UsuarioViewController {
 
         for (Object u : personasAuth) {
             if (u instanceof Map) {
+                @SuppressWarnings("unchecked")
                 Map<String, Object> um = (Map<String, Object>) u;
                 Integer id = ((Number) um.get("id")).intValue();
 
@@ -114,6 +121,7 @@ public class UsuarioViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(WebRoutes.PERSONAS_NUEVO)
     public String crearPersonaForm(Model model, HttpServletRequest request) {
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), new HashMap<String, Object>());
@@ -127,6 +135,7 @@ public class UsuarioViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(WebRoutes.PERSONAS_NUEVO)
     public String procesarCreacion(@RequestParam String username,
             @RequestParam String email,
@@ -172,6 +181,7 @@ public class UsuarioViewController {
         return "redirect:" + WebRoutes.PERSONAS_BASE;
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     @GetMapping(WebRoutes.PERSONAS_EDITAR)
     public String editarPersonaForm(@PathVariable Integer id, Model model, HttpServletRequest request) {
         Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + id, Map.class);
@@ -180,6 +190,7 @@ public class UsuarioViewController {
             persona.putAll(user);
 
         try {
+            @SuppressWarnings("unchecked")
             Map<String, Object> legal = (Map<String, Object>) restTemplate
                     .getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + id, Map.class);
             if (legal != null) {
@@ -204,6 +215,7 @@ public class UsuarioViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     @PostMapping(WebRoutes.PERSONAS_EDITAR)
     public String procesarEdicion(@PathVariable Integer id,
             @RequestParam String nombre,
@@ -214,14 +226,23 @@ public class UsuarioViewController {
             @RequestParam String dni,
             @RequestParam String fechaNacimiento,
             @RequestParam(required = false) String rol,
+            HttpServletRequest request,
             RedirectAttributes redirectAttributes) {
 
         // 1. Actualizar en Auth
         Map<String, Object> userBody = new HashMap<>();
         userBody.put("email", email);
         userBody.put("username", username);
-        if (rol != null)
+        
+        // SEGURIDAD: Solo un ADMIN puede cambiar el rol. 
+        // Si no es admin, ignoramos el parámetro 'rol' que venga en la petición.
+        // Obtenemos el rol actual del contexto de seguridad si es necesario, 
+        // o simplemente no lo enviamos si el microservicio de Auth permite actualizaciones parciales.
+        boolean isAdmin = request.isUserInRole("ROLE_ADMIN");
+        if (isAdmin && rol != null) {
             userBody.put("rol", rol);
+        }
+        
         restTemplate.put(authUrl + "/v1/usuarios/" + id, userBody);
 
         // 2. Actualizar PerfilLegal
@@ -235,9 +256,59 @@ public class UsuarioViewController {
         restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", legalBody, Object.class);
 
         redirectAttributes.addFlashAttribute("successMessage", "Perfil actualizado con éxito");
-        return "redirect:" + WebRoutes.PERSONAS_BASE;
+        
+        // Redirigir dinámicamente según rol
+        if (rol != null && rol.contains("ADMIN")) {
+             return "redirect:" + WebRoutes.PERSONAS_BASE;
+        } else {
+             // Si no es admin o estamos editando nuestro propio perfil sin ser admin (seguridad controlada por @PreAuthorize)
+             // Nota: Usamos el ID del path para la redirección
+             return "redirect:/web/personas/" + id;
+        }
     }
 
+    @PostMapping(WebRoutes.PERSONAS_DETALLE + "/verificar-password")
+    @ResponseBody
+    public ResponseEntity<?> verificarPassword(@PathVariable Integer id, @RequestParam String password) {
+        try {
+            org.springframework.util.MultiValueMap<String, String> map = new org.springframework.util.LinkedMultiValueMap<>();
+            map.add("password", password != null ? password.trim() : "");
+
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
+            
+            org.springframework.http.HttpEntity<org.springframework.util.MultiValueMap<String, String>> request = 
+                new org.springframework.http.HttpEntity<>(map, headers);
+
+            return restTemplate.postForEntity(authUrl + "/v1/usuarios/" + id + "/verificar-password", request, Map.class);
+        } catch (HttpClientErrorException.Forbidden e) {
+            logger.warn("Acceso denegado al verificar password para ID {}: {}", id, e.getResponseBodyAsString());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Contraseña actual incorrecta o falta de permisos"));
+        } catch (Exception e) {
+            logger.error("Error al verificar contraseña para usuario {}: {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error al verificar la contraseña"));
+        }
+    }
+
+    @PostMapping(WebRoutes.PERSONAS_DETALLE + "/cambiar-password")
+    @ResponseBody
+    public ResponseEntity<?> cambiarPassword(@PathVariable Integer id, @RequestParam String newPassword) {
+        try {
+            Map<String, String> body = new HashMap<>();
+            body.put("newPassword", newPassword);
+            
+            restTemplate.put(authUrl + "/v1/usuarios/" + id + "/password", body);
+            
+            return ResponseEntity.ok(Map.of("message", "Contraseña actualizada"));
+        } catch (Exception e) {
+            logger.error("Error al cambiar contraseña para usuario {}: {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error al conectar con el servicio de autenticación"));
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(WebRoutes.PERSONAS_ELIMINAR)
     public String borrar(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
@@ -263,8 +334,14 @@ public class UsuarioViewController {
         return "redirect:" + WebRoutes.PERSONAS_BASE;
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     @GetMapping(WebRoutes.PERSONAS_DETALLE)
     public String verDetalle(@PathVariable Integer id, Model model) {
+        // Inicializar listas vacías para evitar errores de renderizado en Thymeleaf
+        model.addAttribute("tareas", new ArrayList<>());
+        model.addAttribute("vinculosAnimales", new ArrayList<>());
+        model.addAttribute("animalNames", new HashMap<>());
+
         Map<String, Object> userAuth = (Map<String, Object>) restTemplate.getForObject(authUrl + "/v1/usuarios/" + id,
                 Map.class);
         Map<String, Object> persona = new HashMap<>();
@@ -372,6 +449,7 @@ public class UsuarioViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(WebRoutes.PERSONAS_PDF)
     public void exportarPDF(HttpServletResponse response, @RequestParam(required = false) String rol) throws Exception {
         List<Object> personasAuth = fetchList(authUrl + "/v1/usuarios");
@@ -395,6 +473,7 @@ public class UsuarioViewController {
         out.close();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(WebRoutes.PERSONAS_BUSCAR)
     public String buscarUsuarios(
             @RequestParam(required = false, defaultValue = "") String q,
@@ -409,10 +488,12 @@ public class UsuarioViewController {
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
         List<Object> perfiles = fetchList(apiUrl + "/v1/perfiles-legales");
         List<Object> adoptantes = fetchList(apiUrl + "/v1/adoptantes");
+        List<Object> voluntarios = fetchList(apiUrl + "/v1/voluntarios");
 
         Map<Integer, Map<String, Object>> perfilesMap = new HashMap<>();
         for (Object p : perfiles) {
             if (p instanceof Map) {
+                @SuppressWarnings("unchecked")
                 Map<String, Object> pm = (Map<String, Object>) p;
                 Object uId = pm.get("usuarioId");
                 if (uId instanceof Number)
@@ -420,18 +501,25 @@ public class UsuarioViewController {
             }
         }
 
-        Map<Integer, Integer> adoptantesMap = new HashMap<>();
+        Set<Integer> adoptantesUserIds = new HashSet<>();
         for (Object a : adoptantes) {
             if (a instanceof Map) {
+                @SuppressWarnings("unchecked")
                 Map<String, Object> am = (Map<String, Object>) a;
                 Object uIdRaw = am.get("usuarioId");
-                Object aIdRaw = am.get("id");
+                Integer uId = (uIdRaw instanceof Map) ? (Integer) ((Map<?, ?>) uIdRaw).get("value") : (Integer) uIdRaw;
+                if (uId != null) adoptantesUserIds.add(uId);
+            }
+        }
 
-                Integer uId = (uIdRaw instanceof Map) ? (Integer) ((Map) uIdRaw).get("value") : (Integer) uIdRaw;
-                Integer aId = (aIdRaw instanceof Map) ? (Integer) ((Map) aIdRaw).get("value") : (Integer) aIdRaw;
-
-                if (uId != null && aId != null)
-                    adoptantesMap.put(uId, aId);
+        Set<Integer> voluntariosUserIds = new HashSet<>();
+        for (Object v : voluntarios) {
+            if (v instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> vm = (Map<String, Object>) v;
+                Object uIdRaw = vm.get("usuarioId");
+                Integer uId = (uIdRaw instanceof Map) ? (Integer) ((Map<?, ?>) uIdRaw).get("value") : (Integer) uIdRaw;
+                if (uId != null) voluntariosUserIds.add(uId);
             }
         }
 
@@ -440,23 +528,28 @@ public class UsuarioViewController {
 
         for (Object u : usuarios) {
             if (u instanceof Map) {
+                @SuppressWarnings("unchecked")
                 Map<String, Object> um = (Map<String, Object>) u;
                 Integer uId = ((Number) um.get("id")).intValue();
                 Map<String, Object> perfil = perfilesMap.get(uId);
 
-                String nombre = perfil != null && perfil.get("nombre") != null ? String.valueOf(perfil.get("nombre"))
-                        : "";
-                String apellido = perfil != null && perfil.get("apellido") != null
-                        ? String.valueOf(perfil.get("apellido"))
-                        : "";
+                String nombre = perfil != null && perfil.get("nombre") != null ? String.valueOf(perfil.get("nombre")) : "";
+                String apellido = perfil != null && perfil.get("apellido") != null ? String.valueOf(perfil.get("apellido")) : "";
                 String email = String.valueOf(um.get("email"));
 
-                if (nombre.toLowerCase().contains(query) || apellido.toLowerCase().contains(query)
-                        || email.toLowerCase().contains(query)) {
+                if (nombre.toLowerCase().contains(query) || apellido.toLowerCase().contains(query) || email.toLowerCase().contains(query)) {
                     Map<String, Object> result = new HashMap<>(um);
                     result.put("nombre", nombre);
                     result.put("apellido", apellido);
-                    result.put("adoptanteId", adoptantesMap.get(uId));
+                    
+                    boolean yaRegistrado = false;
+                    if ("adoptante".equals(context)) {
+                        yaRegistrado = adoptantesUserIds.contains(uId);
+                    } else if ("voluntario".equals(context)) {
+                        yaRegistrado = voluntariosUserIds.contains(uId);
+                    }
+                    
+                    result.put("yaRegistrado", yaRegistrado);
                     encontrados.add(result);
                 }
             }

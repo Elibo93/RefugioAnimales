@@ -6,7 +6,7 @@
 <div th:fragment="content" class="fade-in">
     <div class="profile-header">
         <div class="profile-cover" style="height: 200px; background: linear-gradient(135deg, var(--primary-light), var(--primary)); border-radius: 20px 20px 0 0; position: relative;">
-            <div class="profile-actions" style="position: absolute; top: 20px; right: 20px; display: flex; gap: 10px;">
+            <div class="profile-actions" th:if="${isAdmin}" style="position: absolute; top: 20px; right: 20px; display: flex; gap: 10px;">
                 <a th:hx-get="@{/web/animales/{id}/editar(id=${animal.get('id')})}" 
                    hx-target="#contenido-dinamico"
                    hx-push-url="true"
@@ -82,7 +82,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="data-pill" style="background: var(--bg-secondary); padding: 10px 20px; border-radius: 12px; display: flex; flex-direction: column;">
+                    <div th:if="${isAdmin}" class="data-pill" style="background: var(--bg-secondary); padding: 10px 20px; border-radius: 12px; display: flex; flex-direction: column;">
                         <span style="font-size: 0.75rem; color: var(--text-muted);">ID de Chip</span>
                         <strong th:text="${animal.get('chipId')}" style="margin-top: 2px;">985100012345678</strong>
                     </div>
@@ -93,8 +93,8 @@
                 </div>
             </div>
 
-            <!-- Historial Médico -->
-            <div class="glass-card" style="padding: 30px;">
+            <!-- Historial Médico (Solo ADMIN) -->
+            <div th:if="${isAdmin}" class="glass-card" style="padding: 30px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                     <h3 style="margin: 0; display: flex; align-items: center; gap: 10px;">
                         <i data-lucide="activity" style="color: var(--secondary);"></i>
@@ -127,8 +127,8 @@
         <!-- Columna Derecha: Métricas y Adoptante -->
         <div class="profile-sidebar-col" style="display: flex; flex-direction: column; gap: 30px;">
             
-            <!-- Métricas de Popularidad -->
-            <div class="glass-card" style="padding: 25px; background: linear-gradient(to bottom right, var(--bg-secondary), var(--bg-main));">
+            <!-- Métricas de Popularidad (Solo ADMIN) -->
+            <div th:if="${isAdmin}" class="glass-card" style="padding: 25px; background: linear-gradient(to bottom right, var(--bg-secondary), var(--bg-main));">
                 <h4 style="margin: 0 0 20px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">Popularidad</h4>
                 <div style="display: flex; align-items: center; gap: 20px;">
                     <div style="width: 60px; height: 60px; border-radius: 15px; background: rgba(var(--secondary-rgb), 0.1); display: flex; align-items: center; justify-content: center;">
@@ -151,8 +151,8 @@
                 </div>
             </div>
 
-            <!-- Información del Adoptante (Si aplica) -->
-            <div th:if="${adoptante != null}" class="glass-card" style="padding: 25px; border: 2px solid var(--primary-light);">
+            <!-- Información del Adoptante (Solo ADMIN) -->
+            <div th:if="${isAdmin and adoptante != null}" class="glass-card" style="padding: 25px; border: 2px solid var(--primary-light);">
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
                     <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--primary);"></div>
                     <h4 style="margin: 0; font-size: 0.9rem; text-transform: uppercase; color: var(--primary); letter-spacing: 1px;">Adoptado por</h4>
@@ -184,14 +184,61 @@
 
             <!-- Botones de Acción Extra -->
             <div style="display: flex; flex-direction: column; gap: 10px;">
-                <a th:if="${animal.get('estado') == 'DISPONIBLE'}" 
+                <!-- 1. Botón para Administrador -->
+                <a th:if="${isAdmin and (animal.get('estado') == 'DISPONIBLE' or animal.get('estado') == 'EN_TRATAMIENTO')}" 
                    th:hx-get="@{/web/solicitudes/nueva(animalId=${animal.get('id')})}" 
                    hx-target="#contenido-dinamico"
                    hx-push-url="true"
-                   class="btn btn-primary" style="width: 100%; justify-content: center;">
+                   class="btn btn-primary" style="width: 100%; justify-content: center; height: 56px; border-radius: 16px;">
                     <i data-lucide="heart" style="width: 18px; margin-right: 8px;"></i>
                     Registrar Adopción
                 </a>
+
+                <!-- 2. Flujo para Usuario Público / Adoptante (Solo si NO es Admin) -->
+                <div th:if="${!isAdmin and (animal.get('estado') == 'DISPONIBLE' or animal.get('estado') == 'EN_TRATAMIENTO')}" style="width: 100%;">
+                    
+                    <!-- Caso A: Ya ha solicitado este animal -->
+                    <div th:if="${animalesSolicitadosIds.contains(animal.get('id'))}"
+                         style="background: rgba(45, 157, 88, 0.1); color: #2d9d58; padding: 1.2rem; border-radius: 16px; border: 1px dashed #2d9d58; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center; margin-bottom: 1rem;">
+                        <i data-lucide="check-circle" style="width: 24px; height: 24px;"></i>
+                        <div style="font-weight: 700; font-size: 1rem;">Solicitud enviada</div>
+                        <p style="font-size: 0.85rem; margin: 0; opacity: 0.8;">Estamos revisando tu interés por <span th:text="${animal.get('nombre')}"></span>. ¡Pronto contactaremos contigo!</p>
+                    </div>
+
+                    <!-- Caso B: No ha solicitado aún -->
+                    <div th:if="${!animalesSolicitadosIds.contains(animal.get('id'))}">
+                        
+                        <!-- No Autenticado -->
+                        <div th:if="${!isAuthenticated}">
+                            <a th:href="@{/web/solicitudes/publico/opciones(animalId=${animal.get('id')})}" 
+                               class="btn btn-primary"
+                               style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
+                                <i data-lucide="heart"></i>
+                                <span>¡Adopta ahora!</span>
+                            </a>
+                        </div>
+
+                        <!-- Autenticado (No Adoptante aún) -->
+                        <div th:if="${isAuthenticated and !isAdoptante}">
+                            <a th:href="@{/web/solicitudes/publico/convertir(animalId=${animal.get('id')})}" 
+                               class="btn btn-primary"
+                               style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
+                                <i data-lucide="heart"></i>
+                                <span>¡Quiero Adoptar!</span>
+                            </a>
+                        </div>
+
+                        <!-- Autenticado (Ya es Adoptante) -->
+                        <div th:if="${isAuthenticated and isAdoptante}">
+                            <a th:href="@{/web/solicitudes/publico/directa/formulario(animalId=${animal.get('id')})}" 
+                               class="btn btn-primary"
+                               style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
+                                <i data-lucide="heart-handshake"></i>
+                                <span>Solicitar Adopción</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
                 <button class="btn btn-secondary" style="width: 100%; justify-content: center;">
                     <i data-lucide="share-2" style="width: 18px; margin-right: 8px;"></i>
                     Compartir Perfil

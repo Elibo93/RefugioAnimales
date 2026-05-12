@@ -4,3 +4,5 @@ databaseChangeLog:
   - include: { file: "db/changelog/changes/003-notificaciones.yaml" }
   - include: { file: "db/changelog/changes/004-notificaciones-rol.yaml" }
   - include: { file: "db/changelog/changes/005-solicitud-admin-comment.yaml" }
+  - include: { file: "db/changelog/changes/006-preferencias-adopcion.yaml" }
+  - include: { file: "db/changelog/changes/009-tarea-notificacion-vencimiento.yaml" }
