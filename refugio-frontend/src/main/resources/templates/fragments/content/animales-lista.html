@@ -1,5 +1,12 @@
 <!-- Vista de Listado de Animales: Catálogo general y gestión administrativa de los animales del refugio -->
 <!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
 <div th:fragment="content">
         <div th:class="${isAdmin ? '' : 'animal-catalog-layout'}" style="margin-top: 1rem;">
             <!-- 1. SIDEBAR PARA ADMINISTRADOR (DISEÑO SIMPLE DE GESTIÓN) -->
@@ -7,112 +14,115 @@
             <!-- 2. SIDEBAR PARA USUARIOS (DISEÑO COMPACTO) -->
             <aside th:if="${!isAdmin}" class="filter-sidebar"
                 style="width: 280px; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(15px); border-radius: 24px; padding: 1.4rem; border: 1px solid rgba(255, 255, 255, 0.3); height: fit-content; position: sticky; top: 2rem;">
-                <form method="get" action="/web/animales" 
-                      hx-get="/web/animales" 
-                      hx-target="#animal-results" 
-                      hx-select="#animal-results"
-                      hx-push-url="true">
-                    
+                <form method="get" action="/web/animales" hx-get="/web/animales" hx-target="#animal-results"
+                    hx-select="#animal-results" hx-push-url="true">
+
                     <!-- BUSCADOR DE TEXTO LIBRE -->
                     <div class="filter-group" style="margin-bottom: 1.2rem;">
-                        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.7rem; font-weight: 800; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase;">
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.7rem; font-weight: 800; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase;">
                             <i data-lucide="search" style="width: 13px; color: var(--primary);"></i>
                             <span>Búsqueda</span>
                         </label>
                         <div style="position: relative;">
-                            <input type="text" name="q" th:value="${q}"
-                                   placeholder="Ej: Luna, Pastor..."
-                                   style="width: 100%; height: 42px; padding: 0 1rem 0 2.5rem; border-radius: 12px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; transition: all 0.3s ease; outline: none;"
-                                   hx-get="/web/animales" 
-                                   hx-trigger="keyup changed delay:800ms" 
-                                   hx-target="#animal-results" 
-                                   hx-select="#animal-results"
-                                   hx-push-url="true"
-                                   onfocus="this.style.borderColor='var(--primary)'; this.style.background='white';"
-                                   onblur="this.style.borderColor='#f1f5f9'; this.style.background='#f8fafc';">
-                            <i data-lucide="search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 16px; color: #94a3b8; pointer-events: none;"></i>
+                            <input type="text" name="q" th:value="${q}" placeholder="Ej: Luna, Pastor..."
+                                style="width: 100%; height: 42px; padding: 0 1rem 0 2.5rem; border-radius: 12px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; transition: all 0.3s ease; outline: none;"
+                                hx-get="/web/animales" hx-trigger="keyup changed delay:800ms"
+                                hx-target="#animal-results" hx-select="#animal-results" hx-push-url="true"
+                                onfocus="this.style.borderColor='var(--primary)'; this.style.background='white';"
+                                onblur="this.style.borderColor='#f1f5f9'; this.style.background='#f8fafc';">
+                            <i data-lucide="search"
+                                style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 16px; color: #94a3b8; pointer-events: none;"></i>
                         </div>
                     </div>
 
                     <!-- ESPECIE -->
                     <div class="filter-group" style="margin-bottom: 1rem;">
-                        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.7rem; font-weight: 800; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase;">
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.7rem; font-weight: 800; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase;">
                             <i data-lucide="dog" style="width: 13px; color: var(--primary);"></i>
                             <span>Especie</span>
                         </label>
                         <div style="position: relative;">
-                            <select name="especie" 
-                                    hx-get="/web/animales" hx-trigger="change" 
-                                    hx-target="#animal-results" hx-select="#animal-results"
-                                    style="width: 100%; height: 42px; padding: 0 2rem 0 1rem; border-radius: 12px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; font-weight: 500; color: var(--text-main); cursor: pointer; appearance: none; outline: none; transition: all 0.3s;">
-                                <option value="" th:selected="${selectedEspecie == null or selectedEspecie == ''}">Todas las especies</option>
-                                <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="${#strings.capitalize(#strings.toLowerCase(e))}"
+                            <select name="especie" hx-get="/web/animales" hx-trigger="change"
+                                hx-target="#animal-results" hx-select="#animal-results"
+                                style="width: 100%; height: 42px; padding: 0 2rem 0 1rem; border-radius: 12px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; font-weight: 500; color: var(--text-main); cursor: pointer; appearance: none; outline: none; transition: all 0.3s;">
+                                <option value="" th:selected="${selectedEspecie == null or selectedEspecie == ''}">Todas
+                                    las especies</option>
+                                <option th:each="e : ${especiesActivas}" th:value="${e}"
+                                    th:text="${#strings.capitalize(#strings.toLowerCase(e))}"
                                     th:selected="${selectedEspecie == e}"></option>
                             </select>
-                            <i data-lucide="chevron-down" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); width: 16px; color: #94a3b8; pointer-events: none;"></i>
+                            <i data-lucide="chevron-down"
+                                style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); width: 16px; color: #94a3b8; pointer-events: none;"></i>
                         </div>
                     </div>
 
                     <!-- TAMAÑO -->
                     <div class="filter-group" style="margin-bottom: 1rem;">
-                        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.7rem; font-weight: 800; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase;">
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.7rem; font-weight: 800; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase;">
                             <i data-lucide="maximize-2" style="width: 13px; color: var(--primary);"></i>
                             <span>Tamaño</span>
                         </label>
                         <div style="position: relative;">
-                            <select name="tamano" 
-                                    hx-get="/web/animales" hx-trigger="change" 
-                                    hx-target="#animal-results" hx-select="#animal-results"
-                                    style="width: 100%; height: 42px; padding: 0 2rem 0 1rem; border-radius: 12px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; font-weight: 500; color: var(--text-main); cursor: pointer; appearance: none; outline: none; transition: all 0.3s;">
-                                <option value="" th:selected="${selectedTamano == null or selectedTamano == ''}">Cualquier tamaño</option>
+                            <select name="tamano" hx-get="/web/animales" hx-trigger="change" hx-target="#animal-results"
+                                hx-select="#animal-results"
+                                style="width: 100%; height: 42px; padding: 0 2rem 0 1rem; border-radius: 12px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; font-weight: 500; color: var(--text-main); cursor: pointer; appearance: none; outline: none; transition: all 0.3s;">
+                                <option value="" th:selected="${selectedTamano == null or selectedTamano == ''}">
+                                    Cualquier tamaño</option>
                                 <option value="PEQUEÑO" th:selected="${selectedTamano == 'PEQUEÑO'}">Pequeño</option>
                                 <option value="MEDIANO" th:selected="${selectedTamano == 'MEDIANO'}">Mediano</option>
                                 <option value="GRANDE" th:selected="${selectedTamano == 'GRANDE'}">Grande</option>
                                 <option value="GIGANTE" th:selected="${selectedTamano == 'GIGANTE'}">Gigante</option>
                             </select>
-                            <i data-lucide="chevron-down" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); width: 16px; color: #94a3b8; pointer-events: none;"></i>
+                            <i data-lucide="chevron-down"
+                                style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); width: 16px; color: #94a3b8; pointer-events: none;"></i>
                         </div>
                     </div>
 
                     <!-- EDAD (ESTILO CHIPS PREMIUM) -->
                     <div class="filter-group" style="margin-bottom: 1.2rem;">
-                        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; font-size: 0.7rem; font-weight: 800; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase;">
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; font-size: 0.7rem; font-weight: 800; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase;">
                             <i data-lucide="calendar" style="width: 13px; color: var(--primary);"></i>
                             <span>Edad</span>
                         </label>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                            <label th:each="e : ${ {'CACHORRO', 'JOVEN', 'ADULTO', 'SENIOR'} }" style="cursor: pointer; position: relative;">
-                                <input type="checkbox" name="edad" th:value="${e}" 
-                                       th:checked="${selectedEdad != null and #lists.contains(selectedEdad, e)}"
-                                       hx-get="/web/animales" hx-trigger="change" 
-                                       hx-target="#animal-results" hx-select="#animal-results"
-                                       style="display: none;">
-                                <span class="filter-chip-premium" th:text="${#strings.capitalize(#strings.toLowerCase(e))}"></span>
+                            <label th:each="e : ${ {'CACHORRO', 'JOVEN', 'ADULTO', 'SENIOR'} }"
+                                style="cursor: pointer; position: relative;">
+                                <input type="checkbox" name="edad" th:value="${e}"
+                                    th:checked="${selectedEdad != null and #lists.contains(selectedEdad, e)}"
+                                    hx-get="/web/animales" hx-trigger="change" hx-target="#animal-results"
+                                    hx-select="#animal-results" style="display: none;">
+                                <span class="filter-chip-premium"
+                                    th:text="${#strings.capitalize(#strings.toLowerCase(e))}"></span>
                             </label>
                         </div>
                     </div>
 
                     <!-- URGENCIA (SWITCH PREMIUM) -->
                     <div class="filter-group" style="margin-bottom: 1.2rem;">
-                        <label class="urgencia-card" 
-                               style="display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1rem; border-radius: 16px; cursor: pointer; transition: all 0.3s; border: 2px solid transparent; background: #fef2f2;">
+                        <label class="urgencia-card"
+                            style="display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1rem; border-radius: 16px; cursor: pointer; transition: all 0.3s; border: 2px solid transparent; background: #fef2f2;">
                             <div style="display: flex; align-items: center; gap: 10px;">
-                                <div style="background: white; padding: 6px; border-radius: 10px; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.1);">
+                                <div
+                                    style="background: white; padding: 6px; border-radius: 10px; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.1);">
                                     <i data-lucide="flame" style="width: 14px; color: #ef4444;"></i>
                                 </div>
                                 <div style="font-size: 0.85rem; font-weight: 800; color: #991b1b;">Solo urgentes</div>
                             </div>
                             <input type="checkbox" name="urgencia" value="true" th:checked="${selectedUrgencia}"
-                                   hx-get="/web/animales" hx-trigger="change" 
-                                   hx-target="#animal-results" hx-select="#animal-results"
-                                   style="width: 18px; height: 18px; cursor: pointer; accent-color: #ef4444;">
+                                hx-get="/web/animales" hx-trigger="change" hx-target="#animal-results"
+                                hx-select="#animal-results"
+                                style="width: 18px; height: 18px; cursor: pointer; accent-color: #ef4444;">
                         </label>
                     </div>
 
                     <!-- BOTÓN LIMPIAR -->
                     <div style="text-align: center; margin-bottom: 0.5rem;">
-                        <a th:href="@{/web/animales}" 
-                           style="color: #94a3b8; text-decoration: none; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0.7rem; border-radius: 14px; transition: all 0.3s; background: #f8fafc;">
+                        <a th:href="@{/web/animales}"
+                            style="color: #94a3b8; text-decoration: none; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0.7rem; border-radius: 14px; transition: all 0.3s; background: #f8fafc;">
                             <i data-lucide="rotate-ccw" style="width: 14px;"></i>
                             <span>Limpiar filtros</span>
                         </a>
@@ -132,20 +142,24 @@
                             font-weight: 600;
                             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
                         }
-                        input:checked + .filter-chip-premium {
+
+                        input:checked+.filter-chip-premium {
                             background: var(--primary);
                             border-color: var(--primary);
                             color: white;
                             box-shadow: 0 8px 15px rgba(var(--primary-rgb), 0.25);
                             transform: translateY(-2px);
                         }
+
                         .filter-chip-premium:hover {
                             border-color: var(--primary);
                             color: var(--primary);
                         }
-                        input:checked + .filter-chip-premium:hover {
+
+                        input:checked+.filter-chip-premium:hover {
                             color: white;
                         }
+
                         .urgencia-card:hover {
                             background: #fee2e2 !important;
                             border-color: #fecaca !important;
@@ -165,38 +179,45 @@
             </aside>
 
             <!-- Main Content Area -->
-            <div class="main-content-area" id="animal-results" th:style="${isAdmin ? 'padding: 0; flex: 1;' : 'padding: 0 0 0 3rem; flex: 1;'}">
+            <div class="main-content-area" id="animal-results"
+                th:style="${isAdmin ? 'padding: 0; flex: 1;' : 'padding: 0 0 0 3rem; flex: 1;'}">
 
                 <!-- BANNER DE ENCUESTA (Solo si no es admin, está logueado y no tiene preferencias) -->
-                <div th:if="${isAuthenticated and !isAdmin and (hasPreferences == null or !hasPreferences)}" 
-                     class="survey-invitation-banner fade-in"
-                     style="margin-bottom: 2.5rem; padding: 2rem; background: linear-gradient(135deg, #2d9d58 0%, #15803d 100%); border-radius: 28px; color: white; display: flex; align-items: center; justify-content: space-between; gap: 2rem; box-shadow: 0 20px 40px rgba(45, 157, 88, 0.25); position: relative; overflow: hidden;">
-                    
+                <div th:if="${isAuthenticated and !isAdmin and (hasPreferences == null or !hasPreferences)}"
+                    class="survey-invitation-banner fade-in"
+                    style="margin-bottom: 2.5rem; padding: 2rem; background: linear-gradient(135deg, #2d9d58 0%, #15803d 100%); border-radius: 28px; color: white; display: flex; align-items: center; justify-content: space-between; gap: 2rem; box-shadow: 0 20px 40px rgba(45, 157, 88, 0.25); position: relative; overflow: hidden;">
+
                     <div style="position: absolute; right: -20px; top: -20px; opacity: 0.1;">
                         <i data-lucide="sparkles" style="width: 150px; height: 150px;"></i>
                     </div>
 
                     <div style="flex: 1; position: relative; z-index: 2;">
                         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.5rem;">
-                            <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 99px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;">Nuevo: Recomendaciones Smart</span>
+                            <span
+                                style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 99px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;">Nuevo:
+                                Recomendaciones Smart</span>
                         </div>
-                        <h3 style="font-weight: 900; font-size: 1.5rem; margin: 0 0 0.5rem 0; letter-spacing: -0.02em;">¿Buscas a tu compañero ideal?</h3>
-                        <p style="margin: 0; font-size: 0.95rem; opacity: 0.9; font-weight: 500; line-height: 1.5; max-width: 500px;">
-                            Cuéntanos qué buscas y nuestro sistema inteligente te avisará en cuanto llegue un animal que encaje contigo.
+                        <h3 style="font-weight: 900; font-size: 1.5rem; margin: 0 0 0.5rem 0; letter-spacing: -0.02em;">
+                            ¿Buscas a tu compañero ideal?</h3>
+                        <p
+                            style="margin: 0; font-size: 0.95rem; opacity: 0.9; font-weight: 500; line-height: 1.5; max-width: 500px;">
+                            Cuéntanos qué buscas y nuestro sistema inteligente te avisará en cuanto llegue un animal que
+                            encaje contigo.
                         </p>
                     </div>
 
                     <div style="display: flex; flex-direction: column; gap: 0.75rem; z-index: 2;">
                         <button hx-get="/web/preferencias/encuesta" hx-target="#contenido-dinamico" hx-push-url="true"
-                                class="btn" style="background: white; color: #15803d; font-weight: 800; padding: 0.9rem 1.8rem; border-radius: 16px; border: none; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);"
-                                onmouseover="this.style.transform='translateY(-2px)';"
-                                onmouseout="this.style.transform='translateY(0)';">
+                            class="btn"
+                            style="background: white; color: #15803d; font-weight: 800; padding: 0.9rem 1.8rem; border-radius: 16px; border: none; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);"
+                            onmouseover="this.style.transform='translateY(-2px)';"
+                            onmouseout="this.style.transform='translateY(0)';">
                             <i data-lucide="check-circle" style="width: 18px;"></i>
                             <span>Empezar encuesta</span>
                         </button>
-                        
+
                         <button th:attr="onclick=|omitirEncuesta('${currentUserId}')|"
-                                style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); font-size: 0.8rem; font-weight: 700; padding: 0.6rem; border-radius: 12px; cursor: pointer; transition: all 0.3s; backdrop-filter: blur(5px);">
+                            style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); font-size: 0.8rem; font-weight: 700; padding: 0.6rem; border-radius: 12px; cursor: pointer; transition: all 0.3s; backdrop-filter: blur(5px);">
                             No me interesa por ahora
                         </button>
                     </div>
@@ -225,8 +246,10 @@
                     style="background: transparent; border: none; box-shadow: none;">
 
                     <div style="margin-bottom: 2.5rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-                            <h2 style="font-weight: 800; color: var(--text-main); margin: 0; font-size: 1.85rem; letter-spacing: -0.02em;" th:text="#{animal.list.title.admin}">Gestión de Animales</h2>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                            <h2 style="font-weight: 800; color: var(--text-main); margin: 0; font-size: 1.85rem; letter-spacing: -0.02em;"
+                                th:text="#{animal.list.title.admin}">Gestión de Animales</h2>
                             <div style="display: flex; gap: 0.75rem;">
                                 <a th:href="@{/web/animales/pdf}" target="_blank" class="btn"
                                     style="padding: 0.7rem 1.25rem; border-radius: 14px; font-weight: 700; background: white; border: 1px solid #e2e8f0; color: #64748b; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm);">
@@ -242,56 +265,62 @@
                         </div>
 
                         <!-- Barra de Herramientas Premium Mejorada -->
-                        <div style="background: white; padding: 1rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 1rem; width: 100%;">
-                            
+                        <div
+                            style="background: white; padding: 1rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 1rem; width: 100%;">
+
                             <!-- Buscador con más peso -->
                             <div style="flex: 3; position: relative;">
-                                <i data-lucide="search" style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); width: 20px; color: #94a3b8; z-index: 10;"></i>
+                                <i data-lucide="search"
+                                    style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); width: 20px; color: #94a3b8; z-index: 10;"></i>
                                 <input type="text" name="q" th:value="${q}"
-                                       placeholder="Buscar por nombre, raza, ID o Chip..." 
-                                       hx-get="/web/animales" hx-trigger="keyup changed delay:300ms" 
-                                       hx-target="#animal-grid-admin" hx-select="#animal-grid-admin"
-                                       hx-swap="outerHTML"
-                                       hx-include="[name='especie'], [name='tamano']"
-                                       style="width: 100%; height: 52px; padding: 0 1.5rem 0 3.25rem; border-radius: 14px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.95rem; transition: all 0.3s; outline: none;">
+                                    placeholder="Buscar por nombre, raza, ID o Chip..." hx-get="/web/animales"
+                                    hx-trigger="keyup changed delay:300ms" hx-target="#animal-grid-admin"
+                                    hx-select="#animal-grid-admin" hx-swap="outerHTML"
+                                    hx-include="[name='especie'], [name='tamano']"
+                                    style="width: 100%; height: 52px; padding: 0 1.5rem 0 3.25rem; border-radius: 14px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.95rem; transition: all 0.3s; outline: none;">
                             </div>
 
                             <!-- Filtro Especie -->
                             <div style="flex: 1.2; position: relative;">
-                                <i data-lucide="dog" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 18px; color: #94a3b8; z-index: 10;"></i>
-                                <select name="especie" 
-                                        hx-get="/web/animales" hx-trigger="change" 
-                                        hx-target="#animal-grid-admin" hx-select="#animal-grid-admin"
-                                        hx-swap="outerHTML"
-                                        hx-include="[name='q'], [name='tamano']"
-                                        style="width: 100%; height: 52px; padding: 0 2rem 0 2.75rem; border-radius: 14px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; color: var(--text-main); font-weight: 600; cursor: pointer; appearance: none; outline: none;">
+                                <i data-lucide="dog"
+                                    style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 18px; color: #94a3b8; z-index: 10;"></i>
+                                <select name="especie" hx-get="/web/animales" hx-trigger="change"
+                                    hx-target="#animal-grid-admin" hx-select="#animal-grid-admin" hx-swap="outerHTML"
+                                    hx-include="[name='q'], [name='tamano']"
+                                    style="width: 100%; height: 52px; padding: 0 2rem 0 2.75rem; border-radius: 14px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; color: var(--text-main); font-weight: 600; cursor: pointer; appearance: none; outline: none;">
                                     <option value="" th:text="#{animal.filter.any}">Especie: Todas</option>
-                                    <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="${#strings.capitalize(#strings.toLowerCase(e))}" th:selected="${selectedEspecie == e}"></option>
+                                    <option th:each="e : ${especiesActivas}" th:value="${e}"
+                                        th:text="${#strings.capitalize(#strings.toLowerCase(e))}"
+                                        th:selected="${selectedEspecie == e}"></option>
                                 </select>
-                                <i data-lucide="chevron-down" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); width: 16px; color: #94a3b8; pointer-events: none;"></i>
+                                <i data-lucide="chevron-down"
+                                    style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); width: 16px; color: #94a3b8; pointer-events: none;"></i>
                             </div>
 
                             <!-- Filtro Tamaño -->
                             <div style="flex: 1.2; position: relative;">
-                                <i data-lucide="maximize-2" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 18px; color: #94a3b8; z-index: 10;"></i>
-                                <select name="tamano" 
-                                        hx-get="/web/animales" hx-trigger="change" 
-                                        hx-target="#animal-grid-admin" hx-select="#animal-grid-admin"
-                                        hx-swap="outerHTML"
-                                        hx-include="[name='q'], [name='especie']"
-                                        style="width: 100%; height: 52px; padding: 0 2rem 0 2.75rem; border-radius: 14px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; color: var(--text-main); font-weight: 600; cursor: pointer; appearance: none; outline: none;">
+                                <i data-lucide="maximize-2"
+                                    style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 18px; color: #94a3b8; z-index: 10;"></i>
+                                <select name="tamano" hx-get="/web/animales" hx-trigger="change"
+                                    hx-target="#animal-grid-admin" hx-select="#animal-grid-admin" hx-swap="outerHTML"
+                                    hx-include="[name='q'], [name='especie']"
+                                    style="width: 100%; height: 52px; padding: 0 2rem 0 2.75rem; border-radius: 14px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; color: var(--text-main); font-weight: 600; cursor: pointer; appearance: none; outline: none;">
                                     <option value="" th:text="#{animal.filter.any}">Tamaño: Todos</option>
-                                    <option value="PEQUEÑO" th:selected="${selectedTamano == 'PEQUEÑO'}">Pequeño</option>
-                                    <option value="MEDIANO" th:selected="${selectedTamano == 'MEDIANO'}">Mediano</option>
+                                    <option value="PEQUEÑO" th:selected="${selectedTamano == 'PEQUEÑO'}">Pequeño
+                                    </option>
+                                    <option value="MEDIANO" th:selected="${selectedTamano == 'MEDIANO'}">Mediano
+                                    </option>
                                     <option value="GRANDE" th:selected="${selectedTamano == 'GRANDE'}">Grande</option>
                                 </select>
-                                <i data-lucide="chevron-down" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); width: 16px; color: #94a3b8; pointer-events: none;"></i>
+                                <i data-lucide="chevron-down"
+                                    style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); width: 16px; color: #94a3b8; pointer-events: none;"></i>
                             </div>
 
                             <!-- Botón Limpiar -->
-                            <a th:href="@{/web/animales}" hx-get="/web/animales" hx-target="#contenido-dinamico" hx-push-url="true"
-                               style="display: flex; align-items: center; justify-content: center; min-width: 52px; height: 52px; background: #fff1f2; color: #ef4444; border-radius: 14px; transition: all 0.2s; border: 1px solid #fee2e2;" 
-                               title="Limpiar Filtros">
+                            <a th:href="@{/web/animales}" hx-get="/web/animales" hx-target="#contenido-dinamico"
+                                hx-push-url="true"
+                                style="display: flex; align-items: center; justify-content: center; min-width: 52px; height: 52px; background: #fff1f2; color: #ef4444; border-radius: 14px; transition: all 0.2s; border: 1px solid #fee2e2;"
+                                title="Limpiar Filtros">
                                 <i data-lucide="rotate-ccw" style="width: 20px;"></i>
                             </a>
                         </div>
@@ -300,7 +329,8 @@
                     <!-- LISTA PREMIUM DE ANIMALES (ADMIN) -->
                     <div class="premium-list-container" id="animal-grid-admin">
                         <!-- Encabezados -->
-                        <div class="list-header" style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
+                        <div class="list-header"
+                            style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
                             <div style="flex: 1.2; text-align: center;">Animal</div>
                             <div style="flex: 2;">Nombre / Raza</div>
                             <div style="flex: 1; text-align: center;">Especie</div>
@@ -315,9 +345,9 @@
                                 <div class="row-cell" style="flex: 1.2; justify-content: center;">
                                     <div style="position: relative; width: 60px; height: 60px;">
                                         <img th:src="${a.get('foto') != null ? a.get('foto') : '/images/placeholder-animal.png'}"
-                                             style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                                        <div style="position: absolute; top: -10px; right: -10px; background: white; padding: 2px 6px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; border: 1px solid #e2e8f0; color: var(--text-muted);" 
-                                             th:text="${'#' + a.get('id')}">#1</div>
+                                            style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                                        <div style="position: absolute; top: -10px; right: -10px; background: white; padding: 2px 6px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; border: 1px solid #e2e8f0; color: var(--text-muted);"
+                                            th:text="${'#' + a.get('id')}">#1</div>
                                     </div>
                                 </div>
 
@@ -325,45 +355,50 @@
                                 <div class="row-cell" style="flex: 2;">
                                     <div style="overflow: hidden;">
                                         <a th:href="@{/web/animales/{id}(id=${a.get('id')})}"
-                                           style="display: block; font-weight: 800; color: var(--text-main); font-size: 1rem; text-decoration: none;"
-                                           th:text="${a.get('nombre')}">Rocky</a>
-                                        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" 
-                                              th:text="${a.get('raza') ?: 'Raza desconocida'}">Pastor Alemán</span>
+                                            style="display: block; font-weight: 800; color: var(--text-main); font-size: 1rem; text-decoration: none;"
+                                            th:text="${a.get('nombre')}">Rocky</a>
+                                        <span
+                                            style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                            th:text="${a.get('raza') ?: 'Raza desconocida'}">Pastor Alemán</span>
                                     </div>
                                 </div>
 
                                 <!-- Especie -->
                                 <div class="row-cell" style="flex: 1; justify-content: center;">
-                                    <div style="display: flex; align-items: center; gap: 6px; font-weight: 600; color: var(--text-main); font-size: 0.9rem;">
-                                        <i th:data-lucide="${a.get('especie') == 'PERRO' ? 'dog' : 'cat'}" style="width: 16px; color: var(--text-muted);"></i>
-                                        <span th:text="${a.get('especie') != null ? #strings.capitalize(#strings.toLowerCase(a.get('especie'))) : ''}">Perro</span>
+                                    <div
+                                        style="display: flex; align-items: center; gap: 6px; font-weight: 600; color: var(--text-main); font-size: 0.9rem;">
+                                        <i th:data-lucide="${a.get('especie') == 'PERRO' ? 'dog' : 'cat'}"
+                                            style="width: 16px; color: var(--text-muted);"></i>
+                                        <span
+                                            th:text="${a.get('especie') != null ? #strings.capitalize(#strings.toLowerCase(a.get('especie'))) : ''}">Perro</span>
                                     </div>
                                 </div>
 
                                 <!-- Edad -->
-                                <div class="row-cell" style="flex: 1; justify-content: center; font-weight: 700; color: var(--text-main);" 
-                                     th:text="${a.get('edad') != null ? a.get('edad') + ' años' : '-'}">2 años</div>
+                                <div class="row-cell"
+                                    style="flex: 1; justify-content: center; font-weight: 700; color: var(--text-main);"
+                                    th:text="${a.get('edad') != null ? a.get('edad') + ' años' : '-'}">2 años</div>
 
                                 <!-- Estado -->
                                 <div class="row-cell" style="flex: 1.2; justify-content: center;">
                                     <span class="badge-premium"
-                                          th:classappend="${a.get('estado') == 'DISPONIBLE' ? 'success' : (a.get('estado') == 'RESERVADO' ? 'warning' : (a.get('estado') == 'ADOPTADO' ? 'primary' : 'info'))}"
-                                          th:text="${a.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(a.get('estado'), '_', ' '))) : ''}">Disponible</span>
+                                        th:classappend="${a.get('estado') == 'DISPONIBLE' ? 'success' : (a.get('estado') == 'RESERVADO' ? 'warning' : (a.get('estado') == 'ADOPTADO' ? 'primary' : 'info'))}"
+                                        th:text="${a.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(a.get('estado'), '_', ' '))) : ''}">Disponible</span>
                                 </div>
 
                                 <!-- Acciones -->
                                 <div class="row-cell" style="flex: 1.8; justify-content: center; gap: 8px;">
-                                    <a class="btn-icon" th:href="@{/web/historiales(animalId=${a.get('id')})}" title="Historial Médico">
+                                    <a class="btn-icon" th:href="@{/web/historiales(animalId=${a.get('id')})}"
+                                        title="Historial Médico">
                                         <i data-lucide="stethoscope" style="width: 16px; color: #10b981;"></i>
                                     </a>
-                                    <a class="btn-icon" 
-                                       th:hx-get="@{/web/animales/{id}/editar(id=${a.get('id')})}"
-                                       hx-target="#contenido-dinamico" hx-push-url="true" title="Editar">
+                                    <a class="btn-icon" th:hx-get="@{/web/animales/{id}/editar(id=${a.get('id')})}"
+                                        hx-target="#contenido-dinamico" hx-push-url="true" title="Editar">
                                         <i data-lucide="edit-2" style="width: 16px;"></i>
                                     </a>
                                     <button class="btn-icon delete"
-                                            th:attr="hx-post=@{/web/animales/{id}/borrar(id=${a.get('id')})}, hx-target='#card-' + ${a.get('id')}"
-                                            hx-swap="outerHTML swap:0.3s" hx-confirm="¿Eliminar?">
+                                        th:attr="hx-post=@{/web/animales/{id}/borrar(id=${a.get('id')})}, hx-target='#card-' + ${a.get('id')}"
+                                        hx-swap="outerHTML swap:0.3s" hx-confirm="¿Eliminar?">
                                         <i data-lucide="trash-2" style="width: 16px;"></i>
                                     </button>
                                 </div>
@@ -371,9 +406,12 @@
                         </div>
 
                         <!-- Empty State -->
-                        <div th:if="${#lists.isEmpty(animales)}" style="text-align:center; padding:5rem 2rem; background:white; border-radius:24px; border: 1px solid var(--border); margin-top: 1rem;">
-                            <i data-lucide="dog" style="width:48px; height:48px; margin-bottom:1rem; color: var(--text-muted); opacity: 0.3;"></i>
-                            <p style="color: var(--text-muted); font-weight: 600;">No hay animales que coincidan con la búsqueda.</p>
+                        <div th:if="${#lists.isEmpty(animales)}"
+                            style="text-align:center; padding:5rem 2rem; background:white; border-radius:24px; border: 1px solid var(--border); margin-top: 1rem;">
+                            <i data-lucide="dog"
+                                style="width:48px; height:48px; margin-bottom:1rem; color: var(--text-muted); opacity: 0.3;"></i>
+                            <p style="color: var(--text-muted); font-weight: 600;">No hay animales que coincidan con la
+                                búsqueda.</p>
                         </div>
                     </div>
                 </div>
@@ -391,15 +429,15 @@
                                     th:text="${a.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(a.get('estado'), '_', ' '))) : ''}">Disponible</span>
 
                                 <!-- Badge de Solicitado -->
-                                <div th:if="${animalesSolicitadosIds.contains(a.get('id'))}" 
-                                     style="position: absolute; top: 3.5rem; left: 1rem; background: #2d9d58; color: white; padding: 0.4rem 0.8rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10;">
+                                <div th:if="${animalesSolicitadosIds.contains(a.get('id'))}"
+                                    style="position: absolute; top: 3.5rem; left: 1rem; background: #2d9d58; color: white; padding: 0.4rem 0.8rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10;">
                                     <i data-lucide="check" style="width: 12px; height: 12px;"></i>
                                     <span>SOLICITADO</span>
                                 </div>
 
                                 <!-- Badge de Alta Demanda -->
-                                <div th:if="${a.get('conteoSolicitudes') != null && a.get('conteoSolicitudes') >= 3}" 
-                                     style="position: absolute; bottom: 1rem; right: 1rem; background: #f59e0b; color: white; padding: 0.4rem 0.8rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10; border: 2px solid white;">
+                                <div th:if="${a.get('conteoSolicitudes') != null && a.get('conteoSolicitudes') >= 3}"
+                                    style="position: absolute; bottom: 1rem; right: 1rem; background: #f59e0b; color: white; padding: 0.4rem 0.8rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10; border: 2px solid white;">
                                     <i data-lucide="flame" style="width: 12px; height: 12px;"></i>
                                     <span>ALTA DEMANDA</span>
                                 </div>
@@ -413,14 +451,16 @@
                                             <i data-lucide="heart"></i>
                                             <span>Conóceme</span>
                                         </button>
-                                        <div th:if="${isVoluntario}" style="display: flex; justify-content: center; gap: 10px;">
-                                            <a th:href="@{/web/historiales(animalId=${a.get('id')})}" class="btn-icon" title="Historial Médico" style="background: rgba(16, 185, 129, 0.2); color: white;">
+                                        <div th:if="${isVoluntario}"
+                                            style="display: flex; justify-content: center; gap: 10px;">
+                                            <a th:href="@{/web/historiales(animalId=${a.get('id')})}" class="btn-icon"
+                                                title="Historial Médico"
+                                                style="background: rgba(16, 185, 129, 0.2); color: white;">
                                                 <i data-lucide="stethoscope" style="width: 18px;"></i>
                                             </a>
-                                            <a th:hx-get="@{/web/animales/{id}/editar(id=${a.get('id')})}" 
-                                               hx-target="#contenido-dinamico"
-                                               hx-push-url="true"
-                                               class="btn-icon" title="Editar" style="background: rgba(255,255,255,0.2); color: white;">
+                                            <a th:hx-get="@{/web/animales/{id}/editar(id=${a.get('id')})}"
+                                                hx-target="#contenido-dinamico" hx-push-url="true" class="btn-icon"
+                                                title="Editar" style="background: rgba(255,255,255,0.2); color: white;">
                                                 <i data-lucide="edit-2" style="width: 18px;"></i>
                                             </a>
                                         </div>
@@ -441,7 +481,8 @@
                 <div id="pagination-controls" class="pagination-footer"
                     style="margin-top: 2rem; display: flex; justify-content: center; align-items: center; gap: 1.5rem; padding: 1rem;">
                     <button id="prevPage" class="btn-circle"><i data-lucide="chevron-left"></i></button>
-                    <div class="page-info">Página <span id="currentPageNum">1</span> de <span id="totalPagesNum">1</span>
+                    <div class="page-info">Página <span id="currentPageNum">1</span> de <span
+                            id="totalPagesNum">1</span>
                     </div>
                     <button id="nextPage" class="btn-circle"><i data-lucide="chevron-right"></i></button>
                 </div>
@@ -457,7 +498,8 @@
                         <!-- Card 1 -->
                         <div class="special-card glass-card hover-lift"
                             style="padding: 2.5rem; cursor: pointer; transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.05); position: relative; background: white;"
-                            hx-get="/web/animales?edad=SENIOR" hx-target="#contenido-dinamico" hx-push-url="true" hx-swap="innerHTML show:top">
+                            hx-get="/web/animales?edad=SENIOR" hx-target="#contenido-dinamico" hx-push-url="true"
+                            hx-swap="innerHTML show:top">
                             <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
                                 <div style="background: rgba(255, 140, 0, 0.1); padding: 0.85rem; border-radius: 14px;">
                                     <i data-lucide="heart" style="color: #FF8C00;"></i>
@@ -477,7 +519,8 @@
                         <!-- Card 2 -->
                         <div class="special-card glass-card hover-lift"
                             style="padding: 2.5rem; cursor: pointer; transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.05); position: relative; background: white;"
-                            hx-get="/web/animales?urgencia=true" hx-target="#contenido-dinamico" hx-push-url="true" hx-swap="innerHTML show:top">
+                            hx-get="/web/animales?urgencia=true" hx-target="#contenido-dinamico" hx-push-url="true"
+                            hx-swap="innerHTML show:top">
                             <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
                                 <div style="background: rgba(79, 70, 229, 0.1); padding: 0.85rem; border-radius: 14px;">
                                     <i data-lucide="zap" style="color: #4F46E5;"></i>

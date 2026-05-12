@@ -1,28 +1,103 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8"/>
+    <meta charset="UTF-8" />
     <title>Contrato de Adopción</title>
     <style>
-        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; line-height: 1.5; padding: 40px; }
-        .header { text-align: center; border-bottom: 2px solid #4a90e2; padding-bottom: 20px; margin-bottom: 30px; }
-        .header h1 { color: #4a90e2; margin: 0; text-transform: uppercase; font-size: 24px; }
-        .header p { margin: 5px 0 0; color: #777; font-size: 14px; }
-        .section { margin-bottom: 25px; }
-        .section-title { font-weight: bold; font-size: 16px; border-bottom: 1px solid #eee; margin-bottom: 10px; color: #444; }
-        .data-grid { width: 100%; margin-top: 10px; }
-        .data-label { font-weight: bold; width: 30%; color: #666; }
-        .data-value { width: 70%; }
-        .clauses { font-size: 12px; text-align: justify; color: #555; }
-        .footer { margin-top: 50px; }
-        .signature-box { width: 45%; display: inline-block; text-align: center; border-top: 1px solid #333; padding-top: 10px; margin-top: 80px; }
-        .signature-box.right { float: right; }
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            color: #333;
+            line-height: 1.5;
+            padding: 20px 40px 40px 40px;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #4a90e2;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #4a90e2;
+            margin: 0;
+            text-transform: uppercase;
+            font-size: 24px;
+        }
+
+        .header p {
+            margin: 5px 0 0;
+            color: #777;
+            font-size: 14px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            font-size: 16px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 10px;
+            color: #444;
+        }
+
+        .data-grid {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .data-label {
+            font-weight: bold;
+            width: 30%;
+            color: #666;
+        }
+
+        .data-value {
+            width: 70%;
+        }
+
+        .clauses {
+            font-size: 12px;
+            text-align: justify;
+            color: #555;
+        }
+
+        .footer {
+            margin-top: 50px;
+        }
+
+        .signature-box {
+            width: 45%;
+            display: inline-block;
+            text-align: center;
+            border-top: 1px solid #333;
+            padding-top: 10px;
+            margin-top: 80px;
+        }
+
+        .signature-box.right {
+            float: right;
+        }
     </style>
 </head>
+
 <body>
     <div class="header">
-        <h1>Contrato de Adopción Responsable</h1>
-        <p>Refugio de Animales - Huellas de Esperanza</p>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="width: 20%; vertical-align: middle; text-align: left;">
+                    <img th:if="${logoBase64}" th:src="${logoBase64}" style="height: 80px; width: auto; object-fit: contain;"/>
+                </td>
+                <td style="width: 60%; vertical-align: middle; text-align: center;">
+                    <h1 style="color: #4a90e2; margin: 0; text-transform: uppercase; font-size: 24px;">Contrato de Adopción Responsable</h1>
+                    <p style="margin: 5px 0 0; color: #777; font-size: 14px;">Refugio de Animales - Huellas de Esperanza</p>
+                </td>
+                <td style="width: 20%;"></td>
+            </tr>
+        </table>
     </div>
 
     <div class="section">
@@ -60,7 +135,7 @@
             </tr>
             <tr>
                 <td class="data-label">Código Chip:</td>
-                <td class="data-value" th:text="${animalChip}">CHIP123456</td>
+                <td class="data-value" th:text="${animalChip}">123456789789456</td>
             </tr>
             <tr>
                 <td class="data-label">Edad Aproximada:</td>
@@ -72,25 +147,34 @@
     <div class="section">
         <div class="section-title">3. CLÁUSULAS DEL CONTRATO</div>
         <div class="clauses">
-            <p>1. El adoptante se compromete a cuidar del animal, proporcionándole alimento, cobijo y atención veterinaria necesaria.</p>
+            <p>1. El adoptante se compromete a cuidar del animal, proporcionándole alimento, cobijo y atención
+                veterinaria necesaria.</p>
             <p>2. Queda terminantemente prohibido el maltrato, abandono o venta del animal adoptado.</p>
-            <p>3. El refugio se reserva el derecho de realizar visitas de seguimiento para comprobar el bienestar del animal.</p>
-            <p>4. En caso de no poder seguir haciéndose cargo del animal, el adoptante deberá contactar con el refugio antes de tomar cualquier otra medida.</p>
+            <p>3. El refugio se reserva el derecho de realizar visitas de seguimiento para comprobar el bienestar del
+                animal.</p>
+            <p>4. En caso de no poder seguir haciéndose cargo del animal, el adoptante deberá contactar con el refugio
+                antes de tomar cualquier otra medida.</p>
         </div>
     </div>
 
     <div class="footer">
-        <p>En cumplimiento con la normativa vigente, ambas partes firman el presente contrato en fecha: <span th:text="${fechaActual}">10/05/2026</span></p>
-        
-        <div class="signature-box">
-            Firma del Adoptante<br/>
-            (DNI: <span th:text="${adoptanteDni}"></span>)
-        </div>
-        
-        <div class="signature-box right">
-            Firma del Refugio<br/>
-            Responsable Administrativo
-        </div>
+        <p>En cumplimiento con la normativa vigente, ambas partes firman el presente contrato en fecha: <span
+                th:text="${fechaActual}">10/05/2026</span></p>
+
+        <table style="width: 100%; margin-top: 95px; border-collapse: collapse;">
+            <tr>
+                <td style="width: 45%; border-top: 1px solid #333; text-align: center; padding-top: 10px; vertical-align: top;">
+                    Firma del Adoptante<br />
+                    (DNI: <span th:text="${adoptanteDni}"></span>)
+                </td>
+                <td style="width: 10%;"></td>
+                <td style="width: 45%; border-top: 1px solid #333; text-align: center; padding-top: 10px; vertical-align: top;">
+                    Firma del Refugio<br />
+                    Responsable Administrativo
+                </td>
+            </tr>
+        </table>
     </div>
 </body>
+
 </html>

@@ -1,4 +1,12 @@
 <!-- Vista de Inicio: Dashboard administrativo y catálogo principal de animales para los usuarios -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
 <div th:fragment="content">
     <!-- 1. VISTA ADMINISTRADOR (PREMIUM) -->
     <div th:if="${isAdmin}">
@@ -360,3 +368,6 @@
     </div>
 
 </div>
+</body>
+
+</html>

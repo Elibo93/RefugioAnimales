@@ -1,11 +1,13 @@
 <!-- Vista de Registro y Solicitud: Formulario dual que permite el alta de usuario y la petición de adopción en un único flujo -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
+
 <head>
     <meta charset="UTF-8">
 </head>
+
 <body>
-    <div th:fragment="content">
+<div th:fragment="content">
         <div class="page-header" style="text-align: center; margin-bottom: 3rem;">
             <h1 class="page-title">Únete a nuestra familia y adopta</h1>
             <p style="color: var(--text-muted);">Completa tus datos para crear una cuenta y enviar tu solicitud para <strong th:text="${animal.get('nombre')}"></strong></p>
