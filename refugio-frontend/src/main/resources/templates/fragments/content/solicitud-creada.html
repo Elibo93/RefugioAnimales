@@ -1,8 +1,12 @@
 <!-- Vista de Éxito de Solicitud (Modal): Confirmación visual tras el envío correcto de una petición de adopción -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<body>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
 <div th:fragment="success-modal" class="modal-overlay" id="modal-host" onclick="this.innerHTML=''">
     <div class="modal" onclick="event.stopPropagation()" style="text-align:center; max-width: 450px; padding: 3rem 2rem;">
         
@@ -24,6 +28,6 @@
 
     </div>
 </div>
-
 </body>
+
 </html>

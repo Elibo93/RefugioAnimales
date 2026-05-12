@@ -1,7 +1,12 @@
 <!-- Fragmento de Menú Lateral (Sidebar): Panel de navegación dinámico adaptado según el rol y estado del usuario -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
 <div th:fragment="sidebar(currentPage)">
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
@@ -284,5 +289,6 @@
         </div>
     </aside>
 </div>
+</body>
 
 </html>
