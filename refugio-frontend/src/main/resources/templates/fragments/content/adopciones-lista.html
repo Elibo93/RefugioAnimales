@@ -1,3 +1,4 @@
+<!-- Vista de Listado de Adopciones: Historial de adopciones completadas y gestión de contratos -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
 
@@ -6,12 +7,8 @@
 </head>
 
 <body>
-    <!-- 
-  PÁGINA: Listado de Adopciones
-  DESCRIPCIÓN: Vista administrativa que muestra el histórico de adopciones completadas. 
-               Permite consultar quién adoptó a qué animal y en qué fecha.
--->
-<div th:fragment="content">
+
+    <div th:fragment="content">
 
         <div class="table-wrapper">
             <div class="actions-bar">
@@ -45,7 +42,8 @@
 
             <!-- LISTA PREMIUM DE ADOPCIONES -->
             <div class="premium-list-container" style="margin-top: 1.5rem;">
-                <div class="list-header" style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
+                <div class="list-header"
+                    style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
                     <div style="flex: 0.5; text-align: center;">ID</div>
                     <div style="flex: 2;">Adoptante</div>
                     <div style="flex: 2;">Animal</div>
@@ -55,19 +53,21 @@
 
                 <div class="list-body" style="display: flex; flex-direction: column; gap: 12px;">
                     <div th:each="i : ${adopciones}" class="premium-row-card" th:id="'row-' + ${i.get('id')}">
-                        <div class="row-cell" style="flex: 0.5; justify-content: center; font-weight: 700; color: var(--text-muted);" th:text="${i.get('id')}">1</div>
-                        
+                        <div class="row-cell"
+                            style="flex: 0.5; justify-content: center; font-weight: 700; color: var(--text-muted);"
+                            th:text="${i.get('id')}">1</div>
+
                         <div class="row-cell" style="flex: 2;">
-                            <div style="display: flex; align-items: center; gap: 12px;" 
-                                 th:with="usuarioId=${adoptanteUsuarioIds != null ? adoptanteUsuarioIds['' + i.get('adoptanteId')] : null}, 
+                            <div style="display: flex; align-items: center; gap: 12px;"
+                                th:with="usuarioId=${adoptanteUsuarioIds != null ? adoptanteUsuarioIds['' + i.get('adoptanteId')] : null}, 
                                           perfilObj=${perfilesMap != null and usuarioId != null ? perfilesMap['' + usuarioId] : null},
                                           usuarioObj=${usuariosMap != null and usuarioId != null ? usuariosMap['' + usuarioId] : null}">
                                 <div class="task-icon-box" style="background: #dcfce7;">
                                     <i data-lucide="user" style="width: 18px; color: #22c55e;"></i>
                                 </div>
-                                <a th:href="@{/web/personas/{id}(id=${usuarioId != null ? usuarioId : '0'})}" 
-                                   style="font-weight: 800; color: var(--text-main); text-decoration: none;"
-                                   th:text="${perfilObj != null and perfilObj.get('nombre') != null ? (perfilObj.get('nombre') + ' ' + (perfilObj.get('apellido') ?: '')) : 
+                                <a th:href="@{/web/personas/{id}(id=${usuarioId != null ? usuarioId : '0'})}"
+                                    style="font-weight: 800; color: var(--text-main); text-decoration: none;"
+                                    th:text="${perfilObj != null and perfilObj.get('nombre') != null ? (perfilObj.get('nombre') + ' ' + (perfilObj.get('apellido') ?: '')) : 
                                             (usuarioObj != null and usuarioObj.get('nombre') != null ? (usuarioObj.get('nombre') + ' ' + (usuarioObj.get('apellido') ?: '')) : 
                                             (usuarioObj != null ? usuarioObj.get('username') : 'Adoptante #' + i.get('adoptanteId')))}">Juan Pérez</a>
                             </div>
@@ -78,20 +78,23 @@
                                 <div class="task-icon-box" style="background: #fef9c3;">
                                     <i data-lucide="dog" style="width: 18px; color: #ca8a04;"></i>
                                 </div>
-                                <a th:href="@{/web/animales/{id}(id=${i.get('animalId')})}" 
-                                   style="font-weight: 800; color: var(--secondary); text-decoration: none;"
-                                   th:text="${animalesMap != null and i.get('animalId') != null and animalesMap['' + i.get('animalId')] != null ? animalesMap['' + i.get('animalId')].get('nombre') : 'Animal'}">Rocky</a>
+                                <a th:href="@{/web/animales/{id}(id=${i.get('animalId')})}"
+                                    style="font-weight: 800; color: var(--secondary); text-decoration: none;"
+                                    th:text="${animalesMap != null and i.get('animalId') != null and animalesMap['' + i.get('animalId')] != null ? animalesMap['' + i.get('animalId')].get('nombre') : 'Animal'}">Rocky</a>
                             </div>
                         </div>
 
-                        <div class="row-cell" style="flex: 1.5; justify-content: center; font-weight: 600; color: var(--text-muted);" 
-                             th:text="${i.get('fechaAdopcion') != null ? i.get('fechaAdopcion') : '-'}">01/01/2023</div>
+                        <div class="row-cell"
+                            style="flex: 1.5; justify-content: center; font-weight: 600; color: var(--text-muted);"
+                            th:text="${i.get('fechaAdopcion') != null ? i.get('fechaAdopcion') : '-'}">01/01/2023</div>
 
                         <div class="row-cell" style="flex: 1.2; justify-content: center; gap: 8px;">
-                            <a class="btn-icon" th:href="@{/web/adopciones/{id}/contrato(id=${i.get('id')})}" title="Descargar Contrato" target="_blank" style="color: #4a90e2;">
+                            <a class="btn-icon" th:href="@{/web/adopciones/{id}/contrato(id=${i.get('id')})}"
+                                title="Descargar Contrato" target="_blank" style="color: #4a90e2;">
                                 <i data-lucide="file-signature" style="width: 16px;"></i>
                             </a>
-                            <a class="btn-icon" th:href="@{/web/adopciones/{id}/editar(id=${i.get('id')})}" title="Editar">
+                            <a class="btn-icon" th:href="@{/web/adopciones/{id}/editar(id=${i.get('id')})}"
+                                title="Editar">
                                 <i data-lucide="edit-2" style="width: 16px;"></i>
                             </a>
                             <button class="btn-icon delete"
@@ -104,9 +107,12 @@
                     </div>
                 </div>
 
-                <div th:if="${#lists.isEmpty(adopciones)}" style="text-align:center; padding:5rem; background:white; border-radius:24px; border:1px solid var(--border); margin-top: 1rem;">
-                    <i data-lucide="heart-off" style="width:48px; height:48px; margin-bottom:1rem; color: var(--text-muted); opacity: 0.3;"></i>
-                    <p style="color: var(--text-muted); font-weight: 600;" th:text="#{adopcion.list.empty}">No hay adopciones registradas.</p>
+                <div th:if="${#lists.isEmpty(adopciones)}"
+                    style="text-align:center; padding:5rem; background:white; border-radius:24px; border:1px solid var(--border); margin-top: 1rem;">
+                    <i data-lucide="heart-off"
+                        style="width:48px; height:48px; margin-bottom:1rem; color: var(--text-muted); opacity: 0.3;"></i>
+                    <p style="color: var(--text-muted); font-weight: 600;" th:text="#{adopcion.list.empty}">No hay
+                        adopciones registradas.</p>
                 </div>
             </div>
         </div>

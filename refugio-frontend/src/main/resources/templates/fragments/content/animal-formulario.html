@@ -1,19 +1,20 @@
+<!-- Vista de Formulario de Animal: Alta y edición de la ficha técnica de los animales del refugio -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
+
 <body>
-    <!-- 
-  PÁGINA: Formulario de Animal
-  DESCRIPCIÓN: Formulario para el alta y edición de animales en el sistema. 
-               Gestiona datos básicos, salud y carga de fotos.
--->
-<div th:fragment="content">
+
+    <div th:fragment="content">
         <!-- Cabecera Premium -->
         <div class="page-header" style="text-align:center; margin-bottom: 3rem;">
-            <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: var(--success-bg); color: var(--success); border-radius: 20px; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm);">
+            <div
+                style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: var(--success-bg); color: var(--success); border-radius: 20px; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm);">
                 <i data-lucide="paw-print" style="width: 32px; height: 32px;"></i>
             </div>
-            <h1 style="font-weight: 800; color: var(--text-main); font-size: 2.25rem; margin-bottom: 0.5rem; letter-spacing: -0.02em;">
-                <span th:text="${animal.get('id') == null ? #messages.msg('animal.form.title') : #messages.msg('animal.modal.edit.title')}">
+            <h1
+                style="font-weight: 800; color: var(--text-main); font-size: 2.25rem; margin-bottom: 0.5rem; letter-spacing: -0.02em;">
+                <span
+                    th:text="${animal.get('id') == null ? #messages.msg('animal.form.title') : #messages.msg('animal.modal.edit.title')}">
                     Configurar Animal
                 </span>
             </h1>
@@ -23,122 +24,172 @@
             </p>
         </div>
 
-        <div style="max-width: 900px; margin: 0 auto; background: white; border-radius: 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; overflow: hidden;">
-            <form th:action="${animal.get('id') == null ? '/web/animales/nuevo' : '/web/animales/' + animal.get('id') + '/editar'}"
-                  method="post" enctype="multipart/form-data" style="padding: 3rem;">
+        <div
+            style="max-width: 900px; margin: 0 auto; background: white; border-radius: 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; overflow: hidden;">
+            <form
+                th:action="${animal.get('id') == null ? '/web/animales/nuevo' : '/web/animales/' + animal.get('id') + '/editar'}"
+                method="post" enctype="multipart/form-data" style="padding: 3rem;">
 
                 <!-- SECCIÓN 1: IDENTIDAD -->
                 <div style="margin-bottom: 3rem;">
-                    <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary); margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; font-weight: 800;">
+                    <h2
+                        style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary); margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; font-weight: 800;">
                         <i data-lucide="info" style="width: 20px;"></i>
                         Información Básica
                     </h2>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
                         <!-- Nombre -->
                         <div class="form-group" th:classappend="${animal.get('id') != null ? 'readonly-group' : ''}">
-                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{animal.field.name}">Nombre</label>
-                            <input type="text" name="nombre" th:value="${animal.get('nombre')}" required th:readonly="${animal.get('id') != null}"
-                                   th:style="'width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; transition: all 0.3s; outline: none; background: ' + (${animal.get('id') != null} ? '#f8fafc' : 'white') + ';'">
+                            <label
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
+                                th:text="#{animal.field.name}">Nombre</label>
+                            <input type="text" name="nombre" th:value="${animal.get('nombre')}" required
+                                th:readonly="${animal.get('id') != null}"
+                                th:style="'width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; transition: all 0.3s; outline: none; background: ' + (${animal.get('id') != null} ? '#f8fafc' : 'white') + ';'">
                         </div>
 
                         <!-- Especie -->
                         <div class="form-group" th:classappend="${animal.get('id') != null ? 'readonly-group' : ''}">
-                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{animal.field.species}">Especie</label>
-                            <select name="especie" id="especieSelect" required onchange="toggleEspeciePersonalizada()" th:disabled="${animal.get('id') != null}"
-                                    th:style="'width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url(\'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E\') no-repeat right 1.25rem center/1.2rem; background-color: ' + (${animal.get('id') != null} ? '#f8fafc' : 'white') + ';'">
+                            <label
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
+                                th:text="#{animal.field.species}">Especie</label>
+                            <select name="especie" id="especieSelect" required onchange="toggleEspeciePersonalizada()"
+                                th:disabled="${animal.get('id') != null}"
+                                th:style="'width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url(\'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E\') no-repeat right 1.25rem center/1.2rem; background-color: ' + (${animal.get('id') != null} ? '#f8fafc' : 'white') + ';'">
                                 <option value="">Selecciona...</option>
-                                <option th:each="e : ${especies}" th:value="${e}" th:text="${#strings.capitalize(e.toLowerCase())}" th:selected="${animal.get('especie') == e}"></option>
+                                <option th:each="e : ${especies}" th:value="${e}"
+                                    th:text="${#strings.capitalize(e.toLowerCase())}"
+                                    th:selected="${animal.get('especie') == e}"></option>
                             </select>
-                            <input type="hidden" th:if="${animal.get('id') != null}" name="especie" th:value="${animal.get('especie')}">
+                            <input type="hidden" th:if="${animal.get('id') != null}" name="especie"
+                                th:value="${animal.get('especie')}">
                         </div>
 
                         <!-- Especie Personalizada -->
                         <div class="form-group" id="especiePersonalizadaGroup"
-                             th:style="${animal.get('especie') != null && animal.get('especie').toString() == 'OTRO' ? 'display:block' : 'display:none'}">
-                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{animal.field.especiePersonalizada.label}">¿Qué especie es?</label>
-                            <input type="text" name="especiePersonalizada" th:value="${animal.get('especiePersonalizada')}" id="especiePersonalizadaInput"
-                                   placeholder="Ej: Hámster..." th:readonly="${animal.get('id') != null}"
-                                   style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none;">
+                            th:style="${animal.get('especie') != null && animal.get('especie').toString() == 'OTRO' ? 'display:block' : 'display:none'}">
+                            <label
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
+                                th:text="#{animal.field.especiePersonalizada.label}">¿Qué especie es?</label>
+                            <input type="text" name="especiePersonalizada"
+                                th:value="${animal.get('especiePersonalizada')}" id="especiePersonalizadaInput"
+                                placeholder="Ej: Hámster..." th:readonly="${animal.get('id') != null}"
+                                style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none;">
                         </div>
 
                         <!-- Raza -->
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{animal.field.breed}">Raza</label>
-                            <input type="text" name="raza" th:value="${animal.get('raza')}" th:readonly="${animal.get('id') != null}"
-                                   style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none;">
+                            <label
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
+                                th:text="#{animal.field.breed}">Raza</label>
+                            <input type="text" name="raza" th:value="${animal.get('raza')}"
+                                th:readonly="${animal.get('id') != null}"
+                                style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none;">
                         </div>
 
                         <!-- Sexo -->
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{animal.field.sex}">Sexo</label>
+                            <label
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
+                                th:text="#{animal.field.sex}">Sexo</label>
                             <select name="sexo" th:disabled="${animal.get('id') != null}"
-                                    style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem; background-color: white;">
-                                <option th:each="s : ${sexos}" th:value="${s}" th:text="${#strings.capitalize(s.toLowerCase())}" th:selected="${animal.get('sexo') == s}"></option>
+                                style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem; background-color: white;">
+                                <option th:each="s : ${sexos}" th:value="${s}"
+                                    th:text="${#strings.capitalize(s.toLowerCase())}"
+                                    th:selected="${animal.get('sexo') == s}"></option>
                             </select>
-                            <input type="hidden" th:if="${animal.get('id') != null}" name="sexo" th:value="${animal.get('sexo')}">
+                            <input type="hidden" th:if="${animal.get('id') != null}" name="sexo"
+                                th:value="${animal.get('sexo')}">
                         </div>
 
                         <!-- Chip ID -->
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{animal.field.chip}">Chip ID</label>
-                            <input type="text" name="chipId" th:value="${animal.get('chipId')}" placeholder="15 dígitos" pattern="[0-9]{15}" th:readonly="${animal.get('id') != null}"
-                                   style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none;">
+                            <label
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
+                                th:text="#{animal.field.chip}">Chip ID</label>
+                            <input type="text" name="chipId" th:value="${animal.get('chipId')}" placeholder="15 dígitos"
+                                pattern="[0-9]{15}" th:readonly="${animal.get('id') != null}"
+                                style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none;">
                         </div>
 
                         <!-- Fecha Ingreso -->
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">Fecha de Ingreso</label>
-                            <input type="date" name="fechaIngreso" th:value="${animal.get('fechaIngreso') != null ? #strings.substring(animal.get('fechaIngreso').toString(), 0, 10) : #calendars.format(#calendars.createNow(), 'yyyy-MM-dd')}"
-                                   style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none;">
+                            <label
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">Fecha
+                                de Ingreso</label>
+                            <input type="date" name="fechaIngreso"
+                                th:value="${animal.get('fechaIngreso') != null ? #strings.substring(animal.get('fechaIngreso').toString(), 0, 10) : #calendars.format(#calendars.createNow(), 'yyyy-MM-dd')}"
+                                style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none;">
                         </div>
                     </div>
                 </div>
 
                 <!-- SECCIÓN 2: ESTADO Y SALUD -->
                 <div style="margin-bottom: 3rem; padding-top: 2rem; border-top: 1px solid #f1f5f9;">
-                    <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary); margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; font-weight: 800;">
+                    <h2
+                        style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary); margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; font-weight: 800;">
                         <i data-lucide="heart-pulse" style="width: 20px;"></i>
                         Detalles y Salud
                     </h2>
 
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
                         <!-- Estado -->
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{animal.field.status}">Estado</label>
-                            <select name="estado" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem; background-color: white;">
-                                <option th:each="e : ${estados}" th:value="${e}" th:text="${#strings.capitalize(e.toLowerCase().replace('_', ' '))}" th:selected="${animal.get('estado') == e}"></option>
+                            <label
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
+                                th:text="#{animal.field.status}">Estado</label>
+                            <select name="estado"
+                                style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem; background-color: white;">
+                                <option th:each="e : ${estados}" th:value="${e}"
+                                    th:text="${#strings.capitalize(e.toLowerCase().replace('_', ' '))}"
+                                    th:selected="${animal.get('estado') == e}"></option>
                             </select>
                         </div>
 
                         <!-- Edad -->
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{animal.field.age}">Edad (Años)</label>
+                            <label
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
+                                th:text="#{animal.field.age}">Edad (Años)</label>
                             <input type="number" name="edad" th:value="${animal.get('edad')}"
-                                   style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none;">
+                                style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none;">
                         </div>
 
                         <!-- Tamaño -->
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{animal.field.size}">Tamaño</label>
-                            <select name="tamano" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem; background-color: white;">
-                                <option th:each="t : ${tamanos}" th:value="${t}" th:text="${#strings.capitalize(t.toLowerCase())}" th:selected="${animal.get('tamano') == t}"></option>
+                            <label
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
+                                th:text="#{animal.field.size}">Tamaño</label>
+                            <select name="tamano"
+                                style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem; background-color: white;">
+                                <option th:each="t : ${tamanos}" th:value="${t}"
+                                    th:text="${#strings.capitalize(t.toLowerCase())}"
+                                    th:selected="${animal.get('tamano') == t}"></option>
                             </select>
                         </div>
 
                         <!-- Peso -->
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{animal.field.peso.label}">Peso (kg)</label>
+                            <label
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
+                                th:text="#{animal.field.peso.label}">Peso (kg)</label>
                             <input type="number" step="0.1" name="peso" th:value="${animal.get('peso')}"
-                                   style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none;">
+                                style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none;">
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-top: 1.5rem; align-items: center;">
+                    <div
+                        style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-top: 1.5rem; align-items: center;">
                         <!-- Nivel Energía -->
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{animal.field.nivelEnergia.label}">Nivel de Energía</label>
-                            <select name="nivelEnergia" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem; background-color: white;">
+                            <label
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
+                                th:text="#{animal.field.nivelEnergia.label}">Nivel de Energía</label>
+                            <select name="nivelEnergia"
+                                style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem; background-color: white;">
                                 <option value="1" th:selected="${animal.get('nivelEnergia') == 1}">Muy Bajo</option>
                                 <option value="2" th:selected="${animal.get('nivelEnergia') == 2}">Bajo</option>
                                 <option value="3" th:selected="${animal.get('nivelEnergia') == 3}">Medio</option>
@@ -148,43 +199,58 @@
                         </div>
 
                         <!-- Urgencia -->
-                        <div style="background: #fff1f2; padding: 1.25rem; border-radius: 18px; border: 1px solid #ffe4e6; display: flex; align-items: center; gap: 12px; margin-top: 1rem;">
-                            <input type="checkbox" name="urgencia" th:checked="${animal.get('urgencia')}" style="width: 20px; height: 20px; cursor: pointer; accent-color: #ef4444;">
-                            <label style="margin: 0; font-weight: 700; color: #be123c; cursor: pointer;" th:text="#{animal.field.urgencia.label}">¿Adopción Urgente?</label>
+                        <div
+                            style="background: #fff1f2; padding: 1.25rem; border-radius: 18px; border: 1px solid #ffe4e6; display: flex; align-items: center; gap: 12px; margin-top: 1rem;">
+                            <input type="checkbox" name="urgencia" th:checked="${animal.get('urgencia')}"
+                                style="width: 20px; height: 20px; cursor: pointer; accent-color: #ef4444;">
+                            <label style="margin: 0; font-weight: 700; color: #be123c; cursor: pointer;"
+                                th:text="#{animal.field.urgencia.label}">¿Adopción Urgente?</label>
                         </div>
                     </div>
                 </div>
 
                 <!-- SECCIÓN 3: MULTIMEDIA Y DESCRIPCIÓN -->
                 <div style="padding-top: 2rem; border-top: 1px solid #f1f5f9;">
-                    <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary); margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; font-weight: 800;">
+                    <h2
+                        style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary); margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; font-weight: 800;">
                         <i data-lucide="image" style="width: 20px;"></i>
                         Multimedia y Perfil
                     </h2>
 
                     <!-- Fotografía -->
                     <div style="margin-bottom: 2rem;">
-                        <label style="display: block; margin-bottom: 1rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{animal.field.foto.label}">Fotografía del Animal</label>
-                        
+                        <label
+                            style="display: block; margin-bottom: 1rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
+                            th:text="#{animal.field.foto.label}">Fotografía del Animal</label>
+
                         <div style="display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap;">
                             <!-- Preview Actual -->
-                            <div th:if="${animal.get('foto') != null && !animal.get('foto').isEmpty()}" style="position: relative;">
-                                <img th:src="${animal.get('foto')}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 20px; border: 4px solid white; box-shadow: var(--shadow-md);">
-                                <span style="position: absolute; top: -10px; right: -10px; background: var(--primary); color: white; padding: 6px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; z-index: 20; box-shadow: 0 4px 10px rgba(45, 157, 88, 0.3); border: 2px solid white;">ACTUAL</span>
+                            <div th:if="${animal.get('foto') != null && !animal.get('foto').isEmpty()}"
+                                style="position: relative;">
+                                <img th:src="${animal.get('foto')}"
+                                    style="width: 120px; height: 120px; object-fit: cover; border-radius: 20px; border: 4px solid white; box-shadow: var(--shadow-md);">
+                                <span
+                                    style="position: absolute; top: -10px; right: -10px; background: var(--primary); color: white; padding: 6px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; z-index: 20; box-shadow: 0 4px 10px rgba(45, 157, 88, 0.3); border: 2px solid white;">ACTUAL</span>
                                 <input type="hidden" name="foto" th:value="${animal.get('foto')}">
                             </div>
 
                             <!-- Upload New -->
                             <div style="flex: 1; min-width: 280px;">
                                 <div style="position: relative; width: 100%; height: 120px; border: 2px dashed #cbd5e1; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8fafc; cursor: pointer; transition: all 0.3s;"
-                                     onclick="document.getElementById('fotoFileInput').click()">
-                                    <i data-lucide="upload-cloud" style="width: 32px; height: 32px; color: #94a3b8; margin-bottom: 0.5rem;"></i>
-                                    <span style="color: #64748b; font-size: 0.85rem; font-weight: 600;">Haz clic para subir nueva foto</span>
-                                    <input type="file" id="fotoFileInput" name="fotoArchivo" accept="image/*" style="display: none;" onchange="previewImage(this)">
+                                    onclick="document.getElementById('fotoFileInput').click()">
+                                    <i data-lucide="upload-cloud"
+                                        style="width: 32px; height: 32px; color: #94a3b8; margin-bottom: 0.5rem;"></i>
+                                    <span style="color: #64748b; font-size: 0.85rem; font-weight: 600;">Haz clic para
+                                        subir nueva foto</span>
+                                    <input type="file" id="fotoFileInput" name="fotoArchivo" accept="image/*"
+                                        style="display: none;" onchange="previewImage(this)">
                                 </div>
-                                <div id="imagePreviewContainer" style="margin-top: 1rem; display: none; align-items: center; gap: 1rem; background: #ecfdf5; padding: 0.75rem; border-radius: 14px; border: 1px solid #d1fae5;">
-                                    <img id="imagePreview" src="#" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;">
-                                    <span style="font-size: 0.8rem; color: #065f46; font-weight: 600;">Nueva imagen lista para subir</span>
+                                <div id="imagePreviewContainer"
+                                    style="margin-top: 1rem; display: none; align-items: center; gap: 1rem; background: #ecfdf5; padding: 0.75rem; border-radius: 14px; border: 1px solid #d1fae5;">
+                                    <img id="imagePreview" src="#"
+                                        style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;">
+                                    <span style="font-size: 0.8rem; color: #065f46; font-weight: 600;">Nueva imagen
+                                        lista para subir</span>
                                 </div>
                                 <input type="hidden" name="foto" id="resizedFotoInput">
                             </div>
@@ -193,21 +259,24 @@
 
                     <!-- Descripción -->
                     <div class="form-group">
-                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{animal.field.description}">Descripción y Personalidad</label>
-                        <textarea name="descripcion" th:text="${animal.get('descripcion')}" 
-                                  placeholder="Cuéntanos sobre su carácter, gustos y necesidades..."
-                                  style="width: 100%; min-height: 150px; padding: 1.25rem; border-radius: 18px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; resize: vertical; transition: all 0.3s;"></textarea>
+                        <label
+                            style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
+                            th:text="#{animal.field.description}">Descripción y Personalidad</label>
+                        <textarea name="descripcion" th:text="${animal.get('descripcion')}"
+                            placeholder="Cuéntanos sobre su carácter, gustos y necesidades..."
+                            style="width: 100%; min-height: 150px; padding: 1.25rem; border-radius: 18px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; resize: vertical; transition: all 0.3s;"></textarea>
                     </div>
                 </div>
 
                 <!-- ACCIONES -->
-                <div style="margin-top: 4rem; display: flex; gap: 1.5rem; justify-content: flex-end; border-top: 1px solid #f1f5f9; padding-top: 2rem;">
-                    <a th:href="@{/web/animales}" class="btn" 
-                       style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: #64748b; background: #f1f5f9; text-decoration: none; transition: all 0.2s;">
+                <div
+                    style="margin-top: 4rem; display: flex; gap: 1.5rem; justify-content: flex-end; border-top: 1px solid #f1f5f9; padding-top: 2rem;">
+                    <a th:href="@{/web/animales}" class="btn"
+                        style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: #64748b; background: #f1f5f9; text-decoration: none; transition: all 0.2s;">
                         Cancelar
                     </a>
-                    <button type="submit" class="btn btn-primary" 
-                            style="padding: 1rem 3rem; border-radius: 16px; font-weight: 700; box-shadow: 0 10px 25px rgba(45, 157, 88, 0.25);">
+                    <button type="submit" class="btn btn-primary"
+                        style="padding: 1rem 3rem; border-radius: 16px; font-weight: 700; box-shadow: 0 10px 25px rgba(45, 157, 88, 0.25);">
                         <i data-lucide="save" style="width: 20px; margin-right: 8px;"></i>
                         Guardar Ficha
                     </button>
@@ -236,13 +305,13 @@
 
                 if (input.files && input.files[0]) {
                     const reader = new FileReader();
-                    reader.onload = function(e) {
+                    reader.onload = function (e) {
                         preview.src = e.target.result;
                         container.style.display = 'flex';
-                        
+
                         const img = new Image();
                         img.src = e.target.result;
-                        img.onload = function() {
+                        img.onload = function () {
                             const canvas = document.createElement('canvas');
                             const MAX_WIDTH = 800;
                             const MAX_HEIGHT = 800;
@@ -270,7 +339,7 @@
                     reader.readAsDataURL(input.files[0]);
                 }
             }
-            
+
             // Inicializar iconos
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
@@ -278,4 +347,5 @@
         </script>
     </div>
 </body>
+
 </html>
