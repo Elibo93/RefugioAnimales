@@ -48,7 +48,7 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 - [ ] **Validaciones:**
   -[✅] Impedir adopciones duplicadas del mismo animal.
   - Acceso a funciones de voluntario solo tras aprobación del admin.
-- [ ] **Contratos:** Sistema automático de generación y asociación de contratos legales al formalizar la adopción.
+- [✅] **Contratos:** Sistema automático de generación y asociación de contratos legales al formalizar la adopción.
 
 ### 6) Backend: Notificaciones y Administración
 - [✅] **Buzón Admin:** Notificar nuevas solicitudes de voluntariado, adopción y donaciones.
