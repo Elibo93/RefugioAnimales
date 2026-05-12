@@ -130,8 +130,8 @@ public class SecurityConfig {
                                                         String proto = request.getHeader("X-Forwarded-Proto");
                                                         String host  = request.getHeader("X-Forwarded-Host");
                                                         String targetUrl = (proto != null && host != null) 
-                                                                           ? proto + "://" + host + "/web/home" 
-                                                                           : "/web/home";
+                                                                           ? proto + "://" + host + "/login?logout" 
+                                                                           : "/login?logout";
                                                         response.sendRedirect(targetUrl);
                                                 })
                                                 .permitAll())

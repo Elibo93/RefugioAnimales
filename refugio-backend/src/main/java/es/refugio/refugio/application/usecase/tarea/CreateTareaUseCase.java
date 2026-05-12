@@ -24,7 +24,7 @@ public class CreateTareaUseCase {
         Tarea tarea = Tarea.builder()
                 .descripcion(command.descripcion())
                 .fecha(command.fecha())
-                .estado(estadoEnum)
+                .estado(command.voluntarioIds() != null && !command.voluntarioIds().isEmpty() ? EstadoTarea.PROPUESTA : estadoEnum)
                 .fechaLimite(command.fechaLimite())
                 .instrucciones(command.instrucciones())
                 .voluntarios(command.voluntarioIds() != null ? 
@@ -43,13 +43,23 @@ public class CreateTareaUseCase {
                 VoluntarioId volId = new VoluntarioId(vIdInt);
                 voluntarioRepository.getById(volId).ifPresent(vol -> {
                     if (vol.getUsuarioId() != null) {
-                        notificacionService.enviar(
-                            vol.getUsuarioId().getValue(),
-                            "Nueva Tarea Asignada",
-                            "Se te ha asignado la tarea: " + saved.getDescripcion(),
-                            "TAREA",
-                            "/web/tareas"
-                        );
+                        if (saved.getEstado() == EstadoTarea.PROPUESTA) {
+                            notificacionService.enviar(
+                                vol.getUsuarioId().getValue(),
+                                "Nueva Tarea Propuesta",
+                                "Se te ha propuesto una nueva tarea: '" + saved.getDescripcion() + "'. Por favor, acéptala o recházala.",
+                                "TAREA_PROPUESTA",
+                                "/web/tareas"
+                            );
+                        } else {
+                            notificacionService.enviar(
+                                vol.getUsuarioId().getValue(),
+                                "Nueva Tarea Asignada",
+                                "Se te ha asignado la tarea: " + saved.getDescripcion(),
+                                "TAREA",
+                                "/web/tareas"
+                            );
+                        }
                     }
                 });
             });

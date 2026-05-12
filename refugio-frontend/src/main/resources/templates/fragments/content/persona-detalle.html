@@ -142,27 +142,39 @@
                     </div>
                 </div>
 
-                <div style="margin-bottom: 20px;">
-                    <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 15px;">Últimas Tareas Asignadas</h4>
+                <div style="margin-bottom: 20px;" th:with="v_id_raw=${voluntario['id']}, v_id=${v_id_raw instanceof T(java.util.Map) ? v_id_raw.get('value') : v_id_raw}">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                        <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin: 0;">Últimas Tareas Asignadas</h4>
+                        <a th:href="@{/web/voluntarios/{id}/editar(id=${v_id})}"
+                           class="btn btn-outline" style="border-radius: 12px; padding: 6px 14px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; border-color: var(--border); color: var(--text-muted); cursor: pointer; background: white; text-decoration: none;">
+                            <i data-lucide="edit-2" style="width: 12px;"></i>
+                            Editar
+                        </a>
+                    </div>
                     
                     <div th:if="${#lists.isEmpty(tareas)}" style="padding: 30px; text-align: center; background: var(--bg-body); border-radius: 16px; border: 1px dashed var(--border);">
                         <p style="color: var(--text-muted); margin: 0;">Sin tareas registradas recientemente.</p>
                     </div>
 
                     <div th:if="${!#lists.isEmpty(tareas)}" style="display: flex; flex-direction: column; gap: 12px;">
-                        <div th:each="t : ${tareas}" class="premium-row-card" style="padding: 15px; background: var(--bg-body); border: 1px solid var(--border); border-radius: 16px;">
+                        <div th:each="t : ${tareas}" th:if="${t != null}" class="premium-row-card" style="padding: 15px; background: var(--bg-body); border: 1px solid var(--border); border-radius: 16px;">
                             <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
                                 <div class="task-icon-box" style="background: white; border: 1px solid var(--border);">
                                     <i data-lucide="clipboard-list" style="width: 18px; color: var(--primary);"></i>
                                 </div>
                                 <div style="flex: 1;">
-                                    <span style="display: block; font-weight: 700; color: var(--text-main); font-size: 0.95rem;" th:text="${t.get('descripcion')}">Tarea</span>
+                                    <span style="display: block; font-weight: 700; color: var(--text-main); font-size: 0.95rem;" th:text="${t.get('descripcion') ?: 'Sin descripción'}">Tarea</span>
                                     <span style="font-size: 0.8rem; color: var(--text-muted);" 
-                                          th:text="${t.get('fechaLimite') != null ? 'Límite: ' + t.get('fechaLimite').toString().substring(0,10) : 'Sin fecha'}">2024-01-01</span>
+                                          th:with="fLimit=${t.get('fechaLimite')}"
+                                          th:text="${fLimit != null ? 'Límite: ' + (fLimit.toString().length() >= 10 ? fLimit.toString().substring(0,10) : fLimit) : 'Sin fecha'}">2024-01-01</span>
                                 </div>
                                 <span class="badge-premium" 
-                                      th:classappend="${t.get('estado') == 'COMPLETADA' ? 'success' : (t.get('estado') == 'CANCELADA' ? 'danger' : (t.get('estado') == 'EN_PROCESO' ? 'info' : 'warning'))}"
-                                      th:text="${t.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(t.get('estado'), '_', ' '))) : 'Pendiente'}">Pendiente</span>
+                                      th:with="est=${t.get('estado')}"
+                                      th:classappend="${est == 'COMPLETADA' or est == 'FINALIZADA' ? 'success' : 
+                                                      (est == 'CANCELADA' or est == 'RECHAZADA' ? 'danger' : 
+                                                      (est == 'EN_PROCESO' or est == 'ACEPTADA' ? 'info' : 
+                                                      (est == 'PROPUESTA' ? 'primary' : 'warning')))}"
+                                      th:text="${est != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(est, '_', ' '))) : 'Pendiente'}">Pendiente</span>
                             </div>
                         </div>
                     </div>
@@ -212,7 +224,10 @@
             </div>
 
             <!-- SECCIÓN: Acciones para perfiles incompletos -->
-            <div th:if="${adoptante == null and voluntario == null}" style="text-align: center; padding: 40px; background: var(--primary-light); border-radius: 32px; border: 2px dashed var(--primary); opacity: 0.8;">
+
+            <!-- Vista ADMIN: registrar a otro usuario como adoptante/voluntario -->
+            <div th:if="${adoptante == null and voluntario == null and isAdmin}"
+                 style="text-align: center; padding: 40px; background: var(--primary-light); border-radius: 32px; border: 2px dashed var(--primary); opacity: 0.8;">
                 <div style="width: 70px; height: 70px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: var(--shadow-md);">
                     <i data-lucide="user-plus" style="width: 30px; color: var(--primary);"></i>
                 </div>
@@ -228,6 +243,30 @@
                     <a th:href="@{/web/voluntarios/nuevo(usuarioId=${persona.get('id')})}" class="btn btn-secondary" style="padding: 10px 20px;">
                         <i data-lucide="shield-check" style="width: 16px; margin-right: 8px;"></i>
                         Alta Voluntario
+                    </a>
+                </div>
+            </div>
+
+            <!-- Vista PUBLICO: el propio usuario aún no tiene rol operativo -->
+            <div th:if="${adoptante == null and voluntario == null and !isAdmin and isPublico}"
+                 style="text-align: center; padding: 48px 40px; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border-radius: 32px; border: 1.5px solid #86efac;">
+                <div style="width: 72px; height: 72px; border-radius: 24px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 10px 20px -5px rgba(34, 197, 94, 0.35);">
+                    <i data-lucide="sparkles" style="width: 32px; color: white;"></i>
+                </div>
+                <h3 style="font-weight: 800; color: #15803d; margin-bottom: 10px; font-size: 1.4rem;">¿Quieres formar parte del refugio?</h3>
+                <p style="color: #4b5563; max-width: 420px; margin: 0 auto 30px; font-size: 0.97rem; line-height: 1.65;">
+                    Tienes una cuenta pero aún no tienes un rol activo. Puedes solicitar adoptar un animal o unirte como voluntario para ayudarnos en nuestra misión.
+                </p>
+                <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+                    <a th:href="@{/web/animales}" 
+                       style="display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; border-radius: 18px; font-weight: 800; font-size: 0.95rem; text-decoration: none; box-shadow: 0 8px 15px -4px rgba(34, 197, 94, 0.4); transition: all 0.2s;">
+                        <i data-lucide="heart" style="width: 18px;"></i>
+                        Quiero Adoptar
+                    </a>
+                    <a th:href="@{/web/voluntarios/nuevo}" 
+                       style="display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; background: white; color: #15803d; border: 2px solid #86efac; border-radius: 18px; font-weight: 800; font-size: 0.95rem; text-decoration: none; box-shadow: 0 4px 10px -2px rgba(34, 197, 94, 0.15); transition: all 0.2s;">
+                        <i data-lucide="shield-check" style="width: 18px;"></i>
+                        Ser Voluntario
                     </a>
                 </div>
             </div>

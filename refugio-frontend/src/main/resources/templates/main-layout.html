@@ -9,7 +9,7 @@
     <div th:replace="~{fragments/sidebar :: sidebar(${currentUri})}"></div>
     <header th:replace="~{fragments/header :: header(${currentUri}, ${currentUri != '/web/home' and currentUri != '/web/home/' and currentUri != '/'})}"></header>
 
-    <div th:replace="~{fragments/toast :: toast}"></div>
+    <div id="toast-container" th:replace="~{fragments/toast :: toast}"></div>
 
     <main id="contenido-dinamico" style="padding-bottom: 60px;">
         <div th:replace="~{${content} :: content}">
@@ -20,6 +20,7 @@
     <div th:replace="~{fragments/footer :: footer}"></div>
     <div id="modal-host"></div>
     <div th:replace="~{fragments/scripts :: scripts}"></div>
+    <div th:replace="~{fragments/cookie-consent :: cookie-consent}"></div>
 
 </body>
 

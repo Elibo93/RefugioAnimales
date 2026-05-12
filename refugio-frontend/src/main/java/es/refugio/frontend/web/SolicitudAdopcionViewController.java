@@ -484,6 +484,7 @@ public class SolicitudAdopcionViewController {
         model.addAttribute("dni", "");
         model.addAttribute("direccion", "");
         model.addAttribute("fechaNacimiento", "");
+        model.addAttribute("comentario", "");
 
         // Pre-cargar datos del perfil legal si existen
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -528,6 +529,11 @@ public class SolicitudAdopcionViewController {
 
     @GetMapping(WebRoutes.SOLICITUDES_DIRECTA_FORM)
     public String formularioDirecta(Model model, @RequestParam Integer animalId) {
+        // Inicializar variables por defecto para evitar errores de renderizado
+        model.addAttribute("perfilExistente", false);
+        model.addAttribute("nombre", "");
+        model.addAttribute("apellido", "");
+
         try {
             Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
             model.addAttribute("animal", animal);

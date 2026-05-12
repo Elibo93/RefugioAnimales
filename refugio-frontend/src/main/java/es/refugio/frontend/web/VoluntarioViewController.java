@@ -26,8 +26,10 @@ import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
+import es.refugio.frontend.security.CustomUserDetails;
 
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -48,11 +50,49 @@ public class VoluntarioViewController {
     @Value("${auth.api.url}")
     private String authUrl;
 
+    @SuppressWarnings("unchecked")
     @GetMapping(WebRoutes.VOLUNTARIOS_BASE)
     @PreAuthorize("hasRole('ADMIN')")
     public String listar(Model model,
             @RequestParam(required = false) String q,
-            HttpServletRequest request) {
+            @RequestParam(required = false, defaultValue = "false") boolean modoSeleccion,
+            @RequestParam(required = false) Integer tareaIdSeleccion,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+
+        // Indicar al navegador que la respuesta varía según si es HTMX o no para evitar
+        // problemas de caché al dar atrás
+        response.setHeader("Vary", "HX-Request");
+
+        // Si estamos en modo selección, intentamos obtener la descripción de la tarea
+        if (modoSeleccion && tareaIdSeleccion != null) {
+            try {
+                Map<String, Object> tarea = (Map<String, Object>) restTemplate
+                        .getForObject(apiUrl + "/v1/tareas/" + tareaIdSeleccion, Map.class);
+                if (tarea != null) {
+                    model.addAttribute("tareaNombreSeleccion", tarea.get("descripcion"));
+
+                    // Obtener IDs de voluntarios ya asignados
+                    List<Integer> assignedIds = new ArrayList<>();
+                    Object vIds = tarea.get("voluntarioIds");
+                    if (vIds instanceof List) {
+                        for (Object o : (List<?>) vIds) {
+                            if (o instanceof Number)
+                                assignedIds.add(((Number) o).intValue());
+                            else if (o instanceof Map) {
+                                Object val = ((Map<?, ?>) o).get("value");
+                                if (val instanceof Number)
+                                    assignedIds.add(((Number) val).intValue());
+                            }
+                        }
+                    }
+                    model.addAttribute("assignedVoluntarioIds", assignedIds);
+                }
+            } catch (Exception e) {
+                logger.warn("No se pudo obtener la información de la tarea para el modo selección: " + e.getMessage());
+            }
+        }
+
         List<Object> voluntarios = fetchList("/v1/voluntarios");
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
         List<Object> perfilesLegales = fetchList("/v1/perfiles-legales");
@@ -106,10 +146,19 @@ public class VoluntarioViewController {
         model.addAttribute("usuariosMap", usuariosMap);
         model.addAttribute("perfilesMap", perfilesMap);
         model.addAttribute("query", q);
+        model.addAttribute("modoSeleccion", modoSeleccion);
+        model.addAttribute("tareaIdSeleccion", tareaIdSeleccion);
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_BASE);
 
         if ("true".equals(request.getHeader("HX-Request"))) {
-            return FragmentoContenido.Voluntario_LIST.getPath() + " :: list-body";
+            String hxTarget = request.getHeader("HX-Target");
+            // Si el objetivo es solo la lista (búsqueda), devolvemos solo el body
+            if ("voluntarios-list-body".equals(hxTarget)) {
+                return FragmentoContenido.Voluntario_LIST.getPath() + " :: list-body";
+            }
+            // Para navegación completa o cualquier otro caso, devolvemos el contenido
+            // completo
+            return FragmentoContenido.Voluntario_LIST.getPath() + " :: content";
         }
 
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Voluntario_LIST.getPath());
@@ -194,33 +243,45 @@ public class VoluntarioViewController {
     }
 
     @GetMapping(WebRoutes.VOLUNTARIOS_NUEVO)
+    @PreAuthorize("hasAnyRole('ADMIN', 'PUBLICO', 'VOLUNTARIO') or isAnonymous()")
     public String formulario(Model model, HttpServletRequest request) {
         model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), new HashMap<String, Object>());
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_NUEVO);
+        
+        // Inicializar flags para evitar errores de null en el template
+        model.addAttribute("perfilLegalExists", false);
+        model.addAttribute("perfilExistente", false);
 
-        // Si el usuario está autenticado, intentamos cargar su PerfilLegal para pre-rellenar o verificar si le falta
+        // Si el usuario está autenticado, intentamos cargar su PerfilLegal para
+        // pre-rellenar o verificar si le falta
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             try {
-                // Obtener ID del usuario desde el modelo (inyectado por GlobalModelAttributesAdvice)
+                // Obtener ID del usuario desde el modelo (inyectado por
+                // GlobalModelAttributesAdvice)
                 Object currentUserId = model.getAttribute("currentUserId");
                 if (currentUserId != null) {
                     Map<String, Object> perfil = restTemplate.exchange(
                             apiUrl + "/v1/perfiles-legales/usuario/" + currentUserId,
                             HttpMethod.GET,
                             null,
-                            new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+                            new ParameterizedTypeReference<Map<String, Object>>() {
+                            }).getBody();
                     if (perfil != null) {
-                        model.addAttribute("perfilLegal", perfil);
-                        // Atributos individuales para compatibilidad con el template actual
-                        model.addAttribute("userPhone", perfil.get("telefono"));
-                        model.addAttribute("userDni", perfil.get("dni"));
-                        model.addAttribute("userDireccion", perfil.get("direccion"));
-                        model.addAttribute("userFechaNacimiento", perfil.get("fechaNacimiento"));
-                        model.addAttribute("userNombre", perfil.get("nombre"));
-                        model.addAttribute("userApellido", perfil.get("apellido"));
-                        model.addAttribute("nombreCompleto", perfil.get("nombre") + " " + perfil.get("apellido"));
-                        model.addAttribute("perfilExistente", true);
+                        flattenId(perfil, "id");
+                        flattenId(perfil, "usuarioId");
+                        model.addAttribute("userPhone",           String.valueOf(perfil.getOrDefault("telefono", "")));
+                        model.addAttribute("userDni",             String.valueOf(perfil.getOrDefault("dni", "")));
+                        model.addAttribute("userDireccion",       String.valueOf(perfil.getOrDefault("direccion", "")));
+                        model.addAttribute("userFechaNacimiento", String.valueOf(perfil.getOrDefault("fechaNacimiento", "")));
+                        model.addAttribute("userNombre",          String.valueOf(perfil.getOrDefault("nombre", "")));
+                        model.addAttribute("userApellido",        String.valueOf(perfil.getOrDefault("apellido", "")));
+                        model.addAttribute("nombreCompleto",      perfil.getOrDefault("nombre", "") + " " + perfil.getOrDefault("apellido", ""));
+                        model.addAttribute("perfilLegalExists",   true);
+                        model.addAttribute("perfilExistente",     true);
+                    } else {
+                        model.addAttribute("perfilLegalExists", false);
+                        model.addAttribute("perfilExistente", false);
                     }
                 }
             } catch (Exception e) {
@@ -237,51 +298,105 @@ public class VoluntarioViewController {
     }
 
     @GetMapping(WebRoutes.VOLUNTARIOS_EDITAR)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
+        logger.info("DEBUG: Entrando en editarFormulario para ID: {}", id);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails currentUser = (CustomUserDetails) auth.getPrincipal();
+        boolean isAdmin = auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        model.addAttribute("isAdmin", isAdmin);
+        
+        // Inicializar flags para evitar errores de null en el template
+        model.addAttribute("perfilLegalExists", false);
+        model.addAttribute("perfilExistente", false);
+
         try {
             Map<String, Object> voluntario = restTemplate.exchange(
                     apiUrl + "/v1/voluntarios/" + id,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+                    new ParameterizedTypeReference<Map<String, Object>>() {
+                    }).getBody();
+
+            logger.info("DEBUG: Voluntario recuperado: {}", voluntario != null ? "SI" : "NULL");
+
+            if (voluntario == null) {
+                logger.warn("No se encontró el voluntario con ID: {}", id);
+                return "redirect:/web/home";
+            }
+
+            // Aplanar IDs para que Thymeleaf pueda usarlos en URLs (th:action, th:href)
+            // sin que serialice objetos Map{value:X} como texto
+            flattenId(voluntario, "id");
+            flattenId(voluntario, "usuarioId");
+
             model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), voluntario);
 
-            if (voluntario != null && voluntario.get("usuarioId") != null) {
-                Object uId = voluntario.get("usuarioId");
-                Map<String, Object> user = restTemplate.exchange(
-                        authUrl + "/v1/usuarios/" + uId,
-                        HttpMethod.GET,
-                        null,
-                        new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
-                if (user != null) {
-                    model.addAttribute("userEmail", user.get("email"));
-                }
+            Integer voluntarioUsuarioId = (voluntario.get("usuarioId") instanceof Number)
+                    ? ((Number) voluntario.get("usuarioId")).intValue()
+                    : null;
 
-                // Fetch PerfilLegal
+            // SEGURIDAD: Solo admin o el propio voluntario pueden editar
+            if (!isAdmin && (voluntarioUsuarioId == null || !currentUser.getId().equals(voluntarioUsuarioId))) {
+                logger.warn("Usuario {} intentó editar voluntario {} sin permiso", currentUser.getId(), id);
+                return "redirect:/web/home";
+            }
+
+            if (voluntarioUsuarioId != null) {
+                // 2. Datos de usuario (email)
                 try {
-                    Map<String, Object> perfil = restTemplate.exchange(
-                            apiUrl + "/v1/perfiles-legales/usuario/" + uId,
+                    Map<String, Object> user = restTemplate.exchange(
+                            authUrl + "/v1/usuarios/" + voluntarioUsuarioId,
                             HttpMethod.GET,
                             null,
-                            new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
-                    if (perfil != null) {
-                        model.addAttribute("nombreCompleto", perfil.get("nombre") + " " + perfil.get("apellido"));
-                        model.addAttribute("userPhone", perfil.get("telefono"));
-                        model.addAttribute("userDni", perfil.get("dni"));
-                        model.addAttribute("userDireccion", perfil.get("direccion"));
-                        model.addAttribute("userFechaNacimiento", perfil.get("fechaNacimiento"));
+                            new ParameterizedTypeReference<Map<String, Object>>() {
+                            }).getBody();
+                    if (user != null) {
+                        model.addAttribute("userEmail", user.get("email"));
                     }
                 } catch (Exception e) {
-                    logger.warn("No se encontró PerfilLegal para usuario " + uId);
+                    logger.warn("No se pudo obtener datos de usuario {} para el voluntario {}", voluntarioUsuarioId, id);
+                }
+
+                // 3. PerfilLegal
+                try {
+                    Map<String, Object> perfil = restTemplate.exchange(
+                            apiUrl + "/v1/perfiles-legales/usuario/" + voluntarioUsuarioId,
+                            HttpMethod.GET,
+                            null,
+                            new ParameterizedTypeReference<Map<String, Object>>() {
+                            }).getBody();
+                    if (perfil != null) {
+                        // Aplanar IDs del perfil también
+                        flattenId(perfil, "id");
+                        flattenId(perfil, "usuarioId");
+                        model.addAttribute("nombreCompleto", perfil.get("nombre") + " " + perfil.get("apellido"));
+                        model.addAttribute("userPhone",         String.valueOf(perfil.getOrDefault("telefono", "")));
+                        model.addAttribute("userDni",           String.valueOf(perfil.getOrDefault("dni", "")));
+                        model.addAttribute("userDireccion",     String.valueOf(perfil.getOrDefault("direccion", "")));
+                        model.addAttribute("userFechaNacimiento", String.valueOf(perfil.getOrDefault("fechaNacimiento", "")));
+                        model.addAttribute("userNombre",        String.valueOf(perfil.getOrDefault("nombre", "")));
+                        model.addAttribute("userApellido",      String.valueOf(perfil.getOrDefault("apellido", "")));
+                        // NO añadimos el Map completo para evitar HttpMessageNotWritableException
+                        model.addAttribute("perfilLegalExists", true);
+                        model.addAttribute("perfilExistente", true);
+                    } else {
+                        model.addAttribute("perfilLegalExists", false);
+                        model.addAttribute("perfilExistente", false);
+                    }
+                } catch (Exception e) {
+                    logger.warn("No se encontró PerfilLegal para usuario: {}", voluntarioUsuarioId);
+                    model.addAttribute("perfilLegalExists", false);
+                    model.addAttribute("perfilExistente", false);
                 }
             }
         } catch (Exception e) {
             logger.error("Error al cargar voluntario/usuario para editar: " + e.getMessage());
+            return "redirect:/web/home";
         }
 
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_EDITAR);
-        model.addAttribute("isAdmin", true);
 
         if ("true".equals(request.getHeader("HX-Request"))) {
             return FragmentoContenido.Voluntario_FORM.getPath() + " :: content";
@@ -291,7 +406,21 @@ public class VoluntarioViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
+    /**
+     * Aplana un ID anidado {value: X} a su valor entero plano.
+     * Necesario porque el backend serializa IDs compuestos como objetos Map.
+     */
+    private void flattenId(Map<String, Object> map, String key) {
+        if (map == null || !map.containsKey(key)) return;
+        Object val = map.get(key);
+        if (val instanceof Map) {
+            Object inner = ((Map<?, ?>) val).get("value");
+            map.put(key, inner);
+        }
+    }
+
     @PostMapping(WebRoutes.VOLUNTARIOS_NUEVO)
+    @PreAuthorize("hasAnyRole('ADMIN', 'PUBLICO', 'VOLUNTARIO') or isAnonymous()")
     public String crearVoluntario(
             @RequestParam(required = false) Integer idUsuario,
             @RequestParam String disponibilidad,
@@ -309,20 +438,24 @@ public class VoluntarioViewController {
 
         Integer finalUsuarioId = idUsuario;
 
-        // SEGURIDAD: Si el usuario está autenticado, verificamos que no esté intentando suplantar a otro
+        // SEGURIDAD: Si el usuario está autenticado, verificamos que no esté intentando
+        // suplantar a otro
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        boolean isAuthenticated = auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal());
-        
+        boolean isAuthenticated = auth != null && auth.isAuthenticated()
+                && !"anonymousUser".equals(auth.getPrincipal());
+
         if (isAuthenticated) {
             try {
                 Map<String, Object> me = restTemplate.exchange(
                         authUrl + "/v1/me",
                         HttpMethod.GET,
                         null,
-                        new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+                        new ParameterizedTypeReference<Map<String, Object>>() {
+                        }).getBody();
                 if (me != null) {
                     Object realIdObj = me.get("id");
-                    if (realIdObj instanceof Map) realIdObj = ((Map<?, ?>) realIdObj).get("value");
+                    if (realIdObj instanceof Map)
+                        realIdObj = ((Map<?, ?>) realIdObj).get("value");
                     Integer realUserId = ((Number) realIdObj).intValue();
                     String rol = (String) me.get("rol");
                     boolean isAdmin = rol != null && rol.contains("ADMIN");
@@ -330,7 +463,9 @@ public class VoluntarioViewController {
                     // Si no es admin y el ID enviado no coincide con el suyo, forzamos el suyo real
                     if (!isAdmin) {
                         if (finalUsuarioId != null && !finalUsuarioId.equals(realUserId)) {
-                            logger.warn("Intento de suplantación detectado: Usuario {} intentó registrar voluntario para {}", realUserId, finalUsuarioId);
+                            logger.warn(
+                                    "Intento de suplantación detectado: Usuario {} intentó registrar voluntario para {}",
+                                    realUserId, finalUsuarioId);
                         }
                         finalUsuarioId = realUserId;
                     }
@@ -354,7 +489,8 @@ public class VoluntarioViewController {
                         targetUrl,
                         HttpMethod.POST,
                         new HttpEntity<>(userBody),
-                        new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+                        new ParameterizedTypeReference<Map<String, Object>>() {
+                        }).getBody();
                 if (createdUser != null && createdUser.get("id") != null) {
                     Object idObj = createdUser.get("id");
                     if (idObj instanceof Map) {
@@ -423,7 +559,8 @@ public class VoluntarioViewController {
                                 targetUrl,
                                 HttpMethod.PUT,
                                 new HttpEntity<>(patchBody),
-                                new ParameterizedTypeReference<Map<String, Object>>() {});
+                                new ParameterizedTypeReference<Map<String, Object>>() {
+                                });
 
                         if (resp.getStatusCode().is2xxSuccessful() && resp.getBody() != null) {
                             String newToken = (String) resp.getBody().get("token");
@@ -467,7 +604,7 @@ public class VoluntarioViewController {
     }
 
     @PostMapping(WebRoutes.VOLUNTARIOS_EDITAR)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public String editarVoluntario(@PathVariable Integer id,
             @RequestParam Integer usuarioId,
             @RequestParam String nombre,
@@ -480,6 +617,17 @@ public class VoluntarioViewController {
             @RequestParam(required = false) String fechaNacimiento,
             @RequestParam(required = false) String especialidad,
             RedirectAttributes redirectAttributes) {
+
+        // SEGURIDAD: Solo admin o el propio voluntario pueden editar
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails currentUser = (CustomUserDetails) auth.getPrincipal();
+        boolean isAdmin = auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+
+        if (!isAdmin && (usuarioId == null || !currentUser.getId().equals(usuarioId))) {
+            logger.warn("Usuario {} intentó procesar edición de voluntario {} (usuarioId {}) sin permiso",
+                    currentUser.getId(), id, usuarioId);
+            return "redirect:/web/home";
+        }
 
         // 1. Actualización de disponibilidad en el servicio de backend
         Map<String, Object> bodyVol = new HashMap<>();
@@ -508,7 +656,8 @@ public class VoluntarioViewController {
                     authUrl + "/v1/usuarios/" + usuarioId,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+                    new ParameterizedTypeReference<Map<String, Object>>() {
+                    }).getBody();
             if (user != null) {
                 Map<String, Object> bodyUser = new HashMap<>(user);
                 bodyUser.put("email", email);
@@ -526,7 +675,12 @@ public class VoluntarioViewController {
         }
 
         redirectAttributes.addFlashAttribute("successMessage", "Voluntario actualizado correctamente.");
-        return "redirect:" + WebRoutes.VOLUNTARIOS_BASE;
+
+        if (isAdmin) {
+            return "redirect:" + WebRoutes.VOLUNTARIOS_BASE;
+        } else {
+            return "redirect:/web/personas/" + usuarioId;
+        }
     }
 
     @PostMapping(WebRoutes.VOLUNTARIOS_ELIMINAR)
@@ -584,7 +738,8 @@ public class VoluntarioViewController {
                     apiUrl + "/v1/voluntarios/" + id,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+                    new ParameterizedTypeReference<Map<String, Object>>() {
+                    }).getBody();
             if (voluntario != null && voluntario.containsKey("usuarioId")) {
                 return "redirect:/web/personas/" + voluntario.get("usuarioId");
             }

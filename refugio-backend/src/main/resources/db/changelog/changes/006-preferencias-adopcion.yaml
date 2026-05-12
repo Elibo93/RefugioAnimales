@@ -1,0 +1,59 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-create-preferencias-adopcion
+      author: antigravity
+      changes:
+        - createTable:
+            tableName: preferencias_adopcion
+            columns:
+              - column: { name: id, type: INT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: usuario_id, type: INT, constraints: { nullable: false, unique: true } }
+              - column: { name: especies, type: VARCHAR(255) }
+              - column: { name: tamanos, type: VARCHAR(255) }
+              - column: { name: sexos, type: VARCHAR(255) }
+              - column: { name: edad_max, type: INT }
+              - column: { name: nivel_energia_max, type: INT }
+              - column: { name: notificaciones_activas, type: BIT, defaultValueBoolean: true }
+              - column: { name: created_at, type: DATETIME, constraints: { nullable: false } }
+              - column: { name: updated_at, type: DATETIME, constraints: { nullable: false } }
+
+  - changeSet:
+      id: 007-refactor-preferencias-to-join-tables
+      author: antigravity
+      changes:
+        - dropColumn:
+            tableName: preferencias_adopcion
+            columnName: especies
+        - dropColumn:
+            tableName: preferencias_adopcion
+            columnName: tamanos
+        - dropColumn:
+            tableName: preferencias_adopcion
+            columnName: sexos
+        - createTable:
+            tableName: preferencias_especies
+            columns:
+              - column: { name: preferencia_id, type: INT, constraints: { nullable: false } }
+              - column: { name: especie, type: VARCHAR(50), constraints: { nullable: false } }
+        - createTable:
+            tableName: preferencias_tamanos
+            columns:
+              - column: { name: preferencia_id, type: INT, constraints: { nullable: false } }
+              - column: { name: tamano, type: VARCHAR(50), constraints: { nullable: false } }
+        - createTable:
+            tableName: preferencias_sexos
+            columns:
+              - column: { name: preferencia_id, type: INT, constraints: { nullable: false } }
+              - column: { name: sexo, type: VARCHAR(50), constraints: { nullable: false } }
+        - addForeignKeyConstraint: { baseTableName: preferencias_especies, baseColumnNames: preferencia_id, referencedTableName: preferencias_adopcion, referencedColumnNames: id, constraintName: fk_pref_especies_id, onDelete: CASCADE }
+        - addForeignKeyConstraint: { baseTableName: preferencias_tamanos, baseColumnNames: preferencia_id, referencedTableName: preferencias_adopcion, referencedColumnNames: id, constraintName: fk_pref_tamanos_id, onDelete: CASCADE }
+        - addForeignKeyConstraint: { baseTableName: preferencias_sexos, baseColumnNames: preferencia_id, referencedTableName: preferencias_adopcion, referencedColumnNames: id, constraintName: fk_pref_sexos_id, onDelete: CASCADE }
+
+  - changeSet:
+      id: 008-add-encuesta-omitida-to-preferencias
+      author: antigravity
+      changes:
+        - addColumn:
+            tableName: preferencias_adopcion
+            columns:
+              - column: { name: encuesta_omitida, type: BIT, defaultValueBoolean: false }

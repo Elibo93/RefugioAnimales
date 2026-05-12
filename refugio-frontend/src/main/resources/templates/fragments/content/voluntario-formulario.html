@@ -32,7 +32,7 @@
                         </h2>
 
                         <!-- CASO A: Invitado O Usuario logueado sin PerfilLegal (Registro de identidad) -->
-                        <div th:if="${(voluntario.get('id') == null) and (!isAuthenticated or (isAuthenticated and perfilLegal == null))}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                        <div th:if="${(voluntario.get('id') == null) and (!isAuthenticated or (isAuthenticated and !perfilLegalExists))}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
                             <!-- ID del usuario si ya está autenticado pero le falta el perfil -->
                             <input type="hidden" name="idUsuario" th:if="${isAuthenticated}" th:value="${currentUserId}">
 
@@ -42,7 +42,7 @@
                                     Al enviar este formulario se creará tu cuenta de usuario. Una vez aprobada tu solicitud, podrás acceder a la gestión.
                                 </p>
                             </div>
-                            <div th:if="${isAuthenticated and perfilLegal == null}" style="grid-column: span 2; background: #fff7ed; border: 1px solid #ffedd5; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start;">
+                            <div th:if="${isAuthenticated and !perfilLegalExists}" style="grid-column: span 2; background: #fff7ed; border: 1px solid #ffedd5; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start;">
                                 <i data-lucide="alert-circle" style="color: #ea580c; width: 22px;"></i>
                                 <p style="margin: 0; font-size: 0.95rem; color: #9a3412; line-height: 1.6;">
                                     Necesitamos completar tu información legal antes de registrarte como voluntario. Por favor, rellena los siguientes campos.
@@ -96,7 +96,7 @@
                         </div>
 
                         <!-- CASO C: Edición o Usuario Logueado con PerfilLegal (Solo lectura/confirmación) -->
-                        <div th:if="${voluntario.get('id') != null or (isAuthenticated and !isAdmin and perfilLegal != null)}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                        <div th:if="${voluntario.get('id') != null or (isAuthenticated and !isAdmin and perfilLegalExists)}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
                              <div style="grid-column: span 2; padding: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.5rem;">
                                 <div style="background: white; color: #0891b2; width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0;">
                                     <i data-lucide="user" style="width: 28px;"></i>

@@ -337,6 +337,11 @@ public class UsuarioViewController {
     @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     @GetMapping(WebRoutes.PERSONAS_DETALLE)
     public String verDetalle(@PathVariable Integer id, Model model) {
+        // Inicializar listas vacías para evitar errores de renderizado en Thymeleaf
+        model.addAttribute("tareas", new ArrayList<>());
+        model.addAttribute("vinculosAnimales", new ArrayList<>());
+        model.addAttribute("animalNames", new HashMap<>());
+
         Map<String, Object> userAuth = (Map<String, Object>) restTemplate.getForObject(authUrl + "/v1/usuarios/" + id,
                 Map.class);
         Map<String, Object> persona = new HashMap<>();

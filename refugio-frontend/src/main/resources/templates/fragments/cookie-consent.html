@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="cookie-consent" id="cookie-banner" class="cookie-consent-wrapper" style="display: none;">
+    <div class="cookie-consent-card">
+        <div class="cookie-header">
+            <div class="cookie-icon-wrapper">
+                <i data-lucide="cookie" class="cookie-icon"></i>
+            </div>
+            <div class="cookie-text">
+                <h3>Tu privacidad nos importa</h3>
+                <p>Utilizamos cookies propias y de terceros para mejorar tu experiencia, analizar el tráfico y mostrarte los animales más cercanos a ti. Respetamos tu privacidad de acuerdo con el RGPD.</p>
+            </div>
+        </div>
+        
+        <div class="cookie-actions">
+            <button onclick="acceptCookies('all')" class="btn-cookie accept">
+                Aceptar todas
+            </button>
+            <button onclick="acceptCookies('necessary')" class="btn-cookie necessary">
+                Solo necesarias
+            </button>
+            <button onclick="toggleCookieSettings()" class="btn-cookie settings">
+                Configurar
+            </button>
+        </div>
+        
+        <div class="cookie-footer">
+            <p>Para más información, consulta nuestra <a href="/web/privacidad">Política de Privacidad</a>.</p>
+        </div>
+    </div>
+
+    <style>
+        .cookie-consent-wrapper {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 900;
+            width: 90%;
+            max-width: 700px;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .cookie-consent-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .cookie-header {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .cookie-icon-wrapper {
+            background: #f0fdf4;
+            color: #15803d;
+            padding: 1rem;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cookie-icon {
+            width: 32px;
+            height: 32px;
+        }
+
+        .cookie-text h3 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #1a1a1a;
+        }
+
+        .cookie-text p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .cookie-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-cookie {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-cookie.accept {
+            background: #15803d;
+            color: white;
+            box-shadow: 0 4px 12px rgba(21, 128, 61, 0.2);
+        }
+
+        .btn-cookie.accept:hover {
+            background: #166534;
+            transform: translateY(-2px);
+        }
+
+        .btn-cookie.necessary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-cookie.necessary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-cookie.settings {
+            background: transparent;
+            color: #6b7280;
+            border: 1px solid #e5e7eb;
+            max-width: 120px;
+        }
+
+        .cookie-footer {
+            text-align: center;
+            border-top: 1px solid #eee;
+            padding-top: 0.75rem;
+        }
+
+        .cookie-footer p {
+            font-size: 0.75rem;
+            color: #999;
+            margin: 0;
+        }
+
+        .cookie-footer a {
+            color: #15803d;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translate(-50%, 100px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        @media (max-width: 600px) {
+            .cookie-actions { flex-direction: column; }
+            .btn-cookie.settings { max-width: none; }
+            .cookie-header { flex-direction: column; text-align: center; }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const consent = localStorage.getItem('cookie-consent');
+            if (!consent) {
+                setTimeout(() => {
+                    const banner = document.getElementById('cookie-banner');
+                    banner.style.display = 'block';
+                    if (window.lucide) lucide.createIcons();
+                }, 1000);
+            }
+        });
+
+        function acceptCookies(type) {
+            localStorage.setItem('cookie-consent', type);
+            localStorage.setItem('cookie-consent-date', new Date().toISOString());
+            
+            const banner = document.getElementById('cookie-banner');
+            banner.style.transition = 'all 0.5s ease';
+            banner.style.opacity = '0';
+            banner.style.transform = 'translate(-50%, 50px)';
+            
+            setTimeout(() => banner.remove(), 500);
+            
+            console.log('Cookies accepted:', type);
+        }
+
+        function toggleCookieSettings() {
+            const banner = document.getElementById('cookie-banner');
+            banner.style.opacity = '0';
+            banner.style.pointerEvents = 'none';
+
+            // Aquí se podría abrir un modal más detallado
+            Swal.fire({
+                title: 'Preferencias de Cookies',
+                html: `
+                    <div style="text-align: left; font-size: 0.9rem;">
+                        <p><input type="checkbox" checked disabled> <strong>Necesarias:</strong> Esenciales para el funcionamiento del sitio.</p>
+                        <p><input type="checkbox" id="check-analytics"> <strong>Analíticas:</strong> Nos ayudan a saber qué animales se visitan más.</p>
+                        <p><input type="checkbox" id="check-marketing"> <strong>Marketing:</strong> Para mostrarte contenido relevante.</p>
+                    </div>
+                `,
+                confirmButtonText: 'Guardar preferencias',
+                confirmButtonColor: '#15803d',
+                showCancelButton: true,
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    acceptCookies('custom');
+                } else {
+                    // Si cancela, volvemos a mostrar el banner
+                    banner.style.opacity = '1';
+                    banner.style.pointerEvents = 'auto';
+                }
+            });
+        }
+    </script>
+</div>
+</html>
