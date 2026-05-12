@@ -6,6 +6,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <!-- Scripts Estáticos (Lógica Principal) -->
     <script th:src="@{/js/scripts.js}"></script>
@@ -73,6 +74,15 @@
                     btnText.dataset.originalText = btnText.textContent;
                     btnText.textContent = "Guardando...";
                 }
+            }
+        });
+
+        // Listener para Toasts disparados desde el servidor (HX-Trigger)
+        document.body.addEventListener('showToast', function(evt) {
+            const message = evt.detail.message || evt.detail;
+            const type = evt.detail.type || 'success';
+            if (typeof showToast === 'function') {
+                showToast(message, type);
             }
         });
 

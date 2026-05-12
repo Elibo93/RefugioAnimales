@@ -20,6 +20,8 @@ public class Tarea {
     private LocalDateTime fechaLimite;
     private String instrucciones;
     private List<VoluntarioId> voluntarios;
+    @Builder.Default
+    private boolean notificadoVencimiento = false;
 
     public String getPrioridad() {
         if (fechaLimite == null) return "BAJA";

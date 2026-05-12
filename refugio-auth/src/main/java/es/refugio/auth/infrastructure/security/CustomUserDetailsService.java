@@ -2,7 +2,6 @@ package es.refugio.auth.infrastructure.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -30,10 +29,11 @@ public class CustomUserDetailsService implements UserDetailsService {
             authorities.add(new SimpleGrantedAuthority("ROLE_ADOPTANTE"));
         }
 
-        return new User(
+        return new CustomUserDetails(
                 user.getEmail(),
                 user.getPassword(),
-                authorities
+                authorities,
+                user.getId()
         );
     }
 }

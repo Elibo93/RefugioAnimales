@@ -37,8 +37,10 @@ public class TareaConfig {
 
     @Bean
     public EditTareaUseCase editTareaUseCase(TareaRepository repository,
+            es.refugio.refugio.domain.repository.VoluntarioRepository voluntarioRepository,
+            es.refugio.refugio.domain.repository.PerfilLegalRepository perfilLegalRepository,
             es.refugio.refugio.application.service.NotificacionService notificacionService) {
-        return new EditTareaUseCase(repository, notificacionService);
+        return new EditTareaUseCase(repository, voluntarioRepository, perfilLegalRepository, notificacionService);
     }
 
     @Bean

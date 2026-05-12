@@ -50,6 +50,10 @@ public class AnimalMapper {
     }
 
     public static AnimalResponse toResponse(Animal a) {
+        return toResponse(a, 0);
+    }
+
+    public static AnimalResponse toResponse(Animal a, Integer conteoSolicitudes) {
         return new AnimalResponse(
                 a.getId() != null ? a.getId().getValue() : 0,
                 a.getNombre(),
@@ -67,7 +71,8 @@ public class AnimalMapper {
                 a.getPeso(),
                 a.getNivelEnergia(),
                 a.getUrgencia(),
-                a.getVisitas());
+                a.getVisitas(),
+                conteoSolicitudes);
     }
 
     public static AnimalEntity toEntity(Animal a) {

@@ -8,6 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,12 +53,14 @@ public class UsuarioController {
     private final EditUsuarioService editUsuarioService;
     private final es.refugio.refugio.infraestructure.db.jpa.repository.usuario.UsuarioEntityJpaRepository usuarioEntityJpaRepository;
     private final es.refugio.auth.infrastructure.security.JwtTokenProvider tokenProvider;
+    private final PasswordEncoder passwordEncoder;
 
     @Operation(summary = "Crea un Usuario", description = "Registra un nuevo usuario con sus credenciales y rol")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Usuario creado correctamente"),
             @ApiResponse(responseCode = "400", description = "Datos de registro inválidos")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<UsuarioResponse> createUsuario(
             @jakarta.validation.Valid @RequestBody UsuarioRequest usuarioRequest) {
@@ -88,6 +95,7 @@ public class UsuarioController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @org.springframework.web.bind.annotation.PutMapping("/{id}/rol")
     public ResponseEntity<Map<String, String>> updateRole(@PathVariable int id, @RequestBody Map<String, String> body) {
         var userOptional = usuarioEntityJpaRepository.findById(id);
@@ -116,11 +124,45 @@ public class UsuarioController {
         return ResponseEntity.notFound().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
+    @PostMapping("/{id}/verificar-password")
+    public ResponseEntity<?> verifyPassword(@PathVariable int id, @RequestParam String password) {
+        System.out.println("[DEBUG] Verificando password para usuario ID: " + id);
+        var userOptional = usuarioEntityJpaRepository.findById(id);
+        if (userOptional.isPresent()) {
+            var user = userOptional.get();
+            
+            if (password != null && passwordEncoder.matches(password.trim(), user.getContrasena())) {
+                return ResponseEntity.ok(Map.of("valid", true));
+            }
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("valid", false, "message", "Contraseña actual incorrecta"));
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
+    @PutMapping("/{id}/password")
+    public ResponseEntity<?> updatePassword(@PathVariable int id, @RequestBody Map<String, String> body) {
+        var userOptional = usuarioEntityJpaRepository.findById(id);
+        if (userOptional.isPresent()) {
+            var user = userOptional.get();
+            String newPassword = body.get("newPassword");
+            if (newPassword == null || newPassword.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "La nueva contraseña no puede estar vacía"));
+            }
+            user.setContrasena(passwordEncoder.encode(newPassword));
+            usuarioEntityJpaRepository.save(user);
+            return ResponseEntity.ok(Map.of("message", "Contraseña actualizada correctamente"));
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @Operation(summary = "Obtiene el listado de usuarios", description = "Retorna todos los usuarios registrados")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Listado generado con éxito"),
             @ApiResponse(responseCode = "404", description = "No existen usuarios registrados")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<UsuarioResponse> getAll() {
         return findUsuarioService.findAll()
@@ -129,6 +171,7 @@ public class UsuarioController {
                 .toList();
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioResponse> findUsuarioById(@PathVariable int id) {
         Usuario usuario = findUsuarioService.findById(new UsuarioId(id));
@@ -140,6 +183,7 @@ public class UsuarioController {
             @ApiResponse(responseCode = "204", description = "Usuario eliminado"),
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUsuario(@PathVariable int id) {
         deleteUsuarioService.delete(new UsuarioId(id));
@@ -151,10 +195,28 @@ public class UsuarioController {
             @ApiResponse(responseCode = "200", description = "Usuario actualizado"),
             @ApiResponse(responseCode = "400", description = "Datos de actualización inválidos")
     })
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     @PutMapping("/{id}")
     public UsuarioResponse editUsuario(@PathVariable int id,
             @jakarta.validation.Valid @RequestBody UsuarioRequest usuarioRequest) {
-        EditUsuarioCommand comando = UsuarioMapper.toCommand(id, usuarioRequest);
+        
+        // SEGURIDAD EXTRA: Si no es ADMIN, forzar que el rol sea el actual (no permitir escalada)
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        
+        es.refugio.auth.domain.Rol finalRol = usuarioRequest.rol();
+        if (!isAdmin) {
+            Usuario usuarioActual = findUsuarioService.findById(new UsuarioId(id));
+            finalRol = usuarioActual.getRol();
+        }
+
+        EditUsuarioCommand comando = new EditUsuarioCommand(
+            new UsuarioId(id), 
+            usuarioRequest.email(), 
+            usuarioRequest.username(), 
+            finalRol
+        );
+        
         Usuario usuario = editUsuarioService.update(comando);
         return UsuarioMapper.toResponse(usuario);
     }

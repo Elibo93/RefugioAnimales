@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 009-add-notificado-vencimiento-to-tareas
+      author: antigravity
+      changes:
+        - addColumn:
+            tableName: tareas
+            columns:
+              - column: { name: notificado_vencimiento, type: BIT, defaultValueBoolean: false }

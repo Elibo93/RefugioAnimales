@@ -46,4 +46,7 @@ public class TareaEntity {
         inverseJoinColumns = @JoinColumn(name = "voluntario_id")
     )
     private List<VoluntarioEntity> voluntarios;
+
+    @Column(name = "notificado_vencimiento", columnDefinition = "BIT")
+    private Boolean notificadoVencimiento;
 }

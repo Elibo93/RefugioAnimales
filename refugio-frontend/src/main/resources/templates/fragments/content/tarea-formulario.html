@@ -7,17 +7,78 @@
 
 <body>
     <div th:fragment="content">
+        <style>
+            .volunteer-chips-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-top: 10px;
+            }
+            .volunteer-chip {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: var(--bg-main);
+                border: 1px solid var(--border);
+                padding: 6px 12px;
+                border-radius: 100px;
+                font-size: 0.85rem;
+                color: var(--text-main);
+                transition: all 0.2s;
+            }
+            .volunteer-chip:hover {
+                border-color: var(--primary);
+                background: white;
+            }
+            .volunteer-chip .remove-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                background: #f3f4f6;
+                color: #9ca3af;
+                border: none;
+                cursor: pointer;
+                padding: 0;
+                transition: all 0.2s;
+            }
+            .volunteer-chip .remove-btn:hover {
+                background: #fee2e2;
+                color: #ef4444;
+            }
+            .btn-add-vol {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                background: white;
+                border: 1px dashed var(--border);
+                padding: 6px 14px;
+                border-radius: 100px;
+                font-size: 0.85rem;
+                color: var(--text-muted);
+                cursor: pointer;
+                transition: all 0.2s;
+                margin-top: 5px;
+            }
+            .btn-add-vol:hover {
+                border-color: var(--primary);
+                color: var(--primary);
+                background: var(--primary-light);
+            }
+        </style>
 
         <div class="page-header" style="text-align:center; margin-bottom: 2rem;">
             <h1 class="page-title" style="display: flex; align-items: center; justify-content: center; gap: 12px;">
                 <div class="premium-modal-icon-wrapper" style="margin: 0; width: 48px; height: 48px; background: #f3f4f6; color: #4b5563;">
                     <i data-lucide="clipboard-list"></i>
                 </div>
-                <span th:text="${tarea.get('id') == null ? (voluntarioPreseleccionado != null ? 'Asignar tarea a ' + voluntarioPreseleccionado.get('nombre') : 'Crear tarea') : 'Editar tarea'}">
+                <span th:text="${tarea.get('id') == null ? 'Nueva Tarea' : 'Editar Tarea'}">
                     Crear tarea
                 </span>
             </h1>
-            <p style="color:var(--text-muted); margin-top:0.5rem;">Configure los detalles y plazos de la tarea</p>
+            <p style="color:var(--text-muted); margin-top:0.5rem;">Configure los detalles y asigne responsables</p>
         </div>
 
         <div class="card" style="max-width:800px; margin:0 auto;">
@@ -53,75 +114,110 @@
                     </div>
 
                     <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Voluntario asignado <span style="color:var(--text-muted); font-size:0.8rem; font-weight:400;">(opcional)</span></label>
+                        <label>Personal asignado</label>
                         
-                        <!-- Buscador de Voluntarios -->
-                        <div id="volunteer-search-container" style="position: relative;" th:styleappend="${tarea.get('voluntarioIds') != null and !tarea.get('voluntarioIds').isEmpty() ? 'display: none;' : ''}">
+                        <div id="assigned-volunteers-container" class="volunteer-chips-container">
+                            <!-- Chips se insertarán aquí por JS -->
+                        </div>
+
+                        <button type="button" id="btn-show-search" class="btn-add-vol" onclick="toggleSearch(true)">
+                            <i data-lucide="plus" style="width: 14px;"></i>
+                            Asignar voluntario
+                        </button>
+
+                        <div id="search-wrapper" style="display: none; position: relative; margin-top: 15px;">
                             <div style="position: relative;">
                                 <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; color: var(--text-muted);"></i>
                                 <input type="text" 
                                        id="volunteer-search-input"
-                                       placeholder="Buscar voluntario por nombre, apellido o email..." 
-                                       style="padding-left: 40px;"
+                                       placeholder="Buscar por nombre o email..." 
+                                       style="padding-left: 40px; border-radius: 12px;"
                                        hx-get="/web/voluntarios/sugerencias"
                                        hx-trigger="keyup[target.value.length >= 2] delay:300ms, search"
                                        hx-target="#volunteer-suggestions"
                                        name="q">
+                                <button type="button" onclick="toggleSearch(false)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); border: none; background: none; color: var(--text-muted); cursor: pointer;">
+                                    <i data-lucide="x" style="width: 16px;"></i>
+                                </button>
                             </div>
                             <div id="volunteer-suggestions"></div>
                         </div>
-
-                        <!-- Voluntario Seleccionado -->
-                        <div id="selected-volunteer-tag" 
-                             style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); border: 1px solid var(--border); padding: 12px 16px; border-radius: 12px; margin-top: 5px;"
-                             th:styleappend="${(tarea.get('voluntarioIds') == null or tarea.get('voluntarioIds').isEmpty()) and voluntarioPreseleccionado == null ? 'display: none;' : ''}">
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <div style="background: var(--primary-light); color: var(--primary); width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                                    <i data-lucide="user" style="width: 18px;"></i>
-                                </div>
-                                <div>
-                                    <span id="selected-volunteer-name" style="display: block; font-weight: 700; color: var(--text-main);"
-                                          th:text="${voluntarioPreseleccionado != null ? (voluntarioPreseleccionado.get('nombre') + ' ' + (voluntarioPreseleccionado.get('apellido') ?: '')) : (tarea.get('voluntarioIds') != null and !tarea.get('voluntarioIds').isEmpty() ? (voluntarioNombres != null ? voluntarioNombres[tarea.get('voluntarioIds')[0].toString()] : 'Voluntario asignado') : '')}">
-                                        Nombre del Voluntario
-                                    </span>
-                                    <small style="color: var(--text-muted); font-size: 0.75rem;">Voluntario asignado a esta tarea</small>
-                                </div>
-                            </div>
-                            <button type="button" class="btn-icon delete" onclick="removeVolunteer()" style="width: 32px; height: 32px;">
-                                <i data-lucide="x" style="width: 16px;"></i>
-                            </button>
-                        </div>
-
-                        <!-- ID Oculto para el formulario -->
-                        <input type="hidden" name="voluntarioIds" id="selected-volunteer-id" 
-                               th:value="${voluntarioPreseleccionado != null ? voluntarioPreseleccionado.get('id') : (tarea.get('voluntarioIds') != null and !tarea.get('voluntarioIds').isEmpty() ? tarea.get('voluntarioIds')[0] : '')}">
                     </div>
 
                     <script th:inline="javascript">
+                        const assignedIds = new Set();
+                        const voluntarioNombres = /*[[${voluntarioNombres}]]*/ {};
+                        const tareaVolIds = /*[[${tarea.get('voluntarioIds')}]]*/ [];
+                        const preselected = /*[[${voluntarioPreseleccionado}]]*/ null;
+
+                        function initVolunteers() {
+                            console.log("DEBUG: Initializing volunteers", { tareaVolIds, preselected });
+                            // 1. Cargar desde la tarea si existe
+                            if (tareaVolIds && Array.isArray(tareaVolIds)) {
+                                tareaVolIds.forEach(vid => {
+                                    if (!vid) return;
+                                    const id = (typeof vid === 'object' && vid !== null) ? (vid.value || vid.id) : vid;
+                                    if (id) {
+                                        const name = (voluntarioNombres && voluntarioNombres[id.toString()]) 
+                                                     ? voluntarioNombres[id.toString()] 
+                                                     : ('Voluntario ' + id);
+                                        addVolunteerChip(id, name);
+                                    }
+                                });
+                            }
+
+                            // 2. Cargar preseleccionado si existe
+                            if (preselected && preselected.id) {
+                                addVolunteerChip(preselected.id, preselected.nombre + ' ' + (preselected.apellido || ''));
+                            }
+                        }
+
+                        function toggleSearch(show) {
+                            document.getElementById('search-wrapper').style.display = show ? 'block' : 'none';
+                            document.getElementById('btn-show-search').style.display = show ? 'none' : 'inline-flex';
+                            if (show) document.getElementById('volunteer-search-input').focus();
+                        }
+
                         function selectVolunteer(id, name) {
-                            document.getElementById('selected-volunteer-id').value = id;
-                            document.getElementById('selected-volunteer-name').innerText = name;
-                            document.getElementById('volunteer-search-container').style.display = 'none';
-                            document.getElementById('selected-volunteer-tag').style.display = 'flex';
+                            addVolunteerChip(id, name);
+                            toggleSearch(false);
                             document.getElementById('volunteer-suggestions').innerHTML = '';
                             document.getElementById('volunteer-search-input').value = '';
                         }
 
-                        function removeVolunteer() {
-                            document.getElementById('selected-volunteer-id').value = '';
-                            document.getElementById('selected-volunteer-tag').style.display = 'none';
-                            document.getElementById('volunteer-search-container').style.display = 'block';
-                            setTimeout(() => {
-                                document.getElementById('volunteer-search-input').focus();
-                            }, 100);
+                        function addVolunteerChip(id, name) {
+                            if (assignedIds.has(id)) return;
+                            assignedIds.add(id);
+
+                            const container = document.getElementById('assigned-volunteers-container');
+                            const chip = document.createElement('div');
+                            chip.className = 'volunteer-chip';
+                            chip.id = `vol-chip-${id}`;
+                            chip.innerHTML = `
+                                <i data-lucide="user" style="width: 14px; color: var(--primary);"></i>
+                                <span>${name}</span>
+                                <input type="hidden" name="voluntarioIds" value="${id}">
+                                <button type="button" class="remove-btn" onclick="removeVolunteer(${id})">
+                                    <i data-lucide="x" style="width: 12px;"></i>
+                                </button>
+                            `;
+                            container.appendChild(chip);
+                            if (window.lucide) lucide.createIcons();
                         }
 
-                        // Cerrar sugerencias al hacer click fuera
-                        document.addEventListener('click', function(e) {
-                            const suggestions = document.getElementById('volunteer-suggestions');
-                            const searchInput = document.getElementById('volunteer-search-input');
-                            if (suggestions && !suggestions.contains(e.target) && e.target !== searchInput) {
-                                suggestions.innerHTML = '';
+                        function removeVolunteer(id) {
+                            assignedIds.delete(id);
+                            const chip = document.getElementById(`vol-chip-${id}`);
+                            if (chip) chip.remove();
+                        }
+
+                        // Inicializar
+                        document.addEventListener('DOMContentLoaded', initVolunteers);
+                        
+                        // HTMX hook para reinicializar iconos después de cargar sugerencias
+                        document.addEventListener('htmx:afterOnLoad', function(evt) {
+                            if (evt.detail.target.id === 'volunteer-suggestions' && window.lucide) {
+                                lucide.createIcons();
                             }
                         });
                     </script>
