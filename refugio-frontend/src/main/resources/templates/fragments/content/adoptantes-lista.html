@@ -1,3 +1,4 @@
+<!-- Vista de Listado de Adoptantes: Gestión y seguimiento de todos los adoptantes registrados -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
 
@@ -6,12 +7,8 @@
 </head>
 
 <body>
-    <!-- 
-  PÁGINA: Listado de Adoptantes
-  DESCRIPCIÓN: Vista de gestión que enumera a todos los usuarios registrados como adoptantes. 
-               Permite el acceso rápido a sus perfiles y solicitudes asociadas.
--->
-<div th:fragment="content">
+
+    <div th:fragment="content">
         <!-- Mensajes de Feedback -->
         <div th:if="${successMessage}" class="alert alert-success"
             style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-radius: 12px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;">
@@ -25,34 +22,32 @@
         </div>
 
         <div class="table-wrapper">
-            <div class="actions-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 20px; background: white; padding: 1.25rem; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+            <div class="actions-bar"
+                style="display: flex; align-items: center; justify-content: space-between; gap: 20px; background: white; padding: 1.25rem; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
                 <div style="display:flex; align-items:center; gap:20px; flex: 1;">
-                    <span class="user-name page" style="white-space: nowrap; margin: 0; font-size: 1.5rem;" th:text="#{adoptante.list.title}">Adoptantes</span>
-                    
+                    <span class="user-name page" style="white-space: nowrap; margin: 0; font-size: 1.5rem;"
+                        th:text="#{adoptante.list.title}">Adoptantes</span>
+
                     <!-- Barra de Búsqueda Reactiva -->
                     <div style="position: relative; flex: 1; max-width: 400px;">
-                        <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; color: var(--text-muted);"></i>
-                        <input type="text" 
-                               name="q" 
-                               th:value="${query}"
-                               placeholder="Buscar adoptante..." 
-                               class="form-control"
-                               style="padding-left: 38px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-main); width: 100%; font-size: 0.9rem;"
-                               th:hx-get="@{/web/adoptantes}"
-                               hx-trigger="keyup delay:500ms, search"
-                               hx-target=".list-body"
-                               hx-swap="outerHTML">
+                        <i data-lucide="search"
+                            style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; color: var(--text-muted);"></i>
+                        <input type="text" name="q" th:value="${query}" placeholder="Buscar adoptante..."
+                            class="form-control"
+                            style="padding-left: 38px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-main); width: 100%; font-size: 0.9rem;"
+                            th:hx-get="@{/web/adoptantes}" hx-trigger="keyup delay:500ms, search" hx-target=".list-body"
+                            hx-swap="outerHTML">
                     </div>
                 </div>
 
                 <div style="display:flex; gap:10px; flex-shrink: 0;">
                     <a class="btn btn-secondary" th:href="@{/web/adoptantes/pdf}" target="_blank"
-                       style="height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 15px; border-radius: 10px; font-weight: 600;">
+                        style="height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 15px; border-radius: 10px; font-weight: 600;">
                         <i data-lucide="file-text" style="width:18px;"></i>
                         <span th:text="#{generic.link.export.pdf}">Exportar PDF</span>
                     </a>
                     <a class="btn btn-primary" th:href="@{/web/adoptantes/nuevo}"
-                       style="height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 15px; border-radius: 10px; font-weight: 600;">
+                        style="height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 15px; border-radius: 10px; font-weight: 600;">
                         <i data-lucide="plus" style="width:18px;"></i>
                         <span th:text="#{generic.link.create}">+ Nuevo</span>
                     </a>
@@ -70,22 +65,23 @@
                     <div style="flex: 2; text-align: center;">Acciones</div>
                 </div>
 
-                <div class="list-body" th:fragment="list-body" style="display: flex; flex-direction: column; gap: 12px; margin-top: 1rem;">
+                <div class="list-body" th:fragment="list-body"
+                    style="display: flex; flex-direction: column; gap: 12px; margin-top: 1rem;">
                     <!-- Mensaje si no hay resultados -->
-                    <div th:if="${#lists.isEmpty(adoptantes)}" 
-                         style="background: white; padding: 4rem 2rem; border-radius: 16px; border: 1px dashed var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; text-align: center;">
-                        <div style="background: var(--bg-main); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <div th:if="${#lists.isEmpty(adoptantes)}"
+                        style="background: white; padding: 4rem 2rem; border-radius: 16px; border: 1px dashed var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; text-align: center;">
+                        <div
+                            style="background: var(--bg-main); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                             <i data-lucide="search-x" style="width: 32px; color: var(--text-muted);"></i>
                         </div>
                         <div>
-                            <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">No se encontraron adoptantes</h3>
-                            <p style="margin: 5px 0 0; color: var(--text-muted); font-size: 0.9rem;">Prueba con otros términos de búsqueda.</p>
+                            <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">No se encontraron
+                                adoptantes</h3>
+                            <p style="margin: 5px 0 0; color: var(--text-muted); font-size: 0.9rem;">Prueba con otros
+                                términos de búsqueda.</p>
                         </div>
-                        <a th:href="@{/web/adoptantes}" 
-                           hx-get="/web/adoptantes" 
-                           hx-target=".list-body"
-                           hx-swap="outerHTML"
-                           class="btn-premium secondary" style="height: 40px; padding: 0 1.5rem;">
+                        <a th:href="@{/web/adoptantes}" hx-get="/web/adoptantes" hx-target=".list-body"
+                            hx-swap="outerHTML" class="btn-premium secondary" style="height: 40px; padding: 0 1.5rem;">
                             Ver todos
                         </a>
                     </div>

@@ -1,11 +1,5 @@
+<!-- Vista de Sugerencias de Animales: Fragmento dinámico para el autocompletado en búsquedas de animales -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<body>
-    <!-- 
-  PÁGINA: Sugerencias de Animales
-  DESCRIPCIÓN: Fragmento dinámico para el autocompletado y búsqueda rápida de animales 
-               en formularios de gestión (ej. Solicitudes).
--->
     <div th:fragment="suggestions">
         <ul th:if="${not #lists.isEmpty(animalesEncontrados)}" 
             class="autocomplete-list"
