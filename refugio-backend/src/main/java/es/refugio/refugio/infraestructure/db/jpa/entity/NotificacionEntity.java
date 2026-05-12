@@ -2,6 +2,7 @@ package es.refugio.refugio.infraestructure.db.jpa.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 
 @Entity
@@ -30,6 +31,7 @@ public class NotificacionEntity {
     private String mensaje;
 
     @Column(nullable = false)
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime fecha;
 
     @Column(nullable = false)

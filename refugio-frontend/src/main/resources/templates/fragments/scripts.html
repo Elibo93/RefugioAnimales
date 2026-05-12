@@ -77,6 +77,15 @@
             }
         });
 
+        // Listener para Toasts disparados desde el servidor (HX-Trigger)
+        document.body.addEventListener('showToast', function(evt) {
+            const message = evt.detail.message || evt.detail;
+            const type = evt.detail.type || 'success';
+            if (typeof showToast === 'function') {
+                showToast(message, type);
+            }
+        });
+
         // Disparo de carga inicial
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();

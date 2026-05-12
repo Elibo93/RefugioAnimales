@@ -24,9 +24,11 @@ import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
 import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
 import es.refugio.refugio.infraestructure.mapper.VoluntarioMapper;
+import es.refugio.refugio.infraestructure.security.CustomUserDetails;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioRequest;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioResponse;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioUpdateRequest;
+import org.springframework.security.core.Authentication;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -59,10 +61,23 @@ public class VoluntarioController {
     @Operation(summary = "Actualizar voluntario")
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "Voluntario actualizado"),
             @ApiResponse(responseCode = "404", description = "No encontrado") })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     @PutMapping("/{id}")
     public ResponseEntity<VoluntarioResponse> update(@PathVariable Integer id,
-            @Valid @RequestBody VoluntarioUpdateRequest request) {
+            @Valid @RequestBody VoluntarioUpdateRequest request,
+            Authentication authentication) {
+        
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        
+        if (!isAdmin) {
+            Voluntario existing = findVoluntarioService.findById(new VoluntarioId(id));
+            if (!existing.getUsuarioId().getValue().equals(userDetails.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        }
+
         EditVoluntarioCommand command = VoluntarioMapper.toCommand(id, request);
         Voluntario voluntario = editVoluntarioService.update(command);
         return ResponseEntity.ok(VoluntarioMapper.toResponse(voluntario));
@@ -79,15 +94,31 @@ public class VoluntarioController {
     @Operation(summary = "Obtener voluntario por ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     @GetMapping("/{id}")
-    public VoluntarioResponse findById(@PathVariable Integer id) {
-        return VoluntarioMapper.toResponse(findVoluntarioService.findById(new VoluntarioId(id)));
+    public ResponseEntity<VoluntarioResponse> findById(@PathVariable Integer id, Authentication authentication) {
+        Voluntario voluntario = findVoluntarioService.findById(new VoluntarioId(id));
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        
+        if (!isAdmin && !voluntario.getUsuarioId().getValue().equals(userDetails.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(VoluntarioMapper.toResponse(voluntario));
     }
 
     @Operation(summary = "Voluntario por usuario", description = "Retorna el voluntario asociado a un usuario")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     @GetMapping("/usuario/{usuarioId}")
-    public VoluntarioResponse findByUsuarioId(@PathVariable Integer usuarioId) {
-        return VoluntarioMapper.toResponse(findVoluntarioService.findByUsuarioId(new UsuarioId(usuarioId)));
+    public ResponseEntity<VoluntarioResponse> findByUsuarioId(@PathVariable Integer usuarioId, Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        
+        if (!isAdmin && !usuarioId.equals(userDetails.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
+        return ResponseEntity.ok(VoluntarioMapper.toResponse(findVoluntarioService.findByUsuarioId(new UsuarioId(usuarioId))));
     }
 
     @Operation(summary = "Eliminar voluntario")

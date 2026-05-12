@@ -115,6 +115,7 @@ public class AdoptanteViewController {
 
 
     @GetMapping(WebRoutes.ADOPTANTES_NUEVO)
+    @PreAuthorize("hasRole('ADMIN')")
     public String nuevo(Model model, HttpServletRequest request) {
         model.addAttribute(ModelAttribute.SINGLE_Adoptante.getName(), new HashMap<>());
         model.addAttribute("currentUri", WebRoutes.ADOPTANTES_BASE);

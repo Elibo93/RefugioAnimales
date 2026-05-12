@@ -1,0 +1,293 @@
+<div th:fragment="content">
+    <div class="survey-container fade-in" style="max-width: 800px; margin: 2rem auto; padding: 2.5rem; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border-radius: 32px; border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);">
+        
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <div style="display: inline-flex; background: var(--primary-light); padding: 1rem; border-radius: 20px; margin-bottom: 1.5rem;">
+                <i data-lucide="sparkles" style="width: 32px; height: 32px; color: var(--primary);"></i>
+            </div>
+            <h1 style="font-weight: 900; font-size: 2.2rem; color: var(--text-main); margin-bottom: 0.5rem; letter-spacing: -0.03em;">Tu compañero ideal te espera</h1>
+            <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 500px; margin: 0 auto;">Cuéntanos tus preferencias y nuestro sistema inteligente hará el resto.</p>
+        </div>
+
+        <!-- Stepper Indicator -->
+        <div class="stepper-wrapper" style="display: flex; justify-content: space-between; margin-bottom: 4rem; position: relative;">
+            <div class="stepper-line" style="position: absolute; top: 20px; left: 0; right: 0; height: 2px; background: #e2e8f0; z-index: 0;"></div>
+            <div class="stepper-line-active" id="stepper-progress" style="position: absolute; top: 20px; left: 0; width: 0%; height: 2px; background: var(--primary); z-index: 1; transition: width 0.5s ease;"></div>
+            
+            <div class="step-item active" data-step="1" style="z-index: 2; position: relative; text-align: center;">
+                <div class="step-dot" style="width: 40px; height: 40px; border-radius: 50%; background: white; border: 2px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #94a3b8; transition: all 0.3s; margin: 0 auto 0.5rem;">1</div>
+                <span style="font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Básicos</span>
+            </div>
+            <div class="step-item" data-step="2" style="z-index: 2; position: relative; text-align: center;">
+                <div class="step-dot" style="width: 40px; height: 40px; border-radius: 50%; background: white; border: 2px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #94a3b8; transition: all 0.3s; margin: 0 auto 0.5rem;">2</div>
+                <span style="font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Perfil</span>
+            </div>
+            <div class="step-item" data-step="3" style="z-index: 2; position: relative; text-align: center;">
+                <div class="step-dot" style="width: 40px; height: 40px; border-radius: 50%; background: white; border: 2px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #94a3b8; transition: all 0.3s; margin: 0 auto 0.5rem;">3</div>
+                <span style="font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Finalizar</span>
+            </div>
+        </div>
+
+        <form id="surveyForm">
+            <!-- STEP 1: ESPECIES Y SEXO -->
+            <div class="step-content" id="step-1">
+                <h3 style="font-weight: 800; font-size: 1.3rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="dog" style="color: var(--primary);"></i> ¿A quién buscas?
+                </h3>
+                
+                <div style="margin-bottom: 2.5rem;">
+                    <label style="display: block; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);">Especies preferidas</label>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                        <label class="pref-card">
+                            <input type="checkbox" name="especies" value="PERRO" style="display: none;">
+                            <div class="card-content">
+                                <i data-lucide="dog" style="width: 24px; height: 24px;"></i>
+                                <span>Perros</span>
+                            </div>
+                        </label>
+                        <label class="pref-card">
+                            <input type="checkbox" name="especies" value="GATO" style="display: none;">
+                            <div class="card-content">
+                                <i data-lucide="cat" style="width: 24px; height: 24px;"></i>
+                                <span>Gatos</span>
+                            </div>
+                        </label>
+                        <label class="pref-card">
+                            <input type="checkbox" name="especies" value="OTRO" style="display: none;">
+                            <div class="card-content">
+                                <i data-lucide="help-circle" style="width: 24px; height: 24px;"></i>
+                                <span>Otros</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);">Sexo preferido</label>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                        <label class="pref-card">
+                            <input type="checkbox" name="sexos" value="MACHO" style="display: none;">
+                            <div class="card-content">
+                                <i data-lucide="mars" style="width: 20px; height: 20px;"></i>
+                                <span>Macho</span>
+                            </div>
+                        </label>
+                        <label class="pref-card">
+                            <input type="checkbox" name="sexos" value="HEMBRA" style="display: none;">
+                            <div class="card-content">
+                                <i data-lucide="venus" style="width: 20px; height: 20px;"></i>
+                                <span>Hembra</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: TAMAÑO Y EDAD -->
+            <div class="step-content" id="step-2" style="display: none;">
+                <h3 style="font-weight: 800; font-size: 1.3rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="maximize" style="color: var(--primary);"></i> Cuéntanos más detalles
+                </h3>
+
+                <div style="margin-bottom: 2.5rem;">
+                    <label style="display: block; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);">Tamaño ideal</label>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                        <label class="pref-card">
+                            <input type="checkbox" name="tamanos" value="PEQUEÑO" style="display: none;">
+                            <div class="card-content"><span>Pequeño</span></div>
+                        </label>
+                        <label class="pref-card">
+                            <input type="checkbox" name="tamanos" value="MEDIANO" style="display: none;">
+                            <div class="card-content"><span>Mediano</span></div>
+                        </label>
+                        <label class="pref-card">
+                            <input type="checkbox" name="tamanos" value="GRANDE" style="display: none;">
+                            <div class="card-content"><span>Grande</span></div>
+                        </label>
+                        <label class="pref-card">
+                            <input type="checkbox" name="tamanos" value="GIGANTE" style="display: none;">
+                            <div class="card-content"><span>Gigante</span></div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);">Edad máxima (años): <span id="val-edad">15</span></label>
+                    <input type="range" name="edadMax" min="1" max="25" value="15" 
+                           oninput="document.getElementById('val-edad').innerText = this.value"
+                           style="width: 100%; height: 8px; border-radius: 4px; accent-color: var(--primary); cursor: pointer;">
+                </div>
+            </div>
+
+            <!-- STEP 3: ENERGÍA Y NOTIFICACIONES -->
+            <div class="step-content" id="step-3" style="display: none;">
+                <h3 style="font-weight: 800; font-size: 1.3rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="zap" style="color: var(--primary);"></i> Últimos ajustes
+                </h3>
+
+                <div style="margin-bottom: 2.5rem;">
+                    <label style="display: block; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);">Nivel de energía máximo (1-5): <span id="val-energia">5</span></label>
+                    <input type="range" name="nivelEnergiaMax" min="1" max="5" value="5" 
+                           oninput="document.getElementById('val-energia').innerText = this.value"
+                           style="width: 100%; height: 8px; border-radius: 4px; accent-color: var(--primary); cursor: pointer;">
+                </div>
+
+                <div style="background: var(--primary-light); padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(var(--primary-rgb), 0.1);">
+                    <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <i data-lucide="bell" style="color: var(--primary);"></i>
+                            <div>
+                                <div style="font-weight: 800; color: var(--text-main);">Activar notificaciones</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">Te avisaremos en cuanto llegue tu match ideal.</div>
+                            </div>
+                        </div>
+                        <input type="checkbox" name="notificacionesActivas" checked style="width: 20px; height: 20px; accent-color: var(--primary);">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div style="display: flex; justify-content: space-between; margin-top: 4rem;">
+                <button type="button" id="prevBtn" onclick="changeStep(-1)" class="btn" style="display: none; padding: 0.8rem 1.5rem; border-radius: 16px; font-weight: 700; background: #f1f5f9; color: #64748b; border: none; cursor: pointer;">Anterior</button>
+                <button type="button" id="nextBtn" onclick="changeStep(1)" class="btn btn-primary" style="margin-left: auto; padding: 0.8rem 2.5rem; border-radius: 16px; font-weight: 800; box-shadow: 0 10px 20px rgba(var(--primary-rgb), 0.2);">Siguiente</button>
+                <button type="submit" id="submitBtn" class="btn btn-primary" style="display: none; margin-left: auto; padding: 0.8rem 2.5rem; border-radius: 16px; font-weight: 800; box-shadow: 0 10px 20px rgba(var(--primary-rgb), 0.2);">Finalizar encuesta</button>
+            </div>
+        </form>
+    </div>
+
+    <style>
+        .pref-card {
+            cursor: pointer;
+            perspective: 1000px;
+        }
+        .pref-card .card-content {
+            padding: 1.5rem;
+            background: white;
+            border: 2px solid #f1f5f9;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #64748b;
+            font-weight: 700;
+            text-align: center;
+        }
+        .pref-card input:checked + .card-content {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(var(--primary-rgb), 0.15);
+        }
+        .pref-card:hover .card-content {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .step-dot.active {
+            background: var(--primary) !important;
+            border-color: var(--primary) !important;
+            color: white !important;
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+        .step-item.completed .step-dot {
+            background: var(--primary) !important;
+            border-color: var(--primary) !important;
+            color: white !important;
+        }
+    </style>
+
+    <script th:inline="javascript">
+        let currentStep = 1;
+        const totalSteps = 3;
+
+        function changeStep(n) {
+            // Hide current step
+            document.getElementById(`step-${currentStep}`).style.display = 'none';
+            
+            // Update step
+            currentStep += n;
+            
+            // Show new step
+            document.getElementById(`step-${currentStep}`).style.display = 'block';
+            
+            // Update UI elements
+            updateUI();
+        }
+
+        function updateUI() {
+            // Update Progress Bar
+            const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+            document.getElementById('stepper-progress').style.width = `${progress}%`;
+
+            // Update Dots
+            document.querySelectorAll('.step-item').forEach((item, idx) => {
+                const stepNum = idx + 1;
+                const dot = item.querySelector('.step-dot');
+                if (stepNum === currentStep) {
+                    dot.classList.add('active');
+                    item.style.opacity = '1';
+                } else if (stepNum < currentStep) {
+                    dot.classList.remove('active');
+                    item.classList.add('completed');
+                    item.style.opacity = '1';
+                } else {
+                    dot.classList.remove('active');
+                    item.classList.remove('completed');
+                    item.style.opacity = '0.5';
+                }
+            });
+
+            // Update Buttons
+            document.getElementById('prevBtn').style.display = currentStep === 1 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentStep === totalSteps ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentStep === totalSteps ? 'block' : 'none';
+
+            // Refresh icons
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        document.getElementById('surveyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                usuarioId: /*[[${currentUserId}]]*/ null,
+                especies: formData.getAll('especies'),
+                sexos: formData.getAll('sexos'),
+                tamanos: formData.getAll('tamanos'),
+                edadMax: parseInt(formData.get('edadMax')),
+                nivelEnergiaMax: parseInt(formData.get('nivelEnergiaMax')),
+                notificacionesActivas: formData.get('notificacionesActivas') === 'on'
+            };
+
+            fetch('/web/preferencias/guardar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(response => response.text())
+            .then(result => {
+                if (result === 'SUCCESS') {
+                    Swal.fire({
+                        title: '¡Preferencias Guardadas!',
+                        text: 'Ahora recibirás notificaciones cuando encontremos a tu compañero ideal.',
+                        icon: 'success',
+                        confirmButtonText: 'Genial',
+                        customClass: {
+                            popup: 'premium-swal'
+                        }
+                    }).then(() => {
+                        window.location.href = '/web/animales';
+                    });
+                } else {
+                    Swal.fire('Error', 'No se pudieron guardar las preferencias', 'error');
+                }
+            });
+        });
+        
+        // Initialize
+        updateUI();
+    </script>
+</div>

@@ -91,6 +91,22 @@ function refreshDynamicComponents() {
 
     // Inicialización automática de carruseles
     if (document.querySelectorAll('.story-card').length > 0) startCarouselAutoPlay();
+
+    // 6. Lógica de Toasts (Auto-ocultar después de 5 segundos)
+    document.querySelectorAll('.toast').forEach(toast => {
+        if (!toast.dataset.processed) {
+            // Añadimos una clase para la animación de salida si no la tiene
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                toast.style.transition = 'all 0.5s ease';
+                setTimeout(() => {
+                    toast.remove();
+                }, 500);
+            }, 5000);
+            toast.dataset.processed = "true";
+        }
+    });
 }
 
 // Lógica de Modales (Sin cambios)
@@ -605,4 +621,43 @@ function togglePasswordVisibility(inputId, btn) {
     if (window.lucide) {
         lucide.createIcons();
     }
+}
+
+/**
+ * Muestra una notificación toast programáticamente
+ * @param {string} message Mensaje a mostrar
+ * @param {string} type Tipo de notificación ('success' o 'error')
+ */
+function showToast(message, type = 'success') {
+    // Buscar el contenedor de toasts o crear uno si no existe (podría estar en main-layout)
+    // Pero como ya tenemos fragmentos, simplemente inyectamos en el body o en un host
+    const toastHost = document.createElement('div');
+    toastHost.className = `toast ${type}`;
+    toastHost.style.position = 'fixed';
+    toastHost.style.top = '20px';
+    toastHost.style.right = '20px';
+    toastHost.style.zIndex = '9999';
+    toastHost.style.opacity = '0';
+    toastHost.style.transform = 'translateY(-20px)';
+    toastHost.style.transition = 'all 0.5s ease';
+    
+    const iconName = type === 'success' ? 'check-circle' : 'alert-circle';
+    toastHost.innerHTML = `<i data-lucide="${iconName}" style="width:20px; margin-right: 10px;"></i> <span>${message}</span>`;
+    
+    document.body.appendChild(toastHost);
+    
+    // Forzar reflow para animación de entrada
+    void toastHost.offsetWidth;
+    
+    toastHost.style.opacity = '1';
+    toastHost.style.transform = 'translateY(0)';
+    
+    if (window.lucide) lucide.createIcons({ root: toastHost });
+    
+    // Auto-ocultar
+    setTimeout(() => {
+        toastHost.style.opacity = '0';
+        toastHost.style.transform = 'translateY(-20px)';
+        setTimeout(() => toastHost.remove(), 500);
+    }, 5000);
 }

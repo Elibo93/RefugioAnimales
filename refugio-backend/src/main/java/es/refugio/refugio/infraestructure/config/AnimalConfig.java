@@ -16,6 +16,7 @@ import es.refugio.refugio.application.usecase.animal.IncrementarVisitasUseCase;
 import es.refugio.refugio.domain.repository.AnimalRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.animal.AnimalEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.animal.AnimalJpaRepositoryImpl;
+import es.refugio.refugio.application.service.preferencia.MatchingService;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class AnimalConfig {
 
     private final AnimalEntityJpaRepository jpaRepository;
+    private final MatchingService matchingService;
 
     @Bean
     public AnimalRepository animalRepository() {
@@ -36,7 +38,7 @@ public class AnimalConfig {
 
     @Bean
     public CreateAnimalService createAnimalService() {
-        return new CreateAnimalService(createAnimalUseCase());
+        return new CreateAnimalService(createAnimalUseCase(), matchingService);
     }
 
     @Bean

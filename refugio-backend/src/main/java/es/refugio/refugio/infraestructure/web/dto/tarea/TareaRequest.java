@@ -9,6 +9,7 @@ public record TareaRequest(
         String estado,
         LocalDateTime fechaLimite,
         String instrucciones,
-        List<Integer> voluntarioIds
+        List<Integer> voluntarioIds,
+        Integer voluntarioActorId
 ) {
 }
