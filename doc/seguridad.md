@@ -1,97 +1,74 @@
-### Seguridad Integral - Gestión del Refugio
+### Estrategia de Seguridad y Control de Acceso - Refugio
 ---
 
-#### Diseño de Seguridad y Arquitectura de Autenticación
+La seguridad es un pilar crítico en el sistema de gestión del refugio, ya que protege datos sensibles de ciudadanos (adoptantes), voluntarios y el historial legal de los animales. El sistema implementa una arquitectura de seguridad **Stateless** basada en **Spring Security** y **JSON Web Tokens (JWT)**, adaptada para funcionar en un entorno de microservicios distribuido.
 
-La seguridad del **Refugio de Animales** se implementa utilizando **Spring Security** como capa de protección transversal, integrada dentro de la **Arquitectura Clean** mediante el patrón de *Vertical Slicing*.
+---
 
-##### 1. Integración en Arquitectura Clean
-La seguridad se trata como una responsabilidad de la capa de **Infraestructura**. El Dominio de animales y adopciones permanece agnóstico a Spring Security.
+#### 1. Arquitectura de Seguridad (Auth Service)
 
-* **Vertical Slice:** Se ha definido un slice `auth` (`com.refugio.auth`) que encapsula la identidad corporativa y del voluntariado.
-* **Separación de Responsabilidades:**
-    * **Dominio:** Define `Usuario`, `Roles` y `Permisos` (ej. `ANIMAL_CREATE`, `ADOPTION_UPDATE`).
-    * **Aplicación:** Interfaces para la gestión de usuarios del refugio.
-    * **Infraestructura:** Configuración del `SecurityFilterChain` y `UserDetails`.
+El microservicio `refugio-auth` centraliza la gestión de identidad:
+*   **Capa de Infraestructura:** Implementa el `SecurityFilterChain` de Spring Security, configurando la política de acceso a cada endpoint de forma centralizada.
+*   **JWT en Cookies (HttpOnly):** Para mitigar ataques de Cross-Site Scripting (XSS), el token JWT no se almacena en el `localStorage` del navegador, sino en una **Cookie cifrada con el flag `HttpOnly`**. Esto impide que scripts maliciosos accedan al token desde el lado del cliente.
+*   **Cifrado de Contraseñas:** Se utiliza **BCrypt** con un factor de trabajo robusto para el hashing de contraseñas, garantizando que nunca se almacenen en texto plano en la base de datos.
 
-##### 2. Modelo de Dominio de Seguridad (RBAC)
-Se ha diseñado un sistema de permisos granulares agrupados en roles adaptados a la operativa del centro:
+---
 
-1.  **Enum `Permiso`:** 
-    * `ANIMAL_READ`, `ANIMAL_WRITE` (Gestión de fichas).
-    * `VOLUNTEER_READ`, `VOLUNTEER_WRITE` (Gestión de personal).
-    * `ADOPTION_READ`, `ADOPTION_WRITE` (Gestión de procesos).
-2.  **Enum `Rol`:**
-    * `ROLE_PUBLICO`: Lectura del catálogo de animales y solicitud de adopción.
-    * `ROLE_VOLUNTARIO`: Gestión diaria de animales y tareas de cuidado.
-    * `ROLE_ADMIN`: Control total (Gestión de usuarios, auditoría de adopciones).
+#### 2. Modelo de Roles y Permisos (RBAC)
 
-##### 3. Flujo de Autenticación (Spring Security Flow)
-El proceso de login sigue el flujo estándar adaptado a nuestra persistencia JPA, asegurando que cada voluntario o administrador acceda solo a sus funciones asignadas.
+Se ha implementado un sistema de **Control de Acceso Basado en Roles (RBAC)** que adapta la interfaz y las capacidades del sistema según el perfil del usuario:
+
+| Rol | Descripción | Permisos Clave |
+| :--- | :--- | :--- |
+| **VISITANTE** | Público anónimo (sin cuenta) | Lectura del catálogo público, registro de cuenta y login. |
+| **ADOPTANTE** | Ciudadano registrado | Enviar solicitudes de adopción, realizar donaciones y gestionar perfil. |
+| **VOLUNTARIO** | Personal operativo del refugio | Gestión de tareas diarias, cuidados y actualización de historiales médicos. |
+| **ADMIN** | Gestión estratégica y legal | Control total de usuarios, validación de solicitudes, contratos y estadísticas. |
+| **DUAL** | Voluntario y Adoptante | Perfil especial para miembros del staff que también colaboran como adoptantes. |
+
+---
+
+#### 3. Integración con API Gateway y Redirecciones
+
+Dado que el sistema corre tras un **API Gateway**, se han implementado mecanismos para asegurar la transparencia en las comunicaciones:
+*   **Gateway Awareness:** El sistema utiliza los headers `X-Forwarded-Host` y `X-Forwarded-Proto` inyectados por el Gateway. Esto asegura que tras un login exitoso, Spring Security redirija al usuario a la URL pública (ej: `https://localhost:8443`) y no a la IP interna del microservicio.
+*   **Seguridad de Red:** La base de datos y los microservicios internos residen en una red privada de Docker, siendo el Gateway el único punto de entrada expuesto al exterior.
+
+---
+
+#### 4. Flujo de Autenticación y Autorización
 
 ```mermaid
 sequenceDiagram
-    autonumber
-    
-    actor User as 👤 Voluntario / Admin
-    
-    box "Framework & Drivers" #f9f9f9
-        participant Filter as SecurityFilterChain
-        participant AuthMgr as AuthenticationManager
-    end
-    
-    box "Infrastructure (Interface Adapters)" #e8f8f5
-        participant Service as UserDetailService
-        participant Mapper as UserMapper
-    end
-    
-    box "Persistencia (Base de Datos)" #fff5e6
-        participant Repo as UserRepository
-        participant DB as MySQL (Contenedor)
-    end
+    participant U as Usuario (Navegador)
+    participant G as API Gateway
+    participant A as Auth Service (Spring Security)
+    participant D as Base de Datos (Auth DB)
 
-    %% Flujo
-    User->>Filter: POST /login (credenciales)
-    Filter->>AuthMgr: authenticate(user, pass)
+    U->>G: POST /login-post (Credenciales)
+    G->>A: Forward Request
+    A->>D: Verificar Usuario y Hashing BCrypt
+    D-->>A: Usuario Válido + Roles
+    A->>A: Generar JWT (Firmado con Clave Secreta)
+    A-->>U: Set-Cookie: JWT_TOKEN (HttpOnly) + Redirect 302
     
-    AuthMgr->>Service: loadUserByUsername(email)
+    Note over U, G: Siguientes peticiones incluyen la Cookie
     
-    Service->>Repo: findByEmail(email)
-    Repo->>DB: SELECT * FROM users WHERE...
-    DB-->>Repo: ResultSet
-    Repo-->>Service: Retorna UserEntity (JPA)
-    
-    rect rgb(200, 255, 200)
-        Note over Service, Mapper: 🔄 ADAPTACIÓN DE DATOS (Clean Arch)
-        Service->>Mapper: toUserDetails(UserEntity)
-        Mapper-->>Service: Retorna UserAuth (Spring Security Safe)
-    end
-    
-    Service-->>AuthMgr: Retorna UserDetails
-    AuthMgr->>AuthMgr: checkPassword(BCrypt)
-    
-    alt Contraseña Correcta
-        AuthMgr-->>Filter: Authentication Success
-        Filter-->>User: 200 OK / Dashboard Refugio
-    else Contraseña Incorrecta
-        AuthMgr-->>Filter: BadCredentialsException
-        Filter-->>User: 401 Unauthorized
-    end
+    U->>G: GET /api/admin/dashboard
+    G->>A: JwtAuthenticationFilter valida el Token
+    A-->>G: Autorizado (SecurityContextHolder poblado)
+    G-->>U: Envío de Datos Protegidos
 ```
 
-##### 4. Configuración de Seguridad
-* **Rutas Públicas:** `/`, `/animales/catalogo`, `/login`, `/css/**`, `/js/**`.
-* **Protección por Rol:**
-    * `/admin/**` → Requiere `ROLE_ADMIN`.
-    * `/voluntarios/**` → Accesible para `ROLE_ADMIN` y `ROLE_VOLUNTARIO`.
-    * `/adopciones/**` → Escritura permitida para `ROLE_ADMIN`, lectura para otros roles.
+---
+
+#### 5. Protección contra Amenazas y Buenas Prácticas
+
+*   **CSRF (Cross-Site Request Forgery):** Protegido automáticamente por Spring Security en los formularios que utilizan Thymeleaf.
+*   **XSS (Cross-Site Scripting):** Mitigado mediante el uso de cookies `HttpOnly` y el escape automático de caracteres en el motor de plantillas.
+*   **Prevención de Inyección SQL:** Garantizada mediante el uso de **Spring Data JPA** y el uso de repositorios que parametrizan todas las consultas a la base de datos.
+*   **Gestión de Sesiones:** Al ser una arquitectura **Stateless**, el servidor no mantiene estado de sesión, lo que facilita el escalado horizontal de los servicios.
 
 ---
 
-#### Seguridad de Infraestructura y Red
-
-Siguiendo el principio de **Defensa en Profundidad**, la base de datos del refugio reside en una subred privada de Docker, aislada de accesos externos directos. Solo el backend de la aplicación tiene visibilidad sobre el contenedor `db`.
-
----
-
-[Volver](/README.md)
+[Volver al Índice de Documentación](/README.md)

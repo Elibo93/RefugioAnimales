@@ -13,7 +13,7 @@ Para la implementación del sistema del refugio, se ha seleccionado un ecosistem
 *   **Spring Data JPA / Hibernate**: ORM para la comunicación con las bases de datos.
 *   **MySQL 8.0**: Motor de base de datos relacional (uno por cada microservicio con datos).
 *   **Liquibase**: Sistema de control de versiones para la base de datos (migraciones seguras).
-*   **Docker & Docker Compose**: Contenedorización de la infraestructura de datos.
+*   **Docker & Docker Compose**: Contenedorización de toda la infraestructura y servicios de la aplicación.
 
 #### 🎨 Frontend y Experiencia de Usuario
 *   **Thymeleaf**: Motor de plantillas server-side.

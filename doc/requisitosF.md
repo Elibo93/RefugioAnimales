@@ -1,57 +1,60 @@
-### Requisitos funcionales (F) - Refugio de Animales
+### Requisitos Funcionales (RF) - Refugio de Animales
 ---
 
-<p align="center">
-  <img src="/img/rf_refugio.png" width="600">
-</p>
-
-En este apartado se describen las funcionalidades principales que la aplicación del **Refugio de Animales** debe ofrecer para gestionar de forma eficiente los animales, usuarios y procesos de adopción. Estos requisitos definen el comportamiento esperado del sistema desde la perspectiva de los diferentes tipos de usuario.
-
-#### Requisitos Funcionales (F) - Gestión por Roles
-
-A continuación, se detallan las funcionalidades del sistema organizadas según el perfil de usuario, estableciendo claramente el alcance y los permisos asociados a cada actor.
+En este apartado se detallan las funcionalidades principales que el sistema del **Refugio de Animales** debe ofrecer. Estos requisitos definen el comportamiento esperado de la aplicación para garantizar una gestión integral de los residentes, el equipo humano y los procesos legales de adopción.
 
 ---
 
-##### 1. Actor: Sistema / Común
-Reglas generales aplicables a toda la aplicación.
+#### 1. Actor: Sistema (Requisitos Transversales)
+Funcionalidades automáticas e integridad del sistema.
 
-* **RF-SYS-01:** El sistema validará automáticamente los datos de entrada, incluyendo campos obligatorios, formatos (email, fechas) y control de duplicados.
-* **RF-SYS-02:** El sistema dispondrá de un buscador global para localizar entidades como animales, usuarios y solicitudes de adopción.
-* **RF-SYS-03:** El sistema garantizará la integridad de los datos en las relaciones entre entidades (por ejemplo, no permitir una adopción sin solicitud previa válida).
-
----
-
-##### 2. Actor: Administrador
-Usuario con privilegios completos para la gestión del sistema.
-
-* **RF-ADM-01:** Gestionar los animales del refugio mediante operaciones CRUD (Entidad: Animal).
-* **RF-ADM-02:** Gestionar los usuarios del sistema, incluyendo voluntarios y adoptantes (Entidad: Usuario).
-* **RF-ADM-03:** Validar o rechazar adoptantes para permitir procesos de adopción (Entidad: Adoptante).
-* **RF-ADM-04:** Supervisar y gestionar las solicitudes de adopción, incluyendo su aprobación o rechazo (Entidad: SolicitudAdopcion).
-* **RF-ADM-05:** Formalizar adopciones a partir de solicitudes previamente aprobadas (Entidad: Adopcion).
-* **RF-ADM-06:** Gestionar el historial médico de los animales (Entidad: HistorialMedico).
-* **RF-ADM-07:** Registrar y consultar donaciones realizadas al refugio (Entidad: Donacion).
+*   **RF-SYS-01: Autenticación y Autorización:** El sistema permitirá el registro y login de usuarios, gestionando el acceso mediante JWT y control de roles (RBAC).
+*   **RF-SYS-02: Validación de Datos:** Validación automática de formatos (DNI/NIE, Email, Teléfono) y campos obligatorios en todos los formularios.
+*   **RF-SYS-03: Buscador y Filtros Avanzados:** Capacidad de búsqueda global y filtrado dinámico en catálogos de animales, voluntarios y solicitudes.
+*   **RF-SYS-04: Notificaciones en Tiempo Real:** El sistema notificará a los usuarios sobre cambios en el estado de sus solicitudes, nuevas tareas asignadas o alertas de urgencia médica.
+*   **RF-SYS-05: Auditoría Básica:** Registro automático de la fecha, hora y usuario que realiza cambios críticos (ej: cambio de estado de un animal).
 
 ---
 
-##### 3. Actor: Voluntario
-Usuario encargado del cuidado y seguimiento de los animales.
+#### 2. Actor: Administrador (Control Total)
+Gestión estratégica y supervisión de la operativa.
 
-* **RF-VOL-01:** Consultar la información completa de los animales del refugio (Entidad: Animal).
-* **RF-VOL-02:** Registrar observaciones sobre el estado y comportamiento de los animales.
-* **RF-VOL-03:** Registrar incidencias o actualizaciones en el historial médico de un animal (Entidad: HistorialMedico).
-
----
-
-##### 4. Actor: Adoptante / Público
-Usuario externo interesado en la adopción.
-
-* **RF-PUB-01:** Consultar el catálogo de animales disponibles para adopción con filtros por características (Entidad: Animal).
-* **RF-PUB-02:** Registrar una solicitud de adopción para un animal específico (Entidad: SolicitudAdopcion).
-* **RF-PUB-03:** Consultar el estado de sus solicitudes de adopción (Entidad: SolicitudAdopcion).
-* **RF-PUB-04:** Consultar el historial de adopciones realizadas (Entidad: Adopcion).
+*   **RF-ADM-01: Gestión Maestra de Animales:** Operaciones CRUD completas sobre la ficha del animal, incluyendo carga de imágenes y asignación de microchip.
+*   **RF-ADM-02: Gestión de Miembros:** Administración de perfiles de Adoptantes y Voluntarios, incluyendo la aprobación de nuevas incorporaciones al equipo.
+*   **RF-ADM-03: Control de Adopciones:** Revisión, aprobación o rechazo de solicitudes. El sistema debe impedir la adopción duplicada de un mismo animal.
+*   **RF-ADM-04: Generación de Documentación Legal:** Generación automática en PDF del **Contrato de Adopción** y del **Certificado de Ingreso** con datos autocompletados.
+*   **RF-ADM-05: Asignación de Tareas:** Capacidad de asignar animales y tareas específicas (limpieza, medicación, paseo) a voluntarios.
+*   **RF-ADM-06: Panel de Estadísticas:** Visualización de métricas clave como número de adopciones mensuales, stock de animales y volumen de donaciones.
 
 ---
 
-[Volver](/README.md)
+#### 3. Actor: Voluntario (Operativa Diaria)
+Enfocado en el cuidado directo y seguimiento.
+
+*   **RF-VOL-01: Gestión de Tareas Propias:** Visualización de la lista de tareas asignadas y capacidad de marcar el progreso (Pendiente, En curso, Finalizada).
+*   **RF-VOL-02: Registro de Intervenciones Médicas:** Añadir entradas al historial médico de un animal (vacunas, incidencias, observaciones de comportamiento).
+*   **RF-VOL-03: Perfil Dual:** Si el voluntario también es adoptante, el sistema debe permitir la conmutación entre el Dashboard de gestión y el Panel personal sin cerrar sesión.
+
+---
+
+#### 4. Actor: Visitante (Público Anónimo)
+Cualquier usuario que accede a la web sin autenticarse.
+
+*   **RF-VIS-01: Exploración del Catálogo:** Consulta de animales disponibles con filtros básicos (especie, edad).
+*   **RF-VIS-02: Visualización de Ficha Pública:** Acceso a la información básica de un animal para fomentar el interés.
+*   **RF-VIS-03: Registro de Cuenta:** Capacidad de crear una cuenta para pasar al rol de Adoptante o solicitar ser Voluntario.
+
+---
+
+#### 5. Actor: Adoptante (Usuario Registrado)
+Usuario autenticado interesado en colaborar o adoptar.
+
+*   **RF-ADO-01: Tramitación de Solicitudes:** Envío de formularios de solicitud de adopción para un animal concreto tras haber iniciado sesión.
+*   **RF-ADO-02: Seguimiento de Trámites:** Consulta del estado de sus solicitudes en tiempo real y recepción de notificaciones de cambio de estado.
+*   **RF-ADO-03: Gestión de Perfil Personal:** Actualización de datos de contacto y preferencias de adopción.
+*   **RF-ADO-04: Pasarela de Donaciones:** Realización de aportaciones económicas y consulta del histórico de donaciones realizadas.
+*   **RF-ADO-05: Acceso a Documentación:** Descarga de contratos de adopción una vez que el proceso ha sido finalizado y aprobado por el administrador.
+
+---
+
+[Volver al Índice de Documentación](/README.md)
