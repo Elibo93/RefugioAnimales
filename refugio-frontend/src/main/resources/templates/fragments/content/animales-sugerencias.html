@@ -1,52 +1,54 @@
+<!-- Vista de Sugerencias de Animales: Fragmento dinámico para el autocompletado en búsquedas de animales -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
 <body>
-    <!-- 
-  PÁGINA: Sugerencias de Animales
-  DESCRIPCIÓN: Fragmento dinámico para el autocompletado y búsqueda rápida de animales 
-               en formularios de gestión (ej. Solicitudes).
--->
-    <div th:fragment="suggestions">
-        <ul th:if="${not #lists.isEmpty(animalesEncontrados)}" 
-            class="autocomplete-list"
+<div th:fragment="suggestions">
+        <ul th:if="${not #lists.isEmpty(animalesEncontrados)}" class="autocomplete-list"
             style="list-style: none; padding: 5px; margin: 5px 0 0; border: 1px solid var(--border); border-radius: 12px; background: white; width: 100%; box-shadow: var(--shadow-lg); max-height: 300px; overflow-y: auto;">
-            <li th:each="a : ${animalesEncontrados}" 
-                class="suggestion-item"
+            <li th:each="a : ${animalesEncontrados}" class="suggestion-item"
                 style="padding: 8px 12px; cursor: pointer; border-radius: 10px; transition: all 0.2s; margin-bottom: 4px; border: 1px solid transparent;"
                 onmouseover="this.style.background='var(--primary-light)'; this.style.borderColor='rgba(var(--primary-rgb), 0.1)';"
                 onmouseout="this.style.background='transparent'; this.style.borderColor='transparent';"
                 th:attr="onclick=|selectAnimal('${a.get('id')}', '${a.get('nombre')}', '${a.get('especie')}', '${a.get('foto')}')|">
-                
+
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <!-- Miniatura -->
-                    <div style="width: 40px; height: 40px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: #f1f5f9;">
-                        <img th:src="${a.get('foto') != null ? a.get('foto') : '/images/placeholder-animal.png'}" 
-                             style="width: 100%; height: 100%; object-fit: cover;">
+                    <div
+                        style="width: 40px; height: 40px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: #f1f5f9;">
+                        <img th:src="${a.get('foto') != null ? a.get('foto') : '/images/placeholder-animal.png'}"
+                            style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
-                    
+
                     <div style="flex: 1;">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-                            <strong th:text="${a.get('nombre')}" style="font-size: 0.95rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></strong>
-                            <span class="badge-soon" 
-                                  th:classappend="${a.get('estado') == 'DISPONIBLE' ? 'success' : 'info'}"
-                                  style="font-size: 0.6rem; padding: 1px 6px;"
-                                  th:text="${#strings.capitalize(#strings.toLowerCase(a.get('estado')))}"></span>
+                            <strong th:text="${a.get('nombre')}"
+                                style="font-size: 0.95rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></strong>
+                            <span class="badge-soon"
+                                th:classappend="${a.get('estado') == 'DISPONIBLE' ? 'success' : 'info'}"
+                                style="font-size: 0.6rem; padding: 1px 6px;"
+                                th:text="${#strings.capitalize(#strings.toLowerCase(a.get('estado')))}"></span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 6px; margin-top: 1px;">
-                            <span th:text="${#strings.capitalize(#strings.toLowerCase(a.get('especie')))}" 
-                                  style="font-size: 0.75rem; color: var(--text-muted);"></span>
+                            <span th:text="${#strings.capitalize(#strings.toLowerCase(a.get('especie')))}"
+                                style="font-size: 0.75rem; color: var(--text-muted);"></span>
                             <span style="color: #cbd5e1; font-size: 0.6rem;">•</span>
-                            <span th:text="${a.get('raza')}" 
-                                  style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;"></span>
+                            <span th:text="${a.get('raza')}"
+                                style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;"></span>
                         </div>
                     </div>
                 </div>
             </li>
         </ul>
-        <div th:if="${#lists.isEmpty(animalesEncontrados)}" 
-             style="padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: white; color: var(--text-muted); font-size: 0.85rem; box-shadow: var(--shadow-lg); margin-top: 5px; text-align: center;">
+        <div th:if="${#lists.isEmpty(animalesEncontrados)}"
+            style="padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: white; color: var(--text-muted); font-size: 0.85rem; box-shadow: var(--shadow-lg); margin-top: 5px; text-align: center;">
             <p style="margin: 0;">No se encontraron animales disponibles</p>
         </div>
     </div>
 </body>
+
 </html>

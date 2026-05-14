@@ -1,8 +1,12 @@
-<!-- 
-  PÁGINA: Modal de Detalle Rápido (Animales)
-  DESCRIPCIÓN: Fragmento de modal para visualizar rápidamente la información de un animal 
-               sin salir de la lista principal.
--->
+<!-- Vista de Modal de Detalle: Ventana emergente para previsualizar rápidamente la información de un animal -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
 <div id="modal-host" th:fragment="detalle">
     <div class="modal-glass-backdrop" onclick="closeModal()">
         <div class="modal-glass-content glass-card" onclick="event.stopPropagation()">
@@ -19,7 +23,6 @@
 
             <!-- Área de Contenido -->
             <div class="modal-body-detail">
-                <header>
                     <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
                         <span class="animal-status-badge"
                             th:classappend="${animal.get('estado') != null ? 
@@ -38,7 +41,6 @@
                         Rocky</h1>
                     <p style="color: var(--text-muted); font-size: 1.1rem; font-weight: 600;"
                         th:text="${animal.get('raza') + ' • ' + animal.get('edad') + ' años'}">Labrador • 2 años</p>
-                </header>
 
                 <div class="quick-stats"
                     style="background: rgba(255,255,255,0.3); padding: 1.5rem; border-radius: 20px;">
@@ -159,3 +161,6 @@
         lucide.createIcons();
     </script>
 </div>
+</body>
+
+</html>

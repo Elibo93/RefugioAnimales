@@ -1,8 +1,12 @@
-<!-- 
-  PÁGINA: Inicio (Dashboard / Catálogo)
-  DESCRIPCIÓN: Vista principal del refugio que muestra el catálogo de animales disponibles para adopción, 
-               filtros de búsqueda y secciones destacadas de voluntariado y donaciones.
--->
+<!-- Vista de Inicio: Dashboard administrativo y catálogo principal de animales para los usuarios -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
 <div th:fragment="content">
     <!-- 1. VISTA ADMINISTRADOR (PREMIUM) -->
     <div th:if="${isAdmin}">
@@ -364,3 +368,6 @@
     </div>
 
 </div>
+</body>
+
+</html>

@@ -44,20 +44,24 @@ public class AdopcionViewController {
     public String listar(Model model,
             @RequestParam(required = false) Integer adoptanteId,
             @RequestParam(required = false) Integer animalId,
-            @RequestParam(required = false) String successMessage) {
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String successMessage,
+            HttpServletRequest request) {
 
         List<Object> adopciones = fetchList("/v1/adopciones");
         List<Object> adoptantes = fetchList("/v1/adoptantes");
         List<Object> animales   = fetchList("/v1/animales");
         List<Object> usuarios   = fetchList(authUrl + "/v1/usuarios");
-        List<Object> perfiles   = fetchList("/v1/personas"); // Real legal profiles
+        List<Object> perfiles   = fetchList("/v1/perfiles-legales"); // Real legal profiles
 
         Map<String, Map<String, Object>> usuariosMap = new HashMap<>();
         for (Object u : usuarios) {
             if (u instanceof Map) {
                 Object id = ((Map<?, ?>) u).get("id");
                 if (id instanceof Number) {
-                    usuariosMap.put(String.valueOf(((Number) id).intValue()), (Map<String, Object>) u);
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> um = (Map<String, Object>) u;
+                    usuariosMap.put(String.valueOf(((Number) id).intValue()), um);
                 }
             }
         }
@@ -67,7 +71,9 @@ public class AdopcionViewController {
             if (p instanceof Map) {
                 Object uid = ((Map<?, ?>) p).get("usuarioId");
                 if (uid instanceof Number) {
-                    perfilesMap.put(String.valueOf(((Number) uid).intValue()), (Map<String, Object>) p);
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> pm = (Map<String, Object>) p;
+                    perfilesMap.put(String.valueOf(((Number) uid).intValue()), pm);
                 }
             }
         }
@@ -79,17 +85,28 @@ public class AdopcionViewController {
                 Object id = ((Map<?, ?>) a).get("id");
                 Object uid = ((Map<?, ?>) a).get("usuarioId");
                 if (id instanceof Number && uid instanceof Number) {
-                    Map<String, Object> user = usuariosMap.get(String.valueOf(((Number) uid).intValue()));
-                    if (user != null) {
-                        Object nombre = user.get("nombre");
-                        Object apellido = user.get("apellido");
-                        String fullName = (nombre != null ? nombre.toString() : "")
-                                + (apellido != null ? " " + apellido.toString() : "");
-                        adoptanteNombres.put(String.valueOf(((Number) id).intValue()), fullName.trim());
-                        // Add temporary name/apellido inside 'a' map so filters can see it
-                        ((Map<String, Object>) a).put("nombre", nombre);
-                        ((Map<String, Object>) a).put("apellido", apellido);
+                    String uidStr = String.valueOf(((Number) uid).intValue());
+                    Map<String, Object> perfil = perfilesMap.get(uidStr);
+                    Map<String, Object> user = usuariosMap.get(uidStr);
+                    
+                    String nombre = "";
+                    String apellido = "";
+                    
+                    if (perfil != null) {
+                        nombre = perfil.get("nombre") != null ? perfil.get("nombre").toString() : "";
+                        apellido = perfil.get("apellido") != null ? perfil.get("apellido").toString() : "";
+                    } else if (user != null) {
+                        // Fallback to username if no profile found
+                        nombre = user.get("username") != null ? user.get("username").toString() : "Adoptante";
                     }
+                    
+                    String fullName = (nombre + " " + apellido).trim();
+                    adoptanteNombres.put(String.valueOf(((Number) id).intValue()), fullName);
+                    
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> am = (Map<String, Object>) a;
+                    am.put("nombre", nombre);
+                    am.put("apellido", apellido);
                 }
             }
         }
@@ -117,6 +134,54 @@ public class AdopcionViewController {
             }
         }
 
+        // --- FILTERING LOGIC ---
+        if (q != null && !q.trim().isEmpty()) {
+            String query = q.toLowerCase().trim();
+            adopciones = adopciones.stream()
+                .filter(a -> {
+                    if (!(a instanceof Map)) return false;
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> am = (Map<String, Object>) a;
+                    
+                    // Filter by Animal Name
+                    Object animId = am.get("animalId");
+                    if (animId != null) {
+                        String animIdStr = String.valueOf(animId);
+                        // Try both raw ID and integer conversion string for map lookup
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> animal = (Map<String, Object>) animalesMap.get(animIdStr);
+                        if (animal == null && animId instanceof Number) {
+                            @SuppressWarnings("unchecked")
+                            Map<String, Object> animalAlt = (Map<String, Object>) animalesMap.get(String.valueOf(((Number) animId).intValue()));
+                            animal = animalAlt;
+                        }
+                        
+                        if (animal != null && animal.get("nombre") != null) {
+                            if (animal.get("nombre").toString().toLowerCase().contains(query)) return true;
+                        }
+                    }
+                    
+                    // Filter by Adoptante Name
+                    Object adpId = am.get("adoptanteId");
+                    if (adpId != null) {
+                        String adpIdStr = String.valueOf(adpId);
+                        String fullName = adoptanteNombres.get(adpIdStr);
+                        if (fullName == null && adpId instanceof Number) {
+                            fullName = adoptanteNombres.get(String.valueOf(((Number) adpId).intValue()));
+                        }
+                        
+                        if (fullName != null && fullName.toLowerCase().contains(query)) return true;
+                    }
+                    
+                    // Filter by Adopcion ID
+                    Object adopId = am.get("id");
+                    if (adopId != null && String.valueOf(adopId).contains(query)) return true;
+
+                    return false;
+                })
+                .toList();
+        }
+
         model.addAttribute(ModelAttribute.Adopcion_LIST.getName(),   adopciones);
         model.addAttribute(ModelAttribute.Persona_LIST.getName(),    usuarios);
         model.addAttribute("listaadoptantes",                        adoptantes);
@@ -127,9 +192,15 @@ public class AdopcionViewController {
         model.addAttribute("usuariosMap",                            usuariosMap);
         model.addAttribute("perfilesMap",                            perfilesMap);
         model.addAttribute("selectedAdoptanteId", adoptanteId);
-        model.addAttribute("selectedanimalId",    animalId);   // lowercase 'a' to match template
+        model.addAttribute("selectedanimalId",    animalId);
+        model.addAttribute("q", q);
 
         if (successMessage != null) model.addAttribute("successMessage", successMessage);
+        
+        if (request != null && "true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Adopcion_LIST.getPath();
+        }
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Adopcion_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -137,7 +208,12 @@ public class AdopcionViewController {
     @GetMapping(WebRoutes.ADOPCIONES_NUEVA)
     public String formulario(Model model) {
         model.addAttribute(ModelAttribute.SINGLE_Adopcion.getName(), new HashMap<>());
-        model.addAttribute("estadosAdopcion", List.of("COMPLETADA", "CANCELADA", "EN_PROCESO"));
+        model.addAttribute("estadosAdopcion", List.of(
+            Map.of("value", "PENDIENTE_FIRMA",       "label", "Pendiente de firma"),
+            Map.of("value", "EN_PERIODO_ADAPTACION", "label", "En periodo de adaptación"),
+            Map.of("value", "COMPLETADA",            "label", "Completada"),
+            Map.of("value", "CANCELADA",             "label", "Cancelada")
+        ));
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Adopcion_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
@@ -182,9 +258,9 @@ public class AdopcionViewController {
                     if (adoptante instanceof Map) {
                         Object usuarioId = ((Map<?,?>)adoptante).get("usuarioId");
                         if (usuarioId != null) {
-                            Object usuario = restTemplate.getForObject(authUrl + "/v1/usuarios/" + usuarioId, Object.class);
-                            if (usuario instanceof Map) {
-                                String nombre = ((Map<?,?>)usuario).get("nombre") + " " + ((Map<?,?>)usuario).get("apellido");
+                            Object perfilObj = restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + usuarioId, Object.class);
+                            if (perfilObj instanceof Map) {
+                                String nombre = ((Map<?,?>)perfilObj).get("nombre") + " " + ((Map<?,?>)perfilObj).get("apellido");
                                 model.addAttribute("nombreAdoptante", nombre.trim());
                             }
                         }
@@ -193,7 +269,12 @@ public class AdopcionViewController {
             }
         }
         
-        model.addAttribute("estadosAdopcion", List.of("COMPLETADA", "CANCELADA", "EN_PROCESO"));
+        model.addAttribute("estadosAdopcion", List.of(
+            Map.of("value", "PENDIENTE_FIRMA",       "label", "Pendiente de firma"),
+            Map.of("value", "EN_PERIODO_ADAPTACION", "label", "En periodo de adaptación"),
+            Map.of("value", "COMPLETADA",            "label", "Completada"),
+            Map.of("value", "CANCELADA",             "label", "Cancelada")
+        ));
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Adopcion_FORM.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }

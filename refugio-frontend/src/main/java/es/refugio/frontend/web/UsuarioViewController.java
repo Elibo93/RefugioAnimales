@@ -514,14 +514,16 @@ public class UsuarioViewController {
             }
         }
 
-        Set<Integer> adoptantesUserIds = new HashSet<>();
+        Map<Integer, Integer> adoptantesUserIds = new HashMap<>();
         for (Object a : adoptantes) {
             if (a instanceof Map) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> am = (Map<String, Object>) a;
                 Object uIdRaw = am.get("usuarioId");
                 Integer uId = (uIdRaw instanceof Map) ? (Integer) ((Map<?, ?>) uIdRaw).get("value") : (Integer) uIdRaw;
-                if (uId != null) adoptantesUserIds.add(uId);
+                Object aIdRaw = am.get("id");
+                Integer aId = (aIdRaw instanceof Map) ? (Integer) ((Map<?, ?>) aIdRaw).get("value") : (Integer) aIdRaw;
+                if (uId != null && aId != null) adoptantesUserIds.put(uId, aId);
             }
         }
 
@@ -557,9 +559,20 @@ public class UsuarioViewController {
                     
                     boolean yaRegistrado = false;
                     if ("adoptante".equals(context)) {
-                        yaRegistrado = adoptantesUserIds.contains(uId);
+                        yaRegistrado = adoptantesUserIds.containsKey(uId);
                     } else if ("voluntario".equals(context)) {
                         yaRegistrado = voluntariosUserIds.contains(uId);
+                    } else if ("adopcion_filter".equals(context)) {
+                        // Special context for filtering where we ONLY want valid adoptantes
+                        if (adoptantesUserIds.containsKey(uId)) {
+                            result.put("adoptanteId", adoptantesUserIds.get(uId));
+                        } else {
+                            continue; // Skip non-adoptantes
+                        }
+                    }
+                    
+                    if (adoptantesUserIds.containsKey(uId)) {
+                        result.put("adoptanteId", adoptantesUserIds.get(uId));
                     }
                     
                     result.put("yaRegistrado", yaRegistrado);

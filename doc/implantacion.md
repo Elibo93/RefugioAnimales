@@ -1,23 +1,39 @@
-### Estrategia de Implantación - Proyecto Refugio
----
+# 🚀 Estrategia de Implantación: RefugioAnimales
 
-Este apartado define la metodología para garantizar que el sistema del refugio se despliegue de forma profesional, reproducible y segura.
-
-#### Contenedorización (Docker)
-Todo el sistema (API + DB) está empaquetado en contenedores Docker.
-* **Consistencia:** El software funciona igual en el portátil de desarrollo que en el servidor final del refugio.
-* **Aislamiento:** Evita conflictos con otros programas del servidor.
-
-#### Gestión del Ciclo de Vida (Maven)
-Usamos **Apache Maven** para compilar el código y gestionar las librerías. El artefacto final es un "Fat JAR" que el refugio puede ejecutar con un simple comando.
-
-#### Estrategia de Versionado (GitFlow)
-* **`main`**: Código estable y verificado. Es lo que el refugio usa a diario.
-* **`develop`**: Integración de nuevas mejoras (ej. módulo de vacunas).
-* **`feature/*`**: Ramas para desarrollar funcionalidades concretas.
-
-Esta estructura protege el funcionamiento diario del refugio mientras se desarrollan nuevas capacidades para el sistema.
+El despliegue de **RefugioAnimales** se basa en una metodología moderna de microservicios, garantizando que cada componente sea independiente, reproducible y fácil de escalar.
 
 ---
 
-[Volver](/README.md)
+## 1. Contenedorización Integral (Docker & Docker Compose)
+
+El sistema está diseñado para ser desplegado bajo una estrategia de **contenedorización total**. Esto significa que no solo la infraestructura de persistencia, sino también cada microservicio, corre de forma aislada y segura:
+
+*   **Microservicios Docketizados:** Cada componente (Eureka, Gateway, Auth, Backend, Frontend) dispone de su propio `Dockerfile`, basado en imágenes ligeras de OpenJDK (JRE), optimizando el tamaño y el tiempo de arranque.
+*   **Orquestación Completa:** Mediante un único archivo `docker-compose.yml`, se define la topología completa de la aplicación. Con un solo comando (`docker-compose up`), se levantan los 8 contenedores (6 servicios + 2 bases de datos), gestionando automáticamente sus dependencias y el orden de arranque.
+*   **Aislamiento y Redes:** Se crea una red virtual interna de Docker donde los microservicios se comunican de forma segura, exponiendo únicamente el **API Gateway** al tráfico exterior.
+
+## 2. Ciclo de Vida y Empaquetado (Maven)
+
+El proyecto se gestiona como una estructura **Maven Multi-módulo**:
+
+*   **Compilación Unificada:** Mediante el `pom.xml` raíz, se coordinan las dependencias de todos los servicios.
+*   **Artefactos Independientes:** Cada microservicio (Eureka, Gateway, Auth, Backend, Frontend) genera su propio "Fat JAR", permitiendo desplegarlos o reiniciarlos de forma individual sin afectar al resto del sistema.
+*   **Gestión de Dependencias:** Se utiliza un módulo común (`refugio-common`) para compartir lógica transversal, asegurando la consistencia en el código.
+
+## 3. Despliegue y Configuración Segura
+
+La implantación se apoya en una gestión de configuración externa:
+
+*   **Inyección de Secretos:** Todas las credenciales críticas (passwords, JWT secrets, IPs) se inyectan en tiempo de ejecución mediante un archivo **`.env`**. Esto evita que información sensible se suba al sistema de control de versiones.
+*   **Migraciones Automáticas:** Al arrancar el servicio de Backend, **Liquibase** verifica el estado de la base de datos y aplica los cambios de esquema pendientes de forma automática, eliminando la necesidad de scripts SQL manuales durante el despliegue.
+
+## 4. Control de Versiones y Estabilidad
+
+Seguimos una variante de **GitFlow** para proteger la integridad del sistema:
+
+*   **`main`**: Rama de producción. Contiene el código listo para ser desplegado en el refugio.
+*   **`develop`**: Rama de integración. Aquí se unen las nuevas funcionalidades antes de pasar a producción.
+*   **`feature/*`**: Ramas efímeras para el desarrollo de nuevas capacidades, asegurando que el código en desarrollo nunca rompa la versión estable.
+
+---
+*Documentación técnica - TFG Refugio*

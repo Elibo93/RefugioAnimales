@@ -1,51 +1,81 @@
-### Vista (UI) - Refugio de Animales
+### Interfaz de Usuario (UI) y Experiencia Visual - Refugio
 ---
 
-La interfaz de usuario sigue el patrón **MVC**, utilizando **Thymeleaf** para el renderizado en servidor. Se integra en la arquitectura como un **Web Adapter**, asegurando un diseño limpio y responsive.
-
----
-
-#### 1. Tecnologías y Enfoque
-* **Motor de Plantillas:** Thymeleaf en Spring Boot.
-* **Estilo:** CSS vainilla (`estilos.css`) con variables para una identidad visual propia del refugio. Tipografía **Plus Jakarta Sans** e iconos **Lucide**.
-* **Responsive:** Diseño adaptable a tablets (uso en patio/jaulas) y equipos de oficina.
+La interfaz del sistema de gestión del refugio se ha diseñado para ser **funcional, profesional y emocionalmente conectiva**. Siguiendo el patrón **MVC** con **Thymeleaf**, las vistas actúan como adaptadores web que transforman los datos del dominio en experiencias interactivas optimizadas para cada actor.
 
 ---
 
-#### 2. Mapa de Navegación y Vistas
-
-- ##### Módulo: Gestión de Animales
-    Centraliza la trazabilidad de cada residente del refugio.
-
-    | ID Vista | Nombre de la Vista | Descripción Funcional |
-    | :--- | :--- | :--- |
-    | **V-ANI-01** | **Listado de Residentes** | Tabla con animales, especie, estado (Disponible/Acogida) y acciones rápidas. |
-    | **V-ANI-02** | **Alta de Animal** | Formulario de ingreso (Chip, nombre, salud inicial, fecha). |
-    | **V-ANI-03** | **Ficha Técnica (Edición)** | Modal para actualizar salud, peso o estado de adopción. |
-    | **V-ANI-04** | **Certificado de Ingreso** | Exportación PDF con los datos base del animal. |
-
-- ##### Módulo: Gestión de Personal (Voluntarios)
-    Administración de los cuidadores y colaboradores.
-
-    | ID Vista | Nombre de la Vista | Descripción Funcional |
-    | :--- | :--- | :--- |
-    | **V-VOL-01** | **Lista de Voluntarios** | Gestión de contacto y disponibilidad. |
-    | **V-VOL-02** | **Registro de Voluntario** | Formulario para nuevas incorporaciones. |
-
-- ##### Módulo: Procesos de Adopción
-    Gestión del flujo desde la solicitud hasta el contrato final.
-
-    | ID Vista | Nombre de la Vista | Descripción Funcional |
-    | :--- | :--- | :--- |
-    | **V-ADO-01** | **Panel de Solicitudes** | Listado de trámites pendientes de revisión. |
-    | **V-ADO-02** | **Formulario de Solicitud** | Captura de datos del adoptante y animal de interés. |
-    | **V-ADO-03** | **Contrato de Adopción** | Generación de PDF legal tras la validación administrativa. |
+#### 1. Identidad Visual y Estética
+Para un proyecto de TFG, la estética es clave. Hemos definido un sistema de diseño propio:
+*   **Paleta de Colores:** Uso de tonos naturales (verdes suaves, tierras y grises limpios) para transmitir calma y profesionalidad.
+*   **Tipografía:** *Plus Jakarta Sans* por su modernidad y alta legibilidad en entornos de gestión.
+*   **Iconografía:** Set de iconos *Lucide* para una navegación intuitiva y minimalista.
+*   **Componentes Premium:** Uso de sombras suaves (*box-shadows*), bordes redondeados y micro-interacciones (hovers) para una sensación de software de alta calidad.
 
 ---
 
-#### 3. Integración con el Backend
-Las vistas se alimentan de objetos `Model` proporcionados por los controladores, que a su vez se comunican con los **Casos de Uso** (ej. `RegistrarEntradaAnimal`). Las validaciones se muestran al usuario de forma integrada en el formulario.
+#### 2. Mapa de Vistas por Módulos
+
+##### 2.1. Módulo de Administración (Control Total)
+Herramientas de gestión estratégica para el personal directivo del refugio.
+
+| ID Vista | Nombre | Descripción |
+| :--- | :--- | :--- |
+| **V-ADM-01** | **Dashboard General** | Panel con estadísticas, alertas médicas y solicitudes urgentes. |
+| **V-ANI-01** | **Inventario Vivo** | Listado maestro de animales con gestión CRUD completa. |
+| **V-ANI-02** | **Historial Médico** | Línea de tiempo con vacunas, intervenciones y observaciones. |
+| **V-ADO-01** | **Gestión de Trámites** | Bandeja de entrada de solicitudes con flujo de aprobación/rechazo. |
+| **V-PDF-01** | **Visor de Contratos** | Previsualización y descarga de documentos legales generados. |
 
 ---
 
-[Volver](/README.md)
+##### 2.2. Módulo de Voluntariado (Operativa Diaria)
+Optimizado para el uso en movilidad y el cuidado directo.
+
+| ID Vista | Nombre | Descripción |
+| :--- | :--- | :--- |
+| **V-VOL-01** | **Mis Tareas** | Lista de tareas diarias (limpieza, paseo, medicación) con checkboxes. |
+| **V-VOL-02** | **Reporte de Incidencias** | Formulario rápido para notificar anomalías detectadas en el patio. |
+
+---
+
+##### 2.3. Módulo del Adoptante (Usuario Registrado)
+Panel personal para la interacción directa y seguimiento de procesos.
+
+| ID Vista | Nombre | Descripción |
+| :--- | :--- | :--- |
+| **V-ADO-01** | **Panel del Adoptante** | Resumen de solicitudes activas y estado de sus trámites. |
+| **V-ADO-02** | **Historial de Interés** | Listado de animales marcados como favoritos o solicitados. |
+| **V-ADO-03** | **Mis Donaciones** | Registro de aportaciones económicas y descarga de certificados. |
+| **V-ADO-04** | **Buzón de Mensajes** | Notificaciones del sistema sobre la evolución de sus solicitudes. |
+
+---
+
+##### 2.4. Módulo Público y Visitante
+Enfocado en el descubrimiento y la captación de nuevos colaboradores.
+
+| ID Vista | Nombre | Descripción |
+| :--- | :--- | :--- |
+| **V-PUB-01** | **Landing Page** | Presentación del refugio, misión y llamada a la acción. |
+| **V-PUB-02** | **Catálogo Público** | Galería interactiva de animales disponibles con filtros rápidos. |
+| **V-PUB-03** | **Ficha de Animal** | Vista detallada con historia, fotos y botón de solicitud. |
+| **V-ACC-01** | **Login / Registro** | Formularios limpios con validación en tiempo real. |
+
+---
+
+#### 3. Interactividad Avanzada con HTMX
+Para mejorar la eficiencia y evitar recargas completas, se han implementado patrones de **actualización parcial**:
+*   **Inline Editing:** Los estados de las tareas se actualizan mediante peticiones HTMX que refrescan solo el componente afectado.
+*   **Filtros Dinámicos:** El catálogo se filtra en tiempo real sin perder la posición del scroll, enviando fragmentos de HTML desde el servidor.
+*   **Modales Reactivos:** Los formularios complejos se cargan en modales mediante HTMX, manteniendo limpia la vista principal.
+
+---
+
+#### 4. Diseño Responsive
+La UI utiliza un sistema de rejilla flexible (CSS Grid/Flexbox) que garantiza:
+- **Desktop:** Panel de administración denso con toda la información visible.
+- **Tablet/Mobile:** Vistas simplificadas con botones de gran tamaño (44x44px mín.) para facilitar el registro de datos mientras se atiende a los animales.
+
+---
+
+[Volver al Índice de Documentación](/README.md)
