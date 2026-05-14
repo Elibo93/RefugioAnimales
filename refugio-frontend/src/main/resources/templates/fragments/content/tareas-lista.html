@@ -208,6 +208,11 @@
                                         title="Asignar Voluntario">
                                     <i data-lucide="user-plus" style="color: var(--secondary);"></i>
                                 </button>
+                                <a class="btn-icon" 
+                                   th:hx-get="@{/web/tareas/{id}/historial(id=${t.get('id')})}"
+                                   hx-target="#contenido-dinamico" hx-push-url="true" title="Ver Historial">
+                                    <i data-lucide="history" style="color: var(--primary);"></i>
+                                </a>
                                 <a class="btn-icon" th:hx-get="@{/web/tareas/{id}/editar(id=${t.get('id')})}"
                                     hx-target="#contenido-dinamico" hx-push-url="true" title="Editar">
                                     <i data-lucide="edit-2"></i>
@@ -299,7 +304,7 @@
                                             <input type="hidden" name="fechaLimite" th:value="${t.get('fechaLimite')}">
                                             <input type="hidden" name="instrucciones" th:value="${t.get('instrucciones')}">
                                             <input type="hidden" name="estado" value="ACEPTADA">
-                                            <input type="hidden" name="voluntarioActorId" th:value="${myVoluntarioId}">
+                                            <input type="hidden" name="voluntarioActorId" th:value="${currentUserId}">
                                             <th:block th:if="${t.get('voluntarioIds') != null}">
                                                 <input th:each="vid : ${t.get('voluntarioIds')}" type="hidden" name="voluntarioIds" th:value="${vid}">
                                             </th:block>
@@ -312,7 +317,7 @@
                                             <input type="hidden" name="fechaLimite" th:value="${t.get('fechaLimite')}">
                                             <input type="hidden" name="instrucciones" th:value="${t.get('instrucciones')}">
                                             <input type="hidden" name="estado" value="RECHAZADA">
-                                            <input type="hidden" name="voluntarioActorId" th:value="${myVoluntarioId}">
+                                            <input type="hidden" name="voluntarioActorId" th:value="${currentUserId}">
                                             <th:block th:if="${t.get('voluntarioIds') != null}">
                                                 <input th:each="vid : ${t.get('voluntarioIds')}" type="hidden" name="voluntarioIds" th:value="${vid}">
                                             </th:block>
@@ -370,7 +375,7 @@
                                     <input type="hidden" name="fechaLimite" th:value="${t.get('fechaLimite')}">
                                     <input type="hidden" name="instrucciones" th:value="${t.get('instrucciones')}">
                                     <input type="hidden" th:id="'input-estado-' + ${t.get('id')}" name="estado" th:value="${t.get('estado')}">
-                                    <input type="hidden" name="voluntarioActorId" th:value="${myVoluntarioId}">
+                                    <input type="hidden" name="voluntarioActorId" th:value="${currentUserId}">
                                     <th:block th:if="${t.get('voluntarioIds') != null}">
                                         <input th:each="vid : ${t.get('voluntarioIds')}" type="hidden" name="voluntarioIds" th:value="${vid}">
                                     </th:block>

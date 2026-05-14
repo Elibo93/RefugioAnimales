@@ -336,7 +336,7 @@ public class UsuarioViewController {
 
     @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     @GetMapping(WebRoutes.PERSONAS_DETALLE)
-    public String verDetalle(@PathVariable Integer id, Model model) {
+    public String verDetalle(@PathVariable Integer id, Model model, HttpServletRequest request) {
         // Inicializar listas vacías para evitar errores de renderizado en Thymeleaf
         model.addAttribute("tareas", new ArrayList<>());
         model.addAttribute("vinculosAnimales", new ArrayList<>());
@@ -443,6 +443,19 @@ public class UsuarioViewController {
                 }
             }
         } catch (Exception ignored) {
+        }
+
+        // Gamificación
+        try {
+            model.addAttribute("metricas", restTemplate.getForObject(apiUrl + "/v1/gamificacion/metricas/usuario/" + id, Map.class));
+            model.addAttribute("logrosUsuario", fetchList(apiUrl + "/v1/gamificacion/logros/usuario/" + id));
+            model.addAttribute("todosLosLogros", fetchList(apiUrl + "/v1/gamificacion/logros"));
+        } catch (Exception e) {
+            logger.warn("Error al cargar datos de gamificación para usuario {}: {}", id, e.getMessage());
+        }
+
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Persona_DETALLE.getPath() + " :: content";
         }
 
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_DETALLE.getPath());

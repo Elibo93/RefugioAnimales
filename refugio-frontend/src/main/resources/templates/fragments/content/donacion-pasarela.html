@@ -21,12 +21,12 @@
                 </div>
 
                 <form th:action="@{/web/donaciones/confirmar}" method="POST" id="payment-form">
-                    <input type="hidden" name="usuarioId" th:value="${donacion.usuarioId}">
-                    <input type="hidden" name="tipo" th:value="${donacion.tipo}">
-                    <input type="hidden" name="cantidad" th:value="${donacion.cantidad}">
-                    <input type="hidden" name="frecuencia" th:value="${donacion.frecuencia}">
-                    <input type="hidden" name="descripcion" th:value="${donacion.descripcion}">
-                    <input type="hidden" name="objetivoId" th:value="${donacion.objetivoId}">
+                    <input type="hidden" name="usuarioId" th:value="${donacion['usuarioId']}">
+                    <input type="hidden" name="tipo" th:value="${donacion['tipo']}">
+                    <input type="hidden" name="cantidad" th:value="${donacion['cantidad']}">
+                    <input type="hidden" name="frecuencia" th:value="${donacion['frecuencia']}">
+                    <input type="hidden" name="descripcion" th:value="${donacion['descripcion']}">
+                    <input type="hidden" name="objetivoId" th:value="${donacion['objetivoId']}">
 
                     <div style="margin-bottom: 1.5rem;">
                         <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-main);">Titular de la tarjeta</label>
@@ -64,7 +64,7 @@
 
                     <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1.15rem; font-size: 1.1rem; border-radius: 14px; display: flex; justify-content: center; align-items: center; gap: 10px;">
                         <i data-lucide="lock" style="width: 20px;"></i>
-                        <span>Pagar [[${#numbers.formatDecimal(donacion.cantidad, 1, 'POINT', 2, 'COMMA')}]] €</span>
+                        <span>Pagar [[${#numbers.formatDecimal(donacion['cantidad'], 1, 'POINT', 2, 'COMMA')}]] €</span>
                     </button>
                     
                     <a th:href="@{/web/donaciones}" style="display: block; text-align: center; margin-top: 1.5rem; color: var(--text-muted); font-size: 0.9rem; text-decoration: none;">
@@ -83,29 +83,29 @@
                 <div style="flex-grow: 1;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 1.2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.05);">
                         <span style="color: var(--text-muted);">Tipo de ayuda</span>
-                        <span style="font-weight: 700; color: var(--text-main);" th:text="${donacion.tipo}">DINERO</span>
+                        <span style="font-weight: 700; color: var(--text-main);" th:text="${donacion['tipo']}">DINERO</span>
                     </div>
 
                     <div style="display: flex; justify-content: space-between; margin-bottom: 1.2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.05);">
                         <span style="color: var(--text-muted);">Frecuencia</span>
                         <div style="text-align: right;">
-                            <span style="font-weight: 700; color: var(--text-main);" th:text="${donacion.frecuencia == 'MENSUAL' ? 'Mensual' : 'Pago único'}">Única</span>
-                            <small th:if="${donacion.frecuencia == 'MENSUAL'}" style="display: block; color: var(--primary); font-size: 0.75rem; font-weight: 600;">Se renovará automáticamente</small>
+                            <span style="font-weight: 700; color: var(--text-main);" th:text="${donacion['frecuencia'] == 'MENSUAL' ? 'Mensual' : 'Pago único'}">Única</span>
+                            <small th:if="${donacion['frecuencia'] == 'MENSUAL'}" style="display: block; color: var(--primary); font-size: 0.75rem; font-weight: 600;">Se renovará automáticamente</small>
                         </div>
                     </div>
                     
                     <!-- Próximo pago con protección contra nulos -->
-                    <div th:if="${donacion.proximaFechaPago != null}" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding: 1rem; background: var(--primary-light); border-radius: 16px; border: 1px solid rgba(34,197,94,0.1);">
+                    <div th:if="${donacion['proximaFechaPago'] != null}" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding: 1rem; background: var(--primary-light); border-radius: 16px; border: 1px solid rgba(34,197,94,0.1);">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <i data-lucide="calendar" style="width: 18px; color: var(--primary);"></i>
                             <span style="color: var(--primary); font-weight: 600; font-size: 0.9rem;">Próximo cobro</span>
                         </div>
-                        <span style="font-weight: 800; color: var(--primary);" th:text="${donacion.proximaFechaPago}">01/01/2024</span>
+                        <span style="font-weight: 800; color: var(--primary);" th:text="${donacion['proximaFechaPago']}">01/01/2024</span>
                     </div>
 
                     <div style="margin-bottom: 2rem;">
                         <span style="display: block; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em;">Comentario</span>
-                        <p style="font-style: italic; color: var(--text-main); font-size: 0.9rem; margin: 0; line-height: 1.4;" th:text="${!donacion.descripcion.isEmpty() ? donacion.descripcion : 'Sin comentario adicional.'}">
+                        <p style="font-style: italic; color: var(--text-main); font-size: 0.9rem; margin: 0; line-height: 1.4;" th:text="${!donacion['descripcion'].isEmpty() ? donacion['descripcion'] : 'Sin comentario adicional.'}">
                             "Sin comentario adicional."
                         </p>
                     </div>
@@ -114,7 +114,7 @@
                 <div style="margin-top: auto;">
                     <div style="background: #1e293b; color: white; padding: 1.5rem; border-radius: 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-lg);">
                         <span style="font-weight: 500; font-size: 0.9rem; opacity: 0.9;">Total a pagar</span>
-                        <span style="font-size: 1.8rem; font-weight: 900;">[[${#numbers.formatDecimal(donacion.cantidad, 1, 'POINT', 2, 'COMMA')}]] €</span>
+                        <span style="font-size: 1.8rem; font-weight: 900;">[[${#numbers.formatDecimal(donacion['cantidad'], 1, 'POINT', 2, 'COMMA')}]] €</span>
                     </div>
 
                     <div style="margin-top: 2rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">

@@ -44,6 +44,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import es.refugio.refugio.infraestructure.db.jpa.entity.FavoritoAnimalEntity;
+import es.refugio.refugio.infraestructure.db.jpa.repository.FavoritoAnimalJpaRepository;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/v1/animales")
 @RequiredArgsConstructor
@@ -56,6 +60,7 @@ public class AnimalController {
     private final DeleteAnimalService deleteAnimalService;
     private final FileStorageService fileStorageService;
     private final SolicitudAdopcionRepository solicitudAdopcionRepository;
+    private final FavoritoAnimalJpaRepository favoritoAnimalRepository;
 
     @Operation(summary = "Crear animal", description = "Registra un nuevo animal en el refugio")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Animal creado"),
@@ -175,6 +180,38 @@ public class AnimalController {
     public ResponseEntity<Void> incrementVisitas(@PathVariable Integer id) {
         editAnimalService.incrementVisitas(new AnimalId(id));
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Alternar estado de favorito (Toggle)")
+    @PostMapping("/{id}/favorito")
+    public ResponseEntity<Boolean> toggleFavorito(@PathVariable Integer id, @org.springframework.web.bind.annotation.RequestParam Integer usuarioId) {
+        Optional<FavoritoAnimalEntity> existente = favoritoAnimalRepository.findByUsuarioIdAndAnimalId(usuarioId, id);
+        if (existente.isPresent()) {
+            favoritoAnimalRepository.delete(existente.get());
+            return ResponseEntity.ok(false); // Retorna false si lo ha quitado
+        } else {
+            FavoritoAnimalEntity nuevo = FavoritoAnimalEntity.builder()
+                .usuarioId(usuarioId)
+                .animalId(id)
+                .build();
+            favoritoAnimalRepository.save(nuevo);
+            return ResponseEntity.ok(true); // Retorna true si lo ha añadido
+        }
+    }
+
+    @Operation(summary = "Obtener IDs de animales favoritos de un usuario")
+    @GetMapping("/favoritos")
+    public List<Integer> getFavoritosByUsuario(@org.springframework.web.bind.annotation.RequestParam Integer usuarioId) {
+        return favoritoAnimalRepository.findByUsuarioId(usuarioId)
+            .stream()
+            .map(FavoritoAnimalEntity::getAnimalId)
+            .toList();
+    }
+
+    @Operation(summary = "Obtener el contador de favoritos de un animal")
+    @GetMapping("/{id}/favoritos/count")
+    public Integer countFavoritosByAnimal(@PathVariable Integer id) {
+        return favoritoAnimalRepository.countByAnimalId(id);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

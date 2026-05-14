@@ -1,0 +1,124 @@
+<div th:fragment="perfil" id="seccion-logros" class="gamificacion-section" style="margin-top: 2rem; scroll-margin-top: 100px;">
+    <h3 class="section-title" style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem;">
+        <i data-lucide="award" style="color: var(--primary-color);"></i>
+        Logros y Méritos
+    </h3>
+
+    <!-- Métricas Rápidas -->
+    <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div th:if="${persona.get('rol').toString().contains('VOLUNTARIO')}" class="metric-card glass-panel" style="padding: 1.5rem; border-radius: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Tareas Completadas</div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--primary-color);" th:text="${metricas != null ? metricas.tareasCompletadas : 0}">0</div>
+            
+            <a th:if="${metricas == null or metricas.tareasCompletadas == 0}" 
+               th:href="@{/web/tareas}" 
+               class="btn btn-outline" 
+               style="margin-top: 12px; padding: 6px 14px; font-size: 0.75rem; border-radius: 12px; border: 1.5px dashed var(--primary); color: var(--primary); text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 800; display: inline-flex; align-items: center; gap: 6px; background: transparent;"
+               onmouseover="this.style.background='var(--primary-light)'; this.style.transform='translateY(-2px)'"
+               onmouseout="this.style.background='transparent'; this.style.transform='none'">
+                <i data-lucide="rocket" style="width: 14px;"></i>
+                ¡Consigue tu primera medalla!
+            </a>
+        </div>
+        <!-- Card: Total Donado (Solo si es > 0) -->
+        <div th:if="${metricas != null and metricas.totalDonado > 0}" class="metric-card glass-panel" style="padding: 1.5rem; border-radius: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Total Donado</div>
+            <div style="font-size: 2rem; font-weight: 800; color: #10b981;" th:text="${metricas.totalDonado + '€'}">0€</div>
+        </div>
+
+        <!-- Card: CTA Donación (Si no ha donado nada) -->
+        <div th:if="${metricas == null or metricas.totalDonado == 0}" class="metric-card glass-panel" style="padding: 1.5rem; border-radius: 16px; text-align: center; border: 1px dashed rgba(255,255,255,0.2); background: rgba(255,255,255,0.01);">
+            <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.8rem;">¿Quieres tu primera medalla?</div>
+            <a th:href="@{/web/donaciones/nueva}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; background: #10b981; border-color: #10b981;">
+                <i data-lucide="heart" style="width: 14px;"></i>
+                Donar ahora
+            </a>
+        </div>
+    </div>
+
+    <!-- Vitrina: Grid de Logros estilo Bento -->
+    <div class="trophy-cabinet" style="background: rgba(255,255,255,0.4); padding: 3rem; border-radius: 32px; border: 1px solid var(--border); box-shadow: inset 0 2px 10px rgba(0,0,0,0.02); position: relative; overflow: hidden;">
+        <!-- Decoración de Vitrina -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 100%; pointer-events: none; opacity: 0.05; background-image: radial-gradient(var(--text-muted) 0.5px, transparent 0.5px); background-size: 20px 20px;"></div>
+        
+        <div class="badges-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 2rem; position: relative; z-index: 1;">
+            <div th:each="logro : ${todosLosLogros}" 
+                 th:if="${logro.categoria != 'VOLUNTARIO' or persona.get('rol').toString().contains('VOLUNTARIO')}"
+                 class="badge-card" 
+                 th:classappend="${#lists.contains(logrosUsuario.![logroId], logro.id) ? 'unlocked ' + logro.rareza.toLowerCase() : 'locked'}"
+                 style="position: relative; padding: 2rem 1.5rem; border-radius: 24px; text-align: center; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; background: white; border: 2px solid #f1f5f9; box-shadow: var(--shadow-sm);">
+                
+                <!-- Badge específico por rareza (Background & Glow) -->
+                <div class="rarity-accent" th:if="${#lists.contains(logrosUsuario.![logroId], logro.id)}"
+                     th:style="'position: absolute; inset: 0; border-radius: 24px; opacity: 0.03; pointer-events: none; ' + 
+                               (logro.rareza == 'ORO' ? 'background: linear-gradient(135deg, #fbbf24, #d97706);' : 
+                               (logro.rareza == 'PLATA' ? 'background: linear-gradient(135deg, #94a3b8, #475569);' : 
+                               'background: linear-gradient(135deg, #d97706, #78350f);'))"></div>
+
+                <div class="badge-icon-wrapper" style="margin-bottom: 1.2rem; position: relative; display: inline-block;">
+                    <div class="badge-glow" 
+                         th:style="'background: ' + (logro.rareza == 'ORO' ? '#fbbf24' : (logro.rareza == 'PLATA' ? '#94a3b8' : '#d97706')) + '; opacity: 0.3; filter: blur(30px); position: absolute; inset: -20px; border-radius: 50%;'"></div>
+                    
+                    <div class="badge-icon-bg" 
+                         th:style="'width: 110px; height: 110px; background: white; border-radius: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 24px -6px rgba(0,0,0,0.12); border: 1px solid ' + (logro.rareza == 'ORO' ? '#fef3c7' : (logro.rareza == 'PLATA' ? '#f1f5f9' : '#ffedd5')) + '; overflow: hidden; position: relative;'">
+                        
+                        <!-- Imagen del Logro Premium -->
+                        <th:block th:switch="${logro.codigo}">
+                            <img th:case="'VOL_PRINCIPIANTE'" th:src="@{/images/logros/primeros-pasos.png}" style="width: 100%; height: 100%; object-fit: contain; padding: 10px; transform: scale(1.1); transition: transform 0.4s ease;" class="achievement-img">
+                            <img th:case="'VOL_COMPROMISO_ALTO'" th:src="@{/images/logros/compromiso-firme.png}" style="width: 100%; height: 100%; object-fit: contain; padding: 10px; transform: scale(1.1); transition: transform 0.4s ease;" class="achievement-img">
+                            <img th:case="'VOL_LEYENDA'" th:src="@{/images/logros/leyenda-refugio.png}" style="width: 100%; height: 100%; object-fit: contain; padding: 10px; transform: scale(1.1); transition: transform 0.4s ease;" class="achievement-img">
+                            <img th:case="'DON_GENEROSO'" th:src="@{/images/logros/corazon-generoso.png}" style="width: 100%; height: 100%; object-fit: contain; padding: 10px; transform: scale(1.1); transition: transform 0.4s ease;" class="achievement-img">
+                            <img th:case="'DON_MECENAS'" th:src="@{/images/logros/mecenas-huellas.png}" style="width: 100%; height: 100%; object-fit: contain; padding: 10px; transform: scale(1.1); transition: transform 0.4s ease;" class="achievement-img">
+                            <img th:case="'DON_ANGEL'" th:src="@{/images/logros/angel-guardian.png}" style="width: 100%; height: 100%; object-fit: contain; padding: 10px; transform: scale(1.1); transition: transform 0.4s ease;" class="achievement-img">
+                            <img th:case="*" th:src="@{/images/logros/placeholder.png}" style="width: 100%; height: 100%; object-fit: contain; padding: 10px; transform: scale(1.1); transition: transform 0.4s ease;" class="achievement-img">
+                        </th:block>
+                    </div>
+
+                    <!-- Corona para Oro -->
+                    <div th:if="${logro.rareza == 'ORO' and #lists.contains(logrosUsuario.![logroId], logro.id)}" 
+                         style="position: absolute; top: -10px; right: -10px; background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 4px 10px rgba(245,158,11,0.4); transform: rotate(15deg); z-index: 10;">
+                        <i data-lucide="sparkles" style="width: 16px;"></i>
+                    </div>
+                </div>
+                
+                <div style="font-weight: 900; font-size: 1.05rem; margin-bottom: 0.6rem; color: var(--text-main); letter-spacing: -0.02em;" th:text="${logro.nombre}">Nombre</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; font-weight: 500;" th:text="${logro.descripcion}">Desc</div>
+                
+                <!-- Rarity Label -->
+                <div style="margin-top: 1rem; display: inline-block; font-size: 0.65rem; font-weight: 900; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.05em;"
+                     th:styleappend="${logro.rareza == 'ORO'} ? 'background: #fef3c7; color: #92400e;' : (${logro.rareza == 'PLATA'} ? 'background: #f1f5f9; color: #475569;' : 'background: #ffedd5; color: #9a3412;')"
+                     th:text="${logro.rareza}">RAREZA</div>
+
+                <!-- Overlay para bloqueados -->
+                <div th:if="${!#lists.contains(logrosUsuario.![logroId], logro.id)}" 
+                     style="position: absolute; inset: 0; background: rgba(248, 250, 252, 0.8); backdrop-filter: grayscale(1) blur(2px); border-radius: 24px; display: flex; align-items: center; justify-content: center; z-index: 2; border: 2px dashed #e2e8f0;">
+                    <div style="background: white; width: 44px; height: 44px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+                        <i data-lucide="lock" style="width: 20px; color: #94a3b8;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .badge-card.unlocked.oro {
+            border-color: #fbbf24 !important;
+            box-shadow: 0 20px 25px -5px rgba(251, 191, 36, 0.1), 0 10px 10px -5px rgba(251, 191, 36, 0.04) !important;
+        }
+        .badge-card.unlocked.plata {
+            border-color: #94a3b8 !important;
+            box-shadow: 0 20px 25px -5px rgba(148, 163, 184, 0.1) !important;
+        }
+        .badge-card.unlocked.bronce {
+            border-color: #d97706 !important;
+            box-shadow: 0 20px 25px -5px rgba(217, 119, 6, 0.1) !important;
+        }
+        .badge-card.unlocked:hover {
+            transform: translateY(-12px) scale(1.02);
+            z-index: 10;
+        }
+        .badge-card.oro:hover { background: #fffdf5 !important; }
+        .badge-card.plata:hover { background: #f8fafc !important; }
+        .badge-card.bronce:hover { background: #fff9f5 !important; }
+    </style>
+</div>

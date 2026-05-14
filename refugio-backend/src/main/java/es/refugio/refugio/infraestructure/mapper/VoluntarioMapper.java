@@ -43,7 +43,8 @@ public class VoluntarioMapper {
                 v.getId() != null ? v.getId().getValue() : null,
                 v.getUsuarioId() != null ? v.getUsuarioId().getValue() : null,
                 v.getDisponibilidad(),
-                v.getEspecialidad());
+                v.getEspecialidad(),
+                v.getEstado() != null ? v.getEstado().name() : null);
     }
 
     public static VoluntarioEntity toEntity(Voluntario v) {
@@ -64,6 +65,7 @@ public class VoluntarioMapper {
                 .usuarioId(usuarioId)
                 .disponibilidad(v.getDisponibilidad())
                 .especialidad(v.getEspecialidad())
+                .status(v.getEstado())
                 .tareas(tareas)
                 .build();
     }
@@ -74,6 +76,7 @@ public class VoluntarioMapper {
                 .usuarioId(e.getUsuarioId() != null ? new UsuarioId(e.getUsuarioId()) : null)
                 .disponibilidad(e.getDisponibilidad())
                 .especialidad(e.getEspecialidad())
+                .estado(e.getStatus())
                 .tareas(e.getTareas() != null
                         ? e.getTareas().stream().map(te -> new TareaId(te.getId())).collect(Collectors.toList())
                         : new java.util.ArrayList<>())

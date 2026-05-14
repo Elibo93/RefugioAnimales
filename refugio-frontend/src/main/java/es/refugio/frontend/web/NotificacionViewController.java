@@ -83,4 +83,52 @@ public class NotificacionViewController {
             return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR).body("Error");
         }
     }
+
+    @GetMapping("/web/notificaciones/check-celebraciones")
+    public ResponseEntity<Void> checkCelebraciones() {
+        try {
+            String url = apiUrl + "/v1/notificaciones/me";
+            Object[] arr = restTemplate.getForObject(url, Object[].class);
+            if (arr != null) {
+                for (Object o : arr) {
+                    if (o instanceof java.util.Map) {
+                        @SuppressWarnings("unchecked")
+                        java.util.Map<String, Object> n = (java.util.Map<String, Object>) o;
+                        // Si es un logro desbloqueado y NO ha sido leído aún
+                        if ("LOGRO_DESBLOQUEADO".equals(n.get("tipo")) && Boolean.FALSE.equals(n.get("leida"))) {
+                            
+                            String titulo = (String) n.get("titulo");
+                            String mensaje = (String) n.get("mensaje");
+                            
+                            // Marcar como leída inmediatamente para que no se repita la celebración
+                            restTemplate.put(apiUrl + "/v1/notificaciones/" + n.get("id") + "/leer", null);
+                            
+                            // Extraer la imagen basada en el texto del mensaje
+                            String imageUrl = "";
+                            if (mensaje.contains("Primeros Pasos")) imageUrl = "/images/logros/primeros-pasos.png";
+                            else if (mensaje.contains("Compromiso Firme")) imageUrl = "/images/logros/compromiso-firme.png";
+                            else if (mensaje.contains("Leyenda del Refugio")) imageUrl = "/images/logros/leyenda-refugio.png";
+                            else if (mensaje.contains("Corazón Generoso")) imageUrl = "/images/logros/corazon-generoso.png";
+                            else if (mensaje.contains("Mecenas de Huellas")) imageUrl = "/images/logros/mecenas-huellas.png";
+                            else if (mensaje.contains("Ángel Guardián")) imageUrl = "/images/logros/angel-guardian.png";
+                            
+                            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+                            headers.add("X-Celebrate", "true");
+                            headers.add("X-Celebrate-Title", java.net.URLEncoder.encode(titulo, java.nio.charset.StandardCharsets.UTF_8));
+                            headers.add("X-Celebrate-Msg", java.net.URLEncoder.encode(mensaje, java.nio.charset.StandardCharsets.UTF_8));
+                            if (!imageUrl.isEmpty()) {
+                                headers.add("X-Celebrate-Img", java.net.URLEncoder.encode(imageUrl, java.nio.charset.StandardCharsets.UTF_8));
+                            }
+                            headers.add("HX-Trigger", "notificacionLeida"); // Actualizar badge también
+                            
+                            return new ResponseEntity<>(headers, org.springframework.http.HttpStatus.OK);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Silencioso
+        }
+        return ResponseEntity.noContent().build();
+    }
 }

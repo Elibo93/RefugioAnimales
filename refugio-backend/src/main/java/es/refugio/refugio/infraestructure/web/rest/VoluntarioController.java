@@ -47,6 +47,7 @@ public class VoluntarioController {
     private final FindVoluntarioService findVoluntarioService;
     private final EditVoluntarioService editVoluntarioService;
     private final DeleteVoluntarioService deleteVoluntarioService;
+    private final es.refugio.refugio.application.service.voluntario.ApproveVoluntarioService approveVoluntarioService;
 
     @Operation(summary = "Crear voluntario", description = "Registra un nuevo voluntario vinculado a un usuario")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Voluntario creado"),
@@ -91,6 +92,53 @@ public class VoluntarioController {
         return VoluntarioMapper.toResponse(findVoluntarioService.findAll());
     }
 
+    @Operation(summary = "Contar voluntarios pendientes")
+    @GetMapping("/count/pendiente")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Long> countPendientes() {
+        long count = findVoluntarioService.findAll().stream()
+                .filter(v -> es.refugio.refugio.domain.model.voluntario.enums.EstadoVoluntario.PENDIENTE.equals(v.getEstado()))
+                .count();
+        return ResponseEntity.ok(count);
+    }
+
+    @Operation(summary = "Listar voluntarios pendientes de aprobación")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/pendientes")
+    public List<VoluntarioResponse> findPending() {
+        return findVoluntarioService.findAll().stream()
+                .filter(v -> es.refugio.refugio.domain.model.voluntario.enums.EstadoVoluntario.PENDIENTE.equals(v.getEstado()))
+                .map(VoluntarioMapper::toResponse)
+                .toList();
+    }
+
+    @Operation(summary = "Aprobar solicitud de voluntariado")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{id}/aprobar")
+    public ResponseEntity<Void> approve(@PathVariable Integer id, jakarta.servlet.http.HttpServletRequest request) {
+        approveVoluntarioService.approve(id, getJwtToken(request));
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Rechazar solicitud de voluntariado")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{id}/rechazar")
+    public ResponseEntity<Void> reject(@PathVariable Integer id, jakarta.servlet.http.HttpServletRequest request) {
+        approveVoluntarioService.reject(id, getJwtToken(request));
+        return ResponseEntity.ok().build();
+    }
+
+    private String getJwtToken(jakarta.servlet.http.HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (var cookie : request.getCookies()) {
+                if ("JWT_TOKEN".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return "";
+    }
+
     @Operation(summary = "Obtener voluntario por ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     @GetMapping("/{id}")
@@ -107,7 +155,7 @@ public class VoluntarioController {
     }
 
     @Operation(summary = "Voluntario por usuario", description = "Retorna el voluntario asociado a un usuario")
-    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/usuario/{usuarioId}")
     public ResponseEntity<VoluntarioResponse> findByUsuarioId(@PathVariable Integer usuarioId, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();

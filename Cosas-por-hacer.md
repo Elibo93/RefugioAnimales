@@ -45,18 +45,18 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 
 ### 5) Backend: Lógica de Adopción y Roles
 - [✅] **Dualidad de Roles:** Permitir que un usuario sea Adoptante y Voluntario simultáneamente.
-- [ ] **Validaciones:**
+- [✅] **Validaciones:**
   -[✅] Impedir adopciones duplicadas del mismo animal.
-  -[ ] Acceso a funciones de voluntario solo tras aprobación del admin.
-- [ ] **Contratos:** Sistema automático de generación y asociación de contratos legales al formalizar la adopción.
+  -[✅] Acceso a funciones de voluntario solo tras aprobación del admin.
+- [✅] **Contratos:** Sistema automático de generación y asociación de contratos legales al formalizar la adopción.
 
 ### 6) Backend: Notificaciones y Administración
 - [✅] **Buzón Admin:** Notificar nuevas solicitudes de voluntariado, adopción y donaciones.
-- [ ] **Lógica de Histórico:** Guardar quién cambió el estado de una tarea y cuándo.
+- [✅] **Lógica de Histórico:** Guardar quién cambió el estado de una tarea y cuándo.
 
 ### 7) Sistema de Logros (Gamificación)
-- [ ] **Donantes:** Insignias según el importe total donado.
-- [ ] **Voluntarios:** Méritos por antigüedad y cantidad de tareas completadas.
+- [✅] **Donantes:** Insignias según el importe total donado.
+- [✅] **Voluntarios:** Méritos por antigüedad y cantidad de tareas completadas.
 
 ### 8) Gestión Multimedia y Archivos
 - [✅] **Imágenes:** Subida de fotos desde el equipo local y almacenamiento (BD o filesystem).
@@ -69,7 +69,7 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 ### 10) Calidad y DevOps
 - [ ] **i18n:** Traducir toda la app (ES/EN) usando archivos de propiedades.
 - [ ] **Docker:** Unificar toda la infraestructura (Gateway, Auth, Backend, Frontend, DB) en un `docker-compose.yml`.
-- [ ] **Código:** Refactorizar controladores, unificar mappers y completar JavaDoc.
+- [ ] **Código:** Refactorizar controladores, unificar mappers, CSS en el front y archivos scripts y completar JavaDoc, .
 
 
 ### 11) Restaurar validaciones de DNI

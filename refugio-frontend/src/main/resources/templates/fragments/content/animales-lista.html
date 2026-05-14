@@ -121,7 +121,11 @@
                         </label>
                     </div>
 
-                    <!-- BOTÓN LIMPIAR -->
+                    <!-- FAVORITOS (HIDDEN, TRIGGERED BY LABEL EN EL HEADER) -->
+                    <input th:if="${isAuthenticated}" type="checkbox" id="favoritos-checkbox" name="favoritos" value="true" th:checked="${selectedFavoritos}"
+                           hx-get="/web/animales" hx-trigger="change" 
+                           hx-target="#animal-results" hx-select="#animal-results"
+                           style="display: none;">                    <!-- BOTÓN LIMPIAR -->
                     <div style="text-align: center; margin-bottom: 0.5rem;">
                         <a th:href="@{/web/animales}" 
                            style="color: #94a3b8; text-decoration: none; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0.7rem; border-radius: 14px; transition: all 0.3s; background: #f8fafc;">
@@ -162,6 +166,33 @@
                             background: #fee2e2 !important;
                             border-color: #fecaca !important;
                             transform: scale(1.02);
+                        }
+                        .favorito-card:hover {
+                            background: #fce7f3 !important;
+                            border-color: #fbcfe8 !important;
+                            transform: scale(1.02);
+                        }
+                        .btn-favorito {
+                            background: rgba(255, 255, 255, 0.9);
+                            border: none;
+                            width: 38px;
+                            height: 38px;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            color: #94a3b8;
+                            cursor: pointer;
+                            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                        }
+                        .btn-favorito:hover {
+                            transform: scale(1.1);
+                            color: #ef4444;
+                        }
+                        .btn-favorito.active {
+                            color: #ef4444;
+                            background: white;
                         }
                     </style>
                     <!-- BOTÓN PDF (Solo para personal del refugio) -->
@@ -391,7 +422,21 @@
                 </div>
 
                 <!-- 2. VISTA DE TARJETAS (PARA VOLUNTARIOS, ADOPTANTES Y PÚBLICO) -->
-                <div th:if="${!isAdmin}" class="animal-grid" id="animal-grid-cards">
+                <div th:if="${!isAdmin}">
+                    <!-- Cabecera de la sección pública con botón de Favoritos -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                        <h2 style="font-weight: 800; color: var(--text-main); margin: 0; font-size: 1.85rem; letter-spacing: -0.02em;">Encuentra a tu mejor amigo</h2>
+                        
+                        <div th:if="${isAuthenticated}" style="background: white; padding: 0.3rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
+                            <label for="favoritos-checkbox" style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 0.6rem 1.2rem; border-radius: 12px; transition: all 0.3s; margin: 0;"
+                                   th:styleappend="${selectedFavoritos} ? 'background: #fdf2f8; color: #be185d; border: 1px solid #fbcfe8;' : 'background: transparent; color: #64748b; border: 1px solid transparent;'">
+                                <i data-lucide="heart" th:style="${selectedFavoritos} ? 'fill: #ec4899; color: #ec4899; width: 18px;' : 'width: 18px;'"></i>
+                                <span style="font-weight: 700; font-size: 0.9rem;" th:text="${selectedFavoritos} ? 'Viendo Mis Favoritos' : 'Ver Mis Favoritos'">Ver Mis Favoritos</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="animal-grid" id="animal-grid-cards">
                     <th:block th:each="a : ${animales}">
                         <div class="animal-card-glass glass-card animal-card-item">
                             <div class="card-img-container"
@@ -416,13 +461,23 @@
                                     <span>ALTA DEMANDA</span>
                                 </div>
 
+                                <!-- Botón Favorito (Top Right) -->
+                                <div th:if="${isAuthenticated}" style="position: absolute; top: 1rem; right: 1rem; z-index: 20;">
+                                    <button th:if="${misFavoritosIds != null and misFavoritosIds.contains(a.get('id'))}" type="button" class="btn-favorito active" th:attr="hx-post=@{/web/animales/{id}/favorito(id=${a.get('id')})}" hx-swap="outerHTML">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                    </button>
+                                    <button th:unless="${misFavoritosIds != null and misFavoritosIds.contains(a.get('id'))}" type="button" class="btn-favorito" th:attr="hx-post=@{/web/animales/{id}/favorito(id=${a.get('id')})}" hx-swap="outerHTML">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                    </button>
+                                </div>
+
                                 <!-- Hover Overlay con Botón -->
                                 <div class="card-info-overlay">
                                     <div style="text-align: center; width: 100%;">
                                         <button th:attr="hx-get=@{/web/animales/{id}/detalle(id=${a.get('id')})}"
                                             hx-target="#modal-host" class="btn btn-primary"
                                             style="width: 80%; justify-content: center; margin-bottom: 1rem; border-radius: 50px; padding: 0.8rem;">
-                                            <i data-lucide="heart"></i>
+                                            <i data-lucide="info"></i>
                                             <span>Conóceme</span>
                                         </button>
                                         <div th:if="${isVoluntario}" style="display: flex; justify-content: center; gap: 10px;">
@@ -447,6 +502,11 @@
                             </div>
                         </div>
                     </th:block>
+                </div>
+                <!-- Empty State Público -->
+                <div th:if="${#lists.isEmpty(animales)}" style="text-align:center; padding:5rem 2rem; background:white; border-radius:24px; border: 1px solid var(--border); margin-top: 1rem;">
+                    <i data-lucide="dog" style="width:48px; height:48px; margin-bottom:1rem; color: var(--text-muted); opacity: 0.3;"></i>
+                    <p style="color: var(--text-muted); font-weight: 600;" th:text="${selectedFavoritos} ? 'Aún no has añadido ningún animal a tus favoritos.' : 'No hay animales que coincidan con la búsqueda.'"></p>
                 </div>
 
                 <!-- Paginación -->

@@ -74,6 +74,7 @@ public interface WebRoutes {
     String SOLICITUDES_PUBLICO_REGISTRO = "/web/solicitudes/publico/registro-y-adopcion";
     String SOLICITUDES_APROBAR      = "/web/solicitudes/{id}/aprobar";
     String SOLICITUDES_RECHAZAR     = "/web/solicitudes/{id}/rechazar";
+    String SOLICITUDES_REVISION     = "/web/solicitudes/{id}/revision";
     String SOLICITUDES_OPCIONES     = "/web/solicitudes/publico/opciones";
     String SOLICITUDES_CONVERTIR    = "/web/solicitudes/publico/convertir";
     String SOLICITUDES_DIRECTA_FORM = "/web/solicitudes/publico/directa/formulario";
@@ -84,6 +85,7 @@ public interface WebRoutes {
     String TAREAS_BASE     = "/web/tareas";
     String TAREAS_NUEVA    = "/web/tareas/nueva";
     String TAREAS_EDITAR   = "/web/tareas/{id}/editar";
+    String TAREAS_HISTORIAL = "/web/tareas/{id}/historial";
     String TAREAS_ELIMINAR = "/web/tareas/{id}/borrar";
     String TAREAS_PDF      = "/web/tareas/pdf";
 

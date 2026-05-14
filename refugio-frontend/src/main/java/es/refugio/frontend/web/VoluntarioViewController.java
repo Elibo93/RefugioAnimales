@@ -19,7 +19,6 @@ import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.http.HttpEntity;
 
 import es.refugio.frontend.web.constants.WebRoutes;
@@ -243,7 +242,7 @@ public class VoluntarioViewController {
     }
 
     @GetMapping(WebRoutes.VOLUNTARIOS_NUEVO)
-    @PreAuthorize("hasAnyRole('ADMIN', 'PUBLICO', 'VOLUNTARIO') or isAnonymous()")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PUBLICO', 'VOLUNTARIO', 'ADOPTANTE') or isAnonymous()")
     public String formulario(Model model, HttpServletRequest request) {
         model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), new HashMap<String, Object>());
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_NUEVO);
@@ -282,6 +281,22 @@ public class VoluntarioViewController {
                     } else {
                         model.addAttribute("perfilLegalExists", false);
                         model.addAttribute("perfilExistente", false);
+                    }
+
+                    // Verificar si ya tiene un registro de voluntario
+                    try {
+                        Map<String, Object> voluntarioExistente = restTemplate.exchange(
+                                apiUrl + "/v1/voluntarios/usuario/" + currentUserId,
+                                HttpMethod.GET,
+                                null,
+                                new ParameterizedTypeReference<Map<String, Object>>() {
+                                }).getBody();
+                        if (voluntarioExistente != null) {
+                            model.addAttribute("voluntarioExistente", voluntarioExistente);
+                        }
+                    } catch (Exception e) {
+                        // No es voluntario todavía, es normal
+                        logger.debug("El usuario no tiene registro de voluntario previo.");
                     }
                 }
             } catch (Exception e) {
@@ -420,7 +435,7 @@ public class VoluntarioViewController {
     }
 
     @PostMapping(WebRoutes.VOLUNTARIOS_NUEVO)
-    @PreAuthorize("hasAnyRole('ADMIN', 'PUBLICO', 'VOLUNTARIO') or isAnonymous()")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PUBLICO', 'VOLUNTARIO', 'ADOPTANTE') or isAnonymous()")
     public String crearVoluntario(
             @RequestParam(required = false) Integer idUsuario,
             @RequestParam String disponibilidad,
@@ -463,11 +478,26 @@ public class VoluntarioViewController {
                     // Si no es admin y el ID enviado no coincide con el suyo, forzamos el suyo real
                     if (!isAdmin) {
                         if (finalUsuarioId != null && !finalUsuarioId.equals(realUserId)) {
-                            logger.warn(
-                                    "Intento de suplantación detectado: Usuario {} intentó registrar voluntario para {}",
-                                    realUserId, finalUsuarioId);
+                            logger.warn("Usuario {} intentó suplantar al ID {} en registro voluntario", realUserId, finalUsuarioId);
                         }
                         finalUsuarioId = realUserId;
+
+                        // BLOQUEO: Evitar doble solicitud
+                        try {
+                            Map<String, Object> existing = restTemplate.exchange(
+                                    apiUrl + "/v1/voluntarios/usuario/" + realUserId,
+                                    HttpMethod.GET,
+                                    null,
+                                    new ParameterizedTypeReference<Map<String, Object>>() {
+                                    }).getBody();
+                            if (existing != null) {
+                                logger.info("Bloqueada solicitud duplicada para usuario {}", realUserId);
+                                redirectAttributes.addFlashAttribute("errorMessage", "Ya tienes una solicitud de voluntariado registrada.");
+                                return "redirect:" + WebRoutes.VOLUNTARIOS_NUEVO;
+                            }
+                        } catch (Exception e) {
+                            // Normal, no hay registro previo
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -529,70 +559,11 @@ public class VoluntarioViewController {
         try {
             restTemplate.postForObject(apiUrl + "/v1/voluntarios", bodyVol, Object.class);
 
-            // 3. Actualizar Rol en Auth si el usuario ya existe
-            auth = SecurityContextHolder.getContext().getAuthentication();
-            if (finalUsuarioId != null && auth != null && auth.isAuthenticated()) {
-                try {
-                    String currentRol = auth.getAuthorities().stream()
-                            .map(a -> a.getAuthority())
-                            .filter(r -> r.startsWith("ROLE_"))
-                            .findFirst().orElse("ROLE_PUBLICO");
-
-                    boolean isAdoptante = auth.getAuthorities().stream()
-                            .anyMatch(a -> a.getAuthority().equals("ROLE_ADOPTANTE"));
-
-                    String newRol = null;
-                    if (isAdoptante) {
-                        newRol = "ROLE_VOLUNTARIO_ADOPTANTE";
-                    } else if ("ROLE_PUBLICO".equals(currentRol)) {
-                        newRol = "ROLE_VOLUNTARIO";
-                    }
-
-                    if (newRol != null && !currentRol.equals(newRol)) {
-                        Map<String, String> patchBody = new HashMap<>();
-                        patchBody.put("rol", newRol);
-
-                        String targetUrl = authUrl + "/v1/usuarios/" + finalUsuarioId + "/rol";
-                        logger.info("Actualizando rol en Auth: " + targetUrl + " -> " + newRol);
-
-                        var resp = restTemplate.exchange(
-                                targetUrl,
-                                HttpMethod.PUT,
-                                new HttpEntity<>(patchBody),
-                                new ParameterizedTypeReference<Map<String, Object>>() {
-                                });
-
-                        if (resp.getStatusCode().is2xxSuccessful() && resp.getBody() != null) {
-                            String newToken = (String) resp.getBody().get("token");
-                            if (newToken != null) {
-                                // Actualizar Cookie
-                                jakarta.servlet.http.Cookie authCookie = new jakarta.servlet.http.Cookie("JWT_TOKEN",
-                                        newToken);
-                                authCookie.setHttpOnly(true);
-                                authCookie.setPath("/");
-                                authCookie.setMaxAge(86400);
-                                response.addCookie(authCookie);
-
-                                // Actualizar Contexto Local
-                                List<SimpleGrantedAuthority> authorities = new java.util.ArrayList<>();
-                                authorities.add(new SimpleGrantedAuthority(newRol));
-                                if ("ROLE_VOLUNTARIO_ADOPTANTE".equals(newRol)) {
-                                    authorities.add(new SimpleGrantedAuthority("ROLE_VOLUNTARIO"));
-                                    authorities.add(new SimpleGrantedAuthority("ROLE_ADOPTANTE"));
-                                }
-                                var newAuth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), null,
-                                        authorities);
-                                SecurityContextHolder.getContext().setAuthentication(newAuth);
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    logger.error("Error al actualizar rol de voluntario: " + e.getMessage());
-                }
-            }
-
+            // 3. Ya no actualizamos el Rol inmediatamente. 
+            // El usuario debe esperar la aprobación del Administrador.
+            
             redirectAttributes.addFlashAttribute("successMessage",
-                    "¡Bienvenido al equipo voluntario! Solicitud enviada con éxito.");
+                    "¡Solicitud enviada! Tu perfil de voluntario está pendiente de revisión por un administrador.");
         } catch (Exception e) {
             String errorMsg = "Error al crear el perfil: " + e.getMessage();
             if (e.getCause() != null)
@@ -747,6 +718,79 @@ public class VoluntarioViewController {
         }
 
         return "redirect:" + WebRoutes.VOLUNTARIOS_BASE;
+    }
+
+    @GetMapping("/web/voluntarios/pendientes")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String listarPendientes(Model model, HttpServletRequest request) {
+        List<Object> pendientes = fetchList("/v1/voluntarios/pendientes");
+        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+        List<Object> perfilesLegales = fetchList("/v1/perfiles-legales");
+
+        Map<String, Object> usuariosMap = new HashMap<>();
+        for (Object u : usuarios) {
+            if (u instanceof Map) {
+                Object id = ((Map<?, ?>) u).get("id");
+                if (id instanceof Number) usuariosMap.put(String.valueOf(((Number) id).intValue()), u);
+            }
+        }
+
+        Map<String, Object> perfilesMap = new HashMap<>();
+        for (Object p : perfilesLegales) {
+            if (p instanceof Map) {
+                Object uId = ((Map<?, ?>) p).get("usuarioId");
+                if (uId instanceof Number) perfilesMap.put(String.valueOf(((Number) uId).intValue()), p);
+            }
+        }
+
+        model.addAttribute("pendientes", pendientes);
+        model.addAttribute("usuariosMap", usuariosMap);
+        model.addAttribute("perfilesMap", perfilesMap);
+        model.addAttribute("currentUri", "/web/voluntarios/pendientes");
+
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return "fragments/content/voluntarios-pendientes :: content";
+        }
+
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), "fragments/content/voluntarios-pendientes");
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    @PostMapping("/web/voluntarios/{id}/aprobar")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
+    public ResponseEntity<String> aprobar(@PathVariable Integer id, HttpServletRequest request) {
+        try {
+            restTemplate.postForEntity(apiUrl + "/v1/voluntarios/" + id + "/aprobar", null, Void.class);
+            
+            if ("true".equals(request.getHeader("HX-Request"))) {
+                return ResponseEntity.ok()
+                    .header("HX-Trigger", "{\"showToast\": {\"message\": \"¡Solicitud aprobada! El nuevo voluntario ya está activo en el equipo.\", \"type\": \"success\"}}")
+                    .body(""); // Eliminamos la fila de la lista
+            }
+        } catch (Exception e) {
+            logger.error("Error al aprobar voluntario {}: {}", id, e.getMessage());
+            return ResponseEntity.status(500).body("Error al procesar la aprobación");
+        }
+        return ResponseEntity.status(302).header("Location", "/web/voluntarios/pendientes").build();
+    }
+
+    @PostMapping("/web/voluntarios/{id}/rechazar")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
+    public ResponseEntity<String> rechazar(@PathVariable Integer id, HttpServletRequest request) {
+        try {
+            restTemplate.postForEntity(apiUrl + "/v1/voluntarios/" + id + "/rechazar", null, Void.class);
+            
+            if ("true".equals(request.getHeader("HX-Request"))) {
+                return ResponseEntity.ok()
+                    .header("HX-Trigger", "{\"showToast\": {\"message\": \"Solicitud rechazada. Se ha actualizado el estado del candidato correctamente.\", \"type\": \"warning\"}}")
+                    .body("");
+            }
+        } catch (Exception e) {
+            logger.error("Error al rechazar voluntario {}: {}", id, e.getMessage());
+        }
+        return ResponseEntity.status(302).header("Location", "/web/voluntarios/pendientes").build();
     }
 
     private List<Object> fetchList(String path) {

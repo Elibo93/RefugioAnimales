@@ -20,12 +20,26 @@ public class EditTareaUseCase {
     private final VoluntarioRepository voluntarioRepository;
     private final PerfilLegalRepository perfilLegalRepository;
     private final es.refugio.refugio.application.service.NotificacionService notificacionService;
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     public Tarea update(EditTareaCommand command) {
         return tareaRepository.getById(command.id())
                 .map(tarea -> {
+                    EstadoTarea estadoAnterior = tarea.getEstado();
                     EstadoTarea estadoEnum = EstadoTarea.valueOf(command.estado().toUpperCase());
                     
+                    // Publicar evento de cambio de estado si ha cambiado
+                    if (estadoEnum != estadoAnterior) {
+                        eventPublisher.publishEvent(es.refugio.refugio.domain.model.tarea.event.TareaStatusChangedEvent.builder()
+                                .tareaId(tarea.getId())
+                                .estadoAnterior(estadoAnterior)
+                                .estadoNuevo(estadoEnum)
+                                .usuarioActorId(command.voluntarioActorId())
+                                .timestamp(java.time.LocalDateTime.now())
+                                .voluntarioIds(command.voluntarioIds())
+                                .build());
+                    }
+
                     // Lógica de Notificaciones
                     
                     // 1. Si la tarea se marca como PROPUESTA, notificar a los voluntarios

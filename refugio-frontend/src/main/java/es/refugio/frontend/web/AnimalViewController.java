@@ -94,8 +94,19 @@ public class AnimalViewController {
             @RequestParam(required = false) List<String> edad,
             @RequestParam(required = false) String sexo,
             @RequestParam(required = false) Boolean urgencia,
+            @RequestParam(required = false) Boolean favoritos,
             @RequestParam(required = false) String q,
             HttpServletRequest request) {
+
+        Integer currentUserId = (Integer) model.getAttribute("currentUserId");
+        List<Integer> misFavoritosIds = List.of();
+        if (currentUserId != null) {
+            try {
+                Integer[] favs = restTemplate.getForObject(apiUrl + "/v1/animales/favoritos?usuarioId=" + currentUserId, Integer[].class);
+                if (favs != null) misFavoritosIds = Arrays.asList(favs);
+            } catch (Exception ignored) {}
+        }
+        model.addAttribute("misFavoritosIds", misFavoritosIds);
 
         try {
             // Construir URL con parámetros de filtro
@@ -125,10 +136,18 @@ public class AnimalViewController {
                         String especieA = a.get("especie") != null ? a.get("especie").toString().toLowerCase() : "";
                         String raza = a.get("raza") != null ? a.get("raza").toString().toLowerCase() : "";
                         
-                        // Solo permitimos buscar por nombre, especie o raza (datos amigables)
                         return nombre.contains(search) || especieA.contains(search) || raza.contains(search);
                     })
                     .toList();
+            }
+
+            if (Boolean.TRUE.equals(favoritos) && !misFavoritosIds.isEmpty()) {
+                List<Integer> finalFavs = misFavoritosIds;
+                animalesList = animalesList.stream()
+                    .filter(a -> finalFavs.contains(((Number) a.get("id")).intValue()))
+                    .toList();
+            } else if (Boolean.TRUE.equals(favoritos)) {
+                animalesList = List.of();
             }
 
             model.addAttribute(ModelAttribute.Animal_LIST.getName(), animalesList);
@@ -160,6 +179,7 @@ public class AnimalViewController {
         model.addAttribute("selectedEdad", edad);
         model.addAttribute("selectedSexo", sexo);
         model.addAttribute("selectedUrgencia", urgencia);
+        model.addAttribute("selectedFavoritos", favoritos);
         model.addAttribute("q", q);
 
         if (successMessage != null)
@@ -394,11 +414,19 @@ public class AnimalViewController {
 
         Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
+
+        try {
+            Integer count = restTemplate.getForObject(apiUrl + "/v1/animales/" + id + "/favoritos/count", Integer.class);
+            model.addAttribute("favoritosCount", count != null ? count : 0);
+        } catch (Exception ignored) {
+            model.addAttribute("favoritosCount", 0);
+        }
+
         return "fragments/content/animales-detalle-modal :: detalle";
     }
 
     @GetMapping(WebRoutes.ANIMALES_DETALLE)
-    public String verDetalle(@PathVariable Integer id, Model model) {
+    public String verDetalle(@PathVariable Integer id, Model model, HttpServletRequest request) {
         // Intentar incrementar visitas (endpoint opcional)
         try {
             restTemplate.postForObject(apiUrl + "/v1/animales/" + id + "/visitas", null, Object.class);
@@ -407,6 +435,13 @@ public class AnimalViewController {
 
         Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + id, Object.class);
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
+
+        try {
+            Integer count = restTemplate.getForObject(apiUrl + "/v1/animales/" + id + "/favoritos/count", Integer.class);
+            model.addAttribute("favoritosCount", count != null ? count : 0);
+        } catch (Exception ignored) {
+            model.addAttribute("favoritosCount", 0);
+        }
 
         // Fetch Historial Médico
         model.addAttribute("historiales", fetchList("/v1/historial-medico/animal/" + id));
@@ -430,6 +465,11 @@ public class AnimalViewController {
         }
 
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Animal_DETALLE.getPath());
+
+        if (request != null && "true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Animal_DETALLE.getPath() + " :: content";
+        }
+
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
@@ -441,6 +481,27 @@ public class AnimalViewController {
         } catch (Exception e) {
             System.err.println("Error llamando a " + path + ": " + e.getMessage());
             return List.of();
+        }
+    }
+
+    @PostMapping("/web/animales/{id}/favorito")
+    @ResponseBody
+    public String toggleFavorito(@PathVariable Integer id, Model model) {
+        Integer currentUserId = (Integer) model.getAttribute("currentUserId");
+        if (currentUserId == null) return "";
+
+        try {
+            Boolean isFavorito = restTemplate.postForObject(apiUrl + "/v1/animales/" + id + "/favorito?usuarioId=" + currentUserId, null, Boolean.class);
+            
+            String svg = Boolean.TRUE.equals(isFavorito) 
+                ? "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"#ef4444\" stroke=\"#ef4444\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\"></path></svg>"
+                : "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\"></path></svg>";
+                
+            String btnClass = Boolean.TRUE.equals(isFavorito) ? "btn-favorito active" : "btn-favorito";
+            
+            return "<button type=\"button\" class=\"" + btnClass + "\" hx-post=\"/web/animales/" + id + "/favorito\" hx-swap=\"outerHTML\">" + svg + "</button>";
+        } catch (Exception e) {
+            return "";
         }
     }
 }

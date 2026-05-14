@@ -62,6 +62,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 List<SimpleGrantedAuthority> authorities = Arrays.stream(rolesStr.split(","))
                         .map(String::trim)
                         .filter(role -> !role.isEmpty())
+                        .flatMap(role -> {
+                            if ("ROLE_VOLUNTARIO_ADOPTANTE".equals(role)) {
+                                return java.util.stream.Stream.of(role, "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE");
+                            }
+                            return java.util.stream.Stream.of(role);
+                        })
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 

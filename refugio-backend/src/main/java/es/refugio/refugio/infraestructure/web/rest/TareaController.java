@@ -44,6 +44,24 @@ public class TareaController {
     private final FindTareaService findTareaService;
     private final EditTareaService editTareaService;
     private final DeleteTareaService deleteTareaService;
+    private final es.refugio.refugio.application.service.tarea.FindTareaHistorialService findTareaHistorialService;
+    private final es.refugio.refugio.domain.repository.PerfilLegalRepository perfilLegalRepository;
+
+    @Operation(summary = "Obtener historial de una tarea")
+    @GetMapping("/{id}/historial")
+    public List<es.refugio.refugio.infraestructure.web.dto.tarea.TareaHistorialResponse> getHistorial(@PathVariable Integer id) {
+        return findTareaHistorialService.findByTareaId(new TareaId(id)).stream()
+                .map(h -> {
+                    String nombre = "Sistema";
+                    if (h.getUsuarioId() != null) {
+                        nombre = perfilLegalRepository.findByUsuarioId(h.getUsuarioId())
+                                .map(p -> p.getNombre() + " " + p.getApellido())
+                                .orElse("Usuario #" + h.getUsuarioId());
+                    }
+                    return es.refugio.refugio.infraestructure.mapper.TareaHistorialMapper.toResponse(h, nombre);
+                })
+                .toList();
+    }
 
     @Operation(summary = "Crear tarea")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Tarea creada"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })

@@ -7,9 +7,13 @@ import es.refugio.refugio.domain.model.donacion.Donacion;
 import es.refugio.refugio.domain.model.donacion.ObjetivoDonacionId;
 import es.refugio.refugio.domain.repository.DonacionRepository;
 import es.refugio.refugio.domain.repository.ObjetivoDonacionRepository;
+import es.refugio.refugio.domain.event.donacion.DonacionCompletedEvent;
 import es.refugio.refugio.domain.model.usuario.UsuarioId;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
@@ -18,9 +22,11 @@ public class CreateDonacionUseCase {
     private final DonacionRepository donacionRepository;
     private final ObjetivoDonacionRepository objetivoRepository;
     private final NotificacionService notificacionService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public Donacion create(CreateDonacionCommand command) {
         Integer targetUserId = command.getUsuarioId();
+        boolean esAnonima = targetUserId == null;
 
         // Si no hay usuarioId (donación anónima), buscar el usuario 'anonimo@refugio.es'
         // El ID 2 corresponde al usuario anónimo en el seed data
@@ -40,6 +46,14 @@ public class CreateDonacionUseCase {
                 .build();
 
         Donacion savedDonacion = donacionRepository.save(donacion);
+
+        // Disparar evento para gamificación (si no es anónima)
+        if (!esAnonima && savedDonacion.getUsuarioId() != null) {
+            eventPublisher.publishEvent(new DonacionCompletedEvent(
+                    Long.valueOf(savedDonacion.getUsuarioId().getValue()), 
+                    BigDecimal.valueOf(savedDonacion.getCantidad())
+            ));
+        }
 
         // Actualizar monto recaudado si hay un objetivo vinculado
         if (command.getObjetivoId() != null) {

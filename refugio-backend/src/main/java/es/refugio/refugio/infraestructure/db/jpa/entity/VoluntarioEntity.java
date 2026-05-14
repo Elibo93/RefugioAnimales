@@ -28,6 +28,10 @@ public class VoluntarioEntity {
     @Column(name = "usuario_id", nullable = false, unique = true)
     private Integer usuarioId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private es.refugio.refugio.domain.model.voluntario.enums.EstadoVoluntario status;
+
     @ManyToMany(mappedBy = "voluntarios")
     private java.util.List<TareaEntity> tareas;
 

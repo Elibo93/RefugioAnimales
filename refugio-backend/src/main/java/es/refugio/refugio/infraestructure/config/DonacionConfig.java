@@ -2,6 +2,7 @@ package es.refugio.refugio.infraestructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.ApplicationEventPublisher;
 
 import es.refugio.refugio.application.service.donacion.CreateDonacionService;
 import es.refugio.refugio.application.service.donacion.DeleteDonacionService;
@@ -42,8 +43,9 @@ public class DonacionConfig {
     public CreateDonacionUseCase createDonacionUseCase(
             DonacionRepository repository,
             ObjetivoDonacionRepository objetivoRepository,
-            NotificacionService notificacionService) {
-        return new CreateDonacionUseCase(repository, objetivoRepository, notificacionService);
+            NotificacionService notificacionService,
+            ApplicationEventPublisher eventPublisher) {
+        return new CreateDonacionUseCase(repository, objetivoRepository, notificacionService, eventPublisher);
     }
 
     @Bean
