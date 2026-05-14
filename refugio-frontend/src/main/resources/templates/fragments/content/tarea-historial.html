@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div th:fragment="content" hx-history="false">
+        <style>
+            .timeline-container { position: relative; padding: 20px 0; }
+            .timeline-container::before { content: ''; position: absolute; left: 81px; top: 0; bottom: 0; width: 2px; background: #e2e8f0; }
+            
+            .timeline-item { position: relative; margin-bottom: 30px; padding-left: 120px; animation: slideInUp 0.4s ease forwards; opacity: 0; }
+            .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+            .timeline-item:nth-child(2) { animation-delay: 0.2s; }
+            .timeline-item:nth-child(3) { animation-delay: 0.3s; }
+            
+            .timeline-dot { position: absolute; left: 74px; top: 0; width: 16px; height: 16px; border-radius: 50%; background: white; border: 3px solid var(--primary); z-index: 1; box-shadow: 0 0 0 4px white; }
+            
+            .timeline-date { position: absolute; left: 0; top: 0; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; width: 65px; text-align: right; line-height: 1.2; }
+            
+            .timeline-content { background: white; border-radius: 16px; padding: 16px 20px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); transition: all 0.3s ease; }
+            .timeline-content:hover { transform: translateX(5px); box-shadow: var(--shadow-md); border-color: var(--primary-light); }
+            
+            .status-change { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+            .status-pill { font-size: 0.7rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; }
+            
+            .status-pill.prev { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+            .status-pill.new { background: rgba(79, 70, 229, 0.1); color: var(--primary); border: 1px solid rgba(79, 70, 229, 0.2); }
+            
+            /* Colores dinámicos para el nuevo estado */
+            .status-pill.new.COMPLETADA, .status-pill.new.FINALIZADA { background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.2); }
+            .status-pill.new.RECHAZADA, .status-pill.new.CANCELADA { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.2); }
+            .status-pill.new.EN_PROCESO, .status-pill.new.ACEPTADA { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-color: rgba(59, 130, 246, 0.2); }
+            .status-pill.new.PROPUESTA { background: rgba(236, 72, 153, 0.1); color: var(--secondary); border-color: rgba(236, 72, 153, 0.2); }
+            
+            .timeline-user { font-size: 0.85rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
+            .timeline-obs { font-size: 0.8rem; color: var(--text-muted); margin-top: 6px; font-style: italic; }
+            
+            @keyframes slideInUp {
+                from { transform: translateY(20px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+        </style>
+
+        <div class="header-section" style="margin-bottom: 2rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <a th:href="@{/web/tareas}" 
+                       hx-get="/web/tareas" 
+                       hx-target="#contenido-dinamico" 
+                       hx-replace-url="true"
+                       hx-history="false"
+                       style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.9rem; text-decoration: none; margin-bottom: 0.5rem; font-weight: 600;">
+                        <i data-lucide="arrow-left" style="width: 16px;"></i>
+                        Volver a Tareas
+                    </a>
+                    <h2 class="user-name page" style="margin: 0;">Historial de Tarea</h2>
+                    <p style="color: var(--text-muted); margin: 5px 0 0; font-size: 0.95rem;">
+                        Trazabilidad de cambios para: <strong style="color: var(--primary);" th:text="${tarea.descripcion}">Tarea</strong>
+                    </p>
+                </div>
+                
+                <div class="task-info-badge" style="background: white; padding: 12px 20px; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 12px;">
+                    <div style="background: var(--bg-main); width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <i data-lucide="activity" style="color: var(--primary); width: 20px;"></i>
+                    </div>
+                    <div>
+                        <span style="display: block; font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">Estado Actual</span>
+                        <span style="font-weight: 800; color: var(--text-main);" th:text="${#strings.replace(tarea.estado, '_', ' ')}">PENDIENTE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline-container">
+            <!-- Si no hay historial -->
+            <div th:if="${#lists.isEmpty(historial)}" 
+                 style="text-align: center; padding: 3rem; background: white; border-radius: 20px; border: 1px dashed var(--border);">
+                <i data-lucide="history" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 1rem; opacity: 0.5;"></i>
+                <h3 style="color: var(--text-main); font-weight: 700;">Sin registros de actividad</h3>
+                <p style="color: var(--text-muted);">Esta tarea aún no ha tenido cambios registrados.</p>
+            </div>
+
+            <!-- Items del Historial -->
+            <div th:each="h : ${historial}" class="timeline-item">
+                <div class="timeline-date">
+                    <span th:text="${#temporals.format(h.fechaCambio, 'dd MMM')}">12 May</span><br>
+                    <span style="font-weight: 400; opacity: 0.7;" th:text="${#temporals.format(h.fechaCambio, 'HH:mm')}">14:30</span>
+                </div>
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="status-change">
+                        <th:block th:if="${h.estadoAnterior != null}">
+                            <span class="status-pill prev" th:text="${#strings.replace(h.estadoAnterior, '_', ' ')}">ESTADO_ANT</span>
+                            <i data-lucide="chevrons-right" style="width: 14px; color: var(--text-muted);"></i>
+                        </th:block>
+                        <span class="status-pill new" th:classappend="${h.estadoNuevo}" th:text="${#strings.replace(h.estadoNuevo, '_', ' ')}">ESTADO_NUEVO</span>
+                    </div>
+                    
+                    <div class="timeline-user">
+                        <i data-lucide="user" style="width: 14px; color: var(--primary);"></i>
+                        <span th:text="${h.usuarioNombre}">Juan Pérez</span>
+                        <span th:if="${h.estadoAnterior == null}" style="font-size: 0.75rem; font-weight: 400; color: var(--text-muted);">(Creador de la tarea)</span>
+                    </div>
+
+                    <div th:if="${h.observaciones != null and !h.observaciones.isEmpty()}" class="timeline-obs">
+                        <span th:text="'&quot;' + ${h.observaciones} + '&quot;'">"Observaciones..."</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            lucide.createIcons();
+        </script>
+    </div>
+</body>
+</html>

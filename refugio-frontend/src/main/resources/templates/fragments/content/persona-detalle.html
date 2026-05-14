@@ -17,15 +17,48 @@
                     </div>
                 </div>
                 
-                <div style="flex: 1; padding-bottom: 10px;">
-                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 8px;">
+                               <!-- Info del Usuario -->
+                <div style="flex: 1; padding-top: 15px;">
+                    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 8px;">
                         <h1 th:text="${persona.get('nombre') != null ? (persona.get('nombre') + ' ' + (persona.get('apellido') ?: '')) : persona.get('username')}" 
-                            style="margin: 0; font-size: 2.5rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em;">Nombre Completo</h1>
+                            style="margin: 0; font-size: 2.2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em;">Nombre Completo</h1>
                         <span class="badge-premium" 
                               th:classappend="${persona.get('rol').toString().contains('ADMIN') ? 'danger' : (persona.get('rol').toString().contains('VOLUNTARIO') ? 'info' : (persona.get('rol').toString().contains('ADOPTANTE') ? 'primary' : 'success'))}"
                               th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(persona.get('rol').toString().replace('ROLE_', ''), '_', ' ')))}">Rol</span>
+                        
+                        <!-- Mini Vitrina de Estatus (Solo si hay logros) -->
+                        <div th:if="${logrosUsuario != null and !logrosUsuario.isEmpty()}" 
+                             style="display: flex; align-items: center; gap: -8px; margin-left: 5px; padding: 6px 14px; background: #f8fafc; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <th:block th:each="lu, iter : ${logrosUsuario}" th:if="${iter.index < 3}">
+                                <th:block th:each="logroInfo : ${todosLosLogros}">
+                                    <a th:if="${logroInfo.id == lu.logroId}" 
+                                       href="#seccion-logros"
+                                       th:title="${logroInfo.nombre + ' (' + logroInfo.rareza + ')&#10;' + logroInfo.descripcion}"
+                                       th:with="zIndex=${3 - iter.index}"
+                                       th:style="'width: 32px; height: 32px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid var(--border); margin-left: -10px; position: relative; z-index: ' + ${zIndex} + '; text-decoration: none; transition: transform 0.2s ease, z-index 0s; cursor: pointer;'"
+                                       onmouseover="this.style.transform='scale(1.15) translateY(-2px)'; this.style.zIndex='10'"
+                                       th:onmouseout="'this.style.transform=\'none\'; this.style.zIndex=\'' + ${zIndex} + '\''"
+                                       th:switch="${logroInfo.codigo}">
+                                        <img th:case="'VOL_PRINCIPIANTE'" th:src="@{/images/logros/primeros-pasos.png}" style="width: 20px; height: 20px; object-fit: contain;">
+                                        <img th:case="'VOL_COMPROMISO_ALTO'" th:src="@{/images/logros/compromiso-firme.png}" style="width: 20px; height: 20px; object-fit: contain;">
+                                        <img th:case="'VOL_LEYENDA'" th:src="@{/images/logros/leyenda-refugio.png}" style="width: 20px; height: 20px; object-fit: contain;">
+                                        <img th:case="'DON_GENEROSO'" th:src="@{/images/logros/corazon-generoso.png}" style="width: 20px; height: 20px; object-fit: contain;">
+                                        <img th:case="'DON_MECENAS'" th:src="@{/images/logros/mecenas-huellas.png}" style="width: 20px; height: 20px; object-fit: contain;">
+                                        <img th:case="'DON_ANGEL'" th:src="@{/images/logros/angel-guardian.png}" style="width: 20px; height: 20px; object-fit: contain;">
+                                        <img th:case="*" th:src="@{/images/logros/placeholder.png}" style="width: 20px; height: 20px; object-fit: contain;">
+                                    </a>
+                                </th:block>
+                            </th:block>
+                            <a href="#seccion-logros" 
+                               style="font-size: 0.75rem; font-weight: 800; color: var(--primary); margin-left: 12px; text-decoration: none; transition: transform 0.2s; cursor: pointer;" 
+                               th:if="${logrosUsuario.size() > 3}"
+                               th:text="${'+' + (logrosUsuario.size() - 3)}"
+                               title="Ver todos los logros"
+                               onmouseover="this.style.transform='scale(1.15)'"
+                               onmouseout="this.style.transform='none'"></a>
+                        </div>
                     </div>
-                    <p style="color: var(--text-muted); font-size: 1.1rem; font-weight: 500; margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <p style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin: 0; display: flex; align-items: center; gap: 8px;">
                         <i data-lucide="at-sign" style="width: 18px;"></i>
                         <span th:text="${persona.get('username')}">@usuario</span>
                     </p>
@@ -40,6 +73,7 @@
             </div>
         </div>
     </div>
+    
 
     <!-- GRID DE INFORMACIÓN -->
     <div style="display: grid; grid-template-columns: 1fr 1.8fr; gap: 2rem;">
@@ -67,7 +101,8 @@
                             </div>
                         </div>
 
-                        <div style="background: var(--bg-body); padding: 20px; border-radius: 20px; border: 1px solid var(--border);">
+                        <div th:if="${currentUserId == persona.get('id')}" 
+                             style="background: var(--bg-body); padding: 20px; border-radius: 20px; border: 1px solid var(--border);">
                             <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 12px;">
                                 <div style="width: 40px; height: 40px; border-radius: 12px; background: white; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm);">
                                     <i data-lucide="key-round" style="width: 20px; color: var(--primary);"></i>
@@ -126,9 +161,62 @@
             </div>
         </div>
 
-        <!-- COLUMNA DERECHA: ACTIVIDAD Y VÍNCULOS -->
+        <!-- COLUMNA DERECHA: ACTIVIDAD Y VÍNCULOS / PANEL ADMIN -->
         <div style="display: flex; flex-direction: column; gap: 2rem;">
             
+            <!-- PANEL DE GESTIÓN ADMINISTRATIVA (Solo para el Admin en su propio perfil) -->
+            <div th:if="${isAdmin and currentUserId == persona.get('id')}" class="glass-card" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); padding: 35px; border-radius: 32px; border: 1px solid var(--primary-light); box-shadow: var(--shadow-md);">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
+                    <div style="width: 50px; height: 50px; border-radius: 16px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 8px 16px rgba(79, 70, 229, 0.2);">
+                        <i data-lucide="layout-dashboard" style="width: 24px;"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.4rem; font-weight: 800; color: var(--text-main);">Centro de Control</h3>
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);">Resumen de gestión y accesos rápidos</p>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 30px;">
+                    <!-- Card Pendientes Adopción -->
+                    <a th:href="@{/web/solicitudes}" style="text-decoration: none; transition: transform 0.2s;">
+                        <div style="padding: 20px; border-radius: 24px; background: #fef2f2; border: 1px solid #fee2e2; display: flex; flex-direction: column; gap: 10px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <i data-lucide="heart" style="color: #ef4444; width: 20px;"></i>
+                                <span style="font-size: 1.5rem; font-weight: 800; color: #b91c1c;" th:text="${pendingAdoptionsCount ?: 0}">0</span>
+                            </div>
+                            <span style="font-size: 0.85rem; font-weight: 700; color: #991b1b;">Adopciones Pendientes</span>
+                        </div>
+                    </a>
+
+                    <!-- Card Pendientes Voluntarios -->
+                    <a th:href="@{/web/voluntarios}" style="text-decoration: none; transition: transform 0.2s;">
+                        <div style="padding: 20px; border-radius: 24px; background: #f0fdf4; border: 1px solid #dcfce7; display: flex; flex-direction: column; gap: 10px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <i data-lucide="users" style="color: #22c55e; width: 20px;"></i>
+                                <span style="font-size: 1.5rem; font-weight: 800; color: #15803d;" th:text="${pendingVolunteersCount ?: 0}">0</span>
+                            </div>
+                            <span style="font-size: 0.85rem; font-weight: 700; color: #166534;">Nuevos Voluntarios</span>
+                        </div>
+                    </a>
+                </div>
+
+                <h4 style="font-size: 0.8rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 15px;">Acciones Frecuentes</h4>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a th:href="@{/web/animales/nuevo}" class="btn btn-outline" style="justify-content: flex-start; gap: 12px; padding: 15px 20px; border-radius: 16px; border-color: var(--border);">
+                        <i data-lucide="plus-circle" style="width: 18px; color: var(--primary);"></i>
+                        Registrar Nuevo Animal
+                    </a>
+                    <a th:href="@{/web/donaciones}" class="btn btn-outline" style="justify-content: flex-start; gap: 12px; padding: 15px 20px; border-radius: 16px; border-color: var(--border);">
+                        <i data-lucide="euro" style="width: 18px; color: #10b981;"></i>
+                        Gestionar Donaciones
+                    </a>
+                    <a th:href="@{/web/personas}" class="btn btn-outline" style="justify-content: flex-start; gap: 12px; padding: 15px 20px; border-radius: 16px; border-color: var(--border);">
+                        <i data-lucide="shield" style="width: 18px; color: #f59e0b;"></i>
+                        Administrar Usuarios y Roles
+                    </a>
+                </div>
+            </div>
+
             <!-- SECCIÓN VOLUNTARIADO -->
             <div th:if="${voluntario != null}" class="glass-card" style="background: white; padding: 35px; border-radius: 24px; border: 1px solid var(--border);">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px;">
@@ -223,33 +311,9 @@
                 </div>
             </div>
 
-            <!-- SECCIÓN: Acciones para perfiles incompletos -->
-
-            <!-- Vista ADMIN: registrar a otro usuario como adoptante/voluntario -->
-            <div th:if="${adoptante == null and voluntario == null and isAdmin}"
-                 style="text-align: center; padding: 40px; background: var(--primary-light); border-radius: 32px; border: 2px dashed var(--primary); opacity: 0.8;">
-                <div style="width: 70px; height: 70px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: var(--shadow-md);">
-                    <i data-lucide="user-plus" style="width: 30px; color: var(--primary);"></i>
-                </div>
-                <h3 style="font-weight: 800; color: var(--primary); margin-bottom: 10px;">Perfil Operativo Pendiente</h3>
-                <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto 25px; font-size: 0.95rem;">
-                    Este usuario actualmente solo tiene una cuenta de acceso. Puedes registrarlo como adoptante o voluntario para habilitar sus funciones operativas.
-                </p>
-                <div style="display: flex; gap: 12px; justify-content: center;">
-                    <a th:href="@{/web/adoptantes/nuevo(usuarioId=${persona.get('id')})}" class="btn btn-primary" style="padding: 10px 20px;">
-                        <i data-lucide="heart" style="width: 16px; margin-right: 8px;"></i>
-                        Registrar Adoptante
-                    </a>
-                    <a th:href="@{/web/voluntarios/nuevo(usuarioId=${persona.get('id')})}" class="btn btn-secondary" style="padding: 10px 20px;">
-                        <i data-lucide="shield-check" style="width: 16px; margin-right: 8px;"></i>
-                        Alta Voluntario
-                    </a>
-                </div>
-            </div>
-
             <!-- Vista PUBLICO: el propio usuario aún no tiene rol operativo -->
             <div th:if="${adoptante == null and voluntario == null and !isAdmin and isPublico}"
-                 style="text-align: center; padding: 48px 40px; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border-radius: 32px; border: 1.5px solid #86efac;">
+                 style="text-align: center; padding: 48px 40px; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border-radius: 32px; border: 1.5px solid #86efac; margin-bottom: 2rem;">
                 <div style="width: 72px; height: 72px; border-radius: 24px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 10px 20px -5px rgba(34, 197, 94, 0.35);">
                     <i data-lucide="sparkles" style="width: 32px; color: white;"></i>
                 </div>
@@ -270,6 +334,32 @@
                     </a>
                 </div>
             </div>
+
+
+            <!-- SECCIÓN: Acciones para perfiles incompletos -->
+
+            <!-- Vista ADMIN: registrar a otro usuario como adoptante/voluntario (No mostrar si es su propio perfil) -->
+            <div th:if="${adoptante == null and voluntario == null and isAdmin and currentUserId != persona.get('id')}"
+                 style="text-align: center; padding: 40px; background: var(--primary-light); border-radius: 32px; border: 2px dashed var(--primary); opacity: 0.8;">
+                <div style="width: 70px; height: 70px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: var(--shadow-md);">
+                    <i data-lucide="user-plus" style="width: 30px; color: var(--primary);"></i>
+                </div>
+                <h3 style="font-weight: 800; color: var(--primary); margin-bottom: 10px;">Perfil Operativo Pendiente</h3>
+                <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto 25px; font-size: 0.95rem;">
+                    Este usuario actualmente solo tiene una cuenta de acceso. Puedes registrarlo como adoptante o voluntario para habilitar sus funciones operativas.
+                </p>
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <a th:href="@{/web/adoptantes/nuevo(usuarioId=${persona.get('id')})}" class="btn btn-primary" style="padding: 10px 20px;">
+                        <i data-lucide="heart" style="width: 16px; margin-right: 8px;"></i>
+                        Registrar Adoptante
+                    </a>
+                    <a th:href="@{/web/voluntarios/nuevo(usuarioId=${persona.get('id')})}" class="btn btn-secondary" style="padding: 10px 20px;">
+                        <i data-lucide="shield-check" style="width: 16px; margin-right: 8px;"></i>
+                        Alta Voluntario
+                    </a>
+                </div>
+            </div>
+
 
         </div>
     </div>
@@ -346,6 +436,12 @@
             outline: none;
         }
     </style>
+
+    <!-- VITRINA DE HONOR: SECCIÓN INFERIOR PREMIUM -->
+    <div th:if="${!persona.get('rol').toString().contains('ADMIN')}" 
+         style="margin-top: 4rem; border-top: 1px solid var(--border); padding-top: 4rem;">
+        <div th:replace="~{fragments/content/gamificacion-perfil :: perfil}"></div>
+    </div>
 
     <script>
         if (window.lucide) lucide.createIcons();

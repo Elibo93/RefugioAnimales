@@ -8,6 +8,8 @@ import es.refugio.refugio.application.service.voluntario.DeleteVoluntarioService
 import es.refugio.refugio.application.service.voluntario.EditVoluntarioService;
 import es.refugio.refugio.application.service.voluntario.FindVoluntarioService;
 import es.refugio.refugio.application.usecase.voluntario.CreateVoluntarioUseCase;
+import es.refugio.refugio.application.usecase.voluntario.ApproveVoluntarioUseCase;
+import es.refugio.refugio.application.service.voluntario.ApproveVoluntarioService;
 import es.refugio.refugio.application.usecase.voluntario.DeleteVoluntarioUseCase;
 import es.refugio.refugio.application.usecase.voluntario.EditVoluntarioUseCase;
 import es.refugio.refugio.application.usecase.voluntario.FindVoluntarioUseCase;
@@ -54,6 +56,17 @@ public class VoluntarioConfig {
     @Bean
     public FindVoluntarioService findVoluntarioService(FindVoluntarioUseCase useCase) {
         return new FindVoluntarioService(useCase);
+    }
+
+    @Bean
+    public ApproveVoluntarioUseCase approveVoluntarioUseCase(VoluntarioRepository repository,
+            NotificacionService notificacionService, org.springframework.web.client.RestTemplate restTemplate) {
+        return new ApproveVoluntarioUseCase(repository, notificacionService, restTemplate);
+    }
+
+    @Bean
+    public ApproveVoluntarioService approveVoluntarioService(ApproveVoluntarioUseCase useCase) {
+        return new ApproveVoluntarioService(useCase);
     }
 
     @Bean

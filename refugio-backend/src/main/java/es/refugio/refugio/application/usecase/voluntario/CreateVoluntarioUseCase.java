@@ -2,6 +2,7 @@ package es.refugio.refugio.application.usecase.voluntario;
 
 import es.refugio.refugio.application.command.voluntario.CreateVoluntarioCommand;
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
+import es.refugio.refugio.domain.model.voluntario.enums.EstadoVoluntario;
 import es.refugio.refugio.domain.repository.VoluntarioRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +29,7 @@ public class CreateVoluntarioUseCase {
                 .usuarioId(command.usuarioId())
                 .disponibilidad(command.disponibilidad())
                 .especialidad(command.especialidad())
+                .estado(EstadoVoluntario.PENDIENTE)
                 .build();
 
         Voluntario saved = voluntarioRepository.save(voluntario);
@@ -35,19 +37,19 @@ public class CreateVoluntarioUseCase {
         // Notificar a los Administradores (por ROL)
         notificacionService.enviarARol(
                 "ROLE_ADMIN",
-                "Nueva Petición de Voluntariado",
-                "Un usuario ha solicitado unirse como voluntario.",
+                "Nueva Solicitud de Voluntariado",
+                "Un usuario ha solicitado unirse como voluntario y espera aprobación.",
                 "SISTEMA",
-                "/web/voluntarios/" + saved.getId().getValue());
+                "/web/voluntarios/pendientes");
 
         // Notificar al propio Voluntario (Personalizado por ID)
         if (command.usuarioId() != null) {
             notificacionService.enviar(
                     command.usuarioId().getValue(),
-                    "Bienvenido al Refugio",
-                    "¡Felicidades! Has sido aceptado como voluntario. Ya puedes ver tus tareas asignadas.",
+                    "Solicitud Recibida",
+                    "Tu solicitud para ser voluntario ha sido recibida correctamente. Te avisaremos cuando un administrador la revise.",
                     "SISTEMA",
-                    "/web/tareas");
+                    "/web/home");
         }
 
         return saved;

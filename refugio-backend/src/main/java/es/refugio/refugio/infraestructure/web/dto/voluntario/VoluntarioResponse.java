@@ -4,6 +4,7 @@ public record VoluntarioResponse(
         Integer id,
         Integer usuarioId,
         String disponibilidad,
-        String especialidad
+        String especialidad,
+        String estado
 ) {
 }

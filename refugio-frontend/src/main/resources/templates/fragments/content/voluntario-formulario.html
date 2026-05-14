@@ -17,7 +17,46 @@
         </div>
 
         <div style="max-width: 850px; margin: 0 auto; padding-bottom: 5rem;">
-            <div class="card" style="padding: 3rem; border-radius: 32px; border: 1px solid var(--border); background: white; box-shadow: var(--shadow-xl);">
+            <!-- CASO: YA EXISTE UNA SOLICITUD (VISTA PREMIUM DE ESTADO) -->
+            <div th:if="${voluntarioExistente != null and voluntario.get('id') == null}" class="card" 
+                 style="padding: 4rem 3rem; border-radius: 32px; border: 1px solid var(--border); background: white; box-shadow: var(--shadow-xl); text-align: center; animation: fadeInUp 0.6s ease-out;">
+                
+                <div th:with="estado=${voluntarioExistente.get('estado')}" style="margin-bottom: 2rem;">
+                    <!-- ICONOS SEGÚN ESTADO -->
+                    <div th:if="${estado == 'PENDIENTE'}" style="margin: 0 auto 2rem; width: 80px; height: 80px; background: #fff7ed; color: #ea580c; border-radius: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(234, 88, 12, 0.1);">
+                        <i data-lucide="clock" style="width: 40px; height: 40px;"></i>
+                    </div>
+                    <div th:if="${estado == 'APROBADO'}" style="margin: 0 auto 2rem; width: 80px; height: 80px; background: #f0fdf4; color: #166534; border-radius: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(22, 101, 52, 0.1);">
+                        <i data-lucide="shield-check" style="width: 40px; height: 40px;"></i>
+                    </div>
+                    <div th:if="${estado == 'RECHAZADO'}" style="margin: 0 auto 2rem; width: 80px; height: 80px; background: #fef2f2; color: #991b1b; border-radius: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(153, 27, 27, 0.1);">
+                        <i data-lucide="alert-octagon" style="width: 40px; height: 40px;"></i>
+                    </div>
+
+                    <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--text-main); margin-bottom: 1rem;" 
+                        th:text="${estado == 'PENDIENTE' ? 'Solicitud en Revisión' : (estado == 'APROBADO' ? '¡Ya eres Voluntario!' : 'Solicitud no aprobada')}">
+                        Estado de Solicitud
+                    </h2>
+                    
+                    <p style="color:var(--text-muted); font-size: 1.1rem; max-width: 500px; margin: 0 auto 2.5rem; line-height: 1.6;"
+                       th:text="${estado == 'PENDIENTE' ? 'Ya hemos recibido tu solicitud. Nuestro equipo la está revisando y te notificaremos muy pronto.' : (estado == 'APROBADO' ? 'Tu cuenta ya tiene acceso a las funciones de voluntariado. ¡Gracias por tu compromiso!' : 'Lamentamos informarte que tu solicitud no ha sido aceptada en este momento. Contacta con nosotros para más información.')}">
+                        Mensaje de estado
+                    </p>
+
+                    <div style="display: flex; gap: 1rem; justify-content: center;">
+                        <a href="/" class="btn" style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: #64748b; background: #f1f5f9; text-decoration: none; transition: all 0.3s;">
+                            Volver al Inicio
+                        </a>
+                        <a th:if="${estado == 'APROBADO'}" href="/web/tareas" class="btn" style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: white; background: #0891b2; text-decoration: none; transition: all 0.3s; box-shadow: 0 4px 6px -1px rgba(8, 145, 178, 0.2);">
+                            Ver mis tareas
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORMULARIO (SOLO SI NO HAY REGISTRO PREVIO) -->
+            <div th:if="${voluntarioExistente == null or voluntario.get('id') != null}" class="card" 
+                 style="padding: 3rem; border-radius: 32px; border: 1px solid var(--border); background: white; box-shadow: var(--shadow-xl);">
                 <form id="volunteerForm"
                     th:action="${voluntario.get('id') == null ? '/web/voluntarios/nuevo' : '/web/voluntarios/' + voluntario.get('id') + '/editar'}"
                     method="post">

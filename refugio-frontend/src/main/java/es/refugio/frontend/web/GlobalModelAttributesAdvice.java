@@ -3,7 +3,6 @@ package es.refugio.frontend.web;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -18,6 +17,8 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 @RequiredArgsConstructor
 public class GlobalModelAttributesAdvice {
+
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalModelAttributesAdvice.class);
 
     private final RestTemplate restTemplate;
 
@@ -118,16 +119,34 @@ public class GlobalModelAttributesAdvice {
 
                 // 4. Check Preferences
                 try {
-                    Map<String, Object> prefs = restTemplate.getForObject(apiUrl + "/v1/preferencias/usuario/" + userId, Map.class);
+                    Map<String, Object> prefs = restTemplate.getForObject(apiUrl + "/v1/preferencias/usuario/" + userId,
+                            Map.class);
                     model.addAttribute("hasPreferences", prefs != null);
                 } catch (Exception e) {
                     model.addAttribute("hasPreferences", false);
+                }
+
+                // 5. Pending Counts for Sidebar (if Admin)
+                if (isAdmin) {
+                    try {
+                        Long pendingAdoptions = restTemplate
+                                .getForObject(apiUrl + "/v1/solicitudes-adopcion/count/pendiente", Long.class);
+                        Long pendingVolunteers = restTemplate.getForObject(apiUrl + "/v1/voluntarios/count/pendiente",
+                                Long.class);
+                        model.addAttribute("pendingAdoptionsCount", pendingAdoptions != null ? pendingAdoptions : 0L);
+                        model.addAttribute("pendingVolunteersCount",
+                                pendingVolunteers != null ? pendingVolunteers : 0L);
+                        model.addAttribute("totalPendingCount", (pendingAdoptions != null ? pendingAdoptions : 0L)
+                                + (pendingVolunteers != null ? pendingVolunteers : 0L));
+                    } catch (Exception e) {
+                        logger.error("Error fetching pending counts: " + e.getMessage());
+                    }
                 }
             } else {
                 setAnonymous(model);
             }
         } catch (Exception e) {
-            System.err.println("DEBUG ERROR: Error en GlobalModelAttributesAdvice: " + e.getMessage());
+            logger.error("Error en GlobalModelAttributesAdvice", e);
             setAnonymous(model);
         }
     }

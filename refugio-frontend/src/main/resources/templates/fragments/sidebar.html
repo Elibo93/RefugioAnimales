@@ -54,10 +54,61 @@
                     </div>
                 </div>
 
-                <!-- Miembros Section -->
+                <!-- Solicitudes Section -->
                 <div class="sidebar-section sidebar-item-group">
                     <div class="sidebar-section-title submenu-toggle">
-                        <div class="title-content"><i data-lucide="users"></i><span>Miembros</span></div>
+                        <div class="title-content">
+                            <i data-lucide="clipboard-list"></i>
+                            <span>Revisiones</span>
+                            <span th:if="${totalPendingCount != null and totalPendingCount > 0}" 
+                                  class="sidebar-badge-dot"></span>
+                        </div>
+                        <i data-lucide="chevron-down" class="chevron-icon"></i>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <div class="sidebar-menu">
+                            <a th:href="@{/web/solicitudes}" class="sidebar-item"
+                                th:classappend="${#strings.contains(currentUri, '/web/solicitudes')} ? 'active' : ''">
+                                <i data-lucide="file-text"></i>
+                                <span th:text="#{solicitud.list.title}">Adopciones</span>
+                                <span th:if="${pendingAdoptionsCount != null and pendingAdoptionsCount > 0}" 
+                                      class="sidebar-badge" th:text="${pendingAdoptionsCount}">0</span>
+                            </a>
+                            <a th:href="@{/web/voluntarios/pendientes}" class="sidebar-item"
+                                th:classappend="${#strings.contains(currentUri, '/web/voluntarios/pendientes')} ? 'active' : ''">
+                                <i data-lucide="user-plus"></i>
+                                <span>Voluntarios</span>
+                                <span th:if="${pendingVolunteersCount != null and pendingVolunteersCount > 0}" 
+                                      class="sidebar-badge" th:text="${pendingVolunteersCount}">0</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1. EL REFUGIO Section -->
+                <div class="sidebar-section sidebar-item-group">
+                    <div class="sidebar-section-title submenu-toggle">
+                        <div class="title-content"><i data-lucide="dog"></i><span>El Refugio</span></div>
+                        <i data-lucide="chevron-down" class="chevron-icon"></i>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <div class="sidebar-menu">
+                            <a th:href="@{/web/animales}" class="sidebar-item"
+                                th:classappend="${#strings.contains(currentUri, '/web/animales')} ? 'active' : ''">
+                                <i data-lucide="dog"></i><span th:text="#{menu.animales.card.title}">Animales</span>
+                            </a>
+                            <a th:href="@{/web/tareas}" class="sidebar-item"
+                                th:classappend="${#strings.contains(currentUri, '/web/tareas')} ? 'active' : ''">
+                                <i data-lucide="check-square"></i><span th:text="#{tarea.list.title}">Tareas</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. COMUNIDAD Section -->
+                <div class="sidebar-section sidebar-item-group">
+                    <div class="sidebar-section-title submenu-toggle">
+                        <div class="title-content"><i data-lucide="users"></i><span>Comunidad</span></div>
                         <i data-lucide="chevron-down" class="chevron-icon"></i>
                     </div>
                     <div class="sidebar-submenu">
@@ -79,52 +130,27 @@
                     </div>
                 </div>
 
-                <!-- Adopciones Section -->
+                <!-- 3. ADMINISTRACIÓN Section -->
                 <div class="sidebar-section sidebar-item-group">
                     <div class="sidebar-section-title submenu-toggle">
-                        <div class="title-content"><i data-lucide="heart"></i><span>Adopciones</span></div>
+                        <div class="title-content"><i data-lucide="settings"></i><span>Administración</span></div>
                         <i data-lucide="chevron-down" class="chevron-icon"></i>
                     </div>
                     <div class="sidebar-submenu">
                         <div class="sidebar-menu">
-                            <a th:href="@{/web/solicitudes}" class="sidebar-item"
-                                th:classappend="${#strings.contains(currentUri, '/web/solicitudes')} ? 'active' : ''">
-                                <i data-lucide="file-text"></i><span
-                                    th:text="#{solicitud.list.title}">Solicitudes</span>
+                            <a th:href="@{/web/donaciones}" class="sidebar-item"
+                                th:classappend="${#strings.contains(currentUri, '/web/donaciones')} ? 'active' : ''">
+                                <i data-lucide="coins"></i><span th:text="#{donacion.list.title}">Donaciones</span>
                             </a>
                             <a th:href="@{/web/adopciones}" class="sidebar-item"
                                 th:classappend="${#strings.contains(currentUri, '/web/adopciones')} ? 'active' : ''">
                                 <i data-lucide="clipboard-check"></i><span
-                                    th:text="#{menu.adopciones.card.title}">Procesadas</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Gestión Section -->
-                <div class="sidebar-section sidebar-item-group">
-                    <div class="sidebar-section-title submenu-toggle">
-                        <div class="title-content"><i data-lucide="settings"></i><span>Gestión</span></div>
-                        <i data-lucide="chevron-down" class="chevron-icon"></i>
-                    </div>
-                    <div class="sidebar-submenu">
-                        <div class="sidebar-menu">
-                            <a th:href="@{/web/animales}" class="sidebar-item"
-                                th:classappend="${#strings.contains(currentUri, '/web/animales')} ? 'active' : ''">
-                                <i data-lucide="dog"></i><span th:text="#{menu.animales.card.title}">Animales</span>
+                                    th:text="#{menu.adopciones.card.title}">Adopciones</span>
                             </a>
                             <a th:href="@{/web/historiales}" class="sidebar-item"
                                 th:classappend="${#strings.contains(currentUri, '/web/historiales')} ? 'active' : ''">
                                 <i data-lucide="stethoscope"></i><span
                                     th:text="#{historial.list.title}">Historiales</span>
-                            </a>
-                            <a th:href="@{/web/donaciones}" class="sidebar-item"
-                                th:classappend="${#strings.contains(currentUri, '/web/donaciones')} ? 'active' : ''">
-                                <i data-lucide="coins"></i><span th:text="#{donacion.list.title}">Donaciones</span>
-                            </a>
-                            <a th:href="@{/web/tareas}" class="sidebar-item"
-                                th:classappend="${#strings.contains(currentUri, '/web/tareas')} ? 'active' : ''">
-                                <i data-lucide="check-square"></i><span th:text="#{tarea.list.title}">Tareas</span>
                             </a>
                         </div>
                     </div>

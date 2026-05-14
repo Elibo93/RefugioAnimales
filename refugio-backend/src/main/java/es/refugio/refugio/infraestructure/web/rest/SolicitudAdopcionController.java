@@ -275,6 +275,16 @@ public class SolicitudAdopcionController {
                 .toList();
     }
 
+    @Operation(summary = "Contar solicitudes pendientes")
+    @GetMapping("/count/pendiente")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
+    public ResponseEntity<Long> countPendientes() {
+        long count = findSolicitudAdopcionService.findAll().stream()
+                .filter(s -> "PENDIENTE".equalsIgnoreCase(s.getEstado().name()))
+                .count();
+        return ResponseEntity.ok(count);
+    }
+
     @Operation(summary = "Listar mis solicitudes", description = "Devuelve solo las solicitudes del usuario autenticado actual.")
     @GetMapping("/mis-solicitudes")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")

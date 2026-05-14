@@ -10,6 +10,7 @@
     
     <!-- Scripts Estáticos (Lógica Principal) -->
     <script th:src="@{/js/scripts.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     
     <script>
         // --- CONFIGURACIÓN GLOBAL DE HTMX ---
@@ -85,6 +86,62 @@
                 showToast(message, type);
             }
         });
+
+        // Integración de SweetAlert2 con hx-confirm
+        document.body.addEventListener('htmx:confirm', function(evt) {
+            if (evt.target.hasAttribute('hx-confirm')) {
+                evt.preventDefault();
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: evt.detail.question,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, proceder',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#15803d', // var(--primary)
+                    cancelButtonColor: '#be123c',  // var(--danger)
+                    background: '#ffffff',
+                    borderRadius: '24px',
+                    customClass: {
+                        popup: 'premium-swal-popup',
+                        title: 'premium-swal-title',
+                        confirmButton: 'btn-premium primary',
+                        cancelButton: 'btn-premium secondary'
+                    }
+                }).then(function(result) {
+                    if (result.isConfirmed) {
+                        evt.detail.issueRequest(true);
+                    }
+                });
+            }
+        });
+
+        // Celebración de Logros (Polling sutil para nuevos logros)
+        function checkNewAchievements() {
+            if (!document.hidden && typeof celebrateAchievement === 'function') {
+                fetch('/web/notificaciones/check-celebraciones')
+                    .then(response => {
+                        if (response.ok && response.headers.get('X-Celebrate')) {
+                            const rawTitle = response.headers.get('X-Celebrate-Title') || '¡Logro!';
+                            const rawMsg = response.headers.get('X-Celebrate-Msg') || '';
+                            const rawImg = response.headers.get('X-Celebrate-Img') || '';
+                            
+                            // Corregir codificación de espacios (+) a %20 para decodeURIComponent
+                            const title = decodeURIComponent(rawTitle.replace(/\+/g, '%20'));
+                            const msg = decodeURIComponent(rawMsg.replace(/\+/g, '%20'));
+                            const imgUrl = rawImg ? decodeURIComponent(rawImg.replace(/\+/g, '%20')) : null;
+                            
+                            celebrateAchievement(title, msg, imgUrl);
+                        }
+                    }).catch(() => {});
+            }
+        }
+
+        // Solo si está autenticado
+        if (document.querySelector('.notification-btn')) {
+            setInterval(checkNewAchievements, 45000); // Cada 45s revisamos
+            setTimeout(checkNewAchievements, 2000);   // Una vez al cargar
+        }
 
         // Disparo de carga inicial
         document.addEventListener('DOMContentLoaded', () => {

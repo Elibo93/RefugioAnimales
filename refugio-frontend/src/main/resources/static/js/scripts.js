@@ -17,63 +17,71 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Inicialización global de componentes
+    // 2. Escuchar eventos de HTMX para re-inicializar componentes tras swaps
+    document.body.addEventListener('htmx:afterSettle', () => {
+        // Para componentes que NO usan delegación (como carruseles o inicializaciones de Lucide)
+        if (window.lucide) lucide.createIcons();
+        
+        // Re-inicializar lógica que dependa de elementos específicos recién llegados
+        const donationSelect = document.getElementById('donation-type-select');
+        if (donationSelect && !donationSelect.dataset.processed) {
+            handleTypeChange();
+            donationSelect.dataset.processed = "true";
+        }
+    });
+
+    // 3. DELEGACIÓN DE EVENTOS (Solución definitiva para Sidebar y Dropdowns)
+    
+    // Lógica del Sidebar (Menú lateral)
+    document.addEventListener('click', (e) => {
+        const openBtn = e.target.closest('#open-sidebar');
+        const closeBtn = e.target.closest('#close-sidebar');
+        const overlay = e.target.closest('#sidebar-overlay');
+        const sidebar = document.getElementById('app-sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        if ((openBtn || closeBtn || overlay) && sidebar && sidebarOverlay) {
+            if (openBtn) e.preventDefault();
+            
+            sidebar.classList.toggle('active');
+            sidebarOverlay.classList.toggle('active');
+            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        }
+
+        // Lógica de Desplegables (Dropdowns)
+        const dropdownTrigger = e.target.closest('.dropdown-trigger');
+        if (dropdownTrigger) {
+            e.stopPropagation();
+            const dropdownMenu = dropdownTrigger.nextElementSibling || document.querySelector('.dropdown-menu');
+            if (dropdownMenu) dropdownMenu.classList.toggle('active');
+        }
+
+        // Lógica de Submenús en el Sidebar (Delegada para resistir htmx:historyRestore)
+        const submenuToggle = e.target.closest('.submenu-toggle');
+        if (submenuToggle) {
+            e.preventDefault();
+            const group = submenuToggle.closest('.sidebar-item-group');
+            if (group) {
+                const submenu = group.querySelector('.sidebar-submenu');
+                group.classList.toggle('open');
+                if (submenu) submenu.classList.toggle('open');
+            }
+        }
+    });
+
+    // Inicialización global de componentes al cargar por primera vez
     refreshDynamicComponents();
 });
 
 // === FUNCIONES GLOBALES ===
 
-// Actualización general de componentes dinámicos
+// Actualización general de componentes dinámicos (Para inicializaciones puntuales)
 function refreshDynamicComponents() {
     if (window.lucide) {
         lucide.createIcons();
     }
 
-    // 1. Lógica del Sidebar (Menú lateral)
-    const openSidebarBtn = document.getElementById('open-sidebar');
-    const closeSidebarBtn = document.getElementById('close-sidebar');
-    const sidebar = document.getElementById('app-sidebar');
-    const sidebarOverlay = document.getElementById('sidebar-overlay');
-
-    if (openSidebarBtn && sidebar && sidebarOverlay && !openSidebarBtn.dataset.listenerRegistered) {
-        const toggleSidebar = () => {
-            sidebar.classList.toggle('active');
-            sidebarOverlay.classList.toggle('active');
-            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
-        };
-
-        openSidebarBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            toggleSidebar();
-        });
-        if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', toggleSidebar);
-        sidebarOverlay.addEventListener('click', toggleSidebar);
-        openSidebarBtn.dataset.listenerRegistered = "true";
-    }
-
-    // 2. Lógica de Desplegables (Dropdowns)
-    const dropdownTrigger = document.querySelector('.dropdown-trigger');
-    const dropdownMenu = document.querySelector('.dropdown-menu');
-    if (dropdownTrigger && dropdownMenu && !dropdownTrigger.dataset.listenerRegistered) {
-        dropdownTrigger.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdownMenu.classList.toggle('active');
-        });
-        dropdownTrigger.dataset.listenerRegistered = "true";
-    }
-
-    // 3. Lógica de Submenús en el Sidebar
-    document.querySelectorAll('.submenu-toggle').forEach(toggle => {
-        if (!toggle.dataset.listenerRegistered) {
-            toggle.addEventListener('click', () => {
-                const group = toggle.closest('.sidebar-item-group');
-                const submenu = group.querySelector('.sidebar-submenu');
-                group.classList.toggle('open');
-                if (submenu) submenu.classList.toggle('open');
-            });
-            toggle.dataset.listenerRegistered = "true";
-        }
-    });
+    // Lógica de Submenús eliminada (ahora está delegada globalmente)
 
     // 4. Inicialización automática de cuadrículas con paginación
     if (document.getElementById('animal-grid-admin')) initPagination('animal-grid-admin');
@@ -660,4 +668,61 @@ function showToast(message, type = 'success') {
         toastHost.style.transform = 'translateY(-20px)';
         setTimeout(() => toastHost.remove(), 500);
     }, 5000);
+}
+
+// 7. Escucha de eventos HTMX para disparar Toasts desde el servidor
+document.body.addEventListener('showToast', (evt) => {
+    if (evt.detail) {
+        showToast(evt.detail.message, evt.detail.type || 'success');
+    }
+});
+/**
+ * Dispara una celebración visual con confeti y un modal premium
+ * @param {string} title Título del logro
+ * @param {string} message Mensaje descriptivo
+ */
+function celebrateAchievement(title, message, imageUrl = null) {
+    if (typeof confetti !== 'undefined') {
+        const count = 200;
+        const defaults = {
+            origin: { y: 0.7 },
+            zIndex: 10000
+        };
+
+        function fire(particleRatio, opts) {
+            confetti({
+                ...defaults,
+                ...opts,
+                particleCount: Math.floor(count * particleRatio)
+            });
+        }
+
+        fire(0.25, { spread: 26, startVelocity: 55 });
+        fire(0.2, { spread: 60 });
+        fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+        fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+        fire(0.1, { spread: 120, startVelocity: 45 });
+    }
+
+    if (window.Swal) {
+        let iconHtml = `<div style="color: #fbbf24; margin-bottom: 10px; font-size: 3rem;">🏆</div>`;
+        if (imageUrl) {
+            iconHtml = `<img src="${imageUrl}" style="width: 100px; height: 100px; object-fit: contain; margin: 0 auto 15px; display: block; filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.15)); animation: float 3s ease-in-out infinite;">`;
+        }
+
+        Swal.fire({
+            title: `${iconHtml} ${title}`,
+            text: message,
+            confirmButtonText: '¡Excelente!',
+            confirmButtonColor: '#15803d',
+            background: '#ffffff',
+            padding: '2.5rem',
+            backdrop: 'rgba(15, 23, 42, 0.4) blur(8px)',
+            customClass: {
+                popup: 'premium-modal-radius achievement-popup',
+                title: 'premium-modal-title',
+                confirmButton: 'premium-modal-btn'
+            }
+        });
+    }
 }

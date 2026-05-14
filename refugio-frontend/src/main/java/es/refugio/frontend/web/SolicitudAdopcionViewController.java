@@ -56,8 +56,14 @@ public class SolicitudAdopcionViewController {
 
     @GetMapping(WebRoutes.SOLICITUDES_BASE)
     @PreAuthorize("hasRole('ADMIN')")
-    public String listar(Model model, @RequestParam(required = false) String successMessage) {
+    public String listar(Model model, HttpServletRequest request, @RequestParam(required = false) String successMessage) {
         List<Object> solicitudes = fetchList("/v1/solicitudes-adopcion");
+        
+        // Filtrar pendientes y en revisión para la sección superior
+        List<Object> pendientes = solicitudes.stream()
+                .filter(s -> s instanceof Map<?, ?> && 
+                        ("PENDIENTE".equals(((Map<?, ?>) s).get("estado")) || "EN_REVISION".equals(((Map<?, ?>) s).get("estado"))))
+                .toList();
         List<Object> animales = fetchList("/v1/animales");
         List<Object> adoptantes = fetchList("/v1/adoptantes");
         List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
@@ -73,10 +79,12 @@ public class SolicitudAdopcionViewController {
 
         Map<String, Map<String, Object>> usuariosMap = new HashMap<>();
         for (Object u : usuarios) {
-            if (u instanceof Map) {
-                Object id = ((Map<?, ?>) u).get("id");
+            if (u instanceof Map<?, ?>) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> um = (Map<String, Object>) u;
+                Object id = um.get("id");
                 if (id instanceof Number)
-                    usuariosMap.put(String.valueOf(((Number) id).intValue()), (Map<String, Object>) u);
+                    usuariosMap.put(String.valueOf(((Number) id).intValue()), um);
             }
         }
 
@@ -146,6 +154,7 @@ public class SolicitudAdopcionViewController {
         }
 
         model.addAttribute(ModelAttribute.Solicitud_LIST.getName(), solicitudes);
+        model.addAttribute("pendientes", pendientes);
         model.addAttribute("animalesMap", animalesMap);
         model.addAttribute("adoptanteNombres", adoptanteNombres);
         model.addAttribute("adoptanteUsuarioIds", adoptanteUsuarioIds);
@@ -153,13 +162,18 @@ public class SolicitudAdopcionViewController {
         if (successMessage != null)
             model.addAttribute("successMessage", successMessage);
         model.addAttribute("currentUri", WebRoutes.SOLICITUDES_BASE);
+
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Solicitud_LIST.getPath() + " :: content";
+        }
+
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Solicitud_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ADOPTANTE')")
     @GetMapping(WebRoutes.SOLICITUDES_MIS_ADOPTADOS)
-    public String misAdoptados(Model model) {
+    public String misAdoptados(Model model, HttpServletRequest request) {
         // 1. Obtener ID del usuario actual del modelo (inyectado por
         // GlobalModelAttributesAdvice)
         Object userIdObj = model.getAttribute("currentUserId");
@@ -227,6 +241,11 @@ public class SolicitudAdopcionViewController {
         model.addAttribute("currentUri", WebRoutes.SOLICITUDES_MIS_ADOPTADOS);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
                 FragmentoContenido.MIS_ADOPTADOS_LISTA.getPath());
+
+        if (request != null && "true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.MIS_ADOPTADOS_LISTA.getPath() + " :: content";
+        }
+
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
@@ -371,39 +390,98 @@ public class SolicitudAdopcionViewController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         restTemplate.delete(apiUrl + "/v1/solicitudes-adopcion/" + id);
-        if ("true".equals(request.getHeader("HX-Request")))
-            return ResponseEntity.ok("");
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return ResponseEntity.ok()
+                .header("HX-Trigger", "{\"showToast\": {\"message\": \"Solicitud eliminada correctamente\", \"type\": \"success\"}}")
+                .body("");
+        }
         return ResponseEntity.status(302).header("Location", WebRoutes.SOLICITUDES_BASE).build();
     }
 
     @PostMapping(WebRoutes.SOLICITUDES_APROBAR)
     @PreAuthorize("hasRole('ADMIN')")
-    public String aprobarSolicitud(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    public String aprobarSolicitud(@PathVariable Integer id, Model model, HttpServletRequest request, HttpServletResponse response, RedirectAttributes redirectAttributes) {
+        String msg = "Solicitud aprobada y adopción registrada correctamente.";
         try {
-            // Llamamos al endpoint específico de aprobación que crea la Adopción automáticamente
             restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/" + id + "/aprobar", null, Object.class);
-            redirectAttributes.addFlashAttribute("successMessage", "Solicitud aprobada y adopción registrada correctamente.");
+            redirectAttributes.addFlashAttribute("successMessage", msg);
+            if ("true".equals(request.getHeader("HX-Request"))) {
+                response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"" + msg + "\", \"type\": \"success\"}}");
+            }
         } catch (Exception e) {
             logger.error("Error al aprobar solicitud: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar la aprobación.");
+            String errorMsg = "Error al procesar la aprobación.";
+            redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
+            if ("true".equals(request.getHeader("HX-Request"))) {
+                response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"" + errorMsg + "\", \"type\": \"error\"}}");
+            }
+        }
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return listar(model, request, null);
         }
         return "redirect:" + WebRoutes.SOLICITUDES_BASE;
     }
 
     @PostMapping(WebRoutes.SOLICITUDES_RECHAZAR)
     @PreAuthorize("hasRole('ADMIN')")
-    public String rechazarSolicitud(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    public String rechazarSolicitud(@PathVariable Integer id, Model model, HttpServletRequest request, HttpServletResponse response, RedirectAttributes redirectAttributes) {
+        String msg = "La solicitud ha sido rechazada correctamente.";
         try {
-            Map<String, Object> existing = restTemplate.getForObject(apiUrl + "/v1/solicitudes-adopcion/" + id,
-                    Map.class);
+            Map<String, Object> existing = restTemplate.exchange(
+                apiUrl + "/v1/solicitudes-adopcion/" + id,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+                
             if (existing != null) {
                 Map<String, Object> body = new HashMap<>(existing);
                 body.put("estado", "RECHAZADA");
                 restTemplate.put(apiUrl + "/v1/solicitudes-adopcion/" + id, body);
-                redirectAttributes.addFlashAttribute("successMessage", "Solicitud rechazada");
+                redirectAttributes.addFlashAttribute("successMessage", msg);
+                if ("true".equals(request.getHeader("HX-Request"))) {
+                    response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"" + msg + "\", \"type\": \"success\"}}");
+                }
             }
         } catch (Exception e) {
             logger.error("Error al rechazar solicitud: " + e.getMessage());
+            if ("true".equals(request.getHeader("HX-Request"))) {
+                response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"Error al rechazar la solicitud\", \"type\": \"error\"}}");
+            }
+        }
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return listar(model, request, null);
+        }
+        return "redirect:" + WebRoutes.SOLICITUDES_BASE;
+    }
+
+    @PostMapping(WebRoutes.SOLICITUDES_REVISION)
+    @PreAuthorize("hasRole('ADMIN')")
+    public String ponerEnRevision(@PathVariable Integer id, Model model, HttpServletRequest request, HttpServletResponse response, RedirectAttributes redirectAttributes) {
+        String msg = "Solicitud marcada 'En Revisión' correctamente.";
+        try {
+            Map<String, Object> existing = restTemplate.exchange(
+                apiUrl + "/v1/solicitudes-adopcion/" + id,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+                
+            if (existing != null) {
+                Map<String, Object> body = new HashMap<>(existing);
+                body.put("estado", "EN_REVISION");
+                restTemplate.put(apiUrl + "/v1/solicitudes-adopcion/" + id, body);
+                redirectAttributes.addFlashAttribute("successMessage", msg);
+                if ("true".equals(request.getHeader("HX-Request"))) {
+                    response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"" + msg + "\", \"type\": \"success\"}}");
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error al poner en revisión: " + e.getMessage());
+            if ("true".equals(request.getHeader("HX-Request"))) {
+                response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"Error al mover a revisión\", \"type\": \"error\"}}");
+            }
+        }
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return listar(model, request, null);
         }
         return "redirect:" + WebRoutes.SOLICITUDES_BASE;
     }
@@ -903,7 +981,7 @@ public class SolicitudAdopcionViewController {
 
     @GetMapping(WebRoutes.SOLICITUDES_DETALLE)
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
-    public String verDetalle(@PathVariable Integer id, Model model) {
+    public String verDetalle(@PathVariable Integer id, Model model, HttpServletRequest request) {
         Map<String, Object> sol = restTemplate.exchange(
                 apiUrl + "/v1/solicitudes-adopcion/" + id,
                 HttpMethod.GET,
@@ -976,6 +1054,11 @@ public class SolicitudAdopcionViewController {
         Object userIdObj = model.getAttribute("currentUserId");
         if (userIdObj != null) {
             model.addAttribute("currentUserId", userIdObj);
+        }
+
+        // Si es una petición HTMX, devolvemos solo el fragmento del contenido
+        if (request != null && "true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Solicitud_DETALLE.getPath() + " :: content";
         }
         
         return ThymTemplates.MAIN_LAYOUT.getPath();

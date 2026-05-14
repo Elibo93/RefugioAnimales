@@ -1,5 +1,6 @@
 package es.refugio.frontend.web;
 
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -365,6 +366,43 @@ public class TareaViewController {
         return ResponseEntity.status(302).header("Location", WebRoutes.TAREAS_BASE).build();
     }
 
+    @GetMapping(WebRoutes.TAREAS_HISTORIAL)
+    public String verHistorial(@PathVariable Integer id, Model model, HttpServletRequest request, HttpServletResponse response) {
+        // Indicar al navegador que la respuesta varía según si es HTMX o no para evitar problemas de caché al dar atrás
+        response.setHeader("Vary", "HX-Request");
+        try {
+            Map<String, Object> tarea = restTemplate.getForObject(apiUrl + "/v1/tareas/" + id, Map.class);
+            List<Map<String, Object>> historialRaw = (List<Map<String, Object>>) restTemplate.getForObject(apiUrl + "/v1/tareas/" + id + "/historial", List.class);
+            
+            List<Map<String, Object>> historial = new ArrayList<>();
+            if (historialRaw != null) {
+                for (Map<String, Object> h : historialRaw) {
+                    Map<String, Object> hMod = new HashMap<>(h);
+                    Object fechaRaw = h.get("fechaCambio");
+                    if (fechaRaw instanceof String) {
+                        try {
+                            hMod.put("fechaCambio", java.time.LocalDateTime.parse((String) fechaRaw));
+                        } catch (Exception ignored) {}
+                    }
+                    historial.add(hMod);
+                }
+            }
+            
+            model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
+            model.addAttribute("historial", historial);
+            model.addAttribute("returnUrl", WebRoutes.TAREAS_BASE);
+        } catch (Exception e) {
+            return "redirect:" + WebRoutes.TAREAS_BASE;
+        }
+
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Tarea_HISTORIAL.getPath() + " :: content";
+        }
+
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Tarea_HISTORIAL.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
     @GetMapping(WebRoutes.TAREAS_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<Object> tareas = fetchList("/v1/tareas");
@@ -413,10 +451,19 @@ public class TareaViewController {
                 vIds.add(voluntarioId);
             }
             
-            // 3. Actualizar la tarea
-            tarea.put("voluntarioIds", vIds);
-            tarea.put("estado", "PROPUESTA"); // Forzar estado de propuesta
-            restTemplate.put(apiUrl + "/v1/tareas/" + id, tarea);
+            // 3. Reconstruir el cuerpo de la petición limpiamente para evitar errores de parseo (ej: fechas como arrays)
+            Map<String, Object> updateBody = new HashMap<>();
+            updateBody.put("descripcion", tarea.get("descripcion"));
+            updateBody.put("estado", "PROPUESTA"); // Forzar estado de propuesta
+            updateBody.put("instrucciones", tarea.get("instrucciones"));
+            updateBody.put("voluntarioIds", vIds);
+            updateBody.put("voluntarioActorId", model.getAttribute("currentUserId"));
+            
+            // Formatear fechas si vienen como arrays [año, mes, dia, hora, min] o Strings
+            updateBody.put("fecha", formatFechaFromMap(tarea.get("fecha")));
+            updateBody.put("fechaLimite", formatFechaFromMap(tarea.get("fechaLimite")));
+
+            restTemplate.put(apiUrl + "/v1/tareas/" + id, updateBody);
             
             // 4. Preparar el Toast profesional vía HTMX Trigger
             String toastMsg = (message != null && !message.isEmpty()) ? message : "Voluntario asignado correctamente";
@@ -426,6 +473,36 @@ public class TareaViewController {
         // 5. Salir del modo selección y volver a la lista de tareas
         // Llamamos a listar para obtener los datos frescos y devolver el fragmento directamente
         return listar(model, prioridad, estado, false, null, null, request, response);
+    }
+
+    private String formatFechaFromMap(Object fechaObj) {
+        if (fechaObj == null) return null;
+        if (fechaObj instanceof String) return (String) fechaObj;
+        if (fechaObj instanceof List) {
+            List<?> list = (List<?>) fechaObj;
+            if (list.size() >= 5) {
+                try {
+                    int y = ((Number) list.get(0)).intValue();
+                    int m = ((Number) list.get(1)).intValue();
+                    int d = ((Number) list.get(2)).intValue();
+                    int h = ((Number) list.get(3)).intValue();
+                    int min = ((Number) list.get(4)).intValue();
+                    return String.format("%04d-%02d-%02dT%02d:%02d:00", y, m, d, h, min);
+                } catch (Exception e) {
+                    System.err.println("Failed to format date array 5: " + list);
+                }
+            } else if (list.size() == 3) {
+                try {
+                    int y = ((Number) list.get(0)).intValue();
+                    int m = ((Number) list.get(1)).intValue();
+                    int d = ((Number) list.get(2)).intValue();
+                    return String.format("%04d-%02d-%02dT00:00:00", y, m, d);
+                } catch (Exception e) {
+                    System.err.println("Failed to format date array 3: " + list);
+                }
+            }
+        }
+        return LocalDateTime.now().toString(); // Fallback
     }
 
     private Map<String, String> fetchVoluntarioNombres() {
