@@ -213,6 +213,32 @@ public class SolicitudAdopcionViewController {
                     }
                 }
             }
+            
+            // AGREGAR ADOPCIONES DIRECTAS (SIN SOLICITUD ASOCIADA) COMO SI FUERAN SOLICITUDES APROBADAS
+            try {
+                List<Map<String, Object>> adopciones = restTemplate.exchange(
+                    apiUrl + "/v1/adopciones/adoptante/" + adoptanteId,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<List<Map<String, Object>>>() {}).getBody();
+                
+                if (adopciones != null) {
+                    for (Map<String, Object> adopcion : adopciones) {
+                        if (adopcion.get("solicitudAdopcionId") == null) {
+                            Map<String, Object> fakeSolicitud = new java.util.HashMap<>();
+                            // ID negativo para identificar que es una adopción directa en el front
+                            fakeSolicitud.put("id", -((Number) adopcion.get("id")).intValue()); 
+                            fakeSolicitud.put("animalId", adopcion.get("animalId"));
+                            fakeSolicitud.put("adoptanteId", adopcion.get("adoptanteId"));
+                            fakeSolicitud.put("estado", "APROBADA");
+                            fakeSolicitud.put("fecha", adopcion.get("fechaAdopcion"));
+                            misSolicitudes.add(fakeSolicitud);
+                        }
+                    }
+                }
+            } catch(Exception e) {
+                logger.warn("No se pudieron obtener adopciones directas para adoptante " + adoptanteId);
+            }
         }
 
         // 4. Si no hay solicitudes, mostrar vista vacía con mensaje personalizado

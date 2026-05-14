@@ -1,100 +1,65 @@
-### Despliegue - Infraestructura y Orquestación
+### Despliegue e Infraestructura (Docker)
 ---
 
-El sistema del **Refugio de Animales** utiliza una arquitectura de microservicios distribuida, orquestada de forma híbrida entre **Docker** (para servicios de infraestructura) y **Maven/JVM** (para la lógica de negocio).
-
----
-
-#### 1. Arquitectura de Servicios (Puertos)
-
-La plataforma se divide en varios módulos que se comunican entre sí. El **API Gateway** es el único punto de entrada público.
-
-| Servicio | Puerto | Descripción |
-| :--- | :--- | :--- |
-| **Eureka Server** | `8761` | Servidor de descubrimiento (Service Registry). |
-| **API Gateway** | `8080` | Punto de entrada único y enrutamiento dinámico. |
-| **Refugio Auth** | `8081` | Gestión de identidades, roles y JWT. |
-| **Refugio Backend** | `8082` | Lógica de negocio, animales, adopciones y tareas. |
-| **Refugio Frontend** | `8083` | Interfaz de usuario (Thymeleaf + HTMX). |
-| **DB Auth** (Docker) | `3306` | Base de datos MySQL para seguridad y usuarios. |
-| **DB Backend** (Docker) | `3307` | Base de datos MySQL para el dominio de negocio. |
+El sistema del **Refugio de Animales** está diseñado bajo una arquitectura de microservicios totalmente **contenedorizada**. Esto garantiza la portabilidad, escalabilidad y facilidad de despliegue en cualquier entorno (desarrollo, pruebas o producción).
 
 ---
 
-#### 📦 Módulos de Soporte (Librerías Compartidas)
+#### 1. Arquitectura de Microservicios
+La plataforma se compone de varios servicios independientes que colaboran entre sí, orquestados mediante **Docker Compose**.
 
-Además de los servicios ejecutables, el sistema cuenta con un núcleo compartido:
-
-*   **Refugio Common**: No es un servicio ejecutable (sin puerto). Es una librería que provee modelos comunes, excepciones personalizadas, utilidades de seguridad y constantes para asegurar que todos los microservicios mantengan la misma estructura de datos y lógica base.
+| Servicio | Contenedor | Puerto Interno | Descripción |
+| :--- | :--- | :--- | :--- |
+| **Eureka Server** | `refugio-eureka` | `8761` | Registro y descubrimiento de servicios. |
+| **API Gateway** | `refugio-gateway` | `8080` | Punto de entrada único y balanceo de carga. |
+| **Auth Service** | `refugio-auth` | `8081` | Seguridad, JWT y gestión de roles. |
+| **Backend Service** | `refugio-backend` | `8082` | Lógica de negocio y dominio animal. |
+| **Frontend UI** | `refugio-frontend` | `8083` | Interfaz de usuario (Thymeleaf/HTMX). |
+| **DB Auth** | `mysql-auth` | `3306` | Persistencia de seguridad. |
+| **DB Backend** | `mysql-backend` | `3306` | Persistencia de negocio. |
 
 ---
 
-#### 2. Infraestructura de Datos (Docker)
+#### 2. Orquestación con Docker Compose
+Toda la infraestructura se levanta con un único comando, eliminando la necesidad de configurar Java o MySQL localmente.
 
-Utilizamos **Docker Compose** para garantizar que los motores de base de datos estén listos y configurados sin necesidad de instalación local.
-
-*   **mysql_refugio_auth**: Persistencia de usuarios y seguridad. Expuesta habitualmente en el puerto `3306`.
-*   **mysql_refugio_backend**: Datos maestros de animales, historiales y procesos. Expuesta habitualmente en el puerto `3307` para evitar colisiones.
-
-##### Detalles Técnicos de la Infraestructura
-*   **Red de Datos (`refugio-network`)**: Los contenedores operan en una red aislada, permitiendo que solo los microservicios autorizados lleguen a los motores de búsqueda.
-*   **Codificación Universal**: Ambos motores están configurados con `--character-set-server=utf8mb4` para soportar descripciones con emojis y caracteres internacionales complejos.
-*   **Persistencia Robusta**: Se utilizan volúmenes de Docker para asegurar que los datos sobrevivan a paradas de contenedores (`down`) o actualizaciones de imagen.
-*   **Alta Disponibilidad Local**: Configurados con `restart: always`, asegurando que los servicios de datos se levanten automáticamente con el sistema operativo host.
-
-##### Comandos Útiles
+##### Comandos Principales:
 ```bash
-# Levantar bases de datos
+# Levantar todo el ecosistema en segundo plano
 docker compose up -d
 
-# Limpiar datos y reiniciar (útil para re-ejecutar semillas de Liquibase)
-docker compose down -v && docker compose up -d
+# Ver el estado de los servicios
+docker compose ps
+
+# Ver logs en tiempo real de un servicio específico
+docker compose logs -f refugio-backend
+
+# Detener y eliminar contenedores y redes
+docker compose down
 ```
 
 ---
 
-#### 3. Configuración de Entorno (.env)
+#### 3. Persistencia de Datos y Archivos
+Para evitar la pérdida de información al reiniciar los contenedores, se utilizan **Volúmenes de Docker**:
 
-El sistema depende de un archivo `.env` en la raíz del proyecto para gestionar secretos y configuraciones dinámicas:
-*   Credenciales de DB (Root passwords).
-*   URLs de conexión entre microservicios.
-*   Configuraciones de almacenamiento de archivos.
-
----
-
-#### 4. Estrategia de Persistencia de Imágenes
-
-Las fotos de los animales no se guardan en la base de datos, sino en el **sistema de archivos** para optimizar el rendimiento:
-
-*   **Ruta Local**: `refugio-backend/uploads/animales/`
-*   **Servicio**: El microservicio `refugio-backend` expone estas imágenes bajo el endpoint `/api/v1/animales/images/**`.
-*   **Persistencia**: En un entorno de producción real, esta carpeta debe mapearse como un **Volumen de Docker** para evitar la pérdida de fotos al actualizar contenedores.
+*   **Volúmenes de DB:** Los datos de MySQL se almacenan en volúmenes persistentes definidos en el host.
+*   **Almacenamiento de Imágenes:** Las fotos de los animales se guardan en un volumen compartido mapeado a `refugio-backend/uploads`. Esto asegura que las imágenes no se pierdan tras un `docker compose down`.
 
 ---
 
-#### 5. Flujo de Comunicación
-
-```mermaid
-graph TD
-    User((👤 Usuario)) --> GW[API Gateway :8080]
-    
-    subgraph Servidores de Aplicación
-        GW --> Auth[Auth Service :8081]
-        GW --> Backend[Backend Service :8082]
-        GW --> Frontend[Frontend :8083]
-    end
-    
-    subgraph Descubrimiento
-        Auth & Backend & Frontend & GW <--> Eureka[Eureka Server :8761]
-    end
-    
-    subgraph Persistencia Docker
-        Auth --> DBAuth[(MySQL Auth)]
-        Backend --> DBBack[(MySQL Backend)]
-        Backend --> FS[FileSystem /uploads]
-    end
-```
+#### 4. Configuración de Red (Docker Network)
+Los microservicios se comunican a través de una red virtual interna denominada `refugio-network`. 
+- El **API Gateway** es el único componente expuesto al exterior (puerto 8080).
+- Las bases de datos y los servicios internos no son accesibles desde fuera de la red de Docker por seguridad, a menos que se mapeen puertos específicos en el `docker-compose.yml`.
 
 ---
 
-[Volver](/README.md)
+#### 5. Flujo de Despliegue Típico
+1.  **Build:** Se generan los archivos `.jar` de cada microservicio mediante Maven.
+2.  **Image Creation:** Se construyen las imágenes de Docker (usando los `Dockerfile` de cada módulo).
+3.  **Deployment:** `docker compose up -d` despliega la nueva versión.
+
+---
+
+[Volver al Índice de Documentación](/README.md)

@@ -17,7 +17,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,6 +48,16 @@ public class ReportController {
                 .orElseThrow(() -> new RuntimeException("Perfil legal del adoptante no encontrado"));
 
         Map<String, Object> data = new HashMap<>();
+
+        // Cargar logo en Base64
+        try {
+            String logoPath = "/home/ely/workspace/RefugioAnimales/refugio-frontend/src/main/resources/static/images/icono_con_eslogan.png";
+            byte[] logoBytes = Files.readAllBytes(Paths.get(logoPath));
+            String logoBase64 = "data:image/png;base64," + Base64.getEncoder().encodeToString(logoBytes);
+            data.put("logoBase64", logoBase64);
+        } catch (Exception e) {
+            // Si falla la carga del logo, el PDF se genera sin él
+        }
         data.put("adoptanteNombre", perfil.getNombre());
         data.put("adoptanteApellido", perfil.getApellido());
         data.put("adoptanteDni", perfil.getDni());
@@ -55,7 +68,7 @@ public class ReportController {
         data.put("animalEspecie", adopcion.getAnimal().getEspecie());
         data.put("animalRaza", adopcion.getAnimal().getRaza());
         data.put("animalEdad", adopcion.getAnimal().getEdad());
-        data.put("animalChip", "N/A"); // Podrías añadir este campo a la entidad animal si existe
+        data.put("animalChip", adopcion.getAnimal().getChipId() != null ? adopcion.getAnimal().getChipId() : "N/A");
 
         data.put("fechaActual", adopcion.getFechaAdopcion().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 

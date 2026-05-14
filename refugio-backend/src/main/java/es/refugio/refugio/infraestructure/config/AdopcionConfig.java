@@ -12,6 +12,7 @@ import es.refugio.refugio.application.usecase.adopcion.DeleteAdopcionUseCase;
 import es.refugio.refugio.application.usecase.adopcion.EditAdopcionUseCase;
 import es.refugio.refugio.application.usecase.adopcion.FindAdopcionUseCase;
 import es.refugio.refugio.domain.repository.AdopcionRepository;
+import es.refugio.refugio.domain.repository.AnimalRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.adopcion.AdopcionEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.adopcion.AdopcionJpaRepositoryImpl;
 
@@ -34,8 +35,8 @@ public class AdopcionConfig {
     }
 
     @Bean
-    public EditAdopcionUseCase editAdopcionUseCase(AdopcionRepository repository) {
-        return new EditAdopcionUseCase(repository);
+    public EditAdopcionUseCase editAdopcionUseCase(AdopcionRepository repository, AnimalRepository animalRepository) {
+        return new EditAdopcionUseCase(repository, animalRepository);
     }
 
     @Bean

@@ -1,8 +1,13 @@
+<!-- Vista de Listado de Donaciones: Panel administrativo para auditar todas las aportaciones recibidas -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
 
+<head>
+    <meta charset="UTF-8">
+</head>
+
 <body>
-    <div th:fragment="content">
+<div th:fragment="content">
         <!-- Impact Section (Ahora filtrado dentro del fragmento para admin/user) -->
         <div th:replace="~{fragments/content/donacion-impacto :: impact}"></div>
 

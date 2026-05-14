@@ -6,13 +6,16 @@ import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.domain.model.animal.AnimalId;
 import es.refugio.refugio.domain.model.adopcion.Adopcion;
 import es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion;
+import es.refugio.refugio.domain.model.animal.enums.EstadoAnimal;
 import es.refugio.refugio.domain.repository.AdopcionRepository;
+import es.refugio.refugio.domain.repository.AnimalRepository;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class EditAdopcionUseCase {
 
     private final AdopcionRepository adopcionRepository;
+    private final AnimalRepository animalRepository;
 
     public Adopcion update(EditAdopcionCommand command) {
         return adopcionRepository.getById(command.id())
@@ -24,6 +27,18 @@ public class EditAdopcionUseCase {
                     adopcion.setFechaAdopcion(command.fechaAdopcion());
                     adopcion.setEstado(estadoEnum);
                     adopcion.setContrato(command.contrato());
+                    
+                    if (estadoEnum == EstadoAdopcion.COMPLETADA) {
+                        animalRepository.getById(adopcion.getAnimalId()).ifPresent(animal -> {
+                            animal.setEstado(EstadoAnimal.ADOPTADO);
+                            animalRepository.save(animal);
+                        });
+                    } else if (estadoEnum == EstadoAdopcion.CANCELADA) {
+                        animalRepository.getById(adopcion.getAnimalId()).ifPresent(animal -> {
+                            animal.setEstado(EstadoAnimal.DISPONIBLE);
+                            animalRepository.save(animal);
+                        });
+                    }
                     
                     return adopcionRepository.save(adopcion);
                 })
