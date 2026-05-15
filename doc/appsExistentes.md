@@ -5,12 +5,12 @@ El mercado de software para refugios cuenta con soluciones que van desde herrami
 
 ## 📊 Comparativa de Soluciones
 
-| Herramienta | Enfoque | Coste | Punto Débil |
-| :--- | :--- | :--- | :--- |
-| **Miwuki (España)** | Red de adopción y gestión | Gratuito | Dependencia de su plataforma de difusión. |
-| **ShelterManager** | Gestión profesional total | Suscripción | Curva de aprendizaje elevada y diseño anticuado. |
-| **Shelterluv** | Comercial (USA) | Pago por transacción | Costes inasumibles para refugios pequeños. |
-| **PetPoint** | Institucional | Variable | Rigidez en la personalización de procesos. |
+| Criterio de Comparación | Miwuki | ShelterManager | **Artia** |
+| :--- | :---: | :---: | :---: |
+| **Arquitectura** | Plataforma SaaS | Monolito Legacy | **Microservicios** |
+| **Soberanía de datos** | El dato es del portal | Local/Pago | **Propia del refugio** |
+| **Gestión Operativa** | Enfocada a adopción | Gestión clínica | **Operativa diaria y tareas** |
+| **Personalización** | Muy baja | Media (configuración) | **Alta (Modular)** |
 
 
 ---

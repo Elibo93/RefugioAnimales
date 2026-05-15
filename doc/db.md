@@ -24,124 +24,240 @@ spring.liquibase.change-log=classpath:db/changelog/db.changelog-master.yaml
 
 #### 2. Modelo de Datos (Diagrama Entidad-Relación)
 
-El sistema utiliza un esquema relacional normalizado que separa las identidades legales de los usuarios y gestiona flujos complejos de adopción y tareas.
+El sistema utiliza un esquema relacional normalizado que separa las identidades legales de los usuarios y gestiona flujos complejos de adopción, tareas, donaciones y gamificación. El diseño sigue una arquitectura de microservicios, donde las bases de datos de **Auth** y **Backend** están aisladas lógicamente.
 
 ```mermaid
 erDiagram
-    USUARIOS {
-        int id PK
-        string email UK
-        string password
-        string role
-    }
-    
-    PERFILES_LEGALES {
-        int id PK
-        string nombre
-        string apellido
-        string dni UK
-        string telefono
-        string direccion
-        date fecha_nacimiento
-        int usuario_id FK
-    }
+    %% --- BASE DE DATOS: REFUGIO_AUTH ---
+    subgraph "Base de Datos: Auth"
+        usuarios {
+            int id PK
+            string email UK
+            string username UK
+            string contrasena
+            string rol
+            datetime created_at
+        }
+    end
 
-    VOLUNTARIOS {
-        int id PK
-        int perfil_legal_id FK
-    }
+    %% --- BASE DE DATOS: REFUGIO_BACKEND ---
+    subgraph "Base de Datos: Backend"
+        animales {
+            int id PK
+            string nombre
+            string especie
+            string especie_personalizada
+            string raza
+            string sexo
+            string chip_id UK
+            string estado
+            int edad
+            string tamano
+            string descripcion
+            string foto
+            double peso
+            int nivel_energia
+            boolean urgencia
+            int visitas
+            datetime fecha_ingreso
+        }
 
-    ADOPTANTES {
-        int id PK
-        int perfil_legal_id FK
-    }
+        perfiles_legales {
+            int id PK
+            int usuario_id FK "UK"
+            string nombre
+            string apellido
+            string dni UK
+            string telefono
+            string direccion
+            string fecha_nacimiento
+        }
 
-    ANIMALES {
-        int id PK
-        string nombre
-        string especie
-        string especie_personalizada
-        string raza
-        string sexo
-        string chip_id UK
-        string estado
-        int edad
-        string tamano
-        string descripcion
-        string foto
-        double peso
-        int nivel_energia
-        boolean urgencia
-        int visitas
-        datetime fecha_ingreso
-    }
+        adoptantes {
+            int id PK
+            int usuario_id UK "FK"
+            string estado_validacion
+            datetime fecha_registro
+        }
 
-    ADOPCIONES {
-        int id PK
-        datetime fecha_adopcion
-        int animal_id FK "1:1"
-        int adoptante_id FK
-    }
+        voluntarios {
+            int id PK
+            int usuario_id UK "FK"
+            string disponibilidad
+            string especialidad
+            string status
+            datetime created_at
+        }
 
-    SOLICITUDES_ADOPCION {
-        int id PK
-        datetime fecha_solicitud
-        string estado
-        int animal_id FK
-        int adoptante_id FK
-    }
+        solicitudes_adopcion {
+            int id PK
+            int animal_id FK
+            int adoptante_id FK
+            datetime fecha
+            string estado
+            string comentario
+            string comentario_admin
+        }
 
-    TAREAS {
-        int id PK
-        string descripcion
-        datetime fecha
-        string estado
-        datetime fecha_limite
-        string instrucciones
-    }
+        adopciones {
+            int id PK
+            int adoptante_id FK
+            int animal_id FK "UK"
+            int solicitud_adopcion_id FK
+            datetime fecha_adopcion
+            string estado
+            string contrato
+        }
 
-    NOTIFICACIONES {
-        int id PK
-        int usuario_id FK
-        string rol
-        string titulo
-        text mensaje
-        datetime fecha
-        boolean leida
-        string tipo
-        string enlace
-    }
+        historial_medicos {
+            int id PK
+            int id_animal FK
+            datetime fecha
+            string descripcion
+            string tratamiento
+            string veterinario
+        }
 
-    HISTORIALES_MEDICOS {
-        int id PK
-        datetime fecha
-        string diagnostico
-        text tratamiento
-        int animal_id FK
-    }
+        animal_favorito {
+            int id PK
+            int usuario_id FK
+            int animal_id FK
+            datetime fecha_creacion
+        }
 
-    DONACIONES {
-        int id PK
-        double cantidad
-        string tipo
-        string moneda
-        datetime fecha
-        int donante_id FK
-    }
+        tareas {
+            int id PK
+            string descripcion
+            datetime fecha
+            string estado
+            datetime fecha_limite
+            string instrucciones
+            boolean notificado_vencimiento
+        }
 
-    %% Relaciones
-    USUARIOS ||--o| PERFILES_LEGALES : "perfil"
-    PERFILES_LEGALES ||--o| VOLUNTARIOS : "es"
-    PERFILES_LEGALES ||--o| ADOPTANTES : "es"
-    ANIMALES ||--o| ADOPCIONES : "1:1"
-    ADOPTANTES ||--o{ ADOPCIONES : "realiza"
-    ANIMALES ||--o{ SOLICITUDES_ADOPCION : "recibe"
-    ADOPTANTES ||--o{ SOLICITUDES_ADOPCION : "solicita"
-    ANIMALES ||--o{ HISTORIALES_MEDICOS : "tiene"
-    VOLUNTARIOS }o--o{ TAREAS : "asignados"
-    USUARIOS ||--o{ NOTIFICACIONES : "recibe"
-    ADOPTANTES ||--o{ DONACIONES : "aporta"
+        voluntarios_tareas {
+            int tarea_id PK "FK"
+            int voluntario_id PK "FK"
+        }
 
+        tarea_historial {
+            int id PK
+            int tarea_id FK
+            int usuario_id FK
+            string estado_anterior
+            string estado_nuevo
+            datetime fecha_cambio
+            string observaciones
+        }
+
+        donaciones {
+            int id PK
+            int usuario_id FK
+            int objetivo_id FK
+            string tipo
+            double cantidad
+            string frecuencia
+            datetime fecha
+            datetime proxima_fecha_pago
+            string descripcion
+        }
+
+        objetivos_donacion {
+            int id PK
+            string titulo
+            string descripcion
+            double monto_objetivo
+            double monto_recaudado
+            string prioridad
+            string estado
+            datetime fecha_inicio
+            datetime fecha_limite
+            string icono
+        }
+
+        notificaciones {
+            int id PK
+            int usuario_id FK
+            string rol
+            string titulo
+            string mensaje
+            datetime fecha
+            boolean leida
+            string tipo
+            string enlace
+        }
+
+        preferencias_adopcion {
+            int id PK
+            int usuario_id UK "FK"
+            int edad_max
+            int nivel_energia_max
+            boolean notificaciones_activas
+            boolean encuesta_omitida
+            datetime created_at
+            datetime updated_at
+        }
+
+        preferencias_especies {
+            int preferencia_id FK
+            string especie
+        }
+        preferencias_tamanos {
+            int preferencia_id FK
+            string tamano
+        }
+        preferencias_sexos {
+            int preferencia_id FK
+            string sexo
+        }
+
+        gamificacion_logro {
+            long id PK
+            string codigo UK
+            string nombre
+            string descripcion
+            string categoria
+            string requisito_tipo
+            decimal requisito_valor
+            string icono_lucide
+            string rareza
+        }
+
+        gamificacion_usuario_logros {
+            long usuario_id PK "FK"
+            long logro_id PK "FK"
+            datetime fecha_desbloqueo
+        }
+
+        gamificacion_usuario_metricas {
+            long usuario_id PK "FK"
+            int tareas_completadas
+            decimal total_donado
+            datetime fecha_primer_aporte
+            datetime ultima_actualizacion
+        }
+    end
+
+    %% Relaciones Lógicas y Físicas
+    usuarios ||--o| perfiles_legales : "perfil"
+    usuarios ||--o| adoptantes : "es"
+    usuarios ||--o| voluntarios : "es"
+    animales ||--o| adopciones : "1:1"
+    adoptantes ||--o{ adopciones : "formaliza"
+    animales ||--o{ solicitudes_adopcion : "recibe"
+    adoptantes ||--o{ solicitudes_adopcion : "presenta"
+    animales ||--o{ historial_medicos : "tiene"
+    voluntarios }o--o{ tareas : "asignados (N:M)"
+    usuarios ||--o{ notificaciones : "recibe"
+    usuarios ||--o{ donaciones : "realiza"
+    usuarios ||--o{ animal_favorito : "marca"
+    objetivos_donacion ||--o{ donaciones : "recibe fondos"
+    preferencias_adopcion ||--o{ preferencias_especies : "incluye"
+    preferencias_adopcion ||--o{ preferencias_tamanos : "incluye"
+    preferencias_adopcion ||--o{ preferencias_sexos : "incluye"
+    gamificacion_logro ||--o{ gamificacion_usuario_logros : "obtenido por"
+    usuarios ||--o| gamificacion_usuario_metricas : "posee"
+    tareas ||--o{ tarea_historial : "rastrea"
 ```
 
 ---
