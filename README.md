@@ -60,9 +60,11 @@ Bienvenido a la plataforma de gestión de **Refugio de Animales**, una solución
 
 *   **Centro de Notificaciones**: Alertas en tiempo real para voluntarios y administradores.
 *   **Gestión Médica**: Historial clínico detallado por cada animal.
-*   **Módulo de Donaciones**: Pasarela segura para apoyo económico.
-*   **Asignación de Tareas**: Sistema de gestión operativa para el staff del refugio.
+*   **Módulo de Donaciones**: Pasarela segura para apoyo económico y seguimiento de objetivos.
+*   **Asignación de Tareas**: Sistema de gestión operativa con historial de cambios para el staff.
 *   **Fichas con Imagen**: Almacenamiento eficiente de fotos en el sistema de archivos.
+*   **Gamificación y Logros**: Sistema de recompensas y métricas personales para fomentar la participación.
+*   **Animales Favoritos**: Herramienta de seguimiento personalizado para adoptantes interesados.
 
 ---
 

@@ -25,6 +25,7 @@ Gestión estratégica y supervisión de la operativa.
 *   **RF-ADM-04: Generación de Documentación Legal:** Generación automática en PDF del **Contrato de Adopción** y del **Certificado de Ingreso** con datos autocompletados.
 *   **RF-ADM-05: Asignación de Tareas:** Capacidad de asignar animales y tareas específicas (limpieza, medicación, paseo) a voluntarios.
 *   **RF-ADM-06: Panel de Estadísticas:** Visualización de métricas clave como número de adopciones mensuales, stock de animales y volumen de donaciones.
+*   **RF-ADM-07: Gestión de Logros:** Configuración de logros y recompensas dentro del sistema de gamificación.
 
 ---
 
@@ -54,6 +55,8 @@ Usuario autenticado interesado en colaborar o adoptar.
 *   **RF-ADO-03: Gestión de Perfil Personal:** Actualización de datos de contacto y preferencias de adopción.
 *   **RF-ADO-04: Pasarela de Donaciones:** Realización de aportaciones económicas y consulta del histórico de donaciones realizadas.
 *   **RF-ADO-05: Acceso a Documentación:** Descarga de contratos de adopción una vez que el proceso ha sido finalizado y aprobado por el administrador.
+*   **RF-ADO-06: Gestión de Favoritos:** Capacidad de marcar animales como favoritos para un acceso rápido y seguimiento.
+*   **RF-ADO-07: Sistema de Logros y Recompensas:** Visualización de logros desbloqueados y progreso de métricas personales (donaciones, tareas) mediante el panel de gamificación.
 
 ---
 
