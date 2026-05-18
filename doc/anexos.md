@@ -7,7 +7,7 @@ Este apartado recopila material de soporte para la implementación y auditoría 
 Instrucciones para clonar el repositorio y ejecutar `docker compose up` para iniciar el sistema en segundos.
 
 #### Anexo B. Diccionario de Datos
-Tablas descriptivas de las entidades `Animal`, `Persona`, `Adopcion` y `Seguimiento`, definiendo tipos de datos, claves primarias y restricciones de integridad.
+Tablas descriptivas de las entidades del sistema (Animal, Persona, Adopción, Gamificación, Donaciones, Seguimiento), definiendo tipos de datos, claves primarias y restricciones de integridad.
 
 #### Anexo C. Especificación OpenAPI (Swagger)
 Referencia completa de los endpoints de la API (REST JSON) para posibles integraciones futuras con una APP móvil para voluntarios.

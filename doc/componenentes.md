@@ -3,6 +3,19 @@
 
 El **Sistema de Gestión del Refugio** está diseñado bajo una **Arquitectura de Microservicios** distribuida, utilizando el ecosistema de **Spring Cloud**. Cada módulo es independiente, escalable y se comunica a través de una red interna protegida.
 
+## 🗺️ Mapa Visual de la Arquitectura
+
+A continuación se presenta un diagrama de alto nivel que muestra la interacción entre los diferentes componentes del ecosistema:
+
+```mermaid
+graph LR
+    User((Usuario)) <--> Gateway[API Gateway]
+    Gateway <--> Auth[Servicio Auth]
+    Gateway <--> Backend[Refugio Backend]
+    Backend <--> DB[(MySQL)]
+    Backend <--> Filesystem[Almacenamiento Fotos]
+```
+
 ## 🌩️ Infraestructura de Microservicios
 
 El sistema se apoya en tres componentes críticos de infraestructura que orquestan el tráfico y la seguridad:
@@ -23,7 +36,7 @@ Dentro de cada microservicio de negocio (como `refugio-backend`), seguimos los p
 
 ### 1. Capa de Dominio (Domain)
 El corazón del sistema. Aquí residen las entidades y reglas de negocio puras, sin dependencias de frameworks.
-*   **Entidades:** `Animal`, `Adoptante`, `Voluntario`, `SolicitudAdopcion`, `Adopcion`, `Tarea`, `HistorialMedico`, `Donacion`, `Notificacion`.
+*   **Entidades:** `Animal`, `Adoptante`, `Voluntario`, `SolicitudAdopcion`, `Adopcion`, `Tarea`, `HistorialMedico`, `Donacion`, `Notificacion`, `Logro`, `UsuarioLogro`, `UsuarioMetricas`, `ObjetivoDonacion`, `FavoritoAnimal`, `TareaHistorial`.
 *   **Repositorios (Interfaces):** Definen cómo se accede a los datos sin decir "cómo" se guardan.
 *   **Excepciones de Dominio:** Errores específicos del refugio (ej: `AnimalYaAdoptadoException`).
 
