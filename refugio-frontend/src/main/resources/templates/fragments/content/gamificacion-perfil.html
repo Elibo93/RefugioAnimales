@@ -6,11 +6,11 @@
 
     <!-- Métricas Rápidas -->
     <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-        <div th:if="${persona.get('rol').toString().contains('VOLUNTARIO')}" class="metric-card glass-panel" style="padding: 1.5rem; border-radius: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <div th:if="${persona.rol.toString().contains('VOLUNTARIO')}" class="metric-card glass-panel" style="padding: 1.5rem; border-radius: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: center; align-items: center;">
             <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Tareas Completadas</div>
             <div style="font-size: 2rem; font-weight: 800; color: var(--primary-color);" th:text="${metricas != null ? metricas.tareasCompletadas : 0}">0</div>
             
-            <a th:if="${metricas == null or metricas.tareasCompletadas == 0}" 
+            <a th:if="${(metricas == null or metricas.tareasCompletadas == 0) and (currentUserId == persona.id)}" 
                th:href="@{/web/tareas}" 
                class="btn btn-outline" 
                style="margin-top: 12px; padding: 6px 14px; font-size: 0.75rem; border-radius: 12px; border: 1.5px dashed var(--primary); color: var(--primary); text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 800; display: inline-flex; align-items: center; gap: 6px; background: transparent;"
@@ -26,8 +26,8 @@
             <div style="font-size: 2rem; font-weight: 800; color: #10b981;" th:text="${metricas.totalDonado + '€'}">0€</div>
         </div>
 
-        <!-- Card: CTA Donación (Si no ha donado nada) -->
-        <div th:if="${metricas == null or metricas.totalDonado == 0}" class="metric-card glass-panel" style="padding: 1.5rem; border-radius: 16px; text-align: center; border: 1px dashed rgba(255,255,255,0.2); background: rgba(255,255,255,0.01);">
+        <!-- Card: CTA Donación (Si no ha donado nada y es el dueño del perfil) -->
+        <div th:if="${(metricas == null or metricas.totalDonado == 0) and (currentUserId == persona.id)}" class="metric-card glass-panel" style="padding: 1.5rem; border-radius: 16px; text-align: center; border: 1px dashed rgba(255,255,255,0.2); background: rgba(255,255,255,0.01);">
             <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.8rem;">¿Quieres tu primera medalla?</div>
             <a th:href="@{/web/donaciones/nueva}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; background: #10b981; border-color: #10b981;">
                 <i data-lucide="heart" style="width: 14px;"></i>
@@ -43,7 +43,7 @@
         
         <div class="badges-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 2rem; position: relative; z-index: 1;">
             <div th:each="logro : ${todosLosLogros}" 
-                 th:if="${logro.categoria != 'VOLUNTARIO' or persona.get('rol').toString().contains('VOLUNTARIO')}"
+                 th:if="${logro.categoria != 'VOLUNTARIO' or persona.rol.toString().contains('VOLUNTARIO')}"
                  class="badge-card" 
                  th:classappend="${#lists.contains(logrosUsuario.![logroId], logro.id) ? 'unlocked ' + logro.rareza.toLowerCase() : 'locked'}"
                  style="position: relative; padding: 2rem 1.5rem; border-radius: 24px; text-align: center; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; background: white; border: 2px solid #f1f5f9; box-shadow: var(--shadow-sm);">

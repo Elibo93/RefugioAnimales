@@ -7,14 +7,14 @@
 </head>
 
 <body>
-<div th:fragment="content">
+    <div th:fragment="content" hx-history="false">
         <!-- Cabecera Premium -->
         <div class="page-header" style="text-align:center; margin-bottom: 3rem;">
             <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: #fee2e2; color: #ef4444; border-radius: 20px; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm);">
                 <i data-lucide="stethoscope" style="width: 32px; height: 32px;"></i>
             </div>
             <h1 style="font-weight: 800; color: var(--text-main); font-size: 2.25rem; margin-bottom: 0.5rem; letter-spacing: -0.02em;">
-                <span th:text="${historial.get('id') == null ? #messages.msg('historial.form.title') : #messages.msg('historial.modal.edit.title')}">
+                <span th:text="${historial.id == null ? #messages.msg('historial.form.title') : #messages.msg('historial.modal.edit.title')}">
                     Registro Médico
                 </span>
             </h1>
@@ -24,7 +24,7 @@
         </div>
 
         <div style="max-width: 850px; margin: 0 auto; background: white; border-radius: 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; overflow: hidden;">
-            <form th:action="${historial.get('id') == null ? '/web/historiales/nuevo' : '/web/historiales/' + historial.get('id') + '/editar'}"
+            <form th:action="${historial.id == null ? '/web/historiales/nuevo' : '/web/historiales/' + historial.id + '/editar'}"
                   method="post" style="padding: 3rem;">
 
                 <!-- SECCIÓN 1: ANIMAL Y VISITA -->
@@ -37,7 +37,7 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
                          <!-- Buscador de Animal (Estilo Adopción) -->
                         <div style="grid-column: 1 / -1;">
-                            <div th:if="${historial.get('id') == null}" style="position: relative;">
+                            <div th:if="${historial.id == null}" style="position: relative;">
                                 <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">
                                     <i data-lucide="search" style="width: 18px; color: #ef4444;"></i>
                                     Buscar Animal
@@ -51,22 +51,22 @@
                                             hx-trigger="keyup changed delay:300ms, focus"
                                             hx-target="#animal-suggestions"
                                             style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; transition: all 0.3s; outline: none;">
-                                    <input type="hidden" name="animalId" id="animalId-input" required th:value="${historial.get('animalId')}">
+                                    <input type="hidden" name="animalId" id="animalId-input" required th:value="${historial.animalId}">
                                 </div>
                                 <div id="animal-suggestions" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 100;"></div>
                             </div>
 
                             <!-- Card de Animal Seleccionado -->
                             <div id="selected-animal-card" 
-                                 th:style="${historial.get('id') != null ? 'display: flex;' : 'display: none;'} + ' margin-top: 1rem; padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; align-items: center; gap: 1.25rem; box-shadow: var(--shadow-sm);'">
+                                 th:style="${historial.id != null ? 'display: flex;' : 'display: none;'} + ' margin-top: 1rem; padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; align-items: center; gap: 1.25rem; box-shadow: var(--shadow-sm);'">
                                 <div style="width: 52px; height: 52px; border-radius: 12px; overflow: hidden; background: white; border: 1px solid #e2e8f0; flex-shrink: 0;">
-                                    <img id="selected-animal-img" th:src="${animalData != null ? animalData.get('foto') : ''}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    <img id="selected-animal-img" th:src="${animalData != null ? animalData.foto : ''}" style="width: 100%; height: 100%; object-fit: cover;">
                                 </div>
                                 <div style="flex: 1;">
-                                    <strong id="selected-animal-name" th:text="${animalData != null ? animalData.get('nombre') : ''}" style="display: block; font-size: 1.1rem; color: var(--text-main);"></strong>
-                                    <span id="selected-animal-species" th:text="${animalData != null ? #strings.capitalize(#strings.toLowerCase(animalData.get('especie'))) : ''}" style="font-size: 0.85rem; color: #64748b;"></span>
+                                    <strong id="selected-animal-name" th:text="${animalData != null ? animalData.nombre : ''}" style="display: block; font-size: 1.1rem; color: var(--text-main);"></strong>
+                                    <span id="selected-animal-species" th:text="${animalData != null ? #strings.capitalize(#strings.toLowerCase(animalData.especie)) : ''}" style="font-size: 0.85rem; color: #64748b;"></span>
                                 </div>
-                                <button type="button" onclick="clearAnimalSelection()" th:if="${historial.get('id') == null}" style="background: #fee2e2; border: none; color: #ef4444; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                <button type="button" onclick="clearAnimalSelection()" th:if="${historial.id == null}" style="background: #fee2e2; border: none; color: #ef4444; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                                     <i data-lucide="x" style="width: 18px;"></i>
                                 </button>
                             </div>
@@ -75,7 +75,7 @@
                         <!-- Veterinario -->
                         <div class="form-group">
                             <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{historial.field.veterinario}">Veterinario responsable</label>
-                            <input type="text" name="veterinario" th:value="${historial.get('veterinario')}" required placeholder="Nombre del profesional"
+                            <input type="text" name="veterinario" th:value="${historial.veterinario}" required placeholder="Nombre del profesional"
                                    style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; transition: all 0.3s;">
                         </div>
 
@@ -83,7 +83,7 @@
                         <div class="form-group">
                             <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">Fecha y Hora</label>
                             <input type="datetime-local" name="fecha" required
-                                   th:value="${historial.get('fecha') != null ? #strings.substring(historial.get('fecha').toString(), 0, 16) : #calendars.format(#calendars.createNow(), 'yyyy-MM-dd''T''HH:mm')}"
+                                   th:value="${historial.fecha != null ? #strings.substring(historial.fecha.toString(), 0, 16) : #calendars.format(#calendars.createNow(), 'yyyy-MM-dd''T''HH:mm')}"
                                    style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none;">
                         </div>
                     </div>
@@ -99,7 +99,7 @@
                     <!-- Descripción -->
                     <div style="margin-bottom: 2rem;">
                         <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{historial.field.descripcion}">Motivo de la consulta / Diagnóstico</label>
-                        <textarea name="descripcion" th:text="${historial.get('descripcion')}" required 
+                        <textarea name="descripcion" th:text="${historial.descripcion}" required 
                                   placeholder="Describe los síntomas observados o el diagnóstico realizado..."
                                   style="width: 100%; min-height: 120px; padding: 1.25rem; border-radius: 18px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; resize: vertical; transition: all 0.3s;"></textarea>
                     </div>
@@ -107,7 +107,7 @@
                     <!-- Tratamiento -->
                     <div style="margin-bottom: 1rem;">
                         <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{historial.field.tratamiento}">Tratamiento prescrito</label>
-                        <textarea name="tratamiento" th:text="${historial.get('tratamiento')}" 
+                        <textarea name="tratamiento" th:text="${historial.tratamiento}" 
                                   placeholder="Medicación, dosis, recomendaciones o próximas revisiones..."
                                   style="width: 100%; min-height: 120px; padding: 1.25rem; border-radius: 18px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; resize: vertical; transition: all 0.3s;"></textarea>
                     </div>
@@ -115,8 +115,10 @@
 
                 <!-- ACCIONES -->
                 <div style="margin-top: 4rem; display: flex; gap: 1.5rem; justify-content: flex-end; border-top: 1px solid #f1f5f9; padding-top: 2rem;">
-                    <a th:href="@{/web/historiales}" class="btn" 
-                       style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: #64748b; background: #f1f5f9; text-decoration: none; transition: all 0.2s;">
+                    <a th:hx-get="${historial.id == null ? '/web/historiales' : '/web/historiales/' + historial.id + '/detalle'}"
+                       hx-target="#contenido-dinamico" hx-replace-url="true" hx-history="false" hx-swap="innerHTML show:window:top"
+                       class="btn" 
+                       style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: #64748b; background: #f1f5f9; text-decoration: none; transition: all 0.2s; cursor: pointer;">
                         Cancelar
                     </a>
                     <button type="submit" class="btn btn-primary" 

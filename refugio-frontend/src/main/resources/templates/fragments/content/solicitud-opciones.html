@@ -14,7 +14,7 @@
         </div>
         
         <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--text-main); margin-bottom: 1rem;">
-            Un paso más para conocer a <span th:text="${animal.get('nombre')}"></span>
+            Un paso más para conocer a <span th:text="${animal.nombre()}"></span>
         </h1>
         <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto;">
             Para continuar con el proceso de adopción, necesitamos saber quién eres. ¿Ya tienes una cuenta en nuestro refugio?
@@ -27,7 +27,7 @@
                 <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 2rem;">
                     Inicia sesión para usar tus datos guardados y enviar la solicitud rápidamente.
                 </p>
-                <a th:href="@{/login(redirect='/web/solicitudes/publico/opciones?animalId=' + ${animal.get('id')})}" 
+                <a th:href="@{/login(redirect='/web/solicitudes/publico/opciones?animalId=' + ${animal.id()})}" 
                    class="btn btn-secondary" style="width: 100%; justify-content: center;">
                     <i data-lucide="log-in"></i>
                     <span>Iniciar Sesión</span>
@@ -40,7 +40,7 @@
                 <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 2rem;">
                     Crea tu cuenta de adoptante y envía la solicitud en un solo paso.
                 </p>
-                <a th:href="@{/web/solicitudes/publico/registro-y-adopcion(animalId=${animal.get('id')})}" 
+                <a th:href="@{/web/solicitudes/publico/registro-y-adopcion(animalId=${animal.id()})}" 
                    class="btn btn-primary" style="width: 100%; justify-content: center;">
                     <i data-lucide="user-plus"></i>
                     <span>Registrarse y Adoptar</span>

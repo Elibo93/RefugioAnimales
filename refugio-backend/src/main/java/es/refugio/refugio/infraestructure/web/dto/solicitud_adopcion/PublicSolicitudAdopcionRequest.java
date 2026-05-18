@@ -1,6 +1,8 @@
 package es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import es.refugio.refugio.infraestructure.web.validation.ValidDni;
 
 /**
  * DTO simplificado para el registro de una solicitud de adopción tras un alta
@@ -16,9 +18,9 @@ public record PublicSolicitudAdopcionRequest(
         String comentario,
 
         // Datos del Perfil Legal para creación automática
-        String nombre,
-        String apellido,
-        String dni,
+        @NotBlank(message = "El nombre es obligatorio") String nombre,
+        @NotBlank(message = "El apellido es obligatorio") String apellido,
+        @NotBlank(message = "El DNI es obligatorio") @ValidDni String dni,
         String telefono,
         String direccion,
         String fechaNacimiento) {

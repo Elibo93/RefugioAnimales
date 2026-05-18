@@ -57,13 +57,13 @@
             </tr>
         </thead>
         <tbody>
-            <tr th:each="a : ${adoptantes}" th:with="u=${usuariosMap != null ? usuariosMap[a.get('usuarioId')] : null}">
-                <td th:text="${a.get('id')}"></td>
-                <td th:text="${u != null ? u.get('nombre') : 'Usuario ' + a.get('usuarioId')}"></td>
-                <td th:text="${u != null ? u.get('apellido') : ''}"></td>
-                <td th:text="${a.get('dni')}"></td>
-                <td th:text="${a.get('direccion')}"></td>
-                <td th:text="${a.get('estadoValidacion')}"></td>
+            <tr th:each="a : ${adoptantes}" th:with="u=${usuariosMap != null ? usuariosMap['' + a.usuarioId] : null}, p=${perfilesMap != null ? perfilesMap['' + a.usuarioId] : null}">
+                <td th:text="${a.id}"></td>
+                <td th:text="${p != null ? p.nombre : (u != null ? u.username : 'Usuario ' + a.usuarioId)}"></td>
+                <td th:text="${p != null ? p.apellido : ''}"></td>
+                <td th:text="${p != null ? p.dni : '-'}"></td>
+                <td th:text="${p != null ? p.direccion : '-'}"></td>
+                <td th:text="${a.estadoValidacion}"></td>
             </tr>
         </tbody>
     </table>

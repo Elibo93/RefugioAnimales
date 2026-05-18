@@ -21,11 +21,11 @@
 
         <div class="glass-card" style="padding: 2rem; margin-bottom: 2.5rem; background: rgba(var(--primary-rgb), 0.02); border: 1px solid var(--primary-light);">
             <div style="display: flex; align-items: center; gap: 1rem;">
-                <img th:src="${animal.get('foto') != null ? animal.get('foto') : '/images/placeholder-animal.png'}" 
+                <img th:src="${animal.foto != null ? animal.foto : '/images/placeholder-animal.png'}" 
                      style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">
                 <div>
                     <span style="font-size: 0.8rem; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Solicitud para</span>
-                    <h3 style="margin: 0; font-weight: 800;" th:text="${animal.get('nombre')}">Nombre del Animal</h3>
+                    <h3 style="margin: 0; font-weight: 800;" th:text="${animal.nombre}">Nombre del Animal</h3>
                 </div>
             </div>
         </div>
@@ -46,7 +46,7 @@
         </div>
 
         <form th:action="@{/web/solicitudes/publico/directa}" method="POST" class="form-grid">
-            <input type="hidden" name="animalId" th:value="${animal.get('id')}">
+            <input type="hidden" name="animalId" th:value="${animal.id}">
 
             <!-- Sección: La Adopción -->
             <div style="grid-column: 1 / -1; margin: 1rem 0 1rem;">
@@ -58,7 +58,7 @@
             </div>
 
             <div class="form-group" style="grid-column: 1 / -1;">
-                <label>¿Por qué quieres adoptar a <span th:text="${animal.get('nombre')}"></span>?</label>
+                <label>¿Por qué quieres adoptar a <span th:text="${animal.nombre}"></span>?</label>
                 <textarea name="comentario" rows="4" placeholder="Cuéntanos un poco sobre por qué has elegido a este peludo..."></textarea>
             </div>
 

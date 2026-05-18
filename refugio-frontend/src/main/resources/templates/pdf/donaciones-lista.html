@@ -27,8 +27,8 @@
         </thead>
         <tbody>
             <tr th:each="d : ${donaciones}">
-                <td th:text="${d.id.value}"></td>
-                <td th:text="${d.usuarioId.value}"></td>
+                <td th:text="${d.id}"></td>
+                <td th:text="${d.usuarioId}"></td>
                 <td th:text="${d.tipo}"></td>
                 <td th:text="${d.cantidad}"></td>
                 <td th:text="${#temporals.format(d.fecha, 'dd/MM/yyyy HH:mm')}"></td>

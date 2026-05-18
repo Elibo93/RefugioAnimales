@@ -568,7 +568,7 @@ databaseChangeLog:
         columnDataType: INT
 - changeSet:
     id: 005-add-comentario-admin-solicitud
-    author: antigravity
+    author: refugio
     changes:
     - addColumn:
         tableName: solicitudes_adopcion
@@ -579,7 +579,7 @@ databaseChangeLog:
             remarks: Comentario o feedback dejado por el administrador sobre la solicitud
 - changeSet:
     id: 006-create-preferencias-adopcion
-    author: antigravity
+    author: refugio
     changes:
     - createTable:
         tableName: preferencias_adopcion
@@ -628,7 +628,7 @@ databaseChangeLog:
               nullable: false
 - changeSet:
     id: 007-refactor-preferencias-to-join-tables
-    author: antigravity
+    author: refugio
     changes:
     - dropColumn:
         tableName: preferencias_adopcion
@@ -701,7 +701,7 @@ databaseChangeLog:
         onDelete: CASCADE
 - changeSet:
     id: 008-add-encuesta-omitida-to-preferencias
-    author: antigravity
+    author: refugio
     changes:
     - addColumn:
         tableName: preferencias_adopcion
@@ -712,7 +712,7 @@ databaseChangeLog:
             defaultValueBoolean: false
 - changeSet:
     id: 009-add-notificado-vencimiento-to-tareas
-    author: antigravity
+    author: refugio
     changes:
     - addColumn:
         tableName: tareas
@@ -723,7 +723,7 @@ databaseChangeLog:
             defaultValueBoolean: false
 - changeSet:
     id: 010-add-status-to-voluntarios
-    author: antigravity
+    author: refugio
     changes:
     - addColumn:
         tableName: voluntarios
@@ -746,7 +746,7 @@ databaseChangeLog:
         where: status = 'PENDIENTE'
 - changeSet:
     id: 012-create-tarea-historial
-    author: antigravity
+    author: refugio
     changes:
     - createTable:
         tableName: tarea_historial
@@ -790,7 +790,7 @@ databaseChangeLog:
             type: varchar(255)
 - changeSet:
     id: 20240512-013-1
-    author: antigravity
+    author: refugio
     changes:
     - createTable:
         tableName: gamificacion_logro
@@ -841,7 +841,7 @@ databaseChangeLog:
               nullable: false
 - changeSet:
     id: 20240512-013-2
-    author: antigravity
+    author: refugio
     changes:
     - createTable:
         tableName: gamificacion_usuario_metricas
@@ -868,7 +868,7 @@ databaseChangeLog:
             type: DATETIME
 - changeSet:
     id: 20240512-013-3
-    author: antigravity
+    author: refugio
     changes:
     - createTable:
         tableName: gamificacion_usuario_logros
@@ -893,7 +893,7 @@ databaseChangeLog:
         columnNames: usuario_id, logro_id
 - changeSet:
     id: 016-animal-favorito-1
-    author: antigravity
+    author: refugio
     changes:
     - createTable:
         tableName: animal_favorito
@@ -925,7 +925,7 @@ databaseChangeLog:
               nullable: false
 - changeSet:
     id: 016-animal-favorito-2
-    author: antigravity
+    author: refugio
     changes:
     - addUniqueConstraint:
         tableName: animal_favorito

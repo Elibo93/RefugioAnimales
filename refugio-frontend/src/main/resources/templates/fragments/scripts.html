@@ -9,7 +9,7 @@
 <body>
 <div th:fragment="scripts" th:remove="tag">
     <!-- Librerías Externas -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest" onload="if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();"></script>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -150,9 +150,14 @@
         }
 
         // Disparo de carga inicial
-        document.addEventListener('DOMContentLoaded', () => {
+        const initLucide = () => {
             if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
-        });
+        };
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initLucide);
+        } else {
+            initLucide();
+        }
     </script>
 </div>
 </body>

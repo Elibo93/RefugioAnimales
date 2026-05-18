@@ -59,9 +59,9 @@
         </thead>
         <tbody>
             <tr th:each="t : ${animales}">
-                <td th:text="${t.id.value}"></td>
+                <td th:text="${t.id}"></td>
                 <td th:text="${t.nombre}"></td>
-                <td th:text="${t.especie.name() == 'OTRO' ? t.especiePersonalizada : t.especie}"></td>
+                <td th:text="${t.especie == 'OTRO' ? t.especiePersonalizada : t.especie}"></td>
                 <td th:text="${t.raza}"></td>
                 <td th:text="${t.sexo}"></td>
                 <td th:text="${t.chipId}"></td>

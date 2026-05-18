@@ -8,6 +8,8 @@ import es.refugio.refugio.domain.model.solicitud_adopcion.SolicitudAdopcion;
 import es.refugio.refugio.domain.model.solicitud_adopcion.SolicitudAdopcionId;
 import es.refugio.refugio.domain.repository.SolicitudAdopcionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
 public class FindSolicitudAdopcionUseCase {
@@ -20,6 +22,10 @@ public class FindSolicitudAdopcionUseCase {
             throw new SolicitudAdopcionNotFoundException();
         }
         return solicitudes;
+    }
+
+    public Page<SolicitudAdopcion> findAll(Pageable pageable) {
+        return solicitudAdopcionRepository.findAll(pageable);
     }
 
     public SolicitudAdopcion findById(SolicitudAdopcionId id) {

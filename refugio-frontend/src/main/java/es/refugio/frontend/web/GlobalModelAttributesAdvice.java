@@ -7,6 +7,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.client.RestTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +20,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GlobalModelAttributesAdvice {
 
-    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalModelAttributesAdvice.class);
+    private static final Logger logger = LoggerFactory.getLogger(GlobalModelAttributesAdvice.class);
 
     private final RestTemplate restTemplate;
 
@@ -45,6 +47,7 @@ public class GlobalModelAttributesAdvice {
      * Los templates usan th:if="${isAdmin}" en lugar de sec:authorize.
      */
     @ModelAttribute
+    @SuppressWarnings("unchecked")
     public void addGlobalAttributes(HttpServletRequest request, Model model) {
         // 1. Atributos de navegación
         String uri = request.getRequestURI();
@@ -53,7 +56,6 @@ public class GlobalModelAttributesAdvice {
 
         // 2. Atributos de usuario (inyectados si hay sesión)
         try {
-            @SuppressWarnings("unchecked")
             Map<String, Object> me = restTemplate.getForObject(authUrl + "/v1/me", Map.class);
 
             if (me != null) {
@@ -69,7 +71,7 @@ public class GlobalModelAttributesAdvice {
                 model.addAttribute("currentUserRol", me.get("rol"));
                 model.addAttribute("isAuthenticated", true);
 
-                // Fetch Name from Backend PerfilLegal
+                // Obtener el nombre del PerfilLegal del backend
                 try {
                     Map<String, Object> perfil = restTemplate.getForObject(
                             apiUrl + "/v1/perfiles-legales/usuario/" + userId, Map.class);
@@ -96,7 +98,6 @@ public class GlobalModelAttributesAdvice {
                 try {
                     // Usamos el endpoint personal para que el badge "SOLICITADO" sea solo del
                     // usuario actual
-                    @SuppressWarnings("unchecked")
                     List<Map<String, Object>> solicitudes = restTemplate
                             .getForObject(apiUrl + "/v1/solicitudes-adopcion/mis-solicitudes", List.class);
                     if (solicitudes != null) {
@@ -117,7 +118,7 @@ public class GlobalModelAttributesAdvice {
                     model.addAttribute("animalesSolicitadosIds", new HashSet<>());
                 }
 
-                // 4. Check Preferences
+                // 4. Comprobar preferencias
                 try {
                     Map<String, Object> prefs = restTemplate.getForObject(apiUrl + "/v1/preferencias/usuario/" + userId,
                             Map.class);
@@ -126,7 +127,7 @@ public class GlobalModelAttributesAdvice {
                     model.addAttribute("hasPreferences", false);
                 }
 
-                // 5. Pending Counts for Sidebar (if Admin)
+                // 5. Conteos pendientes para la barra lateral (si es Administrador)
                 if (isAdmin) {
                     try {
                         Long pendingAdoptions = restTemplate
@@ -161,6 +162,6 @@ public class GlobalModelAttributesAdvice {
         model.addAttribute("isAdoptante", false);
         model.addAttribute("isPublico", false);
         model.addAttribute("animalesSolicitadosIds", new HashSet<>());
-        model.addAttribute("hasPreferences", true); // Default true to hide banner for anonymous
+        model.addAttribute("hasPreferences", true); // Valor por defecto verdadero para ocultar el banner a los usuarios anónimos
     }
 }

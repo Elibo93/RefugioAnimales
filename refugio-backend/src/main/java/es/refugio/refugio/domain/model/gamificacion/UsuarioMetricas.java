@@ -25,7 +25,7 @@ public class UsuarioMetricas {
         this.ultimaActualizacion = ultimaActualizacion;
     }
 
-    // Business Logic
+    // Lógica de Negocio
     public void incrementarTareas() {
         this.tareasCompletadas++;
         this.ultimaActualizacion = LocalDateTime.now();
@@ -38,7 +38,7 @@ public class UsuarioMetricas {
         this.ultimaActualizacion = LocalDateTime.now();
     }
 
-    // Getters and Setters
+    // Getters y Setters
     public Long getUsuarioId() { return usuarioId; }
     public void setUsuarioId(Long usuarioId) { this.usuarioId = usuarioId; }
     public int getTareasCompletadas() { return tareasCompletadas; }

@@ -17,9 +17,9 @@
                     <i data-lucide="heart" style="width: 32px; height: 32px;"></i>
                 </div>
                 <h2 style="font-size: 2.25rem; font-weight: 800; color: var(--text-main);"
-                    th:if="${donacion == null or donacion.get('id') == null}">Registrar donación</h2>
+                    th:if="${donacion == null or donacion.id == null}">Registrar donación</h2>
                 <h2 style="font-size: 2.25rem; font-weight: 800; color: var(--text-main);"
-                    th:unless="${donacion == null or donacion.get('id') == null}">Editar donación</h2>
+                    th:unless="${donacion == null or donacion.id == null}">Editar donación</h2>
                 <p style="color: var(--text-muted); margin-top: 0.5rem;">Tu generosidad hace posible nuestra labor
                     diaria</p>
             </div>
@@ -33,7 +33,7 @@
 
             <form th:action="${formActionUrl}" method="post">
                 <input type="hidden" name="frecuencia" id="frecuencia-input"
-                    th:value="${donacion != null and donacion.get('frecuencia') != null ? donacion.get('frecuencia') : 'UNICA'}">
+                    th:value="${donacion != null and donacion.frecuencia != null ? donacion.frecuencia : 'UNICA'}">
 
                 <div class="form-grid" style="display: flex; flex-direction: column; gap: 1.5rem;">
 
@@ -48,9 +48,9 @@
                                 style="width: 100%; padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1rem; background: white;">
                                 <option value="" disabled th:selected="${currentUserId == null}">Selecciona un
                                     donante...</option>
-                                <option th:each="u : ${usuarios}" th:value="${u.get('id')}"
-                                    th:text="${u.get('username') + ' (' + u.get('email') + ')'}"
-                                    th:selected="${u.get('id') == currentUserId}"></option>
+                                <option th:each="u : ${usuarios}" th:value="${u.id}"
+                                    th:text="${u.username + ' (' + u.email + ')'}"
+                                    th:selected="${u.id == currentUserId}"></option>
                             </select>
                         </div>
 
@@ -80,7 +80,7 @@
                             <select name="tipo" id="donation-type-select" required onchange="handleTypeChange()"
                                 style="width: 100%; padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1rem; background: white;">
                                 <option th:each="t : ${tipos}" th:value="${t}" th:text="${t}"
-                                    th:selected="${(donacion == null or donacion.get('tipo') == null) ? t == 'DINERO' : t == donacion.get('tipo')}">
+                                    th:selected="${(donacion == null or donacion.tipo == null) ? t == 'DINERO' : t == donacion.tipo}">
                                 </option>
                             </select>
                         </div>
@@ -97,9 +97,9 @@
                             <select name="objetivoId" id="objetivo-select"
                                 style="width: 100%; padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1rem; background: white; appearance: none;">
                                 <option value="">Donación general (El refugio decidirá dónde es más urgente)</option>
-                                <option th:each="obj : ${objetivos}" th:value="${obj.get('id')}"
-                                    th:text="${obj.get('titulo')}"
-                                    th:selected="${donacion != null and donacion.get('objetivoId') == obj.get('id')}">
+                                <option th:each="obj : ${objetivos}" th:value="${obj.id}"
+                                    th:text="${obj.titulo}"
+                                    th:selected="${donacion != null and donacion.objetivoId == obj.id}">
                                 </option>
                             </select>
                             <i data-lucide="chevron-down"
@@ -154,7 +154,7 @@
                                 <i id="icon-cantidad" data-lucide="euro"
                                     style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 20px;"></i>
                                 <input type="number" step="0.01" name="cantidad" id="input-cantidad"
-                                    th:value="${donacion != null ? donacion.get('cantidad') : ''}" required
+                                    th:value="${donacion != null ? donacion.cantidad : ''}" required
                                     placeholder="0.00"
                                     style="width: 100%; padding: 1rem 1rem 1rem 3rem; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1.1rem;">
                             </div>
@@ -165,7 +165,7 @@
                                 style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">Mensaje
                                 o dedicatoria (opcional)</label>
                             <textarea name="descripcion" id="input-descripcion"
-                                th:text="${donacion != null ? donacion.get('descripcion') : ''}"
+                                th:text="${donacion != null ? donacion.descripcion : ''}"
                                 style="width: 100%; height: 120px; padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; font-family: inherit; font-size: 1rem;"
                                 placeholder="Escribe un mensaje de apoyo..."></textarea>
                         </div>

@@ -24,12 +24,18 @@
                         animales. Tu apoyo hace posible nuestra misión.
                     </p>
                     <div class="social-icons">
-                        <a href="#" class="social-link" title="Instagram"><img th:src="@{/images/instagram-icon.png}"
-                                alt="Instagram"></a>
-                        <a href="#" class="social-link" title="Facebook"><img th:src="@{/images/facebook-icon.png}"
-                                alt="Facebook"></a>
-                        <a href="#" class="social-link" title="X (Twitter)"><img th:src="@{/images/x-con.png}"
-                                alt="X"></a>
+                        <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="social-link instagram-link" title="Instagram">
+                            <img th:src="@{/images/instagram-icon.png}" alt="Instagram">
+                        </a>
+                        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="social-link facebook-link" title="Facebook">
+                            <img th:src="@{/images/facebook-icon.png}" alt="Facebook">
+                        </a>
+                        <a href="https://x.com" target="_blank" rel="noopener noreferrer" class="social-link x-link" title="X (Twitter)">
+                            <img th:src="@{/images/x-con.png}" alt="X">
+                        </a>
+                        <a href="https://wa.me/34912345678" target="_blank" rel="noopener noreferrer" class="social-link whatsapp-link" title="WhatsApp">
+                            <img th:src="@{/images/whatsapp.png}" alt="WhatsApp">
+                        </a>
                     </div>
                 </div>
 
@@ -50,7 +56,7 @@
                     <ul class="footer-contact-info">
                         <li>
                             <i data-lucide="map-pin"></i>
-                            <span>Calle del Refugio, 12, Madrid, España</span>
+                            <a href="#" onclick="openMapsSelector(event)" style="cursor: pointer;">Calle del Refugio, 12, Madrid, España</a>
                         </li>
                         <li>
                             <i data-lucide="mail"></i>
@@ -210,12 +216,40 @@
                 border-radius: 50%;
             }
 
+            .social-link.whatsapp-link img {
+                width: 70%;
+                height: 70%;
+                object-fit: contain;
+                border-radius: 0;
+            }
+
             .social-link:hover {
-                background: var(--primary);
                 color: white;
                 transform: translateY(-5px) rotate(8deg);
-                box-shadow: 0 10px 20px rgba(21, 128, 61, 0.2);
-                border-color: var(--primary);
+            }
+
+            .social-link.instagram-link:hover {
+                background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
+                border-color: transparent !important;
+                box-shadow: 0 10px 20px rgba(220, 39, 67, 0.2) !important;
+            }
+
+            .social-link.facebook-link:hover {
+                background: #1877F2 !important;
+                border-color: #1877F2 !important;
+                box-shadow: 0 10px 20px rgba(24, 119, 242, 0.2) !important;
+            }
+
+            .social-link.x-link:hover {
+                background: #000000 !important;
+                border-color: #000000 !important;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
+            }
+
+            .social-link.whatsapp-link:hover {
+                background: #f0fdf4 !important; /* Soft white-green */
+                border-color: #25D366 !important;
+                box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2) !important;
             }
 
             .footer-bottom {

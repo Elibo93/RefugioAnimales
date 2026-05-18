@@ -16,6 +16,7 @@ import es.refugio.refugio.application.usecase.adoptante.EditAdoptanteUseCase;
 import es.refugio.refugio.application.usecase.adoptante.FindAdoptanteUseCase;
 import es.refugio.refugio.application.usecase.adoptante.RejectAdoptanteUseCase;
 import es.refugio.refugio.domain.repository.AdoptanteRepository;
+import es.refugio.refugio.domain.repository.PerfilLegalRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.adoptante.AdoptanteEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.adoptante.AdoptanteJpaRepositoryImpl;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class AdoptanteConfig {
 
     private final AdoptanteEntityJpaRepository adoptanteEntityJpaRepository;
-    private final es.refugio.refugio.domain.repository.PerfilLegalRepository perfilLegalRepository;
+    private final PerfilLegalRepository perfilLegalRepository;
 
     // --- REPOSITORIO ---
     @Bean
@@ -33,7 +34,7 @@ public class AdoptanteConfig {
         return new AdoptanteJpaRepositoryImpl(adoptanteEntityJpaRepository);
     }
 
-    // --- CREATE (POST) ---
+    // --- CREAR (POST) ---
     @Bean
     public CreateAdoptanteUseCase createAdoptanteUseCase() {
         return new CreateAdoptanteUseCase(adoptanteRepository(), perfilLegalRepository);
@@ -44,7 +45,7 @@ public class AdoptanteConfig {
         return new CreateAdoptanteService(createAdoptanteUseCase());
     }
 
-    // --- FIND (GET) ---
+    // --- BUSCAR/OBTENER (GET) ---
     @Bean
     public FindAdoptanteUseCase findAdoptanteUseCase() {
         return new FindAdoptanteUseCase(adoptanteRepository());
@@ -55,7 +56,7 @@ public class AdoptanteConfig {
         return new FindAdoptanteService(findAdoptanteUseCase());
     }
 
-    // --- DELETE ---
+    // --- ELIMINAR (DELETE) ---
     @Bean
     public DeleteAdoptanteUseCase deleteAdoptanteUseCase() {
         return new DeleteAdoptanteUseCase(adoptanteRepository());
@@ -66,7 +67,7 @@ public class AdoptanteConfig {
         return new DeleteAdoptanteService(deleteAdoptanteUseCase());
     }
 
-    // --- EDIT (PUT) ---
+    // --- EDITAR (PUT) ---
     @Bean
     public EditAdoptanteUseCase editAdoptanteUseCase() {
         return new EditAdoptanteUseCase(adoptanteRepository());

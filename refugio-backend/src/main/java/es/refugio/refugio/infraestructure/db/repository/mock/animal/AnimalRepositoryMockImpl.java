@@ -69,8 +69,8 @@ public class AnimalRepositoryMockImpl implements AnimalRepository {
     }
 
     @Override
-    public List<Animal> findFiltered(String especie, String tamano, java.util.List<String> edad, String sexo, Boolean urgencia) {
-        return getAll(); // Stub, mostly used for compilation
+    public List<Animal> findFiltered(String q, String especie, String tamano, List<String> edad, String sexo, Boolean urgencia) {
+        return getAll(); // Esbozo (Stub), utilizado principalmente para la compilación
     }
 
     @Override

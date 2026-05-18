@@ -1935,6 +1935,9 @@ databaseChangeLog:
             name: usuario_id
             valueNumeric: 1
         - column:
+            name: status
+            value: APROBADO
+        - column:
             name: created_at
             valueDate: now()
     - insert:
@@ -1949,6 +1952,9 @@ databaseChangeLog:
         - column:
             name: usuario_id
             valueNumeric: 2
+        - column:
+            name: status
+            value: APROBADO
         - column:
             name: created_at
             valueDate: now()
@@ -1965,6 +1971,9 @@ databaseChangeLog:
             name: usuario_id
             valueNumeric: 3
         - column:
+            name: status
+            value: APROBADO
+        - column:
             name: created_at
             valueDate: now()
     - insert:
@@ -1980,6 +1989,9 @@ databaseChangeLog:
             name: usuario_id
             valueNumeric: 10
         - column:
+            name: status
+            value: APROBADO
+        - column:
             name: created_at
             valueDate: now()
     - insert:
@@ -1994,6 +2006,9 @@ databaseChangeLog:
         - column:
             name: usuario_id
             valueNumeric: 19
+        - column:
+            name: status
+            value: APROBADO
         - column:
             name: created_at
             valueDate: now()
@@ -2303,7 +2318,7 @@ databaseChangeLog:
             valueComputed: NOW()
         - column:
             name: estado
-            value: PENDIENTE
+            value: ACEPTADA
         - column:
             name: fecha_limite
             valueComputed: DATE_ADD(NOW(), INTERVAL 1 DAY)
@@ -2357,7 +2372,7 @@ databaseChangeLog:
             valueComputed: NOW()
         - column:
             name: estado
-            value: PENDIENTE
+            value: ACEPTADA
         - column:
             name: fecha_limite
             valueComputed: DATE_ADD(NOW(), INTERVAL 3 DAY)
@@ -2540,7 +2555,7 @@ databaseChangeLog:
             value: syringe
 - changeSet:
     id: seed-logros-iniciales
-    author: antigravity
+    author: refugio
     changes:
     - insert:
         tableName: gamificacion_logro
@@ -2706,7 +2721,7 @@ databaseChangeLog:
             value: 500
 - changeSet:
     id: fix-logro-categories
-    author: antigravity
+    author: refugio
     changes:
     - update:
         tableName: gamificacion_logro
@@ -2722,3 +2737,13 @@ databaseChangeLog:
             name: categoria
             value: DONANTE
         where: categoria = 'DONACIONES'
+- changeSet:
+    id: 014-force-approve-seed-volunteers-fix
+    author: refugio
+    changes:
+    - update:
+        tableName: voluntarios
+        column:
+        - name: status
+          value: APROBADO
+        where: usuario_id IN (1, 2, 3, 10, 19)

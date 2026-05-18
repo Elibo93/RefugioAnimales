@@ -1,6 +1,9 @@
 package es.refugio.refugio.infraestructure.web.rest;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import es.refugio.common.infraestructure.web.dto.common.PaginatedResponse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,11 +23,15 @@ import es.refugio.refugio.application.service.tarea.CreateTareaService;
 import es.refugio.refugio.application.service.tarea.DeleteTareaService;
 import es.refugio.refugio.application.service.tarea.EditTareaService;
 import es.refugio.refugio.application.service.tarea.FindTareaService;
+import es.refugio.refugio.application.service.tarea.FindTareaHistorialService;
 import es.refugio.refugio.domain.model.tarea.Tarea;
 import es.refugio.refugio.domain.model.tarea.TareaId;
+import es.refugio.refugio.domain.repository.PerfilLegalRepository;
 import es.refugio.refugio.infraestructure.mapper.TareaMapper;
+import es.refugio.refugio.infraestructure.mapper.TareaHistorialMapper;
 import es.refugio.refugio.infraestructure.web.dto.tarea.TareaRequest;
 import es.refugio.refugio.infraestructure.web.dto.tarea.TareaResponse;
+import es.refugio.refugio.infraestructure.web.dto.tarea.TareaHistorialResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -44,12 +51,12 @@ public class TareaController {
     private final FindTareaService findTareaService;
     private final EditTareaService editTareaService;
     private final DeleteTareaService deleteTareaService;
-    private final es.refugio.refugio.application.service.tarea.FindTareaHistorialService findTareaHistorialService;
-    private final es.refugio.refugio.domain.repository.PerfilLegalRepository perfilLegalRepository;
+    private final FindTareaHistorialService findTareaHistorialService;
+    private final PerfilLegalRepository perfilLegalRepository;
 
     @Operation(summary = "Obtener historial de una tarea")
     @GetMapping("/{id}/historial")
-    public List<es.refugio.refugio.infraestructure.web.dto.tarea.TareaHistorialResponse> getHistorial(@PathVariable Integer id) {
+    public List<TareaHistorialResponse> getHistorial(@PathVariable Integer id) {
         return findTareaHistorialService.findByTareaId(new TareaId(id)).stream()
                 .map(h -> {
                     String nombre = "Sistema";
@@ -58,7 +65,7 @@ public class TareaController {
                                 .map(p -> p.getNombre() + " " + p.getApellido())
                                 .orElse("Usuario #" + h.getUsuarioId());
                     }
-                    return es.refugio.refugio.infraestructure.mapper.TareaHistorialMapper.toResponse(h, nombre);
+                    return TareaHistorialMapper.toResponse(h, nombre);
                 })
                 .toList();
     }
@@ -83,8 +90,9 @@ public class TareaController {
 
     @Operation(summary = "Listar tareas")
     @GetMapping
-    public List<TareaResponse> findAll() {
-        return TareaMapper.toResponse(findTareaService.findAll());
+    public PaginatedResponse<TareaResponse> findAll(Pageable pageable) {
+        Page<Tarea> page = findTareaService.findAll(pageable);
+        return PaginatedResponse.fromPage(page, TareaMapper.toResponse(page.getContent()));
     }
 
     @Operation(summary = "Obtener tarea por ID")

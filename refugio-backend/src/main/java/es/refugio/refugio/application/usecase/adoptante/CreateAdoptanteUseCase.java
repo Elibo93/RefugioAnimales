@@ -7,13 +7,14 @@ import es.refugio.refugio.application.command.adoptante.CreateAdoptanteCommand;
 import es.refugio.refugio.domain.model.adoptante.Adoptante;
 import es.refugio.refugio.domain.model.adoptante.enums.EstadoValidacion;
 import es.refugio.refugio.domain.repository.AdoptanteRepository;
+import es.refugio.refugio.domain.repository.PerfilLegalRepository;
 import es.refugio.refugio.domain.model.usuario.UsuarioId;
 
 @AllArgsConstructor
 public class CreateAdoptanteUseCase {
 
     private final AdoptanteRepository adoptanteRepository;
-    private final es.refugio.refugio.domain.repository.PerfilLegalRepository perfilLegalRepository;
+    private final PerfilLegalRepository perfilLegalRepository;
 
     public Adoptante create(CreateAdoptanteCommand comando) {
         // 1. Verificar si ya es adoptante (Idempotencia)
@@ -24,7 +25,8 @@ public class CreateAdoptanteUseCase {
 
         // 2. Verificar PerfilLegal (Identidad)
         perfilLegalRepository.findByUsuarioId(comando.usuarioId())
-                .orElseThrow(() -> new IllegalStateException("El usuario debe tener un perfil legal completo antes de ser adoptante"));
+                .orElseThrow(() -> new IllegalStateException(
+                        "El usuario debe tener un perfil legal completo antes de ser adoptante"));
 
         // Crear adoptante
         Adoptante adoptante = Adoptante.builder()

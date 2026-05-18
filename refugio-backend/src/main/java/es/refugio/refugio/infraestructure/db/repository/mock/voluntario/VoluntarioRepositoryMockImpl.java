@@ -9,8 +9,15 @@ import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
 import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
 import es.refugio.refugio.domain.repository.VoluntarioRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public class VoluntarioRepositoryMockImpl implements VoluntarioRepository {
+
+    @Override
+    public Page<Voluntario> findFiltered(String q, Pageable pageable) {
+        return Page.empty();
+    }
 
     private final Map<VoluntarioId, Voluntario> voluntarios = VoluntarioFactory.create();
 

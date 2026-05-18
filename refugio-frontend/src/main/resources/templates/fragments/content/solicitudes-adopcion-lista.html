@@ -55,7 +55,7 @@
                 </div>
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 2rem;">
-                    <div th:each="s : ${pendientes}" th:id="'card-solicitud-' + ${s.get('id')}"
+                    <div th:each="s : ${pendientes}" th:id="'card-solicitud-' + ${s.id()}"
                         class="premium-card-interaction"
                         style="background: white; border-radius: 28px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); overflow: hidden; display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
 
@@ -72,9 +72,9 @@
                                         style="display: block; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Referencia</span>
                                     <h3
                                         style="margin: 0; font-size: 1.05rem; font-weight: 900; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-                                        <span th:text="'ID #' + ${s.get('id')}">#123</span>
-                                        <a th:href="@{/web/solicitudes/{id}/detalle(id=${s.get('id')})}"
-                                            th:hx-get="@{/web/solicitudes/{id}/detalle(id=${s.get('id')})}"
+                                        <span th:text="'ID #' + ${s.id()}">#123</span>
+                                        <a th:href="@{/web/solicitudes/{id}/detalle(id=${s.id()})}"
+                                            th:hx-get="@{/web/solicitudes/{id}/detalle(id=${s.id()})}"
                                             hx-target="#contenido-dinamico" hx-push-url="true"
                                             style="text-decoration: none; color: var(--primary); font-size: 0.75rem; font-weight: 800; background: #f0fdf4; padding: 4px 10px; border-radius: 8px; display: flex; align-items: center; gap: 5px; transition: all 0.2s; border: 1px solid #dcfce7;"
                                             onmouseover="this.style.background='var(--primary)'; this.style.color='white'"
@@ -82,13 +82,22 @@
                                             <i data-lucide="eye" style="width: 14px;"></i>
                                             VER DETALLES
                                         </a>
+                                        <a th:href="@{/web/solicitudes/{id}/editar(id=${s.id()})}"
+                                            th:hx-get="@{/web/solicitudes/{id}/editar(id=${s.id()})}"
+                                            hx-target="#contenido-dinamico" hx-push-url="true"
+                                            style="text-decoration: none; color: #4f46e5; font-size: 0.75rem; font-weight: 800; background: #e0e7ff; padding: 4px 10px; border-radius: 8px; display: flex; align-items: center; gap: 5px; transition: all 0.2s; border: 1px solid #c7d2fe;"
+                                            onmouseover="this.style.background='#4f46e5'; this.style.color='white'"
+                                            onmouseout="this.style.background='#e0e7ff'; this.style.color='#4f46e5'">
+                                            <i data-lucide="edit-3" style="width: 14px;"></i>
+                                            EDITAR
+                                        </a>
                                     </h3>
                                 </div>
                             </div>
                             <span class="badge-premium"
                                 style="padding: 6px 12px; border-radius: 10px; font-weight: 800; font-size: 0.7rem; border: none;"
-                                th:classappend="${s.get('estado') == 'EN_REVISION' ? 'info' : 'warning'}"
-                                th:text="${s.get('estado') == 'EN_REVISION' ? 'REVISIÓN' : 'NUEVA'}">NUEVA</span>
+                                th:classappend="${s.estado() == 'EN_REVISION' ? 'info' : 'warning'}"
+                                th:text="${s.estado() == 'EN_REVISION' ? 'REVISIÓN' : 'NUEVA'}">NUEVA</span>
                         </div>
 
                         <!-- Body de la Card: Clean Spacing -->
@@ -103,10 +112,10 @@
                                     <span
                                         style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Animal
                                         en proceso</span>
-                                    <a th:href="@{/web/animales/{id}(id=${s.get('animalId')})}"
+                                    <a th:href="@{/web/animales/{id}(id=${s.animalId()})}"
                                         style="font-weight: 900; color: var(--secondary); text-decoration: none; font-size: 1.2rem; display: block; margin-top: 2px;"
-                                        th:with="a=${animalesMap['' + s.get('animalId')]}"
-                                        th:text="${a != null ? a.get('nombre') : 'Desconocido'}">Rocky</a>
+                                        th:with="a=${animalesMap['' + s.animalId()]}"
+                                        th:text="${a != null ? a.nombre() : 'Desconocido'}">Rocky</a>
                                 </div>
                                 <div
                                     style="background: #f1f5f9; padding: 4px 8px; border-radius: 8px; font-size: 0.65rem; font-weight: 800; color: var(--text-muted);">
@@ -126,11 +135,11 @@
                                     <span
                                         style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Candidato
                                         interesado</span>
-                                    <a th:href="@{/web/personas/{id}(id=${adoptanteUsuarioIds['' + s.get('adoptanteId')]})}"
-                                        th:hx-get="@{/web/personas/{id}(id=${adoptanteUsuarioIds['' + s.get('adoptanteId')]})}"
+                                    <a th:href="@{/web/personas/{id}(id=${adoptanteUsuarioIds['' + s.adoptanteId()]})}"
+                                        th:hx-get="@{/web/personas/{id}(id=${adoptanteUsuarioIds['' + s.adoptanteId()]})}"
                                         hx-target="#contenido-dinamico" hx-push-url="true"
                                         style="font-weight: 800; color: var(--text-main); text-decoration: none; font-size: 1.1rem; display: block; margin-top: 2px;"
-                                        th:text="${adoptanteNombres['' + s.get('adoptanteId')]}">Juan Pérez</a>
+                                        th:text="${adoptanteNombres['' + s.adoptanteId()]}">Juan Pérez</a>
                                 </div>
                             </div>
                         </div>
@@ -141,7 +150,7 @@
                             <div style="display: flex; gap: 12px;">
                                 <button class="btn-premium primary"
                                     style="flex: 1.5; height: 48px; font-size: 0.95rem; font-weight: 800; border-radius: 16px; background: linear-gradient(135deg, var(--primary) 0%, #166534 100%); box-shadow: 0 4px 12px rgba(22, 101, 52, 0.2); cursor: pointer; color: white; border: none;"
-                                    th:hx-post="@{/web/solicitudes/{id}/aprobar(id=${s.get('id')})}"
+                                    th:hx-post="@{/web/solicitudes/{id}/aprobar(id=${s.id()})}"
                                     hx-target="#contenido-dinamico"
                                     hx-confirm="¿Estás seguro de aprobar esta solicitud? Se generará un contrato de adopción automático.">
                                     Aprobar Solicitud
@@ -150,17 +159,17 @@
                                     style="flex: 1; height: 48px; font-size: 0.95rem; font-weight: 800; border-radius: 16px; color: #be123c; border: 1.5px solid #fecdd3; background: white; transition: all 0.2s; cursor: pointer;"
                                     onmouseover="this.style.background='#fff1f2'"
                                     onmouseout="this.style.background='white'"
-                                    th:hx-post="@{/web/solicitudes/{id}/rechazar(id=${s.get('id')})}"
+                                    th:hx-post="@{/web/solicitudes/{id}/rechazar(id=${s.id()})}"
                                     hx-target="#contenido-dinamico"
                                     hx-confirm="¿Rechazar esta solicitud definitivamente?">
                                     Rechazar
                                 </button>
                             </div>
-                            <button th:if="${s.get('estado') == 'PENDIENTE'}" class="btn-outline"
+                            <button th:if="${s.estado() == 'PENDIENTE'}" class="btn-outline"
                                 style="width: 100%; height: 44px; font-size: 0.9rem; border-radius: 14px; font-weight: 700; background: white; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--text-muted); cursor: pointer; transition: all 0.2s;"
                                 onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)'"
                                 onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)'"
-                                th:hx-post="@{/web/solicitudes/{id}/revision(id=${s.get('id')})}"
+                                th:hx-post="@{/web/solicitudes/{id}/revision(id=${s.id()})}"
                                 hx-target="#contenido-dinamico">
                                 <i data-lucide="eye" style="width: 18px;"></i>
                                 Mover a Revisión
@@ -168,9 +177,10 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div><!-- fin sección pendientes -->
 
             <!-- SECCIÓN 2: HISTORIAL Y GESTIÓN GLOBAL -->
+            <div id="solicitudes-container">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
                 <h2
                     style="font-size: 1rem; font-weight: 900; color: var(--text-muted); margin: 0; display: flex; align-items: center; gap: 12px; letter-spacing: 0.05em;">
@@ -194,10 +204,10 @@
                 </div>
 
                 <div class="list-body" style="display: flex; flex-direction: column; gap: 12px;">
-                    <div th:each="s : ${solicitudes}" class="premium-row-card" th:id="'row-' + ${s.get('id')}">
+                    <div th:each="s : ${solicitudes}" class="premium-row-card" th:id="'row-' + ${s.id()}">
                         <div class="row-cell"
                             style="flex: 0.5; justify-content: center; font-weight: 700; color: var(--text-muted);"
-                            th:text="${s.get('id')}">1</div>
+                            th:text="${s.id()}">1</div>
 
                         <div class="row-cell" style="flex: 3;">
                             <div style="display: flex; align-items: center; gap: 12px;">
@@ -205,15 +215,15 @@
                                     <i data-lucide="file-text" style="width: 18px; color: #64748b;"></i>
                                 </div>
                                 <div style="display: flex; flex-direction: column;">
-                                    <a th:href="@{/web/animales/{id}(id=${s.get('animalId')})}"
+                                    <a th:href="@{/web/animales/{id}(id=${s.animalId()})}"
                                         style="font-weight: 800; color: var(--secondary); text-decoration: none;"
-                                        th:with="a=${s.get('animalId') != null and animalesMap != null ? animalesMap['' + s.get('animalId')] : null}"
-                                        th:text="${a != null ? a.get('nombre') : 'Animal'}">Rocky</a>
-                                    <a th:href="@{/web/personas/{id}(id=${adoptanteUsuarioIds != null ? adoptanteUsuarioIds['' + s.get('adoptanteId')] : '0'})}"
-                                        th:hx-get="@{/web/personas/{id}(id=${adoptanteUsuarioIds != null ? adoptanteUsuarioIds['' + s.get('adoptanteId')] : '0'})}"
+                                        th:with="a=${s.animalId() != null and animalesMap != null ? animalesMap['' + s.animalId()] : null}"
+                                        th:text="${a != null ? a.nombre() : 'Animal'}">Rocky</a>
+                                    <a th:href="@{/web/personas/{id}(id=${adoptanteUsuarioIds != null ? adoptanteUsuarioIds['' + s.adoptanteId()] : '0'})}"
+                                        th:hx-get="@{/web/personas/{id}(id=${adoptanteUsuarioIds != null ? adoptanteUsuarioIds['' + s.adoptanteId()] : '0'})}"
                                         hx-target="#contenido-dinamico" hx-push-url="true"
                                         style="font-size: 0.85rem; color: var(--text-main); font-weight: 600; text-decoration: none;"
-                                        th:with="n=${s.get('adoptanteId') != null and adoptanteNombres != null ? adoptanteNombres['' + s.get('adoptanteId')] : null}"
+                                        th:with="n=${s.adoptanteId() != null and adoptanteNombres != null ? adoptanteNombres['' + s.adoptanteId()] : null}"
                                         th:text="${'por ' + (n != null ? n : 'Anónimo')}">por Juan</a>
                                 </div>
                             </div>
@@ -221,35 +231,41 @@
 
                         <div class="row-cell" style="flex: 1.2; justify-content: center;">
                             <span class="badge-premium"
-                                th:classappend="${s.get('estado') != null ? (s.get('estado').toString() == 'APROBADA' ? 'success' : (s.get('estado').toString() == 'RECHAZADA' ? 'danger' : (s.get('estado').toString() == 'EN_REVISION' ? 'info' : 'warning'))) : 'warning'}"
-                                th:text="${s.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(s.get('estado'), '_', ' '))) : 'Pendiente'}">PENDIENTE</span>
+                                th:classappend="${s.estado() != null ? (s.estado().toString() == 'APROBADA' ? 'success' : (s.estado().toString() == 'RECHAZADA' ? 'danger' : (s.estado().toString() == 'EN_REVISION' ? 'info' : 'warning'))) : 'warning'}"
+                                th:text="${s.estado() != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(s.estado(), '_', ' '))) : 'Pendiente'}">PENDIENTE</span>
                         </div>
 
                         <div class="row-cell"
                             style="flex: 2.5; color: var(--text-muted); font-size: 0.9rem; font-style: italic; border-left: 2px solid #f1f5f9; padding-left: 1rem;"
-                            th:text="${s.get('comentario') != null and s.get('comentario') != '' ? s.get('comentario') : 'Sin comentarios'}">
+                            th:text="${s.comentario() != null and s.comentario() != '' ? s.comentario() : 'Sin comentarios'}">
                             Razón...</div>
 
                         <div class="row-cell"
                             style="flex: 1.2; justify-content: center; font-size: 0.85rem; color: var(--text-muted); font-weight: 500;"
-                            th:text="${s.get('fecha') != null ? s.get('fecha').toString().substring(0, 10) : '-'}">
+                            th:text="${s.fecha() != null ? s.fecha().toString().substring(0, 10) : '-'}">
                             01/01/24</div>
 
                         <div class="row-cell" style="flex: 2; justify-content: center; gap: 8px;">
-                            <a th:if="${solicitudToAdopcionMap != null and solicitudToAdopcionMap.containsKey(s.get('id').toString())}"
+                            <a th:if="${solicitudToAdopcionMap != null and solicitudToAdopcionMap.containsKey(s.id().toString())}"
                                 class="btn-icon"
-                                th:href="@{/web/adopciones/{id}/contrato(id=${solicitudToAdopcionMap.get(s.get('id').toString())})}"
+                                th:href="@{/web/adopciones/{id}/contrato(id=${solicitudToAdopcionMap.get(s.id().toString())})}"
                                 title="Descargar Contrato" target="_blank" style="color: #2563eb;">
                                 <i data-lucide="file-signature" style="width: 16px;"></i>
                             </a>
-                            <a class="btn-icon" th:href="@{/web/solicitudes/{id}/detalle(id=${s.get('id')})}"
-                                th:hx-get="@{/web/solicitudes/{id}/detalle(id=${s.get('id')})}"
+                            <a class="btn-icon" th:href="@{/web/solicitudes/{id}/detalle(id=${s.id()})}"
+                                th:hx-get="@{/web/solicitudes/{id}/detalle(id=${s.id()})}"
                                 hx-target="#contenido-dinamico" hx-push-url="true" title="Ver Detalle">
                                 <i data-lucide="eye" style="width: 16px;"></i>
                             </a>
-                            <button class="btn-icon delete"
-                                th:hx-post="@{/web/solicitudes/{id}/borrar(id=${s.get('id')})}"
-                                th:hx-target="'#row-' + ${s.get('id')}" hx-swap="outerHTML swap:0.3s"
+                            <a th:if="${isAdmin}" class="btn-icon" th:href="@{/web/solicitudes/{id}/editar(id=${s.id()})}"
+                                th:hx-get="@{/web/solicitudes/{id}/editar(id=${s.id()})}"
+                                hx-target="#contenido-dinamico" hx-push-url="true" title="Editar Solicitud"
+                                style="color: var(--primary);">
+                                <i data-lucide="edit-3" style="width: 16px;"></i>
+                            </a>
+                            <button th:if="${isAdmin}" class="btn-icon delete"
+                                th:hx-post="@{/web/solicitudes/{id}/borrar(id=${s.id()})}"
+                                th:hx-target="'#row-' + ${s.id()}" hx-swap="outerHTML swap:0.3s"
                                 hx-confirm="¿Eliminar?">
                                 <i data-lucide="trash-2" style="width: 16px;"></i>
                             </button>
@@ -265,6 +281,11 @@
                         solicitudes registradas.</p>
                 </div>
             </div>
+
+            <!-- Paginación Universal -->
+            <div th:replace="~{fragments/pagination :: controls(pagination=${pagination}, target='#solicitudes-container', url='/web/solicitudes')}"></div>
+
+            </div><!-- fin #solicitudes-container -->
 
             <script>
                 if (typeof lucide !== 'undefined') lucide.createIcons();

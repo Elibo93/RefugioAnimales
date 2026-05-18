@@ -1,19 +1,28 @@
 package es.refugio.refugio.infraestructure.config;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import es.refugio.refugio.application.service.NotificacionService;
 import es.refugio.refugio.application.service.tarea.CreateTareaService;
 import es.refugio.refugio.application.service.tarea.DeleteTareaService;
 import es.refugio.refugio.application.service.tarea.EditTareaService;
 import es.refugio.refugio.application.service.tarea.FindTareaService;
+import es.refugio.refugio.application.service.tarea.FindTareaHistorialService;
 import es.refugio.refugio.application.usecase.tarea.CreateTareaUseCase;
 import es.refugio.refugio.application.usecase.tarea.DeleteTareaUseCase;
 import es.refugio.refugio.application.usecase.tarea.EditTareaUseCase;
 import es.refugio.refugio.application.usecase.tarea.FindTareaUseCase;
+import es.refugio.refugio.application.usecase.tarea.FindTareaHistorialUseCase;
+import es.refugio.refugio.domain.repository.PerfilLegalRepository;
 import es.refugio.refugio.domain.repository.TareaRepository;
+import es.refugio.refugio.domain.repository.TareaHistorialRepository;
+import es.refugio.refugio.domain.repository.VoluntarioRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.tarea.TareaEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.tarea.TareaJpaRepositoryImpl;
+import es.refugio.refugio.infraestructure.db.jpa.repository.tarea.TareaHistorialEntityJpaRepository;
+import es.refugio.refugio.infraestructure.db.jpa.repository.tarea.TareaHistorialJpaRepositoryImpl;
 
 @Configuration
 public class TareaConfig {
@@ -25,9 +34,9 @@ public class TareaConfig {
 
     @Bean
     public CreateTareaUseCase createTareaUseCase(TareaRepository repository,
-            es.refugio.refugio.domain.repository.VoluntarioRepository voluntarioRepository,
-            es.refugio.refugio.application.service.NotificacionService notificacionService,
-            org.springframework.context.ApplicationEventPublisher eventPublisher) {
+            VoluntarioRepository voluntarioRepository,
+            NotificacionService notificacionService,
+            ApplicationEventPublisher eventPublisher) {
         return new CreateTareaUseCase(repository, voluntarioRepository, notificacionService, eventPublisher);
     }
 
@@ -38,10 +47,10 @@ public class TareaConfig {
 
     @Bean
     public EditTareaUseCase editTareaUseCase(TareaRepository repository,
-            es.refugio.refugio.domain.repository.VoluntarioRepository voluntarioRepository,
-            es.refugio.refugio.domain.repository.PerfilLegalRepository perfilLegalRepository,
-            es.refugio.refugio.application.service.NotificacionService notificacionService,
-            org.springframework.context.ApplicationEventPublisher eventPublisher) {
+            VoluntarioRepository voluntarioRepository,
+            PerfilLegalRepository perfilLegalRepository,
+            NotificacionService notificacionService,
+            ApplicationEventPublisher eventPublisher) {
         return new EditTareaUseCase(repository, voluntarioRepository, perfilLegalRepository, notificacionService, eventPublisher);
     }
 
@@ -71,20 +80,20 @@ public class TareaConfig {
     }
 
     @Bean
-    public es.refugio.refugio.domain.repository.TareaHistorialRepository tareaHistorialRepository(
-            es.refugio.refugio.infraestructure.db.jpa.repository.tarea.TareaHistorialEntityJpaRepository jpaRepository) {
-        return new es.refugio.refugio.infraestructure.db.jpa.repository.tarea.TareaHistorialJpaRepositoryImpl(jpaRepository);
+    public TareaHistorialRepository tareaHistorialRepository(
+            TareaHistorialEntityJpaRepository jpaRepository) {
+        return new TareaHistorialJpaRepositoryImpl(jpaRepository);
     }
 
     @Bean
-    public es.refugio.refugio.application.usecase.tarea.FindTareaHistorialUseCase findTareaHistorialUseCase(
-            es.refugio.refugio.domain.repository.TareaHistorialRepository repository) {
-        return new es.refugio.refugio.application.usecase.tarea.FindTareaHistorialUseCase(repository);
+    public FindTareaHistorialUseCase findTareaHistorialUseCase(
+            TareaHistorialRepository repository) {
+        return new FindTareaHistorialUseCase(repository);
     }
 
     @Bean
-    public es.refugio.refugio.application.service.tarea.FindTareaHistorialService findTareaHistorialService(
-            es.refugio.refugio.application.usecase.tarea.FindTareaHistorialUseCase useCase) {
-        return new es.refugio.refugio.application.service.tarea.FindTareaHistorialService(useCase);
+    public FindTareaHistorialService findTareaHistorialService(
+            FindTareaHistorialUseCase useCase) {
+        return new FindTareaHistorialService(useCase);
     }
 }

@@ -34,8 +34,10 @@
                         <input type="text" name="q" th:value="${query}" placeholder="Buscar adoptante..."
                             class="form-control"
                             style="padding-left: 38px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-main); width: 100%; font-size: 0.9rem;"
-                            th:hx-get="@{/web/adoptantes}" hx-trigger="keyup delay:500ms, search" hx-target=".list-body"
-                            hx-swap="outerHTML">
+                             th:hx-get="@{/web/adoptantes}" hx-trigger="keyup delay:800ms, search" 
+                            hx-vals='{"page": 1}'
+                            hx-target="#adoptantes-container"
+                            hx-swap="innerHTML">
                     </div>
                 </div>
 
@@ -59,11 +61,12 @@
                     style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
                     <div style="flex: 0.5; text-align: center;">ID</div>
                     <div style="flex: 3;">Adoptante / Perfil</div>
-                    <div style="flex: 3; text-align: center;">Información Legal</div>
+                    <div style="flex: 3; text-align: center;">Contacto y Dirección</div>
                     <div style="flex: 2; text-align: center;">Estado Validación</div>
                     <div style="flex: 2; text-align: center;">Acciones</div>
                 </div>
 
+                <div id="adoptantes-container">
                 <div class="list-body" th:fragment="list-body"
                     style="display: flex; flex-direction: column; gap: 12px; margin-top: 1rem;">
                     <!-- Mensaje si no hay resultados -->
@@ -85,12 +88,12 @@
                         </a>
                     </div>
 
-                    <div th:each="a : ${adoptantes}" class="premium-row-card" th:id="'row-' + ${a.get('id')}"
-                        th:with="u=${usuariosMap != null ? usuariosMap['' + a.get('usuarioId')] : null}, p=${perfilesMap != null ? perfilesMap['' + a.get('usuarioId')] : null}">
+                    <div th:each="a : ${adoptantes}" class="premium-row-card" th:id="'row-' + ${a.id()}"
+                        th:with="u=${usuariosMap != null ? usuariosMap['' + a.usuarioId()] : null}, p=${perfilesMap != null ? perfilesMap['' + a.usuarioId()] : null}">
 
                         <div class="row-cell"
                             style="flex: 0.5; justify-content: center; font-weight: 700; color: var(--text-muted);"
-                            th:text="${a.get('id')}">1</div>
+                            th:text="${a.id()}">1</div>
 
                         <div class="row-cell" style="flex: 3;">
                             <div style="display: flex; align-items: center; gap: 12px;">
@@ -98,9 +101,9 @@
                                     <i data-lucide="user-check" style="width: 18px; color: #0ea5e9;"></i>
                                 </div>
                                 <div>
-                                    <a th:href="@{/web/personas/{id}(id=${a.get('usuarioId')})}"
+                                    <a th:href="@{/web/personas/{id}(id=${a.usuarioId()})}"
                                         style="display: block; font-weight: 800; color: var(--text-main); font-size: 1rem; text-decoration: none;"
-                                        th:text="${p != null ? (p.get('nombre') + ' ' + (p.get('apellido') ?: '')) : 'Anónimo'}">Juan
+                                        th:text="${p != null ? (p.nombre() + ' ' + (p.apellido() ?: '')) : 'Anónimo'}">Juan
                                         Pérez</a>
                                     <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;"
                                         th:text="${u != null ? '@' + u.username : 'No user'}">@juanp</span>
@@ -108,39 +111,45 @@
                             </div>
                         </div>
 
+                        <!-- Contacto y Dirección -->
                         <div class="row-cell"
                             style="flex: 3; display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: center;">
                             <div
                                 style="display: flex; align-items: center; gap: 8px; color: var(--text-main); font-size: 0.9rem; font-weight: 600;">
-                                <i data-lucide="fingerprint" style="width: 14px; color: var(--text-muted);"></i>
-                                <span th:text="${p != null ? p.get('dni') : '-'}">12345678Z</span>
+                                <i data-lucide="phone" style="width: 14px; color: var(--text-muted);"></i>
+                                <span th:text="${p != null ? p.telefono() : '-'}">911223344</span>
                             </div>
                             <div
                                 style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.8rem;">
                                 <i data-lucide="map-pin" style="width: 12px;"></i>
-                                <span th:text="${p != null ? p.get('direccion') : '-'}">Calle Falsa 123</span>
+                                <span th:text="${p != null ? p.direccion() : '-'}">Calle Falsa 123</span>
                             </div>
                         </div>
 
                         <div class="row-cell" style="flex: 2; justify-content: center;">
                             <span class="badge-premium"
-                                th:classappend="${a.get('estadoValidacion') != null ? (a.get('estadoValidacion').toString() == 'APROBADO' ? 'success' : (a.get('estadoValidacion').toString() == 'RECHAZADO' ? 'danger' : 'warning')) : 'warning'}"
-                                th:text="${a.get('estadoValidacion')}">PENDIENTE</span>
+                                th:classappend="${a.estadoValidacion() != null ? (a.estadoValidacion().toString() == 'APROBADO' ? 'success' : (a.estadoValidacion().toString() == 'RECHAZADO' ? 'danger' : 'warning')) : 'warning'}"
+                                th:text="${a.estadoValidacion()}">PENDIENTE</span>
                         </div>
 
                         <div class="row-cell" style="flex: 2; justify-content: center; gap: 12px;">
-                            <a class="btn-icon" th:hx-get="@{/web/adoptantes/{id}/editar(id=${a.get('id')})}"
+                            <a class="btn-icon" th:hx-get="@{/web/adoptantes/{id}/editar(id=${a.id()})}"
                                 hx-target="#contenido-dinamico" hx-push-url="true" title="Editar">
                                 <i data-lucide="edit-2" style="width: 18px;"></i>
                             </a>
                             <button class="btn-icon delete"
-                                th:hx-post="@{/web/adoptantes/{id}/borrar(id=${a.get('id')})}"
-                                th:hx-target="'#row-' + ${a.get('id')}" hx-swap="outerHTML swap:0.3s"
+                                th:hx-post="@{/web/adoptantes/{id}/borrar(id=${a.id()})}"
+                                th:hx-target="'#row-' + ${a.id()}" hx-swap="outerHTML swap:0.3s"
                                 hx-confirm="¿Eliminar adoptante?">
                                 <i data-lucide="trash-2" style="width: 18px;"></i>
                             </button>
                         </div>
                     </div>
+                </div>
+
+                <!-- Paginación -->
+                <div th:replace="~{fragments/pagination :: controls(pagination=${pagination}, url='/web/adoptantes', target='#adoptantes-container')}"></div>
+
                 </div>
 
                 <div th:if="${#lists.isEmpty(adoptantes)}"

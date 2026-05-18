@@ -75,7 +75,7 @@
                 <div class="premium-modal-icon-wrapper" style="margin: 0; width: 48px; height: 48px; background: #f3f4f6; color: #4b5563;">
                     <i data-lucide="clipboard-list"></i>
                 </div>
-                <span th:text="${tarea.get('id') == null ? 'Nueva Tarea' : 'Editar Tarea'}">
+                <span th:text="${tarea.id == null ? 'Nueva Tarea' : 'Editar Tarea'}">
                     Crear tarea
                 </span>
             </h1>
@@ -83,14 +83,14 @@
         </div>
 
         <div class="card" style="max-width:800px; margin:0 auto;">
-            <form th:action="${tarea.get('id') == null ? '/web/tareas/nueva' : '/web/tareas/' + tarea.get('id') + '/editar'}"
+            <form th:action="${tarea.id == null ? '/web/tareas/nueva' : '/web/tareas/' + tarea.id + '/editar'}"
                 method="post">
 
                 <div class="form-grid">
                     
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Descripción de la tarea</label>
-                        <input type="text" name="descripcion" th:value="${tarea.get('descripcion')}" 
+                        <input type="text" name="descripcion" th:value="${tarea.descripcion}" 
                                placeholder="Ej: Limpieza profunda del sector B" required>
                     </div>
 
@@ -99,19 +99,19 @@
                         <select name="estado" required>
                             <option th:each="e : ${estados}" th:value="${e}" 
                                 th:text="${#strings.capitalize(e.toLowerCase().replace('_', ' '))}"
-                                th:selected="${e == tarea.get('estado')}"></option>
+                                th:selected="${e == tarea.estado}"></option>
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label>Fecha y Hora Límite (Vencimiento)</label>
-                        <input type="datetime-local" name="fechaLimite" th:value="${tarea.get('fechaLimite')}">
+                        <input type="datetime-local" name="fechaLimite" th:value="${tarea.fechaLimite}">
                     </div>
 
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Instrucciones detalladas</label>
                         <textarea name="instrucciones" rows="3" placeholder="Añade detalles, precauciones o información adicional sobre la tarea"
-                                  th:text="${tarea.get('instrucciones')}"></textarea>
+                                  th:text="${tarea.instrucciones}"></textarea>
                     </div>
 
                     <div class="form-group" style="grid-column: 1 / -1;">
@@ -148,7 +148,7 @@
                     <script th:inline="javascript">
                         const assignedIds = new Set();
                         const voluntarioNombres = /*[[${voluntarioNombres}]]*/ {};
-                        const tareaVolIds = /*[[${tarea.get('voluntarioIds')}]]*/ [];
+                        const tareaVolIds = /*[[${tarea.voluntarioIds}]]*/ [];
                         const preselected = /*[[${voluntarioPreseleccionado}]]*/ null;
 
                         function initVolunteers() {
@@ -229,7 +229,7 @@
                     <a th:href="${returnUrl}" class="btn btn-secondary">Cancelar</a>
                     <button type="submit" class="btn btn-primary">
                         <i data-lucide="save" style="width: 18px;"></i>
-                        <span th:text="${tarea.get('id') == null ? 'Crear Tarea' : 'Guardar Cambios'}">Crear Tarea</span>
+                        <span th:text="${tarea.id == null ? 'Crear Tarea' : 'Guardar Cambios'}">Crear Tarea</span>
                     </button>
                 </div>
             </form>

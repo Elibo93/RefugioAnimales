@@ -7,6 +7,8 @@ import es.refugio.refugio.domain.model.animal.AnimalId;
 import es.refugio.refugio.domain.model.adopcion.Adopcion;
 import es.refugio.refugio.domain.model.adopcion.AdopcionId;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
 public class FindAdopcionService {
@@ -15,6 +17,14 @@ public class FindAdopcionService {
 
     public List<Adopcion> findAll() {
         return useCase.findAll();
+    }
+
+    public Page<Adopcion> findAll(Pageable pageable) {
+        return useCase.findAll(pageable);
+    }
+
+    public Page<Adopcion> findFiltered(String q, Pageable pageable) {
+        return useCase.findFiltered(q, pageable);
     }
 
     public Adopcion findById(AdopcionId id) {

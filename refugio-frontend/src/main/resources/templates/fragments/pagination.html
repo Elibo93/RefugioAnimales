@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!-- 
+        Fragmento de Paginación Universal
+        Uso: th:replace="~{fragments/pagination :: controls(pagination=${paginationObj}, target='#mi-tabla', url='/web/entidad')}"
+    -->
+    <div th:fragment="controls(pagination, target, url)" class="pagination-container" 
+         style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: var(--bg-main); border-top: 1px solid var(--border); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+        
+        <div class="pagination-info" style="color: var(--text-muted); font-size: 0.85rem;">
+            <th:block th:if="${pagination.total > 0}">
+                Mostrando <span th:text="${(pagination.page - 1) * pagination.pageSize + 1}" style="font-weight: 600; color: var(--text-main);">1</span> 
+                a <span th:text="${(pagination.page * pagination.pageSize) < pagination.total ? (pagination.page * pagination.pageSize) : pagination.total}" style="font-weight: 600; color: var(--text-main);">10</span> 
+                de <span th:text="${pagination.total}" style="font-weight: 600; color: var(--text-main);">100</span> 
+                <span th:text="${pagination.total == 1 ? 'resultado' : 'resultados'}">resultados</span>
+            </th:block>
+            <th:block th:unless="${pagination.total > 0}">
+                No se encontraron resultados
+            </th:block>
+        </div>
+
+        <div class="pagination-buttons" style="display: flex; gap: 8px;">
+            <!-- Botón Anterior -->
+            <button th:if="${pagination.hasPrevious}"
+                    th:hx-get="${url}"
+                    th:hx-vals="'{&quot;page&quot;: ' + (${pagination.page} - 1) + ', &quot;size&quot;: ' + ${pagination.pageSize} + '}'"
+                    th:hx-target="${target}"
+                    th:hx-select="${target}"
+                    hx-swap="outerHTML"
+                    hx-include="#animal-admin-form, [name='q'], [name='especie'], [name='tamano'], [name='rol']"
+                    class="btn-secondary"
+                    style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-main); cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-main);">
+                <i data-lucide="chevron-left" style="width: 14px;"></i>
+                Anterior
+            </button>
+            <button th:unless="${pagination.hasPrevious}"
+                    disabled
+                    style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-soft); color: var(--text-muted); cursor: not-allowed; display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
+                <i data-lucide="chevron-left" style="width: 14px;"></i>
+                Anterior
+            </button>
+
+            <!-- Números de página (simplificado) -->
+            <div style="display: flex; gap: 4px; align-items: center;">
+                <span style="color: var(--text-muted); font-size: 0.85rem; margin: 0 8px;">
+                    Página <span th:text="${pagination.page}" style="font-weight: 600; color: var(--accent);">1</span> de <span th:text="${pagination.totalPages}">10</span>
+                </span>
+            </div>
+
+            <!-- Botón Siguiente -->
+            <button th:if="${pagination.hasNext}"
+                    th:hx-get="${url}"
+                    th:hx-vals="'{&quot;page&quot;: ' + (${pagination.page} + 1) + ', &quot;size&quot;: ' + ${pagination.pageSize} + '}'"
+                    th:hx-target="${target}"
+                    th:hx-select="${target}"
+                    hx-swap="outerHTML"
+                    hx-include="#animal-admin-form, [name='q'], [name='especie'], [name='tamano'], [name='rol']"
+                    class="btn-secondary"
+                    style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-main); cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-main);">
+                Siguiente
+                <i data-lucide="chevron-right" style="width: 14px;"></i>
+            </button>
+            <button th:unless="${pagination.hasNext}"
+                    disabled
+                    style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-soft); color: var(--text-muted); cursor: not-allowed; display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
+                Siguiente
+                <i data-lucide="chevron-right" style="width: 14px;"></i>
+            </button>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,7 +1,9 @@
 package es.refugio.refugio.infraestructure.db.jpa.entity;
 
+import es.refugio.refugio.domain.model.voluntario.enums.EstadoVoluntario;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,10 +32,10 @@ public class VoluntarioEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private es.refugio.refugio.domain.model.voluntario.enums.EstadoVoluntario status;
+    private EstadoVoluntario status;
 
     @ManyToMany(mappedBy = "voluntarios")
-    private java.util.List<TareaEntity> tareas;
+    private List<TareaEntity> tareas;
 
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME")
     private LocalDateTime createdAt;

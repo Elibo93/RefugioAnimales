@@ -23,7 +23,8 @@ public class SolicitudAdopcionMapper {
                 req.animalId(),
                 req.adoptanteId(),
                 req.fecha(),
-                req.comentario()
+                req.comentario(),
+                req.comentarioAdmin()
         );
     }
 

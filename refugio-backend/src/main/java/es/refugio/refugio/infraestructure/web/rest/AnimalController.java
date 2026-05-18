@@ -3,6 +3,9 @@ package es.refugio.refugio.infraestructure.web.rest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import es.refugio.common.infraestructure.web.dto.common.PaginatedResponse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import es.refugio.refugio.application.command.animal.CreateAnimalCommand;
 import es.refugio.refugio.application.command.animal.EditAnimalCommand;
@@ -103,43 +107,27 @@ public class AnimalController {
     @Operation(summary = "Listar animales", description = "Retorna todos los animales registrados")
     @ApiResponse(responseCode = "200", description = "Listado obtenido")
     @GetMapping
-    public List<AnimalResponse> getAll(
-            @org.springframework.web.bind.annotation.RequestParam(required = false) String estado,
-            @org.springframework.web.bind.annotation.RequestParam(required = false) String especie,
-            @org.springframework.web.bind.annotation.RequestParam(required = false) String tamano,
-            @org.springframework.web.bind.annotation.RequestParam(required = false) List<String> edad,
-            @org.springframework.web.bind.annotation.RequestParam(required = false) String sexo,
-            @org.springframework.web.bind.annotation.RequestParam(required = false) Boolean urgencia) {
+    public PaginatedResponse<AnimalResponse> getAll(
+            Pageable pageable,
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) String especie,
+            @RequestParam(required = false) String tamano,
+            @RequestParam(required = false) List<String> edad,
+            @RequestParam(required = false) String sexo,
+            @RequestParam(required = false) Boolean urgencia,
+            @RequestParam(required = false) String q) {
+        
+        System.out.println("DEBUG: Backend - findFiltered with q=" + q + ", estado=" + estado + ", page=" + pageable.getPageNumber());
+        Page<Animal> page = findAnimalService.findFiltered(q, estado, especie, tamano, edad, sexo, urgencia, pageable);
+        System.out.println("DEBUG: Backend - Results found: " + page.getContent().size() + ", Total elements: " + page.getTotalElements());
+
         Map<Integer, Long> conteos = solicitudAdopcionRepository.getAll().stream()
                 .filter(s -> s.getEstado() == EstadoSolicitud.PENDIENTE || s.getEstado() == EstadoSolicitud.EN_REVISION)
                 .collect(Collectors.groupingBy(s -> s.getAnimalId().getValue(), Collectors.counting()));
 
-        return findAnimalService.findAll()
-                .stream()
-                .filter(a -> estado == null || estado.isEmpty()
-                        || (a.getEstado() != null && a.getEstado().name().equalsIgnoreCase(estado)))
-                .filter(a -> especie == null || especie.isEmpty()
-                        || (a.getEspecie() != null && a.getEspecie().name().equalsIgnoreCase(especie)))
-                .filter(a -> tamano == null || tamano.isEmpty()
-                        || (a.getTamano() != null && a.getTamano().name().equalsIgnoreCase(tamano)))
-                .filter(a -> edad == null || edad.isEmpty() || edad.stream().anyMatch(e -> matchEdad(a.getEdad(), e)))
-                .filter(a -> sexo == null || sexo.isEmpty()
-                        || (a.getSexo() != null && a.getSexo().name().equalsIgnoreCase(sexo)))
-                .filter(a -> urgencia == null || (a.getUrgencia() != null && a.getUrgencia().equals(urgencia)))
+        return PaginatedResponse.fromPage(page, page.getContent().stream()
                 .map(a -> AnimalMapper.toResponse(a, conteos.getOrDefault(a.getId().getValue(), 0L).intValue()))
-                .toList();
-    }
-
-    private boolean matchEdad(Integer animalEdad, String filtroEdad) {
-        if (animalEdad == null)
-            return false;
-        return switch (filtroEdad.toUpperCase()) {
-            case "CACHORRO" -> animalEdad <= 1;
-            case "JOVEN" -> animalEdad == 2 || animalEdad == 3;
-            case "ADULTO" -> animalEdad >= 2 && animalEdad < 7;
-            case "SENIOR" -> animalEdad >= 7;
-            default -> true;
-        };
+                .toList());
     }
 
     @Operation(summary = "Obtener lista única de especies activas")
@@ -184,7 +172,7 @@ public class AnimalController {
 
     @Operation(summary = "Alternar estado de favorito (Toggle)")
     @PostMapping("/{id}/favorito")
-    public ResponseEntity<Boolean> toggleFavorito(@PathVariable Integer id, @org.springframework.web.bind.annotation.RequestParam Integer usuarioId) {
+    public ResponseEntity<Boolean> toggleFavorito(@PathVariable Integer id, @RequestParam Integer usuarioId) {
         Optional<FavoritoAnimalEntity> existente = favoritoAnimalRepository.findByUsuarioIdAndAnimalId(usuarioId, id);
         if (existente.isPresent()) {
             favoritoAnimalRepository.delete(existente.get());
@@ -201,7 +189,7 @@ public class AnimalController {
 
     @Operation(summary = "Obtener IDs de animales favoritos de un usuario")
     @GetMapping("/favoritos")
-    public List<Integer> getFavoritosByUsuario(@org.springframework.web.bind.annotation.RequestParam Integer usuarioId) {
+    public List<Integer> getFavoritosByUsuario(@RequestParam Integer usuarioId) {
         return favoritoAnimalRepository.findByUsuarioId(usuarioId)
             .stream()
             .map(FavoritoAnimalEntity::getAnimalId)

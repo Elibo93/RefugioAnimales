@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,21 +22,26 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
 
 import es.refugio.refugio.domain.model.adoptante.Adoptante;
+import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
+import es.refugio.refugio.domain.model.animal.AnimalId;
+import es.refugio.refugio.domain.model.adopcion.Adopcion;
+import es.refugio.refugio.domain.model.adopcion.AdopcionId;
 import es.refugio.refugio.application.service.adoptante.FindAdoptanteService;
-
 import es.refugio.refugio.application.command.adopcion.CreateAdopcionCommand;
 import es.refugio.refugio.application.command.adopcion.EditAdopcionCommand;
 import es.refugio.refugio.application.service.adopcion.CreateAdopcionService;
 import es.refugio.refugio.application.service.adopcion.DeleteAdopcionService;
 import es.refugio.refugio.application.service.adopcion.EditAdopcionService;
 import es.refugio.refugio.application.service.adopcion.FindAdopcionService;
-import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
-import es.refugio.refugio.domain.model.animal.AnimalId;
-import es.refugio.refugio.domain.model.adopcion.Adopcion;
-import es.refugio.refugio.domain.model.adopcion.AdopcionId;
 import es.refugio.refugio.infraestructure.mapper.AdopcionMapper;
+import es.refugio.refugio.infraestructure.security.CustomUserDetails;
 import es.refugio.refugio.infraestructure.web.dto.adopcion.AdopcionRequest;
 import es.refugio.refugio.infraestructure.web.dto.adopcion.AdopcionResponse;
+import es.refugio.common.infraestructure.web.dto.common.PaginatedResponse;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -82,14 +86,15 @@ public class AdopcionController {
     @Operation(summary = "Listar adopciones", description = "Retorna todas las adopciones registradas")
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
-    public List<AdopcionResponse> getAll() {
+    public PaginatedResponse<AdopcionResponse> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String q) {
         boolean isStaff = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
 
-        List<Adopcion> adopciones = findAdopcionService.findAll();
-
         if (!isStaff) {
-            es.refugio.refugio.infraestructure.security.CustomUserDetails userDetails = (es.refugio.refugio.infraestructure.security.CustomUserDetails) SecurityContextHolder
+            CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
                     .getContext().getAuthentication().getPrincipal();
             Integer usuarioId = userDetails.getId();
             Adoptante adoptante = findAdoptanteService.findAll().stream()
@@ -97,14 +102,41 @@ public class AdopcionController {
                     .findFirst()
                     .orElseThrow(() -> new AccessDeniedException("Adoptante no vinculado"));
 
-            adopciones = adopciones.stream()
-                    .filter(a -> a.getAdoptanteId().equals(adoptante.getId()))
+            List<Adopcion> adopciones = findAdopcionService.findByAdoptanteId(adoptante.getId());
+            
+            // Si hay búsqueda, filtramos en memoria para el usuario (caso simple)
+            if (q != null && !q.trim().isEmpty()) {
+                String pattern = q.toLowerCase().trim();
+                adopciones = adopciones.stream()
+                        .filter(a -> String.valueOf(a.getId().getValue()).contains(pattern) || 
+                                     a.getEstado().name().toLowerCase().contains(pattern))
+                        .toList();
+            }
+
+            // Paginación manual para listas filtradas en memoria
+            int start = Math.min(Math.max(0, page) * size, adopciones.size());
+            int end = Math.min(start + size, adopciones.size());
+            List<AdopcionResponse> pagedList = adopciones.subList(start, end).stream()
+                    .map(AdopcionMapper::toResponse)
                     .toList();
+            int totalPages = (int) Math.ceil((double) adopciones.size() / size);
+            return PaginatedResponse.<AdopcionResponse>builder()
+                    .items(pagedList)
+                    .total(adopciones.size())
+                    .count(adopciones.size())
+                    .page(page + 1)
+                    .pageSize(size)
+                    .totalPages(totalPages)
+                    .hasNext(page + 1 < totalPages)
+                    .hasPrevious(page > 0)
+                    .build();
         }
 
-        return adopciones.stream()
+        Pageable pageable = PageRequest.of(Math.max(0, page), size);
+        Page<Adopcion> adopcionesPage = findAdopcionService.findFiltered(q, pageable);
+        return PaginatedResponse.fromPage(adopcionesPage, adopcionesPage.getContent().stream()
                 .map(AdopcionMapper::toResponse)
-                .toList();
+                .toList());
     }
 
     @Operation(summary = "Obtener adopción por ID")
@@ -145,7 +177,7 @@ public class AdopcionController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
 
         if (!isStaff) {
-            es.refugio.refugio.infraestructure.security.CustomUserDetails userDetails = (es.refugio.refugio.infraestructure.security.CustomUserDetails) SecurityContextHolder
+            CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
                     .getContext().getAuthentication().getPrincipal();
             Integer usuarioId = userDetails.getId();
 
@@ -161,7 +193,7 @@ public class AdopcionController {
     public Map<String, String> handleValidationErrors(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach((error) -> {
-            String field = ((FieldError) error).getField();
+            String field = error.getField();
             String message = error.getDefaultMessage();
             errors.put(field, message);
         });

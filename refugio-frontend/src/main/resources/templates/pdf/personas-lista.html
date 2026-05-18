@@ -57,7 +57,7 @@
         </thead>
         <tbody>
             <tr th:each="a : ${personas}">
-                <td th:text="${a.id.value}"></td>
+                <td th:text="${a.id}"></td>
                 <td th:text="${a.nombre}"></td>
                 <td th:text="${a.apellido}"></td>
                 <td th:text="${a.dni}"></td>
@@ -68,7 +68,3 @@
 </body>
 
 </html>
-
-
-
-

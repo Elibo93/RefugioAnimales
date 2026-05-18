@@ -3,6 +3,7 @@ package es.refugio.refugio.infraestructure.web.rest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import es.refugio.refugio.application.command.usuario.CreateUsuarioCommand;
 import es.refugio.refugio.application.command.usuario.EditUsuarioCommand;
@@ -35,11 +39,20 @@ import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.infraestructure.mapper.UsuarioMapper;
 import es.refugio.refugio.infraestructure.web.dto.usuario.UsuarioRequest;
 import es.refugio.refugio.infraestructure.web.dto.usuario.UsuarioResponse;
+import es.refugio.common.infraestructure.web.dto.common.PaginatedResponse;
+import es.refugio.refugio.infraestructure.db.jpa.entity.UsuarioEntity;
+import es.refugio.refugio.infraestructure.db.jpa.repository.usuario.UsuarioEntityJpaRepository;
+import es.refugio.auth.infrastructure.security.JwtTokenProvider;
+import es.refugio.auth.domain.Rol;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("api/v1/usuarios")
@@ -51,8 +64,8 @@ public class UsuarioController {
     private final FindUsuarioService findUsuarioService;
     private final DeleteUsuarioService deleteUsuarioService;
     private final EditUsuarioService editUsuarioService;
-    private final es.refugio.refugio.infraestructure.db.jpa.repository.usuario.UsuarioEntityJpaRepository usuarioEntityJpaRepository;
-    private final es.refugio.auth.infrastructure.security.JwtTokenProvider tokenProvider;
+    private final UsuarioEntityJpaRepository usuarioEntityJpaRepository;
+    private final JwtTokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder;
 
     @Operation(summary = "Crea un Usuario", description = "Registra un nuevo usuario con sus credenciales y rol")
@@ -63,7 +76,7 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<UsuarioResponse> createUsuario(
-            @jakarta.validation.Valid @RequestBody UsuarioRequest usuarioRequest) {
+            @Valid @RequestBody UsuarioRequest usuarioRequest) {
         CreateUsuarioCommand comando = UsuarioMapper.toCommand(usuarioRequest);
         Usuario usuario = createUsuarioService.createUsuario(comando);
         return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioMapper.toResponse(usuario));
@@ -71,12 +84,12 @@ public class UsuarioController {
 
     @PostMapping("/publico")
     public ResponseEntity<?> createUsuarioPublic(
-            @jakarta.validation.Valid @RequestBody UsuarioRequest usuarioRequest) {
+            @Valid @RequestBody UsuarioRequest usuarioRequest) {
         try {
             CreateUsuarioCommand comando = UsuarioMapper.toCommand(usuarioRequest);
             Usuario usuario = createUsuarioService.createUsuario(comando);
             return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioMapper.toResponse(usuario));
-        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException e) {
             String msg = e.getMostSpecificCause().getMessage();
             String userFriendlyMsg = "Error: El nombre de usuario o el email ya están registrados.";
             
@@ -95,7 +108,7 @@ public class UsuarioController {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     @org.springframework.web.bind.annotation.PutMapping("/{id}/rol")
     public ResponseEntity<Map<String, String>> updateRole(@PathVariable int id, @RequestBody Map<String, String> body) {
         var userOptional = usuarioEntityJpaRepository.findById(id);
@@ -103,18 +116,38 @@ public class UsuarioController {
             var user = userOptional.get();
             try {
                 String nuevoRol = body.get("rol");
-                user.setRol(es.refugio.auth.domain.Rol.valueOf(nuevoRol));
+                
+                // SEGURIDAD EXTRA: Si no es ADMIN, validar transiciones permitidas
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                if (!isAdmin) {
+                    Rol targetRol = Rol.valueOf(nuevoRol);
+                    Rol currentRol = user.getRol();
+                    
+                    boolean isValidTransition = false;
+                    if (currentRol == Rol.ROLE_PUBLICO && targetRol == Rol.ROLE_ADOPTANTE) {
+                        isValidTransition = true;
+                    } else if (currentRol == Rol.ROLE_VOLUNTARIO && targetRol == Rol.ROLE_VOLUNTARIO_ADOPTANTE) {
+                        isValidTransition = true;
+                    }
+                    
+                    if (!isValidTransition) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                    }
+                }
+
+                user.setRol(Rol.valueOf(nuevoRol));
                 usuarioEntityJpaRepository.save(user);
 
                 // Generar nuevo token con el rol actualizado para que el frontend pueda refrescar la sesión
-                java.util.List<org.springframework.security.core.authority.SimpleGrantedAuthority> authorities = new java.util.ArrayList<>();
-                authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority(nuevoRol));
+                List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                authorities.add(new SimpleGrantedAuthority(nuevoRol));
                 if ("ROLE_VOLUNTARIO_ADOPTANTE".equals(nuevoRol)) {
-                    authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_VOLUNTARIO"));
-                    authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADOPTANTE"));
+                    authorities.add(new SimpleGrantedAuthority("ROLE_VOLUNTARIO"));
+                    authorities.add(new SimpleGrantedAuthority("ROLE_ADOPTANTE"));
                 }
-                var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(user.getEmail(), null, authorities);
-                String newToken = tokenProvider.generateToken(auth);
+                var authObject = new UsernamePasswordAuthenticationToken(user.getEmail(), null, authorities);
+                String newToken = tokenProvider.generateToken(authObject);
 
                 return ResponseEntity.ok(Map.of("token", newToken));
             } catch (Exception e) {
@@ -164,11 +197,35 @@ public class UsuarioController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public List<UsuarioResponse> getAll() {
-        return findUsuarioService.findAll()
-                .stream()
-                .map(UsuarioMapper::toResponse)
+    public PaginatedResponse<UsuarioResponse> getAll(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        
+        if (page == null || size == null) {
+            List<UsuarioEntity> all = usuarioEntityJpaRepository.findAll();
+            List<UsuarioResponse> items = all.stream()
+                    .map(entity -> UsuarioMapper.toResponse(UsuarioMapper.toDomain(entity)))
+                    .toList();
+            return PaginatedResponse.<UsuarioResponse>builder()
+                    .items(items)
+                    .total(all.size())
+                    .count(all.size())
+                    .page(1)
+                    .pageSize(all.size() > 0 ? all.size() : 10)
+                    .totalPages(1)
+                    .hasNext(false)
+                    .hasPrevious(false)
+                    .build();
+        }
+
+        Page<UsuarioEntity> pageResult = 
+            usuarioEntityJpaRepository.findAll(PageRequest.of(page, size));
+        
+        List<UsuarioResponse> items = pageResult.getContent().stream()
+                .map(entity -> UsuarioMapper.toResponse(UsuarioMapper.toDomain(entity)))
                 .toList();
+
+        return PaginatedResponse.fromPage(pageResult, items);
     }
 
     @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
@@ -198,13 +255,13 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     @PutMapping("/{id}")
     public UsuarioResponse editUsuario(@PathVariable int id,
-            @jakarta.validation.Valid @RequestBody UsuarioRequest usuarioRequest) {
+            @Valid @RequestBody UsuarioRequest usuarioRequest) {
         
         // SEGURIDAD EXTRA: Si no es ADMIN, forzar que el rol sea el actual (no permitir escalada)
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
         
-        es.refugio.auth.domain.Rol finalRol = usuarioRequest.rol();
+        Rol finalRol = usuarioRequest.rol();
         if (!isAdmin) {
             Usuario usuarioActual = findUsuarioService.findById(new UsuarioId(id));
             finalRol = usuarioActual.getRol();

@@ -10,7 +10,7 @@
 <div th:fragment="content">
         <div class="page-header" style="text-align: center; margin-bottom: 3rem;">
             <h1 class="page-title">Únete a nuestra familia y adopta</h1>
-            <p style="color: var(--text-muted);">Completa tus datos para crear una cuenta y enviar tu solicitud para <strong th:text="${animal.get('nombre')}"></strong></p>
+            <p style="color: var(--text-muted);">Completa tus datos para crear una cuenta y enviar tu solicitud para <strong th:text="${animal.nombre}"></strong></p>
         </div>
 
         <div class="card glass-panel" style="max-width: 900px; margin: 0 auto; padding: 2.5rem; border-radius: 32px;">
@@ -24,15 +24,15 @@
 
                 <!-- Animal Info (Mini Card) -->
                 <div style="display: flex; align-items: center; gap: 1.5rem; background: rgba(255,255,255,0.4); padding: 1rem; border-radius: 20px; margin-bottom: 2.5rem; border: 1px solid var(--border);">
-                    <img th:src="${animal.get('foto') != null ? animal.get('foto') : '/images/placeholder-animal.png'}" 
+                    <img th:src="${animal.foto != null ? animal.foto : '/images/placeholder-animal.png'}" 
                          style="width: 80px; height: 80px; border-radius: 16px; object-fit: cover;" alt="Animal">
                     <div>
-                        <h3 style="margin: 0; font-weight: 800;" th:text="${animal.get('nombre')}">Nombre</h3>
-                        <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);" th:text="${animal.get('raza')}">Raza</p>
+                        <h3 style="margin: 0; font-weight: 800;" th:text="${animal.nombre}">Nombre</h3>
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);" th:text="${animal.raza}">Raza</p>
                     </div>
                 </div>
 
-                <input type="hidden" name="animalId" th:value="${animal.get('id')}">
+                <input type="hidden" name="animalId" th:value="${animal.id}">
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                     
@@ -95,7 +95,7 @@
                         </div>
 
                         <div class="form-group" style="margin-top: 1rem;">
-                            <label>¿Por qué quieres adoptar a <span th:text="${animal.get('nombre')}"></span>?</label>
+                            <label>¿Por qué quieres adoptar a <span th:text="${animal.nombre}"></span>?</label>
                             <textarea name="comentario" rows="4" placeholder="Cuéntanos un poco sobre el futuro hogar del animal..." th:text="${comentario}"></textarea>
                         </div>
                     </div>

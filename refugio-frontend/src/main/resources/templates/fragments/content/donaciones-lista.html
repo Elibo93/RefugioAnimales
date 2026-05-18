@@ -11,8 +11,10 @@
         <!-- Impact Section (Ahora filtrado dentro del fragmento para admin/user) -->
         <div th:replace="~{fragments/content/donacion-impacto :: impact}"></div>
 
-        <!-- Integrated Donation Form (Oculto para admin para una vista de lista pura) -->
-        <div th:if="${isAdmin == null or !isAdmin}" th:replace="~{fragments/content/donacion-formulario :: content}">
+        <!-- Integrated Donation Form (Ocultable para el administrador) -->
+        <div id="donacion-form-container"
+             th:style="${isAdmin} ? 'display: none; opacity: 0; transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);' : ''">
+             <div th:replace="~{fragments/content/donacion-formulario :: content}"></div>
         </div>
 
         <!-- Panel de Lista para Admin -->
@@ -30,6 +32,13 @@
                         aportaciones al refugio</p>
                 </div>
                 <div style="display: flex; gap: 0.75rem;">
+                    <!-- Botón para alternar formulario de donación para el Administrador -->
+                    <button id="btn-admin-donar" class="btn btn-primary"
+                        style="padding: 0.7rem 1.25rem; border-radius: 14px; font-weight: 700; background: var(--primary); color: white; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm); border: none; cursor: pointer; transition: all 0.3s ease;">
+                        <i data-lucide="heart" style="width: 18px; fill: white;"></i>
+                        <span>Registrar Aportación</span>
+                    </button>
+
                     <a th:href="@{/web/donaciones/pdf}" target="_blank" class="btn"
                         style="padding: 0.7rem 1.25rem; border-radius: 14px; font-weight: 700; background: white; border: 1px solid #e2e8f0; color: #64748b; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm);">
                         <i data-lucide="download" style="width: 18px;"></i>
@@ -39,7 +48,8 @@
             </div>
 
             <!-- LISTA PREMIUM DE DONACIONES -->
-            <div class="premium-list-container">
+            <div id="donacion-results-container" class="premium-list-container">
+                <div th:fragment="list-body">
                 <!-- Encabezados -->
                 <div class="list-header" style="background: transparent; padding: 0 3rem 1rem; display: flex; align-items: center; gap: 2rem;">
                     <div style="flex: 2;">Donante</div>
@@ -69,13 +79,12 @@
                         <!-- Tipo -->
                         <div class="row-cell" style="flex: 1.2; justify-content: center; display: flex;">
                             <span class="badge-premium info" style="min-width: 85px; text-align: center;"
-                                  th:with="tipo=${d['tipo']}"
-                                  th:text="${tipo != null ? #strings.replace(tipo, '_', ' ') : '-'}">DINERO</span>
+                                  th:text="${d.tipo != null ? #strings.replace(d.tipo, '_', ' ') : '-'}">DINERO</span>
                         </div>
 
                         <!-- Cantidad -->
                         <div class="row-cell" style="flex: 1.2; justify-content: center; display: flex; align-items: baseline; gap: 2px;">
-                            <span style="font-weight: 800; color: var(--text-main); font-size: 1.15rem;" th:text="${d['cantidad']}">100.0</span>
+                            <span style="font-weight: 800; color: var(--text-main); font-size: 1.15rem;" th:text="${d.cantidad}">100.0</span>
                             <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted);">€</span>
                         </div>
 
@@ -83,16 +92,16 @@
                         <div class="row-cell" style="flex: 1.2; justify-content: center; display: flex;">
                             <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
                                 <div style="font-size: 0.9rem; font-weight: 700; color: var(--text-main); white-space: nowrap;" 
-                                     th:text="${d['fecha'] != null ? #strings.substring(d['fecha'].toString().replace('T', ' '), 0, 10) : '-'}">2026-05-07</div>
+                                     th:text="${d.fecha != null ? #strings.substring(d.fecha.toString().replace('T', ' '), 0, 10) : '-'}">2026-05-07</div>
                                 <span class="badge-premium warning" style="font-size: 0.65rem; padding: 2px 8px; width: fit-content;"
-                                      th:text="${d['frecuencia']}">UNICA</span>
+                                      th:text="${d.frecuencia}">UNICA</span>
                             </div>
                         </div>
 
                         <!-- Descripción -->
                         <div class="row-cell" style="flex: 2.5; padding-left: 2rem; border-left: 1px solid #f1f5f9;">
-                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" 
-                               th:text="${d['descripcion']} ?: 'Sin descripción'">Descripción...</p>
+                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" 
+                               th:text="${d.descripcion} ?: 'Sin descripción'">Descripción...</p>
                         </div>
                     </div>
                 </div>
@@ -102,6 +111,11 @@
                     <i data-lucide="inbox" style="width:48px; height:48px; margin-bottom:1rem; color: var(--text-muted); opacity: 0.3;"></i>
                     <p style="color: var(--text-muted); font-weight: 600;">No hay donaciones registradas aún.</p>
                 </div>
+                </div>
+
+                <!-- Paginación -->
+                <div th:replace="~{fragments/pagination :: controls(pagination=${pagination}, url='/web/donaciones', target='#donacion-results-container')}"></div>
+
             </div>
         </div>
 

@@ -18,81 +18,81 @@
 
             <!-- Galería / Imagen -->
             <div class="modal-gallery">
-                <img th:src="${animal.get('foto') != null ? animal.get('foto') : '/images/placeholder-animal.png'}" alt="Animal">
+                <img th:src="${animal.foto() != null ? animal.foto() : '/images/placeholder-animal.png'}" alt="Animal">
             </div>
 
             <!-- Área de Contenido -->
             <div class="modal-body-detail">
                     <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
                         <span class="animal-status-badge"
-                            th:classappend="${animal.get('estado') != null ? 
-                                (#strings.toUpperCase(animal.get('estado').toString()) == 'DISPONIBLE' ? 'badge-available' : 
-                                (#strings.toUpperCase(animal.get('estado').toString()) == 'RESERVADO' ? 'badge-reserved' : 
-                                (#strings.toUpperCase(animal.get('estado').toString()) == 'ADOPTADO' ? 'badge-adopted' : 'badge-treatment'))) : 'badge-available'}"
-                            th:text="${animal.get('estado') != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(animal.get('estado'), '_', ' '))) : ''}">
+                            th:classappend="${animal.estado() != null ? 
+                                (#strings.toUpperCase(animal.estado().toString()) == 'DISPONIBLE' ? 'badge-available' : 
+                                (#strings.toUpperCase(animal.estado().toString()) == 'RESERVADO' ? 'badge-reserved' : 
+                                (#strings.toUpperCase(animal.estado().toString()) == 'ADOPTADO' ? 'badge-adopted' : 'badge-treatment'))) : 'badge-available'}"
+                            th:text="${animal.estado() != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(animal.estado(), '_', ' '))) : ''}">
                             Disponible
                         </span>
-                        <span th:if="${animal.get('urgencia')}"
+                        <span th:if="${animal.urgencia()}"
                             style="background: #FEE2E2; color: #DC2626; padding: 0.4rem 0.8rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">
                             🔥 Urgente
                         </span>
                     </div>
-                    <h1 class="animal-name" th:text="${animal.get('nombre')}" style="font-size: 3rem; margin-bottom: 0.5rem;">
+                    <h1 class="animal-name" th:text="${animal.nombre()}" style="font-size: 3rem; margin-bottom: 0.5rem;">
                         Rocky</h1>
                     <p style="color: var(--text-muted); font-size: 1.1rem; font-weight: 600;"
-                        th:text="${animal.get('raza') + ' • ' + animal.get('edad') + ' años'}">Labrador • 2 años</p>
+                        th:text="${animal.raza() + ' • ' + animal.edad() + ' años'}">Labrador • 2 años</p>
 
                 <div class="quick-stats"
                     style="background: rgba(255,255,255,0.3); padding: 1.5rem; border-radius: 20px;">
                     <div class="stat-item">
                         <i data-lucide="dog"></i>
                         <span
-                            th:text="${(animal.get('especie') != null and animal.get('especie').toString() == 'OTRO') ? animal.get('especiePersonalizada') : animal.get('especie')}">Perro</span>
+                            th:text="${(animal.especie() != null and animal.especie().toString() == 'OTRO') ? animal.especiePersonalizada() : animal.especie()}">Perro</span>
                         <span style="font-size: 0.65rem; opacity: 0.7;">Especie</span>
                     </div>
                     <div class="stat-item">
                         <i data-lucide="weight"></i>
-                        <span th:text="${animal.get('peso') != null ? animal.get('peso') + 'kg' : '-'}">12kg</span>
+                        <span th:text="${animal.peso() != null ? animal.peso() + 'kg' : '-'}">12kg</span>
                         <span style="font-size: 0.65rem; opacity: 0.7;">Peso</span>
                     </div>
                     <div class="stat-item">
                         <i data-lucide="zap"></i>
-                        <span th:text="${animal.get('nivelEnergia') != null ? animal.get('nivelEnergia') + '/5' : '-'}">4/5</span>
+                        <span th:text="${animal.nivelEnergia() != null ? animal.nivelEnergia() + '/5' : '-'}">4/5</span>
                         <span style="font-size: 0.65rem; opacity: 0.7;">Energía</span>
                     </div>
                     <div class="stat-item">
-                        <i th:data-lucide="${animal.get('sexo') != null ? (animal.get('sexo').toString() == 'MACHO' ? 'mars' : 'venus') : 'circle'}"></i>
-                        <span th:text="${animal.get('sexo')}">Macho</span>
+                        <i th:data-lucide="${animal.sexo() != null ? (animal.sexo().toString() == 'MACHO' ? 'mars' : 'venus') : 'circle'}"></i>
+                        <span th:text="${animal.sexo()}">Macho</span>
                         <span style="font-size: 0.65rem; opacity: 0.7;">Género</span>
                     </div>
                 </div>
 
                 <div class="description-section">
-                    <h4 style="margin-bottom: 1rem;">Sobre <span th:text="${animal.get('nombre')}"></span></h4>
+                    <h4 style="margin-bottom: 1rem;">Sobre <span th:text="${animal.nombre()}"></span></h4>
                     <p style="line-height: 1.6; color: var(--text-main); font-size: 1.05rem;"
-                        th:text="${animal.get('descripcion')}">
+                        th:text="${animal.descripcion()}">
                     </p>
                 </div>
  
                 <!-- Mensaje de interés (Demanda) - Solo se muestra si NO ha solicitado ya -->
-                <div th:if="${animal.get('conteoSolicitudes') != null and animal.get('conteoSolicitudes') > 0 and (animal.get('estado') == null or #strings.toUpperCase(animal.get('estado').toString()) == 'DISPONIBLE' or #strings.toUpperCase(animal.get('estado').toString()) == 'EN_TRATAMIENTO') and !animalesSolicitadosIds.contains(animal.get('id'))}"
+                <div th:if="${animal.conteoSolicitudes() != null and animal.conteoSolicitudes() > 0 and (animal.estado() == null or #strings.toUpperCase(animal.estado().toString()) == 'DISPONIBLE' or #strings.toUpperCase(animal.estado().toString()) == 'EN_TRATAMIENTO') and !animalesSolicitadosIds.contains(animal.id())}"
                      style="background: rgba(245, 158, 11, 0.1); color: #d97706; padding: 1rem; border-radius: 16px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem; border: 1px solid rgba(245, 158, 11, 0.2);">
                     <i data-lucide="info" style="width: 20px; height: 20px;"></i>
                     <p style="margin: 0; font-size: 0.9rem; font-weight: 600;">
-                        Actualmente hay <span th:text="${animal.get('conteoSolicitudes')}"></span> 
-                        <span th:text="${animal.get('conteoSolicitudes') == 1 ? 'solicitud' : 'solicitudes'}"></span> 
+                        Actualmente hay <span th:text="${animal.conteoSolicitudes()}"></span> 
+                        <span th:text="${animal.conteoSolicitudes() == 1 ? 'solicitud' : 'solicitudes'}"></span> 
                         en revisión para este animal. ¡Aún puedes enviar la tuya!
                     </p>
                 </div>
 
                 <div style="margin-top: auto; display: flex; gap: 1rem;"
-                     th:styleappend="${isAuthenticated and !isAdmin and animalesSolicitadosIds.contains(animal.get('id')) ? 'flex-direction: column;' : ''}">
+                     th:styleappend="${isAuthenticated and !isAdmin and animalesSolicitadosIds.contains(animal.id()) ? 'flex-direction: column;' : ''}">
                     <!-- Botón de Adopción (Sólo si DISPONIBLE o EN TRATAMIENTO) -->
-                    <div style="flex: 1;" th:if="${animal.get('estado') != null and (#strings.toUpperCase(animal.get('estado').toString()) == 'DISPONIBLE' or #strings.toUpperCase(animal.get('estado').toString()) == 'EN_TRATAMIENTO')}">
+                    <div style="flex: 1;" th:if="${animal.estado() != null and (#strings.toUpperCase(animal.estado().toString()) == 'DISPONIBLE' or #strings.toUpperCase(animal.estado().toString()) == 'EN_TRATAMIENTO')}">
                         
                         <!-- 1. Usuario No Autenticado -->
                         <div th:if="${!isAuthenticated}">
-                            <a th:href="@{/web/solicitudes/publico/opciones(animalId=${animal.get('id')})}" 
+                            <a th:href="@{/web/solicitudes/publico/opciones(animalId=${animal.id()})}" 
                                class="btn btn-primary"
                                style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
                                 <i data-lucide="heart"></i>
@@ -104,16 +104,16 @@
                         <div th:if="${isAuthenticated and !isAdmin}" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
                             
                             <!-- Caso 0: Ya ha solicitado este animal -->
-                            <div th:if="${animalesSolicitadosIds.contains(animal.get('id'))}"
+                            <div th:if="${animalesSolicitadosIds.contains(animal.id())}"
                                  style="background: rgba(45, 157, 88, 0.1); color: #2d9d58; padding: 1.2rem; border-radius: 16px; border: 1px dashed #2d9d58; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center;">
                                 <i data-lucide="check-circle" style="width: 24px; height: 24px;"></i>
                                 <div style="font-weight: 700; font-size: 1rem;">Solicitud en curso</div>
-                                <p style="font-size: 0.85rem; margin: 0; opacity: 0.8;">Ya hemos recibido tu interés por <span th:text="${animal.get('nombre')}"></span>. ¡Te avisaremos pronto!</p>
+                                <p style="font-size: 0.85rem; margin: 0; opacity: 0.8;">Ya hemos recibido tu interés por <span th:text="${animal.nombre()}"></span>. ¡Te avisaremos pronto!</p>
                             </div>
 
                             <!-- Caso A: Ya es Adoptante -> Adopción Directa (Solo si no ha solicitado ya) -->
-                            <div th:if="${!animalesSolicitadosIds.contains(animal.get('id'))}" sec:authorize="hasRole('ROLE_ADOPTANTE')">
-                                <a th:href="@{/web/solicitudes/publico/directa/formulario(animalId=${animal.get('id')})}" 
+                            <div th:if="${!animalesSolicitadosIds.contains(animal.id())}" sec:authorize="hasRole('ROLE_ADOPTANTE')">
+                                <a th:href="@{/web/solicitudes/publico/directa/formulario(animalId=${animal.id()})}" 
                                    class="btn btn-primary"
                                    style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
                                     <i data-lucide="heart-handshake"></i>
@@ -122,8 +122,8 @@
                             </div>
 
                             <!-- Caso B: Usuario Registrado pero NO Adoptante -> Ir a Conversión (Solo si no ha solicitado ya) -->
-                            <div th:if="${!animalesSolicitadosIds.contains(animal.get('id'))}" sec:authorize="!hasRole('ROLE_ADOPTANTE')">
-                                <a th:href="@{/web/solicitudes/publico/convertir(animalId=${animal.get('id')})}" 
+                            <div th:if="${!animalesSolicitadosIds.contains(animal.id())}" sec:authorize="!hasRole('ROLE_ADOPTANTE')">
+                                <a th:href="@{/web/solicitudes/publico/convertir(animalId=${animal.id()})}" 
                                    class="btn btn-primary"
                                    style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
                                     <i data-lucide="heart"></i>
@@ -134,12 +134,12 @@
 
                         <!-- 3. Administrador -->
                         <div th:if="${isAdmin}" style="display: flex; gap: 1rem; width: 100%;">
-                            <a th:href="@{/web/animales/{id}/editar(id=${animal.get('id')})}" class="btn btn-secondary"
+                            <a th:href="@{/web/animales/{id}/editar(id=${animal.id()})}" class="btn btn-secondary"
                                 style="flex: 1; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px; background: rgba(0,0,0,0.05);">
                                 <i data-lucide="edit"></i>
                                 <span>Editar Ficha</span>
                             </a>
-                            <a th:href="@{/web/solicitudes/nueva(animalId=${animal.get('id')})}" class="btn btn-primary"
+                            <a th:href="@{/web/solicitudes/nueva(animalId=${animal.id()})}" class="btn btn-primary"
                                 style="flex: 1; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
                                 <i data-lucide="heart"></i>
                                 <span th:text="#{animal.button.adopt}">¡Adopta!</span>
@@ -150,7 +150,7 @@
                     <button type="button" class="btn btn-secondary"
                         onclick="closeModal()"
                         style="height: 56px; border-radius: 16px;"
-                        th:styleappend="${isAuthenticated and !isAdmin and animalesSolicitadosIds.contains(animal.get('id')) ? 'width: 100%; justify-content: center;' : ''}">
+                        th:styleappend="${isAuthenticated and !isAdmin and animalesSolicitadosIds.contains(animal.id()) ? 'width: 100%; justify-content: center;' : ''}">
                         Cerrar
                     </button>
                 </div>

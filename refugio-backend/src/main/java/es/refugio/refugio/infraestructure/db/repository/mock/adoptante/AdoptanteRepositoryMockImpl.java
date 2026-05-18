@@ -10,8 +10,15 @@ import es.refugio.refugio.domain.model.adoptante.Adoptante;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.repository.AdoptanteRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public class AdoptanteRepositoryMockImpl implements AdoptanteRepository {
+
+    @Override
+    public Page<Adoptante> findFiltered(String q, Pageable pageable) {
+        return Page.empty();
+    }
 
     private final Map<AdoptanteId, Adoptante> adoptantes = AdoptanteFactory.getDemoData();
 

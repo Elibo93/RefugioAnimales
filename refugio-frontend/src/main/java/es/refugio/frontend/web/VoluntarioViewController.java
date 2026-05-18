@@ -10,8 +10,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -19,17 +17,19 @@ import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.http.HttpEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
 import es.refugio.frontend.security.CustomUserDetails;
+import es.refugio.frontend.web.dto.*;
+import es.refugio.frontend.web.util.ViewControllerHelper;
 
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,10 +38,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class VoluntarioViewController {
 
-    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(VoluntarioViewController.class);
+    private static final Logger logger = LoggerFactory.getLogger(VoluntarioViewController.class);
 
     private final RestTemplate restTemplate;
     private final TemplateEngine templateEngine;
+    private final ViewControllerHelper helper;
 
     @Value("${backend.api.url}")
     private String apiUrl;
@@ -49,41 +50,29 @@ public class VoluntarioViewController {
     @Value("${auth.api.url}")
     private String authUrl;
 
-    @SuppressWarnings("unchecked")
     @GetMapping(WebRoutes.VOLUNTARIOS_BASE)
     @PreAuthorize("hasRole('ADMIN')")
     public String listar(Model model,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false) String q,
             @RequestParam(required = false, defaultValue = "false") boolean modoSeleccion,
             @RequestParam(required = false) Integer tareaIdSeleccion,
             HttpServletRequest request,
             HttpServletResponse response) {
 
-        // Indicar al navegador que la respuesta varía según si es HTMX o no para evitar
-        // problemas de caché al dar atrás
         response.setHeader("Vary", "HX-Request");
 
-        // Si estamos en modo selección, intentamos obtener la descripción de la tarea
         if (modoSeleccion && tareaIdSeleccion != null) {
             try {
-                Map<String, Object> tarea = (Map<String, Object>) restTemplate
-                        .getForObject(apiUrl + "/v1/tareas/" + tareaIdSeleccion, Map.class);
+                TareaRecord tarea = helper.fetchObject(apiUrl + "/v1/tareas/" + tareaIdSeleccion, TareaRecord.class);
                 if (tarea != null) {
-                    model.addAttribute("tareaNombreSeleccion", tarea.get("descripcion"));
+                    model.addAttribute("tareaNombreSeleccion", tarea.descripcion());
 
-                    // Obtener IDs de voluntarios ya asignados
                     List<Integer> assignedIds = new ArrayList<>();
-                    Object vIds = tarea.get("voluntarioIds");
-                    if (vIds instanceof List) {
-                        for (Object o : (List<?>) vIds) {
-                            if (o instanceof Number)
-                                assignedIds.add(((Number) o).intValue());
-                            else if (o instanceof Map) {
-                                Object val = ((Map<?, ?>) o).get("value");
-                                if (val instanceof Number)
-                                    assignedIds.add(((Number) val).intValue());
-                            }
-                        }
+                    List<Integer> vIds = tarea.voluntarioIds();
+                    if (vIds != null) {
+                        assignedIds.addAll(vIds);
                     }
                     model.addAttribute("assignedVoluntarioIds", assignedIds);
                 }
@@ -92,56 +81,28 @@ public class VoluntarioViewController {
             }
         }
 
-        List<Object> voluntarios = fetchList("/v1/voluntarios");
-        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
-        List<Object> perfilesLegales = fetchList("/v1/perfiles-legales");
-
-        // Mapa auxiliar para asociar voluntarios con sus datos de usuario por ID
-        Map<String, Object> usuariosMap = new HashMap<>();
-        for (Object u : usuarios) {
-            if (u instanceof Map) {
-                Object id = ((Map<?, ?>) u).get("id");
-                if (id instanceof Number) {
-                    usuariosMap.put(String.valueOf(((Number) id).intValue()), u);
-                }
-            }
-        }
-
-        Map<String, Object> perfilesMap = new HashMap<>();
-        for (Object p : perfilesLegales) {
-            if (p instanceof Map) {
-                Object uId = ((Map<?, ?>) p).get("usuarioId");
-                if (uId instanceof Number) {
-                    perfilesMap.put(String.valueOf(((Number) uId).intValue()), p);
-                }
-            }
-        }
-
-        // Filtrado por Búsqueda (q)
+        String url = "/v1/voluntarios";
         if (q != null && !q.trim().isEmpty()) {
-            String query = q.toLowerCase();
-            voluntarios = voluntarios.stream()
-                    .filter(v -> {
-                        if (v instanceof Map) {
-                            Map<?, ?> vm = (Map<?, ?>) v;
-                            String uId = String.valueOf(vm.get("usuarioId"));
-                            Map<?, ?> user = (Map<?, ?>) usuariosMap.get(uId);
-                            Map<?, ?> legal = (Map<?, ?>) perfilesMap.get(uId);
+            url += "?q=" + q;
+        }
+        
+        PaginatedResponse<VoluntarioRecord> pagination = helper.fetchPaginated(apiUrl + url, page, size, VoluntarioRecord.class);
+        List<VoluntarioRecord> voluntarios = pagination.items();
+        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+        List<PerfilLegalRecord> perfilesLegales = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
 
-                            String username = user != null ? String.valueOf(user.get("username")).toLowerCase() : "";
-                            String email = user != null ? String.valueOf(user.get("email")).toLowerCase() : "";
-                            String nombre = legal != null ? String.valueOf(legal.get("nombre")).toLowerCase() : "";
-                            String apellido = legal != null ? String.valueOf(legal.get("apellido")).toLowerCase() : "";
-                            String dni = legal != null ? String.valueOf(legal.get("dni")).toLowerCase() : "";
+        Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
+        for (UsuarioRecord u : usuarios) {
+            usuariosMap.put(String.valueOf(u.id()), u);
+        }
 
-                            return username.contains(query) || email.contains(query) ||
-                                    nombre.contains(query) || apellido.contains(query) || dni.contains(query);
-                        }
-                        return false;
-                    }).toList();
+        Map<String, PerfilLegalRecord> perfilesMap = new HashMap<>();
+        for (PerfilLegalRecord p : perfilesLegales) {
+            if (p.usuarioId() != null) perfilesMap.put(String.valueOf(p.usuarioId()), p);
         }
 
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), voluntarios);
+        model.addAttribute("pagination", pagination);
         model.addAttribute("usuariosMap", usuariosMap);
         model.addAttribute("perfilesMap", perfilesMap);
         model.addAttribute("query", q);
@@ -150,13 +111,6 @@ public class VoluntarioViewController {
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_BASE);
 
         if ("true".equals(request.getHeader("HX-Request"))) {
-            String hxTarget = request.getHeader("HX-Target");
-            // Si el objetivo es solo la lista (búsqueda), devolvemos solo el body
-            if ("voluntarios-list-body".equals(hxTarget)) {
-                return FragmentoContenido.Voluntario_LIST.getPath() + " :: list-body";
-            }
-            // Para navegación completa o cualquier otro caso, devolvemos el contenido
-            // completo
             return FragmentoContenido.Voluntario_LIST.getPath() + " :: content";
         }
 
@@ -170,69 +124,45 @@ public class VoluntarioViewController {
             return FragmentoContenido.VOLUNTARIO_SUGERENCIAS.getPath() + " :: suggestions";
         }
 
-        List<Object> voluntarios = fetchList("/v1/voluntarios");
-        List<Object> perfiles = fetchList("/v1/perfiles-legales");
-        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
+        List<VoluntarioRecord> voluntarios = helper.fetchList(apiUrl + "/v1/voluntarios", VoluntarioRecord.class);
+        List<PerfilLegalRecord> perfiles = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
 
-        Map<Integer, Map<String, Object>> perfilesMap = new HashMap<>();
-        for (Object p : perfiles) {
-            if (p instanceof Map) {
-                Object uId = ((Map<?, ?>) p).get("usuarioId");
-                if (uId instanceof Number)
-                    perfilesMap.put(((Number) uId).intValue(), (Map<String, Object>) p);
-            }
+        Map<Integer, PerfilLegalRecord> perfilesMap = new HashMap<>();
+        for (PerfilLegalRecord p : perfiles) {
+            if (p.usuarioId() != null)
+                perfilesMap.put(p.usuarioId(), p);
         }
 
-        Map<Integer, Map<String, Object>> usuariosMap = new HashMap<>();
-        for (Object u : usuarios) {
-            if (u instanceof Map) {
-                Object id = ((Map<?, ?>) u).get("id");
-                if (id instanceof Number)
-                    usuariosMap.put(((Number) id).intValue(), (Map<String, Object>) u);
-            }
+        Map<Integer, UsuarioRecord> usuariosMap = new HashMap<>();
+        for (UsuarioRecord u : usuarios) {
+            usuariosMap.put(u.id(), u);
         }
 
         String query = q.toLowerCase();
-        List<Map<String, Object>> voluntariosEncontrados = new java.util.ArrayList<>();
+        List<Map<String, Object>> voluntariosEncontrados = new ArrayList<>();
 
-        for (Object v : voluntarios) {
-            if (v instanceof Map) {
-                Map<String, Object> vm = (Map<String, Object>) v;
-                Object uIdRaw = vm.get("usuarioId");
-                if (uIdRaw instanceof Map)
-                    uIdRaw = ((Map<?, ?>) uIdRaw).get("value");
+        for (VoluntarioRecord v : voluntarios) {
+            if (v.usuarioId() != null) {
+                int uId = v.usuarioId();
+                PerfilLegalRecord perfil = perfilesMap.get(uId);
+                UsuarioRecord user = usuariosMap.get(uId);
 
-                if (uIdRaw instanceof Number) {
-                    int uId = ((Number) uIdRaw).intValue();
-                    Map<String, Object> perfil = perfilesMap.get(uId);
-                    Map<String, Object> user = usuariosMap.get(uId);
+                String nombre = perfil != null && perfil.nombre() != null ? perfil.nombre() : "";
+                String apellido = perfil != null && perfil.apellido() != null ? perfil.apellido() : "";
+                String email = user != null && user.email() != null ? user.email() : "";
+                String username = user != null && user.username() != null ? user.username() : "";
 
-                    String nombre = perfil != null && perfil.get("nombre") != null
-                            ? String.valueOf(perfil.get("nombre"))
-                            : "";
-                    String apellido = perfil != null && perfil.get("apellido") != null
-                            ? String.valueOf(perfil.get("apellido"))
-                            : "";
-                    String email = user != null && user.get("email") != null ? String.valueOf(user.get("email")) : "";
-                    String username = user != null && user.get("username") != null
-                            ? String.valueOf(user.get("username"))
-                            : "";
+                if (nombre.toLowerCase().contains(query) || apellido.toLowerCase().contains(query) ||
+                        email.toLowerCase().contains(query) || username.toLowerCase().contains(query)) {
 
-                    if (nombre.toLowerCase().contains(query) || apellido.toLowerCase().contains(query) ||
-                            email.toLowerCase().contains(query) || username.toLowerCase().contains(query)) {
-
-                        Map<String, Object> suggestion = new HashMap<>();
-                        Object vId = vm.get("id");
-                        if (vId instanceof Map)
-                            vId = ((Map<?, ?>) vId).get("value");
-
-                        suggestion.put("id", vId);
-                        suggestion.put("nombre", nombre);
-                        suggestion.put("apellido", apellido);
-                        suggestion.put("email", email);
-                        suggestion.put("username", username);
-                        voluntariosEncontrados.add(suggestion);
-                    }
+                    Map<String, Object> suggestion = new HashMap<>();
+                    suggestion.put("id", v.id());
+                    suggestion.put("nombre", nombre);
+                    suggestion.put("apellido", apellido);
+                    suggestion.put("email", email);
+                    suggestion.put("username", username);
+                    voluntariosEncontrados.add(suggestion);
                 }
             }
         }
@@ -244,38 +174,33 @@ public class VoluntarioViewController {
     @GetMapping(WebRoutes.VOLUNTARIOS_NUEVO)
     @PreAuthorize("hasAnyRole('ADMIN', 'PUBLICO', 'VOLUNTARIO', 'ADOPTANTE') or isAnonymous()")
     public String formulario(Model model, HttpServletRequest request) {
-        model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), new HashMap<String, Object>());
+        Map<String, Object> emptyVoluntario = new HashMap<>();
+        emptyVoluntario.put("id", null);
+        emptyVoluntario.put("usuarioId", null);
+        emptyVoluntario.put("telefono", null);
+        emptyVoluntario.put("especialidad", null);
+        emptyVoluntario.put("disponibilidad", null);
+        model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), emptyVoluntario);
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_NUEVO);
         
-        // Inicializar flags para evitar errores de null en el template
         model.addAttribute("perfilLegalExists", false);
         model.addAttribute("perfilExistente", false);
 
-        // Si el usuario está autenticado, intentamos cargar su PerfilLegal para
-        // pre-rellenar o verificar si le falta
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             try {
-                // Obtener ID del usuario desde el modelo (inyectado por
-                // GlobalModelAttributesAdvice)
-                Object currentUserId = model.getAttribute("currentUserId");
-                if (currentUserId != null) {
-                    Map<String, Object> perfil = restTemplate.exchange(
-                            apiUrl + "/v1/perfiles-legales/usuario/" + currentUserId,
-                            HttpMethod.GET,
-                            null,
-                            new ParameterizedTypeReference<Map<String, Object>>() {
-                            }).getBody();
+                Object currentUserIdObj = model.getAttribute("currentUserId");
+                if (currentUserIdObj instanceof Number) {
+                    Integer currentUserId = ((Number) currentUserIdObj).intValue();
+                    PerfilLegalRecord perfil = helper.fetchObject(apiUrl + "/v1/perfiles-legales/usuario/" + currentUserId, PerfilLegalRecord.class);
                     if (perfil != null) {
-                        flattenId(perfil, "id");
-                        flattenId(perfil, "usuarioId");
-                        model.addAttribute("userPhone",           String.valueOf(perfil.getOrDefault("telefono", "")));
-                        model.addAttribute("userDni",             String.valueOf(perfil.getOrDefault("dni", "")));
-                        model.addAttribute("userDireccion",       String.valueOf(perfil.getOrDefault("direccion", "")));
-                        model.addAttribute("userFechaNacimiento", String.valueOf(perfil.getOrDefault("fechaNacimiento", "")));
-                        model.addAttribute("userNombre",          String.valueOf(perfil.getOrDefault("nombre", "")));
-                        model.addAttribute("userApellido",        String.valueOf(perfil.getOrDefault("apellido", "")));
-                        model.addAttribute("nombreCompleto",      perfil.getOrDefault("nombre", "") + " " + perfil.getOrDefault("apellido", ""));
+                        model.addAttribute("userPhone",           perfil.telefono());
+                        model.addAttribute("userDni",             perfil.dni());
+                        model.addAttribute("userDireccion",       perfil.direccion());
+                        model.addAttribute("userFechaNacimiento", perfil.fechaNacimiento());
+                        model.addAttribute("userNombre",          perfil.nombre());
+                        model.addAttribute("userApellido",        perfil.apellido());
+                        model.addAttribute("nombreCompleto",      perfil.nombre() + " " + perfil.apellido());
                         model.addAttribute("perfilLegalExists",   true);
                         model.addAttribute("perfilExistente",     true);
                     } else {
@@ -283,19 +208,12 @@ public class VoluntarioViewController {
                         model.addAttribute("perfilExistente", false);
                     }
 
-                    // Verificar si ya tiene un registro de voluntario
                     try {
-                        Map<String, Object> voluntarioExistente = restTemplate.exchange(
-                                apiUrl + "/v1/voluntarios/usuario/" + currentUserId,
-                                HttpMethod.GET,
-                                null,
-                                new ParameterizedTypeReference<Map<String, Object>>() {
-                                }).getBody();
+                        VoluntarioRecord voluntarioExistente = helper.fetchObject(apiUrl + "/v1/voluntarios/usuario/" + currentUserId, VoluntarioRecord.class);
                         if (voluntarioExistente != null) {
                             model.addAttribute("voluntarioExistente", voluntarioExistente);
                         }
                     } catch (Exception e) {
-                        // No es voluntario todavía, es normal
                         logger.debug("El usuario no tiene registro de voluntario previo.");
                     }
                 }
@@ -322,78 +240,46 @@ public class VoluntarioViewController {
         boolean isAdmin = auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
         model.addAttribute("isAdmin", isAdmin);
         
-        // Inicializar flags para evitar errores de null en el template
         model.addAttribute("perfilLegalExists", false);
         model.addAttribute("perfilExistente", false);
 
         try {
-            Map<String, Object> voluntario = restTemplate.exchange(
-                    apiUrl + "/v1/voluntarios/" + id,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<Map<String, Object>>() {
-                    }).getBody();
-
-            logger.info("DEBUG: Voluntario recuperado: {}", voluntario != null ? "SI" : "NULL");
+            VoluntarioRecord voluntario = helper.fetchObject(apiUrl + "/v1/voluntarios/" + id, VoluntarioRecord.class);
 
             if (voluntario == null) {
                 logger.warn("No se encontró el voluntario con ID: {}", id);
                 return "redirect:/web/home";
             }
 
-            // Aplanar IDs para que Thymeleaf pueda usarlos en URLs (th:action, th:href)
-            // sin que serialice objetos Map{value:X} como texto
-            flattenId(voluntario, "id");
-            flattenId(voluntario, "usuarioId");
-
             model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), voluntario);
 
-            Integer voluntarioUsuarioId = (voluntario.get("usuarioId") instanceof Number)
-                    ? ((Number) voluntario.get("usuarioId")).intValue()
-                    : null;
+            Integer voluntarioUsuarioId = voluntario.usuarioId();
 
-            // SEGURIDAD: Solo admin o el propio voluntario pueden editar
             if (!isAdmin && (voluntarioUsuarioId == null || !currentUser.getId().equals(voluntarioUsuarioId))) {
                 logger.warn("Usuario {} intentó editar voluntario {} sin permiso", currentUser.getId(), id);
                 return "redirect:/web/home";
             }
 
             if (voluntarioUsuarioId != null) {
-                // 2. Datos de usuario (email)
                 try {
-                    Map<String, Object> user = restTemplate.exchange(
-                            authUrl + "/v1/usuarios/" + voluntarioUsuarioId,
-                            HttpMethod.GET,
-                            null,
-                            new ParameterizedTypeReference<Map<String, Object>>() {
-                            }).getBody();
+                    UsuarioRecord user = helper.fetchObject(authUrl + "/v1/usuarios/" + voluntarioUsuarioId, UsuarioRecord.class);
                     if (user != null) {
-                        model.addAttribute("userEmail", user.get("email"));
+                        model.addAttribute("userEmail", user.email());
                     }
                 } catch (Exception e) {
                     logger.warn("No se pudo obtener datos de usuario {} para el voluntario {}", voluntarioUsuarioId, id);
                 }
 
-                // 3. PerfilLegal
                 try {
-                    Map<String, Object> perfil = restTemplate.exchange(
-                            apiUrl + "/v1/perfiles-legales/usuario/" + voluntarioUsuarioId,
-                            HttpMethod.GET,
-                            null,
-                            new ParameterizedTypeReference<Map<String, Object>>() {
-                            }).getBody();
+                    PerfilLegalRecord perfil = helper.fetchObject(apiUrl + "/v1/perfiles-legales/usuario/" + voluntarioUsuarioId, PerfilLegalRecord.class);
                     if (perfil != null) {
-                        // Aplanar IDs del perfil también
-                        flattenId(perfil, "id");
-                        flattenId(perfil, "usuarioId");
-                        model.addAttribute("nombreCompleto", perfil.get("nombre") + " " + perfil.get("apellido"));
-                        model.addAttribute("userPhone",         String.valueOf(perfil.getOrDefault("telefono", "")));
-                        model.addAttribute("userDni",           String.valueOf(perfil.getOrDefault("dni", "")));
-                        model.addAttribute("userDireccion",     String.valueOf(perfil.getOrDefault("direccion", "")));
-                        model.addAttribute("userFechaNacimiento", String.valueOf(perfil.getOrDefault("fechaNacimiento", "")));
-                        model.addAttribute("userNombre",        String.valueOf(perfil.getOrDefault("nombre", "")));
-                        model.addAttribute("userApellido",      String.valueOf(perfil.getOrDefault("apellido", "")));
-                        // NO añadimos el Map completo para evitar HttpMessageNotWritableException
+                        model.addAttribute("nombreCompleto", perfil.nombre() + " " + perfil.apellido());
+                        model.addAttribute("userPhone",         perfil.telefono());
+                        model.addAttribute("userDni",           perfil.dni());
+                        model.addAttribute("userDireccion",     perfil.direccion());
+                        model.addAttribute("userFechaNacimiento", perfil.fechaNacimiento());
+                        model.addAttribute("userNombre",        perfil.nombre());
+                        model.addAttribute("userApellido",      perfil.apellido());
                         model.addAttribute("perfilLegalExists", true);
                         model.addAttribute("perfilExistente", true);
                     } else {
@@ -421,19 +307,6 @@ public class VoluntarioViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    /**
-     * Aplana un ID anidado {value: X} a su valor entero plano.
-     * Necesario porque el backend serializa IDs compuestos como objetos Map.
-     */
-    private void flattenId(Map<String, Object> map, String key) {
-        if (map == null || !map.containsKey(key)) return;
-        Object val = map.get(key);
-        if (val instanceof Map) {
-            Object inner = ((Map<?, ?>) val).get("value");
-            map.put(key, inner);
-        }
-    }
-
     @PostMapping(WebRoutes.VOLUNTARIOS_NUEVO)
     @PreAuthorize("hasAnyRole('ADMIN', 'PUBLICO', 'VOLUNTARIO', 'ADOPTANTE') or isAnonymous()")
     public String crearVoluntario(
@@ -448,48 +321,30 @@ public class VoluntarioViewController {
             @RequestParam(required = false) String fechaNacimiento,
             @RequestParam(required = false) String contrasena,
             @RequestParam(required = false) String especialidad,
-            HttpServletResponse response,
             RedirectAttributes redirectAttributes) {
 
         Integer finalUsuarioId = idUsuario;
 
-        // SEGURIDAD: Si el usuario está autenticado, verificamos que no esté intentando
-        // suplantar a otro
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = auth != null && auth.isAuthenticated()
                 && !"anonymousUser".equals(auth.getPrincipal());
 
         if (isAuthenticated) {
             try {
-                Map<String, Object> me = restTemplate.exchange(
-                        authUrl + "/v1/me",
-                        HttpMethod.GET,
-                        null,
-                        new ParameterizedTypeReference<Map<String, Object>>() {
-                        }).getBody();
+                UsuarioRecord me = helper.fetchObject(authUrl + "/v1/me", UsuarioRecord.class);
                 if (me != null) {
-                    Object realIdObj = me.get("id");
-                    if (realIdObj instanceof Map)
-                        realIdObj = ((Map<?, ?>) realIdObj).get("value");
-                    Integer realUserId = ((Number) realIdObj).intValue();
-                    String rol = (String) me.get("rol");
+                    Integer realUserId = me.id();
+                    String rol = me.rol();
                     boolean isAdmin = rol != null && rol.contains("ADMIN");
 
-                    // Si no es admin y el ID enviado no coincide con el suyo, forzamos el suyo real
                     if (!isAdmin) {
                         if (finalUsuarioId != null && !finalUsuarioId.equals(realUserId)) {
                             logger.warn("Usuario {} intentó suplantar al ID {} en registro voluntario", realUserId, finalUsuarioId);
                         }
                         finalUsuarioId = realUserId;
 
-                        // BLOQUEO: Evitar doble solicitud
                         try {
-                            Map<String, Object> existing = restTemplate.exchange(
-                                    apiUrl + "/v1/voluntarios/usuario/" + realUserId,
-                                    HttpMethod.GET,
-                                    null,
-                                    new ParameterizedTypeReference<Map<String, Object>>() {
-                                    }).getBody();
+                            VoluntarioRecord existing = helper.fetchObject(apiUrl + "/v1/voluntarios/usuario/" + realUserId, VoluntarioRecord.class);
                             if (existing != null) {
                                 logger.info("Bloqueada solicitud duplicada para usuario {}", realUserId);
                                 redirectAttributes.addFlashAttribute("errorMessage", "Ya tienes una solicitud de voluntariado registrada.");
@@ -505,7 +360,6 @@ public class VoluntarioViewController {
             }
         }
 
-        // 1. Si no hay usuarioId, registramos al usuario primero
         if (finalUsuarioId == null) {
             Map<String, Object> userBody = new HashMap<>();
             userBody.put("email", email);
@@ -515,26 +369,17 @@ public class VoluntarioViewController {
             try {
                 String targetUrl = authUrl + "/v1/usuarios";
                 logger.info("Registrando usuario en Auth: " + targetUrl);
-                Map<String, Object> createdUser = restTemplate.exchange(
-                        targetUrl,
-                        HttpMethod.POST,
-                        new HttpEntity<>(userBody),
-                        new ParameterizedTypeReference<Map<String, Object>>() {
-                        }).getBody();
-                if (createdUser != null && createdUser.get("id") != null) {
-                    Object idObj = createdUser.get("id");
-                    if (idObj instanceof Map) {
-                        finalUsuarioId = (Integer) ((Map<?, ?>) idObj).get("value");
-                    } else if (idObj instanceof Number) {
-                        finalUsuarioId = ((Number) idObj).intValue();
-                    }
+                UsuarioRecord createdUser = restTemplate.postForObject(targetUrl, userBody, UsuarioRecord.class);
+                if (createdUser != null) {
+                    finalUsuarioId = createdUser.id();
                 }
             } catch (Exception e) {
                 logger.error("Error al registrar usuario para voluntario: " + e.getMessage());
                 redirectAttributes.addFlashAttribute("errorMessage", "Error al crear la cuenta de usuario.");
                 return "redirect:" + WebRoutes.VOLUNTARIOS_NUEVO;
             }
-        } // 2. Asegurar PerfilLegal (Identidad)
+        }
+
         Map<String, Object> bodyPerfil = new HashMap<>();
         bodyPerfil.put("usuarioId", finalUsuarioId);
         bodyPerfil.put("nombre", nombre);
@@ -550,7 +395,6 @@ public class VoluntarioViewController {
             logger.error("Error al sincronizar PerfilLegal en creación: " + e.getMessage());
         }
 
-        // 2. Registrar el perfil de voluntario (Solo datos operativos)
         Map<String, Object> bodyVol = new HashMap<>();
         bodyVol.put("usuarioId", finalUsuarioId);
         bodyVol.put("disponibilidad", disponibilidad);
@@ -558,10 +402,6 @@ public class VoluntarioViewController {
 
         try {
             restTemplate.postForObject(apiUrl + "/v1/voluntarios", bodyVol, Object.class);
-
-            // 3. Ya no actualizamos el Rol inmediatamente. 
-            // El usuario debe esperar la aprobación del Administrador.
-            
             redirectAttributes.addFlashAttribute("successMessage",
                     "¡Solicitud enviada! Tu perfil de voluntario está pendiente de revisión por un administrador.");
         } catch (Exception e) {
@@ -623,22 +463,14 @@ public class VoluntarioViewController {
 
         // 3. Actualización de datos de usuario en Auth
         try {
-            Map<String, Object> user = restTemplate.exchange(
-                    authUrl + "/v1/usuarios/" + usuarioId,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<Map<String, Object>>() {
-                    }).getBody();
+            UsuarioRecord user = helper.fetchObject(authUrl + "/v1/usuarios/" + usuarioId, UsuarioRecord.class);
             if (user != null) {
-                Map<String, Object> bodyUser = new HashMap<>(user);
+                Map<String, Object> bodyUser = new HashMap<>();
+                bodyUser.put("id", user.id());
+                bodyUser.put("username", user.username());
                 bodyUser.put("email", email);
-
-                // No enviamos teléfono a auth ya que ahora se gestiona en PerfilLegal
-                bodyUser.remove("telefono");
-
-                if (bodyUser.get("contrasena") == null) {
-                    bodyUser.put("contrasena", "secret_placeholder");
-                }
+                bodyUser.put("rol", user.rol());
+                bodyUser.put("contrasena", "secret_placeholder");
                 restTemplate.put(authUrl + "/v1/usuarios/" + usuarioId, bodyUser);
             }
         } catch (Exception e) {
@@ -674,22 +506,26 @@ public class VoluntarioViewController {
     @GetMapping(WebRoutes.VOLUNTARIOS_PDF)
     @PreAuthorize("hasRole('ADMIN')")
     public void exportarPDF(HttpServletResponse response) throws Exception {
-        List<Object> voluntarios = fetchList("/v1/voluntarios");
-        List<Object> perfilesLegales = fetchList("/v1/perfiles-legales");
+        List<VoluntarioRecord> voluntarios = helper.fetchList(apiUrl + "/v1/voluntarios", VoluntarioRecord.class);
+        List<PerfilLegalRecord> perfilesLegales = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
 
-        Map<String, Object> perfilesMap = new HashMap<>();
-        for (Object p : perfilesLegales) {
-            if (p instanceof Map) {
-                Object uId = ((Map<?, ?>) p).get("usuarioId");
-                if (uId instanceof Number) {
-                    perfilesMap.put(String.valueOf(((Number) uId).intValue()), p);
-                }
+        Map<String, PerfilLegalRecord> perfilesMap = new HashMap<>();
+        for (PerfilLegalRecord p : perfilesLegales) {
+            if (p.usuarioId() != null) {
+                perfilesMap.put(String.valueOf(p.usuarioId()), p);
             }
+        }
+
+        Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
+        for (UsuarioRecord u : usuarios) {
+            usuariosMap.put(String.valueOf(u.id()), u);
         }
 
         Context context = new Context();
         context.setVariable("voluntarios", voluntarios);
         context.setVariable("perfilesMap", perfilesMap);
+        context.setVariable("usuariosMap", usuariosMap);
         String html = templateEngine.process(ThymTemplates.Voluntario_LIST_PDF.getPath(), context);
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=voluntarios.pdf");
@@ -705,14 +541,9 @@ public class VoluntarioViewController {
     @PreAuthorize("hasRole('ADMIN')")
     public String verDetalle(@PathVariable Integer id, Model model) {
         try {
-            Map<String, Object> voluntario = restTemplate.exchange(
-                    apiUrl + "/v1/voluntarios/" + id,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<Map<String, Object>>() {
-                    }).getBody();
-            if (voluntario != null && voluntario.containsKey("usuarioId")) {
-                return "redirect:/web/personas/" + voluntario.get("usuarioId");
+            VoluntarioRecord voluntario = helper.fetchObject(apiUrl + "/v1/voluntarios/" + id, VoluntarioRecord.class);
+            if (voluntario != null && voluntario.usuarioId() != null) {
+                return "redirect:/web/personas/" + voluntario.usuarioId();
             }
         } catch (Exception ignored) {
         }
@@ -723,24 +554,18 @@ public class VoluntarioViewController {
     @GetMapping("/web/voluntarios/pendientes")
     @PreAuthorize("hasRole('ADMIN')")
     public String listarPendientes(Model model, HttpServletRequest request) {
-        List<Object> pendientes = fetchList("/v1/voluntarios/pendientes");
-        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
-        List<Object> perfilesLegales = fetchList("/v1/perfiles-legales");
+        List<VoluntarioRecord> pendientes = helper.fetchList(apiUrl + "/v1/voluntarios/pendientes", VoluntarioRecord.class);
+        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+        List<PerfilLegalRecord> perfilesLegales = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
 
-        Map<String, Object> usuariosMap = new HashMap<>();
-        for (Object u : usuarios) {
-            if (u instanceof Map) {
-                Object id = ((Map<?, ?>) u).get("id");
-                if (id instanceof Number) usuariosMap.put(String.valueOf(((Number) id).intValue()), u);
-            }
+        Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
+        for (UsuarioRecord u : usuarios) {
+            usuariosMap.put(String.valueOf(u.id()), u);
         }
 
-        Map<String, Object> perfilesMap = new HashMap<>();
-        for (Object p : perfilesLegales) {
-            if (p instanceof Map) {
-                Object uId = ((Map<?, ?>) p).get("usuarioId");
-                if (uId instanceof Number) perfilesMap.put(String.valueOf(((Number) uId).intValue()), p);
-            }
+        Map<String, PerfilLegalRecord> perfilesMap = new HashMap<>();
+        for (PerfilLegalRecord p : perfilesLegales) {
+            if (p.usuarioId() != null) perfilesMap.put(String.valueOf(p.usuarioId()), p);
         }
 
         model.addAttribute("pendientes", pendientes);
@@ -765,8 +590,8 @@ public class VoluntarioViewController {
             
             if ("true".equals(request.getHeader("HX-Request"))) {
                 return ResponseEntity.ok()
-                    .header("HX-Trigger", "{\"showToast\": {\"message\": \"¡Solicitud aprobada! El nuevo voluntario ya está activo en el equipo.\", \"type\": \"success\"}}")
-                    .body(""); // Eliminamos la fila de la lista
+                    .header("HX-Trigger", "{\"showToast\": {\"message\": \"¡Solicitud aprobada! El nuevo voluntario ya está activo en el equipo.\", \"type\": \"success\"}, \"volunteerStatusChanged\": {}}")
+                    .body("");
             }
         } catch (Exception e) {
             logger.error("Error al aprobar voluntario {}: {}", id, e.getMessage());
@@ -784,22 +609,12 @@ public class VoluntarioViewController {
             
             if ("true".equals(request.getHeader("HX-Request"))) {
                 return ResponseEntity.ok()
-                    .header("HX-Trigger", "{\"showToast\": {\"message\": \"Solicitud rechazada. Se ha actualizado el estado del candidato correctamente.\", \"type\": \"warning\"}}")
+                    .header("HX-Trigger", "{\"showToast\": {\"message\": \"Solicitud rechazada. Se ha actualizado el estado del candidato correctamente.\", \"type\": \"warning\"}, \"volunteerStatusChanged\": {}}")
                     .body("");
             }
         } catch (Exception e) {
             logger.error("Error al rechazar voluntario {}: {}", id, e.getMessage());
         }
         return ResponseEntity.status(302).header("Location", "/web/voluntarios/pendientes").build();
-    }
-
-    private List<Object> fetchList(String path) {
-        try {
-            String finalUrl = path.startsWith("http") ? path : apiUrl + path;
-            Object[] arr = restTemplate.getForObject(finalUrl, Object[].class);
-            return arr != null ? Arrays.asList(arr) : List.of();
-        } catch (Exception e) {
-            return List.of();
-        }
     }
 }

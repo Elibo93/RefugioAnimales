@@ -10,6 +10,7 @@ import es.refugio.refugio.domain.model.animal.enums.EstadoAnimal;
 import es.refugio.refugio.domain.repository.AdopcionRepository;
 import es.refugio.refugio.domain.repository.AnimalRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 public class EditAdopcionUseCase {
@@ -17,6 +18,7 @@ public class EditAdopcionUseCase {
     private final AdopcionRepository adopcionRepository;
     private final AnimalRepository animalRepository;
 
+    @Transactional
     public Adopcion update(EditAdopcionCommand command) {
         return adopcionRepository.getById(command.id())
                 .map(adopcion -> {
@@ -28,7 +30,7 @@ public class EditAdopcionUseCase {
                     adopcion.setEstado(estadoEnum);
                     adopcion.setContrato(command.contrato());
                     
-                    if (estadoEnum == EstadoAdopcion.COMPLETADA) {
+                    if (estadoEnum != EstadoAdopcion.PENDIENTE_FIRMA && estadoEnum != EstadoAdopcion.CANCELADA) {
                         animalRepository.getById(adopcion.getAnimalId()).ifPresent(animal -> {
                             animal.setEstado(EstadoAnimal.ADOPTADO);
                             animalRepository.save(animal);

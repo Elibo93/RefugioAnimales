@@ -1,6 +1,9 @@
 package es.refugio.refugio.infraestructure.web.rest;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import es.refugio.common.infraestructure.web.dto.common.PaginatedResponse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,25 +14,31 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+
 import es.refugio.refugio.application.command.voluntario.CreateVoluntarioCommand;
 import es.refugio.refugio.application.command.voluntario.EditVoluntarioCommand;
 import es.refugio.refugio.application.service.voluntario.CreateVoluntarioService;
 import es.refugio.refugio.application.service.voluntario.DeleteVoluntarioService;
 import es.refugio.refugio.application.service.voluntario.EditVoluntarioService;
 import es.refugio.refugio.application.service.voluntario.FindVoluntarioService;
+import es.refugio.refugio.application.service.voluntario.ApproveVoluntarioService;
 import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
 import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
+import es.refugio.refugio.domain.model.voluntario.enums.EstadoVoluntario;
 import es.refugio.refugio.infraestructure.mapper.VoluntarioMapper;
 import es.refugio.refugio.infraestructure.security.CustomUserDetails;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioRequest;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioResponse;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioUpdateRequest;
-import org.springframework.security.core.Authentication;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Cookie;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,7 +56,7 @@ public class VoluntarioController {
     private final FindVoluntarioService findVoluntarioService;
     private final EditVoluntarioService editVoluntarioService;
     private final DeleteVoluntarioService deleteVoluntarioService;
-    private final es.refugio.refugio.application.service.voluntario.ApproveVoluntarioService approveVoluntarioService;
+    private final ApproveVoluntarioService approveVoluntarioService;
 
     @Operation(summary = "Crear voluntario", description = "Registra un nuevo voluntario vinculado a un usuario")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Voluntario creado"),
@@ -88,8 +97,11 @@ public class VoluntarioController {
     @ApiResponse(responseCode = "200", description = "Listado retornado")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public List<VoluntarioResponse> findAll() {
-        return VoluntarioMapper.toResponse(findVoluntarioService.findAll());
+    public PaginatedResponse<VoluntarioResponse> findAll(
+            @RequestParam(required = false) String q,
+            Pageable pageable) {
+        Page<Voluntario> page = findVoluntarioService.findFiltered(q, pageable);
+        return PaginatedResponse.fromPage(page, VoluntarioMapper.toResponse(page.getContent()));
     }
 
     @Operation(summary = "Contar voluntarios pendientes")
@@ -97,7 +109,7 @@ public class VoluntarioController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> countPendientes() {
         long count = findVoluntarioService.findAll().stream()
-                .filter(v -> es.refugio.refugio.domain.model.voluntario.enums.EstadoVoluntario.PENDIENTE.equals(v.getEstado()))
+                .filter(v -> EstadoVoluntario.PENDIENTE.equals(v.getEstado()))
                 .count();
         return ResponseEntity.ok(count);
     }
@@ -107,7 +119,7 @@ public class VoluntarioController {
     @GetMapping("/pendientes")
     public List<VoluntarioResponse> findPending() {
         return findVoluntarioService.findAll().stream()
-                .filter(v -> es.refugio.refugio.domain.model.voluntario.enums.EstadoVoluntario.PENDIENTE.equals(v.getEstado()))
+                .filter(v -> EstadoVoluntario.PENDIENTE.equals(v.getEstado()))
                 .map(VoluntarioMapper::toResponse)
                 .toList();
     }
@@ -115,7 +127,7 @@ public class VoluntarioController {
     @Operation(summary = "Aprobar solicitud de voluntariado")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/aprobar")
-    public ResponseEntity<Void> approve(@PathVariable Integer id, jakarta.servlet.http.HttpServletRequest request) {
+    public ResponseEntity<Void> approve(@PathVariable Integer id, HttpServletRequest request) {
         approveVoluntarioService.approve(id, getJwtToken(request));
         return ResponseEntity.ok().build();
     }
@@ -123,14 +135,14 @@ public class VoluntarioController {
     @Operation(summary = "Rechazar solicitud de voluntariado")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/rechazar")
-    public ResponseEntity<Void> reject(@PathVariable Integer id, jakarta.servlet.http.HttpServletRequest request) {
+    public ResponseEntity<Void> reject(@PathVariable Integer id, HttpServletRequest request) {
         approveVoluntarioService.reject(id, getJwtToken(request));
         return ResponseEntity.ok().build();
     }
 
-    private String getJwtToken(jakarta.servlet.http.HttpServletRequest request) {
+    private String getJwtToken(HttpServletRequest request) {
         if (request.getCookies() != null) {
-            for (var cookie : request.getCookies()) {
+            for (Cookie cookie : request.getCookies()) {
                 if ("JWT_TOKEN".equals(cookie.getName())) {
                     return cookie.getValue();
                 }

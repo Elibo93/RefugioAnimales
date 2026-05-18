@@ -32,6 +32,11 @@ import es.refugio.refugio.domain.model.historial_medico.HistorialMedicoId;
 import es.refugio.refugio.infraestructure.mapper.HistorialMedicoMapper;
 import es.refugio.refugio.infraestructure.web.dto.historial_medico.HistorialMedicoRequest;
 import es.refugio.refugio.infraestructure.web.dto.historial_medico.HistorialMedicoResponse;
+import es.refugio.common.infraestructure.web.dto.common.PaginatedResponse;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -74,11 +79,12 @@ public class HistorialMedicoController {
     @Operation(summary = "Listar historial médico")
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
-    public List<HistorialMedicoResponse> getAll() {
-        return findHistorialMedicoService.findAll()
-                .stream()
-                .map(HistorialMedicoMapper::toResponse)
-                .toList();
+    public PaginatedResponse<HistorialMedicoResponse> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(Math.max(0, page), size);
+        Page<HistorialMedico> historialPage = findHistorialMedicoService.findAll(pageable);
+        return PaginatedResponse.fromPage(historialPage, HistorialMedicoMapper.toResponse(historialPage.getContent()));
     }
 
     @Operation(summary = "Obtener registro médico por ID")

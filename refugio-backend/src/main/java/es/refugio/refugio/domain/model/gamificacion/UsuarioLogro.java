@@ -15,7 +15,7 @@ public class UsuarioLogro {
         this.fechaDesbloqueo = fechaDesbloqueo;
     }
 
-    // Getters and Setters
+    // Getters y Setters
     public Long getUsuarioId() { return usuarioId; }
     public void setUsuarioId(Long usuarioId) { this.usuarioId = usuarioId; }
     public Long getLogroId() { return logroId; }

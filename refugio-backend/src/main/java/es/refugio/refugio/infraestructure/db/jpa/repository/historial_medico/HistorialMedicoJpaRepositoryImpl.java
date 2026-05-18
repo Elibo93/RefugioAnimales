@@ -10,6 +10,8 @@ import es.refugio.refugio.domain.repository.HistorialMedicoRepository;
 import es.refugio.refugio.infraestructure.db.jpa.entity.HistorialMedicoEntity;
 import es.refugio.refugio.infraestructure.mapper.HistorialMedicoMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
 public class HistorialMedicoJpaRepositoryImpl implements HistorialMedicoRepository {
@@ -32,6 +34,11 @@ public class HistorialMedicoJpaRepositoryImpl implements HistorialMedicoReposito
     @Override
     public List<HistorialMedico> getAll() {
         return HistorialMedicoMapper.toDomain(jpaRepository.findAll());
+    }
+
+    @Override
+    public Page<HistorialMedico> findAll(Pageable pageable) {
+        return jpaRepository.findAll(pageable).map(HistorialMedicoMapper::toDomain);
     }
 
     @Override

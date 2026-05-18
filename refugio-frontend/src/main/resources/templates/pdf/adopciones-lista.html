@@ -56,29 +56,19 @@
         </thead>
         <tbody>
             <tr th:each="i : ${adopciones}">
-                <td th:text="${i.id.value}"></td>
+                <td th:text="${i.id}"></td>
                 <td>
-                    <span th:if="${personas.containsKey(i.personaId.value)}"
-                        th:text="${personas.get(i.personaId.value).nombre} + ' ' + ${personas.get(i.personaId.value).apellido}">
-                    </span>
-                    <span th:unless="${personas.containsKey(i.personaId.value)}" th:text="'ID: ' + ${i.personaId.value}">
+                    <span th:text="${adoptanteNombres != null ? adoptanteNombres.get(i.adoptanteId.toString()) : 'Adoptante #' + i.adoptanteId}">
                     </span>
                 </td>
                 <td>
-                    <span th:if="${animales.containsKey(i.animalId.value)}"
-                        th:text="${animales.get(i.animalId.value).nombre}">
-                    </span>
-                    <span th:unless="${animales.containsKey(i.animalId.value)}" th:text="'ID: ' + ${i.animalId.value}">
+                    <span th:text="${animalesMap != null ? animalesMap.get(i.animalId.toString()) : 'Animal #' + i.animalId}">
                     </span>
                 </td>
-                <td th:text="${i.createdAt != null} ? ${#temporals.format(i.createdAt, 'dd/MM/yyyy')} : '-'"></td>
+                <td th:text="${i.fechaAdopcion != null} ? ${#temporals.format(i.fechaAdopcion, 'dd/MM/yyyy')} : '-'"></td>
             </tr>
         </tbody>
     </table>
 </body>
 
 </html>
-
-
-
-

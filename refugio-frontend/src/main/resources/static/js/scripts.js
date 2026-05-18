@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+const initApp = () => {
     // 1. Listeners Globales (Solo se registran una vez)
     
     // Auto-ocultar sugerencias de usuario al hacer clic fuera
@@ -67,11 +67,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (submenu) submenu.classList.toggle('open');
             }
         }
+
+        // Lógica para alternar formulario de donación para el Administrador
+        const btnAdminDonar = e.target.closest('#btn-admin-donar');
+        if (btnAdminDonar) {
+            const formContainer = document.getElementById('donacion-form-container');
+            if (formContainer) {
+                if (formContainer.style.display === 'none' || formContainer.style.display === '') {
+                    formContainer.style.display = 'block';
+                    setTimeout(() => {
+                        formContainer.style.opacity = '1';
+                        formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 50);
+                    btnAdminDonar.style.background = '#64748b'; // Color Slate
+                    btnAdminDonar.innerHTML = '<i data-lucide="heart-off" style="width: 18px;"></i><span>Ocultar Formulario</span>';
+                } else {
+                    formContainer.style.opacity = '0';
+                    setTimeout(() => {
+                        formContainer.style.display = 'none';
+                    }, 400);
+                    btnAdminDonar.style.background = 'var(--primary)';
+                    btnAdminDonar.innerHTML = '<i data-lucide="heart" style="width: 18px; fill: white;"></i><span>Registrar Aportación</span>';
+                }
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            }
+        }
     });
 
     // Inicialización global de componentes al cargar por primera vez
     refreshDynamicComponents();
-});
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
 
 // === FUNCIONES GLOBALES ===
 
@@ -676,6 +709,61 @@ document.body.addEventListener('showToast', (evt) => {
         showToast(evt.detail.message, evt.detail.type || 'success');
     }
 });
+
+// 8. Escucha de eventos HTMX para actualizar contadores de voluntarios
+document.body.addEventListener('volunteerStatusChanged', () => {
+    // 1. Actualizar contador en Sidebar
+    const vBadge = document.getElementById('sidebar-voluntarios-badge');
+    if (vBadge) {
+        let count = parseInt(vBadge.textContent) || 0;
+        count = Math.max(0, count - 1);
+        if (count > 0) {
+            vBadge.textContent = count;
+        } else {
+            vBadge.remove();
+        }
+        
+        // Actualizar punto de Revisiones
+        const aBadge = document.getElementById('sidebar-adopciones-badge');
+        const revDot = document.getElementById('sidebar-revisiones-dot');
+        const aCount = aBadge ? (parseInt(aBadge.textContent) || 0) : 0;
+        if (count + aCount <= 0 && revDot) {
+            revDot.remove();
+        }
+    }
+
+    // 2. Si estamos en la página de voluntarios pendientes, recargar contenido dinámicamente
+    if (window.location.pathname === '/web/voluntarios/pendientes') {
+        if (typeof htmx !== 'undefined') {
+            htmx.ajax('GET', '/web/voluntarios/pendientes', { target: '#contenido-dinamico', swap: 'innerHTML' });
+        } else {
+            window.location.reload();
+        }
+    }
+});
+
+// 9. Escucha de eventos HTMX para actualizar contadores de adopciones
+document.body.addEventListener('adoptionStatusChanged', () => {
+    // 1. Actualizar contador en Sidebar
+    const aBadge = document.getElementById('sidebar-adopciones-badge');
+    if (aBadge) {
+        let count = parseInt(aBadge.textContent) || 0;
+        count = Math.max(0, count - 1);
+        if (count > 0) {
+            aBadge.textContent = count;
+        } else {
+            aBadge.remove();
+        }
+        
+        // Actualizar punto de Revisiones
+        const vBadge = document.getElementById('sidebar-voluntarios-badge');
+        const revDot = document.getElementById('sidebar-revisiones-dot');
+        const vCount = vBadge ? (parseInt(vBadge.textContent) || 0) : 0;
+        if (count + vCount <= 0 && revDot) {
+            revDot.remove();
+        }
+    }
+});
 /**
  * Dispara una celebración visual con confeti y un modal premium
  * @param {string} title Título del logro
@@ -726,3 +814,134 @@ function celebrateAchievement(title, message, imageUrl = null) {
         });
     }
 }
+
+/**
+ * Alterna la visibilidad del menú de compartición premium y configura sus enlaces dinámicamente.
+ * @param {Event} event Evento del click
+ * @param {string} nombre Nombre del animal
+ */
+function toggleShareMenu(event, nombre) {
+    event.stopPropagation(); // Evitar que se propague y cierre el menú de inmediato
+    
+    const menu = document.getElementById('share-dropdown-menu');
+    if (!menu) return;
+    
+    // Si ya está abierto, lo cerramos
+    if (menu.style.display === 'flex') {
+        menu.style.display = 'none';
+        return;
+    }
+    
+    const animalNombre = nombre || 'el animal';
+    const currentUrl = window.location.href;
+    const shareText = 'Mira el perfil de ' + animalNombre + ' en el Refugio de Animales. ¡Ayúdanos a encontrarle un hogar!';
+    
+    // Configurar enlaces de redes sociales
+    const waBtn = document.getElementById('share-wa');
+    const fbBtn = document.getElementById('share-fb');
+    const xBtn = document.getElementById('share-x');
+    const mailBtn = document.getElementById('share-mail');
+    
+    if (waBtn) {
+        waBtn.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(shareText + ' ' + currentUrl);
+    }
+    if (fbBtn) {
+        fbBtn.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(currentUrl);
+    }
+    if (xBtn) {
+        xBtn.href = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText) + '&url=' + encodeURIComponent(currentUrl);
+    }
+    if (mailBtn) {
+        mailBtn.href = 'mailto:?subject=' + encodeURIComponent('Refugio de Animales: Conoce a ' + animalNombre) + '&body=' + encodeURIComponent(shareText + '\n\nEnlace: ' + currentUrl);
+    }
+    
+    // Mostrar el menú
+    menu.style.display = 'flex';
+    
+    // Registrar listener único para cerrar al hacer click fuera
+    const closeListener = (e) => {
+        if (!menu.contains(e.target) && e.target !== event.currentTarget) {
+            menu.style.display = 'none';
+            document.removeEventListener('click', closeListener);
+        }
+    };
+    
+    // Pequeño retardo para no pillar el propio click actual
+    setTimeout(() => {
+        document.addEventListener('click', closeListener);
+    }, 50);
+}
+
+/**
+ * Muestra un selector premium de mapas para elegir la aplicación de navegación
+ * @param {Event} event Evento del click original
+ */
+function openMapsSelector(event) {
+    if (event) event.preventDefault();
+    
+    const address = "Calle del Refugio, 12, Madrid, España";
+    const encodedAddress = encodeURIComponent(address);
+    
+    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+    const wazeUrl = `https://waze.com/ul?q=${encodedAddress}`;
+    const appleMapsUrl = `maps://maps.apple.com/?q=${encodedAddress}`;
+    const webAppleMapsUrl = `https://maps.apple.com/?q=${encodedAddress}`;
+    
+    // Comprobar si es un dispositivo Apple para usar el esquema nativo o la web
+    const isAppleDevice = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent) && !window.MSStream;
+    const finalAppleUrl = isAppleDevice ? appleMapsUrl : webAppleMapsUrl;
+
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: '¿Cómo deseas llegar?',
+            html: `
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; text-align: center;">
+                    Selecciona tu aplicación favorita para ver la ubicación del refugio.
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 12px; max-width: 320px; margin: 0 auto;">
+                    <a href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer" class="map-provider-btn google" style="display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-radius: 16px; text-decoration: none; border: 1.5px solid #e2e8f0; background: white; transition: all 0.3s ease;">
+                        <img src="/images/google-maps.png" style="width: 24px; height: 24px; object-fit: contain;" alt="Google Maps">
+                        <span style="font-weight: 700; color: #334155; font-size: 0.95rem;">Google Maps</span>
+                    </a>
+                    <a href="${wazeUrl}" target="_blank" rel="noopener noreferrer" class="map-provider-btn waze" style="display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-radius: 16px; text-decoration: none; border: 1.5px solid #e2e8f0; background: white; transition: all 0.3s ease;">
+                        <img src="/images/waze-logo.png" style="width: 24px; height: 24px; object-fit: contain;" alt="Waze">
+                        <span style="font-weight: 700; color: #334155; font-size: 0.95rem;">Waze</span>
+                    </a>
+                    <a href="${finalAppleUrl}" target="_blank" rel="noopener noreferrer" class="map-provider-btn apple" style="display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-radius: 16px; text-decoration: none; border: 1.5px solid #e2e8f0; background: white; transition: all 0.3s ease;">
+                        <img src="/images/apple-map.png" style="width: 24px; height: 24px; object-fit: contain;" alt="Apple Maps">
+                        <span style="font-weight: 700; color: #334155; font-size: 0.95rem;">Apple Maps</span>
+                    </a>
+                </div>
+                <style>
+                    .map-provider-btn {
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+                    }
+                    .map-provider-btn:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+                        border-color: var(--primary) !important;
+                        background: #f8fafc !important;
+                    }
+                    .map-provider-btn:hover span {
+                        color: var(--primary) !important;
+                    }
+                </style>
+            `,
+            showConfirmButton: false,
+            showCancelButton: true,
+            cancelButtonText: 'Cancelar',
+            cancelButtonColor: '#64748b',
+            padding: '2rem',
+            background: '#ffffff',
+            backdrop: 'rgba(15, 23, 42, 0.4) blur(10px)',
+            customClass: {
+                popup: 'premium-modal-radius',
+                cancelButton: 'btn btn-outline'
+            }
+        });
+    } else {
+        // Fallback en caso de que SweetAlert2 no esté cargado
+        window.open(googleMapsUrl, '_blank');
+    }
+}
+
