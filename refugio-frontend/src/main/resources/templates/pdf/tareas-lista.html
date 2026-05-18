@@ -26,12 +26,12 @@
         </thead>
         <tbody>
             <tr th:each="t : ${tareas}">
-                <td th:text="${t.id.value}"></td>
+                <td th:text="${t.id}"></td>
                 <td th:text="${t.descripcion}"></td>
                 <td th:text="${t.estado}"></td>
                 <td th:text="${#temporals.format(t.fecha, 'dd/MM/yyyy')}"></td>
                 <td>
-                    <span th:each="v, iterStat : ${t.voluntarios}" th:text="${v.value} + ${iterStat.last ? '' : ', '}"></span>
+                    <span th:each="v, iterStat : ${t.voluntarioIds}" th:text="${v} + ${iterStat.last ? '' : ', '}"></span>
                 </td>
             </tr>
         </tbody>

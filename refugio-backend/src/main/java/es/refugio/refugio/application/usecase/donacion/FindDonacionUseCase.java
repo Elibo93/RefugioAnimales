@@ -7,6 +7,8 @@ import es.refugio.refugio.domain.model.donacion.DonacionId;
 import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.repository.DonacionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
 public class FindDonacionUseCase {
@@ -15,6 +17,10 @@ public class FindDonacionUseCase {
 
     public List<Donacion> findAll() {
         return donacionRepository.getAll();
+    }
+
+    public Page<Donacion> findAll(Pageable pageable) {
+        return donacionRepository.findAll(pageable);
     }
 
     public Donacion findById(DonacionId id) {

@@ -1,5 +1,6 @@
 package es.refugio.refugio.infraestructure.web.dto.perfil_legal;
 
+import es.refugio.refugio.infraestructure.web.validation.MinAge;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,6 +23,6 @@ public record PerfilLegalRequest(
     String telefono,
     String direccion,
     
-    @es.refugio.refugio.infraestructure.web.validation.MinAge(18)
+    @MinAge(18)
     String fechaNacimiento
 ) {}

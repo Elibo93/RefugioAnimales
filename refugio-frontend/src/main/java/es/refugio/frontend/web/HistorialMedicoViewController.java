@@ -19,6 +19,10 @@ import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
+import es.refugio.frontend.web.dto.HistorialMedicoRecord;
+import es.refugio.frontend.web.dto.AnimalRecord;
+import es.refugio.frontend.web.dto.PaginatedResponse;
+import es.refugio.frontend.web.util.ViewControllerHelper;
 
 import java.io.OutputStream;
 import java.time.LocalDateTime;
@@ -31,6 +35,7 @@ public class HistorialMedicoViewController {
 
     private final RestTemplate restTemplate;
     private final TemplateEngine templateEngine;
+    private final ViewControllerHelper helper;
 
     @Value("${backend.api.url}")
     private String apiUrl;
@@ -38,44 +43,63 @@ public class HistorialMedicoViewController {
     @GetMapping(WebRoutes.HISTORIALES_BASE)
     public String listar(Model model, 
             @RequestParam(required = false) Integer animalId,
-            @RequestParam(required = false) String successMessage) {
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String successMessage,
+            HttpServletRequest request,
+            HttpServletResponse response) {
         
-        List<Object> historiales;
+        response.setHeader("Vary", "HX-Request");
+        
+        PaginatedResponse<HistorialMedicoRecord> pagination = null;
+        List<HistorialMedicoRecord> historiales;
+        
         if (animalId != null) {
-            historiales = fetchList("/v1/historial-medico/animal/" + animalId);
+            historiales = helper.fetchList(apiUrl + "/v1/historial-medico/animal/" + animalId, HistorialMedicoRecord.class);
         } else {
-            historiales = fetchList("/v1/historial-medico");
+            pagination = helper.fetchPaginated(apiUrl + "/v1/historial-medico", page, size, HistorialMedicoRecord.class);
+            historiales = pagination.items();
         }
-        List<Object> animales = fetchList("/v1/animales");
+        List<AnimalRecord> animales = helper.fetchList(apiUrl + "/v1/animales?size=1000", AnimalRecord.class);
 
         if (animalId != null) {
+            final Integer finalAnimalId = animalId;
             historiales = historiales.stream()
-                .filter(h -> h instanceof Map && Objects.equals(((Map<?,?>)h).get("animalId"), animalId))
+                .filter(h -> Objects.equals(h.animalId(), finalAnimalId))
                 .toList();
         }
 
-        Map<Integer, Object> animalesMap = new HashMap<>();
-        for (Object a : animales) {
-            if (a instanceof Map) {
-                Object id = ((Map<?, ?>) a).get("id");
-                if (id instanceof Number) animalesMap.put(((Number) id).intValue(), a);
-            }
+        Map<Integer, AnimalRecord> animalesMap = new HashMap<>();
+        for (AnimalRecord a : animales) {
+            animalesMap.put(a.id(), a);
         }
 
         model.addAttribute(ModelAttribute.Historial_LIST.getName(), historiales);
+        model.addAttribute("pagination", pagination);
         model.addAttribute("animalesMap", animalesMap);
         model.addAttribute("selectedAnimalId", animalId);
         if (successMessage != null) model.addAttribute("successMessage", successMessage);
+        
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return FragmentoContenido.Historial_LIST.getPath() + " :: content";
+        }
+        
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Historial_LIST.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
     @GetMapping(WebRoutes.HISTORIALES_NUEVO)
-    public String formulario(Model model, HttpServletRequest request) {
+    public String formulario(Model model, HttpServletRequest request, HttpServletResponse response) {
+        response.setHeader("Vary", "HX-Request");
         Map<String, Object> historial = new HashMap<>();
+        historial.put("id", null);
+        historial.put("animalId", null);
+        historial.put("veterinario", null);
+        historial.put("descripcion", null);
+        historial.put("tratamiento", null);
         historial.put("fecha", LocalDateTime.now().toString());
         model.addAttribute(ModelAttribute.SINGLE_Historial.getName(), historial);
-        model.addAttribute("animales", fetchList("/v1/animales"));
+        model.addAttribute("animales", helper.fetchList(apiUrl + "/v1/animales?size=1000", AnimalRecord.class));
         
         if ("true".equals(request.getHeader("HX-Request"))) {
             return FragmentoContenido.Historial_FORM.getPath() + " :: content";
@@ -110,21 +134,19 @@ public class HistorialMedicoViewController {
     }
 
     @GetMapping(WebRoutes.HISTORIALES_EDITAR)
-    public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
-        Object historial = restTemplate.getForObject(apiUrl + "/v1/historial-medico/" + id, Object.class);
+    public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request, HttpServletResponse response) {
+        response.setHeader("Vary", "HX-Request");
+        HistorialMedicoRecord historial = helper.fetchObject(apiUrl + "/v1/historial-medico/" + id, HistorialMedicoRecord.class);
         model.addAttribute(ModelAttribute.SINGLE_Historial.getName(), historial);
-        model.addAttribute("animales", fetchList("/v1/animales"));
+        model.addAttribute("animales", helper.fetchList(apiUrl + "/v1/animales?size=1000", AnimalRecord.class));
 
         // Cargar datos del animal para el selector inteligente
-        if (historial instanceof Map) {
-            Object animalId = ((Map<?, ?>) historial).get("animalId");
-            if (animalId != null) {
-                try {
-                    Object animalData = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
-                    model.addAttribute("animalData", animalData);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        if (historial != null && historial.animalId() != null) {
+            try {
+                AnimalRecord animalData = helper.fetchObject(apiUrl + "/v1/animales/" + historial.animalId(), AnimalRecord.class);
+                model.addAttribute("animalData", animalData);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         
@@ -158,7 +180,7 @@ public class HistorialMedicoViewController {
 
         restTemplate.put(apiUrl + "/v1/historial-medico/" + id, body);
         redirectAttributes.addFlashAttribute("successMessage", "Historial médico editado correctamente");
-        return "redirect:" + WebRoutes.HISTORIALES_BASE;
+        return "redirect:" + WebRoutes.HISTORIALES_BASE + "/" + id + "/detalle";
     }
 
     @PostMapping(WebRoutes.HISTORIALES_ELIMINAR)
@@ -171,7 +193,7 @@ public class HistorialMedicoViewController {
 
     @GetMapping(WebRoutes.HISTORIALES_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
-        List<Object> historiales = fetchList("/v1/historial-medico");
+        List<HistorialMedicoRecord> historiales = helper.fetchList(apiUrl + "/v1/historial-medico", HistorialMedicoRecord.class);
         Context context = new Context();
         context.setVariable("historiales", historiales);
         String html = templateEngine.process(ThymTemplates.Historial_LIST_PDF.getPath(), context);
@@ -186,32 +208,25 @@ public class HistorialMedicoViewController {
     }
 
     @GetMapping(WebRoutes.HISTORIALES_BASE + "/{id}/detalle")
-    public String verDetalle(@PathVariable Integer id, Model model) {
-        Object historial = restTemplate.getForObject(apiUrl + "/v1/historial-medico/" + id, Object.class);
+    public String verDetalle(@PathVariable Integer id, Model model, HttpServletRequest request, HttpServletResponse response) {
+        response.setHeader("Vary", "HX-Request");
+        HistorialMedicoRecord historial = helper.fetchObject(apiUrl + "/v1/historial-medico/" + id, HistorialMedicoRecord.class);
         model.addAttribute("historial", historial);
         
-        if (historial instanceof Map) {
-            Object animalId = ((Map<?, ?>) historial).get("animalId");
-            if (animalId != null) {
-                try {
-                    Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + animalId, Object.class);
-                    model.addAttribute("animal", animal);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        if (historial != null && historial.animalId() != null) {
+            try {
+                AnimalRecord animal = helper.fetchObject(apiUrl + "/v1/animales/" + historial.animalId(), AnimalRecord.class);
+                model.addAttribute("animal", animal);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         
-        return "fragments/content/historial-medico-detalle-modal :: detalle";
-    }
-
-    private List<Object> fetchList(String path) {
-        try {
-            Object[] arr = restTemplate.getForObject(apiUrl + path, Object[].class);
-            return arr != null ? Arrays.asList(arr) : List.of();
-        } catch (Exception e) { 
-            e.printStackTrace();
-            return List.of(); 
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return "fragments/content/historial-medico-detalle :: content";
         }
+        
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), "fragments/content/historial-medico-detalle");
+        return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 }

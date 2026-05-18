@@ -7,30 +7,33 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClientResponseException;
 import es.refugio.frontend.web.constants.WebRoutes;
-
+import es.refugio.frontend.web.dto.*;
+import es.refugio.frontend.web.util.ViewControllerHelper;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.http.HttpServletRequest;
 import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * AdoptanteViewController — gestiona el flujo de conversión de usuario a
- * adoptante.
- *
+ * AdoptanteViewController — gestiona el flujo de conversión de usuario a adoptante.
  * Delega completamente en el backend a través de la API REST.
- * El backend tiene los endpoints /api/v1/adoptantes para este proceso.
  */
 @Controller
 @RequiredArgsConstructor
 public class AdoptanteViewController {
 
-    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AdoptanteViewController.class);
+    private static final Logger logger = LoggerFactory.getLogger(AdoptanteViewController.class);
 
     private final RestTemplate restTemplate;
+    private final ViewControllerHelper helper;
 
     @Value("${backend.api.url}")
     private String apiUrl;
@@ -41,83 +44,68 @@ public class AdoptanteViewController {
     @GetMapping(WebRoutes.ADOPTANTES_BASE)
     @PreAuthorize("hasRole('ADMIN')")
     public String listar(Model model, 
+                        @RequestParam(defaultValue = "1") int page,
+                        @RequestParam(defaultValue = "10") int size,
                         @RequestParam(required = false) String q,
                         HttpServletRequest request) {
-        List<Object> adoptantes = fetchList("/v1/adoptantes");
-        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
-        List<Object> perfilesLegales = fetchList("/v1/perfiles-legales");
-
-        Map<String, Object> usuariosMap = new HashMap<>();
-        for (Object u : usuarios) {
-            if (u instanceof Map) {
-                Object id = ((Map<?, ?>) u).get("id");
-                if (id instanceof Number) {
-                    usuariosMap.put(String.valueOf(((Number) id).intValue()), u);
-                }
-            }
-        }
-
-        Map<String, Object> perfilesMap = new HashMap<>();
-        for (Object p : perfilesLegales) {
-            if (p instanceof Map) {
-                Object uId = ((Map<?, ?>) p).get("usuarioId");
-                if (uId instanceof Number) {
-                    perfilesMap.put(String.valueOf(((Number) uId).intValue()), p);
-                }
-            }
-        }
-
-        // Filtrado por Búsqueda (q)
+        
+        String url = apiUrl + "/v1/adoptantes";
         if (q != null && !q.trim().isEmpty()) {
-            String query = q.toLowerCase();
-            adoptantes = adoptantes.stream()
-                .filter(a -> {
-                    if (a instanceof Map) {
-                        Map<?, ?> am = (Map<?, ?>) a;
-                        String uId = String.valueOf(am.get("usuarioId"));
-                        Map<?, ?> user = (Map<?, ?>) usuariosMap.get(uId);
-                        Map<?, ?> legal = (Map<?, ?>) perfilesMap.get(uId);
-                        
-                        String username = user != null ? String.valueOf(user.get("username")).toLowerCase() : "";
-                        String email = user != null ? String.valueOf(user.get("email")).toLowerCase() : "";
-                        String nombre = legal != null ? String.valueOf(legal.get("nombre")).toLowerCase() : "";
-                        String apellido = legal != null ? String.valueOf(legal.get("apellido")).toLowerCase() : "";
-                        String dni = legal != null ? String.valueOf(legal.get("dni")).toLowerCase() : "";
-                        
-                        return username.contains(query) || email.contains(query) || 
-                               nombre.contains(query) || apellido.contains(query) || dni.contains(query);
-                    }
-                    return false;
-                }).toList();
+            url += "?q=" + q;
+        }
+        
+        PaginatedResponse<AdoptanteRecord> pagination = helper.fetchPaginated(url, page, size, AdoptanteRecord.class);
+        List<AdoptanteRecord> adoptantes = pagination.items();
+        logger.info("[ADOPTANTES] URL: {}, page={}, size={}, total={}, items={}", url, page, size, pagination.total(), adoptantes.size());
+        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+        List<PerfilLegalRecord> perfilesLegales = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+
+        Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
+        for (UsuarioRecord u : usuarios) {
+            usuariosMap.put(String.valueOf(u.id()), u);
         }
 
-        model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.Adoptante_LIST.getName(), adoptantes);
+        // Solo mostrar adoptantes con rol ROLE_ADOPTANTE o ROLE_VOLUNTARIO_ADOPTANTE
+        Set<Integer> adoptanteRoleIds = usuarios.stream()
+                .filter(u -> u.rol() != null && (
+                        u.rol().equalsIgnoreCase("ROLE_ADOPTANTE") ||
+                        u.rol().equalsIgnoreCase("ROLE_VOLUNTARIO_ADOPTANTE")))
+                .map(u -> u.id())
+                .collect(Collectors.toSet());
+        adoptantes = adoptantes.stream()
+                .filter(a -> a.usuarioId() != null && adoptanteRoleIds.contains(a.usuarioId()))
+                .toList();
+
+        Map<String, PerfilLegalRecord> perfilesMap = new HashMap<>();
+        for (PerfilLegalRecord p : perfilesLegales) {
+            if (p.usuarioId() != null) perfilesMap.put(String.valueOf(p.usuarioId()), p);
+        }
+
+        model.addAttribute(ModelAttribute.Adoptante_LIST.getName(), adoptantes);
+        model.addAttribute("pagination", pagination);
         model.addAttribute("usuariosMap", usuariosMap);
         model.addAttribute("perfilesMap", perfilesMap);
         model.addAttribute("query", q);
         model.addAttribute("currentUri", WebRoutes.ADOPTANTES_BASE);
 
         if ("true".equals(request.getHeader("HX-Request"))) {
-            return es.refugio.frontend.web.enums.FragmentoContenido.Adoptante_LIST.getPath() + " :: list-body";
+            return FragmentoContenido.Adoptante_LIST.getPath() + " :: list-body";
         }
 
-        model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.FRAGMENTO_CONTENIDO.getName(), es.refugio.frontend.web.enums.FragmentoContenido.Adoptante_LIST.getPath());
-        return es.refugio.frontend.web.enums.ThymTemplates.MAIN_LAYOUT.getPath();
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Adoptante_LIST.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
     }
-
-    private List<Object> fetchList(String path) {
-        try {
-            String finalUrl = path.startsWith("http") ? path : apiUrl + path;
-            Object[] arr = restTemplate.getForObject(finalUrl, Object[].class);
-            return arr != null ? Arrays.asList(arr) : List.of();
-        } catch (Exception e) { return List.of(); }
-    }
-
 
     @GetMapping(WebRoutes.ADOPTANTES_NUEVO)
     @PreAuthorize("hasRole('ADMIN')")
     public String nuevo(Model model, HttpServletRequest request) {
-        model.addAttribute(ModelAttribute.SINGLE_Adoptante.getName(), new HashMap<>());
+        Map<String, Object> emptyAdoptante = new HashMap<>();
+        emptyAdoptante.put("id", null);
+        emptyAdoptante.put("usuarioId", null);
+        emptyAdoptante.put("dni", null);
+        emptyAdoptante.put("direccion", null);
+        emptyAdoptante.put("estadoValidacion", null);
+        model.addAttribute(ModelAttribute.SINGLE_Adoptante.getName(), emptyAdoptante);
         model.addAttribute("currentUri", WebRoutes.ADOPTANTES_BASE);
         
         if ("true".equals(request.getHeader("HX-Request"))) {
@@ -130,28 +118,26 @@ public class AdoptanteViewController {
 
     @GetMapping(WebRoutes.ADOPTANTES_EDITAR)
     @PreAuthorize("hasAnyRole('ADMIN', 'ADOPTANTE')")
-    @SuppressWarnings("unchecked")
     public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
         try {
-            Map<String, Object> adoptante = restTemplate.getForObject(apiUrl + "/v1/adoptantes/" + id, Map.class);
+            AdoptanteRecord adoptante = helper.fetchObject(apiUrl + "/v1/adoptantes/" + id, AdoptanteRecord.class);
             model.addAttribute(ModelAttribute.SINGLE_Adoptante.getName(), adoptante);
             
-            if (adoptante != null) {
-                Object uId = adoptante.get("usuarioId");
-                Map<String, Object> user = restTemplate.getForObject(authUrl + "/v1/usuarios/" + uId, Map.class);
+            if (adoptante != null && adoptante.usuarioId() != null) {
+                Integer uId = adoptante.usuarioId();
+                UsuarioRecord user = helper.fetchObject(authUrl + "/v1/usuarios/" + uId, UsuarioRecord.class);
                 if (user != null) {
-                    model.addAttribute("userEmail", user.get("email"));
+                    model.addAttribute("userEmail", user.email());
                 }
                 
-                // Fetch PerfilLegal
                 try {
-                    Map<String, Object> perfil = restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + uId, Map.class);
+                    PerfilLegalRecord perfil = helper.fetchObject(apiUrl + "/v1/perfiles-legales/usuario/" + uId, PerfilLegalRecord.class);
                     if (perfil != null) {
-                        model.addAttribute("nombreCompleto", perfil.get("nombre") + " " + perfil.get("apellido"));
-                        model.addAttribute("userPhone", perfil.get("telefono"));
-                        model.addAttribute("userDni", perfil.get("dni"));
-                        model.addAttribute("userDireccion", perfil.get("direccion"));
-                        model.addAttribute("userFechaNacimiento", perfil.get("fechaNacimiento"));
+                        model.addAttribute("nombreCompleto", perfil.nombre() + " " + perfil.apellido());
+                        model.addAttribute("userPhone", perfil.telefono());
+                        model.addAttribute("userDni", perfil.dni());
+                        model.addAttribute("userDireccion", perfil.direccion());
+                        model.addAttribute("userFechaNacimiento", perfil.fechaNacimiento());
                     }
                 } catch (Exception e) {
                     logger.warn("No se encontró PerfilLegal para usuario " + uId);
@@ -236,12 +222,11 @@ public class AdoptanteViewController {
             bodyPerfil.put("dni", dni);
             bodyPerfil.put("direccion", direccion);
             bodyPerfil.put("fechaNacimiento", fechaNacimiento);
-            // El teléfono se mantiene o se añade campo al form si es necesario
             restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
 
             redirectAttributes.addFlashAttribute("successMessage", "Perfil de adoptante actualizado correctamente");
             return "redirect:" + WebRoutes.ADOPTANTES_BASE;
-        } catch (org.springframework.web.client.RestClientResponseException e) {
+        } catch (RestClientResponseException e) {
             logger.error("Error del backend al actualizar adoptante: " + e.getResponseBodyAsString());
             redirectAttributes.addFlashAttribute("errorMessage", "Error al actualizar: " + e.getResponseBodyAsString());
             return "redirect:" + WebRoutes.ADOPTANTES_BASE;
@@ -278,34 +263,26 @@ public class AdoptanteViewController {
 
     @GetMapping(WebRoutes.ADOPTANTES_PDF)
     public String exportPdf(Model model) {
-        List<Object> adoptantes = fetchList("/v1/adoptantes");
-        List<Object> usuarios = fetchList(authUrl + "/v1/usuarios");
-        List<Object> perfilesLegales = fetchList("/v1/perfiles-legales");
+        List<AdoptanteRecord> adoptantes = helper.fetchList(apiUrl + "/v1/adoptantes", AdoptanteRecord.class);
+        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+        List<PerfilLegalRecord> perfilesLegales = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
 
-        Map<String, Object> usuariosMap = new HashMap<>();
-        for (Object u : usuarios) {
-            if (u instanceof Map) {
-                Object id = ((Map<?, ?>) u).get("id");
-                if (id instanceof Number) {
-                    usuariosMap.put(String.valueOf(((Number) id).intValue()), u);
-                }
+        Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
+        for (UsuarioRecord u : usuarios) {
+            usuariosMap.put(String.valueOf(u.id()), u);
+        }
+
+        Map<String, PerfilLegalRecord> perfilesMap = new HashMap<>();
+        for (PerfilLegalRecord p : perfilesLegales) {
+            if (p.usuarioId() != null) {
+                perfilesMap.put(String.valueOf(p.usuarioId()), p);
             }
         }
 
-        Map<String, Object> perfilesMap = new HashMap<>();
-        for (Object p : perfilesLegales) {
-            if (p instanceof Map) {
-                Object uId = ((Map<?, ?>) p).get("usuarioId");
-                if (uId instanceof Number) {
-                    perfilesMap.put(String.valueOf(((Number) uId).intValue()), p);
-                }
-            }
-        }
-
-        model.addAttribute(es.refugio.frontend.web.enums.ModelAttribute.Adoptante_LIST.getName(), adoptantes);
+        model.addAttribute(ModelAttribute.Adoptante_LIST.getName(), adoptantes);
         model.addAttribute("usuariosMap", usuariosMap);
         model.addAttribute("perfilesMap", perfilesMap);
-        return es.refugio.frontend.web.enums.ThymTemplates.Adoptante_LIST_PDF.getPath();
+        return ThymTemplates.Adoptante_LIST_PDF.getPath();
     }
 
 }

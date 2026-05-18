@@ -29,6 +29,11 @@ import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.infraestructure.mapper.DonacionMapper;
 import es.refugio.refugio.infraestructure.web.dto.donacion.DonacionRequest;
 import es.refugio.refugio.infraestructure.web.dto.donacion.DonacionResponse;
+import es.refugio.common.infraestructure.web.dto.common.PaginatedResponse;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import es.refugio.refugio.application.service.NotificacionService;
 
 import jakarta.validation.Valid;
@@ -132,9 +137,12 @@ public class DonacionController {
     @Operation(summary = "Listar donaciones")
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public List<DonacionResponse> findAll() {
-        List<Donacion> donaciones = findDonacionService.findAll();
-        return DonacionMapper.toResponse(donaciones);
+    public PaginatedResponse<DonacionResponse> findAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(Math.max(0, page), size);
+        Page<Donacion> donacionesPage = findDonacionService.findAll(pageable);
+        return PaginatedResponse.fromPage(donacionesPage, DonacionMapper.toResponse(donacionesPage.getContent()));
     }
 
     @Operation(summary = "Obtener donación por ID")
@@ -158,7 +166,7 @@ public class DonacionController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
 
         if (!isStaff) {
-            es.refugio.refugio.infraestructure.security.CustomUserDetails userDetails = (es.refugio.refugio.infraestructure.security.CustomUserDetails) SecurityContextHolder
+            CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
                     .getContext().getAuthentication().getPrincipal();
             Integer currentUserId = userDetails.getId();
 

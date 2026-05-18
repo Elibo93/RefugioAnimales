@@ -14,7 +14,7 @@
                 <i data-lucide="file-text" style="width: 32px; height: 32px;"></i>
             </div>
             <h1 class="page-title" style="font-size: 2.25rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.75rem;">
-                <span th:text="${solicitud.get('id') == null ? #messages.msg('solicitud.form.title') : #messages.msg('solicitud.modal.edit.title')}">Nueva solicitud</span>
+                <span th:text="${solicitud.id == null ? #messages.msg('solicitud.form.title') : #messages.msg('solicitud.modal.edit.title')}">Nueva solicitud</span>
             </h1>
             <p style="color:var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
                 Gestión avanzada de solicitudes de adopción
@@ -24,7 +24,7 @@
         <div style="max-width: 800px; margin: 0 auto; padding-bottom: 5rem;">
             <div class="card" style="padding: 2.5rem; border-radius: 24px; border: 1px solid var(--border); background: white; box-shadow: var(--shadow-xl);">
                 <form id="solicitudForm"
-                    th:action="${solicitud.get('id') == null ? '/web/solicitudes/nueva' : '/web/solicitudes/' + solicitud.get('id') + '/editar'}"
+                    th:action="${solicitud.id == null ? '/web/solicitudes/nueva' : '/web/solicitudes/' + solicitud.id + '/editar'}"
                     method="post" th:object="${solicitud}">
                     
                     <!-- SECCIÓN 1: ANIMAL -->
@@ -35,25 +35,25 @@
                         </h2>
 
                         <!-- Vista Edición / Lectura -->
-                        <div th:if="${solicitud.get('id') != null}" style="padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.25rem;">
+                        <div th:if="${solicitud.id != null}" style="padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.25rem;">
                             <div style="width: 56px; height: 56px; border-radius: 14px; overflow: hidden; background: white; border: 1px solid #e2e8f0; flex-shrink: 0;">
-                                <img th:if="${animalData != null and animalData.get('fotoUrl') != null}" 
-                                     th:src="${animalData.get('fotoUrl')}" 
+                                <img th:if="${animalData != null and animalData.foto != null}" 
+                                     th:src="${animalData.foto}" 
                                      style="width: 100%; height: 100%; object-fit: cover;">
-                                <div th:if="${animalData == null or animalData.get('fotoUrl') == null}" 
+                                <div th:if="${animalData == null or animalData.foto == null}" 
                                      style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #f1f5f9;">
                                     <i data-lucide="paw-print" style="width: 24px; color: #94a3b8;"></i>
                                 </div>
                             </div>
                             <div>
-                                <h3 th:text="${animalData != null ? animalData.get('nombre') : 'Animal'}" style="margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--text-main);"></h3>
-                                <span th:text="${animalData != null ? animalData.get('especie') : ''}" style="font-size: 0.85rem; color: #64748b; font-weight: 500;"></span>
+                                <h3 th:text="${animalData != null ? animalData.nombre : 'Animal'}" style="margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--text-main);"></h3>
+                                <span th:text="${animalData != null ? animalData.especie : ''}" style="font-size: 0.85rem; color: #64748b; font-weight: 500;"></span>
                             </div>
-                            <input type="hidden" name="animalId" th:value="${solicitud.get('animalId')}">
+                            <input type="hidden" name="animalId" th:value="${solicitud.animalId}">
                         </div>
 
                         <!-- Vista Creación: Buscador -->
-                        <div th:if="${solicitud.get('id') == null}" style="position: relative;">
+                        <div th:if="${solicitud.id == null}" style="position: relative;">
                             <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">
                                 <i data-lucide="search" style="width: 18px; color: var(--primary);"></i>
                                 Buscar Animal
@@ -68,7 +68,7 @@
                                         hx-trigger="keyup changed delay:300ms, focus"
                                         hx-target="#animal-suggestions"
                                         style="width: 100%; height: 54px; padding-left: 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; transition: all 0.3s;">
-                                <input type="hidden" name="animalId" id="animalId-input" required th:value="${solicitud.get('animalId')}">
+                                <input type="hidden" name="animalId" id="animalId-input" required th:value="${solicitud.animalId}">
                             </div>
                             <div id="animal-suggestions" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 100;"></div>
                             
@@ -99,7 +99,7 @@
                         </h2>
 
                         <!-- Vista Edición -->
-                        <div th:if="${solicitud.get('id') != null}" style="padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.25rem;">
+                        <div th:if="${solicitud.id != null}" style="padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.25rem;">
                             <div style="background: white; color: var(--primary); width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0;">
                                 <i data-lucide="user" style="width: 24px;"></i>
                             </div>
@@ -107,11 +107,11 @@
                                 <h3 th:text="${nombreAdoptante}" style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--text-main);"></h3>
                                 <span style="font-size: 0.85rem; color: #64748b;" th:text="#{solicitud.role.adoptante}">Adoptante</span>
                             </div>
-                            <input type="hidden" name="adoptanteId" th:value="${solicitud.get('adoptanteId')}">
+                            <input type="hidden" name="adoptanteId" th:value="${solicitud.adoptanteId}">
                         </div>
 
                         <!-- Vista Creación: Buscador -->
-                        <div th:if="${solicitud.get('id') == null}" style="position: relative;">
+                        <div th:if="${solicitud.id == null}" style="position: relative;">
                             <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">
                                 <i data-lucide="search" style="width: 18px; color: var(--primary);"></i>
                                 Buscar Persona Registrada
@@ -127,7 +127,7 @@
                                         hx-trigger="keyup changed delay:300ms, focus"
                                         hx-target="#user-suggestions"
                                         style="width: 100%; height: 54px; padding-left: 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; transition: all 0.3s;">
-                                <input type="hidden" name="adoptanteId" id="usuarioId-input" required th:value="${solicitud.get('adoptanteId')}">
+                                <input type="hidden" name="adoptanteId" id="usuarioId-input" required th:value="${solicitud.adoptanteId}">
                             </div>
                             <div id="user-suggestions" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 100;"></div>
                         </div>
@@ -143,11 +143,11 @@
                                 <option th:each="e : ${estados}" 
                                         th:value="${e}" 
                                         th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(e, '_', ' ')))}"
-                                        th:selected="${e == solicitud.get('estado')}"></option>
+                                        th:selected="${e == solicitud.estado}"></option>
                             </select>
                         </div>
                         <input type="hidden" name="estado"
-                            th:value="${solicitud.get('estado') != null ? solicitud.get('estado') : 'PENDIENTE'}"
+                            th:value="${solicitud.estado != null ? solicitud.estado : 'PENDIENTE'}"
                             sec:authorize="!hasRole('ADMIN')">
 
                         <div class="form-group">
@@ -158,7 +158,19 @@
                             <textarea name="comentario" class="form-control" 
                                 placeholder="Indique cualquier detalle relevante para la solicitud..."
                                 style="min-height: 120px; padding: 1rem; border-radius: 16px; border: 2px solid #e2e8f0; line-height: 1.6;"
-                                th:text="${solicitud.get('comentario')}"></textarea>
+                                th:text="${solicitud.comentario}"></textarea>
+                        </div>
+
+                        <!-- Notas del Administrador (Creación y Edición) -->
+                        <div class="form-group" sec:authorize="hasRole('ADMIN')">
+                            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                <i data-lucide="shield-check" style="width: 16px; color: #f97316;"></i>
+                                <span>Notas Internas del Administrador (Comentario Admin)</span>
+                            </label>
+                            <textarea name="comentarioAdmin" class="form-control" 
+                                placeholder="Escriba comentarios internos, notas de seguimiento o motivos de aprobación/rechazo..."
+                                style="min-height: 120px; padding: 1rem; border-radius: 16px; border: 2px solid #e2e8f0; line-height: 1.6;"
+                                th:text="${solicitud.comentarioAdmin}"></textarea>
                         </div>
                     </div>
 
@@ -169,7 +181,7 @@
                         </a>
                         <button type="submit" class="btn btn-primary" id="btn-submit" style="border-radius: 14px; padding: 0.75rem 2.5rem; font-weight: 700; background: var(--primary); border: none; box-shadow: 0 4px 6px -1px rgba(var(--primary-rgb), 0.2); display: flex; align-items: center; gap: 10px; cursor: pointer;">
                             <i data-lucide="save" style="width: 20px;"></i>
-                            <span id="btn-text" th:text="${solicitud.get('id') == null ? #messages.msg('generic.btn.create') : #messages.msg('generic.btn.save')}">Guardar</span>
+                            <span id="btn-text" th:text="${solicitud.id == null ? #messages.msg('generic.btn.create') : #messages.msg('generic.btn.save')}">Guardar</span>
                         </button>
                     </div>
                 </form>

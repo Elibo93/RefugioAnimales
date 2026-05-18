@@ -28,7 +28,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return null; // Not needed after token validation
+        return null; // No es necesario después de la validación del token
     }
 
     @Override

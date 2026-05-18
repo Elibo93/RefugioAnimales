@@ -7,6 +7,7 @@ public record SolicitudAdopcionRequest(
         Integer adoptanteId,
         LocalDateTime fecha,
         String estado,
-        String comentario
+        String comentario,
+        String comentarioAdmin
 ) {
 }

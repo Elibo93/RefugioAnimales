@@ -66,7 +66,8 @@
 
                     <form id="filterForm" th:action="@{/web/adopciones}" method="get"
                         hx-boost="true" hx-target="#adopcion-results" hx-select="#adopcion-results"
-                        hx-trigger="submit, keyup changed delay:500ms from:input[name='q']"
+                        hx-trigger="submit, keyup changed delay:800ms from:input[name='q']"
+                        hx-vals='{"page": 1}'
                         hx-swap="innerHTML show:none"
                         style="display:flex; gap:10px; margin:0; align-items: center;">
                         
@@ -111,14 +112,14 @@
                 </div>
 
                 <div class="list-body" style="display: flex; flex-direction: column; gap: 12px;">
-                    <div th:each="i : ${adopciones}" class="premium-row-card" th:id="'row-' + ${i.get('id')}">
+                    <div th:each="i : ${adopciones}" class="premium-row-card" th:id="'row-' + ${i.id}">
                         <div class="row-cell"
                             style="flex: 0.5; justify-content: center; font-weight: 700; color: var(--text-muted);"
-                            th:text="${i.get('id')}">1</div>
+                            th:text="${i.id}">1</div>
 
                         <div class="row-cell" style="flex: 2;">
                             <div style="display: flex; align-items: center; gap: 12px;"
-                                th:with="usuarioId=${adoptanteUsuarioIds != null ? adoptanteUsuarioIds['' + i.get('adoptanteId')] : null}, 
+                                th:with="usuarioId=${adoptanteUsuarioIds != null ? adoptanteUsuarioIds['' + i.adoptanteId] : null}, 
                                           perfilObj=${perfilesMap != null and usuarioId != null ? perfilesMap['' + usuarioId] : null},
                                           usuarioObj=${usuariosMap != null and usuarioId != null ? usuariosMap['' + usuarioId] : null}">
                                 <div class="task-icon-box" style="background: #dcfce7;">
@@ -126,55 +127,57 @@
                                 </div>
                                 <a th:href="@{/web/personas/{id}(id=${usuarioId != null ? usuarioId : '0'})}"
                                     style="font-weight: 800; color: var(--text-main); text-decoration: none;"
-                                    th:text="${perfilObj != null and perfilObj.get('nombre') != null ? (perfilObj.get('nombre') + ' ' + (perfilObj.get('apellido') ?: '')) : 
-                                            (usuarioObj != null and usuarioObj.get('nombre') != null ? (usuarioObj.get('nombre') + ' ' + (usuarioObj.get('apellido') ?: '')) : 
-                                            (usuarioObj != null ? usuarioObj.get('username') : 'Adoptante #' + i.get('adoptanteId')))}">Juan Pérez</a>
+                                    th:text="${perfilObj != null and perfilObj.nombre != null ? (perfilObj.nombre + ' ' + (perfilObj.apellido ?: '')) : 
+                                            (usuarioObj != null ? usuarioObj.username : 'Adoptante #' + i.adoptanteId)}">Juan Pérez</a>
                             </div>
                         </div>
 
                         <div class="row-cell" style="flex: 2;">
-                            <div style="display: flex; align-items: center; gap: 12px;" th:with="animalObj=${animalesMap != null ? animalesMap['' + i.get('animalId')] : null}">
+                            <div style="display: flex; align-items: center; gap: 12px;" th:with="animalObj=${animalesMap != null ? animalesMap['' + i.animalId] : null}">
                                 <div style="width: 40px; height: 40px; border-radius: 10px; overflow: hidden; background: #f1f5f9; flex-shrink: 0; border: 1px solid #e2e8f0;">
-                                    <img th:src="${animalObj != null and animalObj.get('foto') != null and animalObj.get('foto') != '' ? animalObj.get('foto') : '/images/placeholder-animal.png'}"
+                                    <img th:src="${animalObj != null and animalObj.foto != null and animalObj.foto != '' ? animalObj.foto : '/images/placeholder-animal.png'}"
                                          style="width: 100%; height: 100%; object-fit: cover;">
                                 </div>
-                                <a th:href="@{/web/animales/{id}(id=${i.get('animalId')})}"
+                                <a th:href="@{/web/animales/{id}(id=${i.animalId})}"
                                     style="font-weight: 800; color: var(--secondary); text-decoration: none;"
-                                    th:text="${animalObj != null ? animalObj.get('nombre') : 'Animal'}">Rocky</a>
+                                    th:text="${animalObj != null ? animalObj.nombre : 'Animal'}">Rocky</a>
                             </div>
                         </div>
 
                         <div class="row-cell" style="flex: 1.5; justify-content: center;">
                             <span class="badge-premium"
-                                  th:classappend="${i.get('estado') == 'COMPLETADA' ? 'success' : 
-                                                  (i.get('estado') == 'CANCELADA' ? 'danger' : 
-                                                  (i.get('estado') == 'PENDIENTE_FIRMA' ? 'primary' : 
-                                                  (i.get('estado') == 'EN_PERIODO_ADAPTACION' ? 'warning' : 'info')))}"
-                                  th:text="${i.get('estado') != null ? #strings.replace(#strings.capitalize(#strings.toLowerCase(i.get('estado'))), '_', ' ') : 'En proceso'}">Completada</span>
+                                  th:classappend="${i.estado == 'COMPLETADA' ? 'success' : 
+                                                  (i.estado == 'CANCELADA' ? 'danger' : 
+                                                  (i.estado == 'PENDIENTE_FIRMA' ? 'primary' : 
+                                                  (i.estado == 'EN_PERIODO_ADAPTACION' ? 'warning' : 'info')))}"
+                                  th:text="${i.estado != null ? #strings.replace(#strings.capitalize(#strings.toLowerCase(i.estado)), '_', ' ') : 'En proceso'}">Completada</span>
                         </div>
 
                         <div class="row-cell"
                             style="flex: 1.5; justify-content: center; font-weight: 600; color: var(--text-muted);"
-                            th:text="${i.get('fechaAdopcion') != null ? i.get('fechaAdopcion') : '-'}">01/01/2023</div>
+                            th:text="${i.fechaAdopcion != null ? i.fechaAdopcion : '-'}">01/01/2023</div>
 
                         <div class="row-cell" style="flex: 1.2; justify-content: center; gap: 8px;">
-                            <a class="btn-icon" th:href="@{/web/adopciones/{id}/contrato(id=${i.get('id')})}"
+                            <a class="btn-icon" th:href="@{/web/adopciones/{id}/contrato(id=${i.id})}"
                                 title="Descargar Contrato" target="_blank" style="color: #4a90e2;">
                                 <i data-lucide="file-signature" style="width: 16px;"></i>
                             </a>
-                            <a class="btn-icon" th:href="@{/web/adopciones/{id}/editar(id=${i.get('id')})}"
+                            <a class="btn-icon" th:href="@{/web/adopciones/{id}/editar(id=${i.id})}"
                                 title="Editar">
                                 <i data-lucide="edit-2" style="width: 16px;"></i>
                             </a>
                             <button class="btn-icon delete"
-                                th:hx-post="@{/web/adopciones/{id}/borrar(id=${i.get('id')})}"
-                                th:hx-target="'#row-' + ${i.get('id')}" hx-swap="outerHTML swap:0.3s"
+                                th:hx-post="@{/web/adopciones/{id}/borrar(id=${i.id})}"
+                                th:hx-target="'#row-' + ${i.id}" hx-swap="outerHTML swap:0.3s"
                                 hx-confirm="¿Eliminar inscripción?">
                                 <i data-lucide="trash-2" style="width: 16px;"></i>
                             </button>
                         </div>
                     </div>
                 </div>
+
+                <!-- Paginación -->
+                <div th:replace="~{fragments/pagination :: controls(pagination=${pagination}, url='/web/adopciones', target='#adopcion-results')}"></div>
 
                 <div th:if="${#lists.isEmpty(adopciones)}"
                     style="text-align:center; padding:5rem; background:white; border-radius:24px; border:1px solid var(--border); margin-top: 1rem;">
@@ -186,7 +189,7 @@
             </div>
         </div>
 
-    </div>
+</div>
 </body>
 
 </html>

@@ -17,7 +17,7 @@
                     </div>
                     <span>Revisión de Solicitud</span>
                 </h1>
-                <p th:if="${isAdmin}" style="color: var(--text-muted); margin-top: 4px; margin-left: 60px;">ID de Solicitud: #<span th:text="${solicitud.get('id')}"></span></p>
+                <p th:if="${isAdmin}" style="color: var(--text-muted); margin-top: 4px; margin-left: 60px;">ID de Solicitud: #<span th:text="${solicitud.id}"></span></p>
             </div>
             
             <div style="display: flex; gap: 12px; align-items: center;">
@@ -31,8 +31,8 @@
                 </a>
                 <span class="animal-status-badge" 
                       style="padding: 8px 20px; height: auto; font-size: 0.9rem; text-transform: none; border-radius: 12px;"
-                      th:classappend="${'badge-' + solicitud.get('estado').toString().toLowerCase()}"
-                      th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(solicitud.get('estado'), '_', ' ')))}">
+                      th:classappend="${'badge-' + solicitud.estado.toString().toLowerCase()}"
+                      th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(solicitud.estado, '_', ' ')))}">
                     Estado
                 </span>
             </div>
@@ -52,17 +52,17 @@
                     
                     <!-- Modo Edición (Solo ADMIN) -->
                     <form th:if="${isAdmin}" 
-                          th:action="@{/web/solicitudes/{id}/editar(id=${solicitud.get('id')})}" method="POST">
-                        <input type="hidden" name="animalId" th:value="${solicitud.get('animalId')}">
-                        <input type="hidden" name="adoptanteId" th:value="${solicitud.get('adoptanteId')}">
-                        <input type="hidden" name="estado" th:value="${solicitud.get('estado')}">
-                        <input type="hidden" name="comentario" th:value="${solicitud.get('comentario')}">
+                          th:action="@{/web/solicitudes/{id}/editar(id=${solicitud.id})}" method="POST">
+                        <input type="hidden" name="animalId" th:value="${solicitud.animalId}">
+                        <input type="hidden" name="adoptanteId" th:value="${solicitud.adoptanteId}">
+                        <input type="hidden" name="estado" th:value="${solicitud.estado}">
+                        <input type="hidden" name="comentario" th:value="${solicitud.comentario}">
                         <input type="hidden" name="redireccion" value="detalle">
                         
                         <textarea name="comentarioAdmin" rows="3" 
                                   style="width: 100%; padding: 1rem; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-main); font-family: inherit; margin-bottom: 1rem;"
                                   placeholder="Escribe aquí notas internas o el motivo del rechazo..."
-                                  th:text="${solicitud.get('comentarioAdmin')}"></textarea>
+                                  th:text="${solicitud.comentarioAdmin}"></textarea>
                         <button type="submit" class="btn btn-secondary" style="height: 40px; font-size: 0.85rem;">
                             <i data-lucide="save" style="width: 14px;"></i>
                             Guardar Nota
@@ -73,7 +73,7 @@
                     <div th:unless="${isAdmin}" 
                          style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; border: 1px solid #e2e8f0;">
                         <p style="margin: 0; color: var(--text-main); line-height: 1.6;" 
-                           th:text="${solicitud.get('comentarioAdmin') != null and !solicitud.get('comentarioAdmin').isEmpty() ? solicitud.get('comentarioAdmin') : 'No hay notas del administrador todavía.'}">
+                           th:text="${solicitud.comentarioAdmin != null and !solicitud.comentarioAdmin.isEmpty() ? solicitud.comentarioAdmin : 'No hay notas del administrador todavía.'}">
                             Notas...
                         </p>
                     </div>
@@ -89,23 +89,23 @@
                     <div th:if="${perfilAdoptante != null}" class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                         <div class="detail-item">
                             <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Nombre Completo</label>
-                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="|${perfilAdoptante.get('nombre')} ${perfilAdoptante.get('apellido')}|">Nombre</span>
+                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="|${perfilAdoptante.nombre} ${perfilAdoptante.apellido}|">Nombre</span>
                         </div>
                         <div class="detail-item">
                             <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">DNI / NIE</label>
-                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.get('dni')}">DNI</span>
+                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.dni}">DNI</span>
                         </div>
                         <div class="detail-item">
                             <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Teléfono</label>
-                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.get('telefono')}">Teléfono</span>
+                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.telefono}">Teléfono</span>
                         </div>
                         <div class="detail-item">
                             <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Fecha Nacimiento</label>
-                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.get('fechaNacimiento')}">Fecha</span>
+                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.fechaNacimiento}">Fecha</span>
                         </div>
                         <div class="detail-item" style="grid-column: span 2;">
                             <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Dirección</label>
-                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.get('direccion')}">Dirección</span>
+                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.direccion}">Dirección</span>
                         </div>
                     </div>
                     
@@ -123,24 +123,24 @@
                     </h2>
                     <div style="background: var(--bg-main); padding: 1.5rem; border-radius: 16px; border-left: 4px solid var(--primary);">
                         <p style="margin: 0; font-size: 1.05rem; line-height: 1.6; color: var(--text-main); font-style: italic;" 
-                           th:text="${solicitud.get('comentario') != null and !solicitud.get('comentario').isEmpty() ? solicitud.get('comentario') : 'El adoptante no ha incluido comentarios adicionales.'}">
+                           th:text="${solicitud.comentario != null and !solicitud.comentario.isEmpty() ? solicitud.comentario : 'El adoptante no ha incluido comentarios adicionales.'}">
                             Comentario...
                         </p>
                     </div>
                 </div>
 
                 <!-- Acciones Rápidas (SOLO ADMIN) -->
-                <div th:if="${isAdmin and (solicitud.get('estado') == 'PENDIENTE' or solicitud.get('estado') == 'EN_REVISION')}" 
+                <div th:if="${isAdmin and (solicitud.estado == 'PENDIENTE' or solicitud.estado == 'EN_REVISION')}" 
                      class="card" style="padding: 2rem; background: var(--bg-main); border: 2px solid var(--border);">
                     <div style="display: flex; gap: 1rem;">
-                        <form th:action="@{/web/solicitudes/{id}/aprobar(id=${solicitud.get('id')})}" method="POST" style="flex: 1;">
+                        <form th:action="@{/web/solicitudes/{id}/aprobar(id=${solicitud.id})}" method="POST" style="flex: 1;">
                             <button type="submit" class="btn btn-primary" style="width: 100%; height: 56px; justify-content: center; font-size: 1rem; border-radius: 16px;">
                                 <i data-lucide="check-circle"></i>
                                 Aprobar Adopción
                             </button>
                         </form>
                         
-                        <form th:action="@{/web/solicitudes/{id}/rechazar(id=${solicitud.get('id')})}" method="POST" style="flex: 1;">
+                        <form th:action="@{/web/solicitudes/{id}/rechazar(id=${solicitud.id})}" method="POST" style="flex: 1;">
                             <button type="submit" class="btn btn-danger" style="width: 100%; height: 56px; justify-content: center; font-size: 1rem; border-radius: 16px;">
                                 <i data-lucide="x-circle"></i>
                                 Rechazar Solicitud
@@ -149,13 +149,13 @@
                     </div>
                     
                     <div style="margin-top: 1rem;">
-                        <form th:if="${solicitud.get('estado') == 'PENDIENTE'}"
-                              th:action="@{/web/solicitudes/{id}/editar(id=${solicitud.get('id')})}" method="POST">
-                            <input type="hidden" name="animalId" th:value="${solicitud.get('animalId')}">
-                            <input type="hidden" name="adoptanteId" th:value="${solicitud.get('adoptanteId')}">
+                        <form th:if="${solicitud.estado == 'PENDIENTE'}"
+                              th:action="@{/web/solicitudes/{id}/editar(id=${solicitud.id})}" method="POST">
+                            <input type="hidden" name="animalId" th:value="${solicitud.animalId}">
+                            <input type="hidden" name="adoptanteId" th:value="${solicitud.adoptanteId}">
                             <input type="hidden" name="estado" value="EN_REVISION">
-                            <input type="hidden" name="comentario" th:value="${solicitud.get('comentario')}">
-                            <input type="hidden" name="comentarioAdmin" th:value="${solicitud.get('comentarioAdmin')}">
+                            <input type="hidden" name="comentario" th:value="${solicitud.comentario}">
+                            <input type="hidden" name="comentarioAdmin" th:value="${solicitud.comentarioAdmin}">
                             <input type="hidden" name="redireccion" value="detalle">
                             <button type="submit" class="btn btn-secondary" style="width: 100%; height: 48px; justify-content: center; border-radius: 12px;">
                                 <i data-lucide="clock"></i>
@@ -170,32 +170,37 @@
             <div class="side-column" style="display: flex; flex-direction: column; gap: 1.5rem;">
                 <div class="card premium-card" style="padding: 0; overflow: hidden;">
                     <div style="position: relative; height: 250px;">
-                        <img th:src="${animalData != null and animalData.get('foto') != null ? animalData.get('foto') : '/images/placeholder-animal.png'}" 
+                        <img th:src="${animalData != null and animalData.foto != null ? animalData.foto : '/images/placeholder-animal.png'}" 
                              style="width: 100%; height: 100%; object-fit: cover;">
                         <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; background: linear-gradient(transparent, rgba(0,0,0,0.8));">
-                            <h3 style="margin: 0; color: white; font-size: 1.5rem; font-weight: 800;" th:text="${animalData != null ? animalData.get('nombre') : 'Animal'}">Nombre</h3>
-                            <span style="color: rgba(255,255,255,0.9); font-size: 0.9rem;" th:text="${animalData != null ? animalData.get('especie') : ''}">Especie</span>
+                            <h3 style="margin: 0; color: white; font-size: 1.5rem; font-weight: 800;" th:text="${animalData != null ? animalData.nombre : 'Animal'}">Nombre</h3>
+                            <span style="color: rgba(255,255,255,0.9); font-size: 0.9rem;" th:text="${animalData != null ? animalData.especie : ''}">Especie</span>
                         </div>
                     </div>
                     
                     <div style="padding: 1.5rem;">
                         <div style="display: flex; flex-direction: column; gap: 12px;">
-                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
                                 <span style="color: var(--text-muted);">Sexo</span>
-                                <span style="font-weight: 700;" th:text="${animalData != null ? animalData.get('sexo') : '-'}">Macho</span>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <i th:if="${animalData != null and animalData.sexo != null}"
+                                       th:data-lucide="${animalData.sexo.toString() == 'MACHO' ? 'mars' : 'venus'}"
+                                       th:style="${animalData.sexo.toString() == 'MACHO' ? 'color: #3B82F6; width: 16px; height: 16px; stroke-width: 2.5;' : 'color: #EC4899; width: 16px; height: 16px; stroke-width: 2.5;'}"></i>
+                                    <strong style="font-weight: 700;" th:text="${animalData != null ? #strings.capitalize(#strings.toLowerCase(animalData.sexo)) : '-'}">Macho</strong>
+                                </div>
                             </div>
                             <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
                                 <span style="color: var(--text-muted);">Edad</span>
-                                <span style="font-weight: 700;" th:text="${animalData != null ? animalData.get('edad') : '-'}">2 años</span>
+                                <span style="font-weight: 700;" th:text="${animalData != null ? animalData.edad : '-'}">2 años</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
                                 <span style="color: var(--text-muted);">Tamaño</span>
-                                <span style="font-weight: 700;" th:text="${animalData != null ? animalData.get('tamano') : '-'}">Mediano</span>
+                                <span style="font-weight: 700;" th:text="${animalData != null ? animalData.tamano : '-'}">Mediano</span>
                             </div>
                         </div>
                         
                         <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
-                            <a th:href="@{/web/animales/{id}(id=${solicitud.get('animalId')})}" class="btn btn-secondary" style="width: 100%; justify-content: center; font-size: 0.85rem;">
+                            <a th:href="@{/web/animales/{id}(id=${solicitud.animalId})}" class="btn btn-secondary" style="width: 100%; justify-content: center; font-size: 0.85rem;">
                                 <i data-lucide="external-link" style="width: 14px;"></i>
                                 Ver Ficha Animal
                             </a>

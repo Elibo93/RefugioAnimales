@@ -27,8 +27,8 @@
         </thead>
         <tbody>
             <tr th:each="h : ${historiales}">
-                <td th:text="${h.id.value}"></td>
-                <td th:text="${h.animalId.value}"></td>
+                <td th:text="${h.id}"></td>
+                <td th:text="${h.animalId}"></td>
                 <td th:text="${#temporals.format(h.fecha, 'dd/MM/yyyy')}"></td>
                 <td th:text="${h.veterinario}"></td>
                 <td th:text="${h.descripcion}"></td>

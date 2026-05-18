@@ -13,6 +13,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -22,8 +23,12 @@ import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
+import es.refugio.frontend.web.dto.*;
+import es.refugio.frontend.web.util.ViewControllerHelper;
 
 import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +40,7 @@ public class AnimalViewController {
 
     private final RestTemplate restTemplate;
     private final TemplateEngine templateEngine;
+    private final ViewControllerHelper helper;
 
     @Value("${backend.api.url}")
     private String apiUrl;
@@ -42,36 +48,30 @@ public class AnimalViewController {
     @GetMapping("/web/animales/buscar")
     public String buscarAnimales(@RequestParam(required = false) String animal_q, Model model) {
         try {
-            // Obtenemos todos los animales candidatos (Disponibles o en tratamiento)
-            String queryUrl = apiUrl + "/v1/animales";
-            Object[] arr = restTemplate.getForObject(queryUrl, Object[].class);
-            List<Map<String, Object>> todos = arr != null ? (List) Arrays.asList(arr) : List.of();
+            List<AnimalRecord> todos = helper.fetchList(apiUrl + "/v1/animales?size=1000", AnimalRecord.class);
 
-            // Filtramos en memoria para asegurar que la búsqueda por nombre/especie funcione
-            List<Map<String, Object>> filtrados;
+            List<AnimalRecord> filtrados;
             if (animal_q != null && !animal_q.trim().isEmpty()) {
                 String search = animal_q.toLowerCase().trim();
                 filtrados = todos.stream()
                     .filter(a -> {
-                        String nombre = a.get("nombre") != null ? a.get("nombre").toString().toLowerCase() : "";
-                        String especie = a.get("especie") != null ? a.get("especie").toString().toLowerCase() : "";
-                        String raza = a.get("raza") != null ? a.get("raza").toString().toLowerCase() : "";
-                        String chipId = a.get("chipId") != null ? a.get("chipId").toString().toLowerCase() : "";
-                        String id = a.get("id") != null ? a.get("id").toString().toLowerCase() : "";
-                        String estado = a.get("estado") != null ? a.get("estado").toString() : "";
+                        String nombre = a.nombre() != null ? a.nombre().toLowerCase() : "";
+                        String especie = a.especie() != null ? a.especie().toLowerCase() : "";
+                        String raza = a.raza() != null ? a.raza().toLowerCase() : "";
+                        String chipId = a.chipId() != null ? a.chipId().toLowerCase() : "";
+                        String id = String.valueOf(a.id()).toLowerCase();
+                        String estado = a.estado() != null ? a.estado() : "";
                         
-                        // Solo sugerimos animales que se pueden adoptar
                         boolean esApto = estado.equals("DISPONIBLE") || estado.equals("EN_TRATAMIENTO") || estado.equals("EN_ACOGIDA");
                         
                         return esApto && (nombre.contains(search) || especie.contains(search) || raza.contains(search) || chipId.contains(search) || id.contains(search));
                     })
-                    .limit(10) // Limitamos a 10 para que sea rápido
+                    .limit(10)
                     .toList();
             } else {
-                // Si no hay búsqueda, mostramos los 10 primeros que se pueden adoptar
                 filtrados = todos.stream()
                     .filter(a -> {
-                        String estado = a.get("estado") != null ? a.get("estado").toString() : "";
+                        String estado = a.estado() != null ? a.estado() : "";
                         return "DISPONIBLE".equals(estado) || "EN_TRATAMIENTO".equals(estado);
                     })
                     .limit(10)
@@ -87,6 +87,8 @@ public class AnimalViewController {
 
     @GetMapping(WebRoutes.ANIMALES_BASE)
     public String listar(Model model,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false) String successMessage,
             @RequestParam(required = false) String estado,
             @RequestParam(required = false) String especie,
@@ -96,7 +98,10 @@ public class AnimalViewController {
             @RequestParam(required = false) Boolean urgencia,
             @RequestParam(required = false) Boolean favoritos,
             @RequestParam(required = false) String q,
-            HttpServletRequest request) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
+
+        if (response != null) response.setHeader("Vary", "HX-Request");
 
         Integer currentUserId = (Integer) model.getAttribute("currentUserId");
         List<Integer> misFavoritosIds = List.of();
@@ -109,66 +114,34 @@ public class AnimalViewController {
         model.addAttribute("misFavoritosIds", misFavoritosIds);
 
         try {
-            // Construir URL con parámetros de filtro
-            StringBuilder url = new StringBuilder(apiUrl + "/v1/animales?");
-            if (especie != null)
-                url.append("especie=").append(especie).append("&");
-            if (tamano != null)
-                url.append("tamano=").append(tamano).append("&");
-            if (sexo != null)
-                url.append("sexo=").append(sexo).append("&");
-            if (urgencia != null)
-                url.append("urgencia=").append(urgencia).append("&");
-            if (estado != null)
-                url.append("estado=").append(estado).append("&");
-            if (edad != null)
-                edad.forEach(e -> url.append("edad=").append(e).append("&"));
-
-            Object[] arr = restTemplate.getForObject(url.toString(), Object[].class);
-            List<Map<String, Object>> animalesList = arr != null ? (List) Arrays.asList(arr) : List.of();
-
-            // Filtro por búsqueda de texto (q)
-            if (q != null && !q.trim().isEmpty()) {
-                String search = q.toLowerCase().trim();
-                animalesList = animalesList.stream()
-                    .filter(a -> {
-                        String nombre = a.get("nombre") != null ? a.get("nombre").toString().toLowerCase() : "";
-                        String especieA = a.get("especie") != null ? a.get("especie").toString().toLowerCase() : "";
-                        String raza = a.get("raza") != null ? a.get("raza").toString().toLowerCase() : "";
-                        
-                        return nombre.contains(search) || especieA.contains(search) || raza.contains(search);
-                    })
-                    .toList();
-            }
+            PaginatedResponse<AnimalRecord> pagination = fetchPaginatedAnimals(page, size, estado, especie, tamano, edad, sexo, urgencia, q);
+            List<AnimalRecord> animalesList = pagination.items();
 
             if (Boolean.TRUE.equals(favoritos) && !misFavoritosIds.isEmpty()) {
                 List<Integer> finalFavs = misFavoritosIds;
                 animalesList = animalesList.stream()
-                    .filter(a -> finalFavs.contains(((Number) a.get("id")).intValue()))
+                    .filter(a -> finalFavs.contains(a.id()))
                     .toList();
             } else if (Boolean.TRUE.equals(favoritos)) {
                 animalesList = List.of();
             }
 
             model.addAttribute(ModelAttribute.Animal_LIST.getName(), animalesList);
+            model.addAttribute("pagination", pagination);
         } catch (Exception e) {
             model.addAttribute(ModelAttribute.Animal_LIST.getName(), List.of());
         }
 
-        // Fetch dinámico de especies activas para los filtros
         try {
-            Object[] arrEspecies = restTemplate.getForObject(apiUrl + "/v1/animales/especies", Object[].class);
+            String[] arrEspecies = restTemplate.getForObject(apiUrl + "/v1/animales/especies", String[].class);
             model.addAttribute("especiesActivas", arrEspecies != null ? Arrays.asList(arrEspecies) : List.of());
         } catch (Exception e) {
             model.addAttribute("especiesActivas", List.of());
         }
 
-        // Voluntarios solo son necesarios para el panel de admin — fallo aquí no afecta
-        // la lista de animales
         try {
-            Object[] voluntarios = restTemplate.getForObject(apiUrl + "/v1/voluntarios", Object[].class);
-            model.addAttribute(ModelAttribute.Voluntario_LIST.getName(),
-                    voluntarios != null ? Arrays.asList(voluntarios) : List.of());
+            List<VoluntarioRecord> voluntarios = helper.fetchList(apiUrl + "/v1/voluntarios", VoluntarioRecord.class);
+            model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), voluntarios);
         } catch (Exception e) {
             model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), List.of());
         }
@@ -196,16 +169,30 @@ public class AnimalViewController {
     @GetMapping(WebRoutes.ANIMALES_NUEVO)
     @PreAuthorize("hasRole('ADMIN')")
     public String formulario(Model model, HttpServletRequest request) {
-        System.out.println(
-                "DEBUG: Accediendo a formulario de nuevo animal. HX-Request: " + request.getHeader("HX-Request"));
-        // Enums disponibles en el backend — se listan hardcoded ya que son valores
-        // fijos
-        model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), new HashMap<>());
-        model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), fetchList("/v1/voluntarios"));
+        Map<String, Object> animal = new HashMap<>();
+        // Preinicializar todas las claves a nulo/valores por defecto para evitar excepciones SpEL
+        animal.put("id", null);
+        animal.put("nombre", null);
+        animal.put("especie", null);
+        animal.put("especiePersonalizada", null);
+        animal.put("raza", null);
+        animal.put("sexo", null);
+        animal.put("chipId", null);
+        animal.put("fechaIngreso", null);
+        animal.put("estado", null);
+        animal.put("edad", null);
+        animal.put("tamano", null);
+        animal.put("peso", null);
+        animal.put("nivelEnergia", null);
+        animal.put("urgencia", false);
+        animal.put("foto", null);
+        animal.put("descripcion", null);
+        model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
+
+        model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), helper.fetchList(apiUrl + "/v1/voluntarios", VoluntarioRecord.class));
         model.addAttribute("tamanos", List.of("PEQUEÑO", "MEDIANO", "GRANDE", "GIGANTE"));
         model.addAttribute("sexos", List.of("MACHO", "HEMBRA"));
-        model.addAttribute("estados",
-                List.of("DISPONIBLE", "ADOPTADO", "EN_ACOGIDA", "EN_TRATAMIENTO", "RESERVADO", "FALLECIDO"));
+        model.addAttribute("estados", List.of("DISPONIBLE", "ADOPTADO", "EN_ACOGIDA", "EN_TRATAMIENTO", "RESERVADO", "FALLECIDO"));
         model.addAttribute("especies", List.of("PERRO", "GATO", "CONEJO", "AVE", "REPTIL", "OTRO"));
 
         if ("true".equals(request.getHeader("HX-Request"))) {
@@ -234,14 +221,15 @@ public class AnimalViewController {
             @RequestParam(required = false) Boolean urgencia,
             @RequestParam(required = false) String fechaIngreso,
             @RequestParam(value = "fotoArchivo", required = false) MultipartFile fotoArchivo,
-            RedirectAttributes redirectAttributes,
-            HttpServletRequest request) {
+            RedirectAttributes redirectAttributes) {
 
-        System.out.println("DEBUG: Iniciando crearAnimal para " + nombre);
-        if (request.getCookies() != null) {
-            for (jakarta.servlet.http.Cookie c : request.getCookies()) {
-                if ("JWT_TOKEN".equals(c.getName())) {
-                    System.out.println("DEBUG: Encontrado JWT_TOKEN. Longitud: " + c.getValue().length());
+        String cleanFoto = "";
+        if (foto != null && !foto.trim().isEmpty()) {
+            String[] parts = foto.split(",");
+            for (String p : parts) {
+                if (p != null && !p.trim().isEmpty()) {
+                    cleanFoto = p.trim();
+                    break;
                 }
             }
         }
@@ -257,7 +245,7 @@ public class AnimalViewController {
         body.put("edad", edad != null ? edad : 0);
         body.put("tamano", tamano != null ? tamano : "");
         body.put("descripcion", descripcion != null ? descripcion : "");
-        body.put("foto", foto != null ? foto : "");
+        body.put("foto", cleanFoto);
         body.put("peso", peso != null ? peso : 0.0);
         body.put("nivelEnergia", nivelEnergia != null ? nivelEnergia : 0);
         body.put("urgencia", urgencia != null && urgencia);
@@ -266,16 +254,12 @@ public class AnimalViewController {
         }
 
         try {
-            // Preparar el MultiValueMap para enviar multipart al Backend
             MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-            
-            // Parte 1: El JSON del animal
             HttpHeaders jsonHeaders = new HttpHeaders();
             jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Map<String, Object>> animalEntity = new HttpEntity<>(body, jsonHeaders);
             parts.add("animal", animalEntity);
             
-            // Parte 2: El archivo (si existe)
             if (fotoArchivo != null && !fotoArchivo.isEmpty()) {
                 parts.add("fotoArchivo", fotoArchivo.getResource());
             }
@@ -286,9 +270,7 @@ public class AnimalViewController {
 
             restTemplate.postForObject(apiUrl + "/v1/animales", requestEntity, Object.class);
             redirectAttributes.addFlashAttribute("successMessage", "Animal creado correctamente");
-        } catch (org.springframework.web.client.HttpClientErrorException e) {
-            System.err.println(
-                    "ERROR: Error llamando al backend: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+        } catch (HttpClientErrorException e) {
             throw e;
         }
 
@@ -298,15 +280,12 @@ public class AnimalViewController {
     @GetMapping(WebRoutes.ANIMALES_EDITAR)
     @PreAuthorize("hasRole('ADMIN')")
     public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
-        System.out.println("DEBUG: Accediendo a formulario de edición para ID: " + id + ". HX-Request: "
-                + request.getHeader("HX-Request"));
-        Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + id, Object.class);
+        AnimalRecord animal = helper.fetchObject(apiUrl + "/v1/animales/" + id, AnimalRecord.class);
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
-        model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), fetchList("/v1/voluntarios"));
+        model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), helper.fetchList(apiUrl + "/v1/voluntarios", VoluntarioRecord.class));
         model.addAttribute("tamanos", List.of("PEQUEÑO", "MEDIANO", "GRANDE", "GIGANTE"));
         model.addAttribute("sexos", List.of("MACHO", "HEMBRA"));
-        model.addAttribute("estados",
-                List.of("DISPONIBLE", "ADOPTADO", "EN_ACOGIDA", "EN_TRATAMIENTO", "RESERVADO", "FALLECIDO"));
+        model.addAttribute("estados", List.of("DISPONIBLE", "ADOPTADO", "EN_ACOGIDA", "EN_TRATAMIENTO", "RESERVADO", "FALLECIDO"));
         model.addAttribute("especies", List.of("PERRO", "GATO", "CONEJO", "AVE", "REPTIL", "OTRO"));
 
         if ("true".equals(request.getHeader("HX-Request"))) {
@@ -336,6 +315,17 @@ public class AnimalViewController {
             @RequestParam(value = "fotoArchivo", required = false) MultipartFile fotoArchivo,
             RedirectAttributes redirectAttributes) {
 
+        String cleanFoto = "";
+        if (foto != null && !foto.trim().isEmpty()) {
+            String[] parts = foto.split(",");
+            for (String p : parts) {
+                if (p != null && !p.trim().isEmpty()) {
+                    cleanFoto = p.trim();
+                    break;
+                }
+            }
+        }
+
         Map<String, Object> body = new HashMap<>();
         body.put("nombre", nombre);
         body.put("especie", especie);
@@ -345,7 +335,7 @@ public class AnimalViewController {
         body.put("edad", edad != null ? edad : 0);
         body.put("tamano", tamano != null ? tamano : "");
         body.put("descripcion", descripcion != null ? descripcion : "");
-        body.put("foto", foto != null ? foto : "");
+        body.put("foto", cleanFoto);
         body.put("peso", peso != null ? peso : 0.0);
         body.put("nivelEnergia", nivelEnergia != null ? nivelEnergia : 0);
         body.put("urgencia", urgencia != null && urgencia);
@@ -390,7 +380,7 @@ public class AnimalViewController {
 
     @GetMapping(WebRoutes.ANIMALES_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
-        List<Object> animales = fetchList("/v1/animales");
+        List<AnimalRecord> animales = helper.fetchList(apiUrl + "/v1/animales?size=1000", AnimalRecord.class);
         Context context = new Context();
         context.setVariable("animales", animales);
         String htmlContent = templateEngine.process(ThymTemplates.Animal_LIST_PDF.getPath(), context);
@@ -406,13 +396,11 @@ public class AnimalViewController {
 
     @GetMapping(WebRoutes.ANIMALES_BASE + "/{id}/detalle")
     public String detalleModal(@PathVariable Integer id, Model model) {
-        // Intentar incrementar visitas (endpoint opcional — no falla si no existe)
         try {
             restTemplate.postForObject(apiUrl + "/v1/animales/" + id + "/visitas", null, Object.class);
-        } catch (Exception ignored) {
-            /* endpoint opcional */ }
+        } catch (Exception ignored) {}
 
-        Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + id, Object.class);
+        AnimalRecord animal = helper.fetchObject(apiUrl + "/v1/animales/" + id, AnimalRecord.class);
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
 
         try {
@@ -425,15 +413,16 @@ public class AnimalViewController {
         return "fragments/content/animales-detalle-modal :: detalle";
     }
 
+    @SuppressWarnings("rawtypes")
     @GetMapping(WebRoutes.ANIMALES_DETALLE)
-    public String verDetalle(@PathVariable Integer id, Model model, HttpServletRequest request) {
-        // Intentar incrementar visitas (endpoint opcional)
+    public String verDetalle(@PathVariable Integer id, Model model, HttpServletRequest request, HttpServletResponse response) {
+        if (response != null) response.setHeader("Vary", "HX-Request");
+        
         try {
             restTemplate.postForObject(apiUrl + "/v1/animales/" + id + "/visitas", null, Object.class);
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
 
-        Object animal = restTemplate.getForObject(apiUrl + "/v1/animales/" + id, Object.class);
+        AnimalRecord animal = helper.fetchObject(apiUrl + "/v1/animales/" + id, AnimalRecord.class);
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
 
         try {
@@ -443,25 +432,55 @@ public class AnimalViewController {
             model.addAttribute("favoritosCount", 0);
         }
 
-        // Fetch Historial Médico
-        model.addAttribute("historiales", fetchList("/v1/historial-medico/animal/" + id));
+        model.addAttribute("historiales", helper.fetchList(apiUrl + "/v1/historial-medico/animal/" + id, Map.class));
 
-        // Fetch Info Adopción (si está adoptado)
         try {
-            Object[] adopciones = restTemplate.getForObject(apiUrl + "/v1/adopciones/animal/" + id, Object[].class);
-            if (adopciones != null && adopciones.length > 0) {
-                Map<String, Object> adopcion = (Map<String, Object>) adopciones[0];
-                model.addAttribute("adopcion", adopcion);
+            List<AdopcionRecord> adopciones = helper.fetchList(apiUrl + "/v1/adopciones/animal/" + id, AdopcionRecord.class);
+            if (adopciones != null && !adopciones.isEmpty()) {
+                AdopcionRecord adopcion = adopciones.get(0);
+                
+                Map<String, Object> adopcionMap = new HashMap<>();
+                adopcionMap.put("id", adopcion.id());
+                adopcionMap.put("animalId", adopcion.animalId());
+                adopcionMap.put("adoptanteId", adopcion.adoptanteId());
+                adopcionMap.put("solicitudAdopcionId", adopcion.solicitudAdopcionId());
+                adopcionMap.put("fechaAdopcion", adopcion.fechaAdopcion());
+                adopcionMap.put("estado", adopcion.estado());
+                adopcionMap.put("contrato", adopcion.contrato());
+                model.addAttribute("adopcion", adopcionMap);
 
-                // Fetch info del adoptante
-                Object adoptanteId = adopcion.get("adoptanteId");
+                Integer adoptanteId = adopcion.adoptanteId();
                 if (adoptanteId != null) {
-                    Object adoptante = restTemplate.getForObject(apiUrl + "/v1/adoptantes/" + adoptanteId,
-                            Object.class);
-                    model.addAttribute("adoptante", adoptante);
+                    AdoptanteRecord adoptante = helper.fetchObject(apiUrl + "/v1/adoptantes/" + adoptanteId, AdoptanteRecord.class);
+                    if (adoptante != null) {
+                        Map<String, Object> adoptanteMap = new HashMap<>();
+                        adoptanteMap.put("id", adoptante.id());
+                        adoptanteMap.put("usuarioId", adoptante.usuarioId());
+                        adoptanteMap.put("estadoValidacion", adoptante.estadoValidacion());
+                        adoptanteMap.put("nombre", null);
+                        adoptanteMap.put("apellido", null);
+                        adoptanteMap.put("telefono", null);
+                        adoptanteMap.put("direccion", null);
+                        
+                        if (adoptante.usuarioId() != null) {
+                            try {
+                                PerfilLegalRecord legal = helper.fetchObject(apiUrl + "/v1/perfiles-legales/usuario/" + adoptante.usuarioId(), PerfilLegalRecord.class);
+                                if (legal != null) {
+                                    adoptanteMap.put("nombre", legal.nombre());
+                                    adoptanteMap.put("apellido", legal.apellido());
+                                    adoptanteMap.put("telefono", legal.telefono());
+                                    adoptanteMap.put("direccion", legal.direccion());
+                                }
+                            } catch (Exception e) {
+                                System.err.println("Error fetching PerfilLegal for adoptante: " + e.getMessage());
+                            }
+                        }
+                        model.addAttribute("adoptante", adoptanteMap);
+                    }
                 }
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            System.err.println("Error fetching adopcion/adoptante: " + e.getMessage());
         }
 
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Animal_DETALLE.getPath());
@@ -473,14 +492,27 @@ public class AnimalViewController {
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
-    // ─── Helper ────────────────────────────────────────────────────────────────
-    private List<Object> fetchList(String path) {
+    private PaginatedResponse<AnimalRecord> fetchPaginatedAnimals(int page, int size, String estado, String especie, String tamano, List<String> edad, String sexo, Boolean urgencia, String q) {
         try {
-            Object[] arr = restTemplate.getForObject(apiUrl + path, Object[].class);
-            return arr != null ? Arrays.asList(arr) : List.of();
+            StringBuilder url = new StringBuilder("/v1/animales?");
+            url.append("page=").append(page - 1).append("&size=").append(size).append("&");
+            
+            if (estado != null && !estado.isEmpty() && !"ALL".equalsIgnoreCase(estado)) 
+                url.append("estado=").append(URLEncoder.encode(estado, StandardCharsets.UTF_8)).append("&");
+            if (especie != null && !especie.isEmpty() && !"ALL".equalsIgnoreCase(especie)) 
+                url.append("especie=").append(URLEncoder.encode(especie, StandardCharsets.UTF_8)).append("&");
+            if (tamano != null && !tamano.isEmpty() && !"ALL".equalsIgnoreCase(tamano)) 
+                url.append("tamano=").append(URLEncoder.encode(tamano, StandardCharsets.UTF_8)).append("&");
+            if (sexo != null && !sexo.isEmpty() && !"ALL".equalsIgnoreCase(sexo)) 
+                url.append("sexo=").append(URLEncoder.encode(sexo, StandardCharsets.UTF_8)).append("&");
+            if (urgencia != null) url.append("urgencia=").append(urgencia).append("&");
+            if (q != null && !q.trim().isEmpty()) 
+                url.append("q=").append(URLEncoder.encode(q.trim(), StandardCharsets.UTF_8)).append("&");
+            if (edad != null) edad.forEach(e -> url.append("edad=").append(URLEncoder.encode(e, StandardCharsets.UTF_8)).append("&"));
+
+            return helper.fetchPaginated(apiUrl + url.toString(), page, size, AnimalRecord.class);
         } catch (Exception e) {
-            System.err.println("Error llamando a " + path + ": " + e.getMessage());
-            return List.of();
+            return new PaginatedResponse<>(List.of(), 0, page, size, 0, false, false);
         }
     }
 
@@ -494,10 +526,10 @@ public class AnimalViewController {
             Boolean isFavorito = restTemplate.postForObject(apiUrl + "/v1/animales/" + id + "/favorito?usuarioId=" + currentUserId, null, Boolean.class);
             
             String svg = Boolean.TRUE.equals(isFavorito) 
-                ? "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"#ef4444\" stroke=\"#ef4444\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\"></path></svg>"
-                : "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\"></path></svg>";
+                ? "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"#ef4444\" stroke=\"#ef4444\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\"></path></svg>"
+                : "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\"></path></svg>";
                 
-            String btnClass = Boolean.TRUE.equals(isFavorito) ? "btn-favorito active" : "btn-favorito";
+            String btnClass = Boolean.TRUE.equals(isFavorito) ? "btn-favorito-detalle active" : "btn-favorito-detalle";
             
             return "<button type=\"button\" class=\"" + btnClass + "\" hx-post=\"/web/animales/" + id + "/favorito\" hx-swap=\"outerHTML\">" + svg + "</button>";
         } catch (Exception e) {

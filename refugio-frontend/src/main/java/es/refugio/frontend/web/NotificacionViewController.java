@@ -12,10 +12,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -52,11 +55,11 @@ public class NotificacionViewController {
     public ResponseEntity<String> marcarComoLeida(@PathVariable Integer id) {
         try {
             restTemplate.exchange(apiUrl + "/v1/notificaciones/" + id + "/leer", HttpMethod.PUT, null, Void.class);
-            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            HttpHeaders headers = new HttpHeaders();
             headers.add("HX-Trigger", "notificacionLeida");
-            return new org.springframework.http.ResponseEntity<>("", headers, org.springframework.http.HttpStatus.OK);
+            return new ResponseEntity<>("", headers, HttpStatus.OK);
         } catch (Exception e) {
-            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR).body("Error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error");
         }
     }
 
@@ -76,11 +79,11 @@ public class NotificacionViewController {
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
         try {
             restTemplate.delete(apiUrl + "/v1/notificaciones/" + id);
-            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            HttpHeaders headers = new HttpHeaders();
             headers.add("HX-Trigger", "notificacionLeida");
-            return new org.springframework.http.ResponseEntity<>("", headers, org.springframework.http.HttpStatus.OK);
+            return new ResponseEntity<>("", headers, HttpStatus.OK);
         } catch (Exception e) {
-            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR).body("Error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error");
         }
     }
 
@@ -91,9 +94,9 @@ public class NotificacionViewController {
             Object[] arr = restTemplate.getForObject(url, Object[].class);
             if (arr != null) {
                 for (Object o : arr) {
-                    if (o instanceof java.util.Map) {
+                    if (o instanceof Map) {
                         @SuppressWarnings("unchecked")
-                        java.util.Map<String, Object> n = (java.util.Map<String, Object>) o;
+                        Map<String, Object> n = (Map<String, Object>) o;
                         // Si es un logro desbloqueado y NO ha sido leído aún
                         if ("LOGRO_DESBLOQUEADO".equals(n.get("tipo")) && Boolean.FALSE.equals(n.get("leida"))) {
                             
@@ -112,7 +115,7 @@ public class NotificacionViewController {
                             else if (mensaje.contains("Mecenas de Huellas")) imageUrl = "/images/logros/mecenas-huellas.png";
                             else if (mensaje.contains("Ángel Guardián")) imageUrl = "/images/logros/angel-guardian.png";
                             
-                            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+                            HttpHeaders headers = new HttpHeaders();
                             headers.add("X-Celebrate", "true");
                             headers.add("X-Celebrate-Title", java.net.URLEncoder.encode(titulo, java.nio.charset.StandardCharsets.UTF_8));
                             headers.add("X-Celebrate-Msg", java.net.URLEncoder.encode(mensaje, java.nio.charset.StandardCharsets.UTF_8));
@@ -121,7 +124,7 @@ public class NotificacionViewController {
                             }
                             headers.add("HX-Trigger", "notificacionLeida"); // Actualizar badge también
                             
-                            return new ResponseEntity<>(headers, org.springframework.http.HttpStatus.OK);
+                            return new ResponseEntity<>(headers, HttpStatus.OK);
                         }
                     }
                 }

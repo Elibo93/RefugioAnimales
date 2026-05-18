@@ -25,7 +25,7 @@ public class LogroJpaRepositoryImpl implements LogroRepository {
 
     @Override
     public List<Logro> findByCategoria(CategoriaLogro categoria) {
-        // Need to add method to JpaRepository or filter here
+        // Es necesario añadir el método a JpaRepository o filtrar aquí
         return jpaRepository.findAll().stream()
                 .filter(e -> e.getCategoria() == categoria)
                 .map(this::toDomain)

@@ -2,6 +2,7 @@ package es.refugio.refugio.infraestructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 import es.refugio.refugio.application.service.voluntario.CreateVoluntarioService;
 import es.refugio.refugio.application.service.voluntario.DeleteVoluntarioService;
@@ -60,7 +61,7 @@ public class VoluntarioConfig {
 
     @Bean
     public ApproveVoluntarioUseCase approveVoluntarioUseCase(VoluntarioRepository repository,
-            NotificacionService notificacionService, org.springframework.web.client.RestTemplate restTemplate) {
+            NotificacionService notificacionService, RestTemplate restTemplate) {
         return new ApproveVoluntarioUseCase(repository, notificacionService, restTemplate);
     }
 

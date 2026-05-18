@@ -11,6 +11,8 @@ import es.refugio.refugio.domain.repository.SolicitudAdopcionRepository;
 import es.refugio.refugio.infraestructure.db.jpa.entity.SolicitudAdopcionEntity;
 import es.refugio.refugio.infraestructure.mapper.SolicitudAdopcionMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
 public class SolicitudAdopcionJpaRepositoryImpl implements SolicitudAdopcionRepository {
@@ -33,6 +35,11 @@ public class SolicitudAdopcionJpaRepositoryImpl implements SolicitudAdopcionRepo
     @Override
     public List<SolicitudAdopcion> getAll() {
         return SolicitudAdopcionMapper.toDomain(jpaRepository.findAll());
+    }
+
+    @Override
+    public Page<SolicitudAdopcion> findAll(Pageable pageable) {
+        return jpaRepository.findAll(pageable).map(SolicitudAdopcionMapper::toDomain);
     }
 
     @Override

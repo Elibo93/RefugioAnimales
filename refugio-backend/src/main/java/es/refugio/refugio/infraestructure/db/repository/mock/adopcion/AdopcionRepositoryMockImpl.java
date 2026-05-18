@@ -11,8 +11,15 @@ import es.refugio.refugio.domain.model.adopcion.AdopcionId;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.domain.model.animal.AnimalId;
 import es.refugio.refugio.domain.repository.AdopcionRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public class AdopcionRepositoryMockImpl implements AdopcionRepository {
+
+    @Override
+    public Page<Adopcion> findFiltered(String q, Pageable pageable) {
+        return Page.empty();
+    }
 
     private final Map<AdopcionId, Adopcion> adopciones = AdopcionFactory.getDemoData();
 

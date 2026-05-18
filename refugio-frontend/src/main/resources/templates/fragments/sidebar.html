@@ -67,7 +67,7 @@
                             <i data-lucide="clipboard-list"></i>
                             <span>Revisiones</span>
                             <span th:if="${totalPendingCount != null and totalPendingCount > 0}" 
-                                  class="sidebar-badge-dot"></span>
+                                  class="sidebar-badge-dot" id="sidebar-revisiones-dot"></span>
                         </div>
                         <i data-lucide="chevron-down" class="chevron-icon"></i>
                     </div>
@@ -78,14 +78,14 @@
                                 <i data-lucide="file-text"></i>
                                 <span th:text="#{solicitud.list.title}">Adopciones</span>
                                 <span th:if="${pendingAdoptionsCount != null and pendingAdoptionsCount > 0}" 
-                                      class="sidebar-badge" th:text="${pendingAdoptionsCount}">0</span>
+                                      class="sidebar-badge" id="sidebar-adopciones-badge" th:text="${pendingAdoptionsCount}">0</span>
                             </a>
                             <a th:href="@{/web/voluntarios/pendientes}" class="sidebar-item"
                                 th:classappend="${#strings.contains(currentUri, '/web/voluntarios/pendientes')} ? 'active' : ''">
                                 <i data-lucide="user-plus"></i>
                                 <span>Voluntarios</span>
                                 <span th:if="${pendingVolunteersCount != null and pendingVolunteersCount > 0}" 
-                                      class="sidebar-badge" th:text="${pendingVolunteersCount}">0</span>
+                                      class="sidebar-badge" id="sidebar-voluntarios-badge" th:text="${pendingVolunteersCount}">0</span>
                             </a>
                         </div>
                     </div>

@@ -9,6 +9,8 @@ import es.refugio.refugio.domain.repository.TareaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.entity.TareaEntity;
 import es.refugio.refugio.infraestructure.mapper.TareaMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
 public class TareaJpaRepositoryImpl implements TareaRepository {
@@ -30,6 +32,11 @@ public class TareaJpaRepositoryImpl implements TareaRepository {
     @Override
     public List<Tarea> getAll() {
         return TareaMapper.toDomain(jpaRepository.findAll());
+    }
+
+    @Override
+    public Page<Tarea> findAll(Pageable pageable) {
+        return jpaRepository.findAll(pageable).map(TareaMapper::toDomain);
     }
 
     @Override

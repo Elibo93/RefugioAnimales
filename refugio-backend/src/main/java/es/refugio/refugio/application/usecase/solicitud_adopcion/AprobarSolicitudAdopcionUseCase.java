@@ -1,5 +1,6 @@
 package es.refugio.refugio.application.usecase.solicitud_adopcion;
 
+import es.refugio.refugio.application.service.NotificacionService;
 import es.refugio.refugio.domain.error.SolicitudAdopcionEstadoInvalidoException;
 import es.refugio.refugio.domain.error.SolicitudAdopcionNotFoundException;
 import es.refugio.refugio.domain.error.AnimalYaAdoptadoException;
@@ -19,6 +20,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+/**
+ * Caso de uso orquestador: Aprueba una solicitud de adopción.
+ *
+ * Pasos que realiza en una única transacción:
+ * 1. Busca y valida que la solicitud está en estado PENDIENTE o EN_REVISION
+ * 2. Valida que el animal no tenga ya otra adopción
+ * 3. Cambia la solicitud a APROBADA
+ * 4. Cambia el animal a RESERVADO
+ * 5. Cambia el adoptante a APROBADO
+ * 6. Crea la Adopcion vinculada en estado PENDIENTE_FIRMA
+ * 7. Envía notificaciones al adoptante y al admin
+ */
+
 @RequiredArgsConstructor
 public class AprobarSolicitudAdopcionUseCase {
 
@@ -26,39 +40,33 @@ public class AprobarSolicitudAdopcionUseCase {
     private final AnimalRepository animalRepository;
     private final AdoptanteRepository adoptanteRepository;
     private final AdopcionRepository adopcionRepository;
-    private final es.refugio.refugio.application.service.NotificacionService notificacionService;
+    private final NotificacionService notificacionService;
 
     @Transactional
     public Adopcion aprobar(SolicitudAdopcionId solicitudId) {
-        System.out.println("DEBUG: Iniciando AprobarSolicitudAdopcionUseCase para ID=" + solicitudId.getValue());
-
         // 1 — Buscar y validar la solicitud
         SolicitudAdopcion solicitud = solicitudAdopcionRepository.getById(solicitudId)
                 .orElseThrow(() -> new SolicitudAdopcionNotFoundException(solicitudId.getValue()));
 
         if (solicitud.getEstado() != EstadoSolicitud.PENDIENTE
                 && solicitud.getEstado() != EstadoSolicitud.EN_REVISION) {
-            System.err.println("ERROR: Estado inválido para aprobar: " + solicitud.getEstado());
             throw new SolicitudAdopcionEstadoInvalidoException(solicitud.getEstado().name());
         }
 
         // VALIDACIÓN: ¿El animal ya tiene una adopción?
         if (adopcionRepository.existsByAnimalId(solicitud.getAnimalId())) {
-            System.err.println("ERROR: El animal ya tiene una adopción activa.");
             throw new AnimalYaAdoptadoException(solicitud.getAnimalId().getValue());
         }
 
         // 2 — Actualizar solicitud → APROBADA
         solicitud.setEstado(EstadoSolicitud.APROBADA);
         solicitudAdopcionRepository.save(solicitud);
-        System.out.println("DEBUG: Solicitud actualizada a APROBADA");
 
         // 3 — Actualizar animal → RESERVADO
         String animalNombre = animalRepository.getById(solicitud.getAnimalId())
                 .map(animal -> {
                     animal.setEstado(EstadoAnimal.RESERVADO);
                     animalRepository.save(animal);
-                    System.out.println("DEBUG: Animal actualizado a RESERVADO: " + animal.getNombre());
                     return animal.getNombre();
                 })
                 .orElse("el animal");
@@ -68,7 +76,6 @@ public class AprobarSolicitudAdopcionUseCase {
                 .ifPresent(adoptante -> {
                     adoptante.setEstadoValidacion(EstadoValidacion.APROBADO);
                     adoptanteRepository.save(adoptante);
-                    System.out.println("DEBUG: Adoptante actualizado a APROBADO");
 
                     if (adoptante.getUsuarioId() != null) {
                         notificacionService.enviar(
@@ -89,10 +96,6 @@ public class AprobarSolicitudAdopcionUseCase {
                 .estado(EstadoAdopcion.PENDIENTE_FIRMA)
                 .build();
 
-        Adopcion savedAdopcion = adopcionRepository.save(nuevaAdopcion);
-        System.out.println("DEBUG: Adopción creada con éxito. ID="
-                + (savedAdopcion.getId() != null ? savedAdopcion.getId().getValue() : "PENDIENTE"));
-
-        return savedAdopcion;
+        return adopcionRepository.save(nuevaAdopcion);
     }
 }

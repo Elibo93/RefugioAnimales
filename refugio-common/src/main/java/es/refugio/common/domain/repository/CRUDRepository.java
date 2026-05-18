@@ -9,6 +9,10 @@ public interface CRUDRepository<T, ID> {
 
     public List<T> getAll();
 
+    public default org.springframework.data.domain.Page<T> findAll(org.springframework.data.domain.Pageable pageable) {
+        return org.springframework.data.domain.Page.empty();
+    }
+
     public Optional<T> getById(ID id);
 
     public void deleteById(ID id);

@@ -10,8 +10,12 @@ import es.refugio.auth.application.dto.RegistroDto;
 import es.refugio.auth.infrastructure.repository.UserRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.usuario.UsuarioEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.entity.UsuarioEntity;
+import es.refugio.auth.infrastructure.security.JwtTokenProvider;
+import es.refugio.auth.domain.Rol;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,6 +24,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
+
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 @Controller
@@ -30,7 +36,7 @@ public class AuthController {
     private final UsuarioEntityJpaRepository usuarioEntityJpaRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final es.refugio.auth.infrastructure.security.JwtTokenProvider tokenProvider;
+    private final JwtTokenProvider tokenProvider;
 
     private final HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
 
@@ -38,7 +44,7 @@ public class AuthController {
     public void procesarRegistro(
             @ModelAttribute RegistroDto registroDto,
             HttpServletRequest request,
-            HttpServletResponse response) throws java.io.IOException {
+            HttpServletResponse response) throws IOException {
 
         // Validación manual ya que hemos retirado las aserciones de BindingResult
         // vinculadas a vistas HTML
@@ -62,7 +68,7 @@ public class AuthController {
                 .email(registroDto.getEmail())
                 .username(registroDto.getUsername())
                 .contrasena(passwordEncoder.encode(registroDto.getPassword()))
-                .rol(registroDto.getRol() == null ? es.refugio.auth.domain.Rol.ROLE_PUBLICO : registroDto.getRol())
+                .rol(registroDto.getRol() == null ? Rol.ROLE_PUBLICO : registroDto.getRol())
                 .createdAt(LocalDateTime.now())
                 .build();
         
@@ -79,9 +85,9 @@ public class AuthController {
         request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, sc);
 
         String jwtToken = tokenProvider.generateToken(auth);
-        jakarta.servlet.http.Cookie authCookie = new jakarta.servlet.http.Cookie("JWT_TOKEN", jwtToken);
+        Cookie authCookie = new Cookie("JWT_TOKEN", jwtToken);
         authCookie.setHttpOnly(true);
-        authCookie.setSecure(false); // set to true in prod
+        authCookie.setSecure(false); // establecer a true en producción
         authCookie.setPath("/");
         authCookie.setMaxAge(86400);
         response.addCookie(authCookie);

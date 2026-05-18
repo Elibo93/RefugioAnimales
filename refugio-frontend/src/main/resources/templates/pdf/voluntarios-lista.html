@@ -56,12 +56,12 @@
             </tr>
         </thead>
         <tbody>
-            <tr th:each="p : ${voluntarios}">
-                <td th:text="${p.id.value}"></td>
-                <td th:text="${p.nombre}"></td>
-                <td th:text="${p.apellido}"></td>
-                <td th:text="${p.especialidad}"></td>
-                <td th:text="${p.email}"></td>
+            <tr th:each="p : ${voluntarios}" th:with="pl=${perfilesMap != null ? perfilesMap['' + p.usuarioId] : null}, u=${usuariosMap != null ? usuariosMap['' + p.usuarioId] : null}">
+                <td th:text="${p.id}"></td>
+                <td th:text="${pl != null ? pl.nombre : 'Candidato'}"></td>
+                <td th:text="${pl != null ? pl.apellido : ''}"></td>
+                <td th:text="${p.especialidad != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(p.especialidad, '_', ' '))) : 'General'}"></td>
+                <td th:text="${u != null ? u.email : '-'}"></td>
             </tr>
         </tbody>
     </table>

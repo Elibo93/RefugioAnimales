@@ -1,6 +1,7 @@
 package es.refugio.frontend.config;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Cookie;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -8,6 +9,8 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -21,7 +24,7 @@ import java.io.IOException;
 @Component
 public class SessionCookieRelayInterceptor implements ClientHttpRequestInterceptor {
 
-    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(SessionCookieRelayInterceptor.class);
+    private static final Logger logger = LoggerFactory.getLogger(SessionCookieRelayInterceptor.class);
 
     @Override
     public ClientHttpResponse intercept(HttpRequest request,
@@ -41,7 +44,7 @@ public class SessionCookieRelayInterceptor implements ClientHttpRequestIntercept
             // 2. Buscar específicamente el JWT_TOKEN en los objetos Cookie
             // Esto es más robusto que parsear el header manual o depender de que el header no sea null
             if (currentRequest.getCookies() != null) {
-                for (jakarta.servlet.http.Cookie c : currentRequest.getCookies()) {
+                for (Cookie c : currentRequest.getCookies()) {
                     if ("JWT_TOKEN".equals(c.getName())) {
                         request.getHeaders().setBearerAuth(c.getValue());
                         logger.info("Relaying JWT as Bearer token to " + request.getURI());

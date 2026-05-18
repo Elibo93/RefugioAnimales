@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .anyRequest().permitAll()
             )
             .exceptionHandling(ex -> ex
-                // Redirect unauthenticated users to auth service login via gateway
+                // Redirigir usuarios no autenticados al inicio de sesión del servicio de autenticación a través del gateway
                 .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

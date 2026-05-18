@@ -1,13 +1,13 @@
-package es.refugio.refugio.infraestructure.web.rest;
+package es.refugio.refugio.infraestructure.web.rest; // Controlador de Clean Architecture
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,7 +23,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
-import es.refugio.refugio.infraestructure.security.CustomUserDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import es.refugio.common.infraestructure.web.dto.common.PaginatedResponse;
 
 import es.refugio.refugio.domain.model.adoptante.Adoptante;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
@@ -45,6 +48,7 @@ import es.refugio.refugio.application.command.solicitud_adopcion.CreateSolicitud
 import es.refugio.refugio.application.command.solicitud_adopcion.EditSolicitudAdopcionCommand;
 import es.refugio.refugio.infraestructure.mapper.AdopcionMapper;
 import es.refugio.refugio.infraestructure.mapper.SolicitudAdopcionMapper;
+import es.refugio.refugio.infraestructure.security.CustomUserDetails;
 import es.refugio.refugio.infraestructure.web.dto.adopcion.AdopcionResponse;
 import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.SolicitudAdopcionRequest;
 import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.SolicitudAdopcionResponse;
@@ -123,7 +127,8 @@ public class SolicitudAdopcionController {
                 request.animalId(),
                 adoptante.getId().getValue(),
                 LocalDateTime.now(),
-                request.comentario());
+                request.comentario(),
+                null);
         var solicitud = createSolicitudAdopcionService.create(solicitudCommand);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(SolicitudAdopcionMapper.toResponse(solicitud));
@@ -137,11 +142,10 @@ public class SolicitudAdopcionController {
     public ResponseEntity<SolicitudAdopcionResponse> convertAndRequest(
             @Valid @RequestBody ConvertAdoptanteRequest request) {
 
-        es.refugio.refugio.infraestructure.security.CustomUserDetails userDetails = (es.refugio.refugio.infraestructure.security.CustomUserDetails) SecurityContextHolder
-                .getContext().getAuthentication().getPrincipal();
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
         Integer usuarioId = userDetails.getId();
 
-        // 1. Asegurar/Actualizar PerfilLegal (Atomicidad)
         PerfilLegal perfil = PerfilLegal.builder()
                 .usuarioId(usuarioId)
                 .nombre(request.nombre())
@@ -151,15 +155,14 @@ public class SolicitudAdopcionController {
                 .direccion(request.direccion())
                 .fechaNacimiento(request.fechaNacimiento())
                 .build();
-        
+
         perfilLegalRepository.findByUsuarioId(usuarioId)
-            .ifPresentOrElse(
-                existing -> {
-                    perfil.setId(existing.getId());
-                    perfilLegalRepository.save(perfil);
-                },
-                () -> perfilLegalRepository.save(perfil)
-            );
+                .ifPresentOrElse(
+                        existing -> {
+                            perfil.setId(existing.getId());
+                            perfilLegalRepository.save(perfil);
+                        },
+                        () -> perfilLegalRepository.save(perfil));
 
         // 2. Crear perfil de Adoptante
         var adoptanteCommand = new CreateAdoptanteCommand(usuarioId);
@@ -172,7 +175,8 @@ public class SolicitudAdopcionController {
                 request.animalId(),
                 adoptante.getId().getValue(),
                 LocalDateTime.now(),
-                request.comentario());
+                request.comentario(),
+                null);
         var solicitud = createSolicitudAdopcionService.create(solicitudCommand);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(SolicitudAdopcionMapper.toResponse(solicitud));
@@ -182,8 +186,8 @@ public class SolicitudAdopcionController {
     @PostMapping("/directa")
     @Transactional
     public ResponseEntity<SolicitudAdopcionResponse> directRequest(@RequestBody Map<String, Object> request) {
-        es.refugio.refugio.infraestructure.security.CustomUserDetails userDetails = (es.refugio.refugio.infraestructure.security.CustomUserDetails) SecurityContextHolder
-                .getContext().getAuthentication().getPrincipal();
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
         Integer usuarioId = userDetails.getId();
 
         Adoptante adoptante = findAdoptanteService.findAll().stream()
@@ -198,7 +202,8 @@ public class SolicitudAdopcionController {
                 animalId,
                 adoptante.getId().getValue(),
                 LocalDateTime.now(),
-                comentario);
+                comentario,
+                null);
         var solicitud = createSolicitudAdopcionService.create(solicitudCommand);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(SolicitudAdopcionMapper.toResponse(solicitud));
@@ -250,29 +255,42 @@ public class SolicitudAdopcionController {
     @Operation(summary = "Listar solicitudes")
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
-    public List<SolicitudAdopcionResponse> getAll() {
+    public PaginatedResponse<SolicitudAdopcionResponse> getAll(
+            @PageableDefault(size = 10) Pageable pageable) {
         boolean isStaff = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
 
-        List<SolicitudAdopcion> solicitudes = findSolicitudAdopcionService.findAll();
-
-        if (!isStaff) {
-            es.refugio.refugio.infraestructure.security.CustomUserDetails userDetails = (es.refugio.refugio.infraestructure.security.CustomUserDetails) SecurityContextHolder
-                    .getContext().getAuthentication().getPrincipal();
-            Integer usuarioId = userDetails.getId();
-            Adoptante adoptante = findAdoptanteService.findAll().stream()
-                    .filter(a -> a.getUsuarioId().equals(usuarioId))
-                    .findFirst()
-                    .orElseThrow(() -> new AccessDeniedException("Adoptante no vinculado"));
-
-            solicitudes = solicitudes.stream()
-                    .filter(s -> s.getAdoptanteId().equals(adoptante.getId()))
-                    .toList();
+        if (isStaff) {
+            Page<SolicitudAdopcion> page = findSolicitudAdopcionService.findAll(pageable);
+            return PaginatedResponse.fromPage(page, page.map(SolicitudAdopcionMapper::toResponse).getContent());
         }
 
-        return solicitudes.stream()
+        // Para adoptantes, seguimos filtrando por ahora
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+        Integer usuarioId = userDetails.getId();
+
+        Adoptante adoptante = findAdoptanteService.findAll().stream()
+                .filter(a -> a.getUsuarioId().equals(usuarioId))
+                .findFirst()
+                .orElseThrow(() -> new AccessDeniedException("Adoptante no vinculado"));
+
+        List<SolicitudAdopcion> solicitudes = findSolicitudAdopcionService.findByAdoptanteId(adoptante.getId());
+
+        List<SolicitudAdopcionResponse> responses = solicitudes.stream()
                 .map(SolicitudAdopcionMapper::toResponse)
                 .toList();
+
+        return PaginatedResponse.<SolicitudAdopcionResponse>builder()
+                .items(responses)
+                .total(responses.size())
+                .count(responses.size())
+                .page(1)
+                .pageSize(responses.size() > 0 ? responses.size() : 10)
+                .totalPages(1)
+                .hasNext(false)
+                .hasPrevious(false)
+                .build();
     }
 
     @Operation(summary = "Contar solicitudes pendientes")
@@ -280,7 +298,8 @@ public class SolicitudAdopcionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public ResponseEntity<Long> countPendientes() {
         long count = findSolicitudAdopcionService.findAll().stream()
-                .filter(s -> "PENDIENTE".equalsIgnoreCase(s.getEstado().name()))
+                .filter(s -> "PENDIENTE".equalsIgnoreCase(s.getEstado().name())
+                        || "EN_REVISION".equalsIgnoreCase(s.getEstado().name()))
                 .count();
         return ResponseEntity.ok(count);
     }
@@ -300,7 +319,8 @@ public class SolicitudAdopcionController {
         try {
             // Intentamos buscar el perfil de adoptante del usuario
             var adoptante = findAdoptanteService.findByUsuarioId(usuarioId);
-            if (adoptante == null) return List.of();
+            if (adoptante == null)
+                return List.of();
 
             return findSolicitudAdopcionService.findByAdoptanteId(adoptante.getId()).stream()
                     .map(SolicitudAdopcionMapper::toResponse)
@@ -343,8 +363,8 @@ public class SolicitudAdopcionController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
 
         if (!isStaff) {
-            es.refugio.refugio.infraestructure.security.CustomUserDetails userDetails = (es.refugio.refugio.infraestructure.security.CustomUserDetails) SecurityContextHolder
-                    .getContext().getAuthentication().getPrincipal();
+            CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext()
+                    .getAuthentication().getPrincipal();
             Integer usuarioId = userDetails.getId();
 
             Adoptante adoptante = findAdoptanteService.findById(adoptanteId);
@@ -364,8 +384,8 @@ public class SolicitudAdopcionController {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
-    public Map<String, String> handleDataIntegrity(org.springframework.dao.DataIntegrityViolationException ex) {
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public Map<String, String> handleDataIntegrity(DataIntegrityViolationException ex) {
         String msg = ex.getMessage();
         if (msg != null && msg.contains("perfiles_legales.dni")) {
             return Map.of("message", "El DNI ya está registrado en el sistema. Por favor, use uno distinto.");
@@ -384,7 +404,7 @@ public class SolicitudAdopcionController {
     public Map<String, String> handleValidationErrors(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach((error) -> {
-            String field = ((FieldError) error).getField();
+            String field = error.getField();
             String message = error.getDefaultMessage();
             errors.put(field, message);
         });

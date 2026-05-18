@@ -13,6 +13,7 @@ import es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion;
 import es.refugio.refugio.infraestructure.db.jpa.entity.AdoptanteEntity;
 import es.refugio.refugio.infraestructure.db.jpa.entity.AnimalEntity;
 import es.refugio.refugio.infraestructure.db.jpa.entity.AdopcionEntity;
+import es.refugio.refugio.infraestructure.db.jpa.entity.SolicitudAdopcionEntity;
 import es.refugio.refugio.infraestructure.web.dto.adopcion.AdopcionRequest;
 import es.refugio.refugio.infraestructure.web.dto.adopcion.AdopcionResponse;
 
@@ -58,9 +59,9 @@ public class AdopcionMapper {
             adoptanteEntity = AdoptanteEntity.builder().id(a.getAdoptanteId().getValue()).build();
         }
 
-        es.refugio.refugio.infraestructure.db.jpa.entity.SolicitudAdopcionEntity solicitudEntity = null;
+        SolicitudAdopcionEntity solicitudEntity = null;
         if (a.getSolicitudAdopcionId() != null) {
-            solicitudEntity = es.refugio.refugio.infraestructure.db.jpa.entity.SolicitudAdopcionEntity.builder()
+            solicitudEntity = SolicitudAdopcionEntity.builder()
                 .id(a.getSolicitudAdopcionId())
                 .build();
         }

@@ -1,8 +1,10 @@
 package es.refugio.refugio.application.usecase.voluntario;
 
 import es.refugio.refugio.application.command.voluntario.CreateVoluntarioCommand;
+import es.refugio.refugio.application.service.NotificacionService;
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
 import es.refugio.refugio.domain.model.voluntario.enums.EstadoVoluntario;
+import es.refugio.refugio.domain.repository.PerfilLegalRepository;
 import es.refugio.refugio.domain.repository.VoluntarioRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -10,8 +12,8 @@ import lombok.RequiredArgsConstructor;
 public class CreateVoluntarioUseCase {
 
     private final VoluntarioRepository voluntarioRepository;
-    private final es.refugio.refugio.domain.repository.PerfilLegalRepository perfilLegalRepository;
-    private final es.refugio.refugio.application.service.NotificacionService notificacionService;
+    private final PerfilLegalRepository perfilLegalRepository;
+    private final NotificacionService notificacionService;
 
     public Voluntario create(CreateVoluntarioCommand command) {
         // 1. Verificar si ya es voluntario (Idempotencia)

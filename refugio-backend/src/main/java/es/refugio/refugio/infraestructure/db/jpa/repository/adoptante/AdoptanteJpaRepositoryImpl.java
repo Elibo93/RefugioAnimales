@@ -8,8 +8,13 @@ import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.domain.model.usuario.UsuarioId;
 import es.refugio.refugio.domain.repository.AdoptanteRepository;
 import es.refugio.refugio.infraestructure.db.jpa.entity.AdoptanteEntity;
+import es.refugio.refugio.infraestructure.db.jpa.entity.PerfilLegalEntity;
 import es.refugio.refugio.infraestructure.mapper.AdoptanteMapper;
 import lombok.RequiredArgsConstructor;
+import jakarta.persistence.criteria.Subquery;
+import jakarta.persistence.criteria.Root;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
 public class AdoptanteJpaRepositoryImpl implements AdoptanteRepository {
@@ -28,6 +33,11 @@ public class AdoptanteJpaRepositoryImpl implements AdoptanteRepository {
     }
 
     @Override
+    public Page<Adoptante> findAll(Pageable pageable) {
+        return repository.findAll(pageable).map(AdoptanteMapper::toDomain);
+    }
+
+    @Override
     public Optional<Adoptante> getById(AdoptanteId id) {
         return repository.findById(id.getValue())
                 .map(AdoptanteMapper::toDomain);
@@ -43,5 +53,28 @@ public class AdoptanteJpaRepositoryImpl implements AdoptanteRepository {
     public Optional<Adoptante> getByUsuarioId(UsuarioId usuarioId) {
         return repository.findByUsuarioId(usuarioId.getValue())
                 .map(AdoptanteMapper::toDomain);
+    }
+
+    @Override
+    public Page<Adoptante> findFiltered(String q, Pageable pageable) {
+        if (q == null || q.trim().isEmpty()) {
+            return findAll(pageable);
+        }
+
+        return repository.findAll((root, query, cb) -> {
+            String pattern = "%" + q.toLowerCase().trim() + "%";
+            
+            // Subconsulta para buscar en PerfilLegal por nombre, apellido o DNI
+            Subquery<Integer> subquery = query.subquery(Integer.class);
+            Root<PerfilLegalEntity> perfilRoot = subquery.from(PerfilLegalEntity.class);
+            subquery.select(perfilRoot.get("usuarioId"));
+            subquery.where(cb.or(
+                cb.like(cb.lower(perfilRoot.get("nombre")), pattern),
+                cb.like(cb.lower(perfilRoot.get("apellido")), pattern),
+                cb.like(cb.lower(perfilRoot.get("dni")), pattern)
+            ));
+
+            return root.get("usuarioId").in(subquery);
+        }, pageable).map(AdoptanteMapper::toDomain);
     }
 }

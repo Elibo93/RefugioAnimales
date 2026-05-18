@@ -76,7 +76,7 @@ public class SecurityConfig {
                                 String token = tokenProvider.generateToken(authentication);
                                 Cookie authCookie = new Cookie("JWT_TOKEN", token);
                                 authCookie.setHttpOnly(true);
-                                authCookie.setSecure(false); // set to true in production with HTTPS
+                                authCookie.setSecure(false); // establecer a true en producción con HTTPS
                                 authCookie.setPath("/");
                                 authCookie.setMaxAge(86400); // 1 día
                                 response.addCookie(authCookie);

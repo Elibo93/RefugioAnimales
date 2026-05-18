@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class PerfilLegalController {
     @Operation(summary = "Crear o actualizar perfil legal")
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<PerfilLegalResponse> save(@jakarta.validation.Valid @RequestBody PerfilLegalRequest request) {
+    public ResponseEntity<PerfilLegalResponse> save(@Valid @RequestBody PerfilLegalRequest request) {
         PerfilLegal domain = PerfilLegalMapper.toDomain(request);
         
         return repository.findByUsuarioId(domain.getUsuarioId())

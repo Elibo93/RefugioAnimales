@@ -3,6 +3,7 @@ package es.refugio.refugio.infraestructure.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import es.refugio.refugio.application.service.NotificacionService;
 import es.refugio.refugio.application.service.solicitud_adopcion.AprobarSolicitudAdopcionService;
 import es.refugio.refugio.application.service.solicitud_adopcion.CreateSolicitudAdopcionService;
 import es.refugio.refugio.application.service.solicitud_adopcion.DeleteSolicitudAdopcionService;
@@ -33,7 +34,7 @@ public class SolicitudAdopcionConfig {
     @Bean
     public CreateSolicitudAdopcionUseCase createSolicitudAdopcionUseCase(SolicitudAdopcionRepository repository,
             AnimalRepository animalRepository,
-            es.refugio.refugio.application.service.NotificacionService notificacionService) {
+            NotificacionService notificacionService) {
         return new CreateSolicitudAdopcionUseCase(repository, animalRepository, notificacionService);
     }
 
@@ -47,7 +48,7 @@ public class SolicitudAdopcionConfig {
             AdoptanteRepository adoptanteRepository,
             AnimalRepository animalRepository,
             AdopcionRepository adopcionRepository,
-            es.refugio.refugio.application.service.NotificacionService notificacionService) {
+            NotificacionService notificacionService) {
         return new EditSolicitudAdopcionUseCase(repository, adoptanteRepository, animalRepository, adopcionRepository, notificacionService);
     }
 
@@ -82,7 +83,7 @@ public class SolicitudAdopcionConfig {
             AnimalRepository animalRepo,
             AdoptanteRepository adoptanteRepo,
             AdopcionRepository adopcionRepo,
-            es.refugio.refugio.application.service.NotificacionService notificacionService) {
+            NotificacionService notificacionService) {
         return new AprobarSolicitudAdopcionUseCase(solicitudRepo, animalRepo, adoptanteRepo, adopcionRepo, notificacionService);
     }
 
@@ -96,7 +97,7 @@ public class SolicitudAdopcionConfig {
             SolicitudAdopcionRepository solicitudRepo,
             AdoptanteRepository adoptanteRepo,
             AnimalRepository animalRepo,
-            es.refugio.refugio.application.service.NotificacionService notificacionService) {
+            NotificacionService notificacionService) {
         return new RechazarSolicitudAdopcionUseCase(solicitudRepo, adoptanteRepo, animalRepo, notificacionService);
     }
 

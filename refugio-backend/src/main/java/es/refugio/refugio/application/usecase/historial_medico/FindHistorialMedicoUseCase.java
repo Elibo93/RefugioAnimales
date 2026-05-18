@@ -7,6 +7,8 @@ import es.refugio.refugio.domain.model.historial_medico.HistorialMedico;
 import es.refugio.refugio.domain.model.historial_medico.HistorialMedicoId;
 import es.refugio.refugio.domain.repository.HistorialMedicoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
 public class FindHistorialMedicoUseCase {
@@ -19,6 +21,10 @@ public class FindHistorialMedicoUseCase {
             throw new HistorialMedicoNotFoundException();
         }
         return historiales;
+    }
+
+    public Page<HistorialMedico> findAll(Pageable pageable) {
+        return historialMedicoRepository.findAll(pageable);
     }
 
     public HistorialMedico findById(HistorialMedicoId id) {

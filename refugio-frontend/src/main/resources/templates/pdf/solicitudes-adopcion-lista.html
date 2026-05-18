@@ -27,9 +27,9 @@
         </thead>
         <tbody>
             <tr th:each="s : ${solicitudes}">
-                <td th:text="${s.id.value}"></td>
-                <td th:text="${s.animalId.value}"></td>
-                <td th:text="${s.adoptanteId.value}"></td>
+                <td th:text="${s.id}"></td>
+                <td th:text="${s.animalId}"></td>
+                <td th:text="${s.adoptanteId}"></td>
                 <td th:text="${s.estado}"></td>
                 <td th:text="${#temporals.format(s.fecha, 'dd/MM/yyyy')}"></td>
                 <td th:text="${s.comentario}"></td>

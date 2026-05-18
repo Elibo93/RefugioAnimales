@@ -3,6 +3,7 @@ package es.refugio.refugio.infraestructure.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -34,13 +35,13 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/error")
                         .permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET,
+                        .requestMatchers(HttpMethod.GET,
                                 "/api/v1/animales",
                                 "/api/v1/animales/**",
                                 "/api/v1/donaciones/total",
                                 "/api/v1/objetivos-donacion/**")
                         .permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.POST,
+                        .requestMatchers(HttpMethod.POST,
                                 "/api/v1/donaciones",
                                 "/api/v1/voluntarios",
                                 "/api/v1/solicitudes-adopcion/publico/registro-y-adopcion",

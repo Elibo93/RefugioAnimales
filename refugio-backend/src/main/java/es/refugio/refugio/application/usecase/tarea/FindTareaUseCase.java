@@ -6,6 +6,8 @@ import es.refugio.refugio.domain.model.tarea.Tarea;
 import es.refugio.refugio.domain.model.tarea.TareaId;
 import es.refugio.refugio.domain.repository.TareaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
 public class FindTareaUseCase {
@@ -17,7 +19,7 @@ public class FindTareaUseCase {
         if (tareas.isEmpty()) {
             throw new TareaNotFoundException();
         }
-        // Sort by fechaLimite ascending, putting nulls at the end
+        // Ordenar por fechaLimite de forma ascendente, colocando los nulos al final
         tareas.sort((t1, t2) -> {
             if (t1.getFechaLimite() == null && t2.getFechaLimite() == null) return 0;
             if (t1.getFechaLimite() == null) return 1;
@@ -25,6 +27,10 @@ public class FindTareaUseCase {
             return t1.getFechaLimite().compareTo(t2.getFechaLimite());
         });
         return tareas;
+    }
+
+    public Page<Tarea> findAll(Pageable pageable) {
+        return tareaRepository.findAll(pageable);
     }
 
     public Tarea findById(TareaId id) {

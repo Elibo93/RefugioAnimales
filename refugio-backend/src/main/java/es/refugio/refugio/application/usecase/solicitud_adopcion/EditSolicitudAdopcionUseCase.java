@@ -1,10 +1,12 @@
 package es.refugio.refugio.application.usecase.solicitud_adopcion;
 
 import es.refugio.refugio.application.command.solicitud_adopcion.EditSolicitudAdopcionCommand;
+import es.refugio.refugio.application.service.NotificacionService;
 import es.refugio.refugio.domain.error.SolicitudAdopcionNotFoundException;
 import es.refugio.refugio.domain.error.AnimalYaAdoptadoException;
 import es.refugio.refugio.domain.model.adopcion.Adopcion;
 import es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion;
+import es.refugio.refugio.domain.model.animal.Animal;
 import es.refugio.refugio.domain.model.animal.enums.EstadoAnimal;
 import es.refugio.refugio.domain.model.adoptante.enums.EstadoValidacion;
 import es.refugio.refugio.domain.model.solicitud_adopcion.SolicitudAdopcion;
@@ -24,18 +26,14 @@ public class EditSolicitudAdopcionUseCase {
     private final AdoptanteRepository adoptanteRepository;
     private final AnimalRepository animalRepository;
     private final AdopcionRepository adopcionRepository;
-    private final es.refugio.refugio.application.service.NotificacionService notificacionService;
+    private final NotificacionService notificacionService;
 
     @Transactional
     public SolicitudAdopcion update(EditSolicitudAdopcionCommand command) {
-        System.out.println("DEBUG: Iniciando actualización de solicitud ID=" + command.id().getValue());
-
         return solicitudAdopcionRepository.getById(command.id())
                 .map(solicitud -> {
                     EstadoSolicitud estadoAnterior = solicitud.getEstado();
                     EstadoSolicitud estadoEnum = EstadoSolicitud.valueOf(command.estado().toUpperCase());
-
-                    System.out.println("DEBUG: Estado anterior=" + estadoAnterior + ", Nuevo estado=" + estadoEnum);
 
                     solicitud.setFecha(command.fecha());
                     solicitud.setEstado(estadoEnum);
@@ -46,11 +44,8 @@ public class EditSolicitudAdopcionUseCase {
 
                     // LÓGICA DE APROBACIÓN AUTOMÁTICA AL EDITAR
                     if (estadoEnum == EstadoSolicitud.APROBADA && estadoAnterior != EstadoSolicitud.APROBADA) {
-                        System.out.println("DEBUG: Detectada aprobación. Creando adopción...");
-
                         // 1. Validar si ya existe adopción para este animal
                         if (adopcionRepository.existsByAnimalId(solicitud.getAnimalId())) {
-                            System.err.println("ERROR: El animal ya ha sido adoptado.");
                             throw new AnimalYaAdoptadoException(solicitud.getAnimalId().getValue());
                         }
 
@@ -63,22 +58,18 @@ public class EditSolicitudAdopcionUseCase {
                                 .estado(EstadoAdopcion.PENDIENTE_FIRMA)
                                 .build();
 
-                        Adopcion savedAdopcion = adopcionRepository.save(nuevaAdopcion);
-                        System.out.println("DEBUG: Adopción guardada con ID="
-                                + (savedAdopcion.getId() != null ? savedAdopcion.getId().getValue() : "PENDIENTE"));
+                        adopcionRepository.save(nuevaAdopcion);
 
                         // 3. Actualizar Animal a RESERVADO
                         animalRepository.getById(solicitud.getAnimalId()).ifPresent(animal -> {
                             animal.setEstado(EstadoAnimal.RESERVADO);
                             animalRepository.save(animal);
-                            System.out.println("DEBUG: Animal actualizado a RESERVADO");
                         });
 
                         // 4. Actualizar Adoptante a APROBADO
                         adoptanteRepository.getById(solicitud.getAdoptanteId()).ifPresent(adoptante -> {
                             adoptante.setEstadoValidacion(EstadoValidacion.APROBADO);
                             adoptanteRepository.save(adoptante);
-                            System.out.println("DEBUG: Adoptante actualizado a APROBADO");
                         });
                     }
 
@@ -87,7 +78,7 @@ public class EditSolicitudAdopcionUseCase {
                         adoptanteRepository.getById(solicitud.getAdoptanteId()).ifPresent(adoptante -> {
                             if (adoptante.getUsuarioId() != null) {
                                 String nombreAnimal = animalRepository.getById(solicitud.getAnimalId())
-                                        .map(es.refugio.refugio.domain.model.animal.Animal::getNombre)
+                                        .map(Animal::getNombre)
                                         .orElse("tu animal favorito");
 
                                 String mensaje = "Tu solicitud de adopción para " + nombreAnimal

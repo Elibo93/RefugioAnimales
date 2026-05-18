@@ -14,20 +14,20 @@
                 <i data-lucide="heart" style="width: 32px; height: 32px;"></i>
             </div>
             <h1 class="page-title" style="font-size: 2.25rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.75rem;">
-                <span th:text="${voluntario.get('id') == null ? (!isAuthenticated ? 'Únete al Equipo' : #messages.msg('voluntario.form.title')) : #messages.msg('voluntario.modal.edit.title')}">Registrar voluntario</span>
+                <span th:text="${voluntario.id == null ? (!isAuthenticated ? 'Únete al Equipo' : #messages.msg('voluntario.form.title')) : #messages.msg('voluntario.modal.edit.title')}">Registrar voluntario</span>
             </h1>
             <p style="color:var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto;"
-                th:text="${voluntario.get('id') == null ? (!isAuthenticated ? 'Regístrate y ayúdanos a cambiar el destino de nuestros animales' : #messages.msg('voluntario.form.subtitle.create')) : #messages.msg('voluntario.form.subtitle.edit')}">
+                th:text="${voluntario.id == null ? (!isAuthenticated ? 'Regístrate y ayúdanos a cambiar el destino de nuestros animales' : #messages.msg('voluntario.form.subtitle.create')) : #messages.msg('voluntario.form.subtitle.edit')}">
                 Añada un nuevo voluntario al equipo
             </p>
         </div>
 
         <div style="max-width: 850px; margin: 0 auto; padding-bottom: 5rem;">
             <!-- CASO: YA EXISTE UNA SOLICITUD (VISTA PREMIUM DE ESTADO) -->
-            <div th:if="${voluntarioExistente != null and voluntario.get('id') == null}" class="card" 
+            <div th:if="${voluntarioExistente != null and voluntario.id == null}" class="card" 
                  style="padding: 4rem 3rem; border-radius: 32px; border: 1px solid var(--border); background: white; box-shadow: var(--shadow-xl); text-align: center; animation: fadeInUp 0.6s ease-out;">
                 
-                <div th:with="estado=${voluntarioExistente.get('estado')}" style="margin-bottom: 2rem;">
+                <div th:with="estado=${voluntarioExistente.estado}" style="margin-bottom: 2rem;">
                     <!-- ICONOS SEGÚN ESTADO -->
                     <div th:if="${estado == 'PENDIENTE'}" style="margin: 0 auto 2rem; width: 80px; height: 80px; background: #fff7ed; color: #ea580c; border-radius: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(234, 88, 12, 0.1);">
                         <i data-lucide="clock" style="width: 40px; height: 40px;"></i>
@@ -61,13 +61,13 @@
             </div>
 
             <!-- FORMULARIO (SOLO SI NO HAY REGISTRO PREVIO) -->
-            <div th:if="${voluntarioExistente == null or voluntario.get('id') != null}" class="card" 
+            <div th:if="${voluntarioExistente == null or voluntario.id != null}" class="card" 
                  style="padding: 3rem; border-radius: 32px; border: 1px solid var(--border); background: white; box-shadow: var(--shadow-xl);">
                 <form id="volunteerForm"
-                    th:action="${voluntario.get('id') == null ? '/web/voluntarios/nuevo' : '/web/voluntarios/' + voluntario.get('id') + '/editar'}"
+                    th:action="${voluntario.id == null ? '/web/voluntarios/nuevo' : '/web/voluntarios/' + voluntario.id + '/editar'}"
                     method="post">
                     
-                    <input type="hidden" name="usuarioId" th:value="${voluntario.get('usuarioId')}">
+                    <input type="hidden" name="usuarioId" th:value="${voluntario.usuarioId}">
 
                     <!-- SECCIÓN 1: IDENTIFICACIÓN -->
                     <div class="form-section" style="margin-bottom: 3.5rem;">
@@ -77,7 +77,7 @@
                         </h2>
 
                         <!-- CASO A: Invitado O Usuario logueado sin PerfilLegal (Registro de identidad) -->
-                        <div th:if="${(voluntario.get('id') == null) and (!isAuthenticated or (isAuthenticated and !perfilLegalExists))}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                        <div th:if="${(voluntario.id == null) and (!isAuthenticated or (isAuthenticated and !perfilLegalExists))}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
                             <!-- ID del usuario si ya está autenticado pero le falta el perfil -->
                             <input type="hidden" name="idUsuario" th:if="${isAuthenticated}" th:value="${currentUserId}">
 
@@ -129,7 +129,7 @@
                         </div>
 
                         <!-- CASO B: Admin creando voluntario (Buscador) -->
-                        <div th:if="${isAdmin and voluntario.get('id') == null}" class="form-group">
+                        <div th:if="${isAdmin and voluntario.id == null}" class="form-group">
                             <div style="position: relative;">
                                 <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Buscar Usuario Existente</label>
                                 <input type="text" id="user-search" name="q" placeholder="Nombre, email o ID..." autocomplete="off"
@@ -141,15 +141,15 @@
                         </div>
 
                         <!-- CASO C: Edición o Usuario Logueado con PerfilLegal (Solo lectura/confirmación) -->
-                        <div th:if="${voluntario.get('id') != null or (isAuthenticated and !isAdmin and perfilLegalExists)}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                        <div th:if="${voluntario.id != null or (isAuthenticated and !isAdmin and perfilLegalExists)}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
                              <div style="grid-column: span 2; padding: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.5rem;">
                                 <div style="background: white; color: #0891b2; width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0;">
                                     <i data-lucide="user" style="width: 28px;"></i>
                                 </div>
                                 <div>
-                                    <span style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600;" th:text="${voluntario.get('id') != null ? 'Editando Voluntario' : 'Tu Perfil'}">Perfil</span>
+                                    <span style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600;" th:text="${voluntario.id != null ? 'Editando Voluntario' : 'Tu Perfil'}">Perfil</span>
                                     <h3 style="margin: 0; font-weight: 800; color: var(--text-main);" th:text="${nombreCompleto ?: currentUserName}">Nombre</h3>
-                                    <p th:if="${perfilExistente and voluntario.get('id') == null}" style="margin: 4px 0 0; font-size: 0.8rem; color: #0891b2; font-weight: 500;">
+                                    <p th:if="${perfilExistente and voluntario.id == null}" style="margin: 4px 0 0; font-size: 0.8rem; color: #0891b2; font-weight: 500;">
                                         <i data-lucide="check-circle" style="width: 12px; vertical-align: middle; margin-right: 4px;"></i>
                                         Información legal confirmada.
                                     </p>
@@ -159,7 +159,7 @@
                              <!-- Datos legales ocultos (para preservarlos sin mostrarlos) -->
 
                              <!-- ID del usuario y datos legales ocultos (para preservarlos sin mostrarlos) -->
-                             <input type="hidden" name="idUsuario" th:if="${voluntario.get('id') == null}" th:value="${currentUserId}">
+                             <input type="hidden" name="idUsuario" th:if="${voluntario.id == null}" th:value="${currentUserId}">
                              <input type="hidden" name="nombre" th:value="${userNombre}">
                              <input type="hidden" name="apellido" th:value="${userApellido}">
                              <input type="hidden" name="dni" th:value="${userDni}">
@@ -180,10 +180,10 @@
 
                         <div class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
                             <!-- Teléfono y Fecha Nacimiento: Solo se piden aquí si es EDICIÓN por ADMIN, ya que arriba no aparecen -->
-                            <th:block th:if="${voluntario.get('id') != null and isAdmin}">
+                            <th:block th:if="${voluntario.id != null and isAdmin}">
                                 <div class="form-group">
                                     <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Teléfono</label>
-                                    <input type="text" name="telefono" th:value="${userPhone ?: voluntario.get('telefono')}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    <input type="text" name="telefono" th:value="${userPhone ?: voluntario.telefono}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
                                 </div>
                                 <div class="form-group">
                                     <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Fecha de Nacimiento</label>
@@ -196,23 +196,23 @@
                                 <select id="especialidadSelect" name="especialidad" required onchange="handleEspecialidadChange()"
                                         style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; appearance: none; background: white url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem;">
                                     <option value="">Seleccione...</option>
-                                    <option value="PASEO" th:selected="${voluntario.get('especialidad') == 'PASEO'}">Paseador de perros</option>
-                                    <option value="LIMPIEZA" th:selected="${voluntario.get('especialidad') == 'LIMPIEZA'}">Limpieza de instalaciones</option>
-                                    <option value="ADMINISTRATIVO" th:selected="${voluntario.get('especialidad') == 'ADMINISTRATIVO'}">Apoyo administrativo</option>
-                                    <option value="REDES" th:selected="${voluntario.get('especialidad') == 'REDES'}">Redes sociales y fotos</option>
-                                    <option value="OTRA" th:selected="${voluntario.get('especialidad') != null and !#lists.contains({'PASEO','LIMPIEZA','ADMINISTRATIVO','REDES'}, voluntario.get('especialidad'))}">Otra</option>
+                                    <option value="PASEO" th:selected="${voluntario.especialidad == 'PASEO'}">Paseador de perros</option>
+                                    <option value="LIMPIEZA" th:selected="${voluntario.especialidad == 'LIMPIEZA'}">Limpieza de instalaciones</option>
+                                    <option value="ADMINISTRATIVO" th:selected="${voluntario.especialidad == 'ADMINISTRATIVO'}">Apoyo administrativo</option>
+                                    <option value="REDES" th:selected="${voluntario.especialidad == 'REDES'}">Redes sociales y fotos</option>
+                                    <option value="OTRA" th:selected="${voluntario.especialidad != null and !#lists.contains({'PASEO','LIMPIEZA','ADMINISTRATIVO','REDES'}, voluntario.especialidad)}">Otra</option>
                                 </select>
                             </div>
                         </div>
 
                         <div id="especialidadCustomGroup" style="display:none; margin-top: 1.5rem;">
                             <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Especifique</label>
-                            <input type="text" id="especialidadCustomInput" th:value="${voluntario.get('especialidad')}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                            <input type="text" id="especialidadCustomInput" th:value="${voluntario.especialidad}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
                         </div>
 
                         <div class="form-group" style="margin-top: 1.5rem;">
                             <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Disponibilidad</label>
-                            <textarea name="disponibilidad" required th:text="${voluntario.get('disponibilidad')}" style="width: 100%; min-height: 120px; padding: 1.25rem; border-radius: 18px; border: 2px solid #e2e8f0; line-height: 1.6;"></textarea>
+                            <textarea name="disponibilidad" required th:text="${voluntario.disponibilidad}" style="width: 100%; min-height: 120px; padding: 1.25rem; border-radius: 18px; border: 2px solid #e2e8f0; line-height: 1.6;"></textarea>
                         </div>
                     </div>
 
@@ -223,7 +223,7 @@
                             Cancelar
                         </a>
                         <button type="submit" class="btn btn-primary" style="padding: 1rem 3rem; border-radius: 16px; font-weight: 700; background: #0891b2; border: none; color: white; cursor: pointer;">
-                            <span th:text="${voluntario.get('id') == null ? 'Enviar Solicitud' : 'Guardar Cambios'}">Enviar</span>
+                            <span th:text="${voluntario.id == null ? 'Enviar Solicitud' : 'Guardar Cambios'}">Enviar</span>
                         </button>
                     </div>
                 </form>

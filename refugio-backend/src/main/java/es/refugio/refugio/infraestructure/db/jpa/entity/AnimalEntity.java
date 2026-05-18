@@ -88,7 +88,7 @@ public class AnimalEntity {
     @Column(name = "fecha_ingreso", nullable = false, columnDefinition = "DATETIME")
     private LocalDateTime fechaIngreso;
 
-    @OneToOne(mappedBy = "animal", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "animal")
     private AdopcionEntity adopcion;
 
     @OneToMany(mappedBy = "animal", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})

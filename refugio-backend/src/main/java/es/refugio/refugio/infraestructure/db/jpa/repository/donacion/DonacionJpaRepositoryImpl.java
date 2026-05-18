@@ -10,6 +10,8 @@ import es.refugio.refugio.domain.repository.DonacionRepository;
 import es.refugio.refugio.infraestructure.db.jpa.entity.DonacionEntity;
 import es.refugio.refugio.infraestructure.mapper.DonacionMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
 public class DonacionJpaRepositoryImpl implements DonacionRepository {
@@ -31,6 +33,11 @@ public class DonacionJpaRepositoryImpl implements DonacionRepository {
     @Override
     public List<Donacion> getAll() {
         return DonacionMapper.toDomain(jpaRepository.findAll());
+    }
+
+    @Override
+    public Page<Donacion> findAll(Pageable pageable) {
+        return jpaRepository.findAll(pageable).map(DonacionMapper::toDomain);
     }
 
     @Override

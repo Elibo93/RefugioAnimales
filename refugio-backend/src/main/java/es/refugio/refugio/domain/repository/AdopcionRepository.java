@@ -8,6 +8,8 @@ import es.refugio.refugio.domain.model.adopcion.Adopcion;
 import es.refugio.refugio.domain.model.adopcion.AdopcionId;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.domain.model.animal.AnimalId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface AdopcionRepository extends CRUDRepository<Adopcion, AdopcionId> {
 
@@ -21,4 +23,10 @@ public interface AdopcionRepository extends CRUDRepository<Adopcion, AdopcionId>
 
     List<Adopcion> findByCriteria(AdoptanteId adoptanteId, AnimalId animalId);
     boolean existsByAnimalId(AnimalId animalId);
+
+    default Page<Adopcion> findAll(Pageable pageable) {
+        return Page.empty();
+    }
+
+    Page<Adopcion> findFiltered(String q, Pageable pageable);
 }

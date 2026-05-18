@@ -7,6 +7,8 @@ import es.refugio.refugio.domain.model.adoptante.Adoptante;
 import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.domain.repository.AdoptanteRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
 public class FindAdoptanteUseCase {
@@ -20,6 +22,14 @@ public class FindAdoptanteUseCase {
             throw new AdoptanteNotFoundException();
         }
         return adoptantes;
+    }
+
+    public Page<Adoptante> findAll(Pageable pageable) {
+        return adoptanteRepository.findAll(pageable);
+    }
+
+    public Page<Adoptante> findFiltered(String q, Pageable pageable) {
+        return adoptanteRepository.findFiltered(q, pageable);
     }
 
     public Adoptante findById(AdoptanteId id) {

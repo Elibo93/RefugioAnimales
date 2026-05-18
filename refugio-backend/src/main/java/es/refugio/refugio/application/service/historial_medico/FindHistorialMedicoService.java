@@ -6,6 +6,8 @@ import es.refugio.refugio.domain.model.animal.AnimalId;
 import es.refugio.refugio.domain.model.historial_medico.HistorialMedico;
 import es.refugio.refugio.domain.model.historial_medico.HistorialMedicoId;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
 public class FindHistorialMedicoService {
@@ -14,6 +16,10 @@ public class FindHistorialMedicoService {
 
     public List<HistorialMedico> findAll() {
         return useCase.findAll();
+    }
+
+    public Page<HistorialMedico> findAll(Pageable pageable) {
+        return useCase.findAll(pageable);
     }
 
     public HistorialMedico findById(HistorialMedicoId id) {

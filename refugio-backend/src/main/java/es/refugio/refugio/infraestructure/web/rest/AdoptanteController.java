@@ -2,7 +2,6 @@ package es.refugio.refugio.infraestructure.web.rest;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -10,6 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -38,6 +40,7 @@ import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteRequest;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteResponse;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteUpdateRequest;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.ConvertirAdoptanteRequest;
+import es.refugio.common.infraestructure.web.dto.common.PaginatedResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -72,11 +75,15 @@ public class AdoptanteController {
     @ApiResponse(responseCode = "200", description = "Listado obtenido")
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
-    public List<AdoptanteResponse> getAll() {
-        return findService.findAll()
-                .stream()
+    public PaginatedResponse<AdoptanteResponse> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String q) {
+        Pageable pageable = PageRequest.of(Math.max(0, page), size);
+        Page<Adoptante> adoptantesPage = findService.findFiltered(q, pageable);
+        return PaginatedResponse.fromPage(adoptantesPage, adoptantesPage.getContent().stream()
                 .map(AdoptanteMapper::toResponse)
-                .toList();
+                .toList());
     }
 
     @Operation(summary = "Obtener adoptante por ID")
@@ -154,7 +161,8 @@ public class AdoptanteController {
     @PostMapping("/convertir-y-solicitar")
     @PreAuthorize("hasRole('PUBLICO')")
     public ResponseEntity<String> convertirYSolicitar(@Valid @RequestBody ConvertirAdoptanteRequest request) {
-        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
         Integer usuarioId = userDetails.getId();
 
         // 2. Crear Perfil de Adoptante
@@ -165,15 +173,17 @@ public class AdoptanteController {
                 request.getAnimalId(),
                 adoptante.getId().getValue(),
                 LocalDateTime.now(),
-                "Solicitud automática tras conversión de perfil."));
+                "Solicitud automática tras conversión de perfil.",
+                null));
 
         return ResponseEntity.ok("Perfil actualizado y solicitud enviada correctamente.");
     }
 
     private void checkOwnership(Adoptante adoptante) {
-        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
         Integer usuarioId = userDetails.getId();
-        
+
         boolean isStaff = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
 
