@@ -25,6 +25,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.springframework.security.core.Authentication;
+import es.refugio.common.util.ExcelExportHelper;
  
 import java.util.Set;
 import java.util.Map;
@@ -471,8 +472,41 @@ public class SolicitudAdopcionViewController {
     @PreAuthorize("hasRole('ADMIN')")
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<SolicitudAdopcionRecord> solicitudes = helper.fetchList(apiUrl + "/v1/solicitudes-adopcion", SolicitudAdopcionRecord.class);
-        Context context = new Context();
+        List<AnimalRecord> animales = helper.fetchList(apiUrl + "/v1/animales?size=1000", AnimalRecord.class);
+        List<AdoptanteRecord> adoptantes = helper.fetchList(apiUrl + "/v1/adoptantes?size=1000", AdoptanteRecord.class);
+        List<PerfilLegalRecord> perfiles = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+
+        Map<String, String> animalesMap = new HashMap<>();
+        for (AnimalRecord a : animales) {
+            animalesMap.put(String.valueOf(a.id()), a.nombre());
+        }
+
+        Map<String, PerfilLegalRecord> perfilesMap = new HashMap<>();
+        for (PerfilLegalRecord p : perfiles) {
+            if (p.usuarioId() != null) {
+                perfilesMap.put(String.valueOf(p.usuarioId()), p);
+            }
+        }
+
+        Map<String, String> adoptanteNombres = new HashMap<>();
+        for (AdoptanteRecord a : adoptantes) {
+            if (a.usuarioId() != null) {
+                PerfilLegalRecord perfil = perfilesMap.get(String.valueOf(a.usuarioId()));
+                if (perfil != null) {
+                    String nombre = perfil.nombre() != null ? perfil.nombre() : "";
+                    String apellido = perfil.apellido() != null ? perfil.apellido() : "";
+                    adoptanteNombres.put(String.valueOf(a.id()), (nombre + " " + apellido).trim());
+                } else {
+                    adoptanteNombres.put(String.valueOf(a.id()), "Adoptante #" + a.id());
+                }
+            }
+        }
+
+        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
         context.setVariable("solicitudes", solicitudes);
+        context.setVariable("animalesMap", animalesMap);
+        context.setVariable("adoptanteNombres", adoptanteNombres);
+
         String html = templateEngine.process(ThymTemplates.Solicitud_LIST_PDF.getPath(), context);
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=solicitudes.pdf");
@@ -482,6 +516,63 @@ public class SolicitudAdopcionViewController {
         renderer.layout();
         renderer.createPDF(out);
         out.close();
+    }
+
+    @GetMapping(WebRoutes.SOLICITUDES_EXCEL)
+    @PreAuthorize("hasRole('ADMIN')")
+    public void exportarExcel(HttpServletResponse response) throws Exception {
+        List<SolicitudAdopcionRecord> solicitudes = helper.fetchList(apiUrl + "/v1/solicitudes-adopcion", SolicitudAdopcionRecord.class);
+        List<AnimalRecord> animales = helper.fetchList(apiUrl + "/v1/animales?size=1000", AnimalRecord.class);
+        List<AdoptanteRecord> adoptantes = helper.fetchList(apiUrl + "/v1/adoptantes?size=1000", AdoptanteRecord.class);
+        List<PerfilLegalRecord> perfiles = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+
+        Map<String, String> animalesMap = new HashMap<>();
+        for (AnimalRecord a : animales) {
+            animalesMap.put(String.valueOf(a.id()), a.nombre());
+        }
+
+        Map<String, PerfilLegalRecord> perfilesMap = new HashMap<>();
+        for (PerfilLegalRecord p : perfiles) {
+            if (p.usuarioId() != null) {
+                perfilesMap.put(String.valueOf(p.usuarioId()), p);
+            }
+        }
+
+        Map<String, String> adoptanteNombres = new HashMap<>();
+        for (AdoptanteRecord a : adoptantes) {
+            if (a.usuarioId() != null) {
+                PerfilLegalRecord perfil = perfilesMap.get(String.valueOf(a.usuarioId()));
+                if (perfil != null) {
+                    String nombre = perfil.nombre() != null ? perfil.nombre() : "";
+                    String apellido = perfil.apellido() != null ? perfil.apellido() : "";
+                    adoptanteNombres.put(String.valueOf(a.id()), (nombre + " " + apellido).trim());
+                } else {
+                    adoptanteNombres.put(String.valueOf(a.id()), "Adoptante #" + a.id());
+                }
+            }
+        }
+
+        byte[] excelBytes = ExcelExportHelper.exportToExcel(
+            "Solicitudes de Adopción",
+            List.of("ID", "ID Animal", "Animal", "ID Adoptante", "Adoptante", "Fecha", "Estado", "Comentario", "Comentario Admin"),
+            solicitudes,
+            List.of(
+                SolicitudAdopcionRecord::id,
+                SolicitudAdopcionRecord::animalId,
+                s -> animalesMap.getOrDefault(String.valueOf(s.animalId()), "Animal #" + s.animalId()),
+                SolicitudAdopcionRecord::adoptanteId,
+                s -> adoptanteNombres.getOrDefault(String.valueOf(s.adoptanteId()), "Adoptante #" + s.adoptanteId()),
+                s -> s.fecha() != null ? s.fecha().toString() : "",
+                SolicitudAdopcionRecord::estado,
+                s -> s.comentario() != null ? s.comentario() : "",
+                s -> s.comentarioAdmin() != null ? s.comentarioAdmin() : ""
+            )
+        );
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=solicitudes.xlsx");
+        try (OutputStream out = response.getOutputStream()) {
+            out.write(excelBytes);
+        }
     }
 
     @GetMapping(WebRoutes.SOLICITUDES_PUBLICO_REGISTRO)

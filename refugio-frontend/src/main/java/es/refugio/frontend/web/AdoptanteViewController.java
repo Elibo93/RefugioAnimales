@@ -21,6 +21,12 @@ import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.io.OutputStream;
+import jakarta.servlet.http.HttpServletResponse;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import org.xhtmlrenderer.pdf.ITextRenderer;
+import es.refugio.common.util.ExcelExportHelper;
 
 /**
  * AdoptanteViewController — gestiona el flujo de conversión de usuario a adoptante.
@@ -33,6 +39,7 @@ public class AdoptanteViewController {
     private static final Logger logger = LoggerFactory.getLogger(AdoptanteViewController.class);
 
     private final RestTemplate restTemplate;
+    private final TemplateEngine templateEngine;
     private final ViewControllerHelper helper;
 
     @Value("${backend.api.url}")
@@ -262,7 +269,7 @@ public class AdoptanteViewController {
     }
 
     @GetMapping(WebRoutes.ADOPTANTES_PDF)
-    public String exportPdf(Model model) {
+    public void exportPdf(HttpServletResponse response) throws Exception {
         List<AdoptanteRecord> adoptantes = helper.fetchList(apiUrl + "/v1/adoptantes", AdoptanteRecord.class);
         List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
         List<PerfilLegalRecord> perfilesLegales = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
@@ -279,10 +286,89 @@ public class AdoptanteViewController {
             }
         }
 
-        model.addAttribute(ModelAttribute.Adoptante_LIST.getName(), adoptantes);
-        model.addAttribute("usuariosMap", usuariosMap);
-        model.addAttribute("perfilesMap", perfilesMap);
-        return ThymTemplates.Adoptante_LIST_PDF.getPath();
+        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
+        context.setVariable(ModelAttribute.Adoptante_LIST.getName(), adoptantes);
+        context.setVariable("usuariosMap", usuariosMap);
+        context.setVariable("perfilesMap", perfilesMap);
+
+        String htmlContent = templateEngine.process(ThymTemplates.Adoptante_LIST_PDF.getPath(), context);
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=adoptantes.pdf");
+
+        OutputStream outputStream = response.getOutputStream();
+        ITextRenderer renderer = new ITextRenderer();
+        renderer.setDocumentFromString(htmlContent);
+        renderer.layout();
+        renderer.createPDF(outputStream);
+        outputStream.close();
+    }
+
+    @GetMapping(WebRoutes.ADOPTANTES_EXCEL)
+    public void exportarExcel(HttpServletResponse response) throws Exception {
+        List<AdoptanteRecord> adoptantes = helper.fetchList(apiUrl + "/v1/adoptantes", AdoptanteRecord.class);
+        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+        List<PerfilLegalRecord> perfilesLegales = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+
+        Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
+        for (UsuarioRecord u : usuarios) {
+            usuariosMap.put(String.valueOf(u.id()), u);
+        }
+
+        Map<String, PerfilLegalRecord> perfilesMap = new HashMap<>();
+        for (PerfilLegalRecord p : perfilesLegales) {
+            if (p.usuarioId() != null) {
+                perfilesMap.put(String.valueOf(p.usuarioId()), p);
+            }
+        }
+
+        byte[] excelBytes = ExcelExportHelper.exportToExcel(
+            "Adoptantes",
+            List.of("ID", "ID Usuario", "Username", "Email", "Nombre", "Apellido", "DNI", "Teléfono", "Dirección", "Fecha Nacimiento", "Estado Validación", "Fecha Registro"),
+            adoptantes,
+            List.of(
+                AdoptanteRecord::id,
+                AdoptanteRecord::usuarioId,
+                a -> {
+                    UsuarioRecord u = usuariosMap.get(String.valueOf(a.usuarioId()));
+                    return u != null ? u.username() : "";
+                },
+                a -> {
+                    UsuarioRecord u = usuariosMap.get(String.valueOf(a.usuarioId()));
+                    return u != null ? u.email() : "";
+                },
+                a -> {
+                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(a.usuarioId()));
+                    return p != null ? p.nombre() : "";
+                },
+                a -> {
+                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(a.usuarioId()));
+                    return p != null ? p.apellido() : "";
+                },
+                a -> {
+                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(a.usuarioId()));
+                    return p != null ? p.dni() : "-";
+                },
+                a -> {
+                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(a.usuarioId()));
+                    return p != null ? p.telefono() : "-";
+                },
+                a -> {
+                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(a.usuarioId()));
+                    return p != null ? p.direccion() : "-";
+                },
+                a -> {
+                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(a.usuarioId()));
+                    return p != null ? p.fechaNacimiento() : "-";
+                },
+                AdoptanteRecord::estadoValidacion,
+                a -> a.fechaRegistro() != null ? a.fechaRegistro().toString() : "-"
+            )
+        );
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=adoptantes.xlsx");
+        try (OutputStream out = response.getOutputStream()) {
+            out.write(excelBytes);
+        }
     }
 
 }

@@ -1,74 +1,55 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
-    <meta charset="UTF-8" />
-    <title th:text="#{pdf.adopciones.title}">Listado de adopciones</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-            color: #333;
-        }
-
-        h1 {
-            color: #4f46e5;
-            border-bottom: 2px solid #ccc;
-            padding-bottom: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            font-size: 12px;
-        }
-
-        th {
-            background-color: #f3f4f6;
-            color: #000;
-            padding: 10px;
-            text-align: left;
-            border-bottom: 2px solid #ccc;
-        }
-
-        td {
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-        }
-
-        tr:nth-child(even) {
-            background-color: #fafafa;
-        }
-    </style>
+    <th:block th:replace="~{pdf/pdf-layout :: pdf-head-landscape(#{pdf.adopciones.header})}"></th:block>
 </head>
-
 <body>
+    <div class="watermark">ADOPTIFY</div>
+    <div class="header-container">
+        <div class="logo-container">
+            <span class="logo-text">Adoptify<span class="logo-dot">.</span></span>
+        </div>
+        <div class="meta-container">
+            <div class="doc-title" th:text="#{pdf.adopciones.header}">Listado de adopciones</div>
+            <div class="doc-date" th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}">19/05/2026 09:00</div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
     <h1 th:text="#{pdf.adopciones.header}">Listado de adopciones</h1>
     <table>
         <thead>
             <tr>
-                <th th:text="#{pdf.column.id}">ID</th>
-                <th th:text="#{pdf.column.personaId}">persona</th>
-                <th th:text="#{pdf.column.animalId}">animal</th>
-                <th th:text="#{pdf.column.date}">Fecha</th>
+                <th style="width: 5%;" th:text="#{pdf.column.id}">ID</th>
+                <th style="width: 8%;" th:text="#{pdf.column.animalId}">ID Animal</th>
+                <th style="width: 15%;" th:text="#{adopcion.table.header.animal}">Animal</th>
+                <th style="width: 10%;" th:text="#{adoptante.field.usuarioId}">ID Adoptante</th>
+                <th style="width: 15%;" th:text="#{adopcion.table.header.persona}">Persona</th>
+                <th style="width: 10%;" th:text="#{pdf.column.solicitudId}">ID Solicitud</th>
+                <th style="width: 10%;" th:text="#{adopcion.table.header.date}">Fecha</th>
+                <th style="width: 8%;" th:text="#{pdf.column.status}">Estado</th>
+                <th style="width: 19%;" th:text="#{pdf.column.contrato}">Contrato</th>
             </tr>
         </thead>
         <tbody>
             <tr th:each="i : ${adopciones}">
                 <td th:text="${i.id}"></td>
+                <td th:text="${i.animalId}"></td>
                 <td>
-                    <span th:text="${adoptanteNombres != null ? adoptanteNombres.get(i.adoptanteId.toString()) : 'Adoptante #' + i.adoptanteId}">
-                    </span>
+                    <span th:text="${animalesMap != null ? animalesMap.get(i.animalId.toString()) : 'Animal #' + i.animalId}"></span>
                 </td>
+                <td th:text="${i.adoptanteId}"></td>
                 <td>
-                    <span th:text="${animalesMap != null ? animalesMap.get(i.animalId.toString()) : 'Animal #' + i.animalId}">
-                    </span>
+                    <span th:text="${adoptanteNombres != null ? adoptanteNombres.get(i.adoptanteId.toString()) : 'Adoptante #' + i.adoptanteId}"></span>
                 </td>
+                <td th:text="${i.solicitudAdopcionId != null ? i.solicitudAdopcionId : '-'}"></td>
                 <td th:text="${i.fechaAdopcion != null} ? ${#temporals.format(i.fechaAdopcion, 'dd/MM/yyyy')} : '-'"></td>
+                <td>
+                    <span class="badge badge-success" th:text="${i.estado}"></span>
+                </td>
+                <td th:text="${i.contrato != null ? i.contrato : '-'}"></td>
             </tr>
         </tbody>
     </table>
 </body>
-
 </html>

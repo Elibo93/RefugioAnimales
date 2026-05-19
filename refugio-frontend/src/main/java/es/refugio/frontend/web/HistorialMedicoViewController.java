@@ -14,6 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
+import es.refugio.common.util.ExcelExportHelper;
 
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
@@ -194,8 +195,15 @@ public class HistorialMedicoViewController {
     @GetMapping(WebRoutes.HISTORIALES_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<HistorialMedicoRecord> historiales = helper.fetchList(apiUrl + "/v1/historial-medico", HistorialMedicoRecord.class);
-        Context context = new Context();
+        List<AnimalRecord> animales = helper.fetchList(apiUrl + "/v1/animales?size=1000", AnimalRecord.class);
+        Map<String, String> animalesMap = new HashMap<>();
+        for (AnimalRecord a : animales) {
+            animalesMap.put(String.valueOf(a.id()), a.nombre());
+        }
+
+        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
         context.setVariable("historiales", historiales);
+        context.setVariable("animalesMap", animalesMap);
         String html = templateEngine.process(ThymTemplates.Historial_LIST_PDF.getPath(), context);
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=historiales.pdf");
@@ -205,6 +213,37 @@ public class HistorialMedicoViewController {
         renderer.layout();
         renderer.createPDF(out);
         out.close();
+    }
+
+    @GetMapping(WebRoutes.HISTORIALES_EXCEL)
+    public void exportarExcel(HttpServletResponse response) throws Exception {
+        List<HistorialMedicoRecord> historiales = helper.fetchList(apiUrl + "/v1/historial-medico", HistorialMedicoRecord.class);
+        List<AnimalRecord> animales = helper.fetchList(apiUrl + "/v1/animales?size=1000", AnimalRecord.class);
+
+        Map<Integer, String> animalesMap = new HashMap<>();
+        for (AnimalRecord a : animales) {
+            animalesMap.put(a.id(), a.nombre());
+        }
+
+        byte[] excelBytes = ExcelExportHelper.exportToExcel(
+            "Historiales Médicos",
+            List.of("ID", "ID Animal", "Animal", "Fecha", "Veterinario", "Descripción", "Tratamiento"),
+            historiales,
+            List.of(
+                HistorialMedicoRecord::id,
+                HistorialMedicoRecord::animalId,
+                h -> h.animalId() != null ? animalesMap.getOrDefault(h.animalId(), "Animal #" + h.animalId()) : "",
+                h -> h.fecha() != null ? h.fecha().toString() : "",
+                h -> h.veterinario() != null ? h.veterinario() : "",
+                h -> h.descripcion() != null ? h.descripcion() : "",
+                h -> h.tratamiento() != null ? h.tratamiento() : ""
+            )
+        );
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=historiales.xlsx");
+        try (OutputStream out = response.getOutputStream()) {
+            out.write(excelBytes);
+        }
     }
 
     @GetMapping(WebRoutes.HISTORIALES_BASE + "/{id}/detalle")

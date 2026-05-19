@@ -13,6 +13,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
+import es.refugio.common.util.ExcelExportHelper;
 
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
@@ -334,8 +335,11 @@ public class TareaViewController {
                 })
                 .toList();
         
-        Context context = new Context();
+        Map<String, String> voluntarioNombres = fetchVoluntarioNombres();
+
+        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
         context.setVariable("tareas", filtered);
+        context.setVariable("voluntarioNombres", voluntarioNombres);
         String html = templateEngine.process(ThymTemplates.Tarea_LIST_PDF.getPath(), context);
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=tareas.pdf");
@@ -345,6 +349,71 @@ public class TareaViewController {
         renderer.layout();
         renderer.createPDF(out);
         out.close();
+    }
+
+    @GetMapping(WebRoutes.TAREAS_EXCEL)
+    public void exportarExcel(
+            @RequestParam(required = false) String prioridad,
+            @RequestParam(required = false) String estado,
+            HttpServletResponse response) throws Exception {
+        String allUrl = apiUrl + "/v1/tareas?size=9999";
+        List<TareaRecord> tareas = helper.fetchList(allUrl, TareaRecord.class);
+        
+        Integer myVoluntarioId = getMyVoluntarioId();
+
+        List<TareaRecord> filtered = tareas.stream()
+                .filter(t -> {
+                    if (myVoluntarioId != null) {
+                        if (t.voluntarioIds() == null || !t.voluntarioIds().contains(myVoluntarioId)) {
+                            return false;
+                        }
+                    }
+                    if (prioridad != null && !"ALL".equalsIgnoreCase(prioridad)) {
+                        if (t.prioridad() == null || !prioridad.equalsIgnoreCase(t.prioridad())) {
+                            return false;
+                        }
+                    }
+                    if (estado != null && !"ALL".equalsIgnoreCase(estado)) {
+                        if (t.estado() == null || !estado.equalsIgnoreCase(t.estado())) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .toList();
+
+        Map<String, String> voluntarioNombres = fetchVoluntarioNombres();
+
+        byte[] excelBytes = ExcelExportHelper.exportToExcel(
+            "Tareas",
+            List.of("ID", "Descripción", "Prioridad", "Estado", "Voluntarios Asignados", "Fecha", "Fecha Límite", "Instrucciones"),
+            filtered,
+            List.of(
+                TareaRecord::id,
+                TareaRecord::descripcion,
+                TareaRecord::prioridad,
+                TareaRecord::estado,
+                t -> {
+                    if (t.voluntarioIds() == null || t.voluntarioIds().isEmpty()) {
+                        return "-";
+                    }
+                    List<String> names = new ArrayList<>();
+                    for (Integer vId : t.voluntarioIds()) {
+                        String name = voluntarioNombres.get(String.valueOf(vId));
+                        if (name != null) names.add(name);
+                    }
+                    return String.join(", ", names);
+                },
+                t -> t.fecha() != null ? t.fecha().toString() : "",
+                t -> t.fechaLimite() != null ? t.fechaLimite().toString() : "",
+                t -> t.instrucciones() != null ? t.instrucciones() : ""
+            )
+        );
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=tareas.xlsx");
+        try (OutputStream out = response.getOutputStream()) {
+            out.write(excelBytes);
+        }
     }
 
     @PostMapping("/web/tareas/{id}/vincular-seleccion")

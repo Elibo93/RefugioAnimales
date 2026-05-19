@@ -6,8 +6,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
@@ -33,7 +31,7 @@ public class SecurityConfig {
         private final OAuth2SuccessHandler oauth2SuccessHandler;
 
         public SecurityConfig(JwtTokenProvider tokenProvider, JwtAuthenticationFilter jwtAuthenticationFilter,
-                              CustomOAuth2UserService customOAuth2UserService, OAuth2SuccessHandler oauth2SuccessHandler) {
+                        CustomOAuth2UserService customOAuth2UserService, OAuth2SuccessHandler oauth2SuccessHandler) {
                 this.tokenProvider = tokenProvider;
                 this.jwtAuthenticationFilter = jwtAuthenticationFilter;
                 this.customOAuth2UserService = customOAuth2UserService;
@@ -57,30 +55,33 @@ public class SecurityConfig {
                                         HttpServletResponse response) {
                                 // 1. Verificar si hay un parámetro de 'redirect' en la petición original
                                 // Nota: En un flujo de login normal, el parámetro está en la URL del GET /login
-                                // pero Spring Security lo descarta en el POST /login-post a menos que lo guardemos.
+                                // pero Spring Security lo descarta en el POST /login-post a menos que lo
+                                // guardemos.
                                 // Sin embargo, si el usuario vino de un link th:href="@{/login(redirect=...)}"
-                                // el parámetro debería estar presente si el formulario de login lo incluye como hidden.
-                                
+                                // el parámetro debería estar presente si el formulario de login lo incluye como
+                                // hidden.
+
                                 String redirect = request.getParameter("redirect");
                                 if (redirect != null && !redirect.isBlank()) {
-                                    return redirect;
+                                        return redirect;
                                 }
 
                                 // 2. Fallback al comportamiento estándar vía Gateway
                                 String proto = request.getHeader("X-Forwarded-Proto");
-                                String host  = request.getHeader("X-Forwarded-Host");
+                                String host = request.getHeader("X-Forwarded-Host");
 
                                 if (proto != null && !proto.isBlank()
-                                                 && host != null && !host.isBlank()) {
+                                                && host != null && !host.isBlank()) {
                                         return proto + "://" + host + "/web/home";
                                 }
                                 return "/web/home";
                         }
-                        
+
                         @Override
                         public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                        Authentication authentication) throws java.io.IOException, jakarta.servlet.ServletException {
-                                
+                                        Authentication authentication)
+                                        throws java.io.IOException, jakarta.servlet.ServletException {
+
                                 String token = tokenProvider.generateToken(authentication);
                                 Cookie authCookie = new Cookie("JWT_TOKEN", token);
                                 authCookie.setHttpOnly(true);
@@ -88,7 +89,7 @@ public class SecurityConfig {
                                 authCookie.setPath("/");
                                 authCookie.setMaxAge(86400); // 1 día
                                 response.addCookie(authCookie);
-                                
+
                                 super.onAuthenticationSuccess(request, response, authentication);
                         }
                 };
@@ -110,10 +111,12 @@ public class SecurityConfig {
                                                 .permitAll()
                                                 // API pública (lectura de animales, donaciones y me-info sin login)
                                                 .requestMatchers(org.springframework.http.HttpMethod.GET,
-                                                                "/api/v1/animales/**", "/api/v1/me", "/api/v1/donaciones/total")
+                                                                "/api/v1/animales/**", "/api/v1/me",
+                                                                "/api/v1/donaciones/total")
                                                 .permitAll()
                                                 .requestMatchers(org.springframework.http.HttpMethod.POST,
-                                                                "/api/v1/donaciones", "/api/v1/usuarios/publico", "/api/v1/solicitudes-adopcion/publico/registro-y-adopcion")
+                                                                "/api/v1/donaciones", "/api/v1/usuarios/publico",
+                                                                "/api/v1/solicitudes-adopcion/publico/registro-y-adopcion")
                                                 .permitAll()
                                                 // API de tareas y voluntarios requiere roles específicos
                                                 .requestMatchers("/api/v1/tareas/**").hasAnyRole("ADMIN", "VOLUNTARIO")
@@ -126,8 +129,7 @@ public class SecurityConfig {
                                 .oauth2Login(oauth2 -> oauth2
                                                 .loginPage("/login")
                                                 .userInfoEndpoint(userInfo -> userInfo
-                                                                .userService(customOAuth2UserService)
-                                                )
+                                                                .userService(customOAuth2UserService))
                                                 .successHandler(oauth2SuccessHandler))
                                 .formLogin(form -> form
                                                 .loginPage("/login")
@@ -140,13 +142,14 @@ public class SecurityConfig {
                                 .logout(logout -> logout
                                                 .logoutUrl("/logout")
                                                 .deleteCookies("JWT_TOKEN")
-                                                // Usamos un handler para redirigir respetando el header X-Forwarded-Host del Gateway
+                                                // Usamos un handler para redirigir respetando el header
+                                                // X-Forwarded-Host del Gateway
                                                 .logoutSuccessHandler((request, response, authentication) -> {
                                                         String proto = request.getHeader("X-Forwarded-Proto");
-                                                        String host  = request.getHeader("X-Forwarded-Host");
-                                                        String targetUrl = (proto != null && host != null) 
-                                                                           ? proto + "://" + host + "/login?logout" 
-                                                                           : "/login?logout";
+                                                        String host = request.getHeader("X-Forwarded-Host");
+                                                        String targetUrl = (proto != null && host != null)
+                                                                        ? proto + "://" + host + "/login?logout"
+                                                                        : "/login?logout";
                                                         response.sendRedirect(targetUrl);
                                                 })
                                                 .permitAll())

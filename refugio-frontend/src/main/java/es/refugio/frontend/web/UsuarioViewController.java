@@ -24,6 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
+import es.refugio.common.util.ExcelExportHelper;
 
 import java.io.OutputStream;
 import java.util.*;
@@ -546,7 +547,7 @@ public class UsuarioViewController {
             personasCompletas.add(persona);
         }
 
-        Context context = new Context();
+        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
         context.setVariable("personas", personasCompletas);
         String html = templateEngine.process(ThymTemplates.Persona_LIST_PDF.getPath(), context);
         response.setContentType("application/pdf");
@@ -557,6 +558,73 @@ public class UsuarioViewController {
         renderer.layout();
         renderer.createPDF(out);
         out.close();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(WebRoutes.PERSONAS_EXCEL)
+    public void exportarExcel(HttpServletResponse response, @RequestParam(required = false) String rol) throws Exception {
+        List<UsuarioRecord> personasAuth = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+        List<PerfilLegalRecord> perfilesLegales = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+
+        Map<Integer, PerfilLegalRecord> perfilesMap = new HashMap<>();
+        for (PerfilLegalRecord p : perfilesLegales) {
+            if (p.usuarioId() != null) {
+                perfilesMap.put(p.usuarioId(), p);
+            }
+        }
+
+        List<PersonaCompletaRecord> personasCompletas = new ArrayList<>();
+        for (UsuarioRecord u : personasAuth) {
+            if (rol != null && !rol.isEmpty() && !"ALL".equals(rol)) {
+                if (!String.valueOf(u.rol()).equals(rol))
+                    continue;
+            }
+
+            PerfilLegalRecord perfil = perfilesMap.get(u.id());
+
+            String nombre = perfil != null ? perfil.nombre() : "";
+            String apellido = perfil != null ? perfil.apellido() : "";
+            String dni = perfil != null ? perfil.dni() : "";
+            String telefono = perfil != null ? perfil.telefono() : "";
+            String direccion = perfil != null ? perfil.direccion() : "";
+            String fechaNacimiento = perfil != null ? perfil.fechaNacimiento() : "";
+
+            personasCompletas.add(new PersonaCompletaRecord(
+                    u.id(),
+                    u.email(),
+                    u.username(),
+                    u.rol(),
+                    nombre,
+                    apellido,
+                    dni,
+                    telefono,
+                    direccion,
+                    fechaNacimiento
+            ));
+        }
+
+        byte[] excelBytes = ExcelExportHelper.exportToExcel(
+            "Usuarios",
+            List.of("ID", "Username", "Email", "Nombre", "Apellido", "Teléfono", "DNI", "Rol", "Dirección", "Fecha Nacimiento"),
+            personasCompletas,
+            List.of(
+                PersonaCompletaRecord::id,
+                PersonaCompletaRecord::username,
+                PersonaCompletaRecord::email,
+                PersonaCompletaRecord::nombre,
+                PersonaCompletaRecord::apellido,
+                PersonaCompletaRecord::telefono,
+                PersonaCompletaRecord::dni,
+                PersonaCompletaRecord::rol,
+                p -> p.direccion() != null ? p.direccion() : "-",
+                p -> p.fechaNacimiento() != null ? p.fechaNacimiento() : "-"
+            )
+        );
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=usuarios.xlsx");
+        try (OutputStream out = response.getOutputStream()) {
+            out.write(excelBytes);
+        }
     }
 
     @PreAuthorize("hasRole('ADMIN')")

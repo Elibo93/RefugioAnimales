@@ -1,38 +1,49 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <title>Listado de donaciones</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; color: #333; }
-        h1 { color: #4f46e5; border-bottom: 2px solid #ccc; padding-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
-        th { background-color: #f3f4f6; color: #000; padding: 10px; text-align: left; border-bottom: 2px solid #ccc; }
-        td { padding: 8px; border-bottom: 1px solid #eee; }
-        tr:nth-child(even) { background-color: #fafafa; }
-    </style>
+    <th:block th:replace="~{pdf/pdf-layout :: pdf-head-landscape(#{pdf.donaciones.header})}"></th:block>
 </head>
 <body>
-    <h1>Listado oficial de donaciones</h1>
+    <div class="watermark">ADOPTIFY</div>
+    <div class="header-container">
+        <div class="logo-container">
+            <span class="logo-text">Adoptify<span class="logo-dot">.</span></span>
+        </div>
+        <div class="meta-container">
+            <div class="doc-title" th:text="#{pdf.donaciones.header}">Listado de Donaciones Recibidas</div>
+            <div class="doc-date" th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}">19/05/2026 09:00</div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+    <h1 th:text="#{pdf.donaciones.header}">Listado de Donaciones Recibidas</h1>
     <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Donante (ID)</th>
-                <th>Tipo</th>
-                <th>Cantidad</th>
-                <th>Fecha</th>
-                <th>Descripción</th>
+                <th style="width: 4%;" th:text="#{pdf.column.id}">ID</th>
+                <th style="width: 8%;" th:text="#{adoptante.field.usuarioId}">ID Usuario</th>
+                <th style="width: 16%;" th:text="#{pdf.column.donor}">Donante</th>
+                <th style="width: 8%;" th:text="#{pdf.column.objective}">ID Objetivo</th>
+                <th style="width: 8%;" th:text="#{pdf.column.quantity}">Cantidad</th>
+                <th style="width: 8%;" th:text="#{donacion.table.header.tipo}">Tipo</th>
+                <th style="width: 12%;" th:text="#{donacion.field.frecuencia}">Frecuencia</th>
+                <th style="width: 11%;" th:text="#{donacion.table.header.fecha}">Fecha</th>
+                <th style="width: 11%;" th:text="#{donacion.next_payment}">Próximo Pago</th>
+                <th style="width: 14%;" th:text="#{pdf.column.description}">Descripción</th>
             </tr>
         </thead>
         <tbody>
             <tr th:each="d : ${donaciones}">
                 <td th:text="${d.id}"></td>
                 <td th:text="${d.usuarioId}"></td>
+                <td th:text="${usuariosMap != null and usuariosMap.containsKey(d.usuarioId.toString()) ? usuariosMap.get(d.usuarioId.toString()).email : 'Anónimo'}"></td>
+                <td th:text="${d.objetivoId != null ? d.objetivoId : '-'}"></td>
+                <td th:text="${d.cantidad != null ? #numbers.formatDecimal(d.cantidad, 1, 2) + ' €' : '-'}"></td>
                 <td th:text="${d.tipo}"></td>
-                <td th:text="${d.cantidad}"></td>
-                <td th:text="${#temporals.format(d.fecha, 'dd/MM/yyyy HH:mm')}"></td>
-                <td th:text="${d.descripcion}"></td>
+                <td th:text="${d.frecuencia}"></td>
+                <td th:text="${d.fecha != null ? #temporals.format(d.fecha, 'dd/MM/yyyy HH:mm') : '-'}"></td>
+                <td th:text="${d.proximaFechaPago != null ? #temporals.format(d.proximaFechaPago, 'dd/MM/yyyy') : '-'}"></td>
+                <td th:text="${d.descripcion != null ? d.descripcion : '-'}"></td>
             </tr>
         </tbody>
     </table>

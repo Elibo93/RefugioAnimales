@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.HashMap;
@@ -51,10 +50,29 @@ public class ReportController {
 
         // Cargar logo en Base64
         try {
-            String logoPath = "/home/ely/workspace/RefugioAnimales/refugio-frontend/src/main/resources/static/images/icono_con_eslogan.png";
-            byte[] logoBytes = Files.readAllBytes(Paths.get(logoPath));
-            String logoBase64 = "data:image/png;base64," + Base64.getEncoder().encodeToString(logoBytes);
-            data.put("logoBase64", logoBase64);
+            String userDir = System.getProperty("user.dir");
+            java.io.File logoFile = new java.io.File(
+                    userDir + "/refugio-frontend/src/main/resources/static/images/icono_con_eslogan.png");
+            if (!logoFile.exists()) {
+
+                logoFile = new java.io.File(
+                        userDir + "/../refugio-frontend/src/main/resources/static/images/icono_con_eslogan.png");
+            }
+            if (!logoFile.exists()) {
+
+                logoFile = new java.io.File(
+                        "/home/srromer0/workspace/RefugioAnimales/refugio-frontend/src/main/resources/static/images/icono_con_eslogan.png");
+            }
+            if (!logoFile.exists()) {
+
+                logoFile = new java.io.File(
+                        "/home/ely/workspace/RefugioAnimales/refugio-frontend/src/main/resources/static/images/icono_con_eslogan.png");
+            }
+            if (logoFile.exists()) {
+                byte[] logoBytes = Files.readAllBytes(logoFile.toPath());
+                String logoBase64 = "data:image/png;base64," + Base64.getEncoder().encodeToString(logoBytes);
+                data.put("logoBase64", logoBase64);
+            }
         } catch (Exception e) {
             // Si falla la carga del logo, el PDF se genera sin él
         }
@@ -66,9 +84,18 @@ public class ReportController {
 
         data.put("animalNombre", adopcion.getAnimal().getNombre());
         data.put("animalEspecie", adopcion.getAnimal().getEspecie());
+        data.put("animalEspeciePersonalizada", adopcion.getAnimal().getEspeciePersonalizada());
         data.put("animalRaza", adopcion.getAnimal().getRaza());
         data.put("animalEdad", adopcion.getAnimal().getEdad());
         data.put("animalChip", adopcion.getAnimal().getChipId() != null ? adopcion.getAnimal().getChipId() : "N/A");
+        data.put("animalSexo", adopcion.getAnimal().getSexo() != null ? adopcion.getAnimal().getSexo().name() : "-");
+        data.put("animalEstado", adopcion.getAnimal().getEstado() != null ? adopcion.getAnimal().getEstado().name() : "-");
+        data.put("animalPeso", adopcion.getAnimal().getPeso() != null ? adopcion.getAnimal().getPeso() + " kg" : "-");
+        data.put("animalTamano", adopcion.getAnimal().getTamano() != null ? adopcion.getAnimal().getTamano().name() : "-");
+        data.put("animalNivelEnergia", adopcion.getAnimal().getNivelEnergia() != null ? adopcion.getAnimal().getNivelEnergia() : "-");
+        data.put("animalUrgencia", adopcion.getAnimal().getUrgencia() != null && adopcion.getAnimal().getUrgencia() ? "SÍ" : "NO");
+        data.put("animalDescripcion", adopcion.getAnimal().getDescripcion() != null ? adopcion.getAnimal().getDescripcion() : "-");
+        data.put("animalFechaIngreso", adopcion.getAnimal().getFechaIngreso() != null ? adopcion.getAnimal().getFechaIngreso().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "-");
 
         data.put("fechaActual", adopcion.getFechaAdopcion().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 

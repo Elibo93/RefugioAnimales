@@ -1,72 +1,64 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
-    <meta charset="UTF-8" />
-    <title>Listado de Adoptantes</title>
+    <th:block th:replace="~{pdf/pdf-layout :: pdf-head-landscape(#{pdf.adoptante.header})}"></th:block>
     <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-            color: #333;
-        }
-
-        h1 {
-            color: #4f46e5;
-            border-bottom: 2px solid #ccc;
-            padding-bottom: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            font-size: 12px;
-        }
-
-        th {
-            background-color: #f3f4f6;
-            color: #000;
-            padding: 10px;
-            text-align: left;
-            border-bottom: 2px solid #ccc;
-        }
-
-        td {
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-        }
-
-        tr:nth-child(even) {
-            background-color: #fafafa;
-        }
+        table { font-size: 8.2px; }
+        th { font-size: 7.8px; padding: 5px 6px; }
+        td { padding: 5px 6px; }
     </style>
 </head>
-
 <body>
-    <h1>Listado de Adoptantes</h1>
+    <div class="watermark">ADOPTIFY</div>
+    <div class="header-container">
+        <div class="logo-container">
+            <span class="logo-text">Adoptify<span class="logo-dot">.</span></span>
+        </div>
+        <div class="meta-container">
+            <div class="doc-title" th:text="#{pdf.adoptante.header}">Listado de Adoptantes</div>
+            <div class="doc-date" th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}">19/05/2026 09:00</div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+    <h1 th:text="#{pdf.adoptante.header}">Listado de Adoptantes</h1>
     <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>DNI</th>
-                <th>Dirección</th>
-                <th>Estado</th>
+                <th style="width: 3%;" th:text="#{pdf.column.id}">ID</th>
+                <th style="width: 8%;" th:text="#{adoptante.field.usuarioId}">ID Usuario</th>
+                <th style="width: 10%;" th:text="#{pdf.column.username}">Username</th>
+                <th style="width: 12%;" th:text="#{pdf.column.email}">Email</th>
+                <th style="width: 10%;" th:text="#{adoptante.table.header.name}">Nombre</th>
+                <th style="width: 10%;" th:text="#{adoptante.table.header.surname}">Apellido</th>
+                <th style="width: 8%;" th:text="#{pdf.column.dni}">DNI</th>
+                <th style="width: 8%;" th:text="#{pdf.column.phone}">Teléfono</th>
+                <th style="width: 13%;" th:text="#{pdf.column.address}">Dirección</th>
+                <th style="width: 7%;" th:text="#{pdf.column.birthdate}">F. Nacimiento</th>
+                <th style="width: 5%;" th:text="#{pdf.column.status}">Estado</th>
+                <th style="width: 6%;" th:text="#{pdf.column.registration}">F. Registro</th>
             </tr>
         </thead>
         <tbody>
             <tr th:each="a : ${adoptantes}" th:with="u=${usuariosMap != null ? usuariosMap['' + a.usuarioId] : null}, p=${perfilesMap != null ? perfilesMap['' + a.usuarioId] : null}">
                 <td th:text="${a.id}"></td>
-                <td th:text="${p != null ? p.nombre : (u != null ? u.username : 'Usuario ' + a.usuarioId)}"></td>
+                <td th:text="${a.usuarioId}"></td>
+                <td th:text="${u != null ? u.username : '-'}"></td>
+                <td th:text="${u != null ? u.email : '-'}"></td>
+                <td th:text="${p != null ? p.nombre : '-'}"></td>
                 <td th:text="${p != null ? p.apellido : ''}"></td>
                 <td th:text="${p != null ? p.dni : '-'}"></td>
+                <td th:text="${p != null ? p.telefono : '-'}"></td>
                 <td th:text="${p != null ? p.direccion : '-'}"></td>
-                <td th:text="${a.estadoValidacion}"></td>
+                <td th:text="${p != null ? p.fechaNacimiento : '-'}"></td>
+                <td>
+                    <span class="badge" 
+                          th:classappend="${a.estadoValidacion == 'APROBADO' ? 'badge-success' : (a.estadoValidacion == 'RECHAZADO' ? 'badge-danger' : 'badge-warning')}" 
+                          th:text="${a.estadoValidacion}"></span>
+                </td>
+                <td th:text="${a.fechaRegistro != null} ? ${#temporals.format(a.fechaRegistro, 'dd/MM/yyyy HH:mm')} : '-'"></td>
             </tr>
         </tbody>
     </table>
 </body>
-
 </html>

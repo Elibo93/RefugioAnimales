@@ -1,34 +1,44 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <title>Historiales Médicos</title>
+    <th:block th:replace="~{pdf/pdf-layout :: pdf-head-landscape(#{pdf.historiales.header})}"></th:block>
     <style>
-        body { font-family: sans-serif; padding: 20px; color: #333; }
-        h1 { color: #4f46e5; border-bottom: 2px solid #ccc; padding-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 11px; }
-        th { background-color: #f3f4f6; color: #000; padding: 10px; text-align: left; border-bottom: 2px solid #ccc; }
-        td { padding: 8px; border-bottom: 1px solid #eee; vertical-align: top; }
-        tr:nth-child(even) { background-color: #fafafa; }
+        table { font-size: 10.0px; }
+        th { font-size: 9.5px; padding: 7px 9px; }
+        td { padding: 7px 9px; }
     </style>
 </head>
 <body>
-    <h1>Listado de Historiales Médicos</h1>
+    <div class="watermark">ADOPTIFY</div>
+    <div class="header-container">
+        <div class="logo-container">
+            <span class="logo-text">Adoptify<span class="logo-dot">.</span></span>
+        </div>
+        <div class="meta-container">
+            <div class="doc-title" th:text="#{pdf.historiales.header}">Listado de Historiales Médicos</div>
+            <div class="doc-date" th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}">19/05/2026 09:00</div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+    <h1 th:text="#{pdf.historiales.header}">Listado de Historiales Médicos</h1>
     <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Animal (ID)</th>
-                <th>Fecha</th>
-                <th>Veterinario</th>
-                <th>Descripción</th>
-                <th>Tratamiento</th>
+                <th style="width: 5%;" th:text="#{pdf.column.id}">ID</th>
+                <th style="width: 8%;" th:text="#{pdf.column.animalId}">ID Animal</th>
+                <th style="width: 12%;" th:text="#{adopcion.table.header.animal}">Animal</th>
+                <th style="width: 10%;" th:text="#{historial.table.header.fecha}">Fecha</th>
+                <th style="width: 15%;" th:text="#{historial.table.header.veterinario}">Veterinario</th>
+                <th style="width: 25%;" th:text="#{historial.field.descripcion}">Descripción</th>
+                <th style="width: 25%;" th:text="#{historial.field.tratamiento}">Tratamiento</th>
             </tr>
         </thead>
         <tbody>
             <tr th:each="h : ${historiales}">
                 <td th:text="${h.id}"></td>
                 <td th:text="${h.animalId}"></td>
+                <td th:text="${animalesMap != null ? animalesMap.get(h.animalId.toString()) : '-'}"></td>
                 <td th:text="${#temporals.format(h.fecha, 'dd/MM/yyyy')}"></td>
                 <td th:text="${h.veterinario}"></td>
                 <td th:text="${h.descripcion}"></td>

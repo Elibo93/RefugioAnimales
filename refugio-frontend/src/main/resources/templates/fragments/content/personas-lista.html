@@ -76,6 +76,10 @@
                         <i data-lucide="file-text" style="width:18px;"></i>
                         <span th:text="#{generic.link.export.pdf}">Exportar PDF</span>
                     </a>
+                    <a class="btn btn-secondary" th:href="@{/web/personas/excel(rol=${selectedRol})}" target="_blank">
+                        <i data-lucide="file-text" style="width:18px;"></i>
+                        <span th:text="#{generic.link.export.excel}">Exportar Excel</span>
+                    </a>
                     <a class="btn btn-primary" th:href="@{/web/personas/nuevo}">
                         <i data-lucide="plus" style="width:18px;"></i>
                         <span th:text="#{generic.link.create}">+ Nuevo persona</span>
