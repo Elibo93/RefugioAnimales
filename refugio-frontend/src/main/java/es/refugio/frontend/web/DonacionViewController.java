@@ -14,6 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
+import es.refugio.common.util.ExcelExportHelper;
 
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
@@ -388,8 +389,16 @@ public class DonacionViewController {
     @PreAuthorize("hasRole('ADMIN')")
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<DonacionRecord> donaciones = helper.fetchList(apiUrl + "/v1/donaciones", DonacionRecord.class);
-        Context context = new Context();
+        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+
+        Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
+        for (UsuarioRecord u : usuarios) {
+            usuariosMap.put(String.valueOf(u.id()), u);
+        }
+
+        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
         context.setVariable("donaciones", donaciones);
+        context.setVariable("usuariosMap", usuariosMap);
         String html = templateEngine.process(ThymTemplates.Donacion_LIST_PDF.getPath(), context);
 
         response.setContentType("application/pdf");
@@ -401,5 +410,44 @@ public class DonacionViewController {
         renderer.layout();
         renderer.createPDF(out);
         out.close();
+    }
+
+    @GetMapping(WebRoutes.DONACIONES_EXCEL)
+    @PreAuthorize("hasRole('ADMIN')")
+    public void exportarExcel(HttpServletResponse response) throws Exception {
+        List<DonacionRecord> donaciones = helper.fetchList(apiUrl + "/v1/donaciones", DonacionRecord.class);
+        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+
+        // Construir mapa de usuarios
+        Map<Integer, UsuarioRecord> usuariosMap = new HashMap<>();
+        for (UsuarioRecord u : usuarios) {
+            usuariosMap.put(u.id(), u);
+        }
+
+        byte[] excelBytes = ExcelExportHelper.exportToExcel(
+            "Donaciones",
+            List.of("ID", "ID Usuario", "Donante (Email)", "ID Objetivo", "Cantidad", "Tipo", "Frecuencia", "Descripción", "Fecha", "Próximo Pago"),
+            donaciones,
+            List.of(
+                DonacionRecord::id,
+                DonacionRecord::usuarioId,
+                d -> {
+                    UsuarioRecord u = usuariosMap.get(d.usuarioId());
+                    return u != null ? u.email() : "Anónimo";
+                },
+                d -> d.objetivoId() != null ? d.objetivoId() : "-",
+                DonacionRecord::cantidad,
+                DonacionRecord::tipo,
+                DonacionRecord::frecuencia,
+                d -> d.descripcion() != null ? d.descripcion() : "",
+                d -> d.fecha() != null ? d.fecha().toString() : "",
+                d -> d.proximaFechaPago() != null ? d.proximaFechaPago().toString() : "-"
+            )
+        );
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=donaciones.xlsx");
+        try (OutputStream out = response.getOutputStream()) {
+            out.write(excelBytes);
+        }
     }
 }

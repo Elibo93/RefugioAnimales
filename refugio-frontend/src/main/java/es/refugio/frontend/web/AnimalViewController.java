@@ -18,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
+import es.refugio.common.util.ExcelExportHelper;
 
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
@@ -381,7 +382,7 @@ public class AnimalViewController {
     @GetMapping(WebRoutes.ANIMALES_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<AnimalRecord> animales = helper.fetchList(apiUrl + "/v1/animales?size=1000", AnimalRecord.class);
-        Context context = new Context();
+        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
         context.setVariable("animales", animales);
         String htmlContent = templateEngine.process(ThymTemplates.Animal_LIST_PDF.getPath(), context);
         response.setContentType("application/pdf");
@@ -392,6 +393,39 @@ public class AnimalViewController {
         renderer.layout();
         renderer.createPDF(outputStream);
         outputStream.close();
+    }
+
+    @GetMapping(WebRoutes.ANIMALES_EXCEL)
+    public void exportarExcel(HttpServletResponse response) throws Exception {
+        List<AnimalRecord> animales = helper.fetchList(apiUrl + "/v1/animales?size=1000", AnimalRecord.class);
+        byte[] excelBytes = ExcelExportHelper.exportToExcel(
+            "Animales",
+            List.of("ID", "Nombre", "Especie", "Raza", "Sexo", "Chip ID", "Estado", "Edad", "Tamaño", "Peso (kg)", "Nivel Energía", "Urgente", "Visitas", "Conteo Solicitudes", "Descripción", "Fecha Ingreso"),
+            animales,
+            List.of(
+                AnimalRecord::id,
+                AnimalRecord::nombre,
+                a -> "OTRO".equals(a.especie()) ? a.especiePersonalizada() : a.especie(),
+                AnimalRecord::raza,
+                AnimalRecord::sexo,
+                AnimalRecord::chipId,
+                AnimalRecord::estado,
+                a -> a.edad() != null ? a.edad() : "-",
+                a -> a.tamano() != null ? a.tamano() : "-",
+                a -> a.peso() != null ? a.peso() : "-",
+                a -> a.nivelEnergia() != null ? a.nivelEnergia() : "-",
+                a -> a.urgencia() != null && a.urgencia() ? "SÍ" : "NO",
+                a -> a.visitas() != null ? a.visitas() : 0,
+                a -> a.conteoSolicitudes() != null ? a.conteoSolicitudes() : 0,
+                a -> a.descripcion() != null ? a.descripcion() : "",
+                a -> a.fechaIngreso() != null ? a.fechaIngreso().toString() : "-"
+            )
+        );
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=animales.xlsx");
+        try (OutputStream out = response.getOutputStream()) {
+            out.write(excelBytes);
+        }
     }
 
     @GetMapping(WebRoutes.ANIMALES_BASE + "/{id}/detalle")

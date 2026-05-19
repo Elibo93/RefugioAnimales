@@ -27,6 +27,10 @@
                         th:text="#{generic.link.export.pdf}">
                         Exportar PDF
                     </a>
+                    <a class="btn btn-secondary" th:href="@{/web/solicitudes/excel}" target="_blank"
+                        th:text="#{generic.link.export.excel}">
+                        Exportar Excel
+                    </a>
                     <a class="btn btn-primary" th:href="@{/web/solicitudes/nueva}">
                         <i data-lucide="plus" style="width:18px;"></i>
                         <span th:text="#{generic.link.create}">+ Nueva solicitud</span>

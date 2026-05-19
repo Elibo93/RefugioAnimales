@@ -14,6 +14,7 @@ public interface WebRoutes {
     String PERSONAS_DETALLE  = "/web/personas/{id}";
     String PERSONAS_EDITAR   = "/web/personas/{id}/editar";
     String PERSONAS_PDF      = "/web/personas/pdf";
+    String PERSONAS_EXCEL    = "/web/personas/excel";
     String PERSONAS_ELIMINAR = "/web/personas/{id}/borrar";
     String PERSONAS_BUSCAR   = "/web/personas/buscar";
 
@@ -23,6 +24,7 @@ public interface WebRoutes {
     String ADOPTANTES_EDITAR               = "/web/adoptantes/{id}/editar";
     String ADOPTANTES_ELIMINAR             = "/web/adoptantes/{id}/borrar";
     String ADOPTANTES_PDF                  = "/web/adoptantes/pdf";
+    String ADOPTANTES_EXCEL                = "/web/adoptantes/excel";
     String ADOPTANTES_APROBAR              = "/web/adoptantes/{id}/aprobar";
     String ADOPTANTES_RECHAZAR             = "/web/adoptantes/{id}/rechazar";
 
@@ -32,6 +34,7 @@ public interface WebRoutes {
     String VOLUNTARIOS_DETALLE  = "/web/voluntarios/{id}";
     String VOLUNTARIOS_EDITAR   = "/web/voluntarios/{id}/editar";
     String VOLUNTARIOS_PDF      = "/web/voluntarios/pdf";
+    String VOLUNTARIOS_EXCEL    = "/web/voluntarios/excel";
     String VOLUNTARIOS_ELIMINAR = "/web/voluntarios/{id}/borrar";
 
     // ANIMALES
@@ -40,6 +43,7 @@ public interface WebRoutes {
     String ANIMALES_DETALLE  = "/web/animales/{id}";
     String ANIMALES_EDITAR   = "/web/animales/{id}/editar";
     String ANIMALES_PDF      = "/web/animales/pdf";
+    String ANIMALES_EXCEL    = "/web/animales/excel";
     String ANIMALES_ELIMINAR = "/web/animales/{id}/borrar";
 
     // ADOPCIONES
@@ -48,6 +52,7 @@ public interface WebRoutes {
     String ADOPCIONES_EDITAR   = "/web/adopciones/{id}/editar";
     String ADOPCIONES_ELIMINAR = "/web/adopciones/{id}/borrar";
     String ADOPCIONES_PDF      = "/web/adopciones/pdf";
+    String ADOPCIONES_EXCEL    = "/web/adopciones/excel";
     String ADOPCIONES_CONTRATO = "/web/adopciones/{id}/contrato";
 
     // DONACIONES
@@ -56,6 +61,7 @@ public interface WebRoutes {
     String DONACIONES_EDITAR   = "/web/donaciones/{id}/editar";
     String DONACIONES_ELIMINAR = "/web/donaciones/{id}/borrar";
     String DONACIONES_PDF      = "/web/donaciones/pdf";
+    String DONACIONES_EXCEL    = "/web/donaciones/excel";
 
     // HISTORIAL MÉDICO
     String HISTORIALES_BASE     = "/web/historiales";
@@ -63,6 +69,7 @@ public interface WebRoutes {
     String HISTORIALES_EDITAR   = "/web/historiales/{id}/editar";
     String HISTORIALES_ELIMINAR = "/web/historiales/{id}/borrar";
     String HISTORIALES_PDF      = "/web/historiales/pdf";
+    String HISTORIALES_EXCEL    = "/web/historiales/excel";
 
     // SOLICITUDES ADOPCIÓN
     String SOLICITUDES_BASE         = "/web/solicitudes";
@@ -71,6 +78,7 @@ public interface WebRoutes {
     String SOLICITUDES_EDITAR       = "/web/solicitudes/{id}/editar";
     String SOLICITUDES_ELIMINAR     = "/web/solicitudes/{id}/borrar";
     String SOLICITUDES_PDF          = "/web/solicitudes/pdf";
+    String SOLICITUDES_EXCEL        = "/web/solicitudes/excel";
     String SOLICITUDES_PUBLICO_REGISTRO = "/web/solicitudes/publico/registro-y-adopcion";
     String SOLICITUDES_APROBAR      = "/web/solicitudes/{id}/aprobar";
     String SOLICITUDES_RECHAZAR     = "/web/solicitudes/{id}/rechazar";
@@ -88,6 +96,7 @@ public interface WebRoutes {
     String TAREAS_HISTORIAL = "/web/tareas/{id}/historial";
     String TAREAS_ELIMINAR = "/web/tareas/{id}/borrar";
     String TAREAS_PDF      = "/web/tareas/pdf";
+    String TAREAS_EXCEL    = "/web/tareas/excel";
 
     // NOTIFICACIONES
     String NOTIFICACIONES_BASE = "/web/notificaciones";

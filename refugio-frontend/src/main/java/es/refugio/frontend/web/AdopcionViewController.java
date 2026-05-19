@@ -14,6 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
+import es.refugio.common.util.ExcelExportHelper;
 
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
@@ -305,7 +306,7 @@ public class AdopcionViewController {
             animalesMap.put(String.valueOf(a.id()), a.nombre());
         }
 
-        Context context = new Context();
+        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
         context.setVariable("adopciones", adopciones);
         context.setVariable("adoptanteNombres", adoptanteNombres);
         context.setVariable("animalesMap", animalesMap);
@@ -319,6 +320,76 @@ public class AdopcionViewController {
         renderer.layout();
         renderer.createPDF(out);
         out.close();
+    }
+
+    @GetMapping(WebRoutes.ADOPCIONES_EXCEL)
+    public void exportarExcel(HttpServletResponse response) throws Exception {
+        List<AdopcionRecord> adopciones = helper.fetchList(apiUrl + "/v1/adopciones", AdopcionRecord.class);
+        List<AdoptanteRecord> adoptantes = helper.fetchList(apiUrl + "/v1/adoptantes", AdoptanteRecord.class);
+        List<AnimalRecord> animales   = helper.fetchList(apiUrl + "/v1/animales?size=1000", AnimalRecord.class);
+        List<UsuarioRecord> usuarios   = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+        List<PerfilLegalRecord> perfiles   = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+
+        Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
+        for (UsuarioRecord u : usuarios) {
+            usuariosMap.put(String.valueOf(u.id()), u);
+        }
+
+        Map<String, PerfilLegalRecord> perfilesMap = new HashMap<>();
+        for (PerfilLegalRecord p : perfiles) {
+            if (p.usuarioId() != null) {
+                perfilesMap.put(String.valueOf(p.usuarioId()), p);
+            }
+        }
+
+        Map<String, String> adoptanteNombres = new HashMap<>();
+        for (AdoptanteRecord a : adoptantes) {
+            if (a.usuarioId() != null) {
+                String uidStr = String.valueOf(a.usuarioId());
+                PerfilLegalRecord perfil = perfilesMap.get(uidStr);
+                UsuarioRecord user = usuariosMap.get(uidStr);
+                
+                String nombre = "";
+                String apellido = "";
+                
+                if (perfil != null) {
+                    nombre = perfil.nombre() != null ? perfil.nombre() : "";
+                    apellido = perfil.apellido() != null ? perfil.apellido() : "";
+                } else if (user != null) {
+                    nombre = user.username() != null ? user.username() : "Adoptante";
+                }
+                
+                String fullName = (nombre + " " + apellido).trim();
+                adoptanteNombres.put(String.valueOf(a.id()), fullName);
+            }
+        }
+
+        Map<String, String> animalesMap = new HashMap<>();
+        for (AnimalRecord a : animales) {
+            animalesMap.put(String.valueOf(a.id()), a.nombre());
+        }
+
+        byte[] excelBytes = ExcelExportHelper.exportToExcel(
+            "Adopciones",
+            List.of("ID", "ID Animal", "Animal", "ID Adoptante", "Adoptante", "ID Solicitud Adopción", "Fecha Adopción", "Estado", "Contrato"),
+            adopciones,
+            List.of(
+                AdopcionRecord::id,
+                AdopcionRecord::animalId,
+                a -> animalesMap.getOrDefault(String.valueOf(a.animalId()), "Animal #" + a.animalId()),
+                AdopcionRecord::adoptanteId,
+                a -> adoptanteNombres.getOrDefault(String.valueOf(a.adoptanteId()), "Adoptante #" + a.adoptanteId()),
+                a -> a.solicitudAdopcionId() != null ? a.solicitudAdopcionId() : "-",
+                a -> a.fechaAdopcion() != null ? a.fechaAdopcion().toString() : "",
+                AdopcionRecord::estado,
+                a -> a.contrato() != null ? a.contrato() : "-"
+            )
+        );
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=adopciones.xlsx");
+        try (OutputStream out = response.getOutputStream()) {
+            out.write(excelBytes);
+        }
     }
 
     @GetMapping(WebRoutes.ADOPCIONES_CONTRATO)

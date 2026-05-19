@@ -1,38 +1,51 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <title>Solicitudes de Adopción</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; color: #333; }
-        h1 { color: #4f46e5; border-bottom: 2px solid #ccc; padding-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
-        th { background-color: #f3f4f6; color: #000; padding: 10px; text-align: left; border-bottom: 2px solid #ccc; }
-        td { padding: 8px; border-bottom: 1px solid #eee; }
-        tr:nth-child(even) { background-color: #fafafa; }
-    </style>
+    <th:block th:replace="~{pdf/pdf-layout :: pdf-head-landscape(#{pdf.solicitudes.header})}"></th:block>
 </head>
 <body>
-    <h1>Listado de Solicitudes de Adopción</h1>
+    <div class="watermark">ADOPTIFY</div>
+    <div class="header-container">
+        <div class="logo-container">
+            <span class="logo-text">Adoptify<span class="logo-dot">.</span></span>
+        </div>
+        <div class="meta-container">
+            <div class="doc-title" th:text="#{pdf.solicitudes.header}">Listado de Solicitudes de Adopción</div>
+            <div class="doc-date" th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}">19/05/2026 09:00</div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+    <h1 th:text="#{pdf.solicitudes.header}">Listado de Solicitudes de Adopción</h1>
     <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Animal (ID)</th>
-                <th>Adoptante (ID)</th>
-                <th>Estado</th>
-                <th>Fecha</th>
-                <th>Comentario</th>
+                <th style="width: 4%;" th:text="#{pdf.column.id}">ID</th>
+                <th style="width: 8%;" th:text="#{pdf.column.animalId}">ID Animal</th>
+                <th style="width: 12%;" th:text="#{solicitud.field.animal}">Animal</th>
+                <th style="width: 10%;" th:text="#{adoptante.field.usuarioId}">ID Adoptante</th>
+                <th style="width: 15%;" th:text="#{pdf.column.applicant}">Solicitante</th>
+                <th style="width: 8%;" th:text="#{pdf.column.status}">Estado</th>
+                <th style="width: 8%;" th:text="#{adopcion.table.header.date}">Fecha</th>
+                <th style="width: 18%;" th:text="#{solicitud.field.comentario}">Comentario</th>
+                <th style="width: 17%;" th:text="#{pdf.column.comentarioAdmin}">Comentario Admin</th>
             </tr>
         </thead>
         <tbody>
             <tr th:each="s : ${solicitudes}">
                 <td th:text="${s.id}"></td>
                 <td th:text="${s.animalId}"></td>
+                <td th:text="${animalesMap != null ? animalesMap.get(s.animalId.toString()) : 'Animal #' + s.animalId}"></td>
                 <td th:text="${s.adoptanteId}"></td>
-                <td th:text="${s.estado}"></td>
+                <td th:text="${adoptanteNombres != null ? adoptanteNombres.get(s.adoptanteId.toString()) : 'Adoptante #' + s.adoptanteId}"></td>
+                <td>
+                    <span class="badge" 
+                          th:classappend="${s.estado == 'APROBADA' ? 'badge-success' : (s.estado == 'RECHAZADA' ? 'badge-danger' : 'badge-warning')}"
+                          th:text="${s.estado}"></span>
+                </td>
                 <td th:text="${#temporals.format(s.fecha, 'dd/MM/yyyy')}"></td>
                 <td th:text="${s.comentario}"></td>
+                <td th:text="${s.comentarioAdmin != null ? s.comentarioAdmin : '-'}"></td>
             </tr>
         </tbody>
     </table>

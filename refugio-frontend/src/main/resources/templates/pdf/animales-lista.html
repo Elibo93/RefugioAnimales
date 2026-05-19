@@ -1,60 +1,46 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
-    <meta charset="UTF-8" />
-    <title th:text="#{pdf.animales.title}">Listado de animales</title>
+    <th:block th:replace="~{pdf/pdf-layout :: pdf-head-landscape(#{pdf.animales.header})}"></th:block>
     <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-            color: #333;
-        }
-
-        h1 {
-            color: #4f46e5;
-            border-bottom: 2px solid #ccc;
-            padding-bottom: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            font-size: 12px;
-        }
-
-        th {
-            background-color: #f3f4f6;
-            color: #000;
-            padding: 10px;
-            text-align: left;
-            border-bottom: 2px solid #ccc;
-        }
-
-        td {
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-        }
-
-        tr:nth-child(even) {
-            background-color: #fafafa;
-        }
+        table { font-size: 7.2px; }
+        th { font-size: 6.8px; padding: 4px 5px; }
+        td { padding: 4px 5px; }
     </style>
 </head>
-
 <body>
+    <div class="watermark">ADOPTIFY</div>
+    <div class="header-container">
+        <div class="logo-container">
+            <span class="logo-text">Adoptify<span class="logo-dot">.</span></span>
+        </div>
+        <div class="meta-container">
+            <div class="doc-title" th:text="#{pdf.animales.header}">Listado de animales</div>
+            <div class="doc-date" th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}">19/05/2026 09:00</div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
     <h1 th:text="#{pdf.animales.header}">Listado de animales</h1>
     <table>
         <thead>
             <tr>
-                <th th:text="#{pdf.column.id}">ID</th>
-                <th th:text="#{pdf.column.name}">Nombre</th>
-                <th th:text="#{pdf.column.species}">Especie</th>
-                <th th:text="#{pdf.column.breed}">Raza</th>
-                <th th:text="#{pdf.column.sex}">Sexo</th>
-                <th th:text="#{pdf.column.chip}">Chip ID</th>
-                <th th:text="#{pdf.column.status}">Estado</th>
+                <th style="width: 3%;" th:text="#{pdf.column.id}">ID</th>
+                <th style="width: 7%;" th:text="#{pdf.column.name}">Nombre</th>
+                <th style="width: 7%;" th:text="#{pdf.column.species}">Especie</th>
+                <th style="width: 7%;" th:text="#{pdf.column.breed}">Raza</th>
+                <th style="width: 5%;" th:text="#{pdf.column.sex}">Sexo</th>
+                <th style="width: 9%;" th:text="#{pdf.column.chip}">Chip ID</th>
+                <th style="width: 7%;" th:text="#{pdf.column.status}">Estado</th>
+                <th style="width: 5%;" th:text="#{animal.field.age}">Edad</th>
+                <th style="width: 6%;" th:text="#{animal.filter.size}">Tamaño</th>
+                <th style="width: 5%;" th:text="#{animal.field.peso.label}">Peso</th>
+                <th style="width: 5%;" th:text="#{animal.field.energy}">Energía</th>
+                <th style="width: 5%;" th:text="#{animal.field.urgencia}">Urgente</th>
+                <th style="width: 4%;" th:text="#{stats.visits}">Visitas</th>
+                <th style="width: 4%;" th:text="#{stats.requests}">Solics.</th>
+                <th style="width: 14%;" th:text="#{animal.field.description}">Descripción</th>
+                <th style="width: 7%;" th:text="#{pdf.column.date}">F. Ingreso</th>
             </tr>
         </thead>
         <tbody>
@@ -65,14 +51,24 @@
                 <td th:text="${t.raza}"></td>
                 <td th:text="${t.sexo}"></td>
                 <td th:text="${t.chipId}"></td>
-                <td th:text="${t.estado}"></td>
+                <td>
+                    <span class="badge" 
+                          th:classappend="${t.estado == 'DISPONIBLE' ? 'badge-success' : (t.estado == 'ADOPTADO' ? 'badge-info' : (t.estado == 'FALLECIDO' ? 'badge-danger' : 'badge-warning'))}"
+                          th:text="${t.estado}"></span>
+                </td>
+                <td th:text="${t.edad != null ? t.edad + ' años' : '-'}"></td>
+                <td th:text="${t.tamano != null ? t.tamano : '-'}"></td>
+                <td th:text="${t.peso != null ? t.peso + ' kg' : '-'}"></td>
+                <td th:text="${t.nivelEnergia != null ? t.nivelEnergia : '-'}"></td>
+                <td>
+                    <span class="badge" th:classappend="${t.urgencia ? 'badge-danger' : 'badge-default'}" th:text="${t.urgencia ? 'SÍ' : 'NO'}"></span>
+                </td>
+                <td th:text="${t.visitas != null ? t.visitas : 0}"></td>
+                <td th:text="${t.conteoSolicitudes != null ? t.conteoSolicitudes : 0}"></td>
+                <td th:text="${t.descripcion != null ? t.descripcion : '-'}"></td>
+                <td th:text="${t.fechaIngreso != null ? #temporals.format(t.fechaIngreso, 'dd/MM/yyyy') : '-'}"></td>
             </tr>
         </tbody>
     </table>
 </body>
-
 </html>
-
-
-
-

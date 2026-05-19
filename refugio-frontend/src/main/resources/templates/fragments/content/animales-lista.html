@@ -209,11 +209,16 @@
                     </style>
                     <!-- BOTÓN PDF (Solo para personal del refugio) -->
                     <div sec:authorize="hasRole('ADMIN')"
-                        style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.05);">
+                        style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: center; gap: 12px;">
                         <a th:href="@{/web/animales/pdf}" target="_blank"
                             style="color: #6b7280; text-decoration: none; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 500;">
                             <i data-lucide="download" style="width: 14px; height: 14px;"></i>
-                            <span>PDF</span>
+                            <span th:text="#{generic.link.export.pdf}">PDF</span>
+                        </a>
+                        <a th:href="@{/web/animales/excel}" target="_blank"
+                            style="color: #6b7280; text-decoration: none; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 500;">
+                            <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+                            <span th:text="#{generic.link.export.excel}">Excel</span>
                         </a>
                     </div>
                 </form>
@@ -296,7 +301,12 @@
                                 <a th:href="@{/web/animales/pdf}" target="_blank" class="btn"
                                     style="padding: 0.7rem 1.25rem; border-radius: 14px; font-weight: 700; background: white; border: 1px solid #e2e8f0; color: #64748b; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm);">
                                     <i data-lucide="download" style="width: 18px;"></i>
-                                    <span>Exportar</span>
+                                    <span th:text="#{generic.link.export.pdf}">Exportar PDF</span>
+                                </a>
+                                <a th:href="@{/web/animales/excel}" target="_blank" class="btn"
+                                    style="padding: 0.7rem 1.25rem; border-radius: 14px; font-weight: 700; background: white; border: 1px solid #e2e8f0; color: #64748b; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm);">
+                                    <i data-lucide="download" style="width: 18px;"></i>
+                                    <span th:text="#{generic.link.export.excel}">Exportar Excel</span>
                                 </a>
                                 <a th:href="@{/web/animales/nuevo}" class="btn btn-primary"
                                     style="padding: 0.7rem 1.5rem; border-radius: 14px; font-weight: 700; box-shadow: 0 10px 20px rgba(45, 157, 88, 0.2); display: flex; align-items: center; gap: 8px;">

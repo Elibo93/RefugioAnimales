@@ -15,6 +15,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.springframework.security.core.context.SecurityContextHolder;
+import es.refugio.common.util.ExcelExportHelper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.slf4j.Logger;
@@ -522,7 +523,7 @@ public class VoluntarioViewController {
             usuariosMap.put(String.valueOf(u.id()), u);
         }
 
-        Context context = new Context();
+        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
         context.setVariable("voluntarios", voluntarios);
         context.setVariable("perfilesMap", perfilesMap);
         context.setVariable("usuariosMap", usuariosMap);
@@ -535,6 +536,76 @@ public class VoluntarioViewController {
         renderer.layout();
         renderer.createPDF(out);
         out.close();
+    }
+
+    @GetMapping(WebRoutes.VOLUNTARIOS_EXCEL)
+    @PreAuthorize("hasRole('ADMIN')")
+    public void exportarExcel(HttpServletResponse response) throws Exception {
+        List<VoluntarioRecord> voluntarios = helper.fetchList(apiUrl + "/v1/voluntarios", VoluntarioRecord.class);
+        List<PerfilLegalRecord> perfilesLegales = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+
+        Map<String, PerfilLegalRecord> perfilesMap = new HashMap<>();
+        for (PerfilLegalRecord p : perfilesLegales) {
+            if (p.usuarioId() != null) {
+                perfilesMap.put(String.valueOf(p.usuarioId()), p);
+            }
+        }
+
+        Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
+        for (UsuarioRecord u : usuarios) {
+            usuariosMap.put(String.valueOf(u.id()), u);
+        }
+
+        byte[] excelBytes = ExcelExportHelper.exportToExcel(
+            "Voluntarios",
+            List.of("ID", "ID Usuario", "Username", "Email", "Nombre", "Apellido", "DNI", "Teléfono", "Dirección", "Fecha Nacimiento", "Especialidad", "Disponibilidad", "Estado"),
+            voluntarios,
+            List.of(
+                VoluntarioRecord::id,
+                VoluntarioRecord::usuarioId,
+                v -> {
+                    UsuarioRecord u = usuariosMap.get(String.valueOf(v.usuarioId()));
+                    return u != null ? u.username() : "";
+                },
+                v -> {
+                    UsuarioRecord u = usuariosMap.get(String.valueOf(v.usuarioId()));
+                    return u != null ? u.email() : "";
+                },
+                v -> {
+                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
+                    return p != null ? p.nombre() : "";
+                },
+                v -> {
+                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
+                    return p != null ? p.apellido() : "";
+                },
+                v -> {
+                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
+                    return p != null ? p.dni() : "-";
+                },
+                v -> {
+                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
+                    return p != null ? p.telefono() : "-";
+                },
+                v -> {
+                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
+                    return p != null ? p.direccion() : "-";
+                },
+                v -> {
+                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
+                    return p != null ? p.fechaNacimiento() : "-";
+                },
+                v -> v.especialidad() != null ? v.especialidad() : "-",
+                v -> v.disponibilidad() != null ? v.disponibilidad() : "-",
+                v -> v.estado() != null ? v.estado() : "-"
+            )
+        );
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=voluntarios.xlsx");
+        try (OutputStream out = response.getOutputStream()) {
+            out.write(excelBytes);
+        }
     }
 
     @GetMapping(WebRoutes.VOLUNTARIOS_DETALLE)
