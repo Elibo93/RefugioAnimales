@@ -64,7 +64,7 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 
 ### 9) Donaciones y Seguridad
 - [✅] **Pagos:** Simulación de pasarela de pago (modo prueba).
-- [ ] **OAuth:** Registro/Login con Google y Apple (Opcional).
+- [✅] **OAuth:** Registro/Login con Google y Apple (Opcional).
 
 ### 10) Calidad y DevOps
 - [ ] **i18n:** Traducir toda la app (ES/EN) usando archivos de propiedades.
