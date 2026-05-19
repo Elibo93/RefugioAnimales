@@ -19,6 +19,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import es.refugio.auth.social_login.infrastructure.CustomOAuth2UserService;
+import es.refugio.auth.social_login.infrastructure.OAuth2SuccessHandler;
+
 @Configuration
 @EnableWebSecurity
 @org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
@@ -26,10 +29,15 @@ public class SecurityConfig {
 
         private final JwtTokenProvider tokenProvider;
         private final JwtAuthenticationFilter jwtAuthenticationFilter;
+        private final CustomOAuth2UserService customOAuth2UserService;
+        private final OAuth2SuccessHandler oauth2SuccessHandler;
 
-        public SecurityConfig(JwtTokenProvider tokenProvider, JwtAuthenticationFilter jwtAuthenticationFilter) {
+        public SecurityConfig(JwtTokenProvider tokenProvider, JwtAuthenticationFilter jwtAuthenticationFilter,
+                              CustomOAuth2UserService customOAuth2UserService, OAuth2SuccessHandler oauth2SuccessHandler) {
                 this.tokenProvider = tokenProvider;
                 this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+                this.customOAuth2UserService = customOAuth2UserService;
+                this.oauth2SuccessHandler = oauth2SuccessHandler;
         }
 
         /**
@@ -97,7 +105,8 @@ public class SecurityConfig {
                                                                 "/webjars/**", "/favicon.ico",
                                                                 "/swagger-ui.html", "/swagger-ui/**", "/api-docs",
                                                                 "/api-docs/**",
-                                                                "/v3/api-docs", "/v3/api-docs/**")
+                                                                "/v3/api-docs", "/v3/api-docs/**",
+                                                                "/oauth2/**", "/login/oauth2/**")
                                                 .permitAll()
                                                 // API pública (lectura de animales, donaciones y me-info sin login)
                                                 .requestMatchers(org.springframework.http.HttpMethod.GET,
@@ -114,6 +123,12 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/**").authenticated()
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())
+                                .oauth2Login(oauth2 -> oauth2
+                                                .loginPage("/login")
+                                                .userInfoEndpoint(userInfo -> userInfo
+                                                                .userService(customOAuth2UserService)
+                                                )
+                                                .successHandler(oauth2SuccessHandler))
                                 .formLogin(form -> form
                                                 .loginPage("/login")
                                                 .loginProcessingUrl("/login-post")
@@ -145,11 +160,6 @@ public class SecurityConfig {
 
                 return http.build();
 
-        }
-
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-                return new BCryptPasswordEncoder();
         }
 
         @Bean
