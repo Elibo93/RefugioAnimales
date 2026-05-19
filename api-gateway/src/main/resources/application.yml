@@ -45,6 +45,11 @@ spring:
           predicates:
             - Path=/logout, /error
 
+        - id: backend-auth-oauth2
+          uri: lb://REFUGIO-AUTH
+          predicates:
+            - Path=/oauth2/**, /login/oauth2/**
+
         - id: backend-api
           uri: lb://REFUGIO-BACKEND
           predicates:
