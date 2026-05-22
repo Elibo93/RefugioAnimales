@@ -16,9 +16,7 @@
             <h1 class="page-title" style="font-size: 2.25rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.75rem;">
                 <span th:text="${solicitud.id == null ? #messages.msg('solicitud.form.title') : #messages.msg('solicitud.modal.edit.title')}">Nueva solicitud</span>
             </h1>
-            <p style="color:var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
-                Gestión avanzada de solicitudes de adopción
-            </p>
+            <p style="color:var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto;" th:text="#{adopcion.auto.gestion.avanzada.de.solicitudes.de.adopc}"></p>
         </div>
 
         <div style="max-width: 800px; margin: 0 auto; padding-bottom: 5rem;">
@@ -31,7 +29,7 @@
                     <div class="form-section" style="margin-bottom: 2.5rem;">
                         <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
                             <i data-lucide="paw-print" style="width: 18px;"></i>
-                            Animal para Adoptar
+                            [[#{html.auto.animal.para.adoptar}]]
                         </h2>
 
                         <!-- Vista Edición / Lectura -->
@@ -56,7 +54,7 @@
                         <div th:if="${solicitud.id == null}" style="position: relative;">
                             <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">
                                 <i data-lucide="search" style="width: 18px; color: var(--primary);"></i>
-                                Buscar Animal
+                                [[#{html.auto.buscar.animal}]]
                             </label>
                             <div style="position: relative;">
                                 <input type="text" id="animal-search" 
@@ -95,7 +93,7 @@
                     <div class="form-section" style="margin-bottom: 2.5rem;">
                         <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
                             <i data-lucide="user" style="width: 18px;"></i>
-                            Información del Solicitante
+                            [[#{html.auto.informaci.n.del.solicitante}]]
                         </h2>
 
                         <!-- Vista Edición -->
@@ -114,7 +112,7 @@
                         <div th:if="${solicitud.id == null}" style="position: relative;">
                             <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">
                                 <i data-lucide="search" style="width: 18px; color: var(--primary);"></i>
-                                Buscar Persona Registrada
+                                [[#{html.auto.buscar.persona.registrada}]]
                             </label>
                             <div style="position: relative;">
                                 <input type="text" id="user-search" 
@@ -137,7 +135,7 @@
                         <div class="form-group" sec:authorize="hasRole('ADMIN')">
                             <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
                                 <i data-lucide="activity" style="width: 16px; color: #64748b;"></i>
-                                <span th:text="#{solicitud.field.estado}">Estado de la Solicitud</span>
+                                <span th:text="#{solicitud.field.estado}">Estado [[#{html.auto.de}]] la Solicitud</span>
                             </label>
                             <select name="estado" required class="form-control" style="border-radius: 12px; height: 48px; border: 2px solid #e2e8f0;">
                                 <option th:each="e : ${estados}" 
@@ -165,10 +163,10 @@
                         <div class="form-group" sec:authorize="hasRole('ADMIN')">
                             <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
                                 <i data-lucide="shield-check" style="width: 16px; color: #f97316;"></i>
-                                <span>Notas Internas del Administrador (Comentario Admin)</span>
+                                <span th:text="#{adopcion.auto.notas.internas.del.administrador.comenta}"></span>
                             </label>
                             <textarea name="comentarioAdmin" class="form-control" 
-                                placeholder="Escriba comentarios internos, notas de seguimiento o motivos de aprobación/rechazo..."
+                                th:placeholder="#{solicitud.auto.write.internal.notes}"
                                 style="min-height: 120px; padding: 1rem; border-radius: 16px; border: 2px solid #e2e8f0; line-height: 1.6;"
                                 th:text="${solicitud.comentarioAdmin}"></textarea>
                         </div>
@@ -176,12 +174,10 @@
 
                     <!-- ACCIONES -->
                     <div class="modal-actions" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #f1f5f9; display: flex; gap: 1rem; justify-content: flex-end;">
-                        <a th:href="@{/web/solicitudes}" class="btn btn-outline" style="border-radius: 14px; padding: 0.75rem 2rem; font-weight: 600; color: #64748b; border: 2px solid #e2e8f0; text-decoration: none; display: flex; align-items: center;">
-                            Cancelar
-                        </a>
+                        <a th:href="@{/web/solicitudes}" class="btn btn-outline" style="border-radius: 14px; padding: 0.75rem 2rem; font-weight: 600; color: #64748b; border: 2px solid #e2e8f0; text-decoration: none; display: flex; align-items: center;" th:text="#{generic.auto.cancelar}"></a>
                         <button type="submit" class="btn btn-primary" id="btn-submit" style="border-radius: 14px; padding: 0.75rem 2.5rem; font-weight: 700; background: var(--primary); border: none; box-shadow: 0 4px 6px -1px rgba(var(--primary-rgb), 0.2); display: flex; align-items: center; gap: 10px; cursor: pointer;">
                             <i data-lucide="save" style="width: 20px;"></i>
-                            <span id="btn-text" th:text="${solicitud.id == null ? #messages.msg('generic.btn.create') : #messages.msg('generic.btn.save')}">Guardar</span>
+                            <span id="btn-text" th:text="${solicitud.id == null ? #messages.msg('generic.btn.create') : #messages.msg('generic.btn.save')}">[[#{generic.auto.save}]]</span>
                         </button>
                     </div>
                 </form>

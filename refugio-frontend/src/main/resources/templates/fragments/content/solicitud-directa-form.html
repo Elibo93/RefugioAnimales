@@ -14,8 +14,8 @@
                 <i data-lucide="heart" style="width: 32px; height: 32px;"></i>
             </div>
             <div>
-                <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;">Finaliza tu Adopción</h1>
-                <p style="color: var(--text-muted); margin: 0;">¡Ya casi estás! Envía la solicitud para dar el paso final.</p>
+                <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;" th:text="#{solicitud.auto.finaliza.tu.adopcion}"></h1>
+                <p style="color: var(--text-muted); margin: 0;" th:text="#{solicitud.auto.ya.casi.estas.envia.la.solicitud.para.da}"></p>
             </div>
         </div>
 
@@ -24,7 +24,7 @@
                 <img th:src="${animal.foto != null ? animal.foto : '/images/placeholder-animal.png'}" 
                      style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">
                 <div>
-                    <span style="font-size: 0.8rem; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Solicitud para</span>
+                    <span style="font-size: 0.8rem; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;" th:text="#{solicitud.auto.solicitud.para}"></span>
                     <h3 style="margin: 0; font-weight: 800;" th:text="${animal.nombre}">Nombre del Animal</h3>
                 </div>
             </div>
@@ -36,11 +36,11 @@
                 <i data-lucide="user" style="width: 28px;"></i>
             </div>
             <div>
-                <span style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600;">Adoptante</span>
+                <span style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600;" th:text="#{generic.auto.adoptante}"></span>
                 <h3 style="margin: 0; font-weight: 800; color: var(--text-main);" th:text="${nombre + ' ' + apellido}">Nombre Completo</h3>
                 <p style="margin: 4px 0 0; font-size: 0.8rem; color: var(--primary); font-weight: 500;">
                     <i data-lucide="check-circle" style="width: 12px; vertical-align: middle; margin-right: 4px;"></i>
-                    Perfil de adoptante verificado.
+                    [[#{html.auto.perfil.de.adoptante.verificado}]]
                 </p>
             </div>
         </div>
@@ -52,23 +52,21 @@
             <div style="grid-column: 1 / -1; margin: 1rem 0 1rem;">
                 <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
                     <i data-lucide="message-square" style="width: 18px;"></i>
-                    <span>Información para el refugio</span>
+                    <span th:text="#{solicitud.auto.informacion.para.el.refugio}"></span>
                 </h3>
                 <div style="height: 1px; background: rgba(0,0,0,0.05); margin-top: 0.5rem;"></div>
             </div>
 
             <div class="form-group" style="grid-column: 1 / -1;">
-                <label>¿Por qué quieres adoptar a <span th:text="${animal.nombre}"></span>?</label>
+                <label>[[#{html.auto.por.qu.quieres.adoptar.a}]] <span th:text="${animal.nombre}"></span>?</label>
                 <textarea name="comentario" rows="4" placeholder="Cuéntanos un poco sobre por qué has elegido a este peludo..."></textarea>
             </div>
 
             <div style="grid-column: 1 / -1; margin-top: 2rem; display: flex; gap: 1rem;">
-                <a th:href="@{/web/home}" class="btn btn-secondary" style="flex: 1; justify-content: center; height: 56px; border-radius: 16px;">
-                    Cancelar
-                </a>
+                <a th:href="@{/web/home}" class="btn btn-secondary" style="flex: 1; justify-content: center; height: 56px; border-radius: 16px;" th:text="#{generic.auto.cancelar}"></a>
                 <button type="submit" class="btn btn-primary" style="flex: 2; justify-content: center; height: 56px; border-radius: 16px;">
                     <i data-lucide="send"></i>
-                    <span>Enviar Solicitud</span>
+                    <span th:text="#{solicitud.auto.enviar.solicitud}"></span>
                 </button>
             </div>
         </form>

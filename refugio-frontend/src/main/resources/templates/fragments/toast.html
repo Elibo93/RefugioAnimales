@@ -13,7 +13,7 @@
     </div>
 
     <div th:if="${errorMessage}" class="toast error">
-        <i data-lucide="alert-circle" style="width:20px;"></i> <span th:text="${errorMessage != null and !errorMessage.isEmpty() ? errorMessage : #messages.msg('toast.error')}">Error</span>
+        <i data-lucide="alert-circle" style="width:20px;"></i> <span th:text="${errorMessage != null and !errorMessage.isEmpty() ? errorMessage : #messages.msg('toast.error')}">[[#{html.auto.error}]]</span>
     </div>
 </div>
 

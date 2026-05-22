@@ -79,7 +79,7 @@
                     Crear tarea
                 </span>
             </h1>
-            <p style="color:var(--text-muted); margin-top:0.5rem;">Configure los detalles y asigne responsables</p>
+            <p style="color:var(--text-muted); margin-top:0.5rem;" th:text="#{tarea.auto.configure.los.detalles.y.asigne.responsa}"></p>
         </div>
 
         <div class="card" style="max-width:800px; margin:0 auto;">
@@ -89,13 +89,13 @@
                 <div class="form-grid">
                     
                     <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Descripción de la tarea</label>
+                        <label th:text="#{tarea.auto.descripcion.de.la.tarea}"></label>
                         <input type="text" name="descripcion" th:value="${tarea.descripcion}" 
                                placeholder="Ej: Limpieza profunda del sector B" required>
                     </div>
 
                     <div class="form-group">
-                        <label>Estado</label>
+                        <label th:text="#{generic.auto.estado}"></label>
                         <select name="estado" required>
                             <option th:each="e : ${estados}" th:value="${e}" 
                                 th:text="${#strings.capitalize(e.toLowerCase().replace('_', ' '))}"
@@ -104,18 +104,18 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Fecha y Hora Límite (Vencimiento)</label>
+                        <label th:text="#{tarea.auto.fecha.y.hora.limite.vencimiento}"></label>
                         <input type="datetime-local" name="fechaLimite" th:value="${tarea.fechaLimite}">
                     </div>
 
                     <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Instrucciones detalladas</label>
+                        <label th:text="#{tarea.auto.instrucciones.detalladas}"></label>
                         <textarea name="instrucciones" rows="3" placeholder="Añade detalles, precauciones o información adicional sobre la tarea"
                                   th:text="${tarea.instrucciones}"></textarea>
                     </div>
 
                     <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Personal asignado</label>
+                        <label th:text="#{tarea.auto.personal.asignado}"></label>
                         
                         <div id="assigned-volunteers-container" class="volunteer-chips-container">
                             <!-- Chips se insertarán aquí por JS -->
@@ -123,7 +123,7 @@
 
                         <button type="button" id="btn-show-search" class="btn-add-vol" onclick="toggleSearch(true)">
                             <i data-lucide="plus" style="width: 14px;"></i>
-                            Asignar voluntario
+                            [[#{html.auto.asignar.voluntario}]]
                         </button>
 
                         <div id="search-wrapper" style="display: none; position: relative; margin-top: 15px;">
@@ -239,7 +239,7 @@
                 </div>
 
                 <div class="modal-actions" style="margin-top: 3rem; display: flex; gap: 15px; justify-content: flex-end;">
-                    <a th:href="${returnUrl}" class="btn btn-secondary">Cancelar</a>
+                    <a th:href="${returnUrl}" class="btn btn-secondary" th:text="#{generic.auto.cancelar}"></a>
                     <button type="submit" class="btn btn-primary">
                         <i data-lucide="save" style="width: 18px;"></i>
                         <span th:text="${tarea.id == null ? 'Crear Tarea' : 'Guardar Cambios'}">Crear Tarea</span>

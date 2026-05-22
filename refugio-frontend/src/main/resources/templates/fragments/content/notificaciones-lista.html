@@ -9,8 +9,8 @@
 <body>
 <div th:fragment="content">
     <div class="notif-header">
-        <h1 class="notif-title">Tu Buzón</h1>
-        <p class="notif-subtitle">Mantente al día con las novedades de tus solicitudes y tareas.</p>
+        <h1 class="notif-title" th:text="#{generic.auto.tu.buzon}"></h1>
+        <p class="notif-subtitle" th:text="#{generic.auto.mantente.al.dia.con.las.novedades.de.tus}"></p>
     </div>
 
     <div class="notifications-container">
@@ -19,8 +19,8 @@
             <div class="notif-empty-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
             </div>
-            <h3 class="notif-empty-title">No tienes notificaciones</h3>
-            <p class="notif-empty-text">Te avisaremos cuando haya novedades importantes para ti.</p>
+            <h3 class="notif-empty-title" th:text="#{generic.auto.no.tienes.notificaciones}"></h3>
+            <p class="notif-empty-text" th:text="#{generic.auto.te.avisaremos.cuando.haya.novedades.impo}"></p>
         </div>
 
         <!-- Lista de notificaciones -->
@@ -69,7 +69,7 @@
                             onclick="event.stopPropagation(); const card = this.closest('.notif-card'); card.classList.add('notif-read'); card.classList.remove('notif-unread'); const d = card.querySelector('.notif-status-dot'); if(d) d.remove(); setTimeout(() => this.remove(), 100);"
                             class="btn-mark-read">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                        Marcar como leída
+                        [[#{html.auto.marcar.como.le.da}]]
                     </button>
 
                     <button th:attr="hx-delete=@{/web/notificaciones/{id}(id=${notif.id})}"
@@ -77,12 +77,10 @@
                             onclick="event.stopPropagation();"
                             class="btn-delete-notif">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                        Eliminar
+                        [[#{generic.auto.delete}]]
                     </button>
                     
-                    <span th:if="${notif.enlace != null}" class="btn-mark-read" style="margin-left: auto;">
-                        Ver detalle →
-                    </span>
+                    <span th:if="${notif.enlace != null}" class="btn-mark-read" style="margin-left: auto;" th:text="#{generic.auto.ver.detalle}"></span>
                 </div>
             </div>
         </div>

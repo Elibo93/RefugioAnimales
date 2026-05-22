@@ -16,13 +16,10 @@
                         <img th:src="@{/images/logo-Refugio.png}" class="footer-logo" alt="Logo Refugio">
                         <div class="footer-brand">
                             <span class="footer-app-name" th:text="#{app.name}">Refugio</span>
-                            <span class="footer-app-subtitle">Segunda Oportunidad</span>
+                            <span class="footer-app-subtitle" th:text="#{generic.auto.segunda.oportunidad}"></span>
                         </div>
                     </div>
-                    <p class="footer-mission">
-                        Dedicados a rescatar, cuidar y encontrar hogares llenos de amor para cada uno de nuestros
-                        animales. Tu apoyo hace posible nuestra misión.
-                    </p>
+                    <p class="footer-mission" th:text="#{generic.auto.dedicados.a.rescatar.cuidar.y.encontrar}"></p>
                     <div class="social-icons">
                         <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="social-link instagram-link" title="Instagram">
                             <img th:src="@{/images/instagram-icon.png}" alt="Instagram">
@@ -41,41 +38,40 @@
 
                 <!-- Columna 2: Enlaces Rápidos -->
                 <div class="footer-col links-col">
-                    <h3 class="footer-title">Explorar</h3>
+                    <h3 class="footer-title" th:text="#{generic.auto.explorar}"></h3>
                     <ul class="footer-links">
-                        <li><a th:href="@{/web/animales}"><i data-lucide="dog"></i> Nuestros Animales</a></li>
-                        <li><a th:href="@{/web/donaciones}"><i data-lucide="heart"></i> Donaciones</a></li>
-                        <li><a th:href="@{/web/voluntarios/nuevo}"><i data-lucide="users"></i> Ser Voluntario</a></li>
-                        <li><a th:href="@{/web/home}"><i data-lucide="home"></i> Inicio</a></li>
+                        <li><a th:href="@{/web/animales}"><i data-lucide="dog"></i> [[#{html.auto.nuestros.animales}]]</a></li>
+                        <li><a th:href="@{/web/donaciones}"><i data-lucide="heart"></i> [[#{home.auto.donations}]]</a></li>
+                        <li><a th:href="@{/web/voluntarios/nuevo}"><i data-lucide="users"></i> [[#{html.auto.ser.voluntario}]]</a></li>
+                        <li><a th:href="@{/web/home}"><i data-lucide="home"></i> [[#{html.auto.inicio}]]</a></li>
                     </ul>
                 </div>
 
                 <!-- Columna 3: Contacto -->
                 <div class="footer-col contact-col">
-                    <h3 class="footer-title">Contacto</h3>
+                    <h3 class="footer-title" th:text="#{generic.auto.contacto}"></h3>
                     <ul class="footer-contact-info">
                         <li>
                             <i data-lucide="map-pin"></i>
-                            <a href="#" onclick="openMapsSelector(event)" style="cursor: pointer;">Calle del Refugio, 12, Madrid, España</a>
+                            <a href="#" onclick="openMapsSelector(event)" style="cursor: pointer;" th:text="#{generic.auto.calle.del.refugio.12.madrid.espana}"></a>
                         </li>
                         <li>
                             <i data-lucide="mail"></i>
-                            <a href="mailto:info@refugio.es">info@refugio.es</a>
+                            <a href="mailto:info@refugio.es" th:text="#{generic.auto.inforefugioes}"></a>
                         </li>
                         <li>
                             <i data-lucide="phone"></i>
-                            <a href="tel:+34912345678">+34 912 345 678</a>
+                            <a href="tel:+34912345678" th:text="#{generic.auto.34.912.345.678}"></a>
                         </li>
                     </ul>
                 </div>
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; 2024 Refugio de
-                    Animales. Todos los derechos reservados.</p>
+                <p th:text="#{generic.auto.copy.2024.refugio.de}"></p>
                 <div class="footer-legal">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
+                    <a href="#" th:text="#{generic.auto.privacy.policy}"></a>
+                    <a href="#" th:text="#{generic.auto.terms.of.service}"></a>
                 </div>
             </div>
         </div>

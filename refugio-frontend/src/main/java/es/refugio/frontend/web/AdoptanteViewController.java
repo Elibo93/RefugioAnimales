@@ -95,7 +95,7 @@ public class AdoptanteViewController {
         model.addAttribute("query", q);
         model.addAttribute("currentUri", WebRoutes.ADOPTANTES_BASE);
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Adoptante_LIST.getPath() + " :: list-body";
         }
 
@@ -115,7 +115,7 @@ public class AdoptanteViewController {
         model.addAttribute(ModelAttribute.SINGLE_Adoptante.getName(), emptyAdoptante);
         model.addAttribute("currentUri", WebRoutes.ADOPTANTES_BASE);
         
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Adoptante_FORM.getPath() + " :: content";
         }
         
@@ -154,7 +154,7 @@ public class AdoptanteViewController {
             model.addAttribute("currentUri", WebRoutes.ADOPTANTES_EDITAR);
             model.addAttribute("estados", List.of("PENDIENTE", "APROBADO", "RECHAZADO"));
             
-            if ("true".equals(request.getHeader("HX-Request"))) {
+            if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
                 return FragmentoContenido.Adoptante_FORM.getPath() + " :: content";
             }
         } catch (Exception e) {

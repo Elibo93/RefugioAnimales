@@ -21,15 +21,10 @@
             </div>
 
             <h1
-                style="font-size: 2.75rem; font-weight: 800; color: var(--text-main); margin-bottom: 1rem; letter-spacing: -0.025em;">
-                ¡Gracias de todo corazón!
-            </h1>
+                style="font-size: 2.75rem; font-weight: 800; color: var(--text-main); margin-bottom: 1rem; letter-spacing: -0.025em;" th:text="#{donacion.auto.gracias.de.todo.corazon}"></h1>
 
             <p
-                style="font-size: 1.25rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 3rem; max-width: 550px; margin-left: auto; margin-right: auto;">
-                Tu generosidad es la semilla de una nueva vida para nuestros animales. Cada gesto nos acerca un paso más
-                a darles el hogar y el cariño que merecen.
-            </p>
+                style="font-size: 1.25rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 3rem; max-width: 550px; margin-left: auto; margin-right: auto;" th:text="#{donacion.auto.tu.generosidad.es.la.semilla.de.una.nuev}"></p>
 
             <!-- Emotional Image -->
             <div class="image-wrapper"
@@ -42,12 +37,12 @@
                 <a th:href="@{/web/donaciones}" class="btn btn-primary btn-lg"
                     style="padding: 1rem 2.5rem; justify-content: center; min-width: 220px;">
                     <i data-lucide="list"></i>
-                    Ver donaciones
+                    [[#{html.auto.ver.donaciones}]]
                 </a>
                 <a th:href="@{/web/home}" class="btn btn-secondary btn-lg"
                     style="padding: 1rem 2.5rem; justify-content: center; min-width: 200px;">
                     <i data-lucide="home"></i>
-                    Ir al inicio
+                    [[#{html.auto.ir.al.inicio}]]
                 </a>
             </div>
         </div>

@@ -14,11 +14,11 @@
             <img th:src="@{/images/donation_hero.png}" alt="Rescued Animals">
         </div>
         <div class="donation-hero-content">
-            <h1>Tu ayuda salva vidas</h1>
-            <p>Hoy puedes ser el héroe de cientos de animales que esperan una segunda oportunidad. Cada donación cuenta.</p>
+            <h1 th:text="#{donacion.auto.tu.ayuda.salva.vidas}"></h1>
+            <p th:text="#{donacion.auto.hoy.puedes.ser.el.heroe.de.cientos.de.an}"></p>
             <a href="#formulario-donacion" class="btn btn-primary btn-lg" style="padding: 1rem 2rem; font-size: 1.1rem;">
                 <i data-lucide="heart" style="width:20px; fill: white;"></i>
-                Donar ahora
+                [[#{html.auto.donar.ahora}]]
             </a>
         </div>
     </div>
@@ -29,32 +29,32 @@
             <div class="impact-icon-box">
                 <i data-lucide="utensils" style="width: 24px; color: var(--primary);"></i>
             </div>
-            <span class="impact-amount">10€</span>
-            <p class="impact-text">Alimentas a un perro durante una semana completa con comida de alta calidad.</p>
+            <span class="impact-amount" th:text="#{donacion.auto.10}"></span>
+            <p class="impact-text" th:text="#{donacion.auto.alimentas.a.un.perro.durante.una.semana}"></p>
         </div>
         <div class="impact-card glass-panel">
             <div class="impact-icon-box">
                 <i data-lucide="syringe" style="width: 24px; color: var(--primary);"></i>
             </div>
-            <span class="impact-amount">30€</span>
-            <p class="impact-text">Vacunas y desparasitas a un cachorro, dándole el mejor comienzo posible.</p>
+            <span class="impact-amount" th:text="#{donacion.auto.30}"></span>
+            <p class="impact-text" th:text="#{donacion.auto.vacunas.y.desparasitas.a.un.cachorro.dan}"></p>
         </div>
         <div class="impact-card glass-panel">
             <div class="impact-icon-box">
                 <i data-lucide="activity" style="width: 24px; color: var(--primary);"></i>
             </div>
-            <span class="impact-amount">100€</span>
-            <p class="impact-text">Cubres una cirugía de urgencia o un tratamiento especializado vital.</p>
+            <span class="impact-amount" th:text="#{donacion.auto.100}"></span>
+            <p class="impact-text" th:text="#{donacion.auto.cubres.una.cirugia.de.urgencia.o.un.trat}"></p>
         </div>
     </div>
 
     <!-- Transparency Section (Needs & Progress) -->
     <div class="glass-panel" style="padding: 3rem; border-radius: 24px; margin-bottom: 3rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-            <h2 style="font-size: 2rem; font-weight: 800; margin: 0;">Nuestras necesidades actuales</h2>
+            <h2 style="font-size: 2rem; font-weight: 800; margin: 0;" th:text="#{donacion.auto.nuestras.necesidades.actuales}"></h2>
             <a th:if="${isAdmin}" th:href="@{/web/donaciones/objetivos/nuevo}" class="btn btn-primary" style="display: flex; align-items: center; gap: 8px;">
                 <i data-lucide="plus-circle" style="width: 18px;"></i>
-                Nuevo Objetivo
+                [[#{html.auto.nuevo.objetivo}]]
             </a>
         </div>
 
@@ -72,7 +72,7 @@
                             <span th:if="${obj.prioridad == 'CRITICA'}" 
                                   style="font-size: 0.65rem; background: #fee2e2; color: #dc2626; padding: 2px 10px; border-radius: 6px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;">
                                 <i data-lucide="alert-circle" style="width: 10px;"></i>
-                                Urgente
+                                [[#{html.auto.urgente}]]
                             </span>
                         </div>
                     </div>
@@ -80,7 +80,7 @@
                           th:text="${#numbers.formatDecimal(obj.montoRecaudado, 1, 0)} + '€ / ' + ${#numbers.formatDecimal(obj.montoObjetivo, 1, 0)} + '€'">600€ / 1000€</span>
                 </div>
 
-                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;" th:text="${obj.descripcion}">Descripción de la necesidad...</p>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;" th:text="${obj.descripcion}">Descripción [[#{html.auto.de}]] la necesidad...</p>
 
                 <div class="progress-container" style="height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden; margin-bottom: 10px;">
                     <div class="progress-bar" 
@@ -94,21 +94,19 @@
             </div>
 
             <!-- Empty State -->
-            <div th:if="${#lists.isEmpty(objetivos)}" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                No hay objetivos activos en este momento. Todas las donaciones irán al fondo general.
-            </div>
+            <div th:if="${#lists.isEmpty(objetivos)}" style="text-align: center; padding: 2rem; color: var(--text-muted);" th:text="#{donacion.auto.no.hay.objetivos.activos.en.este.momento}"></div>
         </div>
     </div>
 
     <!-- Testimonials (Sólo usuarios) -->
     <div class="testimonial-section" th:if="${isAdmin == null or !isAdmin}">
         <div class="testimonial-card">
-            <p class="testimonial-quote">"Gracias a las donaciones, pudieron operar a mi perro antes de que yo lo conociera. Ahora es el miembro más feliz de la familia."</p>
+            <p class="testimonial-quote" th:text="#{donacion.auto.gracias.a.las.donaciones.pudieron.operar}"></p>
             <div class="testimonial-author">
                 <img src="https://i.pravatar.cc/150?u=adoptante1" alt="Adoptante" class="testimonial-avatar">
                 <div>
-                    <div style="font-weight: 700;">María García</div>
-                    <div style="font-size: 0.85rem; color: var(--text-muted);">Adoptante de 'Rex'</div>
+                    <div style="font-weight: 700;" th:text="#{donacion.auto.maria.garcia}"></div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);" th:text="#{donacion.auto.adoptante.de.rex}"></div>
                 </div>
             </div>
         </div>

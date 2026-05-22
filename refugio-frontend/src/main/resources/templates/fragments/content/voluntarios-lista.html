@@ -18,16 +18,14 @@
                         <i data-lucide="clipboard-check" style="width: 20px;"></i>
                     </div>
                     <div>
-                        <h4 style="margin: 0; font-size: 1rem; font-weight: 800; color: var(--text-main);">Modo Selección Activo</h4>
+                        <h4 style="margin: 0; font-size: 1rem; font-weight: 800; color: var(--text-main);" th:text="#{generic.auto.modo.seleccion.activo}"></h4>
                         <p style="margin: 2px 0 0; font-size: 0.85rem; color: var(--text-muted);">
-                            Asignando voluntario para: <strong style="color: var(--primary);" th:text="${tareaNombreSeleccion != null ? tareaNombreSeleccion : 'Tarea #' + tareaIdSeleccion}">Tarea</strong>
+                            [[#{html.auto.asignando.voluntario.para}]] <strong style="color: var(--primary);" th:text="${tareaNombreSeleccion != null ? tareaNombreSeleccion : 'Tarea #' + tareaIdSeleccion}">Tarea</strong>
                         </p>
                     </div>
                 </div>
                 <a th:href="@{/web/tareas}" hx-get="/web/tareas" hx-target="#contenido-dinamico" hx-push-url="true"
-                   class="btn-premium secondary" style="height: 36px; padding: 0 15px; font-size: 0.8rem; border-radius: 10px;">
-                    Cancelar selección
-                </a>
+                   class="btn-premium secondary" style="height: 36px; padding: 0 15px; font-size: 0.8rem; border-radius: 10px;" th:text="#{generic.auto.cancelar.seleccion}"></a>
             </div>
 
                 <div id="voluntarios-main-container" style="width: 100%;">
@@ -65,12 +63,12 @@
                 <!-- Encabezados -->
                 <div class="list-header"
                     style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
-                    <div style="flex: 0.5; text-align: center;">ID</div>
-                    <div style="flex: 2.5; padding-left: 10px;">Voluntario / Usuario</div>
-                    <div style="flex: 2.5; text-align: center;">Contacto y Dirección</div>
-                    <div style="flex: 2; text-align: center;">Especialidad</div>
-                    <div style="flex: 2; text-align: center;">Disponibilidad</div>
-                    <div style="flex: 2; text-align: center;">Acciones</div>
+                    <div style="flex: 0.5; text-align: center;" th:text="#{generic.auto.id}"></div>
+                    <div style="flex: 2.5; padding-left: 10px;" th:text="#{voluntario.auto.voluntario.usuario}"></div>
+                    <div style="flex: 2.5; text-align: center;" th:text="#{generic.auto.contacto.y.direccion}"></div>
+                    <div style="flex: 2; text-align: center;" th:text="#{voluntario.auto.especialidad}"></div>
+                    <div style="flex: 2; text-align: center;" th:text="#{voluntario.auto.disponibilidad}"></div>
+                    <div style="flex: 2; text-align: center;" th:text="#{generic.auto.acciones}"></div>
                 </div>
 
                 <div id="voluntarios-container">
@@ -82,8 +80,8 @@
                                 <i data-lucide="search-x" style="width: 32px; color: var(--text-muted);"></i>
                             </div>
                             <div>
-                                <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">No se encontraron voluntarios</h3>
-                                <p style="margin: 5px 0 0; color: var(--text-muted); font-size: 0.9rem;">Prueba con otros términos de búsqueda.</p>
+                                <h3 style="margin: 0; color: var(--text-main); font-weight: 700;" th:text="#{voluntario.auto.no.se.encontraron.voluntarios}"></h3>
+                                <p style="margin: 5px 0 0; color: var(--text-muted); font-size: 0.9rem;" th:text="#{voluntario.auto.prueba.con.otros.terminos.de.busqueda}"></p>
                             </div>
                             <a th:href="@{/web/voluntarios(modoSeleccion=${modoSeleccion}, tareaIdSeleccion=${tareaIdSeleccion})}" 
                                th:hx-get="@{/web/voluntarios(modoSeleccion=${modoSeleccion}, tareaIdSeleccion=${tareaIdSeleccion})}" 
@@ -91,9 +89,7 @@
                                hx-select="#voluntarios-container"
                                hx-swap="outerHTML"
                                hx-replace-url="true"
-                               class="btn-premium secondary" style="height: 40px; padding: 0 1.5rem;">
-                                Ver todos
-                            </a>
+                               class="btn-premium secondary" style="height: 40px; padding: 0 1.5rem;" th:text="#{generic.auto.ver.todos}"></a>
                         </div>
 
                         <div th:each="p_item : ${voluntarios}" class="premium-row-card" th:id="'row-' + ${p_item.id}"
@@ -191,11 +187,11 @@
                                             hx-swap="innerHTML"
                                             hx-push-url="/web/tareas">
                                         <i data-lucide="plus-circle" style="width: 14px;"></i>
-                                        Asignar
+                                        [[#{html.auto.asignar}]]
                                     </button>
                                     <span th:if="${isAssigned}" class="badge-premium success" style="font-size: 0.75rem; padding: 6px 12px; display: flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2);">
                                         <i data-lucide="check-circle" style="width: 14px;"></i>
-                                        Ya asignado
+                                        [[#{html.auto.ya.asignado}]]
                                     </span>
                                 </th:block>
                             </div>

@@ -159,7 +159,7 @@ public class AnimalViewController {
         if (successMessage != null)
             model.addAttribute("successMessage", successMessage);
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Animal_LIST.getPath();
         }
 
@@ -196,7 +196,7 @@ public class AnimalViewController {
         model.addAttribute("estados", List.of("DISPONIBLE", "ADOPTADO", "EN_ACOGIDA", "EN_TRATAMIENTO", "RESERVADO", "FALLECIDO"));
         model.addAttribute("especies", List.of("PERRO", "GATO", "CONEJO", "AVE", "REPTIL", "OTRO"));
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Animal_FORM.getPath() + " :: content";
         }
 
@@ -289,7 +289,7 @@ public class AnimalViewController {
         model.addAttribute("estados", List.of("DISPONIBLE", "ADOPTADO", "EN_ACOGIDA", "EN_TRATAMIENTO", "RESERVADO", "FALLECIDO"));
         model.addAttribute("especies", List.of("PERRO", "GATO", "CONEJO", "AVE", "REPTIL", "OTRO"));
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Animal_FORM.getPath() + " :: content";
         }
 
@@ -373,7 +373,7 @@ public class AnimalViewController {
     public ResponseEntity<String> borrar(@PathVariable Integer id,
             HttpServletRequest request) {
         restTemplate.delete(apiUrl + "/v1/animales/" + id);
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return ResponseEntity.ok("");
         }
         return ResponseEntity.status(302).header("Location", WebRoutes.ANIMALES_BASE).build();
@@ -430,9 +430,13 @@ public class AnimalViewController {
 
     @GetMapping(WebRoutes.ANIMALES_BASE + "/{id}/detalle")
     public String detalleModal(@PathVariable Integer id, Model model) {
-        try {
-            restTemplate.postForObject(apiUrl + "/v1/animales/" + id + "/visitas", null, Object.class);
-        } catch (Exception ignored) {}
+        Object isAdminObj = model.getAttribute("isAdmin");
+        boolean isAdmin = isAdminObj != null && (Boolean) isAdminObj;
+        if (!isAdmin) {
+            try {
+                restTemplate.postForObject(apiUrl + "/v1/animales/" + id + "/visitas", null, Object.class);
+            } catch (Exception ignored) {}
+        }
 
         AnimalRecord animal = helper.fetchObject(apiUrl + "/v1/animales/" + id, AnimalRecord.class);
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
@@ -452,9 +456,13 @@ public class AnimalViewController {
     public String verDetalle(@PathVariable Integer id, Model model, HttpServletRequest request, HttpServletResponse response) {
         if (response != null) response.setHeader("Vary", "HX-Request");
         
-        try {
-            restTemplate.postForObject(apiUrl + "/v1/animales/" + id + "/visitas", null, Object.class);
-        } catch (Exception ignored) {}
+        Object isAdminObj = model.getAttribute("isAdmin");
+        boolean isAdmin = isAdminObj != null && (Boolean) isAdminObj;
+        if (!isAdmin) {
+            try {
+                restTemplate.postForObject(apiUrl + "/v1/animales/" + id + "/visitas", null, Object.class);
+            } catch (Exception ignored) {}
+        }
 
         AnimalRecord animal = helper.fetchObject(apiUrl + "/v1/animales/" + id, AnimalRecord.class);
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
@@ -519,10 +527,9 @@ public class AnimalViewController {
 
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Animal_DETALLE.getPath());
 
-        if (request != null && "true".equals(request.getHeader("HX-Request"))) {
+        if (request != null && "true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Animal_DETALLE.getPath() + " :: content";
         }
-
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 

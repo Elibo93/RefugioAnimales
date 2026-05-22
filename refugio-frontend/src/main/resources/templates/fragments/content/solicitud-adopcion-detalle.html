@@ -15,9 +15,9 @@
                     <div class="premium-modal-icon-wrapper" style="margin: 0; width: 48px; height: 48px; background: var(--primary-light); color: var(--primary);">
                         <i data-lucide="file-search"></i>
                     </div>
-                    <span>Revisión de Solicitud</span>
+                    <span th:text="#{adopcion.auto.revision.de.solicitud}"></span>
                 </h1>
-                <p th:if="${isAdmin}" style="color: var(--text-muted); margin-top: 4px; margin-left: 60px;">ID de Solicitud: #<span th:text="${solicitud.id}"></span></p>
+                <p th:if="${isAdmin}" style="color: var(--text-muted); margin-top: 4px; margin-left: 60px;">[[#{html.auto.id.de.solicitud}]]<span th:text="${solicitud.id}"></span></p>
             </div>
             
             <div style="display: flex; gap: 12px; align-items: center;">
@@ -27,13 +27,13 @@
                    class="btn btn-primary" 
                    style="padding: 10px 24px; font-size: 1rem; border-radius: 14px; background: #2563eb; border: none; color: white; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">
                     <i data-lucide="file-signature" style="width: 20px;"></i>
-                    <span style="font-weight: 700;">Descargar Contrato Legal</span>
+                    <span style="font-weight: 700;" th:text="#{adopcion.auto.descargar.contrato.legal}"></span>
                 </a>
                 <span class="animal-status-badge" 
                       style="padding: 8px 20px; height: auto; font-size: 0.9rem; text-transform: none; border-radius: 12px;"
                       th:classappend="${'badge-' + solicitud.estado.toString().toLowerCase()}"
                       th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(solicitud.estado, '_', ' ')))}">
-                    Estado
+                    [[#{generic.auto.status}]]
                 </span>
             </div>
         </div>
@@ -47,7 +47,7 @@
                 <div class="card premium-card" style="padding: 2rem; border-left: 4px solid var(--primary);">
                     <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
                         <i data-lucide="shield-check" style="color: var(--primary);"></i>
-                        Notas del Administrador
+                        [[#{solicitud.auto.internal.notes}]]
                     </h2>
                     
                     <!-- Modo Edición (Solo ADMIN) -->
@@ -61,11 +61,11 @@
                         
                         <textarea name="comentarioAdmin" rows="3" 
                                   style="width: 100%; padding: 1rem; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-main); font-family: inherit; margin-bottom: 1rem;"
-                                  placeholder="Escribe aquí notas internas o el motivo del rechazo..."
+                                  th:placeholder="#{solicitud.auto.write.internal.notes}"
                                   th:text="${solicitud.comentarioAdmin}"></textarea>
                         <button type="submit" class="btn btn-secondary" style="height: 40px; font-size: 0.85rem;">
                             <i data-lucide="save" style="width: 14px;"></i>
-                            Guardar Nota
+                            [[#{solicitud.auto.save.note}]]
                         </button>
                     </form>
 
@@ -83,35 +83,35 @@
                 <div class="card premium-card" style="padding: 2rem;">
                     <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
                         <i data-lucide="user" style="color: var(--primary);"></i>
-                        Información del Adoptante
+                        [[#{solicitud.auto.applicant.info}]]
                     </h2>
                     
                     <div th:if="${perfilAdoptante != null}" class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                         <div class="detail-item">
-                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Nombre Completo</label>
+                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;" th:text="#{generic.auto.nombre.completo}"></label>
                             <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="|${perfilAdoptante.nombre} ${perfilAdoptante.apellido}|">Nombre</span>
                         </div>
                         <div class="detail-item">
-                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">DNI / NIE</label>
+                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;" th:text="#{generic.auto.dni.nie}"></label>
                             <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.dni}">DNI</span>
                         </div>
                         <div class="detail-item">
-                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Teléfono</label>
+                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;" th:text="#{generic.auto.telefono}"></label>
                             <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.telefono}">Teléfono</span>
                         </div>
                         <div class="detail-item">
-                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Fecha Nacimiento</label>
+                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;" th:text="#{adopcion.auto.fecha.nacimiento}"></label>
                             <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.fechaNacimiento}">Fecha</span>
                         </div>
                         <div class="detail-item" style="grid-column: span 2;">
-                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Dirección</label>
+                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;" th:text="#{generic.auto.direccion}"></label>
                             <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.direccion}">Dirección</span>
                         </div>
                     </div>
                     
                     <div th:unless="${perfilAdoptante != null}" style="padding: 2rem; text-align: center; background: #fef2f2; border-radius: 16px; border: 1px dashed #f87171;">
                         <i data-lucide="alert-triangle" style="width: 32px; height: 32px; color: #ef4444; margin-bottom: 12px;"></i>
-                        <p style="margin: 0; color: #991b1b; font-weight: 600;">No se han encontrado los datos legales de este adoptante.</p>
+                        <p style="margin: 0; color: #991b1b; font-weight: 600;" th:text="#{adopcion.auto.no.se.han.encontrado.los.datos.legales.d}"></p>
                     </div>
                 </div>
 
@@ -119,7 +119,7 @@
                 <div class="card" style="padding: 2rem;">
                     <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
                         <i data-lucide="message-square" style="color: var(--primary);"></i>
-                        Motivación para la Adopción
+                        [[#{solicitud.auto.motivation}]]
                     </h2>
                     <div style="background: var(--bg-main); padding: 1.5rem; border-radius: 16px; border-left: 4px solid var(--primary);">
                         <p style="margin: 0; font-size: 1.05rem; line-height: 1.6; color: var(--text-main); font-style: italic;" 
@@ -136,14 +136,14 @@
                         <form th:action="@{/web/solicitudes/{id}/aprobar(id=${solicitud.id})}" method="POST" style="flex: 1;">
                             <button type="submit" class="btn btn-primary" style="width: 100%; height: 56px; justify-content: center; font-size: 1rem; border-radius: 16px;">
                                 <i data-lucide="check-circle"></i>
-                                Aprobar Adopción
+                                [[#{solicitud.auto.approve.adoption}]]
                             </button>
                         </form>
                         
                         <form th:action="@{/web/solicitudes/{id}/rechazar(id=${solicitud.id})}" method="POST" style="flex: 1;">
                             <button type="submit" class="btn btn-danger" style="width: 100%; height: 56px; justify-content: center; font-size: 1rem; border-radius: 16px;">
                                 <i data-lucide="x-circle"></i>
-                                Rechazar Solicitud
+                                [[#{solicitud.auto.decline.request}]]
                             </button>
                         </form>
                     </div>
@@ -159,7 +159,7 @@
                             <input type="hidden" name="redireccion" value="detalle">
                             <button type="submit" class="btn btn-secondary" style="width: 100%; height: 48px; justify-content: center; border-radius: 12px;">
                                 <i data-lucide="clock"></i>
-                                Poner en Revisión
+                                [[#{html.auto.poner.en.revisi.n}]]
                             </button>
                         </form>
                     </div>
@@ -181,7 +181,7 @@
                     <div style="padding: 1.5rem;">
                         <div style="display: flex; flex-direction: column; gap: 12px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
-                                <span style="color: var(--text-muted);">Sexo</span>
+                                <span style="color: var(--text-muted);" th:text="#{generic.auto.sexo}"></span>
                                 <div style="display: flex; align-items: center; gap: 6px;">
                                     <i th:if="${animalData != null and animalData.sexo != null}"
                                        th:data-lucide="${animalData.sexo.toString() == 'MACHO' ? 'mars' : 'venus'}"
@@ -190,11 +190,11 @@
                                 </div>
                             </div>
                             <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
-                                <span style="color: var(--text-muted);">Edad</span>
+                                <span style="color: var(--text-muted);" th:text="#{generic.auto.edad}"></span>
                                 <span style="font-weight: 700;" th:text="${animalData != null ? animalData.edad : '-'}">2 años</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
-                                <span style="color: var(--text-muted);">Tamaño</span>
+                                <span style="color: var(--text-muted);" th:text="#{generic.auto.tamano}"></span>
                                 <span style="font-weight: 700;" th:text="${animalData != null ? animalData.tamano : '-'}">Mediano</span>
                             </div>
                         </div>
@@ -202,7 +202,7 @@
                         <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
                             <a th:href="@{/web/animales/{id}(id=${solicitud.animalId})}" class="btn btn-secondary" style="width: 100%; justify-content: center; font-size: 0.85rem;">
                                 <i data-lucide="external-link" style="width: 14px;"></i>
-                                Ver Ficha Animal
+                                [[#{html.auto.generic.auto.see.file.animal}]]
                             </a>
                         </div>
                     </div>
@@ -212,12 +212,12 @@
                     <a th:if="${isAdmin}" 
                        th:href="@{/web/solicitudes}" class="btn btn-secondary" style="width: 100%; justify-content: center; height: 48px; border-radius: 12px;">
                         <i data-lucide="arrow-left"></i>
-                        Volver a la Lista
+                        [[#{generic.btn.back}]]
                     </a>
                     <a th:unless="${isAdmin}" 
                        th:href="@{/web/solicitudes/mis-adoptados}" class="btn btn-secondary" style="width: 100%; justify-content: center; height: 48px; border-radius: 12px;">
                         <i data-lucide="arrow-left"></i>
-                        Mis Solicitudes
+                        [[#{html.auto.mis.solicitudes}]]
                     </a>
                 </div>
             </div>

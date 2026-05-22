@@ -43,7 +43,7 @@ public class NotificacionViewController {
 
         model.addAttribute("currentUri", WebRoutes.NOTIFICACIONES_BASE);
         
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Notificacion_LIST.getPath() + " :: content";
         }
         

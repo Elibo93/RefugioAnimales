@@ -7,7 +7,7 @@
 </head>
 
 <body>
-<div th:fragment="content" hx-history="false">
+<div th:fragment="content">
         <!-- Cabecera Premium -->
         <div class="page-header" style="text-align:center; margin-bottom: 3rem;">
             <div
@@ -38,7 +38,7 @@
                     <h2
                         style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary); margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; font-weight: 800;">
                         <i data-lucide="info" style="width: 20px;"></i>
-                        Información Básica
+                        [[#{animal.auto.basic.info}]]
                     </h2>
 
                     <div
@@ -61,7 +61,7 @@
                             <select name="especie" id="especieSelect" required onchange="toggleEspeciePersonalizada()"
                                 th:disabled="${animal.id != null}"
                                 th:style="'width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url(\'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E\') no-repeat right 1.25rem center/1.2rem; background-color: ' + (${animal.id != null} ? '#f8fafc' : 'white') + ';'">
-                                <option value="">Selecciona...</option>
+                                <option value="" th:text="#{animal.auto.selecciona}"></option>
                                 <option th:each="e : ${especies}" th:value="${e}"
                                     th:text="${#strings.capitalize(e.toLowerCase())}"
                                     th:selected="${animal.especie == e}"></option>
@@ -120,8 +120,7 @@
                         <!-- Fecha Ingreso -->
                         <div class="form-group">
                             <label
-                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">Fecha
-                                de Ingreso</label>
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{generic.auto.fecha}"></label>
                             <input type="date" name="fechaIngreso"
                                 th:value="${animal.fechaIngreso != null ? #strings.substring(animal.fechaIngreso.toString(), 0, 10) : #calendars.format(#calendars.createNow(), 'yyyy-MM-dd')}"
                                 style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none;">
@@ -134,7 +133,7 @@
                     <h2
                         style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary); margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; font-weight: 800;">
                         <i data-lucide="heart-pulse" style="width: 20px;"></i>
-                        Detalles y Salud
+                        [[#{animal.auto.details.health}]]
                     </h2>
 
                     <div
@@ -143,7 +142,7 @@
                         <div class="form-group">
                             <label
                                 style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
-                                th:text="#{animal.field.status}">Estado</label>
+                                th:text="#{animal.field.status}">[[#{generic.auto.status}]]</label>
                             <select name="estado"
                                 style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem; background-color: white;">
                                 <option th:each="e : ${estados}" th:value="${e}"
@@ -190,14 +189,14 @@
                         <div class="form-group">
                             <label
                                 style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
-                                th:text="#{animal.field.nivelEnergia.label}">Nivel de Energía</label>
+                                th:text="#{animal.field.nivelEnergia.label}">Nivel [[#{html.auto.de}]] Energía</label>
                             <select name="nivelEnergia"
                                 style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem; background-color: white;">
-                                <option value="1" th:selected="${animal.nivelEnergia == 1}">Muy Bajo</option>
-                                <option value="2" th:selected="${animal.nivelEnergia == 2}">Bajo</option>
-                                <option value="3" th:selected="${animal.nivelEnergia == 3}">Medio</option>
-                                <option value="4" th:selected="${animal.nivelEnergia == 4}">Alto</option>
-                                <option value="5" th:selected="${animal.nivelEnergia == 5}">Muy Alto</option>
+                                <option value="1" th:selected="${animal.nivelEnergia == 1}" th:text="#{animal.auto.muy.bajo}"></option>
+                                <option value="2" th:selected="${animal.nivelEnergia == 2}" th:text="#{animal.auto.bajo}"></option>
+                                <option value="3" th:selected="${animal.nivelEnergia == 3}" th:text="#{animal.auto.medio}"></option>
+                                <option value="4" th:selected="${animal.nivelEnergia == 4}" th:text="#{animal.auto.alto}"></option>
+                                <option value="5" th:selected="${animal.nivelEnergia == 5}" th:text="#{animal.auto.muy.alto}"></option>
                             </select>
                         </div>
 
@@ -207,7 +206,7 @@
                             <input type="checkbox" name="urgencia" th:checked="${animal.urgencia}"
                                 style="width: 20px; height: 20px; cursor: pointer; accent-color: #ef4444;">
                             <label style="margin: 0; font-weight: 700; color: #be123c; cursor: pointer;"
-                                th:text="#{animal.field.urgencia.label}">¿Adopción Urgente?</label>
+                                th:text="#{animal.field.urgencia.label}">¿Adopción [[#{html.auto.urgente}]]?</label>
                         </div>
                     </div>
                 </div>
@@ -217,7 +216,7 @@
                     <h2
                         style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary); margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; font-weight: 800;">
                         <i data-lucide="image" style="width: 20px;"></i>
-                        Multimedia y Perfil
+                        [[#{animal.auto.multimedia.profile}]]
                     </h2>
 
                     <!-- Fotografía -->
@@ -233,7 +232,7 @@
                                 <img th:src="${animal.foto}"
                                     style="width: 120px; height: 120px; object-fit: cover; border-radius: 20px; border: 4px solid white; box-shadow: var(--shadow-md);">
                                 <span
-                                    style="position: absolute; top: -10px; right: -10px; background: var(--primary); color: white; padding: 6px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; z-index: 20; box-shadow: 0 4px 10px rgba(45, 157, 88, 0.3); border: 2px solid white;">ACTUAL</span>
+                                    style="position: absolute; top: -10px; right: -10px; background: var(--primary); color: white; padding: 6px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; z-index: 20; box-shadow: 0 4px 10px rgba(45, 157, 88, 0.3); border: 2px solid white;" th:text="#{animal.auto.actual}"></span>
                                 <input type="hidden" name="foto" th:value="${animal.foto}">
                             </div>
 
@@ -243,8 +242,7 @@
                                     onclick="document.getElementById('fotoFileInput').click()">
                                     <i data-lucide="upload-cloud"
                                         style="width: 32px; height: 32px; color: #94a3b8; margin-bottom: 0.5rem;"></i>
-                                    <span style="color: #64748b; font-size: 0.85rem; font-weight: 600;">Haz clic para
-                                        subir nueva foto</span>
+                                    <span style="color: #64748b; font-size: 0.85rem; font-weight: 600;" th:text="#{animal.auto.haz.clic.para}"></span>
                                     <input type="file" id="fotoFileInput" name="fotoArchivo" accept="image/*"
                                         style="display: none;" onchange="previewImage(this)">
                                 </div>
@@ -252,8 +250,7 @@
                                     style="margin-top: 1rem; display: none; align-items: center; gap: 1rem; background: #ecfdf5; padding: 0.75rem; border-radius: 14px; border: 1px solid #d1fae5;">
                                     <img id="imagePreview" src="#"
                                         style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;">
-                                    <span style="font-size: 0.8rem; color: #065f46; font-weight: 600;">Nueva imagen
-                                        lista para subir</span>
+                                    <span style="font-size: 0.8rem; color: #065f46; font-weight: 600;" th:text="#{animal.auto.nueva.imagen}"></span>
                                 </div>
                                 <input type="hidden" name="foto" id="resizedFotoInput">
                             </div>
@@ -274,14 +271,12 @@
                 <!-- ACCIONES -->
                 <div
                     style="margin-top: 4rem; display: flex; gap: 1.5rem; justify-content: flex-end; border-top: 1px solid #f1f5f9; padding-top: 2rem;">
-                    <a th:hx-get="@{/web/animales}" hx-target="#contenido-dinamico" hx-replace-url="true" hx-history="false" hx-swap="innerHTML show:window:top" class="btn"
-                        style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: #64748b; background: #f1f5f9; text-decoration: none; transition: all 0.2s; cursor: pointer;">
-                        Cancelar
-                    </a>
+                    <a th:hx-get="@{/web/animales}" hx-target="#contenido-dinamico" hx-replace-url="true" hx-swap="innerHTML show:window:top" class="btn"
+                        style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: #64748b; background: #f1f5f9; text-decoration: none; transition: all 0.2s; cursor: pointer;" th:text="#{generic.auto.cancelar}"></a>
                     <button type="submit" class="btn btn-primary"
                         style="padding: 1rem 3rem; border-radius: 16px; font-weight: 700; box-shadow: 0 10px 25px rgba(45, 157, 88, 0.25);">
                         <i data-lucide="save" style="width: 20px; margin-right: 8px;"></i>
-                        Guardar Ficha
+                        [[#{animal.auto.save.file}]]
                     </button>
                 </div>
             </form>

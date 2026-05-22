@@ -26,7 +26,7 @@
                         th:text="${historial.fecha() != null ? historial.fecha().toString().substring(0,10) : '-'}">2024-01-01</span>
                     <h2 style="margin: 0; color: white; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px;"
                         th:text="${animal != null ? 'Historial de ' + animal.nombre() : 'Detalle Médico'}">
-                        Historial de Rocky</h2>
+                        Historial [[#{html.auto.de}]] Rocky</h2>
                 </div>
                 <button type="button" onclick="closeModal()"
                     style="position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.2s; z-index: 10;">
@@ -41,8 +41,7 @@
                     <!-- Veterinario -->
                     <div class="info-row">
                         <label
-                            style="display: block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 1.2px; margin-bottom: 4px;">Veterinario
-                            Responsable</label>
+                            style="display: block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 1.2px; margin-bottom: 4px;" th:text="#{historial.auto.veterinario}"></label>
                         <div
                             style="display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 8px 14px; border-radius: 14px; border: 1px solid #f1f5f9;">
                             <div
@@ -52,8 +51,7 @@
                             <div>
                                 <strong style="color: #1e293b; font-size: 0.9rem;"
                                     th:text="${historial.veterinario()}">Dra. Silva</strong>
-                                <span style="display: block; font-size: 0.65rem; color: #64748b;">Especialista
-                                    Colegiado</span>
+                                <span style="display: block; font-size: 0.65rem; color: #64748b;" th:text="#{historial.auto.especialista}"></span>
                             </div>
                         </div>
                     </div>
@@ -61,8 +59,7 @@
                     <!-- Diagnóstico -->
                     <div class="info-row">
                         <label
-                            style="display: block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 1.2px; margin-bottom: 4px;">Diagnóstico
-                            / Descripción</label>
+                            style="display: block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 1.2px; margin-bottom: 4px;" th:text="#{historial.auto.diagnostico}"></label>
                         <div
                             style="background: #fdf2f8; padding: 12px 14px; border-radius: 14px; border-left: 4px solid #ec4899;">
                             <p style="margin: 0; line-height: 1.4; color: #831843; font-weight: 500; font-size: 0.85rem;"
@@ -75,8 +72,7 @@
                     <!-- Tratamiento -->
                     <div class="info-row">
                         <label
-                            style="display: block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 1.2px; margin-bottom: 4px;">Tratamiento
-                            Aplicado</label>
+                            style="display: block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 1.2px; margin-bottom: 4px;" th:text="#{historial.auto.tratamiento}"></label>
                         <div
                             style="background: #f0fdf4; padding: 12px 14px; border-radius: 14px; border-left: 4px solid #22c55e;">
                             <p style="margin: 0; line-height: 1.4; color: #14532d; font-weight: 500; font-size: 0.85rem;"
@@ -92,7 +88,7 @@
                 <div style="margin-top: 15px; display: flex; justify-content: flex-end;">
                     <button type="button" onclick="closeModal()" class="btn-premium"
                         style="background: #1e293b; color: white; padding: 8px 25px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 8px; font-size: 0.85rem;">
-                        <span>Cerrar Detalle</span>
+                        <span th:text="#{historial.auto.cerrar.detalle}"></span>
                         <i data-lucide="chevron-right" style="width: 14px;"></i>
                     </button>
                 </div>

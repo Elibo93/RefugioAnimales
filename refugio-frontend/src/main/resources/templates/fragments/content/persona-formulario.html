@@ -31,7 +31,7 @@
                     <div class="form-section">
                         <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
                             <i data-lucide="info" style="width: 18px;"></i>
-                            Información de la Cuenta
+                            [[#{html.auto.informaci.n.de.la.cuenta}]]
                         </h2>
 
                         <!-- Username and Email Row -->
@@ -39,7 +39,7 @@
                             <div class="form-group">
                                 <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
                                     <i data-lucide="user" style="width: 16px; color: #64748b;"></i>
-                                    <span>Nombre de Usuario</span>
+                                    <span th:text="#{persona.auto.nombre.de.usuario.1}"></span>
                                 </label>
                                 <input type="text" name="username" th:value="${persona.username}" required
                                     class="form-control"
@@ -50,7 +50,7 @@
                             <div class="form-group">
                                 <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
                                     <i data-lucide="mail" style="width: 16px; color: #64748b;"></i>
-                                    <span th:text="#{persona.field.email}">Email</span>
+                                    <span th:text="#{persona.field.email}">[[#{generic.auto.email}]]</span>
                                 </label>
                                 <input type="email" name="email" th:value="${persona.email}" required
                                     class="form-control"
@@ -61,7 +61,7 @@
 
                         <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 1.5rem; margin-top: 2rem; display: flex; align-items: center; gap: 8px;">
                             <i data-lucide="user-check" style="width: 18px;"></i>
-                            Perfil Legal (Opcional)
+                            [[#{html.auto.perfil.legal.opcional}]]
                         </h2>
 
                         <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
@@ -103,7 +103,7 @@
                             <div class="form-group">
                                 <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
                                     <i data-lucide="credit-card" style="width: 16px; color: #64748b;"></i>
-                                    <span>DNI / NIE</span>
+                                    <span th:text="#{generic.auto.dni.nie}"></span>
                                 </label>
                                 <input type="text" name="dni" th:value="${persona.dni}"
                                     class="form-control"
@@ -117,7 +117,7 @@
                             <div class="form-group">
                                 <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
                                     <i data-lucide="calendar" style="width: 16px; color: #64748b;"></i>
-                                    <span>Fecha de Nacimiento</span>
+                                    <span th:text="#{generic.auto.fecha.de.nacimiento}"></span>
                                 </label>
                                 <input type="date" name="fechaNacimiento" th:value="${persona.fechaNacimiento}"
                                     class="form-control"
@@ -156,7 +156,7 @@
                     <!-- ACCIONES -->
                     <div class="modal-actions" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #f1f5f9; display: flex; gap: 1rem; justify-content: flex-end;">
                         <a th:href="@{${(isAdmin and persona.id != currentUserId) ? '/web/personas' : '/web/personas/' + currentUserId}}" class="btn btn-outline" style="border-radius: 14px; padding: 0.75rem 2rem; font-weight: 600; color: #64748b; border: 2px solid #e2e8f0; transition: all 0.2s; text-decoration: none; display: flex; align-items: center;" th:text="#{generic.btn.cancel}">
-                            Cancelar
+                            [[#{generic.auto.cancel}]]
                         </a>
                         <button type="submit" class="btn btn-primary" style="border-radius: 14px; padding: 0.75rem 2.5rem; font-weight: 700; background: var(--primary); border: none; box-shadow: 0 4px 6px -1px rgba(var(--primary-rgb), 0.2); display: flex; align-items: center; gap: 10px; cursor: pointer;">
                             <i data-lucide="save" style="width: 20px;"></i>

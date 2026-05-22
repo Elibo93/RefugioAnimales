@@ -105,12 +105,12 @@
             <div id="adopcion-results" class="premium-list-container" style="margin-top: 1.5rem;">
                 <div class="list-header"
                     style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
-                    <div style="flex: 0.5; text-align: center;">ID</div>
-                    <div style="flex: 2;">Adoptante</div>
-                    <div style="flex: 2;">Animal</div>
-                    <div style="flex: 1.5; text-align: center;">Estado</div>
-                    <div style="flex: 1.5; text-align: center;">Fecha Firma</div>
-                    <div style="flex: 1.2; text-align: center;">Acciones</div>
+                    <div style="flex: 0.5; text-align: center;" th:text="#{generic.auto.id}"></div>
+                    <div style="flex: 2;" th:text="#{generic.auto.adoptante}"></div>
+                    <div style="flex: 2;" th:text="#{generic.auto.animal}"></div>
+                    <div style="flex: 1.5; text-align: center;" th:text="#{generic.auto.estado}"></div>
+                    <div style="flex: 1.5; text-align: center;" th:text="#{adopcion.auto.fecha.firma}"></div>
+                    <div style="flex: 1.2; text-align: center;" th:text="#{generic.auto.acciones}"></div>
                 </div>
 
                 <div class="list-body" style="display: flex; flex-direction: column; gap: 12px;">

@@ -46,7 +46,7 @@
         </ul>
         <div th:if="${#lists.isEmpty(animalesEncontrados)}"
             style="padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: white; color: var(--text-muted); font-size: 0.85rem; box-shadow: var(--shadow-lg); margin-top: 5px; text-align: center;">
-            <p style="margin: 0;">No se encontraron animales disponibles</p>
+            <p style="margin: 0;" th:text="#{animal.auto.no.se.encontraron.animales.disponibles}"></p>
         </div>
     </div>
 </body>

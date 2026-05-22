@@ -23,9 +23,7 @@
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <strong th:text="${u.nombre + ' ' + u.apellido}" style="display: block; font-size: 0.95rem;"></strong>
                             <span th:if="${u.yaRegistrado}" 
-                                  style="font-size: 0.65rem; background: var(--danger-bg); color: var(--danger); padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase;">
-                                Ya registrado
-                            </span>
+                                  style="font-size: 0.65rem; background: var(--danger-bg); color: var(--danger); padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase;" th:text="#{generic.auto.ya.registrado}"></span>
                         </div>
                         <small th:text="${u.email}" style="color: var(--text-muted); font-size: 0.8rem;"></small>
                     </div>
@@ -33,9 +31,7 @@
             </li>
         </ul>
         <div th:if="${#lists.isEmpty(usuariosEncontrados)}" 
-             style="padding: 15px; border: 1px solid var(--border); border-radius: 12px; background: white; color: var(--text-muted); font-size: 0.85rem; box-shadow: var(--shadow-lg); margin-top: 5px; text-align: center;">
-            No se encontraron usuarios
-        </div>
+             style="padding: 15px; border: 1px solid var(--border); border-radius: 12px; background: white; color: var(--text-muted); font-size: 0.85rem; box-shadow: var(--shadow-lg); margin-top: 5px; text-align: center;" th:text="#{generic.auto.no.se.encontraron.usuarios}"></div>
     </div>
 </body>
 

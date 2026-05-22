@@ -27,16 +27,15 @@
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;">
                 <div>
                     <h2 style="font-weight: 800; color: var(--text-main); margin: 0; font-size: 1.85rem; letter-spacing: -0.02em;"
-                        th:text="#{donacion.list.title}">Registro de Donaciones</h2>
-                    <p style="color: var(--text-muted); margin-top: 0.25rem;">Historial completo e inmutable de
-                        aportaciones al refugio</p>
+                        th:text="#{donacion.list.title}">Registro [[#{html.auto.de}]] Donaciones</h2>
+                    <p style="color: var(--text-muted); margin-top: 0.25rem;" th:text="#{donacion.auto.historial.completo.e.inmutable.de}"></p>
                 </div>
                 <div style="display: flex; gap: 0.75rem;">
                     <!-- Botón para alternar formulario de donación para el Administrador -->
                     <button id="btn-admin-donar" class="btn btn-primary"
                         style="padding: 0.7rem 1.25rem; border-radius: 14px; font-weight: 700; background: var(--primary); color: white; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm); border: none; cursor: pointer; transition: all 0.3s ease;">
                         <i data-lucide="heart" style="width: 18px; fill: white;"></i>
-                        <span>Registrar Aportación</span>
+                        <span th:text="#{donacion.auto.registrar.aportacion}"></span>
                     </button>
 
                     <a th:href="@{/web/donaciones/pdf}" target="_blank" title="Exportar listado a PDF" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
@@ -53,11 +52,11 @@
                 <div th:fragment="list-body">
                 <!-- Encabezados -->
                 <div class="list-header" style="background: transparent; padding: 0 3rem 1rem; display: flex; align-items: center; gap: 2rem;">
-                    <div style="flex: 2;">Donante</div>
-                    <div style="flex: 1.2; text-align: center;">Tipo</div>
-                    <div style="flex: 1.2; text-align: center;">Cantidad</div>
-                    <div style="flex: 1.2; text-align: center;">Fecha</div>
-                    <div style="flex: 2.5; padding-left: 2rem;">Descripción</div>
+                    <div style="flex: 2;" th:text="#{donacion.auto.donante}"></div>
+                    <div style="flex: 1.2; text-align: center;" th:text="#{donacion.auto.tipo}"></div>
+                    <div style="flex: 1.2; text-align: center;" th:text="#{donacion.auto.cantidad}"></div>
+                    <div style="flex: 1.2; text-align: center;" th:text="#{generic.auto.fecha}"></div>
+                    <div style="flex: 2.5; padding-left: 2rem;" th:text="#{generic.auto.descripcion}"></div>
                 </div>
 
                 <div class="list-body" style="display: flex; flex-direction: column; gap: 12px;">
@@ -110,7 +109,7 @@
                 <!-- Empty State -->
                 <div th:if="${#lists.isEmpty(donaciones)}" style="text-align:center;padding:4rem;background:white;border-radius:24px;border: 1px solid var(--border);">
                     <i data-lucide="inbox" style="width:48px; height:48px; margin-bottom:1rem; color: var(--text-muted); opacity: 0.3;"></i>
-                    <p style="color: var(--text-muted); font-weight: 600;">No hay donaciones registradas aún.</p>
+                    <p style="color: var(--text-muted); font-weight: 600;" th:text="#{donacion.auto.no.hay.donaciones.registradas.aun}"></p>
                 </div>
                 </div>
 

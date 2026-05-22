@@ -376,7 +376,7 @@ public class DonacionViewController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         restTemplate.delete(apiUrl + "/v1/donaciones/" + id);
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return ResponseEntity.ok("");
         }
         return ResponseEntity.status(302).header("Location", WebRoutes.DONACIONES_BASE).build();

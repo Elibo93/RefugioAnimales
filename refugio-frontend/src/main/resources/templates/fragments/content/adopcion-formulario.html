@@ -38,14 +38,14 @@
                     <h2
                         style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
                         <i data-lucide="paw-print" style="width: 18px;"></i>
-                        Animal Adoptado
+                        [[#{html.auto.animal.adoptado}]]
                     </h2>
 
                     <div th:if="${adopcion.id == null}" style="position: relative;">
                         <label
                             style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">
                             <i data-lucide="search" style="width: 18px; color: var(--primary);"></i>
-                            Buscar Animal
+                            [[#{html.auto.buscar.animal}]]
                         </label>
                         <div style="position: relative;">
                             <input type="text" id="animal-search" name="animal_q" class="form-control"
@@ -91,14 +91,14 @@
                     <h2
                         style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
                         <i data-lucide="user" style="width: 18px;"></i>
-                        Persona Adoptante
+                        [[#{html.auto.persona.adoptante}]]
                     </h2>
 
                     <div th:if="${adopcion.id == null}" style="position: relative;">
                         <label
                             style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">
                             <i data-lucide="search" style="width: 18px; color: var(--primary);"></i>
-                            Buscar Adoptante
+                            [[#{html.auto.buscar.adoptante}]]
                         </label>
                         <div style="position: relative;">
                             <input type="text" id="user-search" name="q" class="form-control"
@@ -126,7 +126,7 @@
                         <div style="flex: 1;">
                             <strong id="selected-user-name" th:text="${nombreAdoptante}"
                                 style="display: block; font-size: 1.1rem; color: var(--text-main);"></strong>
-                            <span style="font-size: 0.85rem; color: #64748b;">Adoptante Validado</span>
+                            <span style="font-size: 0.85rem; color: #64748b;" th:text="#{adopcion.auto.adoptante.validado}"></span>
                         </div>
                         <button type="button" onclick="clearUserSelection()" th:if="${adopcion.id == null}"
                             style="background: #fee2e2; border: none; color: #ef4444; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
@@ -142,7 +142,7 @@
                     <h2
                         style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
                         <i data-lucide="calendar" style="width: 18px;"></i>
-                        Detalles de la Adopción
+                        [[#{html.auto.detalles.de.la.adopci.n}]]
                     </h2>
 
                     <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
@@ -150,21 +150,21 @@
                             <label
                                 style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
                                 <i data-lucide="activity" style="width: 16px; color: var(--success);"></i>
-                                Estado del Trámite
+                                [[#{html.auto.estado.del.tr.mite}]]
                             </label>
                             <select name="estado" class="form-control" required
                                 style="border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; font-weight: 500; color: var(--text-main);">
                                 <option th:each="opt : ${estadosAdopcion}" 
                                         th:value="${opt.value}" 
                                         th:text="${opt.label}"
-                                        th:selected="${adopcion.estado == opt.value}">Estado</option>
+                                        th:selected="${adopcion.estado == opt.value}">[[#{generic.auto.status}]]</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label
                                 style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
                                 <i data-lucide="calendar-check" style="width: 16px; color: #6366f1;"></i>
-                                Fecha de Firma
+                                [[#{html.auto.fecha.de.firma}]]
                             </label>
                             <input type="date" name="fechaAdopcion" class="form-control" required
                                 th:value="${adopcion.fechaAdopcion != null ? #temporals.format(adopcion.fechaAdopcion, 'yyyy-MM-dd') : #temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
@@ -177,13 +177,11 @@
                 <div class="modal-actions"
                     style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #f1f5f9; display: flex; gap: 1rem; justify-content: flex-end;">
                     <a th:href="@{/web/adopciones}" class="btn btn-outline"
-                        style="border-radius: 14px; padding: 0.75rem 2rem; font-weight: 600; color: #64748b; border: 2px solid #e2e8f0; text-decoration: none; display: flex; align-items: center;">
-                        Cancelar
-                    </a>
+                        style="border-radius: 14px; padding: 0.75rem 2rem; font-weight: 600; color: #64748b; border: 2px solid #e2e8f0; text-decoration: none; display: flex; align-items: center;" th:text="#{generic.auto.cancelar}"></a>
                     <button type="submit" class="btn btn-primary"
                         style="border-radius: 14px; padding: 0.75rem 2.5rem; font-weight: 700; background: var(--primary); border: none; box-shadow: 0 4px 6px -1px rgba(var(--primary-rgb), 0.2); display: flex; align-items: center; gap: 10px; cursor: pointer;">
                         <i data-lucide="save" style="width: 20px;"></i>
-                        Confirmar Adopción
+                        [[#{html.auto.confirmar.adopci.n}]]
                     </button>
                 </div>
             </form>

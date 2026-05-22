@@ -14,17 +14,11 @@
             <i data-lucide="check-circle" style="width: 48px; height: 48px;"></i>
         </div>
 
-        <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--text-main); margin-bottom: 1rem;">
-            ¡Solicitud Enviada!
-        </h2>
+        <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--text-main); margin-bottom: 1rem;" th:text="#{solicitud.auto.solicitud.enviada.1}"></h2>
         
-        <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; margin-bottom: 2.5rem;">
-            Hemos registrado tu solicitud de adopción correctamente. El equipo del refugio la revisará pronto.
-        </p>
+        <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; margin-bottom: 2.5rem;" th:text="#{solicitud.auto.hemos.registrado.tu.solicitud.de.adopcio}"></p>
 
-        <button class="btn btn-primary" style="width: 100%; padding: 1rem;" onclick="window.location.reload()">
-            Entendido
-        </button>
+        <button class="btn btn-primary" style="width: 100%; padding: 1rem;" onclick="window.location.reload()" th:text="#{solicitud.auto.entendido}"></button>
 
     </div>
 </div>

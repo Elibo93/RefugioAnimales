@@ -13,12 +13,8 @@
         <div class="premium-modal-icon-wrapper" style="margin: 0 auto 1.5rem; width: 64px; height: 64px; background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); color: #166534; border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(22, 101, 52, 0.1);">
             <i data-lucide="target" style="width: 32px; height: 32px;"></i>
         </div>
-        <h1 class="page-title" style="font-size: 2.25rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.75rem;">
-            Nuevo Objetivo de Donación
-        </h1>
-        <p style="color:var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
-            Define una necesidad específica para motivar a los donantes y dar transparencia al refugio
-        </p>
+        <h1 class="page-title" style="font-size: 2.25rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.75rem;" th:text="#{donacion.auto.nuevo.objetivo.de.donacion}"></h1>
+        <p style="color:var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto;" th:text="#{donacion.auto.define.una.necesidad.especifica.para.mot}"></p>
     </div>
 
     <div style="max-width: 800px; margin: 0 auto; padding-bottom: 5rem;">
@@ -29,17 +25,17 @@
                 <div class="form-section">
                     <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; font-weight: 800;">
                         <i data-lucide="info" style="width: 20px;"></i>
-                        Información del Objetivo
+                        [[#{html.auto.informaci.n.del.objetivo}]]
                     </h2>
                     
                     <div class="form-group" style="margin-bottom: 1.5rem;">
-                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">Título del Objetivo</label>
+                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{donacion.auto.titulo.del.objetivo}"></label>
                         <input type="text" name="titulo" required placeholder="Ej: Nueva área de juegos para perros" 
                                style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; transition: all 0.3s; outline: none;">
                     </div>
 
                     <div class="form-group">
-                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">Descripción Detallada</label>
+                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{donacion.auto.descripcion.detallada}"></label>
                         <textarea name="descripcion" required placeholder="Explica detalladamente para qué se usará el dinero y qué impacto tendrá..." 
                                   style="width: 100%; min-height: 120px; padding: 1.25rem; border-radius: 16px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; resize: vertical;"></textarea>
                     </div>
@@ -48,7 +44,7 @@
                 <!-- SECCIÓN 2: METAS Y PRIORIDADES -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                     <div class="form-group">
-                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">Cantidad Meta (€)</label>
+                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{donacion.auto.cantidad.meta}"></label>
                         <div style="position: relative;">
                             <i data-lucide="euro" style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 18px;"></i>
                             <input type="number" name="montoObjetivo" required step="0.01" placeholder="0.00"
@@ -57,7 +53,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">Prioridad</label>
+                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{donacion.auto.prioridad}"></label>
                         <select name="prioridad" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem; background-color: white;">
                             <option th:each="p : ${prioridades}" th:value="${p}" th:text="${#strings.capitalize(p.toLowerCase())}" th:selected="${p == 'MEDIA'}"></option>
                         </select>
@@ -66,14 +62,14 @@
 
                 <!-- SECCIÓN 3: ICONO -->
                 <div class="form-group">
-                    <label style="display: block; margin-bottom: 1rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">Icono Representativo</label>
+                    <label style="display: block; margin-bottom: 1rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{donacion.auto.icono.representativo}"></label>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 1rem;">
                         <!-- Icono Heart -->
                         <label class="icon-selector-card" style="cursor: pointer; position: relative;">
                             <input type="radio" name="icono" value="heart" checked style="position: absolute; opacity: 0;" onchange="updateIconSelection(this)">
                             <div class="icon-inner" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 1.5rem; border: 2px solid #e2e8f0; border-radius: 18px; transition: all 0.3s;">
                                 <i data-lucide="heart" style="width: 28px; height: 28px; color: #64748b;"></i>
-                                <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Salud</span>
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;" th:text="#{donacion.auto.salud}"></span>
                             </div>
                         </label>
                         <!-- Icono Home -->
@@ -81,7 +77,7 @@
                             <input type="radio" name="icono" value="home" style="position: absolute; opacity: 0;" onchange="updateIconSelection(this)">
                             <div class="icon-inner" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 1.5rem; border: 2px solid #e2e8f0; border-radius: 18px; transition: all 0.3s;">
                                 <i data-lucide="home" style="width: 28px; height: 28px; color: #64748b;"></i>
-                                <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Hogar</span>
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;" th:text="#{donacion.auto.hogar}"></span>
                             </div>
                         </label>
                         <!-- Icono Truck -->
@@ -89,7 +85,7 @@
                             <input type="radio" name="icono" value="truck" style="position: absolute; opacity: 0;" onchange="updateIconSelection(this)">
                             <div class="icon-inner" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 1.5rem; border: 2px solid #e2e8f0; border-radius: 18px; transition: all 0.3s;">
                                 <i data-lucide="truck" style="width: 28px; height: 28px; color: #64748b;"></i>
-                                <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Rescate</span>
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;" th:text="#{donacion.auto.rescate}"></span>
                             </div>
                         </label>
                         <!-- Icono Syringe -->
@@ -97,7 +93,7 @@
                             <input type="radio" name="icono" value="syringe" style="position: absolute; opacity: 0;" onchange="updateIconSelection(this)">
                             <div class="icon-inner" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 1.5rem; border: 2px solid #e2e8f0; border-radius: 18px; transition: all 0.3s;">
                                 <i data-lucide="syringe" style="width: 28px; height: 28px; color: #64748b;"></i>
-                                <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Médico</span>
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;" th:text="#{donacion.auto.medico}"></span>
                             </div>
                         </label>
                         <!-- Icono Shield -->
@@ -105,7 +101,7 @@
                             <input type="radio" name="icono" value="shield" style="position: absolute; opacity: 0;" onchange="updateIconSelection(this)">
                             <div class="icon-inner" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 1.5rem; border: 2px solid #e2e8f0; border-radius: 18px; transition: all 0.3s;">
                                 <i data-lucide="shield" style="width: 28px; height: 28px; color: #64748b;"></i>
-                                <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Seguro</span>
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;" th:text="#{donacion.auto.seguro}"></span>
                             </div>
                         </label>
                     </div>
@@ -114,13 +110,11 @@
                 <!-- ACCIONES -->
                 <div style="margin-top: 3rem; display: flex; gap: 1.5rem; justify-content: flex-end; border-top: 1px solid #f1f5f9; padding-top: 2rem;">
                     <a th:href="@{/web/donaciones}" class="btn" 
-                       style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: #64748b; background: #f1f5f9; text-decoration: none; transition: all 0.2s;">
-                        Cancelar
-                    </a>
+                       style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: #64748b; background: #f1f5f9; text-decoration: none; transition: all 0.2s;" th:text="#{generic.auto.cancelar}"></a>
                     <button type="submit" class="btn btn-primary" 
                             style="padding: 1rem 3rem; border-radius: 16px; font-weight: 700; background: var(--primary); color: white; border: none; cursor: pointer; box-shadow: 0 10px 25px rgba(22, 101, 52, 0.25); display: flex; align-items: center; gap: 10px;">
                         <i data-lucide="save" style="width: 20px;"></i>
-                        Publicar Objetivo
+                        [[#{html.auto.publicar.objetivo}]]
                     </button>
                 </div>
             </form>
