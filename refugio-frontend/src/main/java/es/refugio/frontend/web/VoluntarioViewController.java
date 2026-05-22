@@ -30,6 +30,7 @@ import es.refugio.frontend.web.dto.*;
 import es.refugio.frontend.web.util.ViewControllerHelper;
 
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -83,8 +84,25 @@ public class VoluntarioViewController {
         }
 
         String url = "/v1/voluntarios";
+        boolean firstQuery = true;
+
         if (q != null && !q.trim().isEmpty()) {
             url += "?q=" + q;
+            firstQuery = false;
+        }
+
+        if (modoSeleccion && tareaIdSeleccion != null) {
+            url += (firstQuery ? "?" : "&") + "excludeTareaId=" + tareaIdSeleccion;
+            firstQuery = false;
+            
+            try {
+                TareaRecord tarea = helper.fetchObject(apiUrl + "/v1/tareas/" + tareaIdSeleccion, TareaRecord.class);
+                if (tarea != null && tarea.fechaLimite() != null) {
+                    url += "&excludeDate=" + tarea.fechaLimite().toLocalDate().toString();
+                }
+            } catch (Exception e) {
+                logger.warn("No se pudo obtener la información de la tarea para el filtrado de fechas: " + e.getMessage());
+            }
         }
         
         PaginatedResponse<VoluntarioRecord> pagination = helper.fetchPaginated(apiUrl + url, page, size, VoluntarioRecord.class);
@@ -620,6 +638,35 @@ public class VoluntarioViewController {
         }
 
         return "redirect:" + WebRoutes.VOLUNTARIOS_BASE;
+    }
+
+    @GetMapping(WebRoutes.VOLUNTARIOS_BASE + "/{id}/modal-disponibilidad")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String modalDisponibilidad(@PathVariable Integer id, Model model) {
+        VoluntarioRecord voluntario = null;
+        try {
+            voluntario = helper.fetchObject(apiUrl + "/v1/voluntarios/" + id, VoluntarioRecord.class);
+        } catch (Exception ignored) {}
+        
+        List<DisponibilidadRecord> disponibilidades = Collections.emptyList();
+        try {
+            disponibilidades = helper.fetchList(apiUrl + "/v1/voluntarios/" + id + "/disponibilidad", DisponibilidadRecord.class);
+        } catch (Exception ignored) {}
+
+        String voluntarioNombre = "Voluntario #" + id;
+        if (voluntario != null && voluntario.usuarioId() != null) {
+            try {
+                PerfilLegalRecord p = helper.fetchObject(apiUrl + "/v1/perfiles-legales/usuario/" + voluntario.usuarioId(), PerfilLegalRecord.class);
+                if (p != null) {
+                    voluntarioNombre = p.nombre() + " " + p.apellido();
+                }
+            } catch (Exception ignored) {}
+        }
+
+        model.addAttribute("voluntarioId", id);
+        model.addAttribute("voluntarioNombre", voluntarioNombre);
+        model.addAttribute("disponibilidades", disponibilidades);
+        return "fragments/content/voluntario-disponibilidad-modal :: modal";
     }
 
     @GetMapping("/web/voluntarios/pendientes")

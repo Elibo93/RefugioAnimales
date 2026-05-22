@@ -23,6 +23,7 @@ import es.refugio.frontend.web.dto.*;
 import es.refugio.frontend.web.util.ViewControllerHelper;
 
 import java.io.OutputStream;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -83,8 +84,17 @@ public class TareaViewController {
             } catch (Exception ignored) {}
         }
 
-        PaginatedResponse<TareaRecord> pagination = fetchPaginated(page, size, prioridad, estado, myVoluntarioId);
+        List<DisponibilidadRecord> disponibilidades = Collections.emptyList();
+        if (modoSeleccion && voluntarioIdSeleccion != null) {
+            try {
+                disponibilidades = helper.fetchList(apiUrl + "/v1/voluntarios/" + voluntarioIdSeleccion + "/disponibilidad", DisponibilidadRecord.class);
+            } catch (Exception ignored) {}
+        }
+
+        List<TareaRecord> todasTareasFiltradas = fetchFiltered(prioridad, estado, myVoluntarioId, voluntarioIdSeleccion, disponibilidades);
+        PaginatedResponse<TareaRecord> pagination = paginateList(todasTareasFiltradas, page, size);
         List<TareaRecord> tareas = pagination.items();
+        model.addAttribute("todasTareasFiltradas", todasTareasFiltradas);
         
         List<VoluntarioRecord> voluntarios = helper.fetchList(apiUrl + "/v1/voluntarios", VoluntarioRecord.class);
 
@@ -203,6 +213,7 @@ public class TareaViewController {
             @RequestParam(required = false) String fechaLimite,
             @RequestParam(required = false) String instrucciones,
             @RequestParam(required = false) List<Integer> voluntarioIds,
+            Model model,
             RedirectAttributes redirectAttributes) {
 
         Map<String, Object> body = new HashMap<>();
@@ -212,10 +223,30 @@ public class TareaViewController {
         body.put("fechaLimite", fechaLimite != null && !fechaLimite.isEmpty() ? fechaLimite : null);
         body.put("instrucciones", instrucciones);
         body.put("voluntarioIds", voluntarioIds != null ? voluntarioIds : List.of());
+        body.put("voluntarioActorId", model.getAttribute("currentUserId"));
 
-        restTemplate.postForObject(apiUrl + "/v1/tareas", body, Object.class);
-        redirectAttributes.addFlashAttribute("successMessage", "Tarea creada correctamente");
-        return "redirect:" + WebRoutes.TAREAS_BASE;
+        try {
+            restTemplate.postForObject(apiUrl + "/v1/tareas", body, Object.class);
+            redirectAttributes.addFlashAttribute("successMessage", "Tarea creada correctamente");
+            return "redirect:" + WebRoutes.TAREAS_BASE;
+        } catch (org.springframework.web.client.RestClientException e) {
+            String msg = e.getMessage();
+            if (e instanceof org.springframework.web.client.HttpStatusCodeException httpException) {
+                String responseBody = httpException.getResponseBodyAsString();
+                try {
+                    com.fasterxml.jackson.databind.JsonNode root = new com.fasterxml.jackson.databind.ObjectMapper().readTree(responseBody);
+                    if (root.has("message")) {
+                        msg = root.get("message").asText();
+                    } else {
+                        msg = responseBody;
+                    }
+                } catch (Exception parseEx) {
+                    msg = responseBody;
+                }
+            }
+            redirectAttributes.addFlashAttribute("errorMessage", msg);
+            return "redirect:" + WebRoutes.TAREAS_NUEVA;
+        }
     }
 
     @GetMapping(WebRoutes.TAREAS_EDITAR)
@@ -253,9 +284,28 @@ public class TareaViewController {
         body.put("voluntarioIds", voluntarioIds != null ? voluntarioIds : List.of());
         body.put("voluntarioActorId", voluntarioActorId);
 
-        restTemplate.put(apiUrl + "/v1/tareas/" + id, body);
-        redirectAttributes.addFlashAttribute("successMessage", "Tarea editada correctamente");
-        return "redirect:" + WebRoutes.TAREAS_BASE;
+        try {
+            restTemplate.put(apiUrl + "/v1/tareas/" + id, body);
+            redirectAttributes.addFlashAttribute("successMessage", "Tarea editada correctamente");
+            return "redirect:" + WebRoutes.TAREAS_BASE;
+        } catch (org.springframework.web.client.RestClientException e) {
+            String msg = e.getMessage();
+            if (e instanceof org.springframework.web.client.HttpStatusCodeException httpException) {
+                String responseBody = httpException.getResponseBodyAsString();
+                try {
+                    com.fasterxml.jackson.databind.JsonNode root = new com.fasterxml.jackson.databind.ObjectMapper().readTree(responseBody);
+                    if (root.has("message")) {
+                        msg = root.get("message").asText();
+                    } else {
+                        msg = responseBody;
+                    }
+                } catch (Exception parseEx) {
+                    msg = responseBody;
+                }
+            }
+            redirectAttributes.addFlashAttribute("errorMessage", msg);
+            return "redirect:" + WebRoutes.TAREAS_EDITAR.replace("{id}", id.toString());
+        }
     }
 
     @PostMapping(WebRoutes.TAREAS_ELIMINAR)
@@ -517,16 +567,29 @@ public class TareaViewController {
         return null;
     }
 
-    private PaginatedResponse<TareaRecord> fetchPaginated(int page, int size, String prioridad, String estado, Integer myVoluntarioId) {
+    private List<TareaRecord> fetchFiltered(String prioridad, String estado, Integer myVoluntarioId, Integer voluntarioIdSeleccion, List<DisponibilidadRecord> disponibilidades) {
         try {
             String allUrl = apiUrl + "/v1/tareas?size=9999";
             List<TareaRecord> allTareas = helper.fetchList(allUrl, TareaRecord.class);
             
-            List<TareaRecord> filtered = allTareas.stream()
+            return allTareas.stream()
                     .filter(t -> {
                         if (myVoluntarioId != null) {
                             if (t.voluntarioIds() == null || !t.voluntarioIds().contains(myVoluntarioId)) {
                                 return false;
+                            }
+                        }
+                        if (voluntarioIdSeleccion != null) {
+                            if (t.voluntarioIds() != null && t.voluntarioIds().contains(voluntarioIdSeleccion)) {
+                                return false;
+                            }
+                            if (t.fechaLimite() != null) {
+                                LocalDate taskDate = t.fechaLimite().toLocalDate();
+                                boolean isUnavailable = disponibilidades.stream()
+                                    .anyMatch(d -> d.fecha() != null && d.fecha().equals(taskDate) && "NO_DISPONIBLE".equals(d.estado()));
+                                if (isUnavailable) {
+                                    return false;
+                                }
                             }
                         }
                         if (prioridad != null && !"ALL".equalsIgnoreCase(prioridad)) {
@@ -542,24 +605,26 @@ public class TareaViewController {
                         return true;
                     })
                     .toList();
-            
-            int totalElements = filtered.size();
-            int totalPages = (int) Math.ceil((double) totalElements / size);
-            
-            int fromIndex = (page - 1) * size;
-            int toIndex = Math.min(fromIndex + size, totalElements);
-            
-            List<TareaRecord> paginatedItems = Collections.emptyList();
-            if (fromIndex < totalElements && fromIndex >= 0) {
-                paginatedItems = filtered.subList(fromIndex, toIndex);
-            }
-            
-            boolean hasNext = page < totalPages;
-            boolean hasPrevious = page > 1;
-            
-            return new PaginatedResponse<>(paginatedItems, totalPages, totalElements, page, size, hasNext, hasPrevious);
         } catch (Exception e) {
-            return new PaginatedResponse<>(Collections.emptyList(), 0, 0, page, size, false, false);
+            return Collections.emptyList();
         }
+    }
+
+    private PaginatedResponse<TareaRecord> paginateList(List<TareaRecord> filtered, int page, int size) {
+        int totalElements = filtered.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        
+        int fromIndex = (page - 1) * size;
+        int toIndex = Math.min(fromIndex + size, totalElements);
+        
+        List<TareaRecord> paginatedItems = Collections.emptyList();
+        if (fromIndex < totalElements && fromIndex >= 0) {
+            paginatedItems = filtered.subList(fromIndex, toIndex);
+        }
+        
+        boolean hasNext = page < totalPages;
+        boolean hasPrevious = page > 1;
+        
+        return new PaginatedResponse<>(paginatedItems, totalPages, totalElements, page, size, hasNext, hasPrevious);
     }
 }

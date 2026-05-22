@@ -17,5 +17,6 @@ public class Voluntario {
     private String disponibilidad;
     private String especialidad;
     private List<TareaId> tareas;
+    private List<DisponibilidadVoluntario> disponibilidades;
     private EstadoVoluntario estado;
 }

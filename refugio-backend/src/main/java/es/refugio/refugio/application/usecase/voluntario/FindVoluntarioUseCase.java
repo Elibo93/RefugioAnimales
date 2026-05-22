@@ -27,8 +27,8 @@ public class FindVoluntarioUseCase {
         return voluntarioRepository.findAll(pageable);
     }
 
-    public Page<Voluntario> findFiltered(String q, Pageable pageable) {
-        return voluntarioRepository.findFiltered(q, pageable);
+    public Page<Voluntario> findFiltered(String q, Integer excludeTareaId, String excludeDate, Pageable pageable) {
+        return voluntarioRepository.findFiltered(q, excludeTareaId, excludeDate, pageable);
     }
 
     public Voluntario findById(VoluntarioId id) {

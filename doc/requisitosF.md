@@ -26,6 +26,8 @@ Gestión estratégica y supervisión de la operativa.
 *   **RF-ADM-05: Asignación de Tareas:** Capacidad de asignar animales y tareas específicas (limpieza, medicación, paseo) a voluntarios.
 *   **RF-ADM-06: Panel de Estadísticas:** Visualización de métricas clave como número de adopciones mensuales, stock de animales y volumen de donaciones.
 *   **RF-ADM-07: Gestión de Logros:** Configuración de logros y recompensas dentro del sistema de gamificación.
+*   **RF-ADM-08: Exportación de Reportes:** Capacidad de exportar a PDF y Excel los listados de voluntarios, animales, adopciones, donaciones y tareas.
+*   **RF-ADM-09: Calendario Interactivo:** Visualización integral de las tareas y de la disponibilidad de los voluntarios en un formato de calendario dinámico (FullCalendar).
 
 ---
 
@@ -35,6 +37,7 @@ Enfocado en el cuidado directo y seguimiento.
 *   **RF-VOL-01: Gestión de Tareas Propias:** Visualización de la lista de tareas asignadas y capacidad de marcar el progreso (Pendiente, En curso, Finalizada).
 *   **RF-VOL-02: Registro de Intervenciones Médicas:** Añadir entradas al historial médico de un animal (vacunas, incidencias, observaciones de comportamiento).
 *   **RF-VOL-03: Perfil Dual:** Si el voluntario también es adoptante, el sistema debe permitir la conmutación entre el Dashboard de gestión y el Panel personal sin cerrar sesión.
+*   **RF-VOL-04: Gestión de Disponibilidad y Turnos:** Los voluntarios pueden definir de forma interactiva (en modo calendario) los días y turnos en los que están disponibles para asistir al refugio.
 
 ---
 
@@ -57,6 +60,7 @@ Usuario autenticado interesado en colaborar o adoptar.
 *   **RF-ADO-05: Acceso a Documentación:** Descarga de contratos de adopción una vez que el proceso ha sido finalizado y aprobado por el administrador.
 *   **RF-ADO-06: Gestión de Favoritos:** Capacidad de marcar animales como favoritos para un acceso rápido y seguimiento.
 *   **RF-ADO-07: Sistema de Logros y Recompensas:** Visualización de logros desbloqueados y progreso de métricas personales (donaciones, tareas) mediante el panel de gamificación.
+*   **RF-ADO-08: Preferencias de Adopción:** Configuración de un perfil de preferencias (tamaño, nivel de energía, edad, especie) para agilizar las recomendaciones de animales compatibles.
 
 ---
 

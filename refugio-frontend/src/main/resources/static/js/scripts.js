@@ -945,3 +945,351 @@ function openMapsSelector(event) {
     }
 }
 
+// === TAREAS: LÓGICA DEL CALENDARIO ===
+var viewMode = localStorage.getItem('tareasViewMode') || 'list';
+
+function toggleViewMode() {
+    viewMode = viewMode === 'list' ? 'calendar' : 'list';
+    localStorage.setItem('tareasViewMode', viewMode);
+    applyViewMode();
+}
+
+function applyViewMode() {
+    const listContainers = document.querySelectorAll('.premium-list-container');
+    const emptyMessage = document.querySelector('.content-body > div[style*="border: 1px dashed"]');
+    const calView = document.getElementById('calendar-view');
+    const icon = document.getElementById('view-icon');
+    const pagination = document.querySelector('.pagination-container');
+    const filterForm = document.getElementById('tareas-filter-form');
+    
+    if (viewMode === 'calendar') {
+        listContainers.forEach(el => el.style.display = 'none');
+        if (emptyMessage) {
+            emptyMessage.setAttribute('data-hidden', 'true');
+            emptyMessage.style.display = 'none';
+        }
+        if (pagination) pagination.style.display = 'none';
+        if (filterForm) filterForm.style.display = 'none';
+        
+        if (calView) calView.style.display = 'block';
+        if (icon) icon.setAttribute('data-lucide', 'list');
+        if (window.lucide) lucide.createIcons();
+        
+        initCalendar();
+    } else {
+        if (calView) calView.style.display = 'none';
+        listContainers.forEach(el => el.style.display = 'block');
+        if (emptyMessage && emptyMessage.getAttribute('data-hidden') === 'true') {
+            emptyMessage.style.display = 'flex';
+            emptyMessage.removeAttribute('data-hidden');
+        }
+        if (pagination) pagination.style.display = 'flex';
+        if (filterForm) filterForm.style.display = 'flex';
+        
+        if (icon) icon.setAttribute('data-lucide', 'calendar');
+        if (window.lucide) lucide.createIcons();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('calendar-view')) {
+        applyViewMode();
+    }
+});
+
+function initCalendar() {
+    var calendarEl = document.getElementById('calendar');
+    if (!calendarEl) return;
+    
+    if (window.currentCalendar) {
+        try { window.currentCalendar.destroy(); } catch(e) {}
+    }
+    
+    var tareasObj = [];
+    var dataTag = document.getElementById('calendar-data');
+    if (dataTag && dataTag.textContent) {
+        try {
+            var rawText = dataTag.textContent.trim();
+            // Evitar problemas si Thymeleaf deja comentarios multilínea residuales
+            if (rawText.startsWith('/*')) {
+                rawText = rawText.replace(/^[\s\S]*?\*\/[\s]*/, '');
+            }
+            tareasObj = JSON.parse(rawText);
+        } catch(e) {
+            console.error("Error al cargar datos del calendario:", e);
+        }
+    } else {
+        tareasObj = window.currentTareas || []; // Fallback por si acaso
+    }
+    
+    var eventsData = [];
+    
+    if (tareasObj && tareasObj.length > 0) {
+        tareasObj.forEach(function(t) {
+            if (!t.fechaLimite) return;
+            
+            var color = '#3b82f6';
+            if (t.estado === 'COMPLETADA' || t.estado === 'FINALIZADA') color = '#10b981';
+            else if (t.estado === 'PENDIENTE' || t.estado === 'PROPUESTA') color = '#f59e0b';
+            else if (t.estado === 'RECHAZADA' || t.estado === 'CANCELADA') color = '#ef4444';
+            
+            eventsData.push({
+                id: t.id,
+                title: t.descripcion,
+                start: t.fechaLimite,
+                backgroundColor: color,
+                borderColor: color,
+                url: '/web/tareas/' + t.id + '/historial',
+                extendedProps: {
+                    estado: t.estado
+                }
+            });
+        });
+    }
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        displayEventTime: true,
+        eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listWeek'
+        },
+        buttonText: {
+            today: 'Hoy',
+            month: 'Mes',
+            week: 'Semana',
+            list: 'Agenda'
+        },
+        locale: 'es',
+        allDayText: 'Todo el día',
+        firstDay: 1,
+        events: eventsData,
+        eventClick: function(info) {
+            if (info.event.url) {
+                info.jsEvent.preventDefault();
+                window.location.href = info.event.url;
+            }
+        }
+    });
+    
+    calendar.render();
+    window.currentCalendar = calendar;
+}
+
+if (!window.htmxCalendarListenerAdded) {
+    document.body.addEventListener('htmx:afterSettle', function(event) {
+        if (document.getElementById('calendar-view')) {
+            applyViewMode();
+        }
+    });
+    window.htmxCalendarListenerAdded = true;
+}
+
+// === PERFIL (PERSONA-DETALLE): LÓGICA DEL CALENDARIO DE DISPONIBILIDAD ===
+document.addEventListener('DOMContentLoaded', function() {
+    var dispEl = document.getElementById('disp-calendar');
+    if(!dispEl) return;
+    
+    // Establecer fecha mínima como hoy para no permitir elegir días pasados
+    const hoy = new Date().toISOString().split('T')[0];
+    const inputFecha = document.getElementById('input-fecha');
+    if (inputFecha) {
+        inputFecha.setAttribute('min', hoy);
+    }
+
+    const isOwner = window.isOwner || false;
+    const disponibilidades = window.disponibilidades || [];
+    
+    const eventsData = disponibilidades.map(d => {
+        let color = '#f59e0b';
+        if (d.estado === 'DISPONIBLE') color = '#10b981';
+        if (d.estado === 'NO_DISPONIBLE') color = '#ef4444';
+        
+        let tituloFormateado = d.turno;
+        if (d.estado === 'NO_DISPONIBLE') {
+            tituloFormateado = 'No Disponible';
+        } else {
+            if (d.turno === 'MANANA') tituloFormateado = 'Mañana';
+            else if (d.turno === 'TARDE') tituloFormateado = 'Tarde';
+            else if (d.turno === 'NOCHE') tituloFormateado = 'Noche';
+            else if (d.turno === 'TODO_EL_DIA') tituloFormateado = 'Todo el día';
+        }
+
+        return {
+            id: d.id,
+            title: tituloFormateado,
+            start: d.fecha,
+            backgroundColor: color,
+            borderColor: color,
+            allDay: true,
+            extendedProps: {
+                estado: d.estado
+            }
+        };
+    });
+
+    const calendar = new FullCalendar.Calendar(dispEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,listWeek'
+        },
+        buttonText: {
+            today: 'Hoy',
+            month: 'Mes',
+            list: 'Lista'
+        },
+        locale: 'es',
+        allDayText: 'Todo el día',
+        firstDay: 1,
+        events: eventsData,
+        height: 'auto',
+        dateClick: function(info) {
+            if (isOwner) {
+                abrirModalDisponibilidad(info.dateStr);
+            }
+        },
+        eventClick: function(info) {
+            if (isOwner) {
+                abrirModalDisponibilidad(info.event.startStr, true);
+            }
+        }
+    });
+    
+    calendar.render();
+});
+
+function abrirModalDisponibilidad(fecha = '', isExisting = false) {
+    const modal = document.getElementById('modal-disponibilidad');
+    const inputFecha = document.getElementById('input-fecha');
+    const btnEliminar = document.getElementById('btn-eliminar-disp');
+    
+    if(fecha && inputFecha) {
+        inputFecha.value = fecha;
+    }
+    
+    if (btnEliminar) {
+        if (isExisting) {
+            btnEliminar.style.display = 'flex';
+        } else {
+            btnEliminar.style.display = 'none';
+        }
+    }
+    
+    if (modal) modal.style.display = 'flex';
+}
+
+async function eliminarDisponibilidad(btn) {
+    if (!confirm("¿Seguro que quieres eliminar este día de tu disponibilidad?")) return;
+    
+    const form = document.getElementById('form-disponibilidad');
+    const vId = form.getAttribute('data-vid');
+    const fecha = document.getElementById('input-fecha').value;
+    const url = '/api/v1/voluntarios/' + vId + '/disponibilidad/' + fecha;
+    
+    try {
+        btn.style.opacity = '0.7';
+        const response = await fetch(url, { method: 'DELETE' });
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            alert("Error al eliminar la disponibilidad.");
+            btn.style.opacity = '1';
+        }
+    } catch (err) {
+        alert("Error de conexión al servidor backend.");
+    }
+}
+
+async function guardarDisponibilidad(e, form) {
+    e.preventDefault();
+    
+    const inputFecha = document.getElementById('input-fecha');
+    const fechaValue = inputFecha ? inputFecha.value : null;
+    const hoy = new Date().toISOString().split('T')[0];
+    
+    if (fechaValue && fechaValue < hoy) {
+        alert("No puedes añadir disponibilidad para días que ya han pasado.");
+        return;
+    }
+    
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    const vId = form.getAttribute('data-vid');
+    const url = '/api/v1/voluntarios/' + vId + '/disponibilidad'; 
+    
+    try {
+        const btn = form.querySelector('button[type="submit"]');
+        if (btn) {
+            btn.innerHTML = 'Guardando...';
+            btn.style.opacity = '0.7';
+        }
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            alert("Error al guardar la disponibilidad. Comprueba que el formato es correcto.");
+            if (btn) {
+                btn.innerHTML = '<i data-lucide="save" style="width: 18px;"></i> Guardar Día';
+                btn.style.opacity = '1';
+            }
+        }
+    } catch (err) { 
+        alert("Error de conexión al servidor backend."); 
+    }
+}
+
+// === DISPONIBILIDAD MODAL ===
+function closeDisponibilidadModal(e) {
+    if (e && e.target !== e.currentTarget) return;
+    const container = document.getElementById('modals-container');
+    if (container) container.innerHTML = '';
+}
+
+function initDisponibilidadCalendar(disponibilidadesData) {
+    setTimeout(() => {
+        if (window.lucide) lucide.createIcons();
+
+        var calendarEl = document.getElementById('disponibilidad-calendar');
+        if (calendarEl) {
+            var events = disponibilidadesData.map(function(d) {
+                var color = d.estado === 'DISPONIBLE' ? '#10b981' : '#ef4444'; // Emerald / Red
+                var title = d.estado === 'DISPONIBLE' ? 'Disponible (' + d.turno + ')' : 'No Disponible';
+                return {
+                    title: title,
+                    start: d.fecha,
+                    allDay: true,
+                    backgroundColor: color,
+                    borderColor: color,
+                    textColor: '#ffffff'
+                };
+            });
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth'
+                },
+                buttonText: {
+                    today: 'Hoy',
+                    month: 'Mes'
+                },
+                events: events,
+                height: 500
+            });
+            calendar.render();
+        }
+    }, 50);
+}

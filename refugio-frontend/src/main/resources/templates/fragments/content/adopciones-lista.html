@@ -88,13 +88,11 @@
                             </div>
                         </div>
                     </form>
-                    <a class="btn btn-secondary" th:href="@{/web/adopciones/pdf}" target="_blank">
-                        <i data-lucide="file-text" style="width:18px;"></i>
-                        <span th:text="#{generic.link.export.pdf}">Exportar PDF</span>
+                    <a th:href="@{/web/adopciones/pdf}" target="_blank" title="Exportar listado a PDF" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/pdf.png" alt="PDF" style="height: 48px; width: 48px; object-fit: contain;">
                     </a>
-                    <a class="btn btn-secondary" th:href="@{/web/adopciones/excel}" target="_blank">
-                        <i data-lucide="file-text" style="width:18px;"></i>
-                        <span th:text="#{generic.link.export.excel}">Exportar Excel</span>
+                    <a th:href="@{/web/adopciones/excel}" target="_blank" title="Exportar listado a Excel" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/excel.png" alt="Excel" style="height: 48px; width: 48px; object-fit: contain;">
                     </a>
                     <a class="btn btn-primary" th:href="@{/web/adopciones/nueva}">
                         <i data-lucide="plus" style="width:18px;"></i>

@@ -7,7 +7,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -39,8 +38,15 @@ public class SecurityConfig {
                 .anyRequest().permitAll()
             )
             .exceptionHandling(ex -> ex
-                // Redirigir usuarios no autenticados al inicio de sesión del servicio de autenticación a través del gateway
-                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+                // Redirigir usuarios no autenticados. Si es petición HTMX, forzamos un full-page redirect.
+                .authenticationEntryPoint((request, response, authException) -> {
+                    if ("true".equals(request.getHeader("HX-Request"))) {
+                        response.setHeader("HX-Redirect", "/login");
+                        response.setStatus(401); // HTMX capturará el header y hará redirect
+                    } else {
+                        response.sendRedirect("/login");
+                    }
+                })
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

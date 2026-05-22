@@ -21,6 +21,26 @@
         </div>
 
         <div class="pagination-buttons" style="display: flex; gap: 8px;">
+            <!-- Botón Primera -->
+            <button th:if="${pagination.page > 1}"
+                    th:hx-get="${url}"
+                    th:hx-vals="'{&quot;page&quot;: 1, &quot;size&quot;: ' + ${pagination.pageSize} + '}'"
+                    th:hx-target="${target}"
+                    th:hx-select="${target}"
+                    hx-swap="outerHTML"
+                    hx-include="#animal-admin-form, [name='q'], [name='especie'], [name='tamano'], [name='rol']"
+                    class="btn-secondary"
+                    title="Ir a la primera página"
+                    style="padding: 6px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-main); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-main);">
+                <i data-lucide="chevrons-left" style="width: 16px;"></i>
+            </button>
+            <button th:unless="${pagination.page > 1}"
+                    disabled
+                    title="Ir a la primera página"
+                    style="padding: 6px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-soft); color: var(--text-muted); cursor: not-allowed; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="chevrons-left" style="width: 16px;"></i>
+            </button>
+
             <!-- Botón Anterior -->
             <button th:if="${pagination.hasPrevious}"
                     th:hx-get="${url}"
@@ -66,6 +86,26 @@
                     style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-soft); color: var(--text-muted); cursor: not-allowed; display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
                 Siguiente
                 <i data-lucide="chevron-right" style="width: 14px;"></i>
+            </button>
+
+            <!-- Botón Última -->
+            <button th:if="${pagination.page < pagination.totalPages}"
+                    th:hx-get="${url}"
+                    th:hx-vals="'{&quot;page&quot;: ' + ${pagination.totalPages} + ', &quot;size&quot;: ' + ${pagination.pageSize} + '}'"
+                    th:hx-target="${target}"
+                    th:hx-select="${target}"
+                    hx-swap="outerHTML"
+                    hx-include="#animal-admin-form, [name='q'], [name='especie'], [name='tamano'], [name='rol']"
+                    class="btn-secondary"
+                    title="Ir a la última página"
+                    style="padding: 6px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-main); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-main);">
+                <i data-lucide="chevrons-right" style="width: 16px;"></i>
+            </button>
+            <button th:unless="${pagination.page < pagination.totalPages}"
+                    disabled
+                    title="Ir a la última página"
+                    style="padding: 6px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-soft); color: var(--text-muted); cursor: not-allowed; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="chevrons-right" style="width: 16px;"></i>
             </button>
         </div>
     </div>

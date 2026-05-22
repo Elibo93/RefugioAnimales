@@ -37,6 +37,9 @@ public class VoluntarioEntity {
     @ManyToMany(mappedBy = "voluntarios")
     private List<TareaEntity> tareas;
 
+    @OneToMany(mappedBy = "voluntario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DisponibilidadVoluntarioEntity> disponibilidades;
+
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME")
     private LocalDateTime createdAt;
 

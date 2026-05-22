@@ -66,7 +66,9 @@ Para evitar repetir código, utilizamos un módulo **Common** que se inyecta com
 
 Desarrollado como un microservicio independiente que consume la API a través del Gateway.
 *   **Tecnología:** Spring Boot con Thymeleaf para el renderizado del lado del servidor.
-*   **Comunicación:** Realiza llamadas REST al Gateway, manteniendo la interfaz desacoplada de la lógica de negocio.
+*   **Comunicación (HTMX):** Las interacciones del usuario (búsquedas, paginación, modales, apertura de calendarios) se gestionan asíncronamente mediante **HTMX** (`hx-get`, `hx-post`). Esto permite actualizar "Fragmentos de HTML" parciales sin recargar la página completa, consiguiendo un comportamiento Single Page Application (SPA) pero sin la complejidad de React/Angular.
+*   **Exportación de Reportes (PDF/Excel):** La lógica de exportación documental se ha delegado a los controladores de presentación (ej. `AnimalViewController`, `TareaViewController`) utilizando **iTextRenderer** y **Apache POI**. Esta decisión arquitectónica mantiene el backend puro y libre de librerías de generación de vistas o documentos pesados.
+*   **Consumo de API:** Realiza llamadas REST al Gateway usando la librería `RestClient` compartida, manteniendo la interfaz desacoplada de la lógica de negocio.
 
 ---
 

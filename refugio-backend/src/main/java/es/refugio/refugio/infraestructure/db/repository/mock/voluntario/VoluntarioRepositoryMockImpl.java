@@ -15,7 +15,7 @@ import org.springframework.data.domain.Pageable;
 public class VoluntarioRepositoryMockImpl implements VoluntarioRepository {
 
     @Override
-    public Page<Voluntario> findFiltered(String q, Pageable pageable) {
+    public Page<Voluntario> findFiltered(String q, Integer excludeTareaId, String excludeDate, Pageable pageable) {
         return Page.empty();
     }
 

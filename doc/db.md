@@ -140,6 +140,14 @@ erDiagram
             int voluntario_id PK "FK"
         }
 
+        disponibilidad_voluntario {
+            int id PK
+            int voluntario_id FK
+            datetime fecha
+            string turno
+            string estado
+        }
+
         tarea_historial {
             int id PK
             int tarea_id FK
@@ -258,6 +266,7 @@ erDiagram
     gamificacion_logro ||--o{ gamificacion_usuario_logros : "obtenido por"
     usuarios ||--o| gamificacion_usuario_metricas : "posee"
     tareas ||--o{ tarea_historial : "rastrea"
+    voluntarios ||--o{ disponibilidad_voluntario : "registra turnos"
 ```
 
 ---

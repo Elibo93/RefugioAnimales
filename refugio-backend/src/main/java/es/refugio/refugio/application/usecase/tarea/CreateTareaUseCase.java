@@ -23,6 +23,28 @@ public class CreateTareaUseCase {
     private final ApplicationEventPublisher eventPublisher;
 
     public Tarea create(CreateTareaCommand command) {
+        if (command.fechaLimite() != null && command.fechaLimite().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("La fecha límite de la tarea no puede ser inferior a la fecha y hora actual.");
+        }
+        
+        if (command.voluntarioIds() != null && command.fechaLimite() != null) {
+            java.time.LocalDate limitDate = command.fechaLimite().toLocalDate();
+            for (Integer vIdInt : command.voluntarioIds()) {
+                if (vIdInt == null) continue;
+                VoluntarioId volId = new VoluntarioId(vIdInt);
+                voluntarioRepository.getById(volId).ifPresent(vol -> {
+                    if (vol.getDisponibilidades() != null) {
+                        boolean noDisponible = vol.getDisponibilidades().stream()
+                                .anyMatch(d -> d.getFecha().equals(limitDate) 
+                                            && d.getEstado() == es.refugio.refugio.domain.model.voluntario.enums.EstadoDisponibilidad.NO_DISPONIBLE);
+                        if (noDisponible) {
+                            throw new IllegalArgumentException("Uno de los voluntarios seleccionados ha marcado como 'No Disponible' la fecha límite de la tarea.");
+                        }
+                    }
+                });
+            }
+        }
+
         EstadoTarea estadoEnum = EstadoTarea.valueOf(command.estado().toUpperCase());
         EstadoTarea estadoFinal = command.voluntarioIds() != null && !command.voluntarioIds().isEmpty() ? EstadoTarea.PROPUESTA : estadoEnum;
         
@@ -47,7 +69,7 @@ public class CreateTareaUseCase {
                 .tareaId(saved.getId())
                 .estadoAnterior(null) // Es creación
                 .estadoNuevo(saved.getEstado())
-                .usuarioActorId(1) // Placeholder: Administrador por defecto. Idealmente vendría del comando.
+                .usuarioActorId(command.voluntarioActorId() != null ? command.voluntarioActorId() : 1) // Usar actor provisto o fallback a 1
                 .timestamp(LocalDateTime.now())
                 .observaciones("Creación de la tarea")
                 .voluntarioIds(command.voluntarioIds())

@@ -81,4 +81,6 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 - [] ConvertirAdoptanteRequest.java
 ---
 *Este documento es una guía viva para el desarrollo del TFG - Refugio de Animales.*
-- []
+
+### Implemtar Calendario de Tareas del Voluntario
+- [ ] 

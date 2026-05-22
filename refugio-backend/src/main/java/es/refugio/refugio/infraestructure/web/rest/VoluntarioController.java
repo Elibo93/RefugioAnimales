@@ -36,6 +36,10 @@ import es.refugio.refugio.infraestructure.security.CustomUserDetails;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioRequest;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioResponse;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioUpdateRequest;
+import es.refugio.refugio.infraestructure.web.dto.voluntario.DisponibilidadRequest;
+import es.refugio.refugio.infraestructure.web.dto.voluntario.DisponibilidadResponse;
+import es.refugio.refugio.application.command.voluntario.SetDisponibilidadCommand;
+import es.refugio.refugio.application.service.voluntario.SetDisponibilidadService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Cookie;
@@ -57,6 +61,7 @@ public class VoluntarioController {
     private final EditVoluntarioService editVoluntarioService;
     private final DeleteVoluntarioService deleteVoluntarioService;
     private final ApproveVoluntarioService approveVoluntarioService;
+    private final SetDisponibilidadService setDisponibilidadService;
 
     @Operation(summary = "Crear voluntario", description = "Registra un nuevo voluntario vinculado a un usuario")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Voluntario creado"),
@@ -99,8 +104,10 @@ public class VoluntarioController {
     @GetMapping
     public PaginatedResponse<VoluntarioResponse> findAll(
             @RequestParam(required = false) String q,
+            @RequestParam(required = false) Integer excludeTareaId,
+            @RequestParam(required = false) String excludeDate,
             Pageable pageable) {
-        Page<Voluntario> page = findVoluntarioService.findFiltered(q, pageable);
+        Page<Voluntario> page = findVoluntarioService.findFiltered(q, excludeTareaId, excludeDate, pageable);
         return PaginatedResponse.fromPage(page, VoluntarioMapper.toResponse(page.getContent()));
     }
 
@@ -138,6 +145,83 @@ public class VoluntarioController {
     public ResponseEntity<Void> reject(@PathVariable Integer id, HttpServletRequest request) {
         approveVoluntarioService.reject(id, getJwtToken(request));
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Marcar disponibilidad de un voluntario")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
+    @PostMapping("/{id}/disponibilidad")
+    public ResponseEntity<List<DisponibilidadResponse>> setDisponibilidad(
+            @PathVariable Integer id,
+            @Valid @RequestBody DisponibilidadRequest request,
+            Authentication authentication) {
+        
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        
+        Voluntario voluntario = findVoluntarioService.findById(new VoluntarioId(id));
+        if (!isAdmin && !voluntario.getUsuarioId().getValue().equals(userDetails.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        SetDisponibilidadCommand command = new SetDisponibilidadCommand(
+            new VoluntarioId(id), request.fecha(), request.turno(), request.estado());
+            
+        Voluntario updated = setDisponibilidadService.setDisponibilidad(command);
+        
+        List<DisponibilidadResponse> responses = updated.getDisponibilidades().stream()
+                .map(VoluntarioMapper::toResponse)
+                .toList();
+                
+        return ResponseEntity.ok(responses);
+    }
+
+    @Operation(summary = "Obtener calendario de disponibilidad de un voluntario")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
+    @GetMapping("/{id}/disponibilidad")
+    public ResponseEntity<List<DisponibilidadResponse>> getDisponibilidades(
+            @PathVariable Integer id,
+            Authentication authentication) {
+            
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        
+        Voluntario voluntario = findVoluntarioService.findById(new VoluntarioId(id));
+        if (!isAdmin && !voluntario.getUsuarioId().getValue().equals(userDetails.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
+        if (voluntario.getDisponibilidades() == null) {
+            return ResponseEntity.ok(List.of());
+        }
+        
+        List<DisponibilidadResponse> responses = voluntario.getDisponibilidades().stream()
+                .map(VoluntarioMapper::toResponse)
+                .toList();
+                
+        return ResponseEntity.ok(responses);
+    }
+
+    @Operation(summary = "Eliminar disponibilidad de un voluntario en una fecha")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
+    @DeleteMapping("/{id}/disponibilidad/{fecha}")
+    public ResponseEntity<Void> deleteDisponibilidad(
+            @PathVariable Integer id,
+            @PathVariable String fecha,
+            Authentication authentication) {
+        
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        
+        Voluntario voluntario = findVoluntarioService.findById(new VoluntarioId(id));
+        if (!isAdmin && !voluntario.getUsuarioId().getValue().equals(userDetails.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        setDisponibilidadService.deleteDisponibilidad(new VoluntarioId(id), java.time.LocalDate.parse(fecha));
+        return ResponseEntity.noContent().build();
     }
 
     private String getJwtToken(HttpServletRequest request) {
