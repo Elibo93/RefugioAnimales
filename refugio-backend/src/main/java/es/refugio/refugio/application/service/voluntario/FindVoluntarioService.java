@@ -22,8 +22,8 @@ public class FindVoluntarioService {
         return useCase.findAll(pageable);
     }
 
-    public Page<Voluntario> findFiltered(String q, Pageable pageable) {
-        return useCase.findFiltered(q, pageable);
+    public Page<Voluntario> findFiltered(String q, Integer excludeTareaId, String excludeDate, Pageable pageable) {
+        return useCase.findFiltered(q, excludeTareaId, excludeDate, pageable);
     }
 
     public Voluntario findById(VoluntarioId id) {

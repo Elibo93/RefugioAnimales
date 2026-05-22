@@ -39,15 +39,11 @@
                         <span>Registrar Aportación</span>
                     </button>
 
-                    <a th:href="@{/web/donaciones/pdf}" target="_blank" class="btn"
-                        style="padding: 0.7rem 1.25rem; border-radius: 14px; font-weight: 700; background: white; border: 1px solid #e2e8f0; color: #64748b; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm);">
-                        <i data-lucide="download" style="width: 18px;"></i>
-                        <span th:text="#{generic.link.export.pdf}">Exportar PDF</span>
+                    <a th:href="@{/web/donaciones/pdf}" target="_blank" title="Exportar listado a PDF" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/pdf.png" alt="PDF" style="height: 48px; width: 48px; object-fit: contain;">
                     </a>
-                    <a th:href="@{/web/donaciones/excel}" target="_blank" class="btn"
-                        style="padding: 0.7rem 1.25rem; border-radius: 14px; font-weight: 700; background: white; border: 1px solid #e2e8f0; color: #64748b; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm);">
-                        <i data-lucide="download" style="width: 18px;"></i>
-                        <span th:text="#{generic.link.export.excel}">Exportar Excel</span>
+                    <a th:href="@{/web/donaciones/excel}" target="_blank" title="Exportar listado a Excel" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/excel.png" alt="Excel" style="height: 48px; width: 48px; object-fit: contain;">
                     </a>
                 </div>
             </div>

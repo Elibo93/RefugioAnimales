@@ -12,13 +12,11 @@
             <div class="actions-bar">
                 <span class="user-name page" th:text="#{historial.list.title}">Historiales Médicos</span>
                 <div style="display:flex; gap:10px;">
-                    <a class="btn btn-secondary" th:href="@{/web/historiales/pdf}" target="_blank"
-                        th:text="#{generic.link.export.pdf}">
-                        Exportar PDF
+                    <a th:href="@{/web/historiales/pdf}" target="_blank" title="Exportar listado a PDF" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/pdf.png" alt="PDF" style="height: 48px; width: 48px; object-fit: contain;">
                     </a>
-                    <a class="btn btn-secondary" th:href="@{/web/historiales/excel}" target="_blank"
-                        th:text="#{generic.link.export.excel}">
-                        Exportar Excel
+                    <a th:href="@{/web/historiales/excel}" target="_blank" title="Exportar listado a Excel" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/excel.png" alt="Excel" style="height: 48px; width: 48px; object-fit: contain;">
                     </a>
                     <a class="btn btn-primary" th:href="@{/web/historiales/nuevo}">
                         <i data-lucide="plus" style="width:18px;"></i>

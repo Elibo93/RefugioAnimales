@@ -2321,7 +2321,7 @@ databaseChangeLog:
             value: ACEPTADA
         - column:
             name: fecha_limite
-            valueComputed: DATE_ADD(NOW(), INTERVAL 1 DAY)
+            valueComputed: DATE_ADD(NOW(), INTERVAL 5 DAY)
         - column:
             name: instrucciones
             value: Usar desinfectante neutro
@@ -2339,7 +2339,7 @@ databaseChangeLog:
             value: EN_PROCESO
         - column:
             name: fecha_limite
-            valueComputed: DATE_ADD(NOW(), INTERVAL 2 HOUR)
+            valueComputed: DATE_ADD(NOW(), INTERVAL 3 DAY)
         - column:
             name: instrucciones
             value: Contar sacos de perro y gato
@@ -2357,7 +2357,7 @@ databaseChangeLog:
             value: COMPLETADA
         - column:
             name: fecha_limite
-            valueComputed: NOW()
+            valueComputed: DATE_ADD(NOW(), INTERVAL 2 DAY)
         - column:
             name: instrucciones
             value: Llevar a Rex, Bella y Thor al parque
@@ -2375,7 +2375,7 @@ databaseChangeLog:
             value: ACEPTADA
         - column:
             name: fecha_limite
-            valueComputed: DATE_ADD(NOW(), INTERVAL 3 DAY)
+            valueComputed: DATE_ADD(NOW(), INTERVAL 10 DAY)
         - column:
             name: instrucciones
             value: Cepillar con cuidado, tiene nudos
@@ -2393,7 +2393,7 @@ databaseChangeLog:
             value: EN_PROCESO
         - column:
             name: fecha_limite
-            valueComputed: DATE_ADD(NOW(), INTERVAL 7 DAY)
+            valueComputed: DATE_ADD(NOW(), INTERVAL 14 DAY)
         - column:
             name: instrucciones
             value: Contactar con el ayuntamiento
@@ -2411,7 +2411,7 @@ databaseChangeLog:
             value: PENDIENTE
         - column:
             name: fecha_limite
-            valueComputed: DATE_ADD(NOW(), INTERVAL 1 DAY)
+            valueComputed: DATE_ADD(NOW(), INTERVAL 4 DAY)
         - column:
             name: instrucciones
             value: La malla está suelta por abajo
@@ -2747,3 +2747,67 @@ databaseChangeLog:
         - name: status
           value: APROBADO
         where: usuario_id IN (1, 2, 3, 10, 19)
+- changeSet:
+    id: 015-seed-disponibilidad-voluntario
+    author: refugio
+    changes:
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column:
+            name: voluntario_id
+            valueNumeric: 1
+        - column:
+            name: fecha
+            valueComputed: DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY)
+        - column:
+            name: turno
+            value: MANANA
+        - column:
+            name: estado
+            value: DISPONIBLE
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column:
+            name: voluntario_id
+            valueNumeric: 2
+        - column:
+            name: fecha
+            valueComputed: DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY)
+        - column:
+            name: turno
+            value: TARDE
+        - column:
+            name: estado
+            value: NO_DISPONIBLE
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column:
+            name: voluntario_id
+            valueNumeric: 3
+        - column:
+            name: fecha
+            valueComputed: DATE_ADD(CURRENT_DATE, INTERVAL 3 DAY)
+        - column:
+            name: turno
+            value: MANANA
+        - column:
+            name: estado
+            value: NO_DISPONIBLE
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column:
+            name: voluntario_id
+            valueNumeric: 4
+        - column:
+            name: fecha
+            valueComputed: DATE_ADD(CURRENT_DATE, INTERVAL 4 DAY)
+        - column:
+            name: turno
+            value: TARDE
+        - column:
+            name: estado
+            value: NO_DISPONIBLE

@@ -23,7 +23,8 @@ public class TareaMapper {
                 req.estado(),
                 req.fechaLimite(),
                 req.instrucciones(),
-                req.voluntarioIds()
+                req.voluntarioIds(),
+                req.voluntarioActorId()
         );
     }
 

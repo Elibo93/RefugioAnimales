@@ -51,12 +51,18 @@ Es el núcleo del sistema. Permite mantener un registro exhaustivo de cada anima
 ### 2.2. Gestión de Voluntariado e Intervenciones
 Orientado a la operativa diaria del refugio.
 - **Asignación:** Los administradores pueden asignar animales específicos a voluntarios para su cuidado.
-- **Tareas Diarias:** Los voluntarios ven su lista de tareas pendientes (limpieza, medicación, paseo). Al completar una, el sistema registra quién y cuándo la realizó.
+- **Disponibilidad:** Los voluntarios acceden a un calendario interactivo donde pueden marcar sus turnos disponibles. Los administradores pueden revisar este calendario al asignar tareas pulsando sobre el botón de calendario en la ficha del voluntario.
+- **Tareas Diarias:** Los voluntarios ven su lista de tareas pendientes (limpieza, medicación, paseo) y pueden alternar entre vista de lista y vista de calendario. Al completar una, el sistema registra quién y cuándo la realizó.
 
 ### 2.3. Proceso de Adopción y Contratos
 Gestiona el flujo legal desde que entra una solicitud hasta que el animal sale del refugio.
 1. **Revisión de Solicitudes:** Aparecerán en el panel de control. Se pueden filtrar por estado (Pendiente, En Estudio, Aprobada).
 2. **Generación de Contrato:** Una vez aprobada, el sistema permite descargar el **Contrato de Adopción Legal** autocompletado con los datos del adoptante y el animal.
+
+### 2.4. Exportación de Reportes
+El sistema permite descargar de forma rápida los datos que se visualizan en pantalla.
+- En la parte superior derecha de casi todas las listas (Voluntarios, Tareas, Animales, Adopciones, etc.), encontrará iconos de **PDF** y **Excel**.
+- Al pulsarlos, se generará y descargará automáticamente un reporte que respeta los filtros que haya aplicado previamente en la tabla.
 
 ---
 

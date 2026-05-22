@@ -15,5 +15,5 @@ public interface VoluntarioRepository extends CRUDRepository<Voluntario, Volunta
         return Page.empty();
     }
 
-    Page<Voluntario> findFiltered(String q, Pageable pageable);
+    Page<Voluntario> findFiltered(String q, Integer excludeTareaId, String excludeDate, Pageable pageable);
 }

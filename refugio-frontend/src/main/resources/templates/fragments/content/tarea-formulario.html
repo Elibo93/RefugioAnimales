@@ -221,6 +221,19 @@
                                 lucide.createIcons();
                             }
                         });
+
+                        // Limitar la fecha mínima de fechaLimite
+                        function initDateLimits() {
+                            const dateInput = document.querySelector('input[name="fechaLimite"]');
+                            if (dateInput) {
+                                const now = new Date();
+                                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                                dateInput.min = now.toISOString().slice(0, 16);
+                            }
+                        }
+                        
+                        document.addEventListener('DOMContentLoaded', initDateLimits);
+                        document.addEventListener('htmx:afterSettle', initDateLimits);
                     </script>
 
                 </div>

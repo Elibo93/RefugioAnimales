@@ -27,6 +27,24 @@ public class EditTareaUseCase {
     private final ApplicationEventPublisher eventPublisher;
 
     public Tarea update(EditTareaCommand command) {
+        if (command.voluntarioIds() != null && command.fechaLimite() != null) {
+            java.time.LocalDate limitDate = command.fechaLimite().toLocalDate();
+            for (Integer vIdInt : command.voluntarioIds()) {
+                if (vIdInt == null) continue;
+                VoluntarioId volId = new VoluntarioId(vIdInt);
+                voluntarioRepository.getById(volId).ifPresent(vol -> {
+                    if (vol.getDisponibilidades() != null) {
+                        boolean noDisponible = vol.getDisponibilidades().stream()
+                                .anyMatch(d -> d.getFecha().equals(limitDate) 
+                                            && d.getEstado() == es.refugio.refugio.domain.model.voluntario.enums.EstadoDisponibilidad.NO_DISPONIBLE);
+                        if (noDisponible) {
+                            throw new IllegalArgumentException("Uno de los voluntarios seleccionados ha marcado como 'No Disponible' la fecha límite de la tarea.");
+                        }
+                    }
+                });
+            }
+        }
+
         return tareaRepository.getById(command.id())
                 .map(tarea -> {
                     EstadoTarea estadoAnterior = tarea.getEstado();

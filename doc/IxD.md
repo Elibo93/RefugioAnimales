@@ -19,6 +19,9 @@ Para garantizar la consistencia y reducir la curva de aprendizaje, se han implem
 *   **Modales de Confirmación (Safe-Guard):** 
     *   *Uso:* Eliminaciones, cambios de estado críticos (ej. marcar un animal como fallecido o adoptado) y cierre de sesiones con cambios pendientes.
     *   *Comportamiento:* Bloqueo del scroll de fondo y enfoque automático en el botón de "Cancelar" para evitar pulsaciones accidentales.
+*   **Modales Asíncronos (HTMX):**
+    *   *Uso:* Visualización rápida de información secundaria (ej. Calendario de disponibilidad de un voluntario).
+    *   *Comportamiento:* Carga dinámica del contenido sin recargar la página, apareciendo con un efecto visual suave e integrando funcionalidades complejas (como FullCalendar) al vuelo.
 *   **Notificaciones Emergentes (Toasts):** 
     *   *Uso:* Feedback no intrusivo tras acciones exitosas (ej. "Perfil actualizado correctamente").
     *   *Uso:* Alertas de error (ej. "No se ha podido conectar con el servidor de correos").
@@ -40,7 +43,8 @@ Para garantizar la consistencia y reducir la curva de aprendizaje, se han implem
 
 ##### 3.2. Gestión de Tareas (Voluntariado)
 1.  **Vistazo rápido:** El Dashboard muestra las tareas del día con códigos de colores (Urgente = Rojo, Rutina = Azul).
-2.  **Ejecución:** Al marcar una tarea como completada, se requiere una breve nota de observación si el animal presentó alguna anomalía.
+2.  **Modos de Vista:** El usuario puede alternar dinámicamente entre una vista de "Lista" estructurada o una vista de "Calendario" mensual (FullCalendar) manteniendo el contexto sin recargas completas de la página gracias a HTMX.
+3.  **Ejecución:** Al marcar una tarea como completada, se requiere una breve nota de observación si el animal presentó alguna anomalía.
 
 ---
 
@@ -63,8 +67,8 @@ El sistema comunica siempre en qué estado se encuentra para evitar la incertidu
 
 #### 6. Micro-interacciones y Feedback Sensorial
 
-*   **Hover Effects:** Los botones y tarjetas de animales responden sutilmente al pasar el cursor, indicando su interactividad.
-*   **Transiciones:** Cambios de vista fluidos para mantener el contexto espacial del usuario dentro de la aplicación.
+*   **Hover Effects:** Los botones y tarjetas de animales responden sutilmente al pasar el cursor, indicando su interactividad. Los iconos de exportación (PDF/Excel) tienen un efecto de escalado (scale) al pasar el cursor.
+*   **Transiciones y Animaciones (CSS/HTMX):** Cambios de vista fluidos (`fadeInUp`) para los modales y transiciones de HTMX para mantener el contexto espacial del usuario dentro de la aplicación.
 
 ---
 

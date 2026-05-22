@@ -81,6 +81,14 @@ public class ApproveVoluntarioUseCase {
                 "SISTEMA",
                 "/web/tareas"
         );
+
+        notificacionService.enviar(
+                voluntario.getUsuarioId().getValue(),
+                "Configura tu Disponibilidad",
+                "Es necesario que indiques qué días estarás disponible en tu calendario para poder asignarte tareas operativas.",
+                "SISTEMA",
+                "/web/personas/" + voluntario.getUsuarioId().getValue()
+        );
     }
 
     public void reject(VoluntarioId id, String adminToken) {

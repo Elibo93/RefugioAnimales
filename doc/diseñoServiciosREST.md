@@ -62,6 +62,14 @@ Gestionado por el microservicio `refugio-auth`.
 
 ---
 
+### 4. Preferencias de Adopción
+| Método | Endpoint | Descripción | Roles |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/preferencias-adopcion/usuario/{id}` | Recupera las preferencias guardadas del usuario. | `ADOPTANTE` |
+| `POST` | `/api/v1/preferencias-adopcion` | Guarda o actualiza las preferencias de tamaño, edad, etc. | `ADOPTANTE` |
+
+---
+
 ### 4. Operativa y Tareas (Staff)
 | Método | Endpoint | Descripción | Roles |
 | :--- | :--- | :--- | :--- |
@@ -69,6 +77,9 @@ Gestionado por el microservicio `refugio-auth`.
 | `POST` | `/api/v1/tareas` | Creación y asignación de nueva tarea. | `ADMIN` |
 | `PUT` | `/api/v1/tareas/{id}` | Actualización de estado/progreso. | `ADMIN`, `VOLUN` |
 | `GET` | `/api/v1/voluntarios` | Directorio de personal operativo. | `ADMIN` |
+| `POST` | `/api/v1/voluntarios/{id}/disponibilidad` | Añade turnos y días de disponibilidad para un voluntario. | `ADMIN`, `VOLUN` |
+| `GET` | `/api/v1/voluntarios/{id}/disponibilidad` | Obtiene el calendario de disponibilidad de un voluntario. | `ADMIN`, `VOLUN` |
+| `DELETE` | `/api/v1/voluntarios/{id}/disponibilidad/{fecha}` | Elimina la disponibilidad de un día concreto. | `ADMIN`, `VOLUN` |
 | `GET` | `/api/v1/historiales-medicos/animal/{id}` | Evolución clínica del animal. | `VOLUN`, `ADMIN` |
 
 ---
@@ -81,6 +92,15 @@ Gestionado por el microservicio `refugio-auth`.
 | `PUT` | `/api/v1/notificaciones/{id}/leer` | Marcar notificación como procesada. | Logueado |
 | `POST` | `/api/v1/donaciones` | Registro de nueva aportación económica. | `ADOPTANTE` |
 | `GET` | `/api/v1/objetivos-donacion` | Proyectos activos para financiar. | Público |
+
+---
+
+### 6. Sistema de Gamificación y Logros
+| Método | Endpoint | Descripción | Roles |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/gamificacion/metricas/me` | Obtiene las métricas actuales del usuario logueado. | Logueado |
+| `GET` | `/api/v1/gamificacion/logros` | Listado de todos los logros disponibles en la plataforma. | Logueado |
+| `GET` | `/api/v1/gamificacion/logros/me` | Obtiene los logros desbloqueados por el usuario. | Logueado |
 
 ---
 

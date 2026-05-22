@@ -931,3 +931,44 @@ databaseChangeLog:
         tableName: animal_favorito
         columnNames: usuario_id, animal_id
         constraintName: uq_animal_favorito_usuario_animal
+- changeSet:
+    id: 014-create-disponibilidad-voluntario
+    author: refugio
+    changes:
+    - createTable:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column:
+            name: id
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: voluntario_id
+            type: INT
+            constraints:
+              nullable: false
+        - column:
+            name: fecha
+            type: DATE
+            constraints:
+              nullable: false
+        - column:
+            name: turno
+            type: VARCHAR(20)
+            constraints:
+              nullable: false
+        - column:
+            name: estado
+            type: VARCHAR(20)
+            constraints:
+              nullable: false
+    - addForeignKeyConstraint:
+        baseTableName: disponibilidad_voluntario
+        baseColumnNames: voluntario_id
+        referencedTableName: voluntarios
+        referencedColumnNames: id
+        constraintName: fk_disp_voluntario
+        onDelete: CASCADE

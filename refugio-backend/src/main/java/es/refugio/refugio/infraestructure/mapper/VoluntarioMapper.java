@@ -14,6 +14,10 @@ import es.refugio.refugio.infraestructure.db.jpa.entity.VoluntarioEntity;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioRequest;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioResponse;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioUpdateRequest;
+import es.refugio.refugio.infraestructure.web.dto.voluntario.DisponibilidadResponse;
+import es.refugio.refugio.domain.model.voluntario.DisponibilidadVoluntario;
+import es.refugio.refugio.domain.model.voluntario.DisponibilidadVoluntarioId;
+import es.refugio.refugio.infraestructure.db.jpa.entity.DisponibilidadVoluntarioEntity;
 
 public class VoluntarioMapper {
 
@@ -47,6 +51,14 @@ public class VoluntarioMapper {
                 v.getEstado() != null ? v.getEstado().name() : null);
     }
 
+    public static DisponibilidadResponse toResponse(DisponibilidadVoluntario d) {
+        return new DisponibilidadResponse(
+                d.getId() != null ? d.getId().getValue() : null,
+                d.getFecha(),
+                d.getTurno(),
+                d.getEstado());
+    }
+
     public static VoluntarioEntity toEntity(Voluntario v) {
         Integer usuarioId = null;
         if (v.getUsuarioId() != null) {
@@ -60,7 +72,7 @@ public class VoluntarioMapper {
                     .collect(Collectors.toList());
         }
 
-        return VoluntarioEntity.builder()
+        VoluntarioEntity entity = VoluntarioEntity.builder()
                 .id(v.getId() != null ? v.getId().getValue() : null)
                 .usuarioId(usuarioId)
                 .disponibilidad(v.getDisponibilidad())
@@ -68,6 +80,21 @@ public class VoluntarioMapper {
                 .status(v.getEstado())
                 .tareas(tareas)
                 .build();
+
+        if (v.getDisponibilidades() != null) {
+            List<DisponibilidadVoluntarioEntity> disponibilidades = v.getDisponibilidades().stream()
+                    .map(d -> DisponibilidadVoluntarioEntity.builder()
+                            .id(d.getId() != null ? d.getId().getValue() : null)
+                            .fecha(d.getFecha())
+                            .turno(d.getTurno())
+                            .estado(d.getEstado())
+                            .voluntario(entity)
+                            .build())
+                    .collect(Collectors.toList());
+            entity.setDisponibilidades(disponibilidades);
+        }
+
+        return entity;
     }
 
     public static Voluntario toDomain(VoluntarioEntity e) {
@@ -79,6 +106,15 @@ public class VoluntarioMapper {
                 .estado(e.getStatus())
                 .tareas(e.getTareas() != null
                         ? e.getTareas().stream().map(te -> new TareaId(te.getId())).collect(Collectors.toList())
+                        : new java.util.ArrayList<>())
+                .disponibilidades(e.getDisponibilidades() != null
+                        ? e.getDisponibilidades().stream().map(de -> DisponibilidadVoluntario.builder()
+                                .id(new DisponibilidadVoluntarioId(de.getId()))
+                                .voluntarioId(new VoluntarioId(e.getId()))
+                                .fecha(de.getFecha())
+                                .turno(de.getTurno())
+                                .estado(de.getEstado())
+                                .build()).collect(Collectors.toList())
                         : new java.util.ArrayList<>())
                 .build();
     }

@@ -46,15 +46,11 @@
                 </div>
 
                 <div style="display:flex; gap:10px; flex-shrink: 0;">
-                    <a class="btn btn-secondary" th:href="@{/web/voluntarios/pdf}" target="_blank"
-                       style="height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 15px; border-radius: 10px; font-weight: 600;">
-                        <i data-lucide="file-text" style="width:18px;"></i>
-                        <span th:text="#{generic.link.export.pdf}">Exportar PDF</span>
+                    <a th:href="@{/web/voluntarios/pdf}" target="_blank" title="Exportar listado a PDF" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/pdf.png" alt="PDF" style="height: 48px; width: 48px; object-fit: contain;">
                     </a>
-                    <a class="btn btn-secondary" th:href="@{/web/voluntarios/excel}" target="_blank"
-                       style="height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 15px; border-radius: 10px; font-weight: 600;">
-                        <i data-lucide="file-text" style="width:18px;"></i>
-                        <span th:text="#{generic.link.export.excel}">Exportar Excel</span>
+                    <a th:href="@{/web/voluntarios/excel}" target="_blank" title="Exportar listado a Excel" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/excel.png" alt="Excel" style="height: 48px; width: 48px; object-fit: contain;">
                     </a>
                     <a class="btn btn-primary" th:href="@{/web/voluntarios/nuevo}"
                        style="height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 15px; border-radius: 10px; font-weight: 600;">
@@ -92,7 +88,8 @@
                             <a th:href="@{/web/voluntarios(modoSeleccion=${modoSeleccion}, tareaIdSeleccion=${tareaIdSeleccion})}" 
                                th:hx-get="@{/web/voluntarios(modoSeleccion=${modoSeleccion}, tareaIdSeleccion=${tareaIdSeleccion})}" 
                                hx-target="#voluntarios-container"
-                               hx-swap="innerHTML"
+                               hx-select="#voluntarios-container"
+                               hx-swap="outerHTML"
                                hx-replace-url="true"
                                class="btn-premium secondary" style="height: 40px; padding: 0 1.5rem;">
                                 Ver todos
@@ -163,6 +160,14 @@
                                         title="Asignar Tarea">
                                     <i data-lucide="plus-circle" style="width: 18px; color: var(--secondary);"></i>
                                 </button>
+                                <button class="btn-icon"
+                                        style="cursor: pointer; display: flex; align-items: center; justify-content: center;"
+                                        th:hx-get="@{/web/voluntarios/{id}/modal-disponibilidad(id=${p_item.id})}"
+                                        hx-target="#modals-container"
+                                        hx-swap="innerHTML"
+                                        title="Ver disponibilidad">
+                                    <i data-lucide="calendar-days" style="width: 18px; color: var(--primary);"></i>
+                                </button>
                                 <a class="btn-icon" th:hx-get="@{/web/voluntarios/{id}/editar(id=${p_item.id})}"
                                     hx-target="#contenido-dinamico" hx-push-url="true" title="Editar">
                                     <i data-lucide="edit-2" style="width: 18px;"></i>
@@ -202,6 +207,8 @@
                         </div>
                     </div>
                 </div>
+        <!-- Modal Container for HTMX injections -->
+        <div id="modals-container"></div>
     </div>
 </body>
 

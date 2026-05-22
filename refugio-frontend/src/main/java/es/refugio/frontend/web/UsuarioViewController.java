@@ -480,6 +480,13 @@ public class UsuarioViewController {
                             .filter(t -> t.voluntarioIds() != null && t.voluntarioIds().contains(vId))
                             .toList();
                     model.addAttribute("tareas", misTareas);
+                    
+                    try {
+                        List<DisponibilidadRecord> disponibilidades = helper.fetchList(apiUrl + "/v1/voluntarios/" + vId + "/disponibilidad", DisponibilidadRecord.class);
+                        model.addAttribute("disponibilidades", disponibilidades);
+                    } catch (Exception e) {
+                        model.addAttribute("disponibilidades", new ArrayList<>());
+                    }
                 }
             }
         } catch (Exception ignored) {
