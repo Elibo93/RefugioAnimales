@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="pdf-head(title)">
     <meta charset="UTF-8" />
-    <title th:text="${title}">Adoptify</title>
+    <title th:text="${title}">[[#{html.auto.adoptify}]]</title>
     <style>
         @page {
             size: A4 portrait;
@@ -178,7 +178,7 @@
 </th:block>
 <th:block th:fragment="pdf-head-landscape(title)">
     <meta charset="UTF-8" />
-    <title th:text="${title}">Adoptify</title>
+    <title th:text="${title}">[[#{html.auto.adoptify}]]</title>
     <style>
         @page {
             size: A4 landscape;

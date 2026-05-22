@@ -9,19 +9,19 @@
     </style>
 </head>
 <body>
-    <div class="watermark">ADOPTIFY</div>
+    <div class="watermark" th:text="#{generic.auto.adoptify}"></div>
     <div class="header-container">
         <div class="logo-container">
-            <span class="logo-text">Adoptify<span class="logo-dot">.</span></span>
+            <span class="logo-text">[[#{html.auto.adoptify}]]<span class="logo-dot">.</span></span>
         </div>
         <div class="meta-container">
-            <div class="doc-title" th:text="#{pdf.animales.header}">Listado de animales</div>
+            <div class="doc-title" th:text="#{pdf.animales.header}">Listado [[#{html.auto.de}]] animales</div>
             <div class="doc-date" th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}">19/05/2026 09:00</div>
         </div>
         <div class="clear"></div>
     </div>
 
-    <h1 th:text="#{pdf.animales.header}">Listado de animales</h1>
+    <h1 th:text="#{pdf.animales.header}">Listado [[#{html.auto.de}]] animales</h1>
     <table>
         <thead>
             <tr>
@@ -31,12 +31,12 @@
                 <th style="width: 7%;" th:text="#{pdf.column.breed}">Raza</th>
                 <th style="width: 5%;" th:text="#{pdf.column.sex}">Sexo</th>
                 <th style="width: 9%;" th:text="#{pdf.column.chip}">Chip ID</th>
-                <th style="width: 7%;" th:text="#{pdf.column.status}">Estado</th>
+                <th style="width: 7%;" th:text="#{pdf.column.status}">[[#{generic.auto.status}]]</th>
                 <th style="width: 5%;" th:text="#{animal.field.age}">Edad</th>
                 <th style="width: 6%;" th:text="#{animal.filter.size}">Tamaño</th>
                 <th style="width: 5%;" th:text="#{animal.field.peso.label}">Peso</th>
                 <th style="width: 5%;" th:text="#{animal.field.energy}">Energía</th>
-                <th style="width: 5%;" th:text="#{animal.field.urgencia}">Urgente</th>
+                <th style="width: 5%;" th:text="#{animal.field.urgencia}">[[#{html.auto.urgente}]]</th>
                 <th style="width: 4%;" th:text="#{stats.visits}">Visitas</th>
                 <th style="width: 4%;" th:text="#{stats.requests}">Solics.</th>
                 <th style="width: 14%;" th:text="#{animal.field.description}">Descripción</th>

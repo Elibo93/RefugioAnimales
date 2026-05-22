@@ -144,7 +144,7 @@ public class SolicitudAdopcionViewController {
             model.addAttribute("successMessage", successMessage);
         model.addAttribute("currentUri", WebRoutes.SOLICITUDES_BASE);
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Solicitud_LIST.getPath() + " :: content";
         }
 
@@ -225,7 +225,7 @@ public class SolicitudAdopcionViewController {
         model.addAttribute("currentUri", WebRoutes.SOLICITUDES_MIS_ADOPTADOS);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.MIS_ADOPTADOS_LISTA.getPath());
 
-        if (request != null && "true".equals(request.getHeader("HX-Request"))) {
+        if (request != null && "true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.MIS_ADOPTADOS_LISTA.getPath() + " :: content";
         }
 
@@ -250,7 +250,7 @@ public class SolicitudAdopcionViewController {
         model.addAttribute("estados", List.of("PENDIENTE", "APROBADA", "RECHAZADA", "EN_REVISION"));
         model.addAttribute("currentUri", WebRoutes.SOLICITUDES_NUEVA);
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Solicitud_FORM.getPath() + " :: content";
         }
 
@@ -277,7 +277,7 @@ public class SolicitudAdopcionViewController {
 
         restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion", body, Object.class);
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return "fragments/content/solicitud-creada :: success-modal";
         }
 
@@ -323,7 +323,7 @@ public class SolicitudAdopcionViewController {
             model.addAttribute("estados", List.of("PENDIENTE", "APROBADA", "RECHAZADA", "EN_REVISION"));
             model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
 
-            if ("true".equals(request.getHeader("HX-Request"))) {
+            if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
                 return FragmentoContenido.Solicitud_FORM.getPath() + " :: content";
             }
 
@@ -370,7 +370,7 @@ public class SolicitudAdopcionViewController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         restTemplate.delete(apiUrl + "/v1/solicitudes-adopcion/" + id);
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return ResponseEntity.ok()
                 .header("HX-Trigger", "{\"showToast\": {\"message\": \"Solicitud eliminada correctamente\", \"type\": \"success\"}}")
                 .body("");
@@ -385,18 +385,18 @@ public class SolicitudAdopcionViewController {
         try {
             restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/" + id + "/aprobar", null, Object.class);
             redirectAttributes.addFlashAttribute("successMessage", msg);
-            if ("true".equals(request.getHeader("HX-Request"))) {
+            if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
                 response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"" + msg + "\", \"type\": \"success\"}, \"adoptionStatusChanged\": {}}");
             }
         } catch (Exception e) {
             logger.error("Error al aprobar solicitud: " + e.getMessage());
             String errorMsg = "Error al procesar la aprobación.";
             redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
-            if ("true".equals(request.getHeader("HX-Request"))) {
+            if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
                 response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"" + errorMsg + "\", \"type\": \"error\"}}");
             }
         }
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return listar(model, request, response, 1, 10, null);
         }
         return "redirect:" + WebRoutes.SOLICITUDES_BASE;
@@ -419,17 +419,17 @@ public class SolicitudAdopcionViewController {
                 
                 restTemplate.put(apiUrl + "/v1/solicitudes-adopcion/" + id, body);
                 redirectAttributes.addFlashAttribute("successMessage", msg);
-                if ("true".equals(request.getHeader("HX-Request"))) {
+                if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
                     response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"" + msg + "\", \"type\": \"success\"}, \"adoptionStatusChanged\": {}}");
                 }
             }
         } catch (Exception e) {
             logger.error("Error al rechazar solicitud: " + e.getMessage());
-            if ("true".equals(request.getHeader("HX-Request"))) {
+            if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
                 response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"Error al rechazar la solicitud\", \"type\": \"error\"}}");
             }
         }
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return listar(model, request, response, 1, 10, null);
         }
         return "redirect:" + WebRoutes.SOLICITUDES_BASE;
@@ -452,17 +452,17 @@ public class SolicitudAdopcionViewController {
                 
                 restTemplate.put(apiUrl + "/v1/solicitudes-adopcion/" + id, body);
                 redirectAttributes.addFlashAttribute("successMessage", msg);
-                if ("true".equals(request.getHeader("HX-Request"))) {
+                if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
                     response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"" + msg + "\", \"type\": \"success\"}}");
                 }
             }
         } catch (Exception e) {
             logger.error("Error al poner en revisión: " + e.getMessage());
-            if ("true".equals(request.getHeader("HX-Request"))) {
+            if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
                 response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"Error al mover a revisión\", \"type\": \"error\"}}");
             }
         }
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return listar(model, request, response, 1, 10, null);
         }
         return "redirect:" + WebRoutes.SOLICITUDES_BASE;
@@ -1046,7 +1046,7 @@ public class SolicitudAdopcionViewController {
             model.addAttribute("currentUserId", userIdObj);
         }
 
-        if (request != null && "true".equals(request.getHeader("HX-Request"))) {
+        if (request != null && "true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Solicitud_DETALLE.getPath() + " :: content";
         }
         

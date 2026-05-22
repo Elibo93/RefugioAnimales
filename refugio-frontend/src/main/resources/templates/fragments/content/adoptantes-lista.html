@@ -12,12 +12,12 @@
         <div th:if="${successMessage}" class="alert alert-success"
             style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-radius: 12px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;">
             <i data-lucide="check-circle" style="width: 20px;"></i>
-            <span th:text="${successMessage}">Mensaje de éxito</span>
+            <span th:text="${successMessage}">Mensaje [[#{html.auto.de}]] éxito</span>
         </div>
         <div th:if="${errorMessage}" class="alert alert-danger"
             style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-radius: 12px; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca;">
             <i data-lucide="alert-circle" style="width: 20px;"></i>
-            <span th:text="${errorMessage}">Mensaje de error</span>
+            <span th:text="${errorMessage}">Mensaje [[#{html.auto.de}]] error</span>
         </div>
 
         <div class="table-wrapper">
@@ -60,11 +60,11 @@
                 <!-- Encabezados -->
                 <div class="list-header"
                     style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
-                    <div style="flex: 0.5; text-align: center;">ID</div>
-                    <div style="flex: 3;">Adoptante / Perfil</div>
-                    <div style="flex: 3; text-align: center;">Contacto y Dirección</div>
-                    <div style="flex: 2; text-align: center;">Estado Validación</div>
-                    <div style="flex: 2; text-align: center;">Acciones</div>
+                    <div style="flex: 0.5; text-align: center;" th:text="#{generic.auto.id}"></div>
+                    <div style="flex: 3;" th:text="#{adoptante.auto.adoptante.perfil}"></div>
+                    <div style="flex: 3; text-align: center;" th:text="#{generic.auto.contacto.y.direccion}"></div>
+                    <div style="flex: 2; text-align: center;" th:text="#{adoptante.auto.estado.validacion}"></div>
+                    <div style="flex: 2; text-align: center;" th:text="#{generic.auto.acciones}"></div>
                 </div>
 
                 <div id="adoptantes-container">
@@ -78,15 +78,11 @@
                             <i data-lucide="search-x" style="width: 32px; color: var(--text-muted);"></i>
                         </div>
                         <div>
-                            <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">No se encontraron
-                                adoptantes</h3>
-                            <p style="margin: 5px 0 0; color: var(--text-muted); font-size: 0.9rem;">Prueba con otros
-                                términos de búsqueda.</p>
+                            <h3 style="margin: 0; color: var(--text-main); font-weight: 700;" th:text="#{adoptante.auto.no.se.encontraron}"></h3>
+                            <p style="margin: 5px 0 0; color: var(--text-muted); font-size: 0.9rem;" th:text="#{adoptante.auto.prueba.con.otros}"></p>
                         </div>
                         <a th:href="@{/web/adoptantes}" hx-get="/web/adoptantes" hx-target=".list-body"
-                            hx-swap="outerHTML" class="btn-premium secondary" style="height: 40px; padding: 0 1.5rem;">
-                            Ver todos
-                        </a>
+                            hx-swap="outerHTML" class="btn-premium secondary" style="height: 40px; padding: 0 1.5rem;" th:text="#{generic.auto.ver.todos}"></a>
                     </div>
 
                     <div th:each="a : ${adoptantes}" class="premium-row-card" th:id="'row-' + ${a.id()}"

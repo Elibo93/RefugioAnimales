@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
 </head>
 <body>
-    <div th:fragment="content" hx-history="false">
+    <div th:fragment="content">
         <style>
             .timeline-container { position: relative; padding: 20px 0; }
             .timeline-container::before { content: ''; position: absolute; left: 81px; top: 0; bottom: 0; width: 2px; background: #e2e8f0; }
@@ -49,14 +49,14 @@
                        hx-get="/web/tareas" 
                        hx-target="#contenido-dinamico" 
                        hx-replace-url="true"
-                       hx-history="false"
+                      
                        style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.9rem; text-decoration: none; margin-bottom: 0.5rem; font-weight: 600;">
                         <i data-lucide="arrow-left" style="width: 16px;"></i>
-                        Volver a Tareas
+                        [[#{html.auto.volver.a.tareas}]]
                     </a>
-                    <h2 class="user-name page" style="margin: 0;">Historial de Tarea</h2>
+                    <h2 class="user-name page" style="margin: 0;" th:text="#{tarea.auto.historial.de.tarea}"></h2>
                     <p style="color: var(--text-muted); margin: 5px 0 0; font-size: 0.95rem;">
-                        Trazabilidad de cambios para: <strong style="color: var(--primary);" th:text="${tarea.descripcion}">Tarea</strong>
+                        [[#{html.auto.trazabilidad.de.cambios.para}]] <strong style="color: var(--primary);" th:text="${tarea.descripcion}">Tarea</strong>
                     </p>
                 </div>
                 
@@ -65,7 +65,7 @@
                         <i data-lucide="activity" style="color: var(--primary); width: 20px;"></i>
                     </div>
                     <div>
-                        <span style="display: block; font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">Estado Actual</span>
+                        <span style="display: block; font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase;" th:text="#{tarea.auto.estado.actual}"></span>
                         <span style="font-weight: 800; color: var(--text-main);" th:text="${#strings.replace(tarea.estado, '_', ' ')}">PENDIENTE</span>
                     </div>
                 </div>
@@ -77,8 +77,8 @@
             <div th:if="${#lists.isEmpty(historial)}" 
                  style="text-align: center; padding: 3rem; background: white; border-radius: 20px; border: 1px dashed var(--border);">
                 <i data-lucide="history" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 1rem; opacity: 0.5;"></i>
-                <h3 style="color: var(--text-main); font-weight: 700;">Sin registros de actividad</h3>
-                <p style="color: var(--text-muted);">Esta tarea aún no ha tenido cambios registrados.</p>
+                <h3 style="color: var(--text-main); font-weight: 700;" th:text="#{tarea.auto.sin.registros.de.actividad}"></h3>
+                <p style="color: var(--text-muted);" th:text="#{tarea.auto.esta.tarea.aun.no.ha.tenido.cambios.regi}"></p>
             </div>
 
             <!-- Items del Historial -->
@@ -100,7 +100,7 @@
                     <div class="timeline-user">
                         <i data-lucide="user" style="width: 14px; color: var(--primary);"></i>
                         <span th:text="${h.usuarioNombre}">Juan Pérez</span>
-                        <span th:if="${h.estadoAnterior == null}" style="font-size: 0.75rem; font-weight: 400; color: var(--text-muted);">(Creador de la tarea)</span>
+                        <span th:if="${h.estadoAnterior == null}" style="font-size: 0.75rem; font-weight: 400; color: var(--text-muted);" th:text="#{tarea.auto.creador.de.la.tarea}"></span>
                     </div>
 
                     <div th:if="${h.observaciones != null and !h.observaciones.isEmpty()}" class="timeline-obs">

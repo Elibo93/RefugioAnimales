@@ -81,7 +81,7 @@ public class HistorialMedicoViewController {
         model.addAttribute("selectedAnimalId", animalId);
         if (successMessage != null) model.addAttribute("successMessage", successMessage);
         
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Historial_LIST.getPath() + " :: content";
         }
         
@@ -102,7 +102,7 @@ public class HistorialMedicoViewController {
         model.addAttribute(ModelAttribute.SINGLE_Historial.getName(), historial);
         model.addAttribute("animales", helper.fetchList(apiUrl + "/v1/animales?size=1000", AnimalRecord.class));
         
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Historial_FORM.getPath() + " :: content";
         }
         
@@ -151,7 +151,7 @@ public class HistorialMedicoViewController {
             }
         }
         
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Historial_FORM.getPath() + " :: content";
         }
         
@@ -188,7 +188,7 @@ public class HistorialMedicoViewController {
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         restTemplate.delete(apiUrl + "/v1/historial-medico/" + id);
-        if ("true".equals(request.getHeader("HX-Request"))) return ResponseEntity.ok("");
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) return ResponseEntity.ok("");
         return ResponseEntity.status(302).header("Location", WebRoutes.HISTORIALES_BASE).build();
     }
 
@@ -261,7 +261,7 @@ public class HistorialMedicoViewController {
             }
         }
         
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return "fragments/content/historial-medico-detalle :: content";
         }
         

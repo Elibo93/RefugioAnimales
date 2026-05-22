@@ -149,7 +149,7 @@ public class UsuarioViewController {
         model.addAttribute("selectedRol", rol);
         model.addAttribute("query", q);
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Persona_LIST.getPath();
         }
 
@@ -173,7 +173,7 @@ public class UsuarioViewController {
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), emptyPersona);
         model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_ADMIN"));
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Persona_FORM.getPath() + " :: content";
         }
 
@@ -269,7 +269,7 @@ public class UsuarioViewController {
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), persona);
         model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_ADMIN"));
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Persona_FORM.getPath() + " :: content";
         }
 
@@ -501,7 +501,7 @@ public class UsuarioViewController {
             logger.warn("Error al cargar datos de gamificación para usuario {}: {}", id, e.getMessage());
         }
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Persona_DETALLE.getPath() + " :: content";
         }
 

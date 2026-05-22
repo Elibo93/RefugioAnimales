@@ -17,9 +17,8 @@
                     </div>
                     <div>
                         <h1 style="margin: 0; font-size: 1.5rem; font-weight: 800; color: var(--text-main);"
-                            th:text="#{solicitud.list.title}">Solicitudes de Adopción</h1>
-                        <p style="margin: 2px 0 0; font-size: 0.9rem; color: var(--text-muted);">Gestiona las
-                            solicitudes de adopción y el proceso de revisión.</p>
+                            th:text="#{solicitud.list.title}">[[#{solicitud.auto.adoption.requests}]]</h1>
+                        <p style="margin: 2px 0 0; font-size: 0.9rem; color: var(--text-muted);" th:text="#{adopcion.auto.gestiona.las}"></p>
                     </div>
                 </div>
                 <div style="display:flex; gap:10px;">
@@ -46,7 +45,7 @@
                             <span
                                 style="background: #f59e0b; width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);"></span>
                         </span>
-                        SOLICITUDES PENDIENTES
+                        [[#{solicitud.auto.pending.requests}]]
                         <span
                             style="font-family: inherit; background: #f59e0b; color: white; font-size: 0.75rem; font-weight: 900; padding: 2px 10px; border-radius: 8px; margin-left: 8px; vertical-align: middle; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);"
                             th:text="${pendientes.size()}">0</span>
@@ -71,7 +70,7 @@
                                 </div>
                                 <div>
                                     <span
-                                        style="display: block; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Referencia</span>
+                                        style="display: block; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;" th:text="#{adopcion.auto.referencia}"></span>
                                     <h3
                                         style="margin: 0; font-size: 1.05rem; font-weight: 900; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
                                         <span th:text="'ID #' + ${s.id()}">#123</span>
@@ -82,7 +81,7 @@
                                             onmouseover="this.style.background='var(--primary)'; this.style.color='white'"
                                             onmouseout="this.style.background='#f0fdf4'; this.style.color='var(--primary)'">
                                             <i data-lucide="eye" style="width: 14px;"></i>
-                                            VER DETALLES
+                                            [[#{solicitud.auto.see.details}]]
                                         </a>
                                         <a th:href="@{/web/solicitudes/{id}/editar(id=${s.id()})}"
                                             th:hx-get="@{/web/solicitudes/{id}/editar(id=${s.id()})}"
@@ -91,7 +90,7 @@
                                             onmouseover="this.style.background='#4f46e5'; this.style.color='white'"
                                             onmouseout="this.style.background='#e0e7ff'; this.style.color='#4f46e5'">
                                             <i data-lucide="edit-3" style="width: 14px;"></i>
-                                            EDITAR
+                                            [[#{html.auto.editar}]]
                                         </a>
                                     </h3>
                                 </div>
@@ -99,7 +98,7 @@
                             <span class="badge-premium"
                                 style="padding: 6px 12px; border-radius: 10px; font-weight: 800; font-size: 0.7rem; border: none;"
                                 th:classappend="${s.estado() == 'EN_REVISION' ? 'info' : 'warning'}"
-                                th:text="${s.estado() == 'EN_REVISION' ? 'REVISIÓN' : 'NUEVA'}">NUEVA</span>
+                                th:text="${s.estado() == 'EN_REVISION' ? 'REVISIÓN' : 'NUEVA'}">[[#{solicitud.auto.new}]]</span>
                         </div>
 
                         <!-- Body de la Card: Clean Spacing -->
@@ -112,17 +111,14 @@
                                 </div>
                                 <div style="flex: 1;">
                                     <span
-                                        style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Animal
-                                        en proceso</span>
+                                        style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;" th:text="#{generic.auto.animal}"></span>
                                     <a th:href="@{/web/animales/{id}(id=${s.animalId()})}"
                                         style="font-weight: 900; color: var(--secondary); text-decoration: none; font-size: 1.2rem; display: block; margin-top: 2px;"
                                         th:with="a=${animalesMap['' + s.animalId()]}"
                                         th:text="${a != null ? a.nombre() : 'Desconocido'}">Rocky</a>
                                 </div>
                                 <div
-                                    style="background: #f1f5f9; padding: 4px 8px; border-radius: 8px; font-size: 0.65rem; font-weight: 800; color: var(--text-muted);">
-                                    VER FICHA
-                                </div>
+                                    style="background: #f1f5f9; padding: 4px 8px; border-radius: 8px; font-size: 0.65rem; font-weight: 800; color: var(--text-muted);" th:text="#{adopcion.auto.ver.ficha}"></div>
                             </div>
 
                             <div style="height: 1px; background: #f1f5f9; width: 100%;"></div>
@@ -135,8 +131,7 @@
                                 </div>
                                 <div style="flex: 1;">
                                     <span
-                                        style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Candidato
-                                        interesado</span>
+                                        style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;" th:text="#{adopcion.auto.candidato}"></span>
                                     <a th:href="@{/web/personas/{id}(id=${adoptanteUsuarioIds['' + s.adoptanteId()]})}"
                                         th:hx-get="@{/web/personas/{id}(id=${adoptanteUsuarioIds['' + s.adoptanteId()]})}"
                                         hx-target="#contenido-dinamico" hx-push-url="true"
@@ -154,18 +149,14 @@
                                     style="flex: 1.5; height: 48px; font-size: 0.95rem; font-weight: 800; border-radius: 16px; background: linear-gradient(135deg, var(--primary) 0%, #166534 100%); box-shadow: 0 4px 12px rgba(22, 101, 52, 0.2); cursor: pointer; color: white; border: none;"
                                     th:hx-post="@{/web/solicitudes/{id}/aprobar(id=${s.id()})}"
                                     hx-target="#contenido-dinamico"
-                                    hx-confirm="¿Estás seguro de aprobar esta solicitud? Se generará un contrato de adopción automático.">
-                                    Aprobar Solicitud
-                                </button>
+                                    hx-confirm="¿Estás seguro de aprobar esta solicitud? Se generará un contrato de adopción automático." th:text="#{adopcion.auto.aprobar.solicitud}"></button>
                                 <button class="btn-premium secondary"
                                     style="flex: 1; height: 48px; font-size: 0.95rem; font-weight: 800; border-radius: 16px; color: #be123c; border: 1.5px solid #fecdd3; background: white; transition: all 0.2s; cursor: pointer;"
                                     onmouseover="this.style.background='#fff1f2'"
                                     onmouseout="this.style.background='white'"
                                     th:hx-post="@{/web/solicitudes/{id}/rechazar(id=${s.id()})}"
                                     hx-target="#contenido-dinamico"
-                                    hx-confirm="¿Rechazar esta solicitud definitivamente?">
-                                    Rechazar
-                                </button>
+                                    hx-confirm="¿Rechazar esta solicitud definitivamente?" th:text="#{generic.auto.rechazar}"></button>
                             </div>
                             <button th:if="${s.estado() == 'PENDIENTE'}" class="btn-outline"
                                 style="width: 100%; height: 44px; font-size: 0.9rem; border-radius: 14px; font-weight: 700; background: white; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--text-muted); cursor: pointer; transition: all 0.2s;"
@@ -174,7 +165,7 @@
                                 th:hx-post="@{/web/solicitudes/{id}/revision(id=${s.id()})}"
                                 hx-target="#contenido-dinamico">
                                 <i data-lucide="eye" style="width: 18px;"></i>
-                                Mover a Revisión
+                                [[#{solicitud.auto.move.review}]]
                             </button>
                         </div>
                     </div>
@@ -187,7 +178,7 @@
                 <h2
                     style="font-size: 1rem; font-weight: 900; color: var(--text-muted); margin: 0; display: flex; align-items: center; gap: 12px; letter-spacing: 0.05em;">
                     <i data-lucide="layers" style="width: 18px; opacity: 0.6;"></i>
-                    HISTORIAL COMPLETO
+                    [[#{solicitud.auto.complete.history}]]
                 </h2>
                 <div
                     style="height: 1px; flex: 1; background: linear-gradient(to right, #f1f5f9, transparent); margin-left: 2rem;">
@@ -197,12 +188,12 @@
             <div class="premium-list-container">
                 <div class="list-header"
                     style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
-                    <div style="flex: 0.5; text-align: center;">ID</div>
-                    <div style="flex: 3;">Animal y Solicitante</div>
-                    <div style="flex: 1.2; text-align: center;">Estado</div>
-                    <div style="flex: 2.5;">Comentario</div>
-                    <div style="flex: 1.2; text-align: center;">Fecha</div>
-                    <div style="flex: 2; text-align: center;">Acciones</div>
+                    <div style="flex: 0.5; text-align: center;" th:text="#{generic.auto.id}"></div>
+                    <div style="flex: 3;" th:text="#{adopcion.auto.animal.y.solicitante}"></div>
+                    <div style="flex: 1.2; text-align: center;" th:text="#{generic.auto.estado}"></div>
+                    <div style="flex: 2.5;" th:text="#{generic.auto.comentario}"></div>
+                    <div style="flex: 1.2; text-align: center;" th:text="#{generic.auto.fecha}"></div>
+                    <div style="flex: 2; text-align: center;" th:text="#{generic.auto.acciones}"></div>
                 </div>
 
                 <div class="list-body" style="display: flex; flex-direction: column; gap: 12px;">

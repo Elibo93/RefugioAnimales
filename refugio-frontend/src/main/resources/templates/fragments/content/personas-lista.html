@@ -51,11 +51,11 @@
                                     hx-select="#personas-results-container"
                                     hx-swap="outerHTML"
                                     hx-include="#personas-search-input">
-                                <option value="ALL" th:selected="${selectedRol == 'ALL' or selectedRol == null}">Todos los roles</option>
-                                <option value="ROLE_PUBLICO" th:selected="${selectedRol == 'ROLE_PUBLICO'}">Simpatizantes</option>
-                                <option value="ROLE_VOLUNTARIO" th:selected="${selectedRol == 'ROLE_VOLUNTARIO'}">Voluntarios</option>
-                                <option value="ROLE_ADOPTANTE" th:selected="${selectedRol == 'ROLE_ADOPTANTE'}">Adoptantes</option>
-                                <option value="ROLE_ADMIN" th:selected="${selectedRol == 'ROLE_ADMIN'}">Administradores</option>
+                                <option value="ALL" th:selected="${selectedRol == 'ALL' or selectedRol == null}" th:text="#{persona.auto.todos.los.roles}"></option>
+                                <option value="ROLE_PUBLICO" th:selected="${selectedRol == 'ROLE_PUBLICO'}" th:text="#{persona.auto.simpatizantes}"></option>
+                                <option value="ROLE_VOLUNTARIO" th:selected="${selectedRol == 'ROLE_VOLUNTARIO'}" th:text="#{home.auto.voluntarios}"></option>
+                                <option value="ROLE_ADOPTANTE" th:selected="${selectedRol == 'ROLE_ADOPTANTE'}" th:text="#{home.auto.adoptantes}"></option>
+                                <option value="ROLE_ADMIN" th:selected="${selectedRol == 'ROLE_ADMIN'}" th:text="#{persona.auto.administradores}"></option>
                             </select>
                         </div>
 
@@ -90,11 +90,11 @@
                 <!-- Encabezados -->
                 <div class="list-header"
                     style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
-                    <div style="flex: 0.5; text-align: center;">ID</div>
-                    <div style="flex: 3;">Nombre Completo</div>
-                    <div style="flex: 2; text-align: center;">Rol de Sistema</div>
-                    <div style="flex: 3; text-align: center;">Datos de Contacto</div>
-                    <div style="flex: 2; text-align: center;">Acciones</div>
+                    <div style="flex: 0.5; text-align: center;" th:text="#{generic.auto.id}"></div>
+                    <div style="flex: 3;" th:text="#{generic.auto.nombre.completo}"></div>
+                    <div style="flex: 2; text-align: center;" th:text="#{persona.auto.rol.de.sistema}"></div>
+                    <div style="flex: 3; text-align: center;" th:text="#{persona.auto.datos.de.contacto}"></div>
+                    <div style="flex: 2; text-align: center;" th:text="#{generic.auto.acciones}"></div>
                 </div>
 
                 <div id="personas-results-container">
@@ -106,17 +106,15 @@
                             <i data-lucide="search-x" style="width: 32px; color: var(--text-muted);"></i>
                         </div>
                         <div>
-                            <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">No se encontraron personas</h3>
-                            <p style="margin: 5px 0 0; color: var(--text-muted); font-size: 0.9rem;">Prueba con otros términos de búsqueda o filtros.</p>
+                            <h3 style="margin: 0; color: var(--text-main); font-weight: 700;" th:text="#{persona.auto.no.se.encontraron.personas}"></h3>
+                            <p style="margin: 5px 0 0; color: var(--text-muted); font-size: 0.9rem;" th:text="#{persona.auto.prueba.con.otros.terminos.de.busqueda.o}"></p>
                         </div>
                         <a th:href="@{/web/personas}" 
                            hx-get="/web/personas" 
                            hx-target="#personas-results-container"
                            hx-select="#personas-results-container"
                            hx-swap="outerHTML"
-                           class="btn-premium secondary" style="height: 40px; padding: 0 1.5rem;">
-                            Ver todos
-                        </a>
+                           class="btn-premium secondary" style="height: 40px; padding: 0 1.5rem;" th:text="#{generic.auto.ver.todos}"></a>
                     </div>
 
                     <div th:each="a : ${personas}" class="premium-row-card" th:id="'row-' + ${a.id}">

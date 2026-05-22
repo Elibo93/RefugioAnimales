@@ -14,25 +14,19 @@
                 <i data-lucide="cookie" class="cookie-icon"></i>
             </div>
             <div class="cookie-text">
-                <h3>Tu privacidad nos importa</h3>
-                <p>Utilizamos cookies propias y de terceros para mejorar tu experiencia, analizar el tráfico y mostrarte los animales más cercanos a ti. Respetamos tu privacidad de acuerdo con el RGPD.</p>
+                <h3 th:text="#{generic.auto.tu.privacidad.nos.importa}"></h3>
+                <p th:text="#{generic.auto.utilizamos.cookies.propias.y.de.terceros}"></p>
             </div>
         </div>
         
         <div class="cookie-actions">
-            <button onclick="acceptCookies('all')" class="btn-cookie accept">
-                Aceptar todas
-            </button>
-            <button onclick="acceptCookies('necessary')" class="btn-cookie necessary">
-                Solo necesarias
-            </button>
-            <button onclick="toggleCookieSettings()" class="btn-cookie settings">
-                Configurar
-            </button>
+            <button onclick="acceptCookies('all')" class="btn-cookie accept" th:text="#{generic.auto.aceptar.todas}"></button>
+            <button onclick="acceptCookies('necessary')" class="btn-cookie necessary" th:text="#{generic.auto.solo.necesarias}"></button>
+            <button onclick="toggleCookieSettings()" class="btn-cookie settings" th:text="#{generic.auto.configurar}"></button>
         </div>
         
         <div class="cookie-footer">
-            <p>Para más información, consulta nuestra <a href="/web/privacidad">Política de Privacidad</a>.</p>
+            <p>[[#{html.auto.para.m.s.informaci.n}]] <a href="/web/privacidad" th:text="#{generic.auto.politica.de.privacidad}"></a>.</p>
         </div>
     </div>
 
@@ -205,9 +199,9 @@
                 title: 'Preferencias de Cookies',
                 html: `
                     <div style="text-align: left; font-size: 0.9rem;">
-                        <p><input type="checkbox" checked disabled> <strong>Necesarias:</strong> Esenciales para el funcionamiento del sitio.</p>
-                        <p><input type="checkbox" id="check-analytics"> <strong>Analíticas:</strong> Nos ayudan a saber qué animales se visitan más.</p>
-                        <p><input type="checkbox" id="check-marketing"> <strong>Marketing:</strong> Para mostrarte contenido relevante.</p>
+                        <p><input type="checkbox" checked disabled> <strong th:text="#{generic.auto.necesarias}"></strong> Esenciales para el funcionamiento del sitio.</p>
+                        <p><input type="checkbox" id="check-analytics"> <strong th:text="#{generic.auto.analiticas}"></strong> Nos ayudan a saber qué animales se visitan más.</p>
+                        <p><input type="checkbox" id="check-marketing"> <strong th:text="#{generic.auto.marketing}"></strong> Para mostrarte contenido relevante.</p>
                     </div>
                 `,
                 confirmButtonText: 'Guardar preferencias',

@@ -28,11 +28,11 @@
             <div id="historial-results-container" class="premium-list-container" style="margin-top: 1.5rem;">
                 <div th:fragment="list-body">
                 <div class="list-header" style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
-                    <div style="flex: 0.5; text-align: center;">ID</div>
-                    <div style="flex: 2;">Animal</div>
-                    <div style="flex: 1.2; text-align: center;">Fecha Consulta</div>
-                    <div style="flex: 2;">Veterinario / Especialista</div>
-                    <div style="flex: 1.5; text-align: center;">Acciones</div>
+                    <div style="flex: 0.5; text-align: center;" th:text="#{generic.auto.id}"></div>
+                    <div style="flex: 2;" th:text="#{generic.auto.animal}"></div>
+                    <div style="flex: 1.2; text-align: center;" th:text="#{historial.auto.fecha.consulta}"></div>
+                    <div style="flex: 2;" th:text="#{historial.auto.veterinario.especialista}"></div>
+                    <div style="flex: 1.5; text-align: center;" th:text="#{generic.auto.acciones}"></div>
                 </div>
 
                 <div class="list-body" style="display: flex; flex-direction: column; gap: 12px;">
@@ -54,7 +54,7 @@
                                    style="font-weight: 800; color: var(--primary); text-decoration: none; cursor: pointer; transition: opacity 0.2s;"
                                    onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'"
                                    th:text="${a.nombre()}">Animal</a>
-                                <div th:if="${a == null}" style="font-weight: 800; color: var(--text-muted);">Desconocido</div>
+                                <div th:if="${a == null}" style="font-weight: 800; color: var(--text-muted);" th:text="#{historial.auto.desconocido}"></div>
                             </div>
                         </div>
 

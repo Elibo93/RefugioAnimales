@@ -129,7 +129,7 @@ public class VoluntarioViewController {
         model.addAttribute("tareaIdSeleccion", tareaIdSeleccion);
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_BASE);
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Voluntario_LIST.getPath() + " :: content";
         }
 
@@ -241,7 +241,7 @@ public class VoluntarioViewController {
             }
         }
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Voluntario_FORM.getPath() + " :: content";
         }
 
@@ -318,7 +318,7 @@ public class VoluntarioViewController {
 
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_EDITAR);
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Voluntario_FORM.getPath() + " :: content";
         }
 
@@ -511,10 +511,10 @@ public class VoluntarioViewController {
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         try {
             restTemplate.delete(apiUrl + "/v1/voluntarios/" + id);
-            if ("true".equals(request.getHeader("HX-Request")))
+            if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request")))
                 return ResponseEntity.ok("");
         } catch (Exception e) {
-            if ("true".equals(request.getHeader("HX-Request"))) {
+            if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
                 return ResponseEntity.unprocessableEntity()
                         .body("<div class='toast error'><span>No se puede eliminar: tiene animales asignados.</span></div>");
             }
@@ -691,7 +691,7 @@ public class VoluntarioViewController {
         model.addAttribute("perfilesMap", perfilesMap);
         model.addAttribute("currentUri", "/web/voluntarios/pendientes");
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return "fragments/content/voluntarios-pendientes :: content";
         }
 
@@ -706,7 +706,7 @@ public class VoluntarioViewController {
         try {
             restTemplate.postForEntity(apiUrl + "/v1/voluntarios/" + id + "/aprobar", null, Void.class);
             
-            if ("true".equals(request.getHeader("HX-Request"))) {
+            if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
                 return ResponseEntity.ok()
                     .header("HX-Trigger", "{\"showToast\": {\"message\": \"¡Solicitud aprobada! El nuevo voluntario ya está activo en el equipo.\", \"type\": \"success\"}, \"volunteerStatusChanged\": {}}")
                     .body("");
@@ -725,7 +725,7 @@ public class VoluntarioViewController {
         try {
             restTemplate.postForEntity(apiUrl + "/v1/voluntarios/" + id + "/rechazar", null, Void.class);
             
-            if ("true".equals(request.getHeader("HX-Request"))) {
+            if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
                 return ResponseEntity.ok()
                     .header("HX-Trigger", "{\"showToast\": {\"message\": \"Solicitud rechazada. Se ha actualizado el estado del candidato correctamente.\", \"type\": \"warning\"}, \"volunteerStatusChanged\": {}}")
                     .body("");

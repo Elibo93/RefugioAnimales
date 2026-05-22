@@ -70,7 +70,7 @@ Gestionado por el microservicio `refugio-auth`.
 
 ---
 
-### 4. Operativa y Tareas (Staff)
+### 5. Operativa y Tareas (Staff)
 | Método | Endpoint | Descripción | Roles |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/tareas` | Listado de tareas activas. | `ADMIN`, `VOLUN` |
@@ -84,7 +84,7 @@ Gestionado por el microservicio `refugio-auth`.
 
 ---
 
-### 5. Sistema de Notificaciones y Donaciones
+### 6. Sistema de Notificaciones y Donaciones
 | Método | Endpoint | Descripción | Roles |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/notificaciones/me` | Listado personal de alertas. | Logueado |
@@ -95,7 +95,7 @@ Gestionado por el microservicio `refugio-auth`.
 
 ---
 
-### 6. Sistema de Gamificación y Logros
+### 7. Sistema de Gamificación y Logros
 | Método | Endpoint | Descripción | Roles |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/gamificacion/metricas/me` | Obtiene las métricas actuales del usuario logueado. | Logueado |

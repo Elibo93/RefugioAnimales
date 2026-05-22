@@ -127,7 +127,7 @@ public class AdopcionViewController {
 
         if (successMessage != null) model.addAttribute("successMessage", successMessage);
         
-        if (request != null && "true".equals(request.getHeader("HX-Request"))) {
+        if (request != null && "true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Adopcion_LIST.getPath();
         }
 
@@ -255,7 +255,7 @@ public class AdopcionViewController {
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         restTemplate.delete(apiUrl + "/v1/adopciones/" + id);
-        if ("true".equals(request.getHeader("HX-Request"))) return ResponseEntity.ok("");
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) return ResponseEntity.ok("");
         return ResponseEntity.status(302).header("Location", WebRoutes.ADOPCIONES_BASE).build();
     }
 

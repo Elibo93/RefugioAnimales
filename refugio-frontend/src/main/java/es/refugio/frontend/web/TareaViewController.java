@@ -136,7 +136,7 @@ public class TareaViewController {
         if (successMessage != null)
             model.addAttribute("successMessage", successMessage);
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Tarea_LIST.getPath() + " :: content";
         }
 
@@ -199,7 +199,7 @@ public class TareaViewController {
         }
         model.addAttribute("usuariosMap", usuariosMap);
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Tarea_FORM.getPath() + " :: content";
         }
 
@@ -257,7 +257,7 @@ public class TareaViewController {
         model.addAttribute("returnUrl", WebRoutes.TAREAS_BASE);
         model.addAttribute("voluntarioNombres", fetchVoluntarioNombres());
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Tarea_FORM.getPath() + " :: content";
         }
 
@@ -312,7 +312,7 @@ public class TareaViewController {
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         restTemplate.delete(apiUrl + "/v1/tareas/" + id);
-        if ("true".equals(request.getHeader("HX-Request")))
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request")))
             return ResponseEntity.ok("");
         return ResponseEntity.status(302).header("Location", WebRoutes.TAREAS_BASE).build();
     }
@@ -346,7 +346,7 @@ public class TareaViewController {
             return "redirect:" + WebRoutes.TAREAS_BASE;
         }
 
-        if ("true".equals(request.getHeader("HX-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Tarea_HISTORIAL.getPath() + " :: content";
         }
 

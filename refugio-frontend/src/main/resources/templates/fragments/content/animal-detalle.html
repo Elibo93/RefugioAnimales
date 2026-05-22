@@ -7,7 +7,7 @@
 </head>
 
 <body>
-    <div th:fragment="content" class="fade-in" hx-history="false">
+    <div th:fragment="content" class="fade-in">
         <style>
             @keyframes pulse-badge {
                 0% {
@@ -134,7 +134,7 @@
                         hx-target="#contenido-dinamico" hx-push-url="true" class="btn btn-secondary"
                         style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
                         <i data-lucide="edit-3" style="width: 18px; margin-right: 8px;"></i>
-                        Editar Ficha
+                        [[#{animal.auto.edit.file}]]
                     </a>
                 </div>
             </div>
@@ -157,7 +157,7 @@
                             style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; font-size: 0.7rem; border-radius: 99px; font-weight: 800; background: #fee2e2; color: #ef4444; border: 1.5px solid #fca5a5; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15); animation: pulse-badge 2s infinite ease-in-out;">
                             <i data-lucide="flame"
                                 style="width: 12px; height: 12px; fill: #ef4444; stroke-width: 2.5;"></i>
-                            <span>URGENTE</span>
+                            <span th:text="#{animal.auto.urgente}"></span>
                         </span>
                     </div>
                     <h1 th:text="${animal.nombre}"
@@ -188,12 +188,10 @@
                     <div style="flex-grow: 1; z-index: 2;">
                         <h4
                             style="margin: 0 0 5px 0; color: #991b1b; font-weight: 800; font-size: 1.1rem; letter-spacing: -0.01em; display: flex; align-items: center; gap: 6px;">
-                            <span>¡LLAMAMIENTO DE ADOPCIÓN URGENTE!</span>
+                            <span th:text="#{animal.auto.llamamiento.de.adopcion.urgente}"></span>
                         </h4>
                         <p style="margin: 0; color: #c53030; font-size: 0.95rem; font-weight: 600; line-height: 1.5;">
-                            <span th:text="${animal.nombre}">Este animal</span> necesita urgentemente una familia de
-                            acogida o adopción. Se encuentra en una situación de especial prioridad en nuestro refugio.
-                            ¡Ayúdale solicitando su adopción o compartiendo su perfil!
+                            <span th:text="${animal.nombre}">Este animal</span> [[#{html.auto.necesita.urgentemente.una.familia.de}]]
                         </p>
                     </div>
                 </div>
@@ -203,14 +201,14 @@
                     style="display: grid; grid-template-columns: repeat(4, 1fr); padding: 25px; text-align: center;">
                     <div class="stat-item">
                         <span
-                            style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Edad</span>
+                            style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;" th:text="#{generic.auto.edad}"></span>
                         <strong style="font-size: 1.2rem; color: var(--primary);"
                             th:text="${(animal.edad ?: 0) + ' años'}">2 años</strong>
                     </div>
                     <div class="stat-item"
                         style="border-left: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; justify-content: center;">
                         <span
-                            style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Sexo</span>
+                            style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;" th:text="#{generic.auto.sexo}"></span>
                         <div style="display: flex; align-items: center; gap: 6px;">
                             <i th:if="${animal.sexo != null}"
                                 th:data-lucide="${animal.sexo.toString() == 'MACHO' ? 'mars' : 'venus'}"
@@ -221,13 +219,13 @@
                     </div>
                     <div class="stat-item" style="border-left: 1px solid var(--border-color);">
                         <span
-                            style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Peso</span>
+                            style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;" th:text="#{animal.auto.peso}"></span>
                         <strong style="font-size: 1.2rem; color: var(--primary);"
                             th:text="${(animal.peso ?: 0) + ' kg'}">15 kg</strong>
                     </div>
                     <div class="stat-item" style="border-left: 1px solid var(--border-color);">
                         <span
-                            style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Tamaño</span>
+                            style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;" th:text="#{generic.auto.tamano}"></span>
                         <strong style="font-size: 1.2rem; color: var(--primary);"
                             th:text="${animal.tamano}">MEDIANO</strong>
                     </div>
@@ -237,7 +235,7 @@
                 <div class="glass-card" style="padding: 30px;">
                     <h3 style="margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
                         <i data-lucide="info" style="color: var(--primary);"></i>
-                        Historia y Personalidad
+                        [[#{animal.auto.history.personality}]]
                     </h3>
                     <p th:text="${animal.descripcion}"
                         style="line-height: 1.7; color: var(--text-main); font-size: 1.05rem;">
@@ -246,7 +244,7 @@
                     <div style="margin-top: 25px; display: flex; gap: 15px; flex-wrap: wrap;">
                         <div class="data-pill"
                             style="background: var(--bg-secondary); padding: 10px 20px; border-radius: 12px; display: flex; flex-direction: column;">
-                            <span style="font-size: 0.75rem; color: var(--text-muted);">Nivel de Energía</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);" th:text="#{animal.auto.nivel.de.energia}"></span>
                             <div style="display: flex; gap: 4px; margin-top: 5px;">
                                 <div th:each="i : ${#numbers.sequence(1, 5)}"
                                     th:style="'width:12px; height:12px; border-radius:50%; background:' + (${i <= (animal.nivelEnergia ?: 0)} ? 'var(--primary)' : 'var(--border-color)')">
@@ -255,12 +253,12 @@
                         </div>
                         <div th:if="${isAdmin}" class="data-pill"
                             style="background: var(--bg-secondary); padding: 10px 20px; border-radius: 12px; display: flex; flex-direction: column;">
-                            <span style="font-size: 0.75rem; color: var(--text-muted);">ID de Chip</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);" th:text="#{animal.auto.id.de.chip}"></span>
                             <strong th:text="${animal.chipId}" style="margin-top: 2px;">985100012345678</strong>
                         </div>
                         <div class="data-pill"
                             style="background: var(--bg-secondary); padding: 10px 20px; border-radius: 12px; display: flex; flex-direction: column;">
-                            <span style="font-size: 0.75rem; color: var(--text-muted);">Fecha de Ingreso</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);" th:text="#{animal.auto.fecha.de.ingreso}"></span>
                             <strong
                                 th:text="${animal.fechaIngreso != null ? animal.fechaIngreso.toString().substring(0,10) : '-'}"
                                 style="margin-top: 2px;">2024-01-15</strong>
@@ -274,7 +272,7 @@
                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                         <h3 style="margin: 0; display: flex; align-items: center; gap: 10px;">
                             <i data-lucide="activity" style="color: var(--secondary);"></i>
-                            Historial Médico
+                            [[#{animal.auto.medical.history}]]
                         </h3>
                         <a th:hx-get="@{/web/historiales/nuevo(animalId=${animal.id})}" hx-target="#contenido-dinamico" hx-push-url="true" class="btn btn-icon"
                             title="Añadir Registro">
@@ -285,7 +283,7 @@
                         style="text-align: center; padding: 40px; color: var(--text-muted); border: 2px dashed var(--border-color); border-radius: 15px;">
                         <i data-lucide="clipboard-list"
                             style="width: 40px; height: 40px; opacity: 0.3; margin-bottom: 10px;"></i>
-                        <p>No hay registros médicos para este animal.</p>
+                        <p th:text="#{animal.auto.no.hay.registros.medicos.para.este.anima}"></p>
                     </div>
                     <div th:if="${!#lists.isEmpty(historiales)}" class="timeline"
                         style="position: relative; padding-left: 30px; border-left: 2px solid var(--border-color); margin-left: 10px;">
@@ -328,8 +326,7 @@
                 <div th:if="${isAdmin}" class="glass-card"
                     style="padding: 25px; background: linear-gradient(to bottom right, var(--bg-secondary), var(--bg-main));">
                     <h4
-                        style="margin: 0 0 20px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">
-                        Popularidad</h4>
+                        style="margin: 0 0 20px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);" th:text="#{animal.auto.popularidad}"></h4>
                     <div style="display: flex; align-items: center; gap: 20px;">
                         <div
                             style="width: 60px; height: 60px; border-radius: 15px; background: rgba(var(--secondary-rgb), 0.1); display: flex; align-items: center; justify-content: center;">
@@ -339,19 +336,19 @@
                             <span
                                 style="display: block; font-size: 2rem; font-weight: 800; color: var(--text-main); line-height: 1;"
                                 th:text="${animal.visitas != null ? animal.visitas : 0}">0</span>
-                            <span style="font-size: 0.85rem; color: var(--text-muted);">Visitas al perfil</span>
+                            <span style="font-size: 0.85rem; color: var(--text-muted);" th:text="#{animal.auto.visitas.al.perfil}"></span>
                         </div>
                     </div>
                     <div
                         style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between;">
                         <div style="text-align: center;">
                             <span
-                                style="display: block; font-size: 0.75rem; color: var(--text-muted);">Solicitudes</span>
+                                style="display: block; font-size: 0.75rem; color: var(--text-muted);" th:text="#{animal.auto.solicitudes}"></span>
                             <strong
                                 th:text="${animal.conteoSolicitudes != null ? animal.conteoSolicitudes : 0}">0</strong>
                         </div>
                         <div style="text-align: center;">
-                            <span style="display: block; font-size: 0.75rem; color: var(--text-muted);">Favoritos</span>
+                            <span style="display: block; font-size: 0.75rem; color: var(--text-muted);" th:text="#{animal.auto.favoritos}"></span>
                             <strong
                                 style="color: #ec4899; display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 2px;">
                                 <i data-lucide="heart" style="width: 14px; fill: #ec4899;"></i>
@@ -359,9 +356,8 @@
                             </strong>
                         </div>
                         <div style="text-align: center;">
-                            <span style="display: block; font-size: 0.75rem; color: var(--text-muted);">Estado
-                                Salud</span>
-                            <span class="badge-soon success" style="font-size: 0.65rem;">Excelente</span>
+                            <span style="display: block; font-size: 0.75rem; color: var(--text-muted);" th:text="#{generic.auto.estado}"></span>
+                            <span class="badge-soon success" style="font-size: 0.65rem;" th:text="#{animal.auto.excelente}"></span>
                         </div>
                     </div>
                 </div>
@@ -372,8 +368,7 @@
                     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
                         <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--primary);"></div>
                         <h4
-                            style="margin: 0; font-size: 0.9rem; text-transform: uppercase; color: var(--primary); letter-spacing: 1px;">
-                            Adoptado por</h4>
+                            style="margin: 0; font-size: 0.9rem; text-transform: uppercase; color: var(--primary); letter-spacing: 1px;" th:text="#{animal.auto.adoptado.por}"></h4>
                     </div>
                     <div style="display: flex; align-items: center; gap: 15px;">
                         <div
@@ -414,7 +409,7 @@
                         hx-push-url="true" class="btn btn-primary"
                         style="width: 100%; justify-content: center; height: 56px; border-radius: 16px;">
                         <i data-lucide="heart" style="width: 18px; margin-right: 8px;"></i>
-                        Registrar Adopción
+                        [[#{animal.auto.register.adoption}]]
                     </a>
 
                     <!-- 2. Flujo para Usuario Público / Adoptante (Solo si NO es Admin) -->
@@ -425,9 +420,9 @@
                         <div th:if="${animalesSolicitadosIds.contains(animal.id)}"
                             style="background: rgba(45, 157, 88, 0.1); color: #2d9d58; padding: 1.2rem; border-radius: 16px; border: 1px dashed #2d9d58; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center; margin-bottom: 1rem;">
                             <i data-lucide="check-circle" style="width: 24px; height: 24px;"></i>
-                            <div style="font-weight: 700; font-size: 1rem;">Solicitud enviada</div>
-                            <p style="font-size: 0.85rem; margin: 0; opacity: 0.8;">Estamos revisando tu interés por
-                                <span th:text="${animal.nombre}"></span>. ¡Pronto contactaremos contigo!
+                            <div style="font-weight: 700; font-size: 1rem;" th:text="#{animal.auto.solicitud.enviada}"></div>
+                            <p style="font-size: 0.85rem; margin: 0; opacity: 0.8;">[[#{html.auto.estamos.revisando.tu.inter.s}]]
+                                <span th:text="${animal.nombre}"></span>[[#{html.auto.pronto.contactaremos.contigo}]]
                             </p>
                         </div>
 
@@ -440,7 +435,7 @@
                                     class="btn btn-primary"
                                     style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
                                     <i data-lucide="heart"></i>
-                                    <span>¡Adopta ahora!</span>
+                                    <span th:text="#{animal.auto.adopta.ahora}"></span>
                                 </a>
                             </div>
 
@@ -450,7 +445,7 @@
                                     class="btn btn-primary"
                                     style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
                                     <i data-lucide="heart"></i>
-                                    <span>¡Quiero Adoptar!</span>
+                                    <span th:text="#{animal.auto.quiero.adoptar}"></span>
                                 </a>
                             </div>
 
@@ -460,7 +455,7 @@
                                     class="btn btn-primary"
                                     style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
                                     <i data-lucide="heart-handshake"></i>
-                                    <span>Solicitar Adopción</span>
+                                    <span th:text="#{animal.auto.solicitar.adopcion}"></span>
                                 </a>
                             </div>
                         </div>
@@ -470,7 +465,7 @@
                             th:data-nombre="${animal.nombre}"
                             onclick="toggleShareMenu(event, this.getAttribute('data-nombre'))">
                             <i data-lucide="share-2" style="width: 18px; margin-right: 8px;"></i>
-                            Compartir Perfil
+                            [[#{html.auto.compartir.perfil}]]
                         </button>
 
                         <!-- Menú de Compartir Premium -->
@@ -482,28 +477,28 @@
                                 <img src="/images/whatsapp.png" width="30" height="30"
                                     style="width: 20px; height: 20px; object-fit: contain; flex-shrink: 0;"
                                     alt="WhatsApp" />
-                                <span>WhatsApp</span>
+                                <span th:text="#{animal.auto.whatsapp}"></span>
                             </a>
 
                             <a id="share-fb" target="_blank" href="#" class="share-option-btn"
                                 style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.95rem; transition: all 0.2s ease;">
                                 <img src="/images/facebook-icon.png" width="20" height="20"
                                     style="object-fit: contain; flex-shrink: 0;" alt="Facebook" />
-                                <span>Facebook</span>
+                                <span th:text="#{animal.auto.facebook}"></span>
                             </a>
 
                             <a id="share-x" target="_blank" href="#" class="share-option-btn"
                                 style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.95rem; transition: all 0.2s ease;">
                                 <img src="/images/x-con.png" width="20" height="20"
                                     style="object-fit: contain; flex-shrink: 0;" alt="X" />
-                                <span>X (Twitter)</span>
+                                <span th:text="#{animal.auto.x.twitter}"></span>
                             </a>
 
                             <a id="share-mail" target="_blank" href="#" class="share-option-btn"
                                 style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.95rem; transition: all 0.2s ease;">
                                 <i data-lucide="mail"
                                     style="width: 20px; height: 20px; color: #EA4335; flex-shrink: 0;"></i>
-                                <span>Correo Electrónico</span>
+                                <span th:text="#{generic.auto.correo.electronico}"></span>
                             </a>
                         </div>
                     </div>

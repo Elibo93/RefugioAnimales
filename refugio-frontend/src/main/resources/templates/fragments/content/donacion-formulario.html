@@ -17,11 +17,10 @@
                     <i data-lucide="heart" style="width: 32px; height: 32px;"></i>
                 </div>
                 <h2 style="font-size: 2.25rem; font-weight: 800; color: var(--text-main);"
-                    th:if="${donacion == null or donacion.id == null}">Registrar donación</h2>
+                    th:if="${donacion == null or donacion.id == null}" th:text="#{donacion.auto.registrar.donacion}"></h2>
                 <h2 style="font-size: 2.25rem; font-weight: 800; color: var(--text-main);"
-                    th:unless="${donacion == null or donacion.id == null}">Editar donación</h2>
-                <p style="color: var(--text-muted); margin-top: 0.5rem;">Tu generosidad hace posible nuestra labor
-                    diaria</p>
+                    th:unless="${donacion == null or donacion.id == null}" th:text="#{donacion.auto.editar.donacion}"></h2>
+                <p style="color: var(--text-muted); margin-top: 0.5rem;" th:text="#{donacion.auto.tu.generosidad.hace.posible.nuestra.labo}"></p>
             </div>
 
             <!-- Mensaje de Error -->
@@ -40,14 +39,13 @@
                     <!-- 1. IDENTIFICACIÓN -->
                     <div class="form-group">
                         <label
-                            style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">Donante</label>
+                            style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);" th:text="#{donacion.auto.donante}"></label>
 
                         <!-- Si es Admin, puede elegir usuario -->
                         <div th:if="${isAdmin}" class="select-wrapper">
                             <select name="usuarioId" required
                                 style="width: 100%; padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1rem; background: white;">
-                                <option value="" disabled th:selected="${currentUserId == null}">Selecciona un
-                                    donante...</option>
+                                <option value="" disabled th:selected="${currentUserId == null}" th:text="#{donacion.auto.selecciona.un}"></option>
                                 <option th:each="u : ${usuarios}" th:value="${u.id}"
                                     th:text="${u.username + ' (' + u.email + ')'}"
                                     th:selected="${u.id == currentUserId}"></option>
@@ -59,13 +57,13 @@
                             <div th:if="${currentUserId != null}" class="alert alert-success"
                                 style="padding: 1rem; border-radius: 12px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; display: flex; align-items: center; gap: 10px;">
                                 <i data-lucide="user" style="width: 20px;"></i>
-                                <span style="font-weight: 600;" th:text="${currentUserName}">Nombre de Usuario</span>
+                                <span style="font-weight: 600;" th:text="${currentUserName}">Nombre [[#{html.auto.de}]] Usuario</span>
                                 <input type="hidden" name="usuarioId" th:value="${currentUserId}">
                             </div>
                             <div th:unless="${currentUserId != null}" class="alert alert-info"
                                 style="padding: 1rem; border-radius: 12px; background: #f0f9ff; color: #075985; border: 1px solid #bae6fd; display: flex; align-items: center; gap: 10px;">
                                 <i data-lucide="info" style="width: 20px;"></i>
-                                <span style="font-weight: 600;">Donación Anónima</span>
+                                <span style="font-weight: 600;" th:text="#{donacion.auto.donacion.anonima}"></span>
                                 <input type="hidden" name="usuarioId" th:value="${currentUserId}">
                             </div>
                         </div>
@@ -74,8 +72,7 @@
                     <!-- 2. SELECTOR DE TIPO -->
                     <div class="form-group">
                         <label
-                            style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">Tipo
-                            de donación</label>
+                            style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);" th:text="#{donacion.auto.tipo}"></label>
                         <div class="select-wrapper">
                             <select name="tipo" id="donation-type-select" required onchange="handleTypeChange()"
                                 style="width: 100%; padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1rem; background: white;">
@@ -91,12 +88,12 @@
                         <label
                             style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
                             <i data-lucide="target" style="width: 18px; color: var(--primary);"></i>
-                            ¿A qué objetivo destinas tu ayuda? (Opcional)
+                            [[#{html.auto.a.qu.objetivo.destinas.tu}]]
                         </label>
                         <div class="select-wrapper" style="position: relative;">
                             <select name="objetivoId" id="objetivo-select"
                                 style="width: 100%; padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1rem; background: white; appearance: none;">
-                                <option value="">Donación general (El refugio decidirá dónde es más urgente)</option>
+                                <option value="" th:text="#{donacion.auto.donacion.general.el.refugio.decidira.don}"></option>
                                 <option th:each="obj : ${objetivos}" th:value="${obj.id}"
                                     th:text="${obj.titulo}"
                                     th:selected="${donacion != null and donacion.objetivoId == obj.id}">
@@ -113,33 +110,32 @@
                             style="display: flex; gap: 10px; background: #f1f5f9; padding: 5px; border-radius: 14px; margin-bottom: 1.5rem;">
                             <button type="button" id="btn-unica" class="toggle-btn"
                                 style="flex: 1; padding: 0.8rem; border-radius: 10px; border: none; cursor: pointer; font-weight: 700;"
-                                onclick="setRecurrence('unica')">Donación única</button>
+                                onclick="setRecurrence('unica')" th:text="#{donacion.auto.donacion.unica}"></button>
                             <button type="button" id="btn-mensual" class="toggle-btn"
                                 style="flex: 1; padding: 0.8rem; border-radius: 10px; border: none; cursor: pointer; font-weight: 700;"
-                                onclick="setRecurrence('mensual')">Donación mensual</button>
+                                onclick="setRecurrence('mensual')" th:text="#{donacion.auto.donacion.mensual}"></button>
                         </div>
 
                         <div class="form-group">
                             <label
-                                style="display: block; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);">Selecciona
-                                una cantidad rápida</label>
+                                style="display: block; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);" th:text="#{donacion.auto.selecciona.1}"></label>
                             <div class="amount-selector"
                                 style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 1rem;">
                                 <button type="button" class="amount-btn"
                                     style="padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-weight: 700; cursor: pointer;"
-                                    onclick="setAmount(10, this)">10€</button>
+                                    onclick="setAmount(10, this)" th:text="#{donacion.auto.10}"></button>
                                 <button type="button" class="amount-btn"
                                     style="padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-weight: 700; cursor: pointer;"
-                                    onclick="setAmount(30, this)">30€</button>
+                                    onclick="setAmount(30, this)" th:text="#{donacion.auto.30}"></button>
                                 <button type="button" class="amount-btn"
                                     style="padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-weight: 700; cursor: pointer;"
-                                    onclick="setAmount(50, this)">50€</button>
+                                    onclick="setAmount(50, this)" th:text="#{donacion.auto.50}"></button>
                                 <button type="button" class="amount-btn"
                                     style="padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-weight: 700; cursor: pointer;"
-                                    onclick="setAmount(100, this)">100€</button>
+                                    onclick="setAmount(100, this)" th:text="#{donacion.auto.100}"></button>
                                 <button type="button" class="amount-btn"
                                     style="padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-weight: 700; cursor: pointer;"
-                                    onclick="focusAmount(this)">Otra</button>
+                                    onclick="focusAmount(this)" th:text="#{generic.auto.otra}"></button>
                             </div>
                         </div>
                     </div>
@@ -148,8 +144,7 @@
                     <div id="panel-unificado">
                         <div class="form-group" style="margin-top: 1.5rem;">
                             <label id="label-cantidad"
-                                style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">Importe
-                                de la donación (€)</label>
+                                style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);" th:text="#{donacion.auto.importe}"></label>
                             <div class="input-with-icon" style="position: relative;">
                                 <i id="icon-cantidad" data-lucide="euro"
                                     style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 20px;"></i>
@@ -162,8 +157,7 @@
 
                         <div class="form-group" style="margin-top: 1.5rem;">
                             <label id="label-descripcion"
-                                style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">Mensaje
-                                o dedicatoria (opcional)</label>
+                                style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);" th:text="#{donacion.auto.mensaje}"></label>
                             <textarea name="descripcion" id="input-descripcion"
                                 th:text="${donacion != null ? donacion.descripcion : ''}"
                                 style="width: 100%; height: 120px; padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; font-family: inherit; font-size: 1rem;"
@@ -177,7 +171,7 @@
                     <button type="submit" class="btn btn-primary"
                         style="width: 100%; padding: 1.25rem; border-radius: 16px; background: #166534; color: white; border: none; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 15px -3px rgba(22, 101, 52, 0.2);">
                         <i data-lucide="heart" style="width: 24px; height: 24px; fill: white;"></i>
-                        <span id="submit-text">Confirmar Donación Ahora</span>
+                        <span id="submit-text" th:text="#{donacion.auto.confirmar.donacion.ahora}"></span>
                     </button>
                 </div>
             </form>

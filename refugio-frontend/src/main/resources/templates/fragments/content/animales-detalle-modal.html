@@ -33,9 +33,7 @@
                             Disponible
                         </span>
                         <span th:if="${animal.urgencia()}"
-                            style="background: #FEE2E2; color: #DC2626; padding: 0.4rem 0.8rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">
-                            🔥 Urgente
-                        </span>
+                            style="background: #FEE2E2; color: #DC2626; padding: 0.4rem 0.8rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;" th:text="#{animal.auto.urgente.1}"></span>
                     </div>
                     <h1 class="animal-name" th:text="${animal.nombre()}" style="font-size: 3rem; margin-bottom: 0.5rem;">
                         Rocky</h1>
@@ -48,27 +46,27 @@
                         <i data-lucide="dog"></i>
                         <span
                             th:text="${(animal.especie() != null and animal.especie().toString() == 'OTRO') ? animal.especiePersonalizada() : animal.especie()}">Perro</span>
-                        <span style="font-size: 0.65rem; opacity: 0.7;">Especie</span>
+                        <span style="font-size: 0.65rem; opacity: 0.7;" th:text="#{generic.auto.especie}"></span>
                     </div>
                     <div class="stat-item">
                         <i data-lucide="weight"></i>
                         <span th:text="${animal.peso() != null ? animal.peso() + 'kg' : '-'}">12kg</span>
-                        <span style="font-size: 0.65rem; opacity: 0.7;">Peso</span>
+                        <span style="font-size: 0.65rem; opacity: 0.7;" th:text="#{animal.auto.peso}"></span>
                     </div>
                     <div class="stat-item">
                         <i data-lucide="zap"></i>
                         <span th:text="${animal.nivelEnergia() != null ? animal.nivelEnergia() + '/5' : '-'}">4/5</span>
-                        <span style="font-size: 0.65rem; opacity: 0.7;">Energía</span>
+                        <span style="font-size: 0.65rem; opacity: 0.7;" th:text="#{animal.auto.energia}"></span>
                     </div>
                     <div class="stat-item">
                         <i th:data-lucide="${animal.sexo() != null ? (animal.sexo().toString() == 'MACHO' ? 'mars' : 'venus') : 'circle'}"></i>
                         <span th:text="${animal.sexo()}">Macho</span>
-                        <span style="font-size: 0.65rem; opacity: 0.7;">Género</span>
+                        <span style="font-size: 0.65rem; opacity: 0.7;" th:text="#{animal.auto.genero}"></span>
                     </div>
                 </div>
 
                 <div class="description-section">
-                    <h4 style="margin-bottom: 1rem;">Sobre <span th:text="${animal.nombre()}"></span></h4>
+                    <h4 style="margin-bottom: 1rem;">[[#{html.auto.sobre}]] <span th:text="${animal.nombre()}"></span></h4>
                     <p style="line-height: 1.6; color: var(--text-main); font-size: 1.05rem;"
                         th:text="${animal.descripcion()}">
                     </p>
@@ -79,9 +77,9 @@
                      style="background: rgba(245, 158, 11, 0.1); color: #d97706; padding: 1rem; border-radius: 16px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem; border: 1px solid rgba(245, 158, 11, 0.2);">
                     <i data-lucide="info" style="width: 20px; height: 20px;"></i>
                     <p style="margin: 0; font-size: 0.9rem; font-weight: 600;">
-                        Actualmente hay <span th:text="${animal.conteoSolicitudes()}"></span> 
+                        [[#{html.auto.actualmente.hay}]] <span th:text="${animal.conteoSolicitudes()}"></span> 
                         <span th:text="${animal.conteoSolicitudes() == 1 ? 'solicitud' : 'solicitudes'}"></span> 
-                        en revisión para este animal. ¡Aún puedes enviar la tuya!
+                        [[#{html.auto.en.revisi.n.para.este}]]
                     </p>
                 </div>
 
@@ -107,8 +105,8 @@
                             <div th:if="${animalesSolicitadosIds.contains(animal.id())}"
                                  style="background: rgba(45, 157, 88, 0.1); color: #2d9d58; padding: 1.2rem; border-radius: 16px; border: 1px dashed #2d9d58; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center;">
                                 <i data-lucide="check-circle" style="width: 24px; height: 24px;"></i>
-                                <div style="font-weight: 700; font-size: 1rem;">Solicitud en curso</div>
-                                <p style="font-size: 0.85rem; margin: 0; opacity: 0.8;">Ya hemos recibido tu interés por <span th:text="${animal.nombre()}"></span>. ¡Te avisaremos pronto!</p>
+                                <div style="font-weight: 700; font-size: 1rem;" th:text="#{animal.auto.solicitud.en.curso}"></div>
+                                <p style="font-size: 0.85rem; margin: 0; opacity: 0.8;">[[#{html.auto.ya.hemos.recibido.tu.inter}]] <span th:text="${animal.nombre()}"></span>[[#{html.auto.te.avisaremos.pronto}]]</p>
                             </div>
 
                             <!-- Caso A: Ya es Adoptante -> Adopción Directa (Solo si no ha solicitado ya) -->
@@ -117,7 +115,7 @@
                                    class="btn btn-primary"
                                    style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
                                     <i data-lucide="heart-handshake"></i>
-                                    <span>Solicitar Adopción</span>
+                                    <span th:text="#{animal.auto.solicitar.adopcion}"></span>
                                 </a>
                             </div>
 
@@ -127,7 +125,7 @@
                                    class="btn btn-primary"
                                    style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
                                     <i data-lucide="heart"></i>
-                                    <span>¡Quiero Adoptar!</span>
+                                    <span th:text="#{animal.auto.quiero.adoptar}"></span>
                                 </a>
                             </div>
                         </div>
@@ -137,7 +135,7 @@
                             <a th:href="@{/web/animales/{id}/editar(id=${animal.id()})}" class="btn btn-secondary"
                                 style="flex: 1; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px; background: rgba(0,0,0,0.05);">
                                 <i data-lucide="edit"></i>
-                                <span>Editar Ficha</span>
+                                <span th:text="#{animal.auto.editar.ficha}"></span>
                             </a>
                             <a th:href="@{/web/solicitudes/nueva(animalId=${animal.id()})}" class="btn btn-primary"
                                 style="flex: 1; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
@@ -150,9 +148,7 @@
                     <button type="button" class="btn btn-secondary"
                         onclick="closeModal()"
                         style="height: 56px; border-radius: 16px;"
-                        th:styleappend="${isAuthenticated and !isAdmin and animalesSolicitadosIds.contains(animal.id()) ? 'width: 100%; justify-content: center;' : ''}">
-                        Cerrar
-                    </button>
+                        th:styleappend="${isAuthenticated and !isAdmin and animalesSolicitadosIds.contains(animal.id()) ? 'width: 100%; justify-content: center;' : ''}" th:text="#{animal.auto.cerrar}"></button>
                 </div>
             </div>
         </div>

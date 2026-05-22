@@ -46,16 +46,14 @@
                         <i data-lucide="user-plus" style="width: 20px;"></i>
                     </div>
                     <div>
-                        <h4 style="margin: 0; font-size: 1rem; font-weight: 800; color: var(--text-main);">Modo Selección Activo</h4>
+                        <h4 style="margin: 0; font-size: 1rem; font-weight: 800; color: var(--text-main);" th:text="#{generic.auto.modo.seleccion.activo}"></h4>
                         <p style="margin: 2px 0 0; font-size: 0.85rem; color: var(--text-muted);">
-                            Asignando tarea al voluntario: <strong style="color: var(--secondary);" th:text="${voluntarioNombreSeleccion ?: (voluntarioNombres != null ? voluntarioNombres[voluntarioIdSeleccion.toString()] : 'Voluntario #' + voluntarioIdSeleccion)}">Voluntario</strong>
+                            [[#{html.auto.asignando.tarea.al.voluntario}]] <strong style="color: var(--secondary);" th:text="${voluntarioNombreSeleccion ?: (voluntarioNombres != null ? voluntarioNombres[voluntarioIdSeleccion.toString()] : 'Voluntario #' + voluntarioIdSeleccion)}">Voluntario</strong>
                         </p>
                     </div>
                 </div>
                 <a th:href="@{/web/voluntarios}" hx-get="/web/voluntarios" hx-target="#contenido-dinamico" hx-push-url="true"
-                   class="btn-premium secondary" style="height: 36px; padding: 0 15px; font-size: 0.8rem; border-radius: 10px;">
-                    Cancelar selección
-                </a>
+                   class="btn-premium secondary" style="height: 36px; padding: 0 15px; font-size: 0.8rem; border-radius: 10px;" th:text="#{generic.auto.cancelar.seleccion}"></a>
             </div>
 
     <!-- Barra de acciones: Buscador y Filtros -->
@@ -82,10 +80,10 @@
                             <i data-lucide="zap" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 14px; color: var(--text-muted);"></i>
                             <select name="prioridad" class="form-control"
                                     style="padding-left: 35px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-main); font-size: 0.9rem; cursor: pointer; width: 100%;">
-                                <option value="ALL" th:selected="${selectedPrioridad == 'ALL'}">Todas las prioridades</option>
-                                <option value="ALTA" th:selected="${selectedPrioridad == 'ALTA'}">Alta prioridad</option>
-                                <option value="MEDIA" th:selected="${selectedPrioridad == 'MEDIA'}">Media prioridad</option>
-                                <option value="BAJA" th:selected="${selectedPrioridad == 'BAJA'}">Baja prioridad</option>
+                                <option value="ALL" th:selected="${selectedPrioridad == 'ALL'}" th:text="#{tarea.auto.todas.las.prioridades}"></option>
+                                <option value="ALTA" th:selected="${selectedPrioridad == 'ALTA'}" th:text="#{tarea.auto.alta.prioridad}"></option>
+                                <option value="MEDIA" th:selected="${selectedPrioridad == 'MEDIA'}" th:text="#{tarea.auto.media.prioridad}"></option>
+                                <option value="BAJA" th:selected="${selectedPrioridad == 'BAJA'}" th:text="#{tarea.auto.baja.prioridad}"></option>
                             </select>
                         </div>
 
@@ -94,15 +92,15 @@
                             <i data-lucide="activity" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 14px; color: var(--text-muted);"></i>
                             <select name="estado" class="form-control"
                                     style="padding-left: 35px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-main); font-size: 0.9rem; cursor: pointer; width: 100%;">
-                                <option value="ALL" th:selected="${selectedEstado == 'ALL'}">Todos los estados</option>
-                                <option value="PENDIENTE" th:selected="${selectedEstado == 'PENDIENTE'}">Pendientes</option>
-                                <option value="PROPUESTA" th:selected="${selectedEstado == 'PROPUESTA'}">Propuestas</option>
-                                <option value="ACEPTADA" th:selected="${selectedEstado == 'ACEPTADA'}">Aceptadas</option>
-                                <option value="EN_PROCESO" th:selected="${selectedEstado == 'EN_PROCESO'}">En proceso</option>
-                                <option value="COMPLETADA" th:selected="${selectedEstado == 'COMPLETADA'}">Completadas</option>
-                                <option value="FINALIZADA" th:selected="${selectedEstado == 'FINALIZADA'}">Finalizadas</option>
-                                <option value="RECHAZADA" th:selected="${selectedEstado == 'RECHAZADA'}">Rechazadas</option>
-                                <option value="CANCELADA" th:selected="${selectedEstado == 'CANCELADA'}">Canceladas</option>
+                                <option value="ALL" th:selected="${selectedEstado == 'ALL'}" th:text="#{tarea.auto.todos.los.estados}"></option>
+                                <option value="PENDIENTE" th:selected="${selectedEstado == 'PENDIENTE'}" th:text="#{tarea.auto.pendientes}"></option>
+                                <option value="PROPUESTA" th:selected="${selectedEstado == 'PROPUESTA'}" th:text="#{tarea.auto.propuestas}"></option>
+                                <option value="ACEPTADA" th:selected="${selectedEstado == 'ACEPTADA'}" th:text="#{tarea.auto.aceptadas}"></option>
+                                <option value="EN_PROCESO" th:selected="${selectedEstado == 'EN_PROCESO'}" th:text="#{tarea.auto.en.proceso}"></option>
+                                <option value="COMPLETADA" th:selected="${selectedEstado == 'COMPLETADA'}" th:text="#{tarea.auto.completadas}"></option>
+                                <option value="FINALIZADA" th:selected="${selectedEstado == 'FINALIZADA'}" th:text="#{tarea.auto.finalizadas}"></option>
+                                <option value="RECHAZADA" th:selected="${selectedEstado == 'RECHAZADA'}" th:text="#{tarea.auto.rechazadas}"></option>
+                                <option value="CANCELADA" th:selected="${selectedEstado == 'CANCELADA'}" th:text="#{tarea.auto.canceladas}"></option>
                             </select>
                         </div>
 
@@ -120,8 +118,11 @@
                 </div>
 
                 <div style="display:flex; gap:10px; flex-shrink: 0;">
-                    <button onclick="toggleViewMode()" class="btn btn-secondary" title="Cambiar Vista (Lista / Calendario)" style="padding: 0 12px; background: var(--bg-body);">
-                        <i id="view-icon" data-lucide="calendar" style="width:18px; color: var(--primary);"></i>
+                    <button onclick="toggleViewMode()" title="Cambiar Vista (Lista / Calendario)" 
+                            style="width: 48px; height: 48px; padding: 0; background: white; border: 1px solid #e2e8f0; border-radius: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02);"
+                            onmouseover="this.style.transform='scale(1.05)'; this.style.borderColor='var(--primary)';" 
+                            onmouseout="this.style.transform='scale(1)'; this.style.borderColor='#e2e8f0';">
+                        <i id="view-icon" data-lucide="calendar" style="width: 24px; height: 24px; color: var(--primary);"></i>
                     </button>
                     <a th:href="@{/web/tareas/pdf(prioridad=${selectedPrioridad}, estado=${selectedEstado})}" target="_blank" title="Exportar listado a PDF" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
                         <img src="/images/pdf.png" alt="PDF" style="height: 48px; width: 48px; object-fit: contain;">
@@ -142,11 +143,11 @@
                     <!-- Encabezados -->
                     <div class="list-header" style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
                         <div style="width: 40px; text-align: center;">#</div>
-                        <div style="flex: 2;">Descripción</div>
-                        <div style="flex: 1.5;">Asignado a</div>
-                        <div style="flex: 1; text-align: center;">Estado</div>
-                        <div style="flex: 1.2; text-align: center;">Prioridad / Fecha</div>
-                        <div style="width: 100px; text-align: right;">Acción</div>
+                        <div style="flex: 2;" th:text="#{generic.auto.descripcion}"></div>
+                        <div style="flex: 1.5;" th:text="#{tarea.auto.asignado.a}"></div>
+                        <div style="flex: 1; text-align: center;" th:text="#{generic.auto.estado}"></div>
+                        <div style="flex: 1.2; text-align: center;" th:text="#{tarea.auto.prioridad.fecha}"></div>
+                        <div style="width: 100px; text-align: right;" th:text="#{tarea.auto.accion}"></div>
                     </div>
 
                     <div class="list-rows" style="display: flex; flex-direction: column; gap: 12px;">
@@ -191,7 +192,7 @@
                                 <span th:if="${t.voluntarioIds == null or t.voluntarioIds.isEmpty()}"
                                     style="color: var(--text-muted); font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
                                     <i data-lucide="user-minus" style="width: 14px; opacity: 0.5;"></i>
-                                    Sin asignar
+                                    [[#{html.auto.sin.asignar}]]
                                 </span>
                             </div>
 
@@ -209,9 +210,9 @@
                             <!-- Prioridad / Fecha -->
                             <div class="row-cell" style="flex: 1.2; justify-content: center;">
                                 <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
-                                    <span th:if="${t.prioridad == 'ALTA'}" class="priority-tag high">ALTA</span>
-                                    <span th:if="${t.prioridad == 'MEDIA'}" class="priority-tag medium">MEDIA</span>
-                                    <span th:if="${t.prioridad == 'BAJA'}" class="priority-tag low">BAJA</span>
+                                    <span th:if="${t.prioridad == 'ALTA'}" class="priority-tag high" th:text="#{tarea.auto.alta}"></span>
+                                    <span th:if="${t.prioridad == 'MEDIA'}" class="priority-tag medium" th:text="#{tarea.auto.media}"></span>
+                                    <span th:if="${t.prioridad == 'BAJA'}" class="priority-tag low" th:text="#{tarea.auto.baja}"></span>
                                     <div th:if="${t.fechaLimite != null}"
                                         style="font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
                                         <i data-lucide="calendar" style="width: 12px;"></i>
@@ -257,11 +258,11 @@
                                             hx-swap="innerHTML"
                                             hx-push-url="/web/tareas">
                                         <i data-lucide="check-circle" style="width: 14px;"></i>
-                                        Asignar
+                                        [[#{html.auto.asignar}]]
                                     </button>
                                     <span th:if="${isAssigned}" class="badge-premium success" style="font-size: 0.75rem; padding: 6px 12px; display: flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2);">
                                         <i data-lucide="check-circle" style="width: 14px;"></i>
-                                        Ya asignada
+                                        [[#{html.auto.ya.asignada}]]
                                     </span>
                                 </th:block>
                             </div>
@@ -274,9 +275,9 @@
                     <!-- Encabezados con Grid -->
                     <div class="list-header" style="background: transparent; padding: 0 1.5rem 1rem; display: grid; grid-template-columns: 50px 2fr 1.2fr 2fr 100px; gap: 1rem; align-items: center;">
                         <div style="text-align: center; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">#</div>
-                        <div style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Descripción</div>
-                        <div style="text-align: center; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Prioridad / Fecha</div>
-                        <div style="text-align: center; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Estado</div>
+                        <div style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;" th:text="#{generic.auto.descripcion}"></div>
+                        <div style="text-align: center; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;" th:text="#{tarea.auto.prioridad.fecha}"></div>
+                        <div style="text-align: center; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;" th:text="#{generic.auto.estado}"></div>
                         <div></div> <!-- Columna vacía para Acción -->
                     </div>
 
@@ -307,9 +308,9 @@
 
                             <!-- Prioridad / Fecha -->
                             <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
-                                <span th:if="${t.prioridad == 'ALTA'}" class="priority-tag high">ALTA</span>
-                                <span th:if="${t.prioridad == 'MEDIA'}" class="priority-tag medium">MEDIA</span>
-                                <span th:if="${t.prioridad == 'BAJA'}" class="priority-tag low">BAJA</span>
+                                <span th:if="${t.prioridad == 'ALTA'}" class="priority-tag high" th:text="#{tarea.auto.alta}"></span>
+                                <span th:if="${t.prioridad == 'MEDIA'}" class="priority-tag medium" th:text="#{tarea.auto.media}"></span>
+                                <span th:if="${t.prioridad == 'BAJA'}" class="priority-tag low" th:text="#{tarea.auto.baja}"></span>
                                 <div th:if="${t.fechaLimite != null}"
                                     style="font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
                                     <i data-lucide="calendar" style="width: 12px;"></i>
@@ -330,9 +331,7 @@
                                             <th:block th:if="${t.voluntarioIds != null}">
                                                 <input th:each="vid : ${t.voluntarioIds}" type="hidden" name="voluntarioIds" th:value="${vid}">
                                             </th:block>
-                                            <button type="submit" class="btn btn-primary btn-sm" style="height: 32px; padding: 0 12px; font-size: 0.75rem; border-radius: 8px; background: var(--success); border-color: var(--success);">
-                                                Aceptar
-                                            </button>
+                                            <button type="submit" class="btn btn-primary btn-sm" style="height: 32px; padding: 0 12px; font-size: 0.75rem; border-radius: 8px; background: var(--success); border-color: var(--success);" th:text="#{tarea.auto.aceptar}"></button>
                                         </form>
                                         <form th:action="@{/web/tareas/{id}/editar(id=${t.id})}" method="post">
                                             <input type="hidden" name="descripcion" th:value="${t.descripcion}">
@@ -343,9 +342,7 @@
                                             <th:block th:if="${t.voluntarioIds != null}">
                                                 <input th:each="vid : ${t.voluntarioIds}" type="hidden" name="voluntarioIds" th:value="${vid}">
                                             </th:block>
-                                            <button type="submit" class="btn btn-secondary btn-sm" style="height: 32px; padding: 0 12px; font-size: 0.75rem; border-radius: 8px;">
-                                                Rechazar
-                                            </button>
+                                            <button type="submit" class="btn btn-secondary btn-sm" style="height: 32px; padding: 0 12px; font-size: 0.75rem; border-radius: 8px;" th:text="#{generic.auto.rechazar}"></button>
                                         </form>
                                     </div>
 
@@ -354,7 +351,7 @@
                                          class="status-dots-container" style="display: flex; gap: 16px; align-items: flex-end;">
                                         <!-- Aceptada -->
                                         <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                                            <span style="font-size: 0.55rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Aceptada</span>
+                                            <span style="font-size: 0.55rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;" th:text="#{tarea.auto.aceptada}"></span>
                                             <label class="dot-radio pending" title="Aceptada">
                                                 <input type="radio" th:name="'estado-' + ${t.id}" value="ACEPTADA" 
                                                        th:checked="${t.estado == 'ACEPTADA'}"
@@ -364,7 +361,7 @@
                                         </div>
                                         <!-- En Proceso -->
                                         <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                                            <span style="font-size: 0.55rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">En Proceso</span>
+                                            <span style="font-size: 0.55rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;" th:text="#{tarea.auto.en.proceso.1}"></span>
                                             <label class="dot-radio in-progress" title="En Proceso">
                                                 <input type="radio" th:name="'estado-' + ${t.id}" value="EN_PROCESO" 
                                                        th:checked="${t.estado == 'EN_PROCESO'}"
@@ -374,7 +371,7 @@
                                         </div>
                                         <!-- Finalizada -->
                                         <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                                            <span style="font-size: 0.55rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Finalizada</span>
+                                            <span style="font-size: 0.55rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;" th:text="#{tarea.auto.finalizada}"></span>
                                             <label class="dot-radio completed" title="Finalizada">
                                                 <input type="radio" th:name="'estado-' + ${t.id}" value="FINALIZADA" 
                                                        th:checked="${t.estado == 'FINALIZADA' or t.estado == 'COMPLETADA'}"
@@ -386,7 +383,7 @@
 
                                     <!-- Mensaje de Rechazada -->
                                     <div th:if="${t.estado == 'RECHAZADA'}" style="color: var(--danger); font-size: 0.8rem; font-weight: 700;">
-                                        <i data-lucide="x-circle" style="width: 14px; vertical-align: middle;"></i> Tarea Rechazada
+                                        <i data-lucide="x-circle" style="width: 14px; vertical-align: middle;"></i> [[#{html.auto.tarea.rechazada}]]
                                     </div>
                             </div>
 
@@ -406,7 +403,7 @@
                                         class="btn btn-primary" 
                                         style="display:none; height: 32px; padding: 0 12px; font-size: 0.8rem; align-items: center; gap: 6px; border-radius: 8px;">
                                     <i data-lucide="save" style="width: 14px;"></i>
-                                    Guardar
+                                    [[#{generic.auto.save}]]
                                 </button>
                             </div>
                         </div>
@@ -433,7 +430,7 @@
                         </h3>
                         <p style="margin: 5px 0 0; color: var(--text-muted); font-size: 0.9rem;"
                            th:text="${hasFilters ? 'Prueba con otros filtros de prioridad o estado.' : (isAdmin ? 'El refugio está al día. Crea una nueva tarea para empezar.' : '¡Buen trabajo! Has completado todas tus tareas o aún no tienes ninguna asignada.')}">
-                            Prueba con otros filtros de prioridad o estado.
+                            Prueba con otros filtros [[#{html.auto.de}]] prioridad o estado.
                         </p>
                     </div>
                     <a th:if="${hasFilters}"
@@ -443,9 +440,7 @@
                        hx-select=".table-wrapper"
                        hx-swap="outerHTML"
                        hx-push-url="true"
-                       class="btn-premium secondary" style="height: 40px; padding: 0 1.5rem;">
-                        Ver todas las tareas
-                    </a>
+                       class="btn-premium secondary" style="height: 40px; padding: 0 1.5rem;" th:text="#{tarea.auto.ver.todas.las.tareas}"></a>
                 </div>
             </div>
             
