@@ -1,129 +1,124 @@
 package es.refugio.refugio.infraestructure.mapper;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 
 import es.refugio.refugio.application.command.voluntario.CreateVoluntarioCommand;
 import es.refugio.refugio.application.command.voluntario.EditVoluntarioCommand;
 import es.refugio.refugio.domain.model.tarea.TareaId;
 import es.refugio.refugio.domain.model.usuario.UsuarioId;
+import es.refugio.refugio.domain.model.voluntario.DisponibilidadVoluntario;
+import es.refugio.refugio.domain.model.voluntario.DisponibilidadVoluntarioId;
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
 import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
+import es.refugio.refugio.infraestructure.db.jpa.entity.DisponibilidadVoluntarioEntity;
 import es.refugio.refugio.infraestructure.db.jpa.entity.TareaEntity;
 import es.refugio.refugio.infraestructure.db.jpa.entity.VoluntarioEntity;
+import es.refugio.refugio.infraestructure.web.dto.voluntario.DisponibilidadResponse;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioRequest;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioResponse;
 import es.refugio.refugio.infraestructure.web.dto.voluntario.VoluntarioUpdateRequest;
-import es.refugio.refugio.infraestructure.web.dto.voluntario.DisponibilidadResponse;
-import es.refugio.refugio.domain.model.voluntario.DisponibilidadVoluntario;
-import es.refugio.refugio.domain.model.voluntario.DisponibilidadVoluntarioId;
-import es.refugio.refugio.infraestructure.db.jpa.entity.DisponibilidadVoluntarioEntity;
 
-public class VoluntarioMapper {
+@Mapper(componentModel = "spring")
+public interface VoluntarioMapper {
 
-    public static CreateVoluntarioCommand toCommand(VoluntarioRequest req) {
-        return new CreateVoluntarioCommand(
-                new UsuarioId(req.usuarioId()),
-                req.disponibilidad(),
-                req.especialidad());
-    }
+    @Mapping(target = "usuarioId", source = "usuarioId", qualifiedByName = "mapUsuarioId")
+    CreateVoluntarioCommand toCommand(VoluntarioRequest req);
 
-    public static EditVoluntarioCommand toCommand(int id, VoluntarioRequest req) {
-        return new EditVoluntarioCommand(
-                new VoluntarioId(id),
-                req.disponibilidad(),
-                req.especialidad());
-    }
+    @Mapping(target = "id", source = "id", qualifiedByName = "mapVoluntarioId")
+    EditVoluntarioCommand toCommand(int id, VoluntarioRequest req);
 
-    public static EditVoluntarioCommand toCommand(int id, VoluntarioUpdateRequest req) {
-        return new EditVoluntarioCommand(
-                new VoluntarioId(id),
-                req.disponibilidad(),
-                req.especialidad());
-    }
+    @Mapping(target = "id", source = "id", qualifiedByName = "mapVoluntarioId")
+    EditVoluntarioCommand toCommand(int id, VoluntarioUpdateRequest req);
 
-    public static VoluntarioResponse toResponse(Voluntario v) {
-        return new VoluntarioResponse(
-                v.getId() != null ? v.getId().getValue() : null,
-                v.getUsuarioId() != null ? v.getUsuarioId().getValue() : null,
-                v.getDisponibilidad(),
-                v.getEspecialidad(),
-                v.getEstado() != null ? v.getEstado().name() : null);
-    }
+    @Mapping(target = "id", source = "id.value")
+    @Mapping(target = "usuarioId", source = "usuarioId.value")
+    VoluntarioResponse toResponse(Voluntario v);
 
-    public static DisponibilidadResponse toResponse(DisponibilidadVoluntario d) {
-        return new DisponibilidadResponse(
-                d.getId() != null ? d.getId().getValue() : null,
-                d.getFecha(),
-                d.getTurno(),
-                d.getEstado());
-    }
+    @Mapping(target = "id", source = "id.value")
+    DisponibilidadResponse toResponse(DisponibilidadVoluntario d);
 
-    public static VoluntarioEntity toEntity(Voluntario v) {
-        Integer usuarioId = null;
-        if (v.getUsuarioId() != null) {
-            usuarioId = v.getUsuarioId().getValue();
+    @Mapping(target = "id", source = "id.value")
+    @Mapping(target = "usuarioId", source = "usuarioId.value")
+    @Mapping(target = "status", source = "estado")
+    @Mapping(target = "tareas", source = "tareas", qualifiedByName = "mapTareasToEntities")
+    @Mapping(target = "disponibilidades", source = "disponibilidades", qualifiedByName = "mapDisponibilidadesToEntities")
+    VoluntarioEntity toEntity(Voluntario v);
+
+    @AfterMapping
+    default void linkDisponibilidades(@MappingTarget VoluntarioEntity entity) {
+        if (entity.getDisponibilidades() != null) {
+            entity.getDisponibilidades().forEach(d -> d.setVoluntario(entity));
         }
+    }
 
-        List<TareaEntity> tareas = null;
-        if (v.getTareas() != null) {
-            tareas = v.getTareas().stream()
-                    .map(tid -> TareaEntity.builder().id(tid.getValue()).build())
-                    .collect(Collectors.toList());
+    @Mapping(target = "id", source = "id", qualifiedByName = "mapVoluntarioId")
+    @Mapping(target = "usuarioId", source = "usuarioId", qualifiedByName = "mapUsuarioId")
+    @Mapping(target = "estado", source = "status")
+    @Mapping(target = "tareas", source = "tareas", qualifiedByName = "mapEntitiesToTareas")
+    @Mapping(target = "disponibilidades", source = "disponibilidades", qualifiedByName = "mapEntitiesToDisponibilidades")
+    Voluntario toDomain(VoluntarioEntity e);
+
+    List<Voluntario> toDomain(List<VoluntarioEntity> entities);
+
+    List<VoluntarioResponse> toResponse(List<Voluntario> voluntarios);
+
+    @Named("mapVoluntarioId")
+    default VoluntarioId mapVoluntarioId(Integer id) {
+        return id != null ? new VoluntarioId(id) : null;
+    }
+
+    @Named("mapUsuarioId")
+    default UsuarioId mapUsuarioId(Integer id) {
+        return id != null ? new UsuarioId(id) : null;
+    }
+
+    @Named("mapTareasToEntities")
+    default List<TareaEntity> mapTareasToEntities(List<TareaId> tareas) {
+        if (tareas == null) {
+            return null;
         }
+        return tareas.stream().map(tid -> TareaEntity.builder().id(tid.getValue()).build()).toList();
+    }
 
-        VoluntarioEntity entity = VoluntarioEntity.builder()
-                .id(v.getId() != null ? v.getId().getValue() : null)
-                .usuarioId(usuarioId)
-                .disponibilidad(v.getDisponibilidad())
-                .especialidad(v.getEspecialidad())
-                .status(v.getEstado())
-                .tareas(tareas)
-                .build();
-
-        if (v.getDisponibilidades() != null) {
-            List<DisponibilidadVoluntarioEntity> disponibilidades = v.getDisponibilidades().stream()
-                    .map(d -> DisponibilidadVoluntarioEntity.builder()
-                            .id(d.getId() != null ? d.getId().getValue() : null)
-                            .fecha(d.getFecha())
-                            .turno(d.getTurno())
-                            .estado(d.getEstado())
-                            .voluntario(entity)
-                            .build())
-                    .collect(Collectors.toList());
-            entity.setDisponibilidades(disponibilidades);
+    @Named("mapEntitiesToTareas")
+    default List<TareaId> mapEntitiesToTareas(List<TareaEntity> tareas) {
+        if (tareas == null) {
+            return new ArrayList<>();
         }
-
-        return entity;
+        return tareas.stream().map(te -> new TareaId(te.getId())).toList();
     }
 
-    public static Voluntario toDomain(VoluntarioEntity e) {
-        return Voluntario.builder()
-                .id(e.getId() != null ? new VoluntarioId(e.getId()) : null)
-                .usuarioId(e.getUsuarioId() != null ? new UsuarioId(e.getUsuarioId()) : null)
-                .disponibilidad(e.getDisponibilidad())
-                .especialidad(e.getEspecialidad())
-                .estado(e.getStatus())
-                .tareas(e.getTareas() != null
-                        ? e.getTareas().stream().map(te -> new TareaId(te.getId())).collect(Collectors.toList())
-                        : new java.util.ArrayList<>())
-                .disponibilidades(e.getDisponibilidades() != null
-                        ? e.getDisponibilidades().stream().map(de -> DisponibilidadVoluntario.builder()
-                                .id(new DisponibilidadVoluntarioId(de.getId()))
-                                .voluntarioId(new VoluntarioId(e.getId()))
-                                .fecha(de.getFecha())
-                                .turno(de.getTurno())
-                                .estado(de.getEstado())
-                                .build()).collect(Collectors.toList())
-                        : new java.util.ArrayList<>())
-                .build();
+    @Named("mapDisponibilidadesToEntities")
+    default List<DisponibilidadVoluntarioEntity> mapDisponibilidadesToEntities(List<DisponibilidadVoluntario> disponibilidades) {
+        if (disponibilidades == null) {
+            return null;
+        }
+        return disponibilidades.stream().map(d -> DisponibilidadVoluntarioEntity.builder()
+                .id(d.getId() != null ? d.getId().getValue() : null)
+                .fecha(d.getFecha())
+                .turno(d.getTurno())
+                .estado(d.getEstado())
+                .build()).toList();
     }
 
-    public static List<Voluntario> toDomain(List<VoluntarioEntity> entities) {
-        return entities.stream().map(VoluntarioMapper::toDomain).collect(Collectors.toList());
-    }
-
-    public static List<VoluntarioResponse> toResponse(List<Voluntario> voluntarios) {
-        return voluntarios.stream().map(VoluntarioMapper::toResponse).collect(Collectors.toList());
+    @Named("mapEntitiesToDisponibilidades")
+    default List<DisponibilidadVoluntario> mapEntitiesToDisponibilidades(List<DisponibilidadVoluntarioEntity> disponibilidades) {
+        if (disponibilidades == null) {
+            return new ArrayList<>();
+        }
+        return disponibilidades.stream().map(de -> DisponibilidadVoluntario.builder()
+                .id(new DisponibilidadVoluntarioId(de.getId()))
+                .voluntarioId(de.getVoluntario() != null ? new VoluntarioId(de.getVoluntario().getId()) : null)
+                .fecha(de.getFecha())
+                .turno(de.getTurno())
+                .estado(de.getEstado())
+                .build()).toList();
     }
 }

@@ -11,6 +11,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Find Animal.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class FindAnimalUseCase {
 
     private final AnimalRepository animalRepository;
@@ -48,4 +54,4 @@ public class FindAnimalUseCase {
     public List<Animal> findTop3Favoritos() {
         return animalRepository.findTop3ByEstadoOrderByVisitasDesc(EstadoAnimal.DISPONIBLE);
     }
-}
+}

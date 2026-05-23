@@ -9,6 +9,12 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Create Animal.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class CreateAnimalService {
 
     private final CreateAnimalUseCase createAnimalUseCase;

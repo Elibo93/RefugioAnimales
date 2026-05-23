@@ -1,47 +1,28 @@
 package es.refugio.refugio.infraestructure.mapper;
 
-import org.springframework.stereotype.Component;
+import java.util.List;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import es.refugio.refugio.domain.model.donacion.ObjetivoDonacion;
 import es.refugio.refugio.domain.model.donacion.ObjetivoDonacionId;
 import es.refugio.refugio.infraestructure.db.jpa.entity.ObjetivoDonacionEntity;
 
-@Component
-public class ObjetivoDonacionMapper {
+@Mapper(componentModel = "spring")
+public interface ObjetivoDonacionMapper {
 
-    public static ObjetivoDonacion toDomain(ObjetivoDonacionEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-        return ObjetivoDonacion.builder()
-                .id(new ObjetivoDonacionId(entity.getId()))
-                .titulo(entity.getTitulo())
-                .descripcion(entity.getDescripcion())
-                .montoObjetivo(entity.getMontoObjetivo())
-                .montoRecaudado(entity.getMontoRecaudado())
-                .prioridad(entity.getPrioridad())
-                .estado(entity.getEstado())
-                .fechaInicio(entity.getFechaInicio())
-                .fechaLimite(entity.getFechaLimite())
-                .icono(entity.getIcono())
-                .build();
-    }
+    @Mapping(target = "id", source = "id", qualifiedByName = "mapObjetivoDonacionId")
+    ObjetivoDonacion toDomain(ObjetivoDonacionEntity entity);
 
-    public static ObjetivoDonacionEntity toEntity(ObjetivoDonacion domain) {
-        if (domain == null) {
-            return null;
-        }
-        return ObjetivoDonacionEntity.builder()
-                .id(domain.getId() != null ? domain.getId().getValue() : null)
-                .titulo(domain.getTitulo())
-                .descripcion(domain.getDescripcion())
-                .montoObjetivo(domain.getMontoObjetivo())
-                .montoRecaudado(domain.getMontoRecaudado())
-                .prioridad(domain.getPrioridad())
-                .estado(domain.getEstado())
-                .fechaInicio(domain.getFechaInicio())
-                .fechaLimite(domain.getFechaLimite())
-                .icono(domain.getIcono())
-                .build();
+    @Mapping(target = "id", source = "id.value")
+    ObjetivoDonacionEntity toEntity(ObjetivoDonacion domain);
+
+    List<ObjetivoDonacion> toDomain(List<ObjetivoDonacionEntity> entities);
+
+    @Named("mapObjetivoDonacionId")
+    default ObjetivoDonacionId mapObjetivoDonacionId(Integer id) {
+        return id != null ? new ObjetivoDonacionId(id) : null;
     }
 }

@@ -20,27 +20,28 @@ import org.springframework.data.domain.Pageable;
 public class AdoptanteJpaRepositoryImpl implements AdoptanteRepository {
 
     private final AdoptanteEntityJpaRepository repository;
+    private final AdoptanteMapper adoptanteMapper;
 
     @Override
     public Adoptante save(Adoptante t) {
-        AdoptanteEntity adoptanteEntity = AdoptanteMapper.toEntity(t);
-        return AdoptanteMapper.toDomain(repository.save(adoptanteEntity));
+        AdoptanteEntity adoptanteEntity = adoptanteMapper.toEntity(t);
+        return adoptanteMapper.toDomain(repository.save(adoptanteEntity));
     }
 
     @Override
     public List<Adoptante> getAll() {
-        return AdoptanteMapper.toDomain(repository.findAll());
+        return adoptanteMapper.toDomain(repository.findAll());
     }
 
     @Override
     public Page<Adoptante> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(AdoptanteMapper::toDomain);
+        return repository.findAll(pageable).map(adoptanteMapper::toDomain);
     }
 
     @Override
     public Optional<Adoptante> getById(AdoptanteId id) {
         return repository.findById(id.getValue())
-                .map(AdoptanteMapper::toDomain);
+                .map(adoptanteMapper::toDomain);
     }
 
     @Override
@@ -52,7 +53,7 @@ public class AdoptanteJpaRepositoryImpl implements AdoptanteRepository {
     @Override
     public Optional<Adoptante> getByUsuarioId(UsuarioId usuarioId) {
         return repository.findByUsuarioId(usuarioId.getValue())
-                .map(AdoptanteMapper::toDomain);
+                .map(adoptanteMapper::toDomain);
     }
 
     @Override
@@ -75,6 +76,6 @@ public class AdoptanteJpaRepositoryImpl implements AdoptanteRepository {
             ));
 
             return root.get("usuarioId").in(subquery);
-        }, pageable).map(AdoptanteMapper::toDomain);
+        }, pageable).map(adoptanteMapper::toDomain);
     }
 }

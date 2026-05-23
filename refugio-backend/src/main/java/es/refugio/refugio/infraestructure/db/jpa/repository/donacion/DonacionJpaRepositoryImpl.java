@@ -17,27 +17,28 @@ import org.springframework.data.domain.Pageable;
 public class DonacionJpaRepositoryImpl implements DonacionRepository {
 
     private final DonacionEntityJpaRepository jpaRepository;
+    private final DonacionMapper donacionMapper;
 
     @Override
     public Donacion save(Donacion donacion) {
-        DonacionEntity entity = DonacionMapper.toEntity(donacion);
-        return DonacionMapper.toDomain(jpaRepository.save(entity));
+        DonacionEntity entity = donacionMapper.toEntity(donacion);
+        return donacionMapper.toDomain(jpaRepository.save(entity));
     }
 
     @Override
     public Optional<Donacion> getById(DonacionId id) {
         return jpaRepository.findById(id.getValue())
-                .map(DonacionMapper::toDomain);
+                .map(donacionMapper::toDomain);
     }
 
     @Override
     public List<Donacion> getAll() {
-        return DonacionMapper.toDomain(jpaRepository.findAll());
+        return donacionMapper.toDomain(jpaRepository.findAll());
     }
 
     @Override
     public Page<Donacion> findAll(Pageable pageable) {
-        return jpaRepository.findAll(pageable).map(DonacionMapper::toDomain);
+        return jpaRepository.findAll(pageable).map(donacionMapper::toDomain);
     }
 
     @Override
@@ -47,6 +48,6 @@ public class DonacionJpaRepositoryImpl implements DonacionRepository {
 
     @Override
     public List<Donacion> getByUsuarioId(UsuarioId usuarioId) {
-        return DonacionMapper.toDomain(jpaRepository.findByUsuarioId(usuarioId.getValue()));
+        return donacionMapper.toDomain(jpaRepository.findByUsuarioId(usuarioId.getValue()));
     }
 }

@@ -20,6 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Edit Solicitud Adopcion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class EditSolicitudAdopcionUseCase {
 
     private final SolicitudAdopcionRepository solicitudAdopcionRepository;

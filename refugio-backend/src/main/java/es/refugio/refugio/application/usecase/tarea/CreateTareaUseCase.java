@@ -16,6 +16,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Create Tarea.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class CreateTareaUseCase {
 
     private final TareaRepository tareaRepository;

@@ -9,6 +9,12 @@ import es.refugio.refugio.domain.repository.DonacionRepository;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Edit Donacion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class EditDonacionUseCase {
 
     private final DonacionRepository donacionRepository;

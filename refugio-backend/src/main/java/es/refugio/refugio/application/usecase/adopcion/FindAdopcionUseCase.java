@@ -12,6 +12,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Find Adopcion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class FindAdopcionUseCase {
 
     private final AdopcionRepository adopcionRepository;

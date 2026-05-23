@@ -20,6 +20,12 @@ import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
+/**
+ * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Notificacion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class NotificacionViewController {
 
     private final NotificacionService notificacionService;

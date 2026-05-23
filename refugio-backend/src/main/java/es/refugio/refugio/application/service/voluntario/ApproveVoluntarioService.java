@@ -5,6 +5,12 @@ import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Approve Voluntario.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class ApproveVoluntarioService {
 
     private final ApproveVoluntarioUseCase useCase;

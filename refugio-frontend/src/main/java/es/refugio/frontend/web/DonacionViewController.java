@@ -1,4 +1,5 @@
 package es.refugio.frontend.web;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,6 +35,12 @@ import es.refugio.frontend.service.DonacionService;
 
 @Controller
 @RequiredArgsConstructor
+/**
+ * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Donacion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class DonacionViewController {
 
     private final DonacionService donacionService;
@@ -394,7 +401,7 @@ public class DonacionViewController {
             usuariosMap.put(String.valueOf(u.id()), u);
         }
 
-        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
+        Context context = new Context(LocaleContextHolder.getLocale());
         context.setVariable("donaciones", donaciones);
         context.setVariable("usuariosMap", usuariosMap);
         String html = templateEngine.process(ThymTemplates.Donacion_LIST_PDF.getPath(), context);

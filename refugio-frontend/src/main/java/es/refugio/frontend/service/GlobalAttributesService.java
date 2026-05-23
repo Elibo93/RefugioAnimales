@@ -10,6 +10,12 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Global Attributes.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class GlobalAttributesService {
 
     private final RestTemplate restTemplate;

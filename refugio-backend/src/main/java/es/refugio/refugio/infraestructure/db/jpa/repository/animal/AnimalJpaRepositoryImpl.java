@@ -23,27 +23,28 @@ import lombok.RequiredArgsConstructor;
 public class AnimalJpaRepositoryImpl implements AnimalRepository {
 
     private final AnimalEntityJpaRepository repository;
+    private final AnimalMapper animalMapper;
 
     @Override
     public Animal save(Animal t) {
-        AnimalEntity animalEntity = AnimalMapper.toEntity(t);
-        return AnimalMapper.toDomain(repository.save(animalEntity));
+        AnimalEntity animalEntity = animalMapper.toEntity(t);
+        return animalMapper.toDomain(repository.save(animalEntity));
     }
 
     @Override
     public List<Animal> getAll() {
-        return AnimalMapper.toDomain(repository.findAll());
+        return animalMapper.toDomain(repository.findAll());
     }
 
     @Override
     public Page<Animal> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(AnimalMapper::toDomain);
+        return repository.findAll(pageable).map(animalMapper::toDomain);
     }
 
     @Override
     public Optional<Animal> getById(AnimalId id) {
         return repository.findById(id.getValue())
-                .map(AnimalMapper::toDomain);
+                .map(animalMapper::toDomain);
     }
 
     @Override
@@ -54,30 +55,35 @@ public class AnimalJpaRepositoryImpl implements AnimalRepository {
     @Override
     public Optional<Animal> getByChipId(String chipId) {
         return repository.findByChipId(chipId)
-                .map(AnimalMapper::toDomain);
+                .map(animalMapper::toDomain);
     }
 
     @Override
     public List<Animal> getByEstado(EstadoAnimal estado) {
-        return AnimalMapper.toDomain(repository.findByEstado(estado));
+        return animalMapper.toDomain(repository.findByEstado(estado));
     }
 
     @Override
     public List<Animal> getByEspecie(Especie especie) {
-        return AnimalMapper.toDomain(repository.findByEspecie(especie));
+        return animalMapper.toDomain(repository.findByEspecie(especie));
     }
 
     @Override
-    public List<Animal> findFiltered(String q, String especie, String tamano, List<String> edad, String sexo, Boolean urgencia) {
-        return AnimalMapper.toDomain(repository.findAll(createSpecification(q, null, especie, tamano, edad, sexo, urgencia)));
+    public List<Animal> findFiltered(String q, String especie, String tamano, List<String> edad, String sexo,
+            Boolean urgencia) {
+        return animalMapper
+                .toDomain(repository.findAll(createSpecification(q, null, especie, tamano, edad, sexo, urgencia)));
     }
 
     @Override
-    public Page<Animal> findFiltered(String q, String estado, String especie, String tamano, List<String> edad, String sexo, Boolean urgencia, Pageable pageable) {
-        return repository.findAll(createSpecification(q, estado, especie, tamano, edad, sexo, urgencia), pageable).map(AnimalMapper::toDomain);
+    public Page<Animal> findFiltered(String q, String estado, String especie, String tamano, List<String> edad,
+            String sexo, Boolean urgencia, Pageable pageable) {
+        return repository.findAll(createSpecification(q, estado, especie, tamano, edad, sexo, urgencia), pageable)
+                .map(animalMapper::toDomain);
     }
 
-    private Specification<AnimalEntity> createSpecification(String q, String estado, String especie, String tamano, List<String> edad, String sexo, Boolean urgencia) {
+    private Specification<AnimalEntity> createSpecification(String q, String estado, String especie, String tamano,
+            List<String> edad, String sexo, Boolean urgencia) {
         return (root, query, cb) -> {
             var predicates = new ArrayList<Predicate>();
 
@@ -85,11 +91,10 @@ public class AnimalJpaRepositoryImpl implements AnimalRepository {
                 String pattern = "%" + q.toLowerCase().trim() + "%";
                 System.out.println("DEBUG: Applying search filter 'q' with pattern: " + pattern);
                 predicates.add(cb.or(
-                    cb.like(cb.lower(root.get("nombre")), pattern),
-                    cb.like(cb.lower(root.get("raza")), pattern),
-                    cb.like(cb.lower(root.get("chipId")), pattern),
-                    cb.like(cb.lower(root.get("descripcion")), pattern)
-                ));
+                        cb.like(cb.lower(root.get("nombre")), pattern),
+                        cb.like(cb.lower(root.get("raza")), pattern),
+                        cb.like(cb.lower(root.get("chipId")), pattern),
+                        cb.like(cb.lower(root.get("descripcion")), pattern)));
             }
 
             if (estado != null && !estado.isEmpty() && !"ALL".equalsIgnoreCase(estado)) {
@@ -101,7 +106,7 @@ public class AnimalJpaRepositoryImpl implements AnimalRepository {
                 System.out.println("DEBUG: Applying especie filter: " + especie);
                 predicates.add(cb.equal(root.get("especie"), Especie.valueOf(especie.toUpperCase())));
             }
-            
+
             if (tamano != null && !tamano.isEmpty() && !"ALL".equalsIgnoreCase(tamano)) {
                 System.out.println("DEBUG: Applying tamano filter: " + tamano);
                 Tamano tEnum = null;
@@ -117,33 +122,36 @@ public class AnimalJpaRepositoryImpl implements AnimalRepository {
                 } else {
                     try {
                         tEnum = Tamano.valueOf(tamano.toUpperCase());
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 }
                 if (tEnum != null) {
                     predicates.add(cb.equal(root.get("tamano"), tEnum));
                 }
             }
-            
+
             if (sexo != null && !sexo.isEmpty() && !"ALL".equalsIgnoreCase(sexo)) {
                 System.out.println("DEBUG: Applying sexo filter: " + sexo);
                 predicates.add(cb.equal(root.get("sexo"), Sexo.valueOf(sexo.toUpperCase())));
             }
-            
+
             if (urgencia != null && urgencia) {
                 System.out.println("DEBUG: Applying urgencia filter: true");
                 predicates.add(cb.equal(root.get("urgencia"), true));
             }
-            
+
             if (edad != null && !edad.isEmpty()) {
                 System.out.println("DEBUG: Applying edad filters: " + edad);
                 var agePredicates = new ArrayList<Predicate>();
                 for (String e : edad) {
                     if ("cachorro".equalsIgnoreCase(e)) {
                         agePredicates.add(cb.lessThan(root.get("edad"), 2));
+                    } else if ("joven".equalsIgnoreCase(e)) {
+                        agePredicates.add(cb.between(root.get("edad"), 2, 4));
                     } else if ("adulto".equalsIgnoreCase(e)) {
-                        agePredicates.add(cb.between(root.get("edad"), 2, 7));
+                        agePredicates.add(cb.between(root.get("edad"), 4, 8));
                     } else if ("senior".equalsIgnoreCase(e)) {
-                        agePredicates.add(cb.greaterThan(root.get("edad"), 7));
+                        agePredicates.add(cb.greaterThan(root.get("edad"), 8));
                     }
                 }
                 if (!agePredicates.isEmpty()) {
@@ -158,7 +166,7 @@ public class AnimalJpaRepositoryImpl implements AnimalRepository {
 
     @Override
     public List<Animal> findTop3ByEstadoOrderByVisitasDesc(EstadoAnimal estado) {
-        return AnimalMapper.toDomain(repository.findTop3ByEstadoOrderByVisitasDesc(estado));
+        return animalMapper.toDomain(repository.findTop3ByEstadoOrderByVisitasDesc(estado));
     }
 
     @Override

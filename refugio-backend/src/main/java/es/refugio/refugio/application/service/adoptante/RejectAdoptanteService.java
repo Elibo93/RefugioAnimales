@@ -12,6 +12,12 @@ import lombok.RequiredArgsConstructor;
  */
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Reject Adoptante.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class RejectAdoptanteService {
 
     private final RejectAdoptanteUseCase rejectAdoptanteUseCase;

@@ -11,6 +11,12 @@ import lombok.AllArgsConstructor;
  * Caso de uso: aprueba un adoptante cambiando su estado a APROBADO.
  */
 @AllArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Approve Adoptante.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class ApproveAdoptanteUseCase {
 
     private final AdoptanteRepository adoptanteRepository;

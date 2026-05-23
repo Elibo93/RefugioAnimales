@@ -20,8 +20,8 @@ import es.refugio.refugio.infraestructure.db.jpa.repository.adopcion.AdopcionJpa
 public class AdopcionConfig {
 
     @Bean
-    public AdopcionRepository adopcionRepository(AdopcionEntityJpaRepository jpaRepository) {
-        return new AdopcionJpaRepositoryImpl(jpaRepository);
+    public AdopcionRepository adopcionRepository(AdopcionEntityJpaRepository jpaRepository, es.refugio.refugio.infraestructure.mapper.AdopcionMapper adopcionMapper) {
+        return new AdopcionJpaRepositoryImpl(jpaRepository, adopcionMapper);
     }
 
     @Bean

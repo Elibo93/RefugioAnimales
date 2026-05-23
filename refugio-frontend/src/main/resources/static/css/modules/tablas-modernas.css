@@ -1,0 +1,225 @@
+/* TABLAS-MODERNAS */
+
+.table-wrapper {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    /* Allow horizontal scroll */
+}
+
+.actions-bar {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #F8FAFC;
+    border-bottom: 1px solid var(--border);
+}
+
+th {
+    text-align: left;
+    padding: 1rem 1.5rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-main);
+    font-size: 0.95rem;
+    position: relative;
+}
+
+table th:not(:last-child)::after,
+table td:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 25%;
+    height: 50%;
+    width: 1px;
+    background-color: var(--border);
+    opacity: 0.3;
+}
+
+table th {
+    position: relative;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+tbody tr:hover {
+    background-color: #F8FAFC;
+}
+
+/* Radio buttons interactivos para tareas — diseño personalizado */
+.status-radio {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #cbd5e1;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0;
+    vertical-align: middle;
+    flex-shrink: 0;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.status-radio::after {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: transparent;
+    transition: background 0.15s ease;
+}
+
+.status-radio:hover {
+    border-color: #94a3b8;
+    transform: scale(1.1);
+}
+
+/* Colores por estado */
+.status-radio.radio-pendiente:checked {
+    border-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.status-radio.radio-pendiente:checked::after {
+    background: #f59e0b;
+}
+
+.status-radio.radio-progreso:checked {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.status-radio.radio-progreso:checked::after {
+    background: #3b82f6;
+}
+
+.status-radio.radio-completada:checked {
+    border-color: #10b981;
+    background: #ecfdf5;
+}
+
+.status-radio.radio-completada:checked::after {
+    background: #10b981;
+}
+
+.status-radio.radio-cancelada:checked {
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+.status-radio.radio-cancelada:checked::after {
+    background: #ef4444;
+}
+
+.save-status-btn {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Botones Acción */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 8px rgba(37, 99, 235, 0.3);
+}
+
+.btn-secondary {
+    background: white;
+    border: 1px solid var(--border);
+    color: var(--text-main);
+}
+
+.btn-secondary:hover {
+    background: #F1F5F9;
+    border-color: #CBD5E1;
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.btn-icon:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.btn-icon.delete:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: var(--danger-bg);
+}
+
+

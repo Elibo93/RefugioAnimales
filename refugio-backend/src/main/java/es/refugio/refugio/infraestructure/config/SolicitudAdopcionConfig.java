@@ -27,8 +27,8 @@ import es.refugio.refugio.infraestructure.db.jpa.repository.solicitud_adopcion.S
 public class SolicitudAdopcionConfig {
 
     @Bean
-    public SolicitudAdopcionRepository solicitudAdopcionRepository(SolicitudAdopcionEntityJpaRepository jpaRepository) {
-        return new SolicitudAdopcionJpaRepositoryImpl(jpaRepository);
+    public SolicitudAdopcionRepository solicitudAdopcionRepository(SolicitudAdopcionEntityJpaRepository jpaRepository, es.refugio.refugio.infraestructure.mapper.SolicitudAdopcionMapper mapper) {
+        return new SolicitudAdopcionJpaRepositoryImpl(jpaRepository, mapper);
     }
 
     @Bean

@@ -1,4 +1,5 @@
 package es.refugio.frontend.web;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,6 +34,12 @@ import es.refugio.frontend.service.AnimalService;
 
 @Controller
 @RequiredArgsConstructor
+/**
+ * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Animal.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class AnimalViewController {
 
     private final AnimalService animalService;
@@ -355,7 +362,7 @@ public class AnimalViewController {
     @GetMapping(WebRoutes.ANIMALES_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<AnimalRecord> animales = animalService.fetchAllAnimals();
-        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
+        Context context = new Context(LocaleContextHolder.getLocale());
         context.setVariable("animales", animales);
         String htmlContent = templateEngine.process(ThymTemplates.Animal_LIST_PDF.getPath(), context);
         response.setContentType("application/pdf");

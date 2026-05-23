@@ -7,6 +7,12 @@ import es.refugio.refugio.domain.repository.VoluntarioRepository;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Edit Voluntario.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class EditVoluntarioUseCase {
 
     private final VoluntarioRepository voluntarioRepository;

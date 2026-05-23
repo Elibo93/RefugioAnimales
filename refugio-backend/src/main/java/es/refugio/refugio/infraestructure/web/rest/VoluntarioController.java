@@ -54,10 +54,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/api/v1/voluntarios")
 @RequiredArgsConstructor
 @Tag(name = "Voluntarios", description = "Gestión de voluntarios del refugio")
+/**
+ * Controlador REST que expone los endpoints HTTP de la API para la gestión de Voluntario.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class VoluntarioController {
 
     private final CreateVoluntarioService createVoluntarioService;
     private final FindVoluntarioService findVoluntarioService;
+    private final VoluntarioMapper voluntarioMapper;
     private final EditVoluntarioService editVoluntarioService;
     private final DeleteVoluntarioService deleteVoluntarioService;
     private final ApproveVoluntarioService approveVoluntarioService;
@@ -68,9 +75,9 @@ public class VoluntarioController {
             @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<VoluntarioResponse> create(@Valid @RequestBody VoluntarioRequest request) {
-        CreateVoluntarioCommand command = VoluntarioMapper.toCommand(request);
+        CreateVoluntarioCommand command = voluntarioMapper.toCommand(request);
         Voluntario voluntario = createVoluntarioService.createVoluntario(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(VoluntarioMapper.toResponse(voluntario));
+        return ResponseEntity.status(HttpStatus.CREATED).body(voluntarioMapper.toResponse(voluntario));
     }
 
     @Operation(summary = "Actualizar voluntario")
@@ -93,9 +100,9 @@ public class VoluntarioController {
             }
         }
 
-        EditVoluntarioCommand command = VoluntarioMapper.toCommand(id, request);
+        EditVoluntarioCommand command = voluntarioMapper.toCommand(id, request);
         Voluntario voluntario = editVoluntarioService.update(command);
-        return ResponseEntity.ok(VoluntarioMapper.toResponse(voluntario));
+        return ResponseEntity.ok(voluntarioMapper.toResponse(voluntario));
     }
 
     @Operation(summary = "Listar voluntarios")
@@ -108,7 +115,7 @@ public class VoluntarioController {
             @RequestParam(required = false) String excludeDate,
             Pageable pageable) {
         Page<Voluntario> page = findVoluntarioService.findFiltered(q, excludeTareaId, excludeDate, pageable);
-        return PaginatedResponse.fromPage(page, VoluntarioMapper.toResponse(page.getContent()));
+        return PaginatedResponse.fromPage(page, voluntarioMapper.toResponse(page.getContent()));
     }
 
     @Operation(summary = "Contar voluntarios pendientes")
@@ -127,7 +134,7 @@ public class VoluntarioController {
     public List<VoluntarioResponse> findPending() {
         return findVoluntarioService.findAll().stream()
                 .filter(v -> EstadoVoluntario.PENDIENTE.equals(v.getEstado()))
-                .map(VoluntarioMapper::toResponse)
+                .map(voluntarioMapper::toResponse)
                 .toList();
     }
 
@@ -170,7 +177,7 @@ public class VoluntarioController {
         Voluntario updated = setDisponibilidadService.setDisponibilidad(command);
         
         List<DisponibilidadResponse> responses = updated.getDisponibilidades().stream()
-                .map(VoluntarioMapper::toResponse)
+                .map(voluntarioMapper::toResponse)
                 .toList();
                 
         return ResponseEntity.ok(responses);
@@ -197,7 +204,7 @@ public class VoluntarioController {
         }
         
         List<DisponibilidadResponse> responses = voluntario.getDisponibilidades().stream()
-                .map(VoluntarioMapper::toResponse)
+                .map(voluntarioMapper::toResponse)
                 .toList();
                 
         return ResponseEntity.ok(responses);
@@ -247,7 +254,7 @@ public class VoluntarioController {
         if (!isAdmin && !voluntario.getUsuarioId().getValue().equals(userDetails.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        return ResponseEntity.ok(VoluntarioMapper.toResponse(voluntario));
+        return ResponseEntity.ok(voluntarioMapper.toResponse(voluntario));
     }
 
     @Operation(summary = "Voluntario por usuario", description = "Retorna el voluntario asociado a un usuario")
@@ -262,7 +269,7 @@ public class VoluntarioController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         
-        return ResponseEntity.ok(VoluntarioMapper.toResponse(findVoluntarioService.findByUsuarioId(new UsuarioId(usuarioId))));
+        return ResponseEntity.ok(voluntarioMapper.toResponse(findVoluntarioService.findByUsuarioId(new UsuarioId(usuarioId))));
     }
 
     @Operation(summary = "Eliminar voluntario")

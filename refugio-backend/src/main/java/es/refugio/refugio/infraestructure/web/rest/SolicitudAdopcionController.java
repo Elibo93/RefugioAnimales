@@ -67,6 +67,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/api/v1/solicitudes-adopcion")
 @RequiredArgsConstructor
 @Tag(name = "Solicitudes de Adopción", description = "Gestión de solicitudes de adopción")
+/**
+ * Controlador REST que expone los endpoints HTTP de la API para la gestión de Solicitud Adopcion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class SolicitudAdopcionController {
 
     private final CreateAdoptanteService createAdoptanteService;
@@ -77,7 +83,9 @@ public class SolicitudAdopcionController {
     private final AprobarSolicitudAdopcionService aprobarSolicitudAdopcionService;
     private final RechazarSolicitudAdopcionService rechazarSolicitudAdopcionService;
     private final FindAdoptanteService findAdoptanteService;
+    private final AdopcionMapper adopcionMapper;
     private final PerfilLegalRepository perfilLegalRepository;
+    private final SolicitudAdopcionMapper solicitudAdopcionMapper;
 
     @Operation(summary = "Crear solicitud de adopción")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Solicitud creada"),
@@ -86,9 +94,9 @@ public class SolicitudAdopcionController {
     @Transactional
     public ResponseEntity<SolicitudAdopcionResponse> createSolicitudAdopcion(
             @Valid @RequestBody SolicitudAdopcionRequest request) {
-        CreateSolicitudAdopcionCommand command = SolicitudAdopcionMapper.toCommand(request);
+        CreateSolicitudAdopcionCommand command = solicitudAdopcionMapper.toCommand(request);
         SolicitudAdopcion solicitud = createSolicitudAdopcionService.create(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(SolicitudAdopcionMapper.toResponse(solicitud));
+        return ResponseEntity.status(HttpStatus.CREATED).body(solicitudAdopcionMapper.toResponse(solicitud));
     }
 
     @Operation(summary = "Registro público y solicitud de adopción", description = "Registra un nuevo usuario, crea su perfil de adoptante y envía la solicitud de adopción en un solo paso.")
@@ -131,7 +139,7 @@ public class SolicitudAdopcionController {
                 null);
         var solicitud = createSolicitudAdopcionService.create(solicitudCommand);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(SolicitudAdopcionMapper.toResponse(solicitud));
+        return ResponseEntity.status(HttpStatus.CREATED).body(solicitudAdopcionMapper.toResponse(solicitud));
     }
 
     @Operation(summary = "Convertir usuario a adoptante y enviar solicitud", description = "Asocia un perfil de adoptante a un usuario existente.")
@@ -179,7 +187,7 @@ public class SolicitudAdopcionController {
                 null);
         var solicitud = createSolicitudAdopcionService.create(solicitudCommand);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(SolicitudAdopcionMapper.toResponse(solicitud));
+        return ResponseEntity.status(HttpStatus.CREATED).body(solicitudAdopcionMapper.toResponse(solicitud));
     }
 
     @Operation(summary = "Adopción directa para adoptantes registrados", description = "Crea una solicitud de adopción directamente para el perfil del usuario autenticado.")
@@ -206,7 +214,7 @@ public class SolicitudAdopcionController {
                 null);
         var solicitud = createSolicitudAdopcionService.create(solicitudCommand);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(SolicitudAdopcionMapper.toResponse(solicitud));
+        return ResponseEntity.status(HttpStatus.CREATED).body(solicitudAdopcionMapper.toResponse(solicitud));
     }
 
     @Operation(summary = "Actualizar solicitud de adopción")
@@ -225,9 +233,9 @@ public class SolicitudAdopcionController {
             }
         }
 
-        EditSolicitudAdopcionCommand command = SolicitudAdopcionMapper.toCommand(id, request);
+        EditSolicitudAdopcionCommand command = solicitudAdopcionMapper.toCommand(id, request);
         SolicitudAdopcion solicitud = editSolicitudAdopcionService.update(command);
-        return ResponseEntity.ok(SolicitudAdopcionMapper.toResponse(solicitud));
+        return ResponseEntity.ok(solicitudAdopcionMapper.toResponse(solicitud));
     }
 
     @Operation(summary = "Aprobar solicitud de adopción", description = "Aprueba una solicitud pendiente, actualizando el animal a RESERVADO, el adoptante a APROBADO y creando la Adopción.")
@@ -237,7 +245,7 @@ public class SolicitudAdopcionController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AdopcionResponse> aprobarSolicitud(@PathVariable Integer id) {
         var adopcion = aprobarSolicitudAdopcionService.aprobar(new SolicitudAdopcionId(id));
-        return ResponseEntity.status(HttpStatus.CREATED).body(AdopcionMapper.toResponse(adopcion));
+        return ResponseEntity.status(HttpStatus.CREATED).body(adopcionMapper.toResponse(adopcion));
     }
 
     @Operation(summary = "Rechazar solicitud de adopción", description = "Rechaza una solicitud pendiente, marcando a su vez al adoptante como RECHAZADO.")
@@ -249,7 +257,7 @@ public class SolicitudAdopcionController {
             @RequestBody(required = false) Map<String, String> body) {
         String comentario = (body != null && body.containsKey("comentario")) ? body.get("comentario") : null;
         var solicitud = rechazarSolicitudAdopcionService.rechazar(new SolicitudAdopcionId(id), comentario);
-        return ResponseEntity.ok(SolicitudAdopcionMapper.toResponse(solicitud));
+        return ResponseEntity.ok(solicitudAdopcionMapper.toResponse(solicitud));
     }
 
     @Operation(summary = "Listar solicitudes")
@@ -262,7 +270,7 @@ public class SolicitudAdopcionController {
 
         if (isStaff) {
             Page<SolicitudAdopcion> page = findSolicitudAdopcionService.findAll(pageable);
-            return PaginatedResponse.fromPage(page, page.map(SolicitudAdopcionMapper::toResponse).getContent());
+            return PaginatedResponse.fromPage(page, page.map(solicitudAdopcionMapper::toResponse).getContent());
         }
 
         // Para adoptantes, seguimos filtrando por ahora
@@ -278,7 +286,7 @@ public class SolicitudAdopcionController {
         List<SolicitudAdopcion> solicitudes = findSolicitudAdopcionService.findByAdoptanteId(adoptante.getId());
 
         List<SolicitudAdopcionResponse> responses = solicitudes.stream()
-                .map(SolicitudAdopcionMapper::toResponse)
+                .map(solicitudAdopcionMapper::toResponse)
                 .toList();
 
         return PaginatedResponse.<SolicitudAdopcionResponse>builder()
@@ -323,7 +331,7 @@ public class SolicitudAdopcionController {
                 return List.of();
 
             return findSolicitudAdopcionService.findByAdoptanteId(adoptante.getId()).stream()
-                    .map(SolicitudAdopcionMapper::toResponse)
+                    .map(solicitudAdopcionMapper::toResponse)
                     .toList();
         } catch (Exception e) {
             // Si no tiene perfil de adoptante, es normal que no tenga solicitudes
@@ -337,7 +345,7 @@ public class SolicitudAdopcionController {
     public SolicitudAdopcionResponse getSolicitudAdopcionById(@PathVariable Integer id) {
         SolicitudAdopcion solicitud = findSolicitudAdopcionService.findById(new SolicitudAdopcionId(id));
         checkOwnership(solicitud.getAdoptanteId());
-        return SolicitudAdopcionMapper.toResponse(solicitud);
+        return solicitudAdopcionMapper.toResponse(solicitud);
     }
 
     @Operation(summary = "Solicitudes por animal")
@@ -345,7 +353,7 @@ public class SolicitudAdopcionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public List<SolicitudAdopcionResponse> getSolicitudAdopcionByAnimalId(@PathVariable Integer animalId) {
         List<SolicitudAdopcion> solicitudes = findSolicitudAdopcionService.findByAnimalId(new AnimalId(animalId));
-        return SolicitudAdopcionMapper.toResponse(solicitudes);
+        return solicitudAdopcionMapper.toResponse(solicitudes);
     }
 
     @Operation(summary = "Solicitudes por adoptante")
@@ -355,7 +363,7 @@ public class SolicitudAdopcionController {
         checkOwnership(new AdoptanteId(adoptanteId));
         List<SolicitudAdopcion> solicitudes = findSolicitudAdopcionService
                 .findByAdoptanteId(new AdoptanteId(adoptanteId));
-        return SolicitudAdopcionMapper.toResponse(solicitudes);
+        return solicitudAdopcionMapper.toResponse(solicitudes);
     }
 
     private void checkOwnership(AdoptanteId adoptanteId) {

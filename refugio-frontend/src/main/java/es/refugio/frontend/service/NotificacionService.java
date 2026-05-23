@@ -13,6 +13,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Notificacion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class NotificacionService {
 
     private final RestTemplate restTemplate;

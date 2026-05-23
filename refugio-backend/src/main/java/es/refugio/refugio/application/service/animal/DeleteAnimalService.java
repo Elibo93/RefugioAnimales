@@ -7,6 +7,12 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Delete Animal.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class DeleteAnimalService {
 
     private final DeleteAnimalUseCase deleteAnimalUseCase;

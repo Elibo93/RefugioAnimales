@@ -16,6 +16,12 @@ import java.util.Map;
  */
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Adoptante.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class AdoptanteService {
 
     private final RestTemplate restTemplate;
@@ -36,7 +42,7 @@ public class AdoptanteService {
     }
 
     public List<AdoptanteRecord> fetchAllAdoptantes() {
-        return helper.fetchList(apiUrl + "/v1/adoptantes", AdoptanteRecord.class);
+        return helper.fetchList(apiUrl + "/v1/adoptantes?size=1000", AdoptanteRecord.class);
     }
 
     public AdoptanteRecord fetchAdoptanteById(Integer id) {
@@ -44,7 +50,7 @@ public class AdoptanteService {
     }
 
     public List<UsuarioRecord> fetchAllUsuarios() {
-        return helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+        return helper.fetchList(authUrl + "/v1/usuarios?size=1000", UsuarioRecord.class);
     }
 
     public UsuarioRecord fetchUsuarioById(Integer id) {
@@ -52,7 +58,7 @@ public class AdoptanteService {
     }
 
     public List<PerfilLegalRecord> fetchAllPerfilesLegales() {
-        return helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+        return helper.fetchList(apiUrl + "/v1/perfiles-legales?size=1000", PerfilLegalRecord.class);
     }
 
     public PerfilLegalRecord fetchPerfilLegalByUsuarioId(Integer usuarioId) {

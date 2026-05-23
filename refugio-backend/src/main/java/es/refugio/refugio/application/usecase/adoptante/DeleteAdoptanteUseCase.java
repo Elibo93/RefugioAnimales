@@ -5,6 +5,12 @@ import es.refugio.refugio.domain.repository.AdoptanteRepository;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Delete Adoptante.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class DeleteAdoptanteUseCase {
 
     private final AdoptanteRepository adoptanteRepository;

@@ -9,6 +9,12 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Edit Animal.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class EditAnimalService {
 
     private final EditAnimalUseCase editAnimalUseCase;

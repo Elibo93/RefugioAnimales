@@ -11,6 +11,12 @@ import es.refugio.refugio.domain.repository.AnimalRepository;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Edit Animal.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class EditAnimalUseCase {
 
     private final AnimalRepository animalRepository;

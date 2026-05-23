@@ -10,6 +10,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Find Historial Medico.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class FindHistorialMedicoService {
 
     private final FindHistorialMedicoUseCase useCase;

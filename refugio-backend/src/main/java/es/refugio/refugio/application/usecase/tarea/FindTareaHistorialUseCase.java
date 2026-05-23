@@ -7,6 +7,12 @@ import es.refugio.refugio.domain.repository.TareaHistorialRepository;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Find Tarea Historial.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class FindTareaHistorialUseCase {
 
     private final TareaHistorialRepository repository;

@@ -6,6 +6,12 @@ import es.refugio.refugio.domain.model.donacion.Donacion;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Create Donacion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class CreateDonacionService {
 
     private final CreateDonacionUseCase useCase;

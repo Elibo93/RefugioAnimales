@@ -10,6 +10,12 @@ import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Create Adopcion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class CreateAdopcionUseCase {
 
     private final AdopcionRepository adopcionRepository;

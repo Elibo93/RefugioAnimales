@@ -22,19 +22,22 @@
                 <!-- Avatar Dinámico -->
                 <div style="width: 160px; height: 160px; border-radius: 40px; background: white; padding: 8px; box-shadow: var(--shadow-lg);">
                     <div style="width: 100%; height: 100%; border-radius: 32px; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-size: 4rem; font-weight: 800; color: var(--primary);">
-                        <span th:text="${persona.nombre != null ? persona.nombre.substring(0,1).toUpperCase() : persona.username.substring(0,1).toUpperCase()}">U</span>
+                        <span th:text="${(persona.nombre != null and !persona.nombre.isEmpty()) ? persona.nombre.substring(0,1).toUpperCase() : (persona.username != null and !persona.username.isEmpty() ? persona.username.substring(0,1).toUpperCase() : '?')}">U</span>
                     </div>
                 </div>
                 
                                <!-- Info del Usuario -->
                 <div style="flex: 1; padding-top: 15px;">
                     <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 8px;">
-                        <h1 th:text="${persona.nombre != null ? (persona.nombre + ' ' + (persona.apellido ?: '')) : persona.username}" 
+                        <h1 th:text="${(persona.nombre != null and !persona.nombre.isEmpty()) ? (persona.nombre + ' ' + (persona.apellido ?: '')) : (persona.username ?: 'Usuario Desconocido')}" 
                             style="margin: 0; font-size: 2.2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em;">Nombre Completo</h1>
                         <span class="badge-premium" 
+                              th:if="${persona.rol != null}"
                               th:classappend="${persona.rol.toString().contains('ADMIN') ? 'danger' : (persona.rol.toString().contains('VOLUNTARIO') ? 'info' : (persona.rol.toString().contains('ADOPTANTE') ? 'primary' : 'success'))}"
                               th:text="${#messages.msg('enum.Rol.' + persona.rol.toString())}">Rol</span>
-                        
+                        <span class="badge-premium" 
+                              th:if="${persona.rol == null}"
+                              th:text="'Rol Desconocido'">Rol</span>
                         <!-- Mini Vitrina de Estatus (Solo si hay logros) -->
                         <div th:if="${logrosUsuario != null and !logrosUsuario.isEmpty()}" 
                              style="display: flex; align-items: center; gap: -8px; margin-left: 5px; padding: 6px 14px; background: #f8fafc; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">

@@ -8,6 +8,12 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Delete Adoptante.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class DeleteAdoptanteService {
 
     private final DeleteAdoptanteUseCase deleteAdoptanteUseCase;

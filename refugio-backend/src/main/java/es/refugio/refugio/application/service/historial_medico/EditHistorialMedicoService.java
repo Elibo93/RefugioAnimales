@@ -6,6 +6,12 @@ import es.refugio.refugio.domain.model.historial_medico.HistorialMedico;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Edit Historial Medico.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class EditHistorialMedicoService {
 
     private final EditHistorialMedicoUseCase useCase;

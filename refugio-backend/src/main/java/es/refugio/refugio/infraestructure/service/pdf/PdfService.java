@@ -12,6 +12,12 @@ import java.util.Map;
  * Servicio encargado de la generación de documentos PDF a partir de plantillas HTML.
  */
 @Service
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Pdf.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class PdfService {
 
     private final TemplateEngine templateEngine;

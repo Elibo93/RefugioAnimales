@@ -19,6 +19,12 @@ import java.util.Map;
  */
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Voluntario.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class VoluntarioService {
 
     private final RestTemplate restTemplate;
@@ -39,7 +45,7 @@ public class VoluntarioService {
     }
 
     public List<VoluntarioRecord> fetchAllVoluntarios() {
-        return helper.fetchList(apiUrl + "/v1/voluntarios", VoluntarioRecord.class);
+        return helper.fetchList(apiUrl + "/v1/voluntarios?size=1000", VoluntarioRecord.class);
     }
 
     public VoluntarioRecord fetchVoluntarioById(Integer id) {
@@ -47,7 +53,7 @@ public class VoluntarioService {
     }
 
     public List<UsuarioRecord> fetchAllUsuarios() {
-        return helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+        return helper.fetchList(authUrl + "/v1/usuarios?size=1000", UsuarioRecord.class);
     }
 
     public UsuarioRecord fetchUsuarioById(Integer id) {
@@ -55,7 +61,7 @@ public class VoluntarioService {
     }
 
     public List<PerfilLegalRecord> fetchAllPerfilesLegales() {
-        return helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+        return helper.fetchList(apiUrl + "/v1/perfiles-legales?size=1000", PerfilLegalRecord.class);
     }
 
     public PerfilLegalRecord fetchPerfilLegalByUsuarioId(Integer usuarioId) {
@@ -63,7 +69,7 @@ public class VoluntarioService {
     }
 
     public List<TareaRecord> fetchTareasByVoluntario(Integer voluntarioId) {
-        return helper.fetchList(apiUrl + "/v1/tareas/voluntario/" + voluntarioId, TareaRecord.class);
+        return helper.fetchList(apiUrl + "/v1/tareas/voluntario/" + voluntarioId + "?size=1000", TareaRecord.class);
     }
 
     public List<Map<String, Object>> fetchDisponibilidad(Integer voluntarioId) {
@@ -101,7 +107,7 @@ public class VoluntarioService {
     }
 
     public List<VoluntarioRecord> fetchVoluntariosPendientes() {
-        return helper.fetchList(apiUrl + "/v1/voluntarios/pendientes", VoluntarioRecord.class);
+        return helper.fetchList(apiUrl + "/v1/voluntarios/pendientes?size=1000", VoluntarioRecord.class);
     }
 
     public void crearVoluntarioYPerfil(Integer usuarioId, String nombre, String apellido, String dni, String direccion, String telefono, String fechaNacimiento, String especialidad, String disponibilidad) {

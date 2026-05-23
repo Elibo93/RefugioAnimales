@@ -11,13 +11,14 @@ class AdoptanteMapperTest {
     @Test
     void toDomain_shouldMapEntityToDomain() {
         // Arrange
+        AdoptanteMapper mapper = new AdoptanteMapperImpl();
         AdoptanteEntity entity = AdoptanteEntity.builder()
                 .id(10)
                 .usuarioId(1)
                 .build();
 
         // Act
-        Adoptante domain = AdoptanteMapper.toDomain(entity);
+        Adoptante domain = mapper.toDomain(entity);
 
         // Assert
         assertEquals(10, domain.getId().getValue());

@@ -8,6 +8,12 @@ import es.refugio.refugio.domain.repository.AdoptanteRepository;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Edit Adoptante.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class EditAdoptanteUseCase {
 
     private final AdoptanteRepository adoptanteRepository;

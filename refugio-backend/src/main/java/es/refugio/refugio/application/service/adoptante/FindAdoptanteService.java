@@ -14,6 +14,12 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Find Adoptante.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class FindAdoptanteService {
 
     private final FindAdoptanteUseCase findAdoptanteUseCase;

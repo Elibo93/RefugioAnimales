@@ -29,6 +29,7 @@
                                 style="width: 100%; height: 42px; padding: 0 1rem 0 2.5rem; border-radius: 12px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; transition: all 0.3s ease; outline: none;"
                                 hx-get="/web/animales" hx-trigger="keyup changed delay:800ms"
                                 hx-vals='{"page": 1}'
+                                hx-include="closest form"
                                 hx-target="#animal-results" hx-select="#animal-results" hx-push-url="true"
                                 onfocus="this.style.borderColor='var(--primary)'; this.style.background='white';"
                                 onblur="this.style.borderColor='#f1f5f9'; this.style.background='#f8fafc';">
@@ -47,7 +48,8 @@
                         <div style="position: relative;">
                             <select name="especie" hx-get="/web/animales" hx-trigger="change"
                                 hx-vals='{"page": 1}'
-                                hx-target="#animal-results" hx-select="#animal-results"
+                                hx-include="closest form"
+                                hx-target="#animal-results" hx-select="#animal-results" hx-push-url="true"
                                 style="width: 100%; height: 42px; padding: 0 2rem 0 1rem; border-radius: 12px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; font-weight: 500; color: var(--text-main); cursor: pointer; appearance: none; outline: none; transition: all 0.3s;">
                                 <option value="" th:selected="${selectedEspecie == null or selectedEspecie == ''}" th:text="#{animal.auto.todas}"></option>
                                 <option th:each="e : ${especiesActivas}" th:value="${e}"
@@ -69,7 +71,8 @@
                         <div style="position: relative;">
                             <select name="tamano" hx-get="/web/animales" hx-trigger="change" hx-target="#animal-results"
                                 hx-vals='{"page": 1}'
-                                hx-select="#animal-results"
+                                hx-include="closest form"
+                                hx-select="#animal-results" hx-push-url="true"
                                 style="width: 100%; height: 42px; padding: 0 2rem 0 1rem; border-radius: 12px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; font-weight: 500; color: var(--text-main); cursor: pointer; appearance: none; outline: none; transition: all 0.3s;">
                                 <option value="" th:selected="${selectedTamano == null or selectedTamano == ''}" th:text="#{generic.auto.cualquier.tamano}"></option>
                                 <option value="PEQUEÑO" th:selected="${selectedTamano == 'PEQUEÑO'}" th:text="#{generic.auto.pequeno}"></option>
@@ -96,6 +99,7 @@
                                     th:checked="${selectedEdad != null and #lists.contains(selectedEdad, e)}"
                                     hx-get="/web/animales" hx-trigger="change" hx-target="#animal-results"
                                     hx-vals='{"page": 1}'
+                                    hx-include="closest form" hx-push-url="true"
                                     hx-select="#animal-results" style="display: none;">
                                 <span class="filter-chip-premium"
                                     th:text="#{enum.Edad.__${e}__}"></span>
@@ -117,6 +121,7 @@
                             <input type="checkbox" name="urgencia" value="true" th:checked="${selectedUrgencia}"
                                 hx-get="/web/animales" hx-trigger="change" hx-target="#animal-results"
                                 hx-vals='{"page": 1}'
+                                hx-include="closest form" hx-push-url="true"
                                 hx-select="#animal-results"
                                 style="width: 18px; height: 18px; cursor: pointer; accent-color: #ef4444;">
                         </label>
@@ -126,6 +131,7 @@
                     <input th:if="${isAuthenticated}" type="checkbox" id="favoritos-checkbox" name="favoritos"
                         value="true" th:checked="${selectedFavoritos}" hx-get="/web/animales" hx-trigger="change"
                         hx-vals='{"page": 1}'
+                        hx-include="closest form" hx-push-url="true"
                         hx-target="#animal-results" hx-select="#animal-results" style="display: none;">
                     <!-- BOTÓN LIMPIAR -->
                     <div style="text-align: center; margin-bottom: 0.5rem;">

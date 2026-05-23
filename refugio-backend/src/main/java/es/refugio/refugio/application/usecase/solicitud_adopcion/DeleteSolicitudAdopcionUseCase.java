@@ -5,6 +5,12 @@ import es.refugio.refugio.domain.repository.SolicitudAdopcionRepository;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Delete Solicitud Adopcion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class DeleteSolicitudAdopcionUseCase {
 
     private final SolicitudAdopcionRepository solicitudAdopcionRepository;

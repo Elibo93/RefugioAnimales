@@ -21,21 +21,22 @@ import org.springframework.data.domain.Pageable;
 public class AdopcionJpaRepositoryImpl implements AdopcionRepository {
 
     private final AdopcionEntityJpaRepository repository;
+    private final AdopcionMapper adopcionMapper;
 
     @Override
     public Adopcion save(Adopcion t) {
-        AdopcionEntity entity = AdopcionMapper.toEntity(t);
-        return AdopcionMapper.toDomain(repository.save(entity));
+        AdopcionEntity entity = adopcionMapper.toEntity(t);
+        return adopcionMapper.toDomain(repository.save(entity));
     }
 
     @Override
     public List<Adopcion> getAll() {
-        return AdopcionMapper.toDomain(repository.findAll());
+        return adopcionMapper.toDomain(repository.findAll());
     }
 
     @Override
     public Optional<Adopcion> getById(AdopcionId id) {
-        return repository.findById(id.getValue()).map(AdopcionMapper::toDomain);
+        return repository.findById(id.getValue()).map(adopcionMapper::toDomain);
     }
 
     @Override
@@ -45,18 +46,18 @@ public class AdopcionJpaRepositoryImpl implements AdopcionRepository {
 
     @Override
     public List<Adopcion> getByAdoptanteId(AdoptanteId adoptanteId) {
-        return AdopcionMapper.toDomain(repository.findByAdoptanteId(adoptanteId.getValue()));
+        return adopcionMapper.toDomain(repository.findByAdoptanteId(adoptanteId.getValue()));
     }
 
     @Override
     public List<Adopcion> getByAnimalId(AnimalId animalId) {
-        return AdopcionMapper.toDomain(repository.findByAnimalId(animalId.getValue()));
+        return adopcionMapper.toDomain(repository.findByAnimalId(animalId.getValue()));
     }
 
     @Override
     public Optional<Adopcion> getByAdoptanteAndAnimal(AdoptanteId adoptanteId, AnimalId animalId) {
         return repository.findByAdoptanteIdAndAnimalId(adoptanteId.getValue(), animalId.getValue())
-                .map(AdopcionMapper::toDomain);
+                .map(adopcionMapper::toDomain);
     }
 
     @Override
@@ -66,7 +67,7 @@ public class AdopcionJpaRepositoryImpl implements AdopcionRepository {
 
     @Override
     public List<Adopcion> findByCriteria(AdoptanteId adoptanteId, AnimalId animalId) {
-        return AdopcionMapper.toDomain(repository.findByAdoptanteIdAndAnimalId(adoptanteId.getValue(), animalId.getValue())
+        return adopcionMapper.toDomain(repository.findByAdoptanteIdAndAnimalId(adoptanteId.getValue(), animalId.getValue())
                 .map(List::of).orElse(List.of()));
     }
 
@@ -77,7 +78,7 @@ public class AdopcionJpaRepositoryImpl implements AdopcionRepository {
 
     @Override
     public Page<Adopcion> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(AdopcionMapper::toDomain);
+        return repository.findAll(pageable).map(adopcionMapper::toDomain);
     }
 
     @Override
@@ -105,6 +106,6 @@ public class AdopcionJpaRepositoryImpl implements AdopcionRepository {
             var adoptanteNombreLike = root.get("adoptante").get("usuarioId").in(subquery);
 
             return cb.or(animalNombreLike, adoptanteNombreLike);
-        }, pageable).map(AdopcionMapper::toDomain);
+        }, pageable).map(adopcionMapper::toDomain);
     }
 }

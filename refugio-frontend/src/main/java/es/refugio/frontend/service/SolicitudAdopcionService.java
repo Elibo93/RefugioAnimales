@@ -17,6 +17,12 @@ import java.util.Map;
  */
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Solicitud Adopcion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class SolicitudAdopcionService {
 
     private final RestTemplate restTemplate;
@@ -33,7 +39,7 @@ public class SolicitudAdopcionService {
     }
 
     public List<SolicitudAdopcionRecord> fetchAllSolicitudes() {
-        return helper.fetchList(apiUrl + "/v1/solicitudes-adopcion", SolicitudAdopcionRecord.class);
+        return helper.fetchList(apiUrl + "/v1/solicitudes-adopcion?size=1000", SolicitudAdopcionRecord.class);
     }
 
     public SolicitudAdopcionRecord fetchSolicitudById(Integer id) {
@@ -106,11 +112,11 @@ public class SolicitudAdopcionService {
     }
 
     public List<UsuarioRecord> fetchAllUsuarios() {
-        return helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+        return helper.fetchList(authUrl + "/v1/usuarios?size=1000", UsuarioRecord.class);
     }
 
     public List<PerfilLegalRecord> fetchAllPerfilesLegales() {
-        return helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+        return helper.fetchList(apiUrl + "/v1/perfiles-legales?size=1000", PerfilLegalRecord.class);
     }
 
     public PerfilLegalRecord fetchPerfilLegalByUsuarioId(Integer usuarioId) {
@@ -118,11 +124,11 @@ public class SolicitudAdopcionService {
     }
 
     public List<AdopcionRecord> fetchAllAdopciones() {
-        return helper.fetchList(apiUrl + "/v1/adopciones", AdopcionRecord.class);
+        return helper.fetchList(apiUrl + "/v1/adopciones?size=1000", AdopcionRecord.class);
     }
 
     public List<AdopcionRecord> fetchAdopcionesByAdoptanteId(Integer adoptanteId) {
-        return helper.fetchList(apiUrl + "/v1/adopciones/adoptante/" + adoptanteId, AdopcionRecord.class);
+        return helper.fetchList(apiUrl + "/v1/adopciones/adoptante/" + adoptanteId + "?size=1000", AdopcionRecord.class);
     }
 
     public ResponseEntity<byte[]> descargarPdfSolicitud(Integer id) {

@@ -6,6 +6,12 @@ import es.refugio.refugio.domain.model.adopcion.Adopcion;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Create Adopcion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class CreateAdopcionService {
 
     private final CreateAdopcionUseCase useCase;

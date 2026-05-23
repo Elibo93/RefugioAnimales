@@ -14,6 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Motor de gamificación que evalúa y otorga logros a los usuarios en función de sus métricas acumuladas.
+ * Recorre todos los logros disponibles en el sistema y, para cada uno, comprueba si el usuario cumple
+ * el requisito asociado. Si lo cumple y aún no lo tenía, lo otorga y envía una notificación.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -22,6 +30,13 @@ public class LogroEngine {
     private final UsuarioLogroRepository usuarioLogroRepository;
     private final NotificacionService notificacionService;
 
+    /**
+     * Comprueba todos los logros definidos en el sistema para las métricas del usuario indicado.
+     * Para cada logro aún no obtenido, evalúa si el usuario cumple su requisito y, en caso afirmativo,
+     * lo otorga llamando a {@link #otorgarLogro(Long, Logro)}.
+     *
+     * @param metricas Objeto con las métricas actualizadas del usuario (tareas completadas, total donado, etc.).
+     */
     @Transactional
     public void checkLogros(UsuarioMetricas metricas) {
         log.info("Comprobando logros para el usuario {}", metricas.getUsuarioId());
@@ -52,6 +67,14 @@ public class LogroEngine {
         }
     }
 
+    /**
+     * Persiste el logro obtenido por el usuario y envía una notificación in-app para informarle.
+     * En caso de fallo en el envío de la notificación, el error se registra en el log como advertencia
+     * sin interrumpir el flujo principal.
+     *
+     * @param usuarioId ID del usuario al que se le otorga el logro.
+     * @param logro     Objeto {@link Logro} que representa el mérito desbloqueado.
+     */
     private void otorgarLogro(Long usuarioId, Logro logro) {
         log.info("¡Logro desbloqueado! Usuario: {}, Logro: {}", usuarioId, logro.getNombre());
         

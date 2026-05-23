@@ -23,6 +23,12 @@ import org.springframework.transaction.annotation.Transactional;
  * 3. Actualiza el adoptante → RECHAZADO
  */
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Rechazar Solicitud Adopcion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class RechazarSolicitudAdopcionUseCase {
 
     private final SolicitudAdopcionRepository solicitudAdopcionRepository;

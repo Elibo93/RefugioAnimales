@@ -1,7 +1,10 @@
 package es.refugio.refugio.infraestructure.mapper;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import es.refugio.refugio.application.command.solicitud_adopcion.CreateSolicitudAdopcionCommand;
 import es.refugio.refugio.application.command.solicitud_adopcion.EditSolicitudAdopcionCommand;
@@ -16,93 +19,59 @@ import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.SolicitudAd
 import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.SolicitudAdopcionResponse;
 import es.refugio.refugio.infraestructure.web.dto.solicitud_adopcion.SolicitudAdopcionUpdateRequest;
 
-public class SolicitudAdopcionMapper {
+@Mapper(componentModel = "spring")
+public interface SolicitudAdopcionMapper {
 
-    public static CreateSolicitudAdopcionCommand toCommand(SolicitudAdopcionRequest req) {
-        return new CreateSolicitudAdopcionCommand(
-                req.animalId(),
-                req.adoptanteId(),
-                req.fecha(),
-                req.comentario(),
-                req.comentarioAdmin()
-        );
+    CreateSolicitudAdopcionCommand toCommand(SolicitudAdopcionRequest req);
+
+    @Mapping(target = "id", source = "id", qualifiedByName = "mapSolicitudAdopcionId")
+    @Mapping(target = "comentarioAdmin", ignore = true)
+    EditSolicitudAdopcionCommand toCommand(int id, SolicitudAdopcionRequest req);
+
+    @Mapping(target = "id", source = "id", qualifiedByName = "mapSolicitudAdopcionId")
+    EditSolicitudAdopcionCommand toCommand(int id, SolicitudAdopcionUpdateRequest req);
+
+    @Mapping(target = "id", source = "id.value")
+    @Mapping(target = "animalId", source = "animalId.value")
+    @Mapping(target = "adoptanteId", source = "adoptanteId.value")
+    SolicitudAdopcionResponse toResponse(SolicitudAdopcion s);
+
+    @Mapping(target = "id", source = "id.value")
+    @Mapping(target = "animal", source = "animalId", qualifiedByName = "mapAnimalEntity")
+    @Mapping(target = "adoptante", source = "adoptanteId", qualifiedByName = "mapAdoptanteEntity")
+    SolicitudAdopcionEntity toEntity(SolicitudAdopcion s);
+
+    @Mapping(target = "id", source = "id", qualifiedByName = "mapSolicitudAdopcionId")
+    @Mapping(target = "animalId", source = "animal.id", qualifiedByName = "mapAnimalId")
+    @Mapping(target = "adoptanteId", source = "adoptante.id", qualifiedByName = "mapAdoptanteId")
+    SolicitudAdopcion toDomain(SolicitudAdopcionEntity e);
+
+    List<SolicitudAdopcion> toDomain(List<SolicitudAdopcionEntity> lista);
+
+    List<SolicitudAdopcionResponse> toResponse(List<SolicitudAdopcion> lista);
+
+    @Named("mapSolicitudAdopcionId")
+    default SolicitudAdopcionId mapSolicitudAdopcionId(Integer id) {
+        return id != null ? new SolicitudAdopcionId(id) : null;
     }
 
-    public static EditSolicitudAdopcionCommand toCommand(int id, SolicitudAdopcionRequest req) {
-        return new EditSolicitudAdopcionCommand(
-                new SolicitudAdopcionId(id),
-                req.fecha(),
-                req.estado(),
-                req.comentario(),
-                null // Request normal no suele llevar comentario admin inicial
-        );
+    @Named("mapAnimalId")
+    default AnimalId mapAnimalId(Integer id) {
+        return id != null ? new AnimalId(id) : null;
     }
 
-    public static EditSolicitudAdopcionCommand toCommand(int id, SolicitudAdopcionUpdateRequest req) {
-        return new EditSolicitudAdopcionCommand(
-                new SolicitudAdopcionId(id),
-                req.fecha(),
-                req.estado(),
-                req.comentario(),
-                req.comentarioAdmin()
-        );
+    @Named("mapAdoptanteId")
+    default AdoptanteId mapAdoptanteId(Integer id) {
+        return id != null ? new AdoptanteId(id) : null;
     }
 
-    public static SolicitudAdopcionResponse toResponse(SolicitudAdopcion s) {
-        return new SolicitudAdopcionResponse(
-                s.getId() != null ? s.getId().getValue() : null,
-                s.getAnimalId() != null ? s.getAnimalId().getValue() : null,
-                s.getAdoptanteId() != null ? s.getAdoptanteId().getValue() : null,
-                s.getFecha(),
-                s.getEstado() != null ? s.getEstado().name() : null,
-                s.getComentario(),
-                s.getComentarioAdmin()
-        );
+    @Named("mapAnimalEntity")
+    default AnimalEntity mapAnimalEntity(AnimalId id) {
+        return id != null ? AnimalEntity.builder().id(id.getValue()).build() : null;
     }
 
-    public static SolicitudAdopcionEntity toEntity(SolicitudAdopcion s) {
-        AnimalEntity animalEntity = null;
-        if (s.getAnimalId() != null) {
-            animalEntity = AnimalEntity.builder().id(s.getAnimalId().getValue()).build();
-        }
-
-        AdoptanteEntity adoptanteEntity = null;
-        if (s.getAdoptanteId() != null) {
-            adoptanteEntity = AdoptanteEntity.builder().id(s.getAdoptanteId().getValue()).build();
-        }
-
-        return SolicitudAdopcionEntity.builder()
-                .id(s.getId() != null ? s.getId().getValue() : null)
-                .animal(animalEntity)
-                .adoptante(adoptanteEntity)
-                .fecha(s.getFecha())
-                .estado(s.getEstado())
-                .comentario(s.getComentario())
-                .comentarioAdmin(s.getComentarioAdmin())
-                .build();
-    }
-
-    public static SolicitudAdopcion toDomain(SolicitudAdopcionEntity e) {
-        return SolicitudAdopcion.builder()
-                .id(e.getId() != null ? new SolicitudAdopcionId(e.getId()) : null)
-                .animalId(e.getAnimal() != null ? new AnimalId(e.getAnimal().getId()) : null)
-                .adoptanteId(e.getAdoptante() != null ? new AdoptanteId(e.getAdoptante().getId()) : null)
-                .fecha(e.getFecha())
-                .estado(e.getEstado())
-                .comentario(e.getComentario())
-                .comentarioAdmin(e.getComentarioAdmin())
-                .build();
-    }
-
-    public static List<SolicitudAdopcion> toDomain(List<SolicitudAdopcionEntity> lista) {
-        return lista.stream()
-                .map(SolicitudAdopcionMapper::toDomain)
-                .collect(Collectors.toList());
-    }
-
-    public static List<SolicitudAdopcionResponse> toResponse(List<SolicitudAdopcion> lista) {
-        return lista.stream()
-                .map(SolicitudAdopcionMapper::toResponse)
-                .collect(Collectors.toList());
+    @Named("mapAdoptanteEntity")
+    default AdoptanteEntity mapAdoptanteEntity(AdoptanteId id) {
+        return id != null ? AdoptanteEntity.builder().id(id.getValue()).build() : null;
     }
 }

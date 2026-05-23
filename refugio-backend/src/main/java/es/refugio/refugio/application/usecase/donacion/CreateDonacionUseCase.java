@@ -17,6 +17,12 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Create Donacion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class CreateDonacionUseCase {
 
     private final DonacionRepository donacionRepository;

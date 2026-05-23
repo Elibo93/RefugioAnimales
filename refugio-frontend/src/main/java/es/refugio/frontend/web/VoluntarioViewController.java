@@ -1,4 +1,5 @@
 package es.refugio.frontend.web;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,6 +39,12 @@ import es.refugio.frontend.service.VoluntarioService;
 
 @Controller
 @RequiredArgsConstructor
+/**
+ * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Voluntario.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class VoluntarioViewController {
 
     private static final Logger logger = LoggerFactory.getLogger(VoluntarioViewController.class);
@@ -456,7 +463,7 @@ public class VoluntarioViewController {
             usuariosMap.put(String.valueOf(u.id()), u);
         }
 
-        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
+        Context context = new Context(LocaleContextHolder.getLocale());
         context.setVariable("voluntarios", voluntarios);
         context.setVariable("perfilesMap", perfilesMap);
         context.setVariable("usuariosMap", usuariosMap);

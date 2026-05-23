@@ -5,6 +5,12 @@ import es.refugio.refugio.domain.repository.VoluntarioRepository;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Delete Voluntario.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class DeleteVoluntarioUseCase {
 
     private final VoluntarioRepository voluntarioRepository;

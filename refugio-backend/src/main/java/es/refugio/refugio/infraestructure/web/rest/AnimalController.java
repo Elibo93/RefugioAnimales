@@ -58,6 +58,12 @@ import java.util.Optional;
 @RequestMapping("/api/v1/animales")
 @RequiredArgsConstructor
 @Tag(name = "Animales", description = "Gestión de animales del refugio")
+/**
+ * Controlador REST que expone los endpoints HTTP de la API para la gestión de Animal.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class AnimalController {
 
     private final CreateAnimalService createAnimalService;
@@ -67,6 +73,7 @@ public class AnimalController {
     private final FileStorageService fileStorageService;
     private final SolicitudAdopcionRepository solicitudAdopcionRepository;
     private final FavoritoAnimalJpaRepository favoritoAnimalRepository;
+    private final AnimalMapper animalMapper;
 
     @Operation(summary = "Crear animal", description = "Registra un nuevo animal en el refugio")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Animal creado"),
@@ -82,9 +89,9 @@ public class AnimalController {
             fotoUrl = fileStorageService.storeFile(fotoArchivo, request.nombre());
         }
 
-        CreateAnimalCommand comando = AnimalMapper.toCommand(request.withFoto(fotoUrl));
+        CreateAnimalCommand comando = animalMapper.toCommand(request.withFoto(fotoUrl));
         Animal animal = createAnimalService.createAnimal(comando);
-        return ResponseEntity.status(HttpStatus.CREATED).body(AnimalMapper.toResponse(animal));
+        return ResponseEntity.status(HttpStatus.CREATED).body(animalMapper.toResponse(animal));
     }
 
     @Operation(summary = "Actualizar animal", description = "Modifica los datos de un animal existente")
@@ -101,9 +108,9 @@ public class AnimalController {
             fotoUrl = fileStorageService.storeFile(fotoArchivo, request.nombre());
         }
 
-        EditAnimalCommand comando = AnimalMapper.toCommand(id, request.withFoto(fotoUrl));
+        EditAnimalCommand comando = animalMapper.toCommand(id, request.withFoto(fotoUrl));
         Animal animal = editAnimalService.update(comando);
-        return ResponseEntity.ok(AnimalMapper.toResponse(animal));
+        return ResponseEntity.ok(animalMapper.toResponse(animal));
     }
 
     @Operation(summary = "Listar animales", description = "Retorna todos los animales registrados")
@@ -130,7 +137,7 @@ public class AnimalController {
                 .collect(Collectors.groupingBy(s -> s.getAnimalId().getValue(), Collectors.counting()));
 
         return PaginatedResponse.fromPage(page, page.getContent().stream()
-                .map(a -> AnimalMapper.toResponse(a, conteos.getOrDefault(a.getId().getValue(), 0L).intValue()))
+                .map(a -> animalMapper.toResponse(a, conteos.getOrDefault(a.getId().getValue(), 0L).intValue()))
                 .toList());
     }
 
@@ -151,7 +158,7 @@ public class AnimalController {
         long count = solicitudAdopcionRepository.getByAnimalId(a.getId()).stream()
                 .filter(s -> s.getEstado() == EstadoSolicitud.PENDIENTE || s.getEstado() == EstadoSolicitud.EN_REVISION)
                 .count();
-        return AnimalMapper.toResponse(a, (int) count);
+        return animalMapper.toResponse(a, (int) count);
     }
 
     @Operation(summary = "Eliminar animal")

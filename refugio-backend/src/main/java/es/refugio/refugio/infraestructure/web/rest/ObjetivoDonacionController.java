@@ -23,6 +23,12 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/objetivos-donacion")
 @RequiredArgsConstructor
 @Tag(name = "Objetivos de Donación", description = "Endpoints para gestionar las necesidades y objetivos del refugio")
+/**
+ * Controlador REST que expone los endpoints HTTP de la API para la gestión de Objetivo Donacion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class ObjetivoDonacionController {
 
     private final CreateObjetivoDonacionUseCase createUseCase;

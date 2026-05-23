@@ -15,23 +15,24 @@ import lombok.RequiredArgsConstructor;
 public class ObjetivoDonacionJpaRepositoryImpl implements ObjetivoDonacionRepository {
 
     private final ObjetivoDonacionEntityJpaRepository jpaRepository;
+    private final ObjetivoDonacionMapper objetivoDonacionMapper;
 
     @Override
     public ObjetivoDonacion save(ObjetivoDonacion objetivo) {
-        ObjetivoDonacionEntity entity = ObjetivoDonacionMapper.toEntity(objetivo);
-        return ObjetivoDonacionMapper.toDomain(jpaRepository.save(entity));
+        ObjetivoDonacionEntity entity = objetivoDonacionMapper.toEntity(objetivo);
+        return objetivoDonacionMapper.toDomain(jpaRepository.save(entity));
     }
 
     @Override
     public Optional<ObjetivoDonacion> getById(ObjetivoDonacionId id) {
         return jpaRepository.findById(id.getValue())
-                .map(ObjetivoDonacionMapper::toDomain);
+                .map(objetivoDonacionMapper::toDomain);
     }
 
     @Override
     public List<ObjetivoDonacion> getAll() {
         return jpaRepository.findAll().stream()
-                .map(ObjetivoDonacionMapper::toDomain)
+                .map(objetivoDonacionMapper::toDomain)
                 .collect(Collectors.toList());
     }
 

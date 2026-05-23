@@ -26,21 +26,22 @@ import es.refugio.refugio.domain.model.voluntario.enums.EstadoDisponibilidad;
 public class VoluntarioJpaRepositoryImpl implements VoluntarioRepository {
 
     private final VoluntarioEntityJpaRepository repository;
+    private final VoluntarioMapper voluntarioMapper;
 
     @Override
     public Voluntario save(Voluntario voluntario) {
-        VoluntarioEntity entity = VoluntarioMapper.toEntity(voluntario);
-        return VoluntarioMapper.toDomain(repository.save(entity));
+        VoluntarioEntity entity = voluntarioMapper.toEntity(voluntario);
+        return voluntarioMapper.toDomain(repository.save(entity));
     }
 
     @Override
     public List<Voluntario> getAll() {
-        return VoluntarioMapper.toDomain(repository.findAll());
+        return voluntarioMapper.toDomain(repository.findAll());
     }
 
     @Override
     public Optional<Voluntario> getById(VoluntarioId id) {
-        return repository.findById(id.getValue()).map(VoluntarioMapper::toDomain);
+        return repository.findById(id.getValue()).map(voluntarioMapper::toDomain);
     }
 
     @Override
@@ -50,12 +51,12 @@ public class VoluntarioJpaRepositoryImpl implements VoluntarioRepository {
 
     @Override
     public Optional<Voluntario> findByUsuarioId(UsuarioId usuarioId) {
-        return repository.findByUsuarioId(usuarioId.getValue()).map(VoluntarioMapper::toDomain);
+        return repository.findByUsuarioId(usuarioId.getValue()).map(voluntarioMapper::toDomain);
     }
 
     @Override
     public Page<Voluntario> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(VoluntarioMapper::toDomain);
+        return repository.findAll(pageable).map(voluntarioMapper::toDomain);
     }
 
     @Override
@@ -100,6 +101,6 @@ public class VoluntarioJpaRepositoryImpl implements VoluntarioRepository {
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
-        }, pageable).map(VoluntarioMapper::toDomain);
+        }, pageable).map(voluntarioMapper::toDomain);
     }
 }

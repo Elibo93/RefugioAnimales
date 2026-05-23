@@ -15,6 +15,12 @@ import java.util.Map;
  */
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Donacion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class DonacionService {
 
     private final RestTemplate restTemplate;
@@ -31,7 +37,7 @@ public class DonacionService {
     }
 
     public List<DonacionRecord> fetchAllDonaciones() {
-        return helper.fetchList(apiUrl + "/v1/donaciones", DonacionRecord.class);
+        return helper.fetchList(apiUrl + "/v1/donaciones?size=1000", DonacionRecord.class);
     }
 
     public DonacionRecord fetchDonacionById(Integer id) {
@@ -39,12 +45,12 @@ public class DonacionService {
     }
 
     public List<UsuarioRecord> fetchUsuarios() {
-        return helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+        return helper.fetchList(authUrl + "/v1/usuarios?size=1000", UsuarioRecord.class);
     }
 
     @SuppressWarnings("rawtypes")
     public List<Map> fetchObjetivos() {
-        return helper.fetchList(apiUrl + "/v1/objetivos-donacion", Map.class);
+        return helper.fetchList(apiUrl + "/v1/objetivos-donacion?size=1000", Map.class);
     }
 
     public Double fetchTotalDinero() {

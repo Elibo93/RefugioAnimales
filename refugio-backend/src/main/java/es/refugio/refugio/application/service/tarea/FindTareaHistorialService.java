@@ -7,6 +7,12 @@ import es.refugio.refugio.domain.model.tarea.TareaId;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Find Tarea Historial.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class FindTareaHistorialService {
 
     private final FindTareaHistorialUseCase useCase;

@@ -23,6 +23,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Controller
 @RequiredArgsConstructor
+/**
+ * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Auth.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class AuthViewController {
 
     private final AuthService authService;

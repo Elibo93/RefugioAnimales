@@ -3,11 +3,7 @@ package es.refugio.refugio.infraestructure.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import es.refugio.refugio.application.service.animal.CreateAnimalService;
-import es.refugio.refugio.application.service.animal.DeleteAnimalService;
-import es.refugio.refugio.application.service.animal.EditAnimalService;
-import es.refugio.refugio.application.service.animal.FindAnimalService;
-import es.refugio.refugio.application.service.animal.IncrementarVisitasService;
+
 import es.refugio.refugio.application.usecase.animal.CreateAnimalUseCase;
 import es.refugio.refugio.application.usecase.animal.DeleteAnimalUseCase;
 import es.refugio.refugio.application.usecase.animal.EditAnimalUseCase;
@@ -16,68 +12,44 @@ import es.refugio.refugio.application.usecase.animal.IncrementarVisitasUseCase;
 import es.refugio.refugio.domain.repository.AnimalRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.animal.AnimalEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.animal.AnimalJpaRepositoryImpl;
-import es.refugio.refugio.application.service.preferencia.MatchingService;
-import lombok.RequiredArgsConstructor;
+import es.refugio.refugio.infraestructure.mapper.AnimalMapper;
 
 @Configuration
-@RequiredArgsConstructor
 public class AnimalConfig {
 
-    private final AnimalEntityJpaRepository jpaRepository;
-    private final MatchingService matchingService;
-
     @Bean
-    public AnimalRepository animalRepository() {
-        return new AnimalJpaRepositoryImpl(jpaRepository);
+    public AnimalRepository animalRepository(AnimalEntityJpaRepository jpaRepository, AnimalMapper mapper) {
+        return new AnimalJpaRepositoryImpl(jpaRepository, mapper);
     }
 
     @Bean
-    public CreateAnimalUseCase createAnimalUseCase() {
-        return new CreateAnimalUseCase(animalRepository());
+    public CreateAnimalUseCase createAnimalUseCase(AnimalRepository repository) {
+        return new CreateAnimalUseCase(repository);
     }
 
-    @Bean
-    public CreateAnimalService createAnimalService() {
-        return new CreateAnimalService(createAnimalUseCase(), matchingService);
-    }
 
     @Bean
-    public FindAnimalUseCase findAnimalUseCase() {
-        return new FindAnimalUseCase(animalRepository());
+    public FindAnimalUseCase findAnimalUseCase(AnimalRepository repository) {
+        return new FindAnimalUseCase(repository);
     }
 
-    @Bean
-    public FindAnimalService findAnimalService() {
-        return new FindAnimalService(findAnimalUseCase());
-    }
 
     @Bean
-    public DeleteAnimalUseCase deleteAnimalUseCase() {
-        return new DeleteAnimalUseCase(animalRepository());
+    public DeleteAnimalUseCase deleteAnimalUseCase(AnimalRepository repository) {
+        return new DeleteAnimalUseCase(repository);
     }
 
-    @Bean
-    public DeleteAnimalService deleteAnimalService() {
-        return new DeleteAnimalService(deleteAnimalUseCase());
-    }
 
     @Bean
-    public EditAnimalUseCase editAnimalUseCase() {
-        return new EditAnimalUseCase(animalRepository());
+    public EditAnimalUseCase editAnimalUseCase(AnimalRepository repository) {
+        return new EditAnimalUseCase(repository);
     }
 
-    @Bean
-    public EditAnimalService editAnimalService() {
-        return new EditAnimalService(editAnimalUseCase());
-    }
 
     @Bean
-    public IncrementarVisitasUseCase incrementarVisitasUseCase() {
-        return new IncrementarVisitasUseCase(animalRepository());
+    public IncrementarVisitasUseCase incrementarVisitasUseCase(AnimalRepository repository) {
+        return new IncrementarVisitasUseCase(repository);
     }
 
-    @Bean
-    public IncrementarVisitasService incrementarVisitasService() {
-        return new IncrementarVisitasService(incrementarVisitasUseCase());
-    }
-}
+
+}

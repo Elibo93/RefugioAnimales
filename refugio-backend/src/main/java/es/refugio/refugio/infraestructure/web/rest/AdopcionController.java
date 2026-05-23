@@ -54,6 +54,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/api/v1/adopciones")
 @RequiredArgsConstructor
 @Tag(name = "Adopciones", description = "Gestión de adopciones de animales")
+/**
+ * Controlador REST que expone los endpoints HTTP de la API para la gestión de Adopcion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class AdopcionController {
 
     private final CreateAdopcionService createAdopcionService;
@@ -61,15 +67,16 @@ public class AdopcionController {
     private final EditAdopcionService editAdopcionService;
     private final DeleteAdopcionService deleteAdopcionService;
     private final FindAdoptanteService findAdoptanteService;
+    private final AdopcionMapper adopcionMapper;
 
     @Operation(summary = "Registrar adopción", description = "Crea una nueva adopción vinculando adoptante y animal")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Adopción registrada"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<AdopcionResponse> createAdopcion(@Valid @RequestBody AdopcionRequest request) {
-        CreateAdopcionCommand command = AdopcionMapper.toCommand(request);
+        CreateAdopcionCommand command = adopcionMapper.toCommand(request);
         Adopcion adopcion = createAdopcionService.createAdopcion(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(AdopcionMapper.toResponse(adopcion));
+        return ResponseEntity.status(HttpStatus.CREATED).body(adopcionMapper.toResponse(adopcion));
     }
 
     @Operation(summary = "Actualizar adopción")
@@ -78,9 +85,9 @@ public class AdopcionController {
     @PutMapping("/{id}")
     public ResponseEntity<AdopcionResponse> updateAdopcion(@PathVariable Integer id,
             @Valid @RequestBody AdopcionRequest request) {
-        EditAdopcionCommand command = AdopcionMapper.toCommand(id, request);
+        EditAdopcionCommand command = adopcionMapper.toCommand(id, request);
         Adopcion adopcion = editAdopcionService.update(command);
-        return ResponseEntity.ok(AdopcionMapper.toResponse(adopcion));
+        return ResponseEntity.ok(adopcionMapper.toResponse(adopcion));
     }
 
     @Operation(summary = "Listar adopciones", description = "Retorna todas las adopciones registradas")
@@ -117,7 +124,7 @@ public class AdopcionController {
             int start = Math.min(Math.max(0, page) * size, adopciones.size());
             int end = Math.min(start + size, adopciones.size());
             List<AdopcionResponse> pagedList = adopciones.subList(start, end).stream()
-                    .map(AdopcionMapper::toResponse)
+                    .map(adopcionMapper::toResponse)
                     .toList();
             int totalPages = (int) Math.ceil((double) adopciones.size() / size);
             return PaginatedResponse.<AdopcionResponse>builder()
@@ -135,7 +142,7 @@ public class AdopcionController {
         Pageable pageable = PageRequest.of(Math.max(0, page), size);
         Page<Adopcion> adopcionesPage = findAdopcionService.findFiltered(q, pageable);
         return PaginatedResponse.fromPage(adopcionesPage, adopcionesPage.getContent().stream()
-                .map(AdopcionMapper::toResponse)
+                .map(adopcionMapper::toResponse)
                 .toList());
     }
 
@@ -145,7 +152,7 @@ public class AdopcionController {
     public AdopcionResponse getAdopcionById(@PathVariable Integer id) {
         Adopcion adopcion = findAdopcionService.findById(new AdopcionId(id));
         checkOwnership(adopcion.getAdoptanteId());
-        return AdopcionMapper.toResponse(adopcion);
+        return adopcionMapper.toResponse(adopcion);
     }
 
     @Operation(summary = "Adopciones por animal", description = "Retorna adopciones asociadas a un animal concreto")
@@ -153,14 +160,14 @@ public class AdopcionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public List<AdopcionResponse> getAdopcionByAnimalId(@PathVariable Integer animalId) {
         List<Adopcion> adopciones = findAdopcionService.findByAnimalId(new AnimalId(animalId));
-        return AdopcionMapper.toResponse(adopciones);
+        return adopcionMapper.toResponse(adopciones);
     }
 
     @Operation(summary = "Adopciones por adoptante", description = "Retorna adopciones de un adoptante concreto")
     @GetMapping("/adoptante/{adoptanteId}")
     public List<AdopcionResponse> getAdopcionByAdoptanteId(@PathVariable Integer adoptanteId) {
         List<Adopcion> adopciones = findAdopcionService.findByAdoptanteId(new AdoptanteId(adoptanteId));
-        return AdopcionMapper.toResponse(adopciones);
+        return adopcionMapper.toResponse(adopciones);
     }
 
     @Operation(summary = "Eliminar adopción")

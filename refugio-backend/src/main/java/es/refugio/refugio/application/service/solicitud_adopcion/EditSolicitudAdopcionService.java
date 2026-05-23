@@ -6,6 +6,12 @@ import es.refugio.refugio.domain.model.solicitud_adopcion.SolicitudAdopcion;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Edit Solicitud Adopcion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class EditSolicitudAdopcionService {
 
     private final EditSolicitudAdopcionUseCase useCase;

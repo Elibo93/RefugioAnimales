@@ -1,0 +1,240 @@
+/* RESET-AND-VARIABLES */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    /* Paleta Refugio de animales - Tonos Tierra y Naturaleza */
+    /* Verde Bosque / Esperanza */
+    --primary: #15803d;
+    --primary-hover: #166534;
+    --primary-light: #f0fdf4;
+
+    /* Tierra / Madera - Acento */
+    --secondary: #92400e;
+    --secondary-hover: #78350f;
+
+    --danger: #be123c;
+    --danger-hover: #9f1239;
+    --danger-bg: #fff1f2;
+
+    --success: #059669;
+    --success-bg: #ecfdf5;
+
+    /* Neutros Cálidos */
+    --text-main: #27272a;
+    --text-muted: #71717a;
+    --border: #e4e4e7;
+    --bg-body: #fafaf9;
+
+    /* Nuevos Colores de Acento */
+    --color-adopt: #78C2AD;
+    --color-active: #F3969A;
+    --color-volunteer: #6CC3D5;
+
+    /* Sombras Elevadas */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --radius: 12px;
+    --radius-lg: 24px;
+    --radius-xl: 32px;
+
+    /* Glassmorphism Tokens */
+    --glass-bg: rgba(255, 255, 255, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    --glass-blur: 12px;
+}
+
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+    transition: all 0.3s ease;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s;
+}
+
+.checkbox-container:hover {
+    color: var(--primary);
+}
+
+.checkbox-container input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--primary);
+}
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background-color: var(--bg-body);
+    /* Patrón sutil de huellas o puntos cálidos */
+    background-image: radial-gradient(#d6d3d1 1px, transparent 1px);
+    background-size: 32px 32px;
+    color: var(--text-main);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+
+
+/* =====================
+   MODAL PREMIUM (REDISEÑO)
+   ===================== */
+.premium-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.premium-modal-card {
+    background: white;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: modalScaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalScaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.premium-modal-header {
+    padding: 2rem 2rem 1.5rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.premium-modal-icon-wrapper {
+    background: var(--primary-light);
+    color: var(--primary);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.premium-modal-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.25rem;
+}
+
+.premium-modal-subtitle {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.premium-modal-body {
+    padding: 0 2rem 1.5rem;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.premium-modal-footer {
+    padding: 1.5rem 2rem 2rem;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    flex-shrink: 0;
+    display: flex;
+    gap: 1rem;
+}
+
+
+
+/* Títulos de Sección sutiles */
+.modal-section-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.modal-section-divider span {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
+.modal-section-divider::after {
+    content: "";
+    flex-grow: 1;
+    height: 1px;
+    background: #e2e8f0;
+}
+
+
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #cbd5e1;
+    /* Borde más oscuro para contraste */
+    border-radius: 8px;
+    background-color: #ffffff;
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    /* Sombra interior sutil */
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background-color: #fff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    /* Anillo de enfoque más amplio */
+}
+

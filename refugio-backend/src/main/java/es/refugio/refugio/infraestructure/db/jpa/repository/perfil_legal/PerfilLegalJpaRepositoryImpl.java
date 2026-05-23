@@ -16,23 +16,24 @@ import java.util.Optional;
 public class PerfilLegalJpaRepositoryImpl implements PerfilLegalRepository {
 
     private final PerfilLegalEntityJpaRepository jpaRepository;
+    private final PerfilLegalMapper perfilLegalMapper;
 
     @Override
     public PerfilLegal save(PerfilLegal domain) {
-        PerfilLegalEntity entity = PerfilLegalMapper.toEntity(domain);
-        return PerfilLegalMapper.toDomain(jpaRepository.save(entity));
+        PerfilLegalEntity entity = perfilLegalMapper.toEntity(domain);
+        return perfilLegalMapper.toDomain(jpaRepository.save(entity));
     }
 
     @Override
     public Optional<PerfilLegal> getById(PerfilLegalId id) {
         return jpaRepository.findById(id.getValue())
-                .map(PerfilLegalMapper::toDomain);
+                .map(perfilLegalMapper::toDomain);
     }
 
     @Override
     public List<PerfilLegal> getAll() {
         return jpaRepository.findAll().stream()
-                .map(PerfilLegalMapper::toDomain)
+                .map(perfilLegalMapper::toDomain)
                 .toList();
     }
 
@@ -44,12 +45,12 @@ public class PerfilLegalJpaRepositoryImpl implements PerfilLegalRepository {
     @Override
     public Optional<PerfilLegal> findByUsuarioId(Integer usuarioId) {
         return jpaRepository.findByUsuarioId(usuarioId)
-                .map(PerfilLegalMapper::toDomain);
+                .map(perfilLegalMapper::toDomain);
     }
 
     @Override
     public Optional<PerfilLegal> findByDni(String dni) {
         return jpaRepository.findByDni(dni)
-                .map(PerfilLegalMapper::toDomain);
+                .map(perfilLegalMapper::toDomain);
     }
 }

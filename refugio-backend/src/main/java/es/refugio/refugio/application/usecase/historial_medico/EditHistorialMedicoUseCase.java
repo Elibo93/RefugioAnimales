@@ -8,6 +8,12 @@ import es.refugio.refugio.domain.repository.HistorialMedicoRepository;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Edit Historial Medico.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class EditHistorialMedicoUseCase {
 
     private final HistorialMedicoRepository historialMedicoRepository;

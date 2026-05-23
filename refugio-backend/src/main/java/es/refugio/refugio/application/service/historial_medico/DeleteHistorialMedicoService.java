@@ -5,6 +5,12 @@ import es.refugio.refugio.domain.model.historial_medico.HistorialMedicoId;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Delete Historial Medico.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class DeleteHistorialMedicoService {
 
     private final DeleteHistorialMedicoUseCase useCase;
