@@ -76,7 +76,7 @@
                         <div class="select-wrapper">
                             <select name="tipo" id="donation-type-select" required onchange="handleTypeChange()"
                                 style="width: 100%; padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1rem; background: white;">
-                                <option th:each="t : ${tipos}" th:value="${t}" th:text="${t}"
+                                <option th:each="t : ${tipos}" th:value="${t}" th:text="#{enum.TipoDonacion.__${t}__}"
                                     th:selected="${(donacion == null or donacion.tipo == null) ? t == 'DINERO' : t == donacion.tipo}">
                                 </option>
                             </select>
@@ -161,7 +161,8 @@
                             <textarea name="descripcion" id="input-descripcion"
                                 th:text="${donacion != null ? donacion.descripcion : ''}"
                                 style="width: 100%; height: 120px; padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; font-family: inherit; font-size: 1rem;"
-                                placeholder="Escribe un mensaje de apoyo..."></textarea>
+                                placeholder="Escribe un mensaje de apoyo..."
+                                th:placeholder="#{donacion.placeholder.apoyo}"></textarea>
                         </div>
                     </div>
 

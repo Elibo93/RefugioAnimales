@@ -137,7 +137,7 @@
                             <button class="btn-icon delete"
                                 th:hx-post="@{/web/adoptantes/{id}/borrar(id=${a.id()})}"
                                 th:hx-target="'#row-' + ${a.id()}" hx-swap="outerHTML swap:0.3s"
-                                hx-confirm="¿Eliminar adoptante?">
+                                th:hx-confirm="#{confirm.adoptante.eliminar}">
                                 <i data-lucide="trash-2" style="width: 18px;"></i>
                             </button>
                         </div>

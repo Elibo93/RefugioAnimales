@@ -22,6 +22,7 @@ import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
 import es.refugio.frontend.web.dto.*;
 import es.refugio.frontend.web.util.ViewControllerHelper;
+import es.refugio.frontend.web.util.ErrorMessageExtractor;
 
 import java.io.OutputStream;
 import java.time.LocalDateTime;
@@ -99,7 +100,7 @@ public class DonacionViewController {
         model.addAttribute("tipos", List.of("DINERO", "COMIDA", "MEDICINAS", "OTRO"));
         model.addAttribute("formActionUrl", "/web/donaciones/nueva");
 
-        if (successMessage != null) {
+        if (successMessage != null && !successMessage.isEmpty()) {
             model.addAttribute("successMessage", successMessage);
         }
 
@@ -257,12 +258,12 @@ public class DonacionViewController {
                 if (errorMap != null && errorMap.containsKey("message")) {
                     errorMsg = (String) errorMap.get("message");
                 } else {
-                    errorMsg = e.getStatusText();
+                    errorMsg = ErrorMessageExtractor.extract(e);
                 }
             } catch (Exception ignored) {
-                errorMsg = e.getMessage();
+                errorMsg = ErrorMessageExtractor.extract(e);
             }
-            model.addAttribute("errorMessage", errorMsg);
+            model.addAttribute("errorMessage", "No se pudo procesar el pago. " + errorMsg);
             model.addAttribute("donacion", body);
             model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_PASARELA.getPath());
             return ThymTemplates.MAIN_LAYOUT.getPath();
@@ -319,7 +320,7 @@ public class DonacionViewController {
         body.put("icono", icono);
 
         restTemplate.postForObject(apiUrl + "/v1/objetivos-donacion", body, Object.class);
-        redirectAttributes.addFlashAttribute("successMessage", "Nuevo objetivo de donación creado");
+        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.objetivo_creado"));
         return "redirect:" + WebRoutes.DONACIONES_BASE;
     }
 
@@ -364,7 +365,7 @@ public class DonacionViewController {
         body.put("fecha", LocalDateTime.now().toString());
 
         restTemplate.put(apiUrl + "/v1/donaciones/" + id, body);
-        redirectAttributes.addFlashAttribute("successMessage", "Donación editada correctamente");
+        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.donacion_editada"));
         return "redirect:" + WebRoutes.DONACIONES_BASE;
     }
 

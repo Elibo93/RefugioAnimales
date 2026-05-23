@@ -41,7 +41,7 @@
                 <td>
                     <span class="badge" 
                           th:classappend="${s.estado == 'APROBADA' ? 'badge-success' : (s.estado == 'RECHAZADA' ? 'badge-danger' : 'badge-warning')}"
-                          th:text="${s.estado}"></span>
+                          th:text="#{enum.EstadoSolicitud.__${s.estado}__}"></span>
                 </td>
                 <td th:text="${#temporals.format(s.fecha, 'dd/MM/yyyy')}"></td>
                 <td th:text="${s.comentario}"></td>

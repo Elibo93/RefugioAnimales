@@ -2,16 +2,18 @@ package es.refugio.common.infraestructure.web.error;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.context.NoSuchMessageException;
+import es.refugio.common.domain.error.EntityNotFoundException;
 
 import lombok.AllArgsConstructor;
 
@@ -23,7 +25,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<CustomResponse> nullPointerHandler(NullPointerException nfe) {
-        String msg = messageSource.getMessage("common.error.null_pointer", new Object[]{nfe.getMessage()}, Locale.getDefault());
+        String msg = messageSource.getMessage("common.error.null_pointer", new Object[]{nfe.getMessage()}, LocaleContextHolder.getLocale());
         CustomResponse cr = new CustomResponse(LocalDateTime.now(), HttpStatus.INTERNAL_SERVER_ERROR, msg);
         return new ResponseEntity<>(cr, cr.getStatus());
     }
@@ -37,10 +39,11 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
+        String msg = messageSource.getMessage("common.error.validation", null, LocaleContextHolder.getLocale());
         CustomResponse cr = new CustomResponse(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST,
-                "Error de validación en los datos enviados",
+                msg,
                 errors
         );
         return new ResponseEntity<>(cr, HttpStatus.BAD_REQUEST);
@@ -50,14 +53,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<CustomResponse> handleDataIntegrityViolation(org.springframework.dao.DataIntegrityViolationException ex) {
         Map<String, Object> details = new HashMap<>();
         String message = ex.getMostSpecificCause().getMessage();
-        String friendlyMessage = "Error de integridad de datos";
+        String friendlyMessage = messageSource.getMessage("common.error.data_integrity", null, LocaleContextHolder.getLocale());
 
         if (message != null && message.contains("dni")) {
-            friendlyMessage = "El DNI introducido ya existe en el sistema";
-            details.put("dni", "Duplicado");
+            friendlyMessage = messageSource.getMessage("common.error.dni_duplicate", null, LocaleContextHolder.getLocale());
+            details.put("dni", messageSource.getMessage("common.error.duplicate", null, LocaleContextHolder.getLocale()));
         } else if (message != null && message.contains("usuario_id")) {
-            friendlyMessage = "Este usuario ya tiene un perfil legal asignado";
-            details.put("usuarioId", "Duplicado");
+            friendlyMessage = messageSource.getMessage("common.error.usuario_duplicate", null, LocaleContextHolder.getLocale());
+            details.put("usuarioId", messageSource.getMessage("common.error.duplicate", null, LocaleContextHolder.getLocale()));
         }
 
         CustomResponse cr = new CustomResponse(
@@ -69,13 +72,64 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(cr, HttpStatus.CONFLICT);
     }
 
+    private String tryTranslate(String messageKey) {
+        try {
+            return messageSource.getMessage(messageKey, null, LocaleContextHolder.getLocale());
+        } catch (NoSuchMessageException e) {
+            return messageKey;
+        }
+    }
+
+    private String tryTranslate(String messageKey, Object[] args) {
+        try {
+            return messageSource.getMessage(messageKey, args, LocaleContextHolder.getLocale());
+        } catch (NoSuchMessageException e) {
+            return messageKey;
+        }
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<CustomResponse> handleIllegalState(IllegalStateException ex) {
         CustomResponse cr = new CustomResponse(
                 LocalDateTime.now(),
                 HttpStatus.PRECONDITION_FAILED,
-                ex.getMessage()
+                tryTranslate(ex.getMessage())
         );
         return new ResponseEntity<>(cr, HttpStatus.PRECONDITION_FAILED);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<CustomResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        CustomResponse cr = new CustomResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST,
+                tryTranslate(ex.getMessage())
+        );
+        return new ResponseEntity<>(cr, HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<CustomResponse> handleEntityNotFound(EntityNotFoundException ex) {
+        String msg = tryTranslate("error.entity.not_found", new Object[]{ex.getEntityName()});
+        if (ex.getEntityId() != null) {
+            msg = tryTranslate("error.entity.not_found_id", new Object[]{ex.getEntityName(), ex.getEntityId()});
+        }
+        CustomResponse cr = new CustomResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND,
+                msg
+        );
+        return new ResponseEntity<>(cr, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<CustomResponse> handleGenericException(Exception ex) {
+        CustomResponse cr = new CustomResponse(
+                LocalDateTime.now(),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                tryTranslate(ex.getMessage())
+        );
+        return new ResponseEntity<>(cr, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

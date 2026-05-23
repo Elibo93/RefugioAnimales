@@ -130,7 +130,7 @@ public class HistorialMedicoViewController {
         }
 
         restTemplate.postForObject(apiUrl + "/v1/historial-medico", body, Object.class);
-        redirectAttributes.addFlashAttribute("successMessage", "Historial médico registrado correctamente");
+        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.historial_creado"));
         return "redirect:" + WebRoutes.HISTORIALES_BASE;
     }
 
@@ -180,7 +180,7 @@ public class HistorialMedicoViewController {
         }
 
         restTemplate.put(apiUrl + "/v1/historial-medico/" + id, body);
-        redirectAttributes.addFlashAttribute("successMessage", "Historial médico editado correctamente");
+        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.historial_editado"));
         return "redirect:" + WebRoutes.HISTORIALES_BASE + "/" + id + "/detalle";
     }
 
@@ -207,6 +207,34 @@ public class HistorialMedicoViewController {
         String html = templateEngine.process(ThymTemplates.Historial_LIST_PDF.getPath(), context);
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=historiales.pdf");
+        OutputStream out = response.getOutputStream();
+        ITextRenderer renderer = new ITextRenderer();
+        renderer.setDocumentFromString(html);
+        renderer.layout();
+        renderer.createPDF(out);
+        out.close();
+    }
+
+    @GetMapping(WebRoutes.HISTORIALES_BASE + "/{id}/pdf")
+    public void exportarDetallePDF(@PathVariable Integer id, HttpServletResponse response) throws Exception {
+        HistorialMedicoRecord historial = helper.fetchObject(apiUrl + "/v1/historial-medico/" + id, HistorialMedicoRecord.class);
+        if (historial == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Historial no encontrado");
+            return;
+        }
+
+        AnimalRecord animal = null;
+        if (historial.animalId() != null) {
+            animal = helper.fetchObject(apiUrl + "/v1/animales/" + historial.animalId(), AnimalRecord.class);
+        }
+
+        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
+        context.setVariable("historial", historial);
+        context.setVariable("animal", animal);
+        String html = templateEngine.process(ThymTemplates.Historial_DETALLE_PDF.getPath(), context);
+        
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=informe-clinico-" + id + ".pdf");
         OutputStream out = response.getOutputStream();
         ITextRenderer renderer = new ITextRenderer();
         renderer.setDocumentFromString(html);

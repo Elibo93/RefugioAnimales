@@ -39,8 +39,8 @@
                 <td th:text="${usuariosMap != null and usuariosMap.containsKey(d.usuarioId.toString()) ? usuariosMap.get(d.usuarioId.toString()).email : 'Anónimo'}"></td>
                 <td th:text="${d.objetivoId != null ? d.objetivoId : '-'}"></td>
                 <td th:text="${d.cantidad != null ? #numbers.formatDecimal(d.cantidad, 1, 2) + ' €' : '-'}"></td>
-                <td th:text="${d.tipo}"></td>
-                <td th:text="${d.frecuencia}"></td>
+                <td th:text="#{enum.TipoDonacion.__${d.tipo}__}"></td>
+                <td th:text="#{enum.FrecuenciaDonacion.__${d.frecuencia}__}"></td>
                 <td th:text="${d.fecha != null ? #temporals.format(d.fecha, 'dd/MM/yyyy HH:mm') : '-'}"></td>
                 <td th:text="${d.proximaFechaPago != null ? #temporals.format(d.proximaFechaPago, 'dd/MM/yyyy') : '-'}"></td>
                 <td th:text="${d.descripcion != null ? d.descripcion : '-'}"></td>

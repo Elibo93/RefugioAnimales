@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 @Component
 @RequiredArgsConstructor
@@ -20,6 +23,15 @@ public class ViewControllerHelper {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final MessageSource messageSource;
+
+    public String getMessage(String code) {
+        try {
+            return messageSource.getMessage(code, null, LocaleContextHolder.getLocale());
+        } catch (NoSuchMessageException e) {
+            return code;
+        }
+    }
 
     /**
      * Hace un fetch de una lista de objetos y los mapea fuertemente a una clase/record.

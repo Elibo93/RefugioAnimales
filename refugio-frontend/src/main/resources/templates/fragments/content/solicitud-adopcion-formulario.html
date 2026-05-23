@@ -140,7 +140,7 @@
                             <select name="estado" required class="form-control" style="border-radius: 12px; height: 48px; border: 2px solid #e2e8f0;">
                                 <option th:each="e : ${estados}" 
                                         th:value="${e}" 
-                                        th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(e, '_', ' ')))}"
+                                        th:text="#{enum.EstadoSolicitud.__${e}__}"
                                         th:selected="${e == solicitud.estado}"></option>
                             </select>
                         </div>

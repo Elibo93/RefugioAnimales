@@ -9,6 +9,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.HttpStatusCodeException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -21,6 +25,7 @@ import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
 import es.refugio.frontend.web.dto.*;
 import es.refugio.frontend.web.util.ViewControllerHelper;
+import es.refugio.frontend.web.util.ErrorMessageExtractor;
 
 import java.io.OutputStream;
 import java.time.LocalDate;
@@ -227,14 +232,14 @@ public class TareaViewController {
 
         try {
             restTemplate.postForObject(apiUrl + "/v1/tareas", body, Object.class);
-            redirectAttributes.addFlashAttribute("successMessage", "Tarea creada correctamente");
+            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.tarea_creada"));
             return "redirect:" + WebRoutes.TAREAS_BASE;
-        } catch (org.springframework.web.client.RestClientException e) {
+        } catch (RestClientException e) {
             String msg = e.getMessage();
-            if (e instanceof org.springframework.web.client.HttpStatusCodeException httpException) {
+            if (e instanceof HttpStatusCodeException httpException) {
                 String responseBody = httpException.getResponseBodyAsString();
                 try {
-                    com.fasterxml.jackson.databind.JsonNode root = new com.fasterxml.jackson.databind.ObjectMapper().readTree(responseBody);
+                    JsonNode root = new ObjectMapper().readTree(responseBody);
                     if (root.has("message")) {
                         msg = root.get("message").asText();
                     } else {
@@ -286,14 +291,14 @@ public class TareaViewController {
 
         try {
             restTemplate.put(apiUrl + "/v1/tareas/" + id, body);
-            redirectAttributes.addFlashAttribute("successMessage", "Tarea editada correctamente");
+            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.tarea_editada"));
             return "redirect:" + WebRoutes.TAREAS_BASE;
-        } catch (org.springframework.web.client.RestClientException e) {
+        } catch (RestClientException e) {
             String msg = e.getMessage();
-            if (e instanceof org.springframework.web.client.HttpStatusCodeException httpException) {
+            if (e instanceof HttpStatusCodeException httpException) {
                 String responseBody = httpException.getResponseBodyAsString();
                 try {
-                    com.fasterxml.jackson.databind.JsonNode root = new com.fasterxml.jackson.databind.ObjectMapper().readTree(responseBody);
+                    JsonNode root = new ObjectMapper().readTree(responseBody);
                     if (root.has("message")) {
                         msg = root.get("message").asText();
                     } else {
@@ -496,10 +501,33 @@ public class TareaViewController {
             updateBody.put("fecha", tarea.fecha() != null ? tarea.fecha().toString() : null);
             updateBody.put("fechaLimite", tarea.fechaLimite() != null ? tarea.fechaLimite().toString() : null);
 
-            restTemplate.put(apiUrl + "/v1/tareas/" + id, updateBody);
-            
-            String toastMsg = (message != null && !message.isEmpty()) ? message : "Voluntario asignado correctamente";
-            response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"" + toastMsg + "\", \"type\": \"success\"}}");
+            try {
+                restTemplate.put(apiUrl + "/v1/tareas/" + id, updateBody);
+                String toastMsg = (message != null && !message.isEmpty()) ? message : "Voluntario asignado correctamente";
+                response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"" + toastMsg + "\", \"type\": \"success\"}}");
+            } catch (RestClientException e) {
+                String msg = e.getMessage();
+                if (e instanceof HttpStatusCodeException httpException) {
+                    String responseBody = httpException.getResponseBodyAsString();
+                    try {
+                        JsonNode root = new ObjectMapper().readTree(responseBody);
+                        if (root.has("message")) {
+                            msg = root.get("message").asText();
+                            msg = helper.getMessage(msg); // Intentar traducir si es una clave i18n
+                        } else if (root.has("error")) {
+                            msg = root.get("error").asText();
+                        } else {
+                            msg = responseBody;
+                        }
+                    } catch (Exception parseEx) {
+                        msg = responseBody;
+                    }
+                }
+                
+                // Escape comillas para el JSON del header
+                msg = msg.replace("\"", "\\\"");
+                response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"" + msg + "\", \"type\": \"error\"}}");
+            }
         }
         
         return listar(model, prioridad, estado, false, null, 1, 10, null, request, response);

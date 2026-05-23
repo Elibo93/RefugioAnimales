@@ -17,10 +17,49 @@
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales/es.global.min.js'></script>
     
     <!-- Scripts Estáticos (Lógica Principal) -->
+    <script th:inline="javascript">
+        window.refugioI18n = {
+            securityTitle: /*[[#{js.modal.security.title}]]*/ 'Verificación de Seguridad',
+            securityDesc: /*[[#{js.modal.security.desc}]]*/ 'Por seguridad, confirma tu identidad introduciendo tu contraseña actual.',
+            securityPlaceholder: /*[[#{js.modal.security.placeholder}]]*/ 'Tu contraseña actual',
+            btnVerify: /*[[#{js.modal.security.btn.verify}]]*/ 'Verificar ahora',
+            btnCancel: /*[[#{js.modal.security.btn.cancel}]]*/ 'Cancelar',
+            validating: /*[[#{js.modal.security.validating}]]*/ 'Validando...',
+            deniedTitle: /*[[#{js.modal.security.denied.title}]]*/ 'Acceso Denegado',
+            deniedDesc: /*[[#{js.modal.security.denied.desc}]]*/ 'La contraseña actual no es correcta.',
+            errorTitle: /*[[#{js.modal.security.error.title}]]*/ 'Error de Conexión',
+            errorDesc: /*[[#{js.modal.security.error.desc}]]*/ 'No se pudo contactar con el servicio de seguridad.',
+            btnUpdate: /*[[#{js.modal.security.btn.update}]]*/ 'Actualizar Contraseña',
+            errMismatch: /*[[#{js.modal.security.err.mismatch}]]*/ 'Las contraseñas no coinciden',
+            errLength: /*[[#{js.modal.security.err.length}]]*/ 'La contraseña debe tener al menos 6 caracteres',
+            saving: /*[[#{js.modal.security.saving}]]*/ 'Guardando...',
+            successTitle: /*[[#{js.modal.security.success.title}]]*/ '¡Seguridad actualizada!',
+            successDesc: /*[[#{js.modal.security.success.desc}]]*/ 'Tu contraseña ha sido cambiada correctamente.',
+            errServer: /*[[#{js.modal.security.err.server}]]*/ 'Error en el servidor',
+            errUpdate: /*[[#{js.modal.security.err.update}]]*/ 'Error al actualizar la contraseña',
+            errConnection: /*[[#{js.modal.security.err.connection}]]*/ 'Error de conexión con el servidor',
+            donacionImporte: /*[[#{js.donacion.importe}]]*/ 'Importe de la donación (€)',
+            donacionMensaje: /*[[#{js.donacion.mensaje}]]*/ 'Mensaje o dedicatoria (opcional)',
+            donacionPeso: /*[[#{js.donacion.peso}]]*/ 'Peso aproximado (Kg)',
+            donacionMarca: /*[[#{js.donacion.marca}]]*/ 'Marca y tipo de alimento',
+            donacionUnidades: /*[[#{js.donacion.unidades}]]*/ 'Unidades / Cajas',
+            donacionMedicamento: /*[[#{js.donacion.medicamento}]]*/ 'Nombre y uso del medicamento',
+            donacionCantidad: /*[[#{js.donacion.cantidad}]]*/ 'Cantidad / Unidades',
+            donacionMaterial: /*[[#{js.donacion.material}]]*/ 'Descripción del material',
+            donacionConfirmarMensual: /*[[#{js.donacion.confirmar.mensual}]]*/ 'Confirmar Donación Mensual',
+            donacionConfirmar: /*[[#{js.donacion.confirmar}]]*/ 'Confirmar Donación',
+            donacionPlaceholder15: /*[[#{js.donacion.placeholder.ej15}]]*/ 'Ej: 15',
+            donacionPlaceholder2: /*[[#{js.donacion.placeholder.ej2}]]*/ 'Ej: 2',
+            donacionPlaceholder5: /*[[#{js.donacion.placeholder.ej5}]]*/ 'Ej: 5',
+            mapTitle: /*[[#{js.map.title}]]*/ '¿Cómo deseas llegar?',
+            mapDesc: /*[[#{js.map.desc}]]*/ 'Selecciona tu aplicación favorita para ver la ubicación del refugio.',
+            btnExcellent: /*[[#{js.btn.excellent}]]*/ '¡Excelente!'
+        };
+    </script>
     <script th:src="@{/js/scripts.js}"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     
-    <script>
+    <script th:inline="javascript">
         // --- CONFIGURACIÓN GLOBAL DE HTMX ---
 
         // Integración de Token CSRF para peticiones HTMX
@@ -76,12 +115,13 @@
             if (btn && !btn.hasAttribute('data-no-loading')) {
                 const btnText = btn.querySelector('.btn-text') || btn;
                 btn.disabled = true;
+                const loadingText = /*[[#{generic.btn.saving}]]*/ 'Guardando...';
                 if (btnText === btn) {
                     btn.dataset.originalText = btn.textContent;
-                    btn.textContent = "Guardando...";
+                    btn.textContent = loadingText;
                 } else {
                     btnText.dataset.originalText = btnText.textContent;
-                    btnText.textContent = "Guardando...";
+                    btnText.textContent = loadingText;
                 }
             }
         });
@@ -100,12 +140,12 @@
             if (evt.target.hasAttribute('hx-confirm')) {
                 evt.preventDefault();
                 Swal.fire({
-                    title: '¿Estás seguro?',
+                    title: /*[[#{sweetalert.title.seguro}]]*/ '¿Estás seguro?',
                     text: evt.detail.question,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Sí, proceder',
-                    cancelButtonText: 'Cancelar',
+                    confirmButtonText: /*[[#{sweetalert.btn.proceder}]]*/ 'Sí, proceder',
+                    cancelButtonText: /*[[#{sweetalert.btn.cancelar}]]*/ 'Cancelar',
                     confirmButtonColor: '#15803d', // var(--primary)
                     cancelButtonColor: '#be123c',  // var(--danger)
                     background: '#ffffff',

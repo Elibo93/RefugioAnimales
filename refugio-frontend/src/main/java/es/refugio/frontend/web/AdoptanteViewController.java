@@ -11,6 +11,7 @@ import org.springframework.web.client.RestClientResponseException;
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.dto.*;
 import es.refugio.frontend.web.util.ViewControllerHelper;
+import es.refugio.frontend.web.util.ErrorMessageExtractor;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -192,11 +193,11 @@ public class AdoptanteViewController {
             bodyAdoptante.put("usuarioId", usuarioId);
             restTemplate.postForObject(apiUrl + "/v1/adoptantes", bodyAdoptante, Object.class);
 
-            redirectAttributes.addFlashAttribute("successMessage", "Adoptante creado correctamente");
+            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.adoptante_creado"));
             return "redirect:" + WebRoutes.ADOPTANTES_BASE;
         } catch (Exception e) {
-            logger.error("Error al crear adoptante: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al crear adoptante: " + e.getMessage());
+            logger.error("Error al crear adoptante: " + ErrorMessageExtractor.extract(e));
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al crear adoptante: " + ErrorMessageExtractor.extract(e));
             return "redirect:" + WebRoutes.ADOPTANTES_BASE;
         }
     }
@@ -231,11 +232,11 @@ public class AdoptanteViewController {
             bodyPerfil.put("fechaNacimiento", fechaNacimiento);
             restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
 
-            redirectAttributes.addFlashAttribute("successMessage", "Perfil de adoptante actualizado correctamente");
+            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.adoptante_editado"));
             return "redirect:" + WebRoutes.ADOPTANTES_BASE;
         } catch (RestClientResponseException e) {
-            logger.error("Error del backend al actualizar adoptante: " + e.getResponseBodyAsString());
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al actualizar: " + e.getResponseBodyAsString());
+            logger.error("Error inesperado al actualizar adoptante: " + ErrorMessageExtractor.extract(e));
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al actualizar el adoptante: " + ErrorMessageExtractor.extract(e));
             return "redirect:" + WebRoutes.ADOPTANTES_BASE;
         } catch (Exception e) {
             logger.error("Error inesperado al actualizar adoptante: " + e.getMessage());

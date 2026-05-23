@@ -150,7 +150,7 @@
                         <span class="animal-status-badge"
                             th:classappend="${animal.estado != null ? 'badge-' + animal.estado.toString().toLowerCase() : ''}"
                             style="padding: 0 12px; height: 26px; border-radius: 99px; font-weight: 800; font-size: 0.7rem; display: inline-flex; align-items: center; justify-content: center;"
-                            th:text="${animal.estado != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(animal.estado, '_', ' '))) : ''}">
+                            th:text="${animal.estado != null ? #messages.msg('enum.EstadoAnimal.' + animal.estado) : ''}">
                             Disponible
                         </span>
                         <span th:if="${animal.urgencia}"
@@ -166,7 +166,7 @@
                     <p
                         style="margin: 8px 0 0; color: var(--text-muted); font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
                         <i data-lucide="tag" style="width: 18px;"></i>
-                        <span th:text="${(animal.raza ?: 'Mestizo') + ' • ' + animal.especie}">Raza • Especie</span>
+                        <span th:text="${(animal.raza ?: 'Mestizo') + ' • ' + #messages.msg('enum.Especie.' + animal.especie)}">Raza • Especie</span>
                     </p>
                 </div>
             </div>
@@ -214,7 +214,7 @@
                                 th:data-lucide="${animal.sexo.toString() == 'MACHO' ? 'mars' : 'venus'}"
                                 th:style="${animal.sexo.toString() == 'MACHO' ? 'color: #3B82F6; width: 18px; height: 18px; stroke-width: 2.5;' : 'color: #EC4899; width: 18px; height: 18px; stroke-width: 2.5;'}"></i>
                             <strong style="font-size: 1.2rem; color: var(--primary);"
-                                th:text="${animal.sexo != null ? #strings.capitalize(#strings.toLowerCase(animal.sexo)) : '-'}">Macho</strong>
+                                th:text="${animal.sexo != null ? #messages.msg('enum.Sexo.' + animal.sexo) : '-'}">Macho</strong>
                         </div>
                     </div>
                     <div class="stat-item" style="border-left: 1px solid var(--border-color);">
@@ -227,7 +227,7 @@
                         <span
                             style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;" th:text="#{generic.auto.tamano}"></span>
                         <strong style="font-size: 1.2rem; color: var(--primary);"
-                            th:text="${animal.tamano}">MEDIANO</strong>
+                            th:text="#{enum.Tamano.__${animal.tamano}__}">MEDIANO</strong>
                     </div>
                 </div>
 

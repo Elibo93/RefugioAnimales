@@ -25,8 +25,7 @@ public class CreateAdoptanteUseCase {
 
         // 2. Verificar PerfilLegal (Identidad)
         perfilLegalRepository.findByUsuarioId(comando.usuarioId())
-                .orElseThrow(() -> new IllegalStateException(
-                        "El usuario debe tener un perfil legal completo antes de ser adoptante"));
+                .orElseThrow(() -> new IllegalStateException("error.adoptante.perfil_incompleto"));
 
         // Crear adoptante
         Adoptante adoptante = Adoptante.builder()

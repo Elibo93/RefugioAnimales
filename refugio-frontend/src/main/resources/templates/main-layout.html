@@ -11,7 +11,7 @@
 
     <div id="toast-container" th:replace="~{fragments/toast :: toast}"></div>
 
-    <main id="contenido-dinamico" style="padding-bottom: 60px;">
+    <main id="contenido-dinamico" hx-history-elt style="padding-bottom: 60px;">
         <div th:replace="~{${content} :: content}" th:text="#{generic.auto.contenido.principal}"></div>
     </main>
 

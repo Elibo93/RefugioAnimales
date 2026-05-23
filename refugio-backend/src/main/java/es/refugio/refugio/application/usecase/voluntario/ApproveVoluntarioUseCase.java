@@ -5,6 +5,7 @@ import es.refugio.refugio.domain.model.voluntario.Voluntario;
 import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
 import es.refugio.refugio.domain.model.voluntario.enums.EstadoVoluntario;
 import es.refugio.refugio.domain.repository.VoluntarioRepository;
+import es.refugio.refugio.domain.error.VoluntarioNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -27,10 +28,10 @@ public class ApproveVoluntarioUseCase {
 
     public void approve(VoluntarioId id, String adminToken) {
         Voluntario voluntario = voluntarioRepository.getById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Voluntario no encontrado"));
+                .orElseThrow(() -> new VoluntarioNotFoundException());
 
         if (voluntario.getEstado() != EstadoVoluntario.PENDIENTE) {
-            throw new IllegalStateException("Solo se pueden aprobar solicitudes pendientes");
+            throw new IllegalStateException("error.voluntario.solo_pendientes_aprobar");
         }
 
         // 1. Obtener datos del usuario desde Auth Service para saber su rol actual
@@ -93,10 +94,10 @@ public class ApproveVoluntarioUseCase {
 
     public void reject(VoluntarioId id, String adminToken) {
         Voluntario voluntario = voluntarioRepository.getById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Voluntario no encontrado"));
+                .orElseThrow(() -> new VoluntarioNotFoundException());
 
         if (voluntario.getEstado() != EstadoVoluntario.PENDIENTE) {
-            throw new IllegalStateException("Solo se pueden rechazar solicitudes pendientes");
+            throw new IllegalStateException("error.voluntario.solo_pendientes_rechazar");
         }
 
         voluntario.setEstado(EstadoVoluntario.RECHAZADO);

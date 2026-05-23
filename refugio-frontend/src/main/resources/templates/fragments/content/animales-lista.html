@@ -51,7 +51,7 @@
                                 style="width: 100%; height: 42px; padding: 0 2rem 0 1rem; border-radius: 12px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; font-weight: 500; color: var(--text-main); cursor: pointer; appearance: none; outline: none; transition: all 0.3s;">
                                 <option value="" th:selected="${selectedEspecie == null or selectedEspecie == ''}" th:text="#{animal.auto.todas}"></option>
                                 <option th:each="e : ${especiesActivas}" th:value="${e}"
-                                    th:text="${#strings.capitalize(#strings.toLowerCase(e))}"
+                                    th:text="#{enum.Especie.__${e}__}"
                                     th:selected="${selectedEspecie == e}"></option>
                             </select>
                             <i data-lucide="chevron-down"
@@ -98,7 +98,7 @@
                                     hx-vals='{"page": 1}'
                                     hx-select="#animal-results" style="display: none;">
                                 <span class="filter-chip-premium"
-                                    th:text="${#strings.capitalize(#strings.toLowerCase(e))}"></span>
+                                    th:text="#{enum.Edad.__${e}__}"></span>
                             </label>
                         </div>
                     </div>
@@ -327,7 +327,7 @@
                                     style="width: 100%; height: 52px; padding: 0 2rem 0 2.75rem; border-radius: 14px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; color: var(--text-main); font-weight: 500; cursor: pointer; appearance: none; outline: none;">
                                     <option value="" th:text="#{animal.filter.any}">Especie: Todas</option>
                                     <option th:each="e : ${especiesActivas}" th:value="${e}"
-                                        th:text="${#strings.capitalize(#strings.toLowerCase(e))}"
+                                        th:text="#{enum.Especie.__${e}__}"
                                         th:selected="${selectedEspecie == e}"></option>
                                 </select>
                                 <i data-lucide="chevron-down"
@@ -415,7 +415,7 @@
                                             <i th:data-lucide="${a.especie() == 'PERRO' ? 'dog' : 'cat'}"
                                                 style="width: 16px; color: var(--text-muted);"></i>
                                             <span
-                                                th:text="${a.especie() != null ? #strings.capitalize(#strings.toLowerCase(a.especie())) : ''}">Perro</span>
+                                                th:text="${a.especie() != null ? #messages.msg('enum.Especie.' + a.especie()) : ''}">Perro</span>
                                         </div>
                                     </div>
 
@@ -428,7 +428,7 @@
                                     <div class="row-cell" style="flex: 1.2; justify-content: center;">
                                         <span class="badge-premium"
                                             th:classappend="${a.estado() == 'DISPONIBLE' ? 'success' : (a.estado() == 'RESERVADO' ? 'warning' : (a.estado() == 'ADOPTADO' ? 'primary' : 'info'))}"
-                                            th:text="${a.estado() != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(a.estado(), '_', ' '))) : ''}">Disponible</span>
+                                            th:text="${a.estado() != null ? #messages.msg('enum.EstadoAnimal.' + a.estado()) : ''}">Disponible</span>
                                     </div>
 
                                     <!-- Acciones -->
@@ -443,7 +443,7 @@
                                         </a>
                                         <button class="btn-icon delete"
                                             th:attr="hx-post=@{/web/animales/{id}/borrar(id=${a.id()})}, hx-target='#card-' + ${a.id()}"
-                                            hx-swap="outerHTML swap:0.3s" hx-confirm="¿Eliminar?">
+                                            hx-swap="outerHTML swap:0.3s" th:hx-confirm="#{confirm.generic.eliminar}">
                                             <i data-lucide="trash-2" style="width: 16px;"></i>
                                         </button>
                                     </div>
@@ -476,7 +476,7 @@
                                 <i data-lucide="heart"
                                     th:style="${selectedFavoritos} ? 'fill: #ec4899; color: #ec4899; width: 18px;' : 'width: 18px;'"></i>
                                 <span style="font-weight: 700; font-size: 0.9rem;"
-                                    th:text="${selectedFavoritos} ? 'Viendo Mis Favoritos' : 'Ver Mis Favoritos'">Ver
+                                    th:text="${selectedFavoritos} ? #{animal.favoritos.btn.viendo} : #{animal.favoritos.btn.ver}">Ver
                                     Mis Favoritos</span>
                             </label>
                         </div>
@@ -491,7 +491,7 @@
                                         style="width: 100%; height: 100%; object-fit: cover;">
                                     <span class="animal-status-badge"
                                         th:classappend="${a.estado() != null ? 'badge-' + a.estado().toString().toLowerCase() : ''}"
-                                        th:text="${a.estado() != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(a.estado(), '_', ' '))) : ''}">Disponible</span>
+                                        th:text="${a.estado() != null ? #messages.msg('enum.EstadoAnimal.' + a.estado()) : ''}">Disponible</span>
 
                                     <!-- Badge de Solicitado -->
                                     <div th:if="${animalesSolicitadosIds != null and animalesSolicitadosIds.contains(a.id())}"
@@ -513,7 +513,7 @@
                                         <button
                                             th:if="${misFavoritosIds != null and misFavoritosIds.contains(a.id())}"
                                             type="button" class="btn-favorito active"
-                                            th:attr="hx-post=@{/web/animales/{id}/favorito(id=${a.id()})}"
+                                            th:attr="hx-post=@{/web/animales/{id}/favorito(id=${a.id()}, source='lista')}"
                                             hx-swap="outerHTML">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                                 viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2"
@@ -526,7 +526,7 @@
                                         <button
                                             th:unless="${misFavoritosIds != null and misFavoritosIds.contains(a.id())}"
                                             type="button" class="btn-favorito"
-                                            th:attr="hx-post=@{/web/animales/{id}/favorito(id=${a.id()})}"
+                                            th:attr="hx-post=@{/web/animales/{id}/favorito(id=${a.id()}, source='lista')}"
                                             hx-swap="outerHTML">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -585,7 +585,7 @@
                         <i data-lucide="dog"
                             style="width:48px; height:48px; margin-bottom:1rem; color: var(--text-muted); opacity: 0.3;"></i>
                         <p style="color: var(--text-muted); font-weight: 600;"
-                            th:text="${selectedFavoritos} ? 'Aún no has añadido ningún animal a tus favoritos.' : 'No hay animales que coincidan con la búsqueda.'">
+                            th:text="${selectedFavoritos} ? #{animal.favoritos.empty} : #{animal.search.empty}">
                         </p>
                     </div>
 

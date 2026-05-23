@@ -40,9 +40,11 @@ import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
 import es.refugio.frontend.web.dto.*;
 import es.refugio.frontend.web.util.ViewControllerHelper;
+import es.refugio.frontend.web.util.ErrorMessageExtractor;
+import es.refugio.frontend.security.CustomUserDetails;
+import java.time.LocalDateTime;
 
 import java.io.OutputStream;
-import java.time.LocalDateTime;
 
 @Controller
 @RequiredArgsConstructor
@@ -281,7 +283,7 @@ public class SolicitudAdopcionViewController {
             return "fragments/content/solicitud-creada :: success-modal";
         }
 
-        redirectAttributes.addFlashAttribute("successMessage", "Solicitud de adopción registrada correctamente");
+        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.solicitud_creada"));
         return "redirect:" + WebRoutes.SOLICITUDES_BASE;
     }
 
@@ -357,7 +359,7 @@ public class SolicitudAdopcionViewController {
         body.put("fecha", LocalDateTime.now().toString());
 
         restTemplate.put(apiUrl + "/v1/solicitudes-adopcion/" + id, body);
-        redirectAttributes.addFlashAttribute("successMessage", "Solicitud actualizada correctamente");
+        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.solicitud_actualizada"));
         
         if ("detalle".equals(redireccion)) {
             return "redirect:/web/solicitudes/" + id + "/detalle";
@@ -438,7 +440,7 @@ public class SolicitudAdopcionViewController {
     @PostMapping(WebRoutes.SOLICITUDES_REVISION)
     @PreAuthorize("hasRole('ADMIN')")
     public String ponerEnRevision(@PathVariable Integer id, Model model, HttpServletRequest request, HttpServletResponse response, RedirectAttributes redirectAttributes) {
-        String msg = "Solicitud marcada 'En Revisión' correctamente.";
+        String msg = helper.getMessage("toast.success.solicitud_revision");
         try {
             SolicitudAdopcionRecord existing = helper.fetchObject(apiUrl + "/v1/solicitudes-adopcion/" + id, SolicitudAdopcionRecord.class);
             if (existing != null) {
@@ -834,7 +836,7 @@ public class SolicitudAdopcionViewController {
         try {
             restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/directa", body, Object.class);
         } catch (org.springframework.web.client.HttpClientErrorException.Unauthorized e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Debe iniciar sesión para realizar esta acción.");
+            redirectAttributes.addFlashAttribute("errorMessage", helper.getMessage("toast.error.iniciar_sesion"));
             return "redirect:" + WebRoutes.SOLICITUDES_OPCIONES + "?animalId=" + animalId;
         } catch (org.springframework.web.client.HttpStatusCodeException e) {
             String errorMsg = "Error al procesar la solicitud.";
@@ -848,7 +850,7 @@ public class SolicitudAdopcionViewController {
             return "redirect:" + WebRoutes.SOLICITUDES_DIRECTA_FORM + "?animalId=" + animalId;
         }
 
-        redirectAttributes.addFlashAttribute("successMessage", "Solicitud enviada con éxito");
+        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.solicitud_enviada_exito"));
         return "redirect:" + WebRoutes.HOME;
     }
 
@@ -988,7 +990,7 @@ public class SolicitudAdopcionViewController {
 
         logger.info("Registro exitoso para usuario ID: " + usuarioId);
 
-        redirectAttributes.addFlashAttribute("successMessage", "¡Registro y solicitud completados!");
+        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.registro_completado"));
         return "redirect:" + WebRoutes.HOME;
     }
 

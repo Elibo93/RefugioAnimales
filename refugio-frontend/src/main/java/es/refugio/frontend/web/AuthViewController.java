@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import es.refugio.frontend.web.enums.ThymTemplates;
 import es.refugio.frontend.web.enums.ModelAttribute;
+import es.refugio.frontend.web.util.ErrorMessageExtractor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -20,7 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class AuthViewController {
@@ -105,7 +108,8 @@ public class AuthViewController {
             return "redirect:/web/home?registroExitoso";
 
         } catch (Exception e) {
-            return "redirect:/registro?error=" + e.getMessage();
+            log.error("Error en registro: " + e.getMessage());
+            return "redirect:/registro?error=" + ErrorMessageExtractor.extract(e);
         }
     }
 }

@@ -136,7 +136,7 @@
                             <div class="row-cell" style="flex: 2; justify-content: center;">
                                 <span class="badge-premium info"
                                     style="min-width: 100px; text-align: center; font-size: 0.75rem;"
-                                    th:text="${p_item.especialidad != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(p_item.especialidad, '_', ' '))) : 'General'}">Especialidad</span>
+                                    th:text="${p_item.especialidad != null ? (#messages.msgOrNull('enum.EspecialidadVoluntario.' + p_item.especialidad) ?: #strings.capitalize(#strings.toLowerCase(p_item.especialidad))) : 'General'}">Especialidad</span>
                             </div>
 
                             <!-- Disponibilidad -->
@@ -171,7 +171,7 @@
                                 <button class="btn-icon delete"
                                     th:hx-post="@{/web/voluntarios/{id}/borrar(id=${p_item.id})}"
                                     th:hx-target="'#row-' + ${p_item.id}" hx-swap="outerHTML swap:0.3s"
-                                    hx-confirm="¿Eliminar voluntario?">
+                                    th:hx-confirm="#{confirm.voluntario.eliminar}">
                                     <i data-lucide="trash-2" style="width: 18px;"></i>
                                 </button>
                             </div>

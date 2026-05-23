@@ -67,7 +67,7 @@
 
                     <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1.15rem; font-size: 1.1rem; border-radius: 14px; display: flex; justify-content: center; align-items: center; gap: 10px;">
                         <i data-lucide="lock" style="width: 20px;"></i>
-                        <span>[[#{html.auto.pagar.numbers.formatdecimal.donacion.cantidad}]]</span>
+                        <span th:text="#{donacion.auto.total.a.pagar} + ' ' + ${#numbers.formatDecimal(donacion['cantidad'], 1, 'POINT', 2, 'COMMA')} + ' €'"></span>
                     </button>
                     
                     <a th:href="@{/web/donaciones}" style="display: block; text-align: center; margin-top: 1.5rem; color: var(--text-muted); font-size: 0.9rem; text-decoration: none;" th:text="#{donacion.auto.cancelar.y.volver}"></a>
@@ -115,7 +115,7 @@
                 <div style="margin-top: auto;">
                     <div style="background: #1e293b; color: white; padding: 1.5rem; border-radius: 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-lg);">
                         <span style="font-weight: 500; font-size: 0.9rem; opacity: 0.9;" th:text="#{donacion.auto.total.a.pagar}"></span>
-                        <span style="font-size: 1.8rem; font-weight: 900;">[[#{html.auto.numbers.formatdecimal.donacion.cantidad.1}]]</span>
+                        <span style="font-size: 1.8rem; font-weight: 900;" th:text="${#numbers.formatDecimal(donacion['cantidad'], 1, 'POINT', 2, 'COMMA')} + ' €'"></span>
                     </div>
 
                     <div style="margin-top: 2rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
@@ -133,7 +133,7 @@
             </div>
         </div>
 
-        <script>
+        <script th:inline="javascript">
             // Forzar carga de iconos Lucide
             if (typeof lucide !== 'undefined') { lucide.createIcons(); }
             const paymentForm = document.getElementById('payment-form');
@@ -141,7 +141,7 @@
                 paymentForm.addEventListener('submit', function(e) {
                     const btn = this.querySelector('button');
                     btn.disabled = true;
-                    btn.innerHTML = '<span th:text="#{donacion.auto.procesando.pago}"></span>';
+                    btn.innerHTML = '<span>' + /*[[#{donacion.auto.procesando.pago}]]*/ 'Procesando...' + '</span>';
                 });
             }
         </script>

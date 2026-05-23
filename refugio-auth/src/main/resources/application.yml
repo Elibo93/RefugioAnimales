@@ -45,3 +45,5 @@ eureka:
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION}
+
+spring.messages.basename: common_messages

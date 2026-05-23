@@ -280,10 +280,10 @@
             .then(result => {
                 if (result === 'SUCCESS') {
                     Swal.fire({
-                        title: '¡Preferencias Guardadas!',
-                        text: 'Ahora recibirás notificaciones cuando encontremos a tu compañero ideal.',
+                        title: /*[[#{alert.preferences.saved.title}]]*/ '¡Preferencias Guardadas!',
+                        text: /*[[#{alert.preferences.saved.text}]]*/ 'Ahora recibirás notificaciones cuando encontremos a tu compañero ideal.',
                         icon: 'success',
-                        confirmButtonText: 'Genial',
+                        confirmButtonText: /*[[#{alert.preferences.saved.confirm}]]*/ 'Genial',
                         customClass: {
                             popup: 'premium-swal'
                         }
@@ -291,7 +291,11 @@
                         window.location.href = '/web/animales';
                     });
                 } else {
-                    Swal.fire('Error', 'No se pudieron guardar las preferencias', 'error');
+                    Swal.fire(
+                        /*[[#{alert.preferences.error.title}]]*/ 'Error',
+                        /*[[#{alert.preferences.error.text}]]*/ 'No se pudieron guardar las preferencias',
+                        'error'
+                    );
                 }
             });
         });

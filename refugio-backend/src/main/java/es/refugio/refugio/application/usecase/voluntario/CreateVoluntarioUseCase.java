@@ -24,8 +24,7 @@ public class CreateVoluntarioUseCase {
 
         // 2. Verificar que tiene PerfilLegal (Identidad)
         perfilLegalRepository.findByUsuarioId(command.usuarioId().getValue())
-                .orElseThrow(() -> new IllegalStateException(
-                        "El usuario debe tener un perfil legal completo antes de ser voluntario"));
+                .orElseThrow(() -> new IllegalStateException("error.voluntario.perfil_incompleto"));
 
         Voluntario voluntario = Voluntario.builder()
                 .usuarioId(command.usuarioId())
@@ -39,8 +38,8 @@ public class CreateVoluntarioUseCase {
         // Notificar a los Administradores (por ROL)
         notificacionService.enviarARol(
                 "ROLE_ADMIN",
-                "Nueva Solicitud de Voluntariado",
-                "Un usuario ha solicitado unirse como voluntario y espera aprobación.",
+                "notificacion.voluntario.nueva_solicitud.titulo",
+                "notificacion.voluntario.nueva_solicitud.mensaje",
                 "SISTEMA",
                 "/web/voluntarios/pendientes");
 
@@ -48,8 +47,8 @@ public class CreateVoluntarioUseCase {
         if (command.usuarioId() != null) {
             notificacionService.enviar(
                     command.usuarioId().getValue(),
-                    "Solicitud Recibida",
-                    "Tu solicitud para ser voluntario ha sido recibida correctamente. Te avisaremos cuando un administrador la revise.",
+                    "notificacion.voluntario.solicitud_recibida.titulo",
+                    "notificacion.voluntario.solicitud_recibida.mensaje",
                     "SISTEMA",
                     "/web/home");
         }

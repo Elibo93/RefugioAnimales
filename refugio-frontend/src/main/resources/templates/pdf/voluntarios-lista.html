@@ -52,12 +52,12 @@
                 <td th:text="${pl != null ? pl.telefono : '-'}"></td>
                 <td th:text="${pl != null ? pl.direccion : '-'}"></td>
                 <td th:text="${pl != null ? pl.fechaNacimiento : '-'}"></td>
-                <td th:text="${p.especialidad != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(p.especialidad, '_', ' '))) : 'General'}"></td>
+                <td th:text="${p.especialidad != null ? (#messages.msgOrNull('enum.EspecialidadVoluntario.' + p.especialidad) ?: #strings.capitalize(#strings.toLowerCase(p.especialidad))) : 'General'}"></td>
                 <td th:text="${p.disponibilidad != null ? p.disponibilidad : '-'}"></td>
                 <td>
                     <span class="badge" 
                           th:classappend="${p.estado == 'APROBADO' ? 'badge-success' : (p.estado == 'RECHAZADO' ? 'badge-danger' : 'badge-warning')}"
-                          th:text="${p.estado}"></span>
+                          th:text="#{enum.EstadoVoluntario.__${p.estado}__}"></span>
                 </td>
             </tr>
         </tbody>

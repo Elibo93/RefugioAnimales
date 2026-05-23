@@ -4,20 +4,20 @@ import es.refugio.refugio.infraestructure.web.validation.MinAge;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import es.refugio.refugio.infraestructure.web.validation.ValidDni;
 
 @Schema(description = "Datos para crear o actualizar un perfil legal")
 public record PerfilLegalRequest(
-    @NotNull(message = "El ID de usuario es obligatorio")
+    @NotNull(message = "{error.validation.usuario_id_obligatorio}")
     Integer usuarioId,
     
-    @NotBlank(message = "El nombre es obligatorio")
+    @NotBlank(message = "{error.validation.nombre_obligatorio}")
     String nombre,
     
-    @NotBlank(message = "El apellido es obligatorio")
+    @NotBlank(message = "{error.validation.apellido_obligatorio}")
     String apellido,
     
-    @Pattern(regexp = "([0-9]{8}[A-Z])|([XYZ][0-9]{7}[A-Z])", message = "DNI/NIE inválido")
+    @ValidDni
     String dni,
     
     String telefono,

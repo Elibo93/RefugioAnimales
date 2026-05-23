@@ -193,8 +193,8 @@ public class AnimalViewController {
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), helper.fetchList(apiUrl + "/v1/voluntarios", VoluntarioRecord.class));
         model.addAttribute("tamanos", List.of("PEQUEÑO", "MEDIANO", "GRANDE", "GIGANTE"));
         model.addAttribute("sexos", List.of("MACHO", "HEMBRA"));
-        model.addAttribute("estados", List.of("DISPONIBLE", "ADOPTADO", "EN_ACOGIDA", "EN_TRATAMIENTO", "RESERVADO", "FALLECIDO"));
-        model.addAttribute("especies", List.of("PERRO", "GATO", "CONEJO", "AVE", "REPTIL", "OTRO"));
+        model.addAttribute("estados", List.of("DISPONIBLE", "ADOPTADO", "EN_TRATAMIENTO", "RESERVADO"));
+        model.addAttribute("especies", List.of("PERRO", "GATO", "ROEDOR", "AVE", "REPTIL", "OTRO"));
 
         if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Animal_FORM.getPath() + " :: content";
@@ -270,7 +270,7 @@ public class AnimalViewController {
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(parts, headers);
 
             restTemplate.postForObject(apiUrl + "/v1/animales", requestEntity, Object.class);
-            redirectAttributes.addFlashAttribute("successMessage", "Animal creado correctamente");
+            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.animal_creado"));
         } catch (HttpClientErrorException e) {
             throw e;
         }
@@ -286,8 +286,8 @@ public class AnimalViewController {
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), helper.fetchList(apiUrl + "/v1/voluntarios", VoluntarioRecord.class));
         model.addAttribute("tamanos", List.of("PEQUEÑO", "MEDIANO", "GRANDE", "GIGANTE"));
         model.addAttribute("sexos", List.of("MACHO", "HEMBRA"));
-        model.addAttribute("estados", List.of("DISPONIBLE", "ADOPTADO", "EN_ACOGIDA", "EN_TRATAMIENTO", "RESERVADO", "FALLECIDO"));
-        model.addAttribute("especies", List.of("PERRO", "GATO", "CONEJO", "AVE", "REPTIL", "OTRO"));
+        model.addAttribute("estados", List.of("DISPONIBLE", "ADOPTADO", "EN_TRATAMIENTO", "RESERVADO"));
+        model.addAttribute("especies", List.of("PERRO", "GATO", "ROEDOR", "AVE", "REPTIL", "OTRO"));
 
         if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Animal_FORM.getPath() + " :: content";
@@ -363,7 +363,7 @@ public class AnimalViewController {
         } catch (Exception e) {
             System.err.println("Error editando animal: " + e.getMessage());
         }
-        redirectAttributes.addFlashAttribute("successMessage", "Animal editado correctamente");
+        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.animal_editado"));
         return "redirect:" + WebRoutes.ANIMALES_BASE;
     }
 
@@ -559,20 +559,22 @@ public class AnimalViewController {
 
     @PostMapping("/web/animales/{id}/favorito")
     @ResponseBody
-    public String toggleFavorito(@PathVariable Integer id, Model model) {
+    public String toggleFavorito(@PathVariable Integer id, @RequestParam(required = false, defaultValue = "detalle") String source, Model model) {
         Integer currentUserId = (Integer) model.getAttribute("currentUserId");
         if (currentUserId == null) return "";
 
         try {
             Boolean isFavorito = restTemplate.postForObject(apiUrl + "/v1/animales/" + id + "/favorito?usuarioId=" + currentUserId, null, Boolean.class);
             
+            String svgSize = "lista".equals(source) ? "20" : "24";
             String svg = Boolean.TRUE.equals(isFavorito) 
-                ? "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"#ef4444\" stroke=\"#ef4444\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\"></path></svg>"
-                : "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\"></path></svg>";
+                ? "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + svgSize + "\" height=\"" + svgSize + "\" viewBox=\"0 0 24 24\" fill=\"#ef4444\" stroke=\"#ef4444\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\"></path></svg>"
+                : "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + svgSize + "\" height=\"" + svgSize + "\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\"></path></svg>";
                 
-            String btnClass = Boolean.TRUE.equals(isFavorito) ? "btn-favorito-detalle active" : "btn-favorito-detalle";
+            String baseClass = "lista".equals(source) ? "btn-favorito" : "btn-favorito-detalle";
+            String btnClass = Boolean.TRUE.equals(isFavorito) ? baseClass + " active" : baseClass;
             
-            return "<button type=\"button\" class=\"" + btnClass + "\" hx-post=\"/web/animales/" + id + "/favorito\" hx-swap=\"outerHTML\">" + svg + "</button>";
+            return "<button type=\"button\" class=\"" + btnClass + "\" hx-post=\"/web/animales/" + id + "/favorito?source=" + source + "\" hx-swap=\"outerHTML\">" + svg + "</button>";
         } catch (Exception e) {
             return "";
         }

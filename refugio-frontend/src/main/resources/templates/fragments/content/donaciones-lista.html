@@ -94,7 +94,7 @@
                                 <div style="font-size: 0.9rem; font-weight: 700; color: var(--text-main); white-space: nowrap;" 
                                      th:text="${d.fecha != null ? #strings.substring(d.fecha.toString().replace('T', ' '), 0, 10) : '-'}">2026-05-07</div>
                                 <span class="badge-premium warning" style="font-size: 0.65rem; padding: 2px 8px; width: fit-content;"
-                                      th:text="${d.frecuencia}">UNICA</span>
+                                      th:text="#{enum.FrecuenciaDonacion.__${d.frecuencia}__}">UNICA</span>
                             </div>
                         </div>
 

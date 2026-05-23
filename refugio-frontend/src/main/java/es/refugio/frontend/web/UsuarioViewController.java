@@ -6,6 +6,7 @@ import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
 import es.refugio.frontend.web.util.ViewControllerHelper;
+import es.refugio.frontend.web.util.ErrorMessageExtractor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -219,9 +220,10 @@ public class UsuarioViewController {
 
                 restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", legalBody, Object.class);
             }
-            redirectAttributes.addFlashAttribute("successMessage", "Usuario creado con éxito");
+            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.usuario_creado"));
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al crear usuario: " + e.getMessage());
+            logger.error("Error al crear usuario: " + ErrorMessageExtractor.extract(e));
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al crear usuario: " + ErrorMessageExtractor.extract(e));
         }
 
         return "redirect:" + WebRoutes.PERSONAS_BASE;
@@ -313,7 +315,7 @@ public class UsuarioViewController {
         legalBody.put("fechaNacimiento", fechaNacimiento);
         restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", legalBody, Object.class);
 
-        redirectAttributes.addFlashAttribute("successMessage", "Perfil actualizado con éxito");
+        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.perfil_actualizado"));
         
         return "redirect:/web/personas/" + id;
     }
@@ -375,10 +377,10 @@ public class UsuarioViewController {
             restTemplate.delete(authUrl + "/v1/usuarios/" + id);
             logger.info("Usuario ID {} eliminado con éxito de Auth", id);
 
-            redirectAttributes.addFlashAttribute("successMessage", "Usuario y datos legales eliminados con éxito");
+            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.usuario_eliminado"));
         } catch (Exception e) {
-            logger.error("Error crítico al borrar usuario {}: {}", id, e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al borrar usuario: " + e.getMessage());
+            logger.error("Error crítico al borrar usuario {}: {}", id, ErrorMessageExtractor.extract(e));
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al borrar usuario: " + ErrorMessageExtractor.extract(e));
         }
         return "redirect:" + WebRoutes.PERSONAS_BASE;
     }

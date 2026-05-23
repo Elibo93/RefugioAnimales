@@ -33,7 +33,7 @@
                             style="margin: 0; font-size: 2.2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em;">Nombre Completo</h1>
                         <span class="badge-premium" 
                               th:classappend="${persona.rol.toString().contains('ADMIN') ? 'danger' : (persona.rol.toString().contains('VOLUNTARIO') ? 'info' : (persona.rol.toString().contains('ADOPTANTE') ? 'primary' : 'success'))}"
-                              th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(persona.rol.toString().replace('ROLE_', ''), '_', ' ')))}">Rol</span>
+                              th:text="${#messages.msg('enum.Rol.' + persona.rol.toString())}">Rol</span>
                         
                         <!-- Mini Vitrina de Estatus (Solo si hay logros) -->
                         <div th:if="${logrosUsuario != null and !logrosUsuario.isEmpty()}" 
@@ -46,7 +46,7 @@
                                        th:with="zIndex=${3 - iter.index}"
                                        th:style="'width: 32px; height: 32px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid var(--border); margin-left: -10px; position: relative; z-index: ' + ${zIndex} + '; text-decoration: none; transition: transform 0.2s ease, z-index 0s; cursor: pointer;'"
                                        onmouseover="this.style.transform='scale(1.15) translateY(-2px)'; this.style.zIndex='10'"
-                                       th:onmouseout="'this.style.transform=\'none\'; this.style.zIndex=\'' + ${zIndex} + '\''"
+                                       th:onmouseout="|this.style.transform=''; this.style.zIndex='${zIndex}';|"
                                        th:switch="${logroInfo.codigo}">
                                         <img th:case="'VOL_PRINCIPIANTE'" th:src="@{/images/logros/primeros-pasos.png}" style="width: 20px; height: 20px; object-fit: contain;">
                                         <img th:case="'VOL_COMPROMISO_ALTO'" th:src="@{/images/logros/compromiso-firme.png}" style="width: 20px; height: 20px; object-fit: contain;">
@@ -64,7 +64,7 @@
                                th:text="${'+' + (logrosUsuario.size() - 3)}"
                                title="Ver todos los logros"
                                onmouseover="this.style.transform='scale(1.15)'"
-                               onmouseout="this.style.transform='none'"></a>
+                               onmouseout="this.style.transform=''"></a>
                         </div>
                     </div>
                     <p style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin: 0; display: flex; align-items: center; gap: 8px;">
@@ -233,9 +233,17 @@
                         <i data-lucide="heart-handshake" style="width: 24px;"></i>
                         [[#{persona.auto.volunteering.activity}]]
                     </h3>
-                    <div style="text-align: right;">
-                        <span style="display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;" th:text="#{persona.auto.disp.preferente}"></span>
-                        <span style="color: var(--primary); font-weight: 700;" th:text="${voluntario.disponibilidad() ?: 'No definida'}">Fines [[#{html.auto.de}]] semana</span>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="text-align: right;">
+                            <span style="display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;" th:text="#{persona.auto.disp.preferente}"></span>
+                            <span style="color: var(--primary); font-weight: 700;" th:text="${voluntario.disponibilidad() ?: 'No definida'}">Fines [[#{html.auto.de}]] semana</span>
+                        </div>
+                        <a th:href="@{/web/voluntarios/{id}/editar(id=${voluntario.id()})}"
+                           class="btn btn-outline" style="border-radius: 12px; padding: 6px 14px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; border-color: var(--border); color: var(--text-muted); cursor: pointer; background: white; text-decoration: none;"
+                           title="Editar detalles del voluntario">
+                            <i data-lucide="edit-2" style="width: 12px;"></i>
+                            [[#{generic.auto.edit}]]
+                        </a>
                     </div>
                 </div>
 
@@ -272,11 +280,6 @@
                 <div style="margin-bottom: 20px;" th:with="v_id=${voluntario.id()}">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
                         <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin: 0;" th:text="#{persona.auto.ultimas.tareas.asignadas}"></h4>
-                        <a th:href="@{/web/voluntarios/{id}/editar(id=${v_id})}"
-                           class="btn btn-outline" style="border-radius: 12px; padding: 6px 14px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; border-color: var(--border); color: var(--text-muted); cursor: pointer; background: white; text-decoration: none;">
-                            <i data-lucide="edit-2" style="width: 12px;"></i>
-                            [[#{generic.auto.edit}]]
-                        </a>
                     </div>
                     
                     <div th:if="${#lists.isEmpty(tareas)}" style="padding: 30px; text-align: center; background: var(--bg-body); border-radius: 16px; border: 1px dashed var(--border);">
@@ -284,7 +287,13 @@
                     </div>
 
                     <div th:if="${!#lists.isEmpty(tareas)}" style="display: flex; flex-direction: column; gap: 12px;">
-                        <div th:each="t : ${tareas}" th:if="${t != null}" class="premium-row-card" style="padding: 15px; background: var(--bg-body); border: 1px solid var(--border); border-radius: 16px;">
+                        <a th:each="t : ${tareas}" th:if="${t != null}" 
+                           th:href="${currentUserId == persona.id} ? @{/web/tareas} : null"
+                           class="premium-row-card" 
+                           style="padding: 15px; background: var(--bg-body); border: 1px solid var(--border); border-radius: 16px; text-decoration: none; color: inherit; display: block; transition: all 0.2s;"
+                           th:styleappend="${currentUserId == persona.id} ? 'cursor: pointer;' : 'cursor: default;'"
+                           th:onmouseover="${currentUserId == persona.id} ? 'this.style.transform=''scale(1.02)''; this.style.borderColor=''var(--primary-light)''; this.style.boxShadow=''var(--shadow-sm)'';' : ''"
+                           th:onmouseout="${currentUserId == persona.id} ? 'this.style.transform=''scale(1)''; this.style.borderColor=''var(--border)''; this.style.boxShadow=''none'';' : ''">
                             <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
                                 <div class="task-icon-box" style="background: white; border: 1px solid var(--border);">
                                     <i data-lucide="clipboard-list" style="width: 18px; color: var(--primary);"></i>
@@ -301,9 +310,9 @@
                                                       (est == 'CANCELADA' or est == 'RECHAZADA' ? 'danger' : 
                                                       (est == 'EN_PROCESO' or est == 'ACEPTADA' ? 'info' : 
                                                       (est == 'PROPUESTA' ? 'primary' : 'warning')))}"
-                                      th:text="${est != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(est, '_', ' '))) : 'Pendiente'}">Pendiente</span>
+                                      th:text="${est != null ? #messages.msg('enum.EstadoTarea.' + est) : #messages.msg('enum.EstadoTarea.PENDIENTE')}">Pendiente</span>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -368,7 +377,7 @@
                                 style="flex: 1; height: 46px; background: #10b981; border: none; font-weight: 700; border-radius: 12px; font-size: 0.9rem; color: white;"
                                 th:hx-post="'/web/voluntarios/' + ${voluntario.id()} + '/aprobar'"
                                 hx-swap="none"
-                                hx-confirm="¿Estás seguro de que quieres aprobar a este voluntario?"
+                                th:hx-confirm="#{confirm.voluntario.aprobar.corto}"
                                 hx-on::after-request="window.location.reload();">
                             <i data-lucide="user-check" style="width: 16px; margin-right: 6px;"></i>
                             [[#{html.auto.aprobar}]]
@@ -377,7 +386,7 @@
                                 style="flex: 1; height: 46px; border: 1.5px solid #ef4444; color: #ef4444; font-weight: 700; border-radius: 12px; font-size: 0.9rem; background: white;"
                                 th:hx-post="'/web/voluntarios/' + ${voluntario.id()} + '/rechazar'"
                                 hx-swap="none; margin-top: 0;"
-                                hx-confirm="¿Estás seguro de que quieres rechazar a este voluntario?"
+                                th:hx-confirm="#{confirm.voluntario.rechazar.corto}"
                                 hx-on::after-request="window.location.reload();">
                             <i data-lucide="user-x" style="width: 16px; margin-right: 6px;"></i>
                             [[#{solicitud.auto.decline.request}]]
@@ -440,7 +449,7 @@
                             </div>
                             <span class="badge-premium" 
                                   th:classappend="${v.estadoVinculo == 'ADOPTADO' or v.estadoVinculo == 'APROBADA' or v.estadoVinculo == 'FINALIZADA' ? 'success' : (v.estadoVinculo == 'RECHAZADA' ? 'danger' : 'warning')}" 
-                                  th:text="${v.estadoVinculo != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(v.estadoVinculo, '_', ' '))) : 'Pendiente'}">[[#{generic.auto.status}]]</span>
+                                  th:text="${v.estadoVinculo != null ? #messages.msg('enum.EstadoVinculo.' + v.estadoVinculo) : #messages.msg('enum.EstadoVinculo.PENDIENTE')}">[[#{generic.auto.status}]]</span>
                             <a th:href="${v.tipoVinculo == 'SOLICITUD'} ? @{/web/solicitudes/{id}/detalle(id=${v.id})} : @{/web/animales/{id}(id=${v.animalId})}" class="btn-icon">
                                 <i data-lucide="arrow-right" style="width: 16px;"></i>
                             </a>

@@ -32,7 +32,7 @@
                 <span class="animal-status-badge" 
                       style="padding: 8px 20px; height: auto; font-size: 0.9rem; text-transform: none; border-radius: 12px;"
                       th:classappend="${'badge-' + solicitud.estado.toString().toLowerCase()}"
-                      th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(solicitud.estado, '_', ' ')))}">
+                      th:text="#{solicitud.estado.__${solicitud.estado}__}">
                     [[#{generic.auto.status}]]
                 </span>
             </div>
@@ -174,7 +174,7 @@
                              style="width: 100%; height: 100%; object-fit: cover;">
                         <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; background: linear-gradient(transparent, rgba(0,0,0,0.8));">
                             <h3 style="margin: 0; color: white; font-size: 1.5rem; font-weight: 800;" th:text="${animalData != null ? animalData.nombre : 'Animal'}">Nombre</h3>
-                            <span style="color: rgba(255,255,255,0.9); font-size: 0.9rem;" th:text="${animalData != null ? animalData.especie : ''}">Especie</span>
+                            <span style="color: rgba(255,255,255,0.9); font-size: 0.9rem;" th:text="${animalData != null ? #messages.msg('animal.especie.' + animalData.especie) : ''}">Especie</span>
                         </div>
                     </div>
                     
@@ -186,7 +186,7 @@
                                     <i th:if="${animalData != null and animalData.sexo != null}"
                                        th:data-lucide="${animalData.sexo.toString() == 'MACHO' ? 'mars' : 'venus'}"
                                        th:style="${animalData.sexo.toString() == 'MACHO' ? 'color: #3B82F6; width: 16px; height: 16px; stroke-width: 2.5;' : 'color: #EC4899; width: 16px; height: 16px; stroke-width: 2.5;'}"></i>
-                                    <strong style="font-weight: 700;" th:text="${animalData != null ? #strings.capitalize(#strings.toLowerCase(animalData.sexo)) : '-'}">Macho</strong>
+                                    <strong style="font-weight: 700;" th:text="${animalData != null ? #messages.msg('animal.sexo.' + animalData.sexo) : '-'}">Macho</strong>
                                 </div>
                             </div>
                             <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
@@ -195,14 +195,14 @@
                             </div>
                             <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
                                 <span style="color: var(--text-muted);" th:text="#{generic.auto.tamano}"></span>
-                                <span style="font-weight: 700;" th:text="${animalData != null ? animalData.tamano : '-'}">Mediano</span>
+                                <span style="font-weight: 700;" th:text="${animalData != null ? #messages.msg('animal.tamano.' + animalData.tamano) : '-'}">Mediano</span>
                             </div>
                         </div>
                         
                         <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
                             <a th:href="@{/web/animales/{id}(id=${solicitud.animalId})}" class="btn btn-secondary" style="width: 100%; justify-content: center; font-size: 0.85rem;">
                                 <i data-lucide="external-link" style="width: 14px;"></i>
-                                [[#{html.auto.generic.auto.see.file.animal}]]
+                                <span th:text="#{generic.auto.see.file} + ' ' + #{generic.auto.animal}">Ver Ficha Animal</span>
                             </a>
                         </div>
                     </div>

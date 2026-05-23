@@ -29,7 +29,7 @@
                                 (#strings.toUpperCase(animal.estado().toString()) == 'DISPONIBLE' ? 'badge-available' : 
                                 (#strings.toUpperCase(animal.estado().toString()) == 'RESERVADO' ? 'badge-reserved' : 
                                 (#strings.toUpperCase(animal.estado().toString()) == 'ADOPTADO' ? 'badge-adopted' : 'badge-treatment'))) : 'badge-available'}"
-                            th:text="${animal.estado() != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(animal.estado(), '_', ' '))) : ''}">
+                            th:text="${animal.estado() != null ? #messages.msg('enum.EstadoAnimal.' + animal.estado()) : ''}">
                             Disponible
                         </span>
                         <span th:if="${animal.urgencia()}"

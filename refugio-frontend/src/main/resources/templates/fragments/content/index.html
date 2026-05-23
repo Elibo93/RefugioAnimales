@@ -186,7 +186,7 @@
                         <label th:text="#{generic.auto.especie.1}"></label>
                         <select name="especie">
                             <option value="" th:text="#{generic.auto.cualquier.especie}"></option>
-                            <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="${#strings.capitalize(#strings.toLowerCase(e))}"></option>
+                            <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="#{enum.Especie.__${e}__}"></option>
                         </select>
                     </div>
                     <div class="field-divider"></div>
@@ -257,7 +257,7 @@
 
                         <span class="animal-status-badge"
                             th:classappend="${a.estado() != null ? 'badge-' + a.estado().toString().toLowerCase() : 'badge-disponible'}"
-                            th:text="${a.estado() != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(a.estado(), '_', ' '))) : 'Disponible'}">
+                            th:text="${a.estado() != null ? #messages.msg('enum.EstadoAnimal.' + a.estado()) : #messages.msg('enum.EstadoAnimal.DISPONIBLE')}">
                             Disponible
                         </span>
 

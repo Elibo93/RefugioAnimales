@@ -74,7 +74,7 @@
                                 th:text="${animalData != null ? animalData.nombre : ''}"
                                 style="display: block; font-size: 1.1rem; color: var(--text-main);"></strong>
                             <span id="selected-animal-species"
-                                th:text="${animalData != null ? #strings.capitalize(#strings.toLowerCase(animalData.especie)) : ''}"
+                                th:text="${animalData != null ? #messages.msg('enum.Especie.' + animalData.especie) : ''}"
                                 style="font-size: 0.85rem; color: #64748b;"></span>
                         </div>
                         <button type="button" onclick="clearAnimalSelection()" th:if="${adopcion.id == null}"

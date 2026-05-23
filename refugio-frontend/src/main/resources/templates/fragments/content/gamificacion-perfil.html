@@ -81,13 +81,13 @@
                     </div>
                 </div>
                 
-                <div style="font-weight: 900; font-size: 1.05rem; margin-bottom: 0.6rem; color: var(--text-main); letter-spacing: -0.02em;" th:text="${logro.nombre}">Nombre</div>
-                <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; font-weight: 500;" th:text="${logro.descripcion}">Desc</div>
+                <div style="font-weight: 900; font-size: 1.05rem; margin-bottom: 0.6rem; color: var(--text-main); letter-spacing: -0.02em;" th:text="#{achievement.name.__${#strings.toLowerCase(logro.codigo)}__}">Nombre</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; font-weight: 500;" th:text="#{achievement.desc.__${#strings.toLowerCase(logro.codigo)}__}">Desc</div>
                 
                 <!-- Rarity Label -->
                 <div style="margin-top: 1rem; display: inline-block; font-size: 0.65rem; font-weight: 900; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.05em;"
                      th:styleappend="${logro.rareza == 'ORO'} ? 'background: #fef3c7; color: #92400e;' : (${logro.rareza == 'PLATA'} ? 'background: #f1f5f9; color: #475569;' : 'background: #ffedd5; color: #9a3412;')"
-                     th:text="${logro.rareza}">RAREZA</div>
+                     th:text="#{enum.RarezaLogro.__${logro.rareza}__}">RAREZA</div>
 
                 <!-- Overlay para bloqueados -->
                 <div th:if="${!#lists.contains(logrosUsuario.![logroId], logro.id)}" 

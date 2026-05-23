@@ -56,10 +56,10 @@
             <!-- Cuerpo de la notificación -->
             <div class="notif-body">
                 <div class="notif-info-row">
-                    <h4 class="notif-card-title" th:text="${notif.titulo}">Título</h4>
+                    <h4 class="notif-card-title" th:text="${#messages.msgOrNull(notif.titulo) != null ? #messages.msg(notif.titulo) : notif.titulo}">Título</h4>
                     <span class="notif-date" th:text="${notif.fecha}">Fecha</span>
                 </div>
-                <p class="notif-message" th:text="${notif.mensaje}">Mensaje</p>
+                <p class="notif-message" th:text="${#messages.msgOrNull(notif.mensaje) != null ? #messages.msg(notif.mensaje) : notif.mensaje}">Mensaje</p>
 
                 <!-- Botones de Acción -->
                 <div class="notif-actions">

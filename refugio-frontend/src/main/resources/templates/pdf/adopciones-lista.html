@@ -45,7 +45,7 @@
                 <td th:text="${i.solicitudAdopcionId != null ? i.solicitudAdopcionId : '-'}"></td>
                 <td th:text="${i.fechaAdopcion != null} ? ${#temporals.format(i.fechaAdopcion, 'dd/MM/yyyy')} : '-'"></td>
                 <td>
-                    <span class="badge badge-success" th:text="${i.estado}"></span>
+                    <span class="badge badge-success" th:text="#{enum.EstadoAdopcion.__${i.estado}__}"></span>
                 </td>
                 <td th:text="${i.contrato != null ? i.contrato : '-'}"></td>
             </tr>
