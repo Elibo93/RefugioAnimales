@@ -2,7 +2,10 @@ package es.refugio.refugio.infraestructure.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import es.refugio.refugio.application.command.tarea.CreateTareaCommand;
 import es.refugio.refugio.application.command.tarea.EditTareaCommand;
@@ -14,86 +17,56 @@ import es.refugio.refugio.infraestructure.db.jpa.entity.VoluntarioEntity;
 import es.refugio.refugio.infraestructure.web.dto.tarea.TareaRequest;
 import es.refugio.refugio.infraestructure.web.dto.tarea.TareaResponse;
 
-public class TareaMapper {
+@Mapper(componentModel = "spring")
+public interface TareaMapper {
 
-    public static CreateTareaCommand toCommand(TareaRequest req) {
-        return new CreateTareaCommand(
-                req.descripcion(),
-                req.fecha(),
-                req.estado(),
-                req.fechaLimite(),
-                req.instrucciones(),
-                req.voluntarioIds(),
-                req.voluntarioActorId()
-        );
+    CreateTareaCommand toCommand(TareaRequest req);
+
+    @Mapping(target = "id", source = "id", qualifiedByName = "mapTareaId")
+    EditTareaCommand toCommand(int id, TareaRequest req);
+
+    @Mapping(target = "id", source = "id.value")
+    @Mapping(target = "voluntarioIds", source = "voluntarios", qualifiedByName = "mapVoluntarioIdsToIntList")
+    TareaResponse toResponse(Tarea t);
+
+    @Mapping(target = "id", source = "id.value")
+    @Mapping(target = "voluntarios", source = "voluntarios", qualifiedByName = "mapVoluntarioIdsToEntities")
+    TareaEntity toEntity(Tarea t);
+
+    @Mapping(target = "id", source = "id", qualifiedByName = "mapTareaId")
+    @Mapping(target = "voluntarios", source = "voluntarios", qualifiedByName = "mapEntitiesToVoluntarioIds")
+    Tarea toDomain(TareaEntity e);
+
+    List<Tarea> toDomain(List<TareaEntity> entities);
+
+    List<TareaResponse> toResponse(List<Tarea> tareas);
+
+    @Named("mapTareaId")
+    default TareaId mapTareaId(Integer id) {
+        return id != null ? new TareaId(id) : null;
     }
 
-    public static EditTareaCommand toCommand(int id, TareaRequest req) {
-        return new EditTareaCommand(
-                new TareaId(id),
-                req.descripcion(),
-                req.fecha(),
-                req.estado(),
-                req.fechaLimite(),
-                req.instrucciones(),
-                req.voluntarioIds(),
-                req.voluntarioActorId()
-        );
-    }
-
-    public static TareaResponse toResponse(Tarea t) {
-        return new TareaResponse(
-                t.getId() != null ? t.getId().getValue() : null,
-                t.getDescripcion(),
-                t.getFecha(),
-                t.getEstado() != null ? t.getEstado().name() : null,
-                t.getFechaLimite(),
-                t.getInstrucciones(),
-                t.getPrioridad(),
-                t.getVoluntarios() != null ? 
-                    t.getVoluntarios().stream().map(VoluntarioId::getValue).collect(Collectors.toList()) : 
-                    new ArrayList<>()
-        );
-    }
-
-    public static TareaEntity toEntity(Tarea t) {
-        List<VoluntarioEntity> voluntarios = null;
-        if (t.getVoluntarios() != null) {
-            voluntarios = t.getVoluntarios().stream()
-                    .map(vid -> VoluntarioEntity.builder().id(vid.getValue()).build())
-                    .collect(Collectors.toList());
+    @Named("mapVoluntarioIdsToIntList")
+    default List<Integer> mapVoluntarioIdsToIntList(List<VoluntarioId> voluntarios) {
+        if (voluntarios == null) {
+            return new ArrayList<>();
         }
-
-        return TareaEntity.builder()
-                .id(t.getId() != null ? t.getId().getValue() : null)
-                .descripcion(t.getDescripcion())
-                .fecha(t.getFecha())
-                .estado(t.getEstado())
-                .fechaLimite(t.getFechaLimite())
-                .instrucciones(t.getInstrucciones())
-                .voluntarios(voluntarios)
-                .build();
+        return voluntarios.stream().map(VoluntarioId::getValue).toList();
     }
 
-    public static Tarea toDomain(TareaEntity e) {
-        return Tarea.builder()
-                .id(e.getId() != null ? new TareaId(e.getId()) : null)
-                .descripcion(e.getDescripcion())
-                .fecha(e.getFecha())
-                .estado(e.getEstado())
-                .fechaLimite(e.getFechaLimite())
-                .instrucciones(e.getInstrucciones())
-                .voluntarios(e.getVoluntarios() != null ? 
-                    e.getVoluntarios().stream().map(ve -> new VoluntarioId(ve.getId())).collect(Collectors.toList()) : 
-                    new ArrayList<>())
-                .build();
+    @Named("mapVoluntarioIdsToEntities")
+    default List<VoluntarioEntity> mapVoluntarioIdsToEntities(List<VoluntarioId> voluntarios) {
+        if (voluntarios == null) {
+            return null;
+        }
+        return voluntarios.stream().map(vid -> VoluntarioEntity.builder().id(vid.getValue()).build()).toList();
     }
 
-    public static List<Tarea> toDomain(List<TareaEntity> entities) {
-        return entities.stream().map(TareaMapper::toDomain).collect(Collectors.toList());
-    }
-
-    public static List<TareaResponse> toResponse(List<Tarea> tareas) {
-        return tareas.stream().map(TareaMapper::toResponse).collect(Collectors.toList());
+    @Named("mapEntitiesToVoluntarioIds")
+    default List<VoluntarioId> mapEntitiesToVoluntarioIds(List<VoluntarioEntity> voluntarios) {
+        if (voluntarios == null) {
+            return new ArrayList<>();
+        }
+        return voluntarios.stream().map(ve -> new VoluntarioId(ve.getId())).toList();
     }
 }

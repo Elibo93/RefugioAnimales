@@ -17,28 +17,29 @@ import org.springframework.data.domain.Pageable;
 public class HistorialMedicoJpaRepositoryImpl implements HistorialMedicoRepository {
 
     private final HistorialMedicoEntityJpaRepository jpaRepository;
+    private final HistorialMedicoMapper historialMedicoMapper;
 
     @Override
     public HistorialMedico save(HistorialMedico historialMedico) {
-        HistorialMedicoEntity entity = HistorialMedicoMapper.toEntity(historialMedico);
+        HistorialMedicoEntity entity = historialMedicoMapper.toEntity(historialMedico);
         HistorialMedicoEntity savedEntity = jpaRepository.save(entity);
-        return HistorialMedicoMapper.toDomain(savedEntity);
+        return historialMedicoMapper.toDomain(savedEntity);
     }
 
     @Override
     public Optional<HistorialMedico> getById(HistorialMedicoId id) {
         return jpaRepository.findById(id.getValue())
-                .map(HistorialMedicoMapper::toDomain);
+                .map(historialMedicoMapper::toDomain);
     }
 
     @Override
     public List<HistorialMedico> getAll() {
-        return HistorialMedicoMapper.toDomain(jpaRepository.findAll());
+        return historialMedicoMapper.toDomain(jpaRepository.findAll());
     }
 
     @Override
     public Page<HistorialMedico> findAll(Pageable pageable) {
-        return jpaRepository.findAll(pageable).map(HistorialMedicoMapper::toDomain);
+        return jpaRepository.findAll(pageable).map(historialMedicoMapper::toDomain);
     }
 
     @Override
@@ -49,7 +50,7 @@ public class HistorialMedicoJpaRepositoryImpl implements HistorialMedicoReposito
     @Override
     public List<HistorialMedico> getByAnimalId(AnimalId animalId) {
         List<HistorialMedicoEntity> entities = jpaRepository.findByAnimalId(animalId.getValue());
-        return HistorialMedicoMapper.toDomain(entities);
+        return historialMedicoMapper.toDomain(entities);
     }
 
 }

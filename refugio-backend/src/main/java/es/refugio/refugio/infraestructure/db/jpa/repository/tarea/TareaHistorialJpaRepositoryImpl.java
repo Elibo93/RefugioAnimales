@@ -12,17 +12,18 @@ import lombok.RequiredArgsConstructor;
 public class TareaHistorialJpaRepositoryImpl implements TareaHistorialRepository {
 
     private final TareaHistorialEntityJpaRepository jpaRepository;
+    private final TareaHistorialMapper tareaHistorialMapper;
 
     @Override
     public TareaHistorial save(TareaHistorial historial) {
-        TareaHistorialEntity entity = TareaHistorialMapper.toEntity(historial);
+        TareaHistorialEntity entity = tareaHistorialMapper.toEntity(historial);
         TareaHistorialEntity saved = jpaRepository.save(entity);
-        return TareaHistorialMapper.toDomain(saved);
+        return tareaHistorialMapper.toDomain(saved);
     }
 
     @Override
     public List<TareaHistorial> findByTareaId(TareaId tareaId) {
         List<TareaHistorialEntity> entities = jpaRepository.findByTareaIdOrderByFechaCambioDesc(tareaId.getValue());
-        return TareaHistorialMapper.toDomain(entities);
+        return tareaHistorialMapper.toDomain(entities);
     }
 }

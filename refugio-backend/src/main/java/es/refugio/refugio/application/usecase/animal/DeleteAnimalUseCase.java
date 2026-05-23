@@ -5,6 +5,12 @@ import es.refugio.refugio.domain.repository.AnimalRepository;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Delete Animal.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class DeleteAnimalUseCase {
 
     private final AnimalRepository animalRepository;

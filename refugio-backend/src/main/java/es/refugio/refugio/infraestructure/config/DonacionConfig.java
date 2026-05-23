@@ -22,21 +22,22 @@ import es.refugio.refugio.infraestructure.db.jpa.repository.donacion.DonacionEnt
 import es.refugio.refugio.infraestructure.db.jpa.repository.donacion.DonacionJpaRepositoryImpl;
 import es.refugio.refugio.infraestructure.db.jpa.repository.donacion.ObjetivoDonacionEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.donacion.ObjetivoDonacionJpaRepositoryImpl;
+import es.refugio.refugio.infraestructure.mapper.DonacionMapper;
 import es.refugio.refugio.infraestructure.mapper.ObjetivoDonacionMapper;
 
 @Configuration
 public class DonacionConfig {
 
     @Bean
-    public DonacionRepository donacionRepository(DonacionEntityJpaRepository jpaRepository) {
-        return new DonacionJpaRepositoryImpl(jpaRepository);
+    public DonacionRepository donacionRepository(DonacionEntityJpaRepository jpaRepository, DonacionMapper mapper) {
+        return new DonacionJpaRepositoryImpl(jpaRepository, mapper);
     }
 
     @Bean
     public ObjetivoDonacionRepository objetivoDonacionRepository(
             ObjetivoDonacionEntityJpaRepository jpaRepository,
             ObjetivoDonacionMapper mapper) {
-        return new ObjetivoDonacionJpaRepositoryImpl(jpaRepository);
+        return new ObjetivoDonacionJpaRepositoryImpl(jpaRepository, mapper);
     }
 
     @Bean

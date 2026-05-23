@@ -14,56 +14,53 @@ import es.refugio.refugio.application.usecase.historial_medico.FindHistorialMedi
 import es.refugio.refugio.domain.repository.HistorialMedicoRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.historial_medico.HistorialMedicoEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.historial_medico.HistorialMedicoJpaRepositoryImpl;
-import lombok.RequiredArgsConstructor;
+import es.refugio.refugio.infraestructure.mapper.HistorialMedicoMapper;
 
 @Configuration
-@RequiredArgsConstructor
 public class HistorialMedicoConfig {
 
-    private final HistorialMedicoEntityJpaRepository jpaRepository;
-
     @Bean
-    public HistorialMedicoRepository historialMedicoRepository() {
-        return new HistorialMedicoJpaRepositoryImpl(jpaRepository);
+    public HistorialMedicoRepository historialMedicoRepository(HistorialMedicoEntityJpaRepository jpaRepository, HistorialMedicoMapper historialMedicoMapper) {
+        return new HistorialMedicoJpaRepositoryImpl(jpaRepository, historialMedicoMapper);
     }
 
     @Bean
-    public CreateHistorialMedicoUseCase createHistorialMedicoUseCase() {
-        return new CreateHistorialMedicoUseCase(historialMedicoRepository());
+    public CreateHistorialMedicoUseCase createHistorialMedicoUseCase(HistorialMedicoRepository repository) {
+        return new CreateHistorialMedicoUseCase(repository);
     }
 
     @Bean
-    public CreateHistorialMedicoService createHistorialMedicoService() {
-        return new CreateHistorialMedicoService(createHistorialMedicoUseCase());
+    public CreateHistorialMedicoService createHistorialMedicoService(CreateHistorialMedicoUseCase useCase) {
+        return new CreateHistorialMedicoService(useCase);
     }
 
     @Bean
-    public FindHistorialMedicoUseCase findHistorialMedicoUseCase() {
-        return new FindHistorialMedicoUseCase(historialMedicoRepository());
+    public FindHistorialMedicoUseCase findHistorialMedicoUseCase(HistorialMedicoRepository repository) {
+        return new FindHistorialMedicoUseCase(repository);
     }
 
     @Bean
-    public FindHistorialMedicoService findHistorialMedicoService() {
-        return new FindHistorialMedicoService(findHistorialMedicoUseCase());
+    public FindHistorialMedicoService findHistorialMedicoService(FindHistorialMedicoUseCase useCase) {
+        return new FindHistorialMedicoService(useCase);
     }
 
     @Bean
-    public DeleteHistorialMedicoUseCase deleteHistorialMedicoUseCase() {
-        return new DeleteHistorialMedicoUseCase(historialMedicoRepository());
+    public DeleteHistorialMedicoUseCase deleteHistorialMedicoUseCase(HistorialMedicoRepository repository) {
+        return new DeleteHistorialMedicoUseCase(repository);
     }
 
     @Bean
-    public DeleteHistorialMedicoService deleteHistorialMedicoService() {
-        return new DeleteHistorialMedicoService(deleteHistorialMedicoUseCase());
+    public DeleteHistorialMedicoService deleteHistorialMedicoService(DeleteHistorialMedicoUseCase useCase) {
+        return new DeleteHistorialMedicoService(useCase);
     }
 
     @Bean
-    public EditHistorialMedicoUseCase editHistorialMedicoUseCase() {
-        return new EditHistorialMedicoUseCase(historialMedicoRepository());
+    public EditHistorialMedicoUseCase editHistorialMedicoUseCase(HistorialMedicoRepository repository) {
+        return new EditHistorialMedicoUseCase(repository);
     }
 
     @Bean
-    public EditHistorialMedicoService editHistorialMedicoService() {
-        return new EditHistorialMedicoService(editHistorialMedicoUseCase());
+    public EditHistorialMedicoService editHistorialMedicoService(EditHistorialMedicoUseCase useCase) {
+        return new EditHistorialMedicoService(useCase);
     }
 }

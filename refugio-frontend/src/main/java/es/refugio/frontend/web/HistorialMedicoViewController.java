@@ -1,4 +1,5 @@
 package es.refugio.frontend.web;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,6 +33,12 @@ import es.refugio.frontend.service.HistorialMedicoService;
 @Controller
 @RequiredArgsConstructor
 @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
+/**
+ * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Historial Medico.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class HistorialMedicoViewController {
 
     private final HistorialMedicoService historialMedicoService;
@@ -205,7 +212,7 @@ public class HistorialMedicoViewController {
             animalesMap.put(String.valueOf(a.id()), a.nombre());
         }
 
-        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
+        Context context = new Context(LocaleContextHolder.getLocale());
         context.setVariable("historiales", historiales);
         context.setVariable("animalesMap", animalesMap);
         String html = templateEngine.process(ThymTemplates.Historial_LIST_PDF.getPath(), context);
@@ -232,7 +239,7 @@ public class HistorialMedicoViewController {
             animal = historialMedicoService.fetchAnimalById(historial.animalId());
         }
 
-        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
+        Context context = new Context(LocaleContextHolder.getLocale());
         context.setVariable("historial", historial);
         context.setVariable("animal", animal);
         String html = templateEngine.process(ThymTemplates.Historial_DETALLE_PDF.getPath(), context);

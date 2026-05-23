@@ -11,6 +11,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Find Donacion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class FindDonacionUseCase {
 
     private final DonacionRepository donacionRepository;

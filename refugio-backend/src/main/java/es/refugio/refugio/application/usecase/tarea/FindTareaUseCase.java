@@ -10,6 +10,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Find Tarea.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class FindTareaUseCase {
 
     private final TareaRepository tareaRepository;

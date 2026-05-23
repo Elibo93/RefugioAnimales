@@ -8,6 +8,15 @@ import es.refugio.refugio.domain.repository.PerfilLegalRepository;
 import es.refugio.refugio.domain.repository.VoluntarioRepository;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Caso de uso que encapsula la creación de un nuevo voluntario en el sistema.
+ * Garantiza idempotencia (no crea un segundo voluntario si ya existe para ese usuario),
+ * verifica que el usuario tenga un perfil legal completo y envía notificaciones
+ * tanto al voluntario como a los administradores.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 @RequiredArgsConstructor
 public class CreateVoluntarioUseCase {
 
@@ -15,6 +24,16 @@ public class CreateVoluntarioUseCase {
     private final PerfilLegalRepository perfilLegalRepository;
     private final NotificacionService notificacionService;
 
+    /**
+     * Registra un nuevo voluntario en el sistema para el usuario indicado en el comando.
+     * <p>
+     * Si el usuario ya es voluntario, se devuelve la instancia existente sin modificar nada (idempotencia).
+     * Si no posee un perfil legal activo, se lanza una excepción indicando que el perfil está incompleto.
+     *
+     * @param command Objeto con los datos necesarios: ID del usuario, disponibilidad y especialidad.
+     * @return El objeto {@link es.refugio.refugio.domain.model.voluntario.Voluntario} recién creado o existente.
+     * @throws IllegalStateException Si el usuario no tiene un perfil legal registrado en el sistema.
+     */
     public Voluntario create(CreateVoluntarioCommand command) {
         // 1. Verificar si ya es voluntario (Idempotencia)
         var existing = voluntarioRepository.findByUsuarioId(command.usuarioId());

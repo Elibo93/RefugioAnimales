@@ -9,6 +9,12 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Edit Adoptante.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class EditAdoptanteService {
 
     private final EditAdoptanteUseCase editAdoptanteUseCase;

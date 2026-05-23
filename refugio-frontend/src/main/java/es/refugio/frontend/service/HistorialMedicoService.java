@@ -15,6 +15,12 @@ import java.util.Map;
  */
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Historial Medico.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class HistorialMedicoService {
 
     private final RestTemplate restTemplate;
@@ -28,11 +34,11 @@ public class HistorialMedicoService {
     }
 
     public List<HistorialMedicoRecord> fetchAllHistoriales() {
-        return helper.fetchList(apiUrl + "/v1/historial-medico", HistorialMedicoRecord.class);
+        return helper.fetchList(apiUrl + "/v1/historial-medico?size=1000", HistorialMedicoRecord.class);
     }
 
     public List<HistorialMedicoRecord> fetchByAnimalId(Integer animalId) {
-        return helper.fetchList(apiUrl + "/v1/historial-medico/animal/" + animalId, HistorialMedicoRecord.class);
+        return helper.fetchList(apiUrl + "/v1/historial-medico/animal/" + animalId + "?size=1000", HistorialMedicoRecord.class);
     }
 
     public HistorialMedicoRecord fetchHistorialById(Integer id) {

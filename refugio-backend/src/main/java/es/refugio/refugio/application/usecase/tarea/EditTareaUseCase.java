@@ -19,6 +19,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Edit Tarea.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class EditTareaUseCase {
 
     private final TareaRepository tareaRepository;

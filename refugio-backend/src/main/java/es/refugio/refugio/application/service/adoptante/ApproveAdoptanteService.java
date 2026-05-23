@@ -12,6 +12,12 @@ import lombok.RequiredArgsConstructor;
  */
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Approve Adoptante.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class ApproveAdoptanteService {
 
     private final ApproveAdoptanteUseCase approveAdoptanteUseCase;

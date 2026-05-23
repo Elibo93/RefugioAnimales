@@ -5,6 +5,12 @@ import es.refugio.refugio.domain.model.adopcion.AdopcionId;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Delete Adopcion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class DeleteAdopcionService {
 
     private final DeleteAdopcionUseCase useCase;

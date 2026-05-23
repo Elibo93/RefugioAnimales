@@ -5,6 +5,12 @@ import es.refugio.refugio.domain.repository.TareaRepository;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Delete Tarea.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class DeleteTareaUseCase {
 
     private final TareaRepository tareaRepository;

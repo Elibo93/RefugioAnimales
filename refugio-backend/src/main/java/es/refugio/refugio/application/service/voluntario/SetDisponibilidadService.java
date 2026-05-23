@@ -10,6 +10,12 @@ import es.refugio.refugio.domain.repository.VoluntarioRepository;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Set Disponibilidad.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class SetDisponibilidadService {
     
     private final VoluntarioRepository voluntarioRepository;

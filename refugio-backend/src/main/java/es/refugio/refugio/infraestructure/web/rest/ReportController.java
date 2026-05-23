@@ -30,6 +30,12 @@ import java.util.Map;
 @RequestMapping("/api/v1/reports")
 @RequiredArgsConstructor
 @Tag(name = "Informes", description = "Endpoints para la generación de documentos PDF")
+/**
+ * Controlador REST que expone los endpoints HTTP de la API para la gestión de Report.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class ReportController {
 
     private final AdopcionEntityJpaRepository adopcionRepository;

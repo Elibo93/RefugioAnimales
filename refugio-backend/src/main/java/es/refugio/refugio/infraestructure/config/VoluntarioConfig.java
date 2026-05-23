@@ -19,13 +19,14 @@ import es.refugio.refugio.domain.repository.PerfilLegalRepository;
 import es.refugio.refugio.application.service.NotificacionService;
 import es.refugio.refugio.infraestructure.db.jpa.repository.voluntario.VoluntarioEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.voluntario.VoluntarioJpaRepositoryImpl;
+import es.refugio.refugio.infraestructure.mapper.VoluntarioMapper;
 
 @Configuration
 public class VoluntarioConfig {
 
     @Bean
-    public VoluntarioRepository voluntarioRepository(VoluntarioEntityJpaRepository jpaRepository) {
-        return new VoluntarioJpaRepositoryImpl(jpaRepository);
+    public VoluntarioRepository voluntarioRepository(VoluntarioEntityJpaRepository jpaRepository, VoluntarioMapper mapper) {
+        return new VoluntarioJpaRepositoryImpl(jpaRepository, mapper);
     }
 
     @Bean

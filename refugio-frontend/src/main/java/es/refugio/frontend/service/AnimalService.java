@@ -26,6 +26,12 @@ import java.util.Map;
  */
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Animal.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class AnimalService {
 
     private final RestTemplate restTemplate;

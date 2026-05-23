@@ -15,6 +15,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/preferencias")
 @RequiredArgsConstructor
 @Tag(name = "Preferencias", description = "Gestión de preferencias de adopción de los usuarios")
+/**
+ * Controlador REST que expone los endpoints HTTP de la API para la gestión de Preferencia Adopcion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class PreferenciaAdopcionController {
 
     private final PreferenciaAdopcionService service;

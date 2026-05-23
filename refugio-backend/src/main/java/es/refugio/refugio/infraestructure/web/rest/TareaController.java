@@ -45,10 +45,18 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequiredArgsConstructor
 @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
 @Tag(name = "Tareas", description = "Gestión de tareas asignadas a los voluntarios")
+/**
+ * Controlador REST que expone los endpoints HTTP de la API para la gestión de Tarea.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class TareaController {
 
     private final CreateTareaService createTareaService;
     private final FindTareaService findTareaService;
+    private final TareaMapper tareaMapper;
+    private final TareaHistorialMapper tareaHistorialMapper;
     private final EditTareaService editTareaService;
     private final DeleteTareaService deleteTareaService;
     private final FindTareaHistorialService findTareaHistorialService;
@@ -65,7 +73,7 @@ public class TareaController {
                                 .map(p -> p.getNombre() + " " + p.getApellido())
                                 .orElse("Usuario #" + h.getUsuarioId());
                     }
-                    return TareaHistorialMapper.toResponse(h, nombre);
+                    return tareaHistorialMapper.toResponse(h, nombre);
                 })
                 .toList();
     }
@@ -74,31 +82,31 @@ public class TareaController {
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Tarea creada"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<TareaResponse> create(@Valid @RequestBody TareaRequest request) {
-        CreateTareaCommand command = TareaMapper.toCommand(request);
+        CreateTareaCommand command = tareaMapper.toCommand(request);
         Tarea tarea = createTareaService.create(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(TareaMapper.toResponse(tarea));
+        return ResponseEntity.status(HttpStatus.CREATED).body(tareaMapper.toResponse(tarea));
     }
 
     @Operation(summary = "Actualizar tarea")
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "Tarea actualizada"), @ApiResponse(responseCode = "404", description = "No encontrada") })
     @PutMapping("/{id}")
     public ResponseEntity<TareaResponse> update(@PathVariable Integer id, @Valid @RequestBody TareaRequest request) {
-        EditTareaCommand command = TareaMapper.toCommand(id, request);
+        EditTareaCommand command = tareaMapper.toCommand(id, request);
         Tarea tarea = editTareaService.update(command);
-        return ResponseEntity.ok(TareaMapper.toResponse(tarea));
+        return ResponseEntity.ok(tareaMapper.toResponse(tarea));
     }
 
     @Operation(summary = "Listar tareas")
     @GetMapping
     public PaginatedResponse<TareaResponse> findAll(Pageable pageable) {
         Page<Tarea> page = findTareaService.findAll(pageable);
-        return PaginatedResponse.fromPage(page, TareaMapper.toResponse(page.getContent()));
+        return PaginatedResponse.fromPage(page, tareaMapper.toResponse(page.getContent()));
     }
 
     @Operation(summary = "Obtener tarea por ID")
     @GetMapping("/{id}")
     public TareaResponse findById(@PathVariable Integer id) {
-        return TareaMapper.toResponse(findTareaService.findById(new TareaId(id)));
+        return tareaMapper.toResponse(findTareaService.findById(new TareaId(id)));
     }
 
     @Operation(summary = "Eliminar tarea")

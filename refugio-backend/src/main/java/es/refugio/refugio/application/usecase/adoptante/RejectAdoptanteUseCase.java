@@ -11,6 +11,12 @@ import lombok.AllArgsConstructor;
  * Caso de uso: rechaza un adoptante cambiando su estado a RECHAZADO.
  */
 @AllArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Reject Adoptante.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class RejectAdoptanteUseCase {
 
     private final AdoptanteRepository adoptanteRepository;

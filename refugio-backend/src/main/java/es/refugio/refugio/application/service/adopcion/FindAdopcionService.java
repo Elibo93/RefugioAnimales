@@ -11,6 +11,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Find Adopcion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class FindAdopcionService {
 
     private final FindAdopcionUseCase useCase;

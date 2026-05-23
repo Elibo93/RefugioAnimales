@@ -1,4 +1,5 @@
 package es.refugio.frontend.web;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,6 +36,12 @@ import es.refugio.frontend.service.AdoptanteService;
  */
 @Controller
 @RequiredArgsConstructor
+/**
+ * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Adoptante.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class AdoptanteViewController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdoptanteViewController.class);
@@ -247,7 +254,7 @@ public class AdoptanteViewController {
             }
         }
 
-        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
+        Context context = new Context(LocaleContextHolder.getLocale());
         context.setVariable(ModelAttribute.Adoptante_LIST.getName(), adoptantes);
         context.setVariable("usuariosMap", usuariosMap);
         context.setVariable("perfilesMap", perfilesMap);

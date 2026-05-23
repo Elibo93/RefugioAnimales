@@ -9,6 +9,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Find Tarea.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class FindTareaService {
 
     private final FindTareaUseCase useCase;

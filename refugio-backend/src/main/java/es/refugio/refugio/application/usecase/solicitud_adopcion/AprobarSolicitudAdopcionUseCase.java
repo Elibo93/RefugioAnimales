@@ -21,18 +21,22 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 /**
- * Caso de uso orquestador: Aprueba una solicitud de adopción.
+ * Caso de uso que aprueba una solicitud de adopción pendiente.
  *
- * Pasos que realiza en una única transacción:
- * 1. Busca y valida que la solicitud está en estado PENDIENTE o EN_REVISION
- * 2. Valida que el animal no tenga ya otra adopción
- * 3. Cambia la solicitud a APROBADA
- * 4. Cambia el animal a RESERVADO
- * 5. Cambia el adoptante a APROBADO
- * 6. Crea la Adopcion vinculada en estado PENDIENTE_FIRMA
- * 7. Envía notificaciones al adoptante y al admin
+ * <p>En una única transacción, este caso de uso:
+ * <ol>
+ *   <li>Busca y valida que la solicitud está en estado {@code PENDIENTE} o {@code EN_REVISION}.</li>
+ *   <li>Valida que el animal no tenga ya otra adopción activa.</li>
+ *   <li>Cambia la solicitud a {@code APROBADA}.</li>
+ *   <li>Cambia el estado del animal a {@code RESERVADO}.</li>
+ *   <li>Actualiza el adoptante a {@code APROBADO}.</li>
+ *   <li>Crea la entidad {@link es.refugio.refugio.domain.model.adopcion.Adopcion} en estado {@code PENDIENTE_FIRMA}.</li>
+ *   <li>Envía notificaciones al adoptante y a los administradores.</li>
+ * </ol>
+ *
+ * @author Elisabeth
+ * @author Diego
  */
-
 @RequiredArgsConstructor
 public class AprobarSolicitudAdopcionUseCase {
 
@@ -42,6 +46,18 @@ public class AprobarSolicitudAdopcionUseCase {
     private final AdopcionRepository adopcionRepository;
     private final NotificacionService notificacionService;
 
+    /**
+     * Aprueba la solicitud de adopción identificada por el ID proporcionado,
+     * actualizando en cadena el estado de la solicitud, el animal y el adoptante,
+     * y creando la entidad de adopción definitiva.
+     *
+     * @param solicitudId Identificador único de la solicitud a aprobar.
+     * @return La entidad {@link es.refugio.refugio.domain.model.adopcion.Adopcion} recién creada
+     *         con estado {@code PENDIENTE_FIRMA}.
+     * @throws SolicitudAdopcionNotFoundException      Si la solicitud no existe en el sistema.
+     * @throws SolicitudAdopcionEstadoInvalidoException Si la solicitud no está en estado {@code PENDIENTE} ni {@code EN_REVISION}.
+     * @throws AnimalYaAdoptadoException               Si el animal ya tiene una adopción vigente.
+     */
     @Transactional
     public Adopcion aprobar(SolicitudAdopcionId solicitudId) {
         // 1 — Buscar y validar la solicitud

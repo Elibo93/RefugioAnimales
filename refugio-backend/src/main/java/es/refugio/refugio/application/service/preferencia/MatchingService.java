@@ -10,6 +10,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Servicio de aplicación que evalúa la compatibilidad entre nuevos animales
+ * y las preferencias de adopción registradas por los usuarios, enviando
+ * notificaciones en tiempo real a los potenciales adoptantes interesados.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -18,6 +26,14 @@ public class MatchingService {
     private final JpaPreferenciaAdopcionRepository repository;
     private final NotificacionService notificacionService;
 
+    /**
+     * Inicia el proceso de matching para un animal recién registrado.
+     * Recorre todas las preferencias de adopción activas y, si el animal
+     * cumple los criterios de una preferencia, envía una notificación al
+     * usuario propietario de esa preferencia.
+     *
+     * @param animal El animal recién creado sobre el que se ejecuta el matching.
+     */
     public void processNewAnimal(Animal animal) {
         log.info("Iniciando proceso de matching para nuevo animal: {} ({})", animal.getNombre(), animal.getEspecie());
         
@@ -36,6 +52,16 @@ public class MatchingService {
         }
     }
 
+    /**
+     * Evalúa si un animal cumple todos los criterios de una preferencia de adopción.
+     * Aplica filtros secuenciales de especie, tamaño, sexo, edad máxima y nivel de energía.
+     * Si el usuario no ha especificado un criterio, ese criterio no se aplica (es inclusivo).
+     *
+     * @param animal El animal a evaluar.
+     * @param pref   La preferencia de adopción del usuario contra la que se compara.
+     * @return {@code true} si el animal satisface todos los criterios de la preferencia;
+     *         {@code false} en caso contrario.
+     */
     private boolean isMatch(Animal animal, PreferenciaAdopcionEntity pref) {
         // 1. Especie (Si el usuario eligió especies y el animal no está en la lista -> false)
         if (pref.getEspecies() != null && !pref.getEspecies().isEmpty()) {

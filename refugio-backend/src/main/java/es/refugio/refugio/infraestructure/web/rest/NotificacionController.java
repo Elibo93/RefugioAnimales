@@ -18,6 +18,12 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/notificaciones")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+/**
+ * Controlador REST que expone los endpoints HTTP de la API para la gestión de Notificacion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class NotificacionController {
 
     private final NotificacionRepository repository;

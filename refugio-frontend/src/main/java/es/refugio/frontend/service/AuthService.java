@@ -13,6 +13,12 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Auth.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class AuthService {
 
     private final RestTemplate restTemplate;

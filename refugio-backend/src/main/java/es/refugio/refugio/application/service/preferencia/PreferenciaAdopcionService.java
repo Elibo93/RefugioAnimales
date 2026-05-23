@@ -13,6 +13,12 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Preferencia Adopcion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class PreferenciaAdopcionService {
 
     private final JpaPreferenciaAdopcionRepository repository;

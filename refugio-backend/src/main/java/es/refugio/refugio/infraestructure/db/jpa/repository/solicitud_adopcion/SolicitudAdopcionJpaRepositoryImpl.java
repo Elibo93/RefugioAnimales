@@ -18,28 +18,29 @@ import org.springframework.data.domain.Pageable;
 public class SolicitudAdopcionJpaRepositoryImpl implements SolicitudAdopcionRepository {
 
     private final SolicitudAdopcionEntityJpaRepository jpaRepository;
+    private final SolicitudAdopcionMapper solicitudAdopcionMapper;
 
     @Override
     public SolicitudAdopcion save(SolicitudAdopcion solicitudAdopcion) {
-        SolicitudAdopcionEntity entity = SolicitudAdopcionMapper.toEntity(solicitudAdopcion);
+        SolicitudAdopcionEntity entity = solicitudAdopcionMapper.toEntity(solicitudAdopcion);
         SolicitudAdopcionEntity savedEntity = jpaRepository.save(entity);
-        return SolicitudAdopcionMapper.toDomain(savedEntity);
+        return solicitudAdopcionMapper.toDomain(savedEntity);
     }
 
     @Override
     public Optional<SolicitudAdopcion> getById(SolicitudAdopcionId id) {
         return jpaRepository.findById(id.getValue())
-                .map(SolicitudAdopcionMapper::toDomain);
+                .map(solicitudAdopcionMapper::toDomain);
     }
 
     @Override
     public List<SolicitudAdopcion> getAll() {
-        return SolicitudAdopcionMapper.toDomain(jpaRepository.findAll());
+        return solicitudAdopcionMapper.toDomain(jpaRepository.findAll());
     }
 
     @Override
     public Page<SolicitudAdopcion> findAll(Pageable pageable) {
-        return jpaRepository.findAll(pageable).map(SolicitudAdopcionMapper::toDomain);
+        return jpaRepository.findAll(pageable).map(solicitudAdopcionMapper::toDomain);
     }
 
     @Override
@@ -50,12 +51,12 @@ public class SolicitudAdopcionJpaRepositoryImpl implements SolicitudAdopcionRepo
     @Override
     public List<SolicitudAdopcion> getByAnimalId(AnimalId animalId) {
         List<SolicitudAdopcionEntity> entities = jpaRepository.findByAnimalId(animalId.getValue());
-        return SolicitudAdopcionMapper.toDomain(entities);
+        return solicitudAdopcionMapper.toDomain(entities);
     }
 
     @Override
     public List<SolicitudAdopcion> getByAdoptanteId(AdoptanteId adoptanteId) {
         List<SolicitudAdopcionEntity> entities = jpaRepository.findByAdoptanteId(adoptanteId.getValue());
-        return SolicitudAdopcionMapper.toDomain(entities);
+        return solicitudAdopcionMapper.toDomain(entities);
     }
 }

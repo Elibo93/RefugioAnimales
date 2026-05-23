@@ -1,4 +1,5 @@
 package es.refugio.frontend.web;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,6 +36,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @Controller
 @RequiredArgsConstructor
 @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'VOLUNTARIO_ADOPTANTE')")
+/**
+ * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Tarea.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class TareaViewController {
 
     private final TareaService tareaService;
@@ -426,7 +433,7 @@ public class TareaViewController {
 
         Map<String, String> voluntarioNombres = fetchVoluntarioNombres();
 
-        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
+        Context context = new Context(LocaleContextHolder.getLocale());
         context.setVariable("tareas", filtered);
         context.setVariable("voluntarioNombres", voluntarioNombres);
         String html = templateEngine.process(ThymTemplates.Tarea_LIST_PDF.getPath(), context);

@@ -19,84 +19,80 @@ import es.refugio.refugio.domain.repository.AdoptanteRepository;
 import es.refugio.refugio.domain.repository.PerfilLegalRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.adoptante.AdoptanteEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.adoptante.AdoptanteJpaRepositoryImpl;
-import lombok.RequiredArgsConstructor;
+import es.refugio.refugio.infraestructure.mapper.AdoptanteMapper;
 
 @Configuration
-@RequiredArgsConstructor
 public class AdoptanteConfig {
-
-    private final AdoptanteEntityJpaRepository adoptanteEntityJpaRepository;
-    private final PerfilLegalRepository perfilLegalRepository;
 
     // --- REPOSITORIO ---
     @Bean
-    public AdoptanteRepository adoptanteRepository() {
-        return new AdoptanteJpaRepositoryImpl(adoptanteEntityJpaRepository);
+    public AdoptanteRepository adoptanteRepository(AdoptanteEntityJpaRepository jpaRepository, AdoptanteMapper mapper) {
+        return new AdoptanteJpaRepositoryImpl(jpaRepository, mapper);
     }
 
     // --- CREAR (POST) ---
     @Bean
-    public CreateAdoptanteUseCase createAdoptanteUseCase() {
-        return new CreateAdoptanteUseCase(adoptanteRepository(), perfilLegalRepository);
+    public CreateAdoptanteUseCase createAdoptanteUseCase(AdoptanteRepository repository, PerfilLegalRepository perfilLegalRepository) {
+        return new CreateAdoptanteUseCase(repository, perfilLegalRepository);
     }
 
     @Bean
-    public CreateAdoptanteService createAdoptanteService() {
-        return new CreateAdoptanteService(createAdoptanteUseCase());
+    public CreateAdoptanteService createAdoptanteService(CreateAdoptanteUseCase useCase) {
+        return new CreateAdoptanteService(useCase);
     }
 
     // --- BUSCAR/OBTENER (GET) ---
     @Bean
-    public FindAdoptanteUseCase findAdoptanteUseCase() {
-        return new FindAdoptanteUseCase(adoptanteRepository());
+    public FindAdoptanteUseCase findAdoptanteUseCase(AdoptanteRepository repository) {
+        return new FindAdoptanteUseCase(repository);
     }
 
     @Bean
-    public FindAdoptanteService findAdoptanteService() {
-        return new FindAdoptanteService(findAdoptanteUseCase());
+    public FindAdoptanteService findAdoptanteService(FindAdoptanteUseCase useCase) {
+        return new FindAdoptanteService(useCase);
     }
 
     // --- ELIMINAR (DELETE) ---
     @Bean
-    public DeleteAdoptanteUseCase deleteAdoptanteUseCase() {
-        return new DeleteAdoptanteUseCase(adoptanteRepository());
+    public DeleteAdoptanteUseCase deleteAdoptanteUseCase(AdoptanteRepository repository) {
+        return new DeleteAdoptanteUseCase(repository);
     }
 
     @Bean
-    public DeleteAdoptanteService deleteAdoptanteService() {
-        return new DeleteAdoptanteService(deleteAdoptanteUseCase());
+    public DeleteAdoptanteService deleteAdoptanteService(DeleteAdoptanteUseCase useCase) {
+        return new DeleteAdoptanteService(useCase);
     }
 
     // --- EDITAR (PUT) ---
     @Bean
-    public EditAdoptanteUseCase editAdoptanteUseCase() {
-        return new EditAdoptanteUseCase(adoptanteRepository());
+    public EditAdoptanteUseCase editAdoptanteUseCase(AdoptanteRepository repository) {
+        return new EditAdoptanteUseCase(repository);
     }
 
     @Bean
-    public EditAdoptanteService editAdoptanteService() {
-        return new EditAdoptanteService(editAdoptanteUseCase());
+    public EditAdoptanteService editAdoptanteService(EditAdoptanteUseCase useCase) {
+        return new EditAdoptanteService(useCase);
     }
 
     // --- APPROVE (PATCH) ---
     @Bean
-    public ApproveAdoptanteUseCase approveAdoptanteUseCase() {
-        return new ApproveAdoptanteUseCase(adoptanteRepository());
+    public ApproveAdoptanteUseCase approveAdoptanteUseCase(AdoptanteRepository repository) {
+        return new ApproveAdoptanteUseCase(repository);
     }
 
     @Bean
-    public ApproveAdoptanteService approveAdoptanteService() {
-        return new ApproveAdoptanteService(approveAdoptanteUseCase());
+    public ApproveAdoptanteService approveAdoptanteService(ApproveAdoptanteUseCase useCase) {
+        return new ApproveAdoptanteService(useCase);
     }
 
     // --- REJECT (PATCH) ---
     @Bean
-    public RejectAdoptanteUseCase rejectAdoptanteUseCase() {
-        return new RejectAdoptanteUseCase(adoptanteRepository());
+    public RejectAdoptanteUseCase rejectAdoptanteUseCase(AdoptanteRepository repository) {
+        return new RejectAdoptanteUseCase(repository);
     }
 
     @Bean
-    public RejectAdoptanteService rejectAdoptanteService() {
-        return new RejectAdoptanteService(rejectAdoptanteUseCase());
+    public RejectAdoptanteService rejectAdoptanteService(RejectAdoptanteUseCase useCase) {
+        return new RejectAdoptanteService(useCase);
     }
 }

@@ -1,4 +1,5 @@
 package es.refugio.frontend.web;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,6 +32,12 @@ import es.refugio.frontend.service.AnimalService;
 
 @Controller
 @RequiredArgsConstructor
+/**
+ * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Adopcion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class AdopcionViewController {
 
     private final AdopcionService adopcionService;
@@ -266,7 +273,7 @@ public class AdopcionViewController {
             animalesMap.put(String.valueOf(a.id()), a.nombre());
         }
 
-        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
+        Context context = new Context(LocaleContextHolder.getLocale());
         context.setVariable("adopciones", adopciones);
         context.setVariable("adoptanteNombres", adoptanteNombres);
         context.setVariable("animalesMap", animalesMap);

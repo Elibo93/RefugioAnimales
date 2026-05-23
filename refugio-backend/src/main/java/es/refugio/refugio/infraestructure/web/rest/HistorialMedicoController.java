@@ -49,21 +49,28 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/api/v1/historial-medico")
 @RequiredArgsConstructor
 @Tag(name = "Historial Médico", description = "Registro del historial médico de los animales")
+/**
+ * Controlador REST que expone los endpoints HTTP de la API para la gestión de Historial Medico.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class HistorialMedicoController {
 
     private final CreateHistorialMedicoService createHistorialMedicoService;
     private final FindHistorialMedicoService findHistorialMedicoService;
     private final EditHistorialMedicoService editHistorialMedicoService;
     private final DeleteHistorialMedicoService deleteHistorialMedicoService;
+    private final HistorialMedicoMapper historialMedicoMapper;
 
     @Operation(summary = "Crear registro médico")
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Registro creado"), @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public ResponseEntity<HistorialMedicoResponse> createHistorialMedico(@Valid @RequestBody HistorialMedicoRequest request) {
-        CreateHistorialMedicoCommand command = HistorialMedicoMapper.toCommand(request);
+        CreateHistorialMedicoCommand command = historialMedicoMapper.toCommand(request);
         HistorialMedico historialMedico = createHistorialMedicoService.create(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(HistorialMedicoMapper.toResponse(historialMedico));
+        return ResponseEntity.status(HttpStatus.CREATED).body(historialMedicoMapper.toResponse(historialMedico));
     }
 
     @Operation(summary = "Actualizar registro médico")
@@ -71,9 +78,9 @@ public class HistorialMedicoController {
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public ResponseEntity<HistorialMedicoResponse> updateHistorialMedico(@PathVariable Integer id,
                                                                          @Valid @RequestBody HistorialMedicoRequest request) {
-        EditHistorialMedicoCommand command = HistorialMedicoMapper.toCommand(id, request);
+        EditHistorialMedicoCommand command = historialMedicoMapper.toCommand(id, request);
         HistorialMedico historialMedico = editHistorialMedicoService.update(command);
-        return ResponseEntity.ok(HistorialMedicoMapper.toResponse(historialMedico));
+        return ResponseEntity.ok(historialMedicoMapper.toResponse(historialMedico));
     }
 
     @Operation(summary = "Listar historial médico")
@@ -84,14 +91,14 @@ public class HistorialMedicoController {
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), size);
         Page<HistorialMedico> historialPage = findHistorialMedicoService.findAll(pageable);
-        return PaginatedResponse.fromPage(historialPage, HistorialMedicoMapper.toResponse(historialPage.getContent()));
+        return PaginatedResponse.fromPage(historialPage, historialMedicoMapper.toResponse(historialPage.getContent()));
     }
 
     @Operation(summary = "Obtener registro médico por ID")
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public HistorialMedicoResponse getHistorialMedicoById(@PathVariable Integer id) {
-        return HistorialMedicoMapper.toResponse(findHistorialMedicoService.findById(new HistorialMedicoId(id)));
+        return historialMedicoMapper.toResponse(findHistorialMedicoService.findById(new HistorialMedicoId(id)));
     }
 
     @Operation(summary = "Historial médico por animal", description = "Retorna todos los registros médicos de un animal concreto")
@@ -99,7 +106,7 @@ public class HistorialMedicoController {
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public List<HistorialMedicoResponse> getHistorialMedicoByAnimalId(@PathVariable Integer animalId) {
         List<HistorialMedico> historiales = findHistorialMedicoService.findByAnimalId(new AnimalId(animalId));
-        return HistorialMedicoMapper.toResponse(historiales);
+        return historialMedicoMapper.toResponse(historiales);
     }
 
     @Operation(summary = "Eliminar registro médico")

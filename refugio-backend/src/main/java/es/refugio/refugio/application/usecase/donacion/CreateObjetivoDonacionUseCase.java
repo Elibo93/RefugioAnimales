@@ -5,6 +5,12 @@ import es.refugio.refugio.domain.repository.ObjetivoDonacionRepository;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Create Objetivo Donacion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class CreateObjetivoDonacionUseCase {
 
     private final ObjetivoDonacionRepository repository;

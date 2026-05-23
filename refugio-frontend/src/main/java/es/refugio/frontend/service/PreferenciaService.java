@@ -9,6 +9,12 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Preferencia.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class PreferenciaService {
 
     private final RestTemplate restTemplate;

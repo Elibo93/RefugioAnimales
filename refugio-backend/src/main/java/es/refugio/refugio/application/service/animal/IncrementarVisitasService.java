@@ -7,6 +7,12 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Incrementar Visitas.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class IncrementarVisitasService {
 
     private final IncrementarVisitasUseCase incrementarVisitasUseCase;

@@ -9,6 +9,12 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Create Adoptante.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class CreateAdoptanteService {
 
     private final CreateAdoptanteUseCase createAdoptanteUseCase;

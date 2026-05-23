@@ -16,27 +16,28 @@ import org.springframework.data.domain.Pageable;
 public class TareaJpaRepositoryImpl implements TareaRepository {
 
     private final TareaEntityJpaRepository jpaRepository;
+    private final TareaMapper tareaMapper;
 
     @Override
     public Tarea save(Tarea tarea) {
-        TareaEntity entity = TareaMapper.toEntity(tarea);
-        return TareaMapper.toDomain(jpaRepository.save(entity));
+        TareaEntity entity = tareaMapper.toEntity(tarea);
+        return tareaMapper.toDomain(jpaRepository.save(entity));
     }
 
     @Override
     public Optional<Tarea> getById(TareaId id) {
         return jpaRepository.findById(id.getValue())
-                .map(TareaMapper::toDomain);
+                .map(tareaMapper::toDomain);
     }
 
     @Override
     public List<Tarea> getAll() {
-        return TareaMapper.toDomain(jpaRepository.findAll());
+        return tareaMapper.toDomain(jpaRepository.findAll());
     }
 
     @Override
     public Page<Tarea> findAll(Pageable pageable) {
-        return jpaRepository.findAll(pageable).map(TareaMapper::toDomain);
+        return jpaRepository.findAll(pageable).map(tareaMapper::toDomain);
     }
 
     @Override

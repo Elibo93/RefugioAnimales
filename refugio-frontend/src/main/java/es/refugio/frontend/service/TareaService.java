@@ -15,6 +15,12 @@ import java.util.Map;
  */
 @Service
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Tarea.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class TareaService {
 
     private final RestTemplate restTemplate;

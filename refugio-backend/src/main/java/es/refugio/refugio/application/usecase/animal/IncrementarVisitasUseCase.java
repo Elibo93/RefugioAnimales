@@ -5,6 +5,12 @@ import es.refugio.refugio.domain.repository.AnimalRepository;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Incrementar Visitas.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class IncrementarVisitasUseCase {
     private final AnimalRepository animalRepository;
 

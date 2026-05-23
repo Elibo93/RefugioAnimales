@@ -6,6 +6,12 @@ import es.refugio.refugio.domain.model.tarea.Tarea;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Create Tarea.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class CreateTareaService {
 
     private final CreateTareaUseCase useCase;

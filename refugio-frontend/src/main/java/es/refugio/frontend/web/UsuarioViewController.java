@@ -1,4 +1,5 @@
 package es.refugio.frontend.web;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.dto.*;
@@ -31,6 +32,12 @@ import java.util.*;
 
 @Controller
 @RequiredArgsConstructor
+/**
+ * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Usuario.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class UsuarioViewController {
 
     private static final Logger logger = LoggerFactory.getLogger(UsuarioViewController.class);
@@ -546,7 +553,7 @@ public class UsuarioViewController {
             personasCompletas.add(persona);
         }
 
-        Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
+        Context context = new Context(LocaleContextHolder.getLocale());
         context.setVariable("personas", personasCompletas);
         String html = templateEngine.process(ThymTemplates.Persona_LIST_PDF.getPath(), context);
         response.setContentType("application/pdf");

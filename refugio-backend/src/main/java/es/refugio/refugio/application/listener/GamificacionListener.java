@@ -14,6 +14,16 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Listener de eventos de dominio responsable de actualizar las métricas de gamificación
+ * de los usuarios cuando ocurren eventos relevantes en el sistema (cambios de estado de tareas
+ * y donaciones completadas). Delega la evaluación de logros al {@link LogroEngine}.
+ *
+ * <p>Todos sus métodos se ejecutan de forma asíncrona para no bloquear el flujo principal.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -23,6 +33,14 @@ public class GamificacionListener {
     private final LogroEngine logroEngine;
     private final VoluntarioRepository voluntarioRepository;
 
+    /**
+     * Escucha el evento {@link TareaStatusChangedEvent} y actualiza las métricas de tareas
+     * completadas para cada voluntario asignado a la tarea cuando ésta pasa a estado
+     * {@code COMPLETADA} o {@code FINALIZADA}. Tras actualizar las métricas, lanza la evaluación
+     * de logros correspondiente.
+     *
+     * @param event Evento publicado al cambiar el estado de una tarea.
+     */
     @Async
     @EventListener
     @Transactional
@@ -57,6 +75,13 @@ public class GamificacionListener {
         }
     }
 
+    /**
+     * Escucha el evento {@link DonacionCompletedEvent} y acumula el monto donado
+     * en las métricas del usuario para habilitar la evaluación de logros relacionados
+     * con la generosidad o el importe total donado.
+     *
+     * @param event Evento publicado cuando una donación se marca como completada.
+     */
     @Async
     @EventListener
     @Transactional

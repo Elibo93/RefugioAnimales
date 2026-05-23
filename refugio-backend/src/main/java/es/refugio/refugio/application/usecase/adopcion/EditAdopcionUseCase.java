@@ -13,6 +13,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Edit Adopcion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class EditAdopcionUseCase {
 
     private final AdopcionRepository adopcionRepository;

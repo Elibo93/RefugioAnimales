@@ -12,6 +12,12 @@ import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
 @Service
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Find Animal.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class FindAnimalService {
 
     private final FindAnimalUseCase findAnimalUseCase;
@@ -43,4 +49,4 @@ public class FindAnimalService {
     public List<Animal> findTop3Favoritos() {
         return findAnimalUseCase.findTop3Favoritos();
     }
-}
+}

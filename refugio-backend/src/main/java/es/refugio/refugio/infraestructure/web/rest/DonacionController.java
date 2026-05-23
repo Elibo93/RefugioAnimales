@@ -47,12 +47,19 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/api/v1/donaciones")
 @RequiredArgsConstructor
 @Tag(name = "Donaciones", description = "Registro y gestión de donaciones al refugio")
+/**
+ * Controlador REST que expone los endpoints HTTP de la API para la gestión de Donacion.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class DonacionController {
 
     private final CreateDonacionService createDonacionService;
     private final FindDonacionService findDonacionService;
     private final EditDonacionService editDonacionService;
     private final DeleteDonacionService deleteDonacionService;
+    private final DonacionMapper donacionMapper;
     private final NotificacionService notificacionService;
 
     @Operation(summary = "Registrar donación")
@@ -85,7 +92,7 @@ public class DonacionController {
             // necesario.
         }
 
-        CreateDonacionCommand command = DonacionMapper.toCommand(request);
+        CreateDonacionCommand command = donacionMapper.toCommand(request);
         Donacion donacion = createDonacionService.create(command);
 
         // Notificar al Admin
@@ -121,7 +128,7 @@ public class DonacionController {
             // No bloqueamos la donación si falla la notificación
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(DonacionMapper.toResponse(donacion));
+        return ResponseEntity.status(HttpStatus.CREATED).body(donacionMapper.toResponse(donacion));
     }
 
     @Operation(summary = "Actualizar donación")
@@ -129,9 +136,9 @@ public class DonacionController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DonacionResponse> update(@PathVariable Integer id,
             @Valid @RequestBody DonacionRequest request) {
-        EditDonacionCommand command = DonacionMapper.toCommand(id, request);
+        EditDonacionCommand command = donacionMapper.toCommand(id, request);
         Donacion donacion = editDonacionService.update(command);
-        return ResponseEntity.ok(DonacionMapper.toResponse(donacion));
+        return ResponseEntity.ok(donacionMapper.toResponse(donacion));
     }
 
     @Operation(summary = "Listar donaciones")
@@ -142,14 +149,14 @@ public class DonacionController {
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), size);
         Page<Donacion> donacionesPage = findDonacionService.findAll(pageable);
-        return PaginatedResponse.fromPage(donacionesPage, DonacionMapper.toResponse(donacionesPage.getContent()));
+        return PaginatedResponse.fromPage(donacionesPage, donacionMapper.toResponse(donacionesPage.getContent()));
     }
 
     @Operation(summary = "Obtener donación por ID")
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public DonacionResponse findById(@PathVariable Integer id) {
-        return DonacionMapper.toResponse(findDonacionService.findById(new DonacionId(id)));
+        return donacionMapper.toResponse(findDonacionService.findById(new DonacionId(id)));
     }
 
     @Operation(summary = "Donaciones por usuario", description = "Retorna las donaciones de un usuario concreto")
@@ -157,7 +164,7 @@ public class DonacionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE')")
     public List<DonacionResponse> findByUsuarioId(@PathVariable Integer usuarioId) {
         checkUserOwnership(usuarioId);
-        return DonacionMapper.toResponse(findDonacionService.findByUsuarioId(new UsuarioId(usuarioId)));
+        return donacionMapper.toResponse(findDonacionService.findByUsuarioId(new UsuarioId(usuarioId)));
     }
 
     private void checkUserOwnership(Integer targetUsuarioId) {

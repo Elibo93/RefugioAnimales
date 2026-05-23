@@ -6,6 +6,12 @@ import es.refugio.refugio.domain.model.tarea.Tarea;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Edit Tarea.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class EditTareaService {
 
     private final EditTareaUseCase useCase;

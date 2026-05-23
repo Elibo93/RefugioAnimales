@@ -48,6 +48,12 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/adoptantes")
 @RequiredArgsConstructor
 @Tag(name = "Adoptantes", description = "Gestión de adoptantes del refugio")
+/**
+ * Controlador REST que expone los endpoints HTTP de la API para la gestión de Adoptante.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class AdoptanteController {
 
     private final CreateAdoptanteService createService;
@@ -56,6 +62,7 @@ public class AdoptanteController {
     private final EditAdoptanteService editService;
     private final ApproveAdoptanteService approveService;
     private final RejectAdoptanteService rejectService;
+    private final AdoptanteMapper adoptanteMapper;
     private final CreateSolicitudAdopcionService solicitudService;
 
     @Operation(summary = "Crear adoptante", description = "Registra un nuevo adoptante vinculado a un usuario")
@@ -63,12 +70,12 @@ public class AdoptanteController {
             @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
     public ResponseEntity<AdoptanteResponse> createAdoptante(@Valid @RequestBody AdoptanteRequest request) {
-        CreateAdoptanteCommand command = AdoptanteMapper.toCommand(request);
+        CreateAdoptanteCommand command = adoptanteMapper.toCommand(request);
         Adoptante adoptante = createService.createAdoptante(command);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(AdoptanteMapper.toResponse(adoptante));
+                .body(adoptanteMapper.toResponse(adoptante));
     }
 
     @Operation(summary = "Listar adoptantes")
@@ -82,7 +89,7 @@ public class AdoptanteController {
         Pageable pageable = PageRequest.of(Math.max(0, page), size);
         Page<Adoptante> adoptantesPage = findService.findFiltered(q, pageable);
         return PaginatedResponse.fromPage(adoptantesPage, adoptantesPage.getContent().stream()
-                .map(AdoptanteMapper::toResponse)
+                .map(adoptanteMapper::toResponse)
                 .toList());
     }
 
@@ -94,7 +101,7 @@ public class AdoptanteController {
     public AdoptanteResponse getById(@PathVariable int id) {
         Adoptante adoptante = findService.findById(new AdoptanteId(id));
         checkOwnership(adoptante);
-        return AdoptanteMapper.toResponse(adoptante);
+        return adoptanteMapper.toResponse(adoptante);
     }
 
     @Operation(summary = "Obtener adoptante por ID de usuario")
@@ -103,7 +110,7 @@ public class AdoptanteController {
     public AdoptanteResponse getByUsuarioId(@PathVariable int usuarioId) {
         Adoptante adoptante = findService.findByUsuarioId(usuarioId);
         checkOwnership(adoptante);
-        return AdoptanteMapper.toResponse(adoptante);
+        return adoptanteMapper.toResponse(adoptante);
     }
 
     @Operation(summary = "Eliminar adoptante")
@@ -126,9 +133,9 @@ public class AdoptanteController {
         Adoptante adoptanteExistente = findService.findById(new AdoptanteId(id));
         checkOwnership(adoptanteExistente);
 
-        EditAdoptanteCommand command = AdoptanteMapper.toEditCommand(new AdoptanteId(id), request);
+        EditAdoptanteCommand command = adoptanteMapper.toEditCommand(new AdoptanteId(id), request);
         Adoptante adoptante = editService.update(command);
-        return AdoptanteMapper.toResponse(adoptante);
+        return adoptanteMapper.toResponse(adoptante);
     }
 
     @Operation(summary = "Aprobar adoptante", description = "Cambia el estado de validación del adoptante a APROBADO")
@@ -141,7 +148,7 @@ public class AdoptanteController {
     public AdoptanteResponse approveAdoptante(@PathVariable int id) {
         ApproveAdoptanteCommand command = new ApproveAdoptanteCommand(new AdoptanteId(id));
         Adoptante adoptante = approveService.approve(command);
-        return AdoptanteMapper.toResponse(adoptante);
+        return adoptanteMapper.toResponse(adoptante);
     }
 
     @Operation(summary = "Rechazar adoptante", description = "Cambia el estado de validación del adoptante a RECHAZADO")
@@ -154,7 +161,7 @@ public class AdoptanteController {
     public AdoptanteResponse rejectAdoptante(@PathVariable int id) {
         RejectAdoptanteCommand command = new RejectAdoptanteCommand(new AdoptanteId(id));
         Adoptante adoptante = rejectService.reject(command);
-        return AdoptanteMapper.toResponse(adoptante);
+        return adoptanteMapper.toResponse(adoptante);
     }
 
     @Operation(summary = "Convertir usuario público a adoptante y crear solicitud", description = "Actualiza el rol del usuario, crea su perfil de adoptante y registra la solicitud de adopción automáticamente.")

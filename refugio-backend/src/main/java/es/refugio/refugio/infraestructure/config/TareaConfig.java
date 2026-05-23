@@ -23,13 +23,15 @@ import es.refugio.refugio.infraestructure.db.jpa.repository.tarea.TareaEntityJpa
 import es.refugio.refugio.infraestructure.db.jpa.repository.tarea.TareaJpaRepositoryImpl;
 import es.refugio.refugio.infraestructure.db.jpa.repository.tarea.TareaHistorialEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.tarea.TareaHistorialJpaRepositoryImpl;
+import es.refugio.refugio.infraestructure.mapper.TareaMapper;
+import es.refugio.refugio.infraestructure.mapper.TareaHistorialMapper;
 
 @Configuration
 public class TareaConfig {
 
     @Bean
-    public TareaRepository tareaRepository(TareaEntityJpaRepository jpaRepository) {
-        return new TareaJpaRepositoryImpl(jpaRepository);
+    public TareaRepository tareaRepository(TareaEntityJpaRepository jpaRepository, TareaMapper mapper) {
+        return new TareaJpaRepositoryImpl(jpaRepository, mapper);
     }
 
     @Bean
@@ -81,8 +83,8 @@ public class TareaConfig {
 
     @Bean
     public TareaHistorialRepository tareaHistorialRepository(
-            TareaHistorialEntityJpaRepository jpaRepository) {
-        return new TareaHistorialJpaRepositoryImpl(jpaRepository);
+            TareaHistorialEntityJpaRepository jpaRepository, TareaHistorialMapper mapper) {
+        return new TareaHistorialJpaRepositoryImpl(jpaRepository, mapper);
     }
 
     @Bean

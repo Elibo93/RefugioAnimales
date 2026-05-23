@@ -11,6 +11,12 @@ import es.refugio.refugio.domain.repository.PerfilLegalRepository;
 import es.refugio.refugio.domain.model.usuario.UsuarioId;
 
 @AllArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Create Adoptante.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class CreateAdoptanteUseCase {
 
     private final AdoptanteRepository adoptanteRepository;

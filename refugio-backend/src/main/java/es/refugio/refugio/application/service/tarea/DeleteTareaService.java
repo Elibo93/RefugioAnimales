@@ -5,6 +5,12 @@ import es.refugio.refugio.domain.model.tarea.TareaId;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+/**
+ * Servicio de aplicación que orquesta las operaciones relacionadas con Delete Tarea.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class DeleteTareaService {
 
     private final DeleteTareaUseCase useCase;

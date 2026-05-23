@@ -15,6 +15,16 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/**
+ * Servicio de recordatorios programados para las tareas del refugio.
+ * Utiliza un planificador de tareas ({@code @Scheduled}) para comprobar cada hora si hay
+ * tareas activas cuya fecha límite esté dentro de las próximas 24 horas y que aún
+ * no hayan recibido notificación de vencimiento. Envía alertas de tipo {@code URGENTE}
+ * a todos los voluntarios asignados a dichas tareas.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -25,7 +35,11 @@ public class TareaReminderService {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     /**
-     * Se ejecuta cada hora (3600000 ms) para buscar tareas próximas a vencer.
+     * Método programado que se ejecuta automáticamente cada hora (3 600 000 ms).
+     * Busca en la base de datos todas las tareas con estado {@code PENDIENTE}, {@code ACEPTADA}
+     * o {@code EN_PROCESO} cuya fecha límite esté comprendida entre ahora y las próximas 24 horas
+     * y que todavía no han sido notificadas. Para cada una, llama a
+     * {@link #notificarVoluntarios(TareaEntity)} y marca la tarea como notificada.
      */
     @Scheduled(fixedRate = 3600000)
     @Transactional
@@ -51,6 +65,13 @@ public class TareaReminderService {
         }
     }
 
+    /**
+     * Envía una notificación de tipo {@code URGENTE} a cada voluntario asignado
+     * a la tarea indicada, informando de la fecha y hora de vencimiento.
+     *
+     * @param tarea La entidad de la tarea próxima a vencer cuya lista de voluntarios
+     *              será notificada.
+     */
     private void notificarVoluntarios(TareaEntity tarea) {
         if (tarea.getVoluntarios() == null) return;
 

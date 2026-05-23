@@ -20,16 +20,23 @@ import java.util.List;
 @RequestMapping("/api/v1/perfiles-legales")
 @RequiredArgsConstructor
 @Tag(name = "Perfiles Legales", description = "Gestión de información legal (DNI, Teléfono) de los usuarios")
+/**
+ * Controlador REST que expone los endpoints HTTP de la API para la gestión de Perfil Legal.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class PerfilLegalController {
 
     private final PerfilLegalRepository repository;
+    private final PerfilLegalMapper perfilLegalMapper;
 
     @Operation(summary = "Obtener perfil legal por Usuario ID")
     @GetMapping("/usuario/{usuarioId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'ADOPTANTE', 'ROLE_PUBLICO', 'PUBLICO')")
     public ResponseEntity<PerfilLegalResponse> getByUsuarioId(@PathVariable Integer usuarioId) {
         return repository.findByUsuarioId(usuarioId)
-                .map(PerfilLegalMapper::toResponse)
+                .map(perfilLegalMapper::toResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -38,17 +45,17 @@ public class PerfilLegalController {
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PerfilLegalResponse> save(@Valid @RequestBody PerfilLegalRequest request) {
-        PerfilLegal domain = PerfilLegalMapper.toDomain(request);
+        PerfilLegal domain = perfilLegalMapper.toDomain(request);
         
         return repository.findByUsuarioId(domain.getUsuarioId())
                 .map(existing -> {
                     domain.setId(existing.getId());
                     PerfilLegal saved = repository.save(domain);
-                    return ResponseEntity.ok(PerfilLegalMapper.toResponse(saved));
+                    return ResponseEntity.ok(perfilLegalMapper.toResponse(saved));
                 })
                 .orElseGet(() -> {
                     PerfilLegal saved = repository.save(domain);
-                    return ResponseEntity.status(HttpStatus.CREATED).body(PerfilLegalMapper.toResponse(saved));
+                    return ResponseEntity.status(HttpStatus.CREATED).body(perfilLegalMapper.toResponse(saved));
                 });
     }
 
@@ -57,7 +64,7 @@ public class PerfilLegalController {
     @PreAuthorize("hasRole('ADMIN')")
     public List<PerfilLegalResponse> getAll() {
         return repository.getAll().stream()
-                .map(PerfilLegalMapper::toResponse)
+                .map(perfilLegalMapper::toResponse)
                 .toList();
     }
 }

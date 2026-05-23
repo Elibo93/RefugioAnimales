@@ -17,6 +17,12 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Map;
 
 @RequiredArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Approve Voluntario.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
 public class ApproveVoluntarioUseCase {
 
     private final VoluntarioRepository voluntarioRepository;
