@@ -3,13 +3,11 @@ package es.refugio.frontend.web;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -32,34 +30,30 @@ import java.util.*;
  * Controlador para la gestión de donaciones en la capa de vista.
  * Maneja la visualización de listas, formularios y la integración con la pasarela de pago.
  */
+import es.refugio.frontend.service.DonacionService;
+
 @Controller
 @RequiredArgsConstructor
 public class DonacionViewController {
 
-    private final RestTemplate restTemplate;
+    private final DonacionService donacionService;
     private final TemplateEngine templateEngine;
     private final ViewControllerHelper helper;
-
-    @Value("${backend.api.url}")
-    private String apiUrl;
-
-    @Value("${auth.api.url}")
-    private String authUrl;
 
     /**
      * Lista todas las donaciones y prepara el modelo para la vista principal.
      */
     @SuppressWarnings("rawtypes")
     @GetMapping(WebRoutes.DONACIONES_BASE)
-    public String listar(Model model, 
+    public String listar(Model model,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String successMessage) {
-        
-        PaginatedResponse<DonacionRecord> pagination = helper.fetchPaginated(apiUrl + "/v1/donaciones", page, size, DonacionRecord.class);
+
+        PaginatedResponse<DonacionRecord> pagination = donacionService.fetchPaginated(page, size);
         List<DonacionRecord> donaciones = pagination.items();
-        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
-        List<Map> objetivos = helper.fetchList(apiUrl + "/v1/objetivos-donacion", Map.class);
+        List<UsuarioRecord> usuarios = donacionService.fetchUsuarios();
+        List<Map> objetivos = donacionService.fetchObjetivos();
 
         // Construir mapa de usuarios para acceso rápido por ID en la vista
         Map<Integer, UsuarioRecord> usuariosMap = new HashMap<>();
@@ -67,13 +61,7 @@ public class DonacionViewController {
             usuariosMap.put(u.id(), u);
         }
 
-        double totalDinero = 0;
-        try {
-            Double total = restTemplate.getForObject(apiUrl + "/v1/donaciones/total", Double.class);
-            totalDinero = total != null ? total : 0;
-        } catch (Exception e) {
-            // Silencioso
-        }
+        double totalDinero = donacionService.fetchTotalDinero();
 
         if (successMessage != null && !successMessage.isEmpty()) {
             model.addAttribute("successMessage", successMessage);
@@ -114,8 +102,8 @@ public class DonacionViewController {
     @SuppressWarnings("rawtypes")
     @GetMapping(WebRoutes.DONACIONES_NUEVA)
     public String formulario(Model model) {
-        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
-        List<Map> objetivos = helper.fetchList(apiUrl + "/v1/objetivos-donacion", Map.class);
+        List<UsuarioRecord> usuarios = donacionService.fetchUsuarios();
+        List<Map> objetivos = donacionService.fetchObjetivos();
 
         Map<String, Object> nuevaDonacion = new HashMap<>();
         nuevaDonacion.put("fecha", LocalDateTime.now().toString());
@@ -150,7 +138,7 @@ public class DonacionViewController {
 
         // Si no hay usuarioId, buscamos el usuario anónimo del sistema
         if (usuarioId == null) {
-            List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+            List<UsuarioRecord> usuarios = donacionService.fetchUsuarios();
             for (UsuarioRecord u : usuarios) {
                 if ("anonimo@refugio.es".equals(u.email())) {
                     usuarioId = u.id();
@@ -170,12 +158,14 @@ public class DonacionViewController {
 
         if ("MENSUAL".equals(frecuencia)) {
             LocalDateTime next = LocalDateTime.now().plusMonths(1);
-            String formattedDate = String.format("%02d/%02d/%d", next.getDayOfMonth(), next.getMonthValue(), next.getYear());
+            String formattedDate = String.format("%02d/%02d/%d", next.getDayOfMonth(), next.getMonthValue(),
+                    next.getYear());
             donacionTemp.put("proximaFechaPago", formattedDate);
         }
 
         if (!"DINERO".equals(tipo)) {
-            // Si no es dinero (comida, material, etc.), registramos directamente sin pasarela
+            // Si no es dinero (comida, material, etc.), registramos directamente sin
+            // pasarela
             Map<String, Object> body = new HashMap<>();
             body.put("usuarioId", usuarioId);
             body.put("objetivoId", objetivoId);
@@ -186,8 +176,9 @@ public class DonacionViewController {
             body.put("fecha", LocalDateTime.now().toString());
 
             try {
-                restTemplate.postForObject(apiUrl + "/v1/donaciones", body, Object.class);
-                model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_GRACIAS.getPath());
+                donacionService.crearDonacion(body);
+                model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
+                        FragmentoContenido.Donacion_GRACIAS.getPath());
                 return ThymTemplates.MAIN_LAYOUT.getPath();
             } catch (Exception e) {
                 String errorMsg = "Error al registrar la donación física.";
@@ -198,7 +189,8 @@ public class DonacionViewController {
                         if (errorMap != null && errorMap.containsKey("message")) {
                             errorMsg = (String) errorMap.get("message");
                         }
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 } else {
                     errorMsg = e.getMessage();
                 }
@@ -206,13 +198,15 @@ public class DonacionViewController {
                 // Volver al formulario con los datos
                 model.addAttribute("donacion", donacionTemp);
                 model.addAttribute("tipos", List.of("DINERO", "COMIDA", "MEDICINAS", "OTRO"));
-                model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_FORM.getPath());
+                model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
+                        FragmentoContenido.Donacion_FORM.getPath());
                 return ThymTemplates.MAIN_LAYOUT.getPath();
             }
         }
 
         model.addAttribute("donacion", donacionTemp);
-        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_PASARELA.getPath());
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
+                FragmentoContenido.Donacion_PASARELA.getPath());
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
@@ -231,7 +225,7 @@ public class DonacionViewController {
 
         // Asegurar que tenemos un usuarioId (si sigue siendo null, buscamos el anónimo)
         if (usuarioId == null) {
-            List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+            List<UsuarioRecord> usuarios = donacionService.fetchUsuarios();
             for (UsuarioRecord u : usuarios) {
                 if ("anonimo@refugio.es".equals(u.email())) {
                     usuarioId = u.id();
@@ -250,7 +244,7 @@ public class DonacionViewController {
         body.put("fecha", LocalDateTime.now().toString());
 
         try {
-            restTemplate.postForObject(apiUrl + "/v1/donaciones", body, Object.class);
+            donacionService.crearDonacion(body);
         } catch (org.springframework.web.client.RestClientResponseException e) {
             String errorMsg = "Error al procesar la donación.";
             try {
@@ -265,12 +259,14 @@ public class DonacionViewController {
             }
             model.addAttribute("errorMessage", "No se pudo procesar el pago. " + errorMsg);
             model.addAttribute("donacion", body);
-            model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_PASARELA.getPath());
+            model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
+                    FragmentoContenido.Donacion_PASARELA.getPath());
             return ThymTemplates.MAIN_LAYOUT.getPath();
         } catch (Exception e) {
             model.addAttribute("errorMessage", "Error inesperado: " + e.getMessage());
             model.addAttribute("donacion", body);
-            model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_PASARELA.getPath());
+            model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
+                    FragmentoContenido.Donacion_PASARELA.getPath());
             return ThymTemplates.MAIN_LAYOUT.getPath();
         }
 
@@ -319,7 +315,7 @@ public class DonacionViewController {
         body.put("estado", "ACTIVO");
         body.put("icono", icono);
 
-        restTemplate.postForObject(apiUrl + "/v1/objetivos-donacion", body, Object.class);
+        donacionService.crearObjetivo(body);
         redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.objetivo_creado"));
         return "redirect:" + WebRoutes.DONACIONES_BASE;
     }
@@ -331,10 +327,10 @@ public class DonacionViewController {
     @GetMapping(WebRoutes.DONACIONES_EDITAR)
     @PreAuthorize("hasRole('ADMIN')")
     public String editarFormulario(@PathVariable Integer id, Model model) {
-        DonacionRecord donacion = helper.fetchObject(apiUrl + "/v1/donaciones/" + id, DonacionRecord.class);
+        DonacionRecord donacion = donacionService.fetchDonacionById(id);
         model.addAttribute(ModelAttribute.SINGLE_Donacion.getName(), donacion);
-        model.addAttribute("usuarios", helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class));
-        model.addAttribute("objetivos", helper.fetchList(apiUrl + "/v1/objetivos-donacion", Map.class));
+        model.addAttribute("usuarios", donacionService.fetchUsuarios());
+        model.addAttribute("objetivos", donacionService.fetchObjetivos());
         model.addAttribute("tipos", List.of("DINERO", "COMIDA", "MEDICINAS", "OTRO"));
         model.addAttribute("formActionUrl", "/web/donaciones/" + id + "/editar");
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Donacion_FORM.getPath());
@@ -364,7 +360,7 @@ public class DonacionViewController {
         body.put("descripcion", descripcion);
         body.put("fecha", LocalDateTime.now().toString());
 
-        restTemplate.put(apiUrl + "/v1/donaciones/" + id, body);
+        donacionService.editarDonacion(id, body);
         redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.donacion_editada"));
         return "redirect:" + WebRoutes.DONACIONES_BASE;
     }
@@ -376,8 +372,9 @@ public class DonacionViewController {
     @ResponseBody
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
-        restTemplate.delete(apiUrl + "/v1/donaciones/" + id);
-        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
+        donacionService.eliminarDonacion(id);
+        if ("true".equals(request.getHeader("HX-Request"))
+                && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return ResponseEntity.ok("");
         }
         return ResponseEntity.status(302).header("Location", WebRoutes.DONACIONES_BASE).build();
@@ -389,8 +386,8 @@ public class DonacionViewController {
     @GetMapping(WebRoutes.DONACIONES_PDF)
     @PreAuthorize("hasRole('ADMIN')")
     public void exportarPDF(HttpServletResponse response) throws Exception {
-        List<DonacionRecord> donaciones = helper.fetchList(apiUrl + "/v1/donaciones", DonacionRecord.class);
-        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+        List<DonacionRecord> donaciones = donacionService.fetchAllDonaciones();
+        List<UsuarioRecord> usuarios = donacionService.fetchUsuarios();
 
         Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
         for (UsuarioRecord u : usuarios) {
@@ -416,8 +413,8 @@ public class DonacionViewController {
     @GetMapping(WebRoutes.DONACIONES_EXCEL)
     @PreAuthorize("hasRole('ADMIN')")
     public void exportarExcel(HttpServletResponse response) throws Exception {
-        List<DonacionRecord> donaciones = helper.fetchList(apiUrl + "/v1/donaciones", DonacionRecord.class);
-        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+        List<DonacionRecord> donaciones = donacionService.fetchAllDonaciones();
+        List<UsuarioRecord> usuarios = donacionService.fetchUsuarios();
 
         // Construir mapa de usuarios
         Map<Integer, UsuarioRecord> usuariosMap = new HashMap<>();
@@ -426,25 +423,24 @@ public class DonacionViewController {
         }
 
         byte[] excelBytes = ExcelExportHelper.exportToExcel(
-            "Donaciones",
-            List.of("ID", "ID Usuario", "Donante (Email)", "ID Objetivo", "Cantidad", "Tipo", "Frecuencia", "Descripción", "Fecha", "Próximo Pago"),
-            donaciones,
-            List.of(
-                DonacionRecord::id,
-                DonacionRecord::usuarioId,
-                d -> {
-                    UsuarioRecord u = usuariosMap.get(d.usuarioId());
-                    return u != null ? u.email() : "Anónimo";
-                },
-                d -> d.objetivoId() != null ? d.objetivoId() : "-",
-                DonacionRecord::cantidad,
-                DonacionRecord::tipo,
-                DonacionRecord::frecuencia,
-                d -> d.descripcion() != null ? d.descripcion() : "",
-                d -> d.fecha() != null ? d.fecha().toString() : "",
-                d -> d.proximaFechaPago() != null ? d.proximaFechaPago().toString() : "-"
-            )
-        );
+                "Donaciones",
+                List.of("ID", "ID Usuario", "Donante (Email)", "ID Objetivo", "Cantidad", "Tipo", "Frecuencia",
+                        "Descripción", "Fecha", "Próximo Pago"),
+                donaciones,
+                List.of(
+                        DonacionRecord::id,
+                        DonacionRecord::usuarioId,
+                        d -> {
+                            UsuarioRecord u = usuariosMap.get(d.usuarioId());
+                            return u != null ? u.email() : "Anónimo";
+                        },
+                        d -> d.objetivoId() != null ? d.objetivoId() : "-",
+                        DonacionRecord::cantidad,
+                        DonacionRecord::tipo,
+                        DonacionRecord::frecuencia,
+                        d -> d.descripcion() != null ? d.descripcion() : "",
+                        d -> d.fecha() != null ? d.fecha().toString() : "",
+                        d -> d.proximaFechaPago() != null ? d.proximaFechaPago().toString() : "-"));
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename=donaciones.xlsx");
         try (OutputStream out = response.getOutputStream()) {

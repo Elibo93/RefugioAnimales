@@ -31,7 +31,6 @@ public class DniValidator {
             return true;
         }
 
-
         // Regex para DNI (8 números + 1 letra) o NIE (X/Y/Z + 7 números + 1 letra)
         Pattern pattern = Pattern.compile("([0-9]{8}|[XYZ][0-9]{7})[A-Z]");
         Matcher matcher = pattern.matcher(dni);

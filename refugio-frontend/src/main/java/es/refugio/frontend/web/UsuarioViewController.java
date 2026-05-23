@@ -19,8 +19,7 @@ import org.springframework.ui.Model;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
+import es.refugio.frontend.service.UsuarioService;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -36,7 +35,7 @@ public class UsuarioViewController {
 
     private static final Logger logger = LoggerFactory.getLogger(UsuarioViewController.class);
 
-    private final RestTemplate restTemplate;
+    private final UsuarioService usuarioService;
     private final TemplateEngine templateEngine;
     private final ViewControllerHelper helper;
 
@@ -203,7 +202,7 @@ public class UsuarioViewController {
         userBody.put("rol", rol);
 
         try {
-            Map<?, ?> createdUser = restTemplate.postForObject(authUrl + "/v1/usuarios", userBody, Map.class);
+            Map<?, ?> createdUser = usuarioService.createUserAuth(userBody);
             if (createdUser != null && createdUser.get("id") != null) {
                 Integer usuarioId = ((Number) createdUser.get("id")).intValue();
 
@@ -218,7 +217,7 @@ public class UsuarioViewController {
                 legalBody.put("fechaNacimiento",
                         (fechaNacimiento != null && !fechaNacimiento.isEmpty()) ? fechaNacimiento : "2000-01-01");
 
-                restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", legalBody, Object.class);
+                usuarioService.createPerfilLegal(legalBody);
             }
             redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.usuario_creado"));
         } catch (Exception e) {
@@ -303,7 +302,7 @@ public class UsuarioViewController {
             userBody.put("rol", rol);
         }
         
-        restTemplate.put(authUrl + "/v1/usuarios/" + id, userBody);
+        usuarioService.updateUserAuth(id, userBody);
 
         // 2. Actualizar PerfilLegal
         Map<String, Object> legalBody = new HashMap<>();
@@ -313,7 +312,7 @@ public class UsuarioViewController {
         legalBody.put("dni", dni);
         legalBody.put("telefono", telefono);
         legalBody.put("fechaNacimiento", fechaNacimiento);
-        restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", legalBody, Object.class);
+        usuarioService.createPerfilLegal(legalBody);
 
         redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.perfil_actualizado"));
         
@@ -324,17 +323,8 @@ public class UsuarioViewController {
     @ResponseBody
     public ResponseEntity<?> verificarPassword(@PathVariable Integer id, @RequestParam String password) {
         try {
-            org.springframework.util.MultiValueMap<String, String> map = new org.springframework.util.LinkedMultiValueMap<>();
-            map.add("password", password != null ? password.trim() : "");
-
-            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-            headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
-            
-            org.springframework.http.HttpEntity<org.springframework.util.MultiValueMap<String, String>> req = 
-                new org.springframework.http.HttpEntity<>(map, headers);
-
-            return restTemplate.postForEntity(authUrl + "/v1/usuarios/" + id + "/verificar-password", req, Map.class);
-        } catch (HttpClientErrorException.Forbidden e) {
+            return (ResponseEntity<Map>) usuarioService.verificarPassword(id, password);
+        } catch (org.springframework.web.client.HttpClientErrorException.Forbidden e) {
             logger.warn("Acceso denegado al verificar password para ID {}: {}", id, e.getResponseBodyAsString());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Contraseña actual incorrecta o falta de permisos"));
         } catch (Exception e) {
@@ -351,7 +341,7 @@ public class UsuarioViewController {
             Map<String, String> body = new HashMap<>();
             body.put("newPassword", newPassword);
             
-            restTemplate.put(authUrl + "/v1/usuarios/" + id + "/password", body);
+            usuarioService.cambiarPassword(id, body);
             
             return ResponseEntity.ok(Map.of("message", "Contraseña actualizada"));
         } catch (Exception e) {
@@ -368,13 +358,13 @@ public class UsuarioViewController {
             logger.info("Iniciando borrado coordinado para usuario ID: {}", id);
 
             try {
-                restTemplate.delete(apiUrl + "/v1/perfiles-legales/usuario/" + id);
+                usuarioService.deletePerfilLegal(id);
                 logger.info("PerfilLegal eliminado con éxito para usuario {}", id);
             } catch (Exception e) {
                 logger.warn("No se pudo eliminar el PerfilLegal del usuario {} o no existía. Continuando...", id);
             }
 
-            restTemplate.delete(authUrl + "/v1/usuarios/" + id);
+            usuarioService.deleteUsuarioAuth(id);
             logger.info("Usuario ID {} eliminado con éxito de Auth", id);
 
             redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.usuario_eliminado"));
@@ -496,7 +486,7 @@ public class UsuarioViewController {
 
         // Gamificación
         try {
-            model.addAttribute("metricas", restTemplate.getForObject(apiUrl + "/v1/gamificacion/metricas/usuario/" + id, Map.class));
+            model.addAttribute("metricas", usuarioService.fetchMetricasGamificacion(id));
             model.addAttribute("logrosUsuario", helper.fetchList(apiUrl + "/v1/gamificacion/logros/usuario/" + id, Map.class));
             model.addAttribute("todosLosLogros", helper.fetchList(apiUrl + "/v1/gamificacion/logros", Map.class));
         } catch (Exception e) {
@@ -705,7 +695,7 @@ public class UsuarioViewController {
                         adoptanteReq.put("usuarioId", u.id());
                         adoptanteReq.put("estadoValidacion", "APROBADO");
                         
-                        Map<?, ?> createdAdoptante = restTemplate.postForObject(apiUrl + "/v1/adoptantes", adoptanteReq, Map.class);
+                        Map<?, ?> createdAdoptante = usuarioService.createAdoptante(adoptanteReq);
                         if (createdAdoptante != null && createdAdoptante.get("id") != null) {
                             Integer newAdoptanteId = ((Number) createdAdoptante.get("id")).intValue();
                             adoptantesUserIds.put(u.id(), newAdoptanteId);

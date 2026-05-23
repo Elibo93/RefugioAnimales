@@ -12,6 +12,7 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import java.util.ArrayList;
 
 import java.nio.charset.StandardCharsets;
@@ -29,7 +30,7 @@ public class RestTemplateConfig {
     @Bean
     @LoadBalanced
     public RestTemplate restTemplate(SessionCookieRelayInterceptor sessionCookieRelayInterceptor) {
-        RestTemplate restTemplate = new RestTemplate();
+        RestTemplate restTemplate = new RestTemplate(new JdkClientHttpRequestFactory());
 
         // Configurar ObjectMapper con soporte de fechas Java 8
         ObjectMapper objectMapper = new ObjectMapper();
