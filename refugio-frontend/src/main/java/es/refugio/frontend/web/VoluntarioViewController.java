@@ -377,7 +377,7 @@ public class VoluntarioViewController {
 
         try {
             voluntarioService.crearVoluntarioYPerfil(finalUsuarioId, nombre, apellido, dni, direccion, telefono, fechaNacimiento, especialidad, disponibilidad);
-            redirectAttributes.addFlashAttribute("successMessage", "toast.success.solicitud_enviada");
+            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("voluntario.estado.pendiente.msg"));
         } catch (Exception e) {
             String errorMsg = "Error al crear el perfil: " + ErrorMessageExtractor.extract(e);
             logger.error(errorMsg);

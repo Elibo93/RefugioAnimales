@@ -291,12 +291,11 @@
 
                     <div th:if="${!#lists.isEmpty(tareas)}" style="display: flex; flex-direction: column; gap: 12px;">
                         <a th:each="t : ${tareas}" th:if="${t != null}" 
-                           th:href="${currentUserId == persona.id} ? @{/web/tareas} : null"
+                           th:href="@{/web/tareas(voluntarioIdFiltro=${v_id})}"
                            class="premium-row-card" 
-                           style="padding: 15px; background: var(--bg-body); border: 1px solid var(--border); border-radius: 16px; text-decoration: none; color: inherit; display: block; transition: all 0.2s;"
-                           th:styleappend="${currentUserId == persona.id} ? 'cursor: pointer;' : 'cursor: default;'"
-                           th:onmouseover="${currentUserId == persona.id} ? 'this.style.transform=''scale(1.02)''; this.style.borderColor=''var(--primary-light)''; this.style.boxShadow=''var(--shadow-sm)'';' : ''"
-                           th:onmouseout="${currentUserId == persona.id} ? 'this.style.transform=''scale(1)''; this.style.borderColor=''var(--border)''; this.style.boxShadow=''none'';' : ''">
+                           style="padding: 15px; background: var(--bg-body); border: 1px solid var(--border); border-radius: 16px; text-decoration: none; color: inherit; display: block; transition: all 0.2s; cursor: pointer;"
+                           onmouseover="this.style.transform='scale(1.02)'; this.style.borderColor='var(--primary-light)'; this.style.boxShadow='var(--shadow-sm)';"
+                           onmouseout="this.style.transform='scale(1)'; this.style.borderColor='var(--border)'; this.style.boxShadow='none';">
                             <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
                                 <div class="task-icon-box" style="background: white; border: 1px solid var(--border);">
                                     <i data-lucide="clipboard-list" style="width: 18px; color: var(--primary);"></i>

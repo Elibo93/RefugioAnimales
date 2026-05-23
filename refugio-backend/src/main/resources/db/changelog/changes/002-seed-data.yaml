@@ -717,48 +717,6 @@ databaseChangeLog:
         columns:
         - column:
             name: nombre
-            value: Balto
-        - column:
-            name: especie
-            value: PERRO
-        - column:
-            name: raza
-            value: Husky
-        - column:
-            name: sexo
-            value: MACHO
-        - column:
-            name: chip_id
-            value: CHIP021
-        - column:
-            name: estado
-            value: DISPONIBLE
-        - column:
-            name: edad
-            valueNumeric: 2
-        - column:
-            name: tamano
-            value: GRANDE
-        - column:
-            name: descripcion
-            value: Ojos azules impresionantes
-        - column:
-            name: foto
-            value: https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&w=800&q=80
-        - column:
-            name: fecha_ingreso
-            valueDate: now()
-        - column:
-            name: peso
-            valueNumeric: 26.5
-        - column:
-            name: nivel_energia
-            valueNumeric: 5
-    - insert:
-        tableName: animales
-        columns:
-        - column:
-            name: nombre
             value: Pluto
         - column:
             name: especie
@@ -1818,7 +1776,7 @@ databaseChangeLog:
             value: No le pidas que corra
         - column:
             name: foto
-            value: https://images.unsplash.com/photo-1548550023-2bdb3c5beed7
+            value: /api/v1/animales/images/flash.jpg
         - column:
             name: fecha_ingreso
             valueDate: now()

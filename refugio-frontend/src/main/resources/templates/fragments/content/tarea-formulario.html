@@ -241,7 +241,7 @@
                 </div>
 
                 <div class="modal-actions" style="margin-top: 3rem; display: flex; gap: 15px; justify-content: flex-end;">
-                    <a th:href="${returnUrl}" class="btn btn-secondary" th:text="#{generic.auto.cancelar}"></a>
+                    <button type="button" onclick="window.history.back()" class="btn btn-secondary" style="border: none; cursor: pointer;" th:text="#{generic.auto.cancelar}"></button>
                     <button type="submit" class="btn btn-primary">
                         <i data-lucide="save" style="width: 18px;"></i>
                         <span th:text="${tarea.id == null ? #messages.msg('tarea.auto.crear.tarea') : #messages.msg('generic.auto.guardar.cambios')}">Crear Tarea</span>

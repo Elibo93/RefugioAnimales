@@ -115,17 +115,44 @@ public class AnimalViewController {
         model.addAttribute("misFavoritosIds", misFavoritosIds);
 
         try {
-            PaginatedResponse<AnimalRecord> pagination = animalService.fetchPaginatedAnimals(page, size, estado,
-                    especie, tamano, edad, sexo, urgencia, q);
-            List<AnimalRecord> animalesList = pagination.items();
+            PaginatedResponse<AnimalRecord> pagination;
+            List<AnimalRecord> animalesList;
 
             if (Boolean.TRUE.equals(favoritos) && !misFavoritosIds.isEmpty()) {
+                // Obtenemos todos los animales y filtramos por favoritos
                 List<Integer> finalFavs = misFavoritosIds;
-                animalesList = animalesList.stream()
+                List<AnimalRecord> todosFavoritos = animalService.fetchAllAnimals().stream()
                         .filter(a -> finalFavs.contains(a.id()))
                         .toList();
+
+                int totalFavoritos = todosFavoritos.size();
+                int totalPages = (int) Math.ceil((double) totalFavoritos / size);
+                int start = (page - 1) * size;
+                int end = Math.min(start + size, totalFavoritos);
+
+                if (start < totalFavoritos) {
+                    animalesList = todosFavoritos.subList(start, end);
+                } else {
+                    animalesList = List.of();
+                }
+
+                pagination = new PaginatedResponse<>(
+                        animalesList,
+                        totalPages,       // int totalPages
+                        totalFavoritos,   // long total
+                        page,             // int page
+                        size,             // int pageSize
+                        page < totalPages,// boolean hasNext
+                        page > 1          // boolean hasPrevious
+                );
+
             } else if (Boolean.TRUE.equals(favoritos)) {
                 animalesList = List.of();
+                pagination = new PaginatedResponse<>(animalesList, 0, 0, page, size, false, false);
+            } else {
+                pagination = animalService.fetchPaginatedAnimals(page, size, estado,
+                        especie, tamano, edad, sexo, urgencia, q);
+                animalesList = pagination.items();
             }
 
             model.addAttribute(ModelAttribute.Animal_LIST.getName(), animalesList);

@@ -71,9 +71,10 @@
                           hx-push-url="true"
                           style="display: flex; align-items: center; gap: 12px; flex: 1; max-width: 700px;">
                         
-                        <!-- Preservar estados del modo selección -->
+                        <!-- Preservar estados del modo selección y filtros -->
                         <input type="hidden" name="modoSeleccion" th:value="${modoSeleccion}">
                         <input type="hidden" name="voluntarioIdSeleccion" th:value="${voluntarioIdSeleccion}">
+                        <input type="hidden" name="voluntarioIdFiltro" th:value="${voluntarioIdFiltro}">
 
                         <!-- Selector de Prioridad -->
                         <div style="position: relative; min-width: 160px;">
@@ -104,7 +105,7 @@
                             </select>
                         </div>
 
-                        <a th:hx-get="@{/web/tareas(modoSeleccion=${modoSeleccion}, voluntarioIdSeleccion=${voluntarioIdSeleccion})}" 
+                        <a th:hx-get="@{/web/tareas(modoSeleccion=${modoSeleccion}, voluntarioIdSeleccion=${voluntarioIdSeleccion}, voluntarioIdFiltro=${voluntarioIdFiltro})}" 
                            hx-target=".table-wrapper"
                            hx-select=".table-wrapper"
                            hx-swap="outerHTML"
@@ -124,10 +125,10 @@
                             onmouseout="this.style.transform='scale(1)'; this.style.borderColor='#e2e8f0';">
                         <i id="view-icon" data-lucide="calendar" style="width: 24px; height: 24px; color: var(--primary);"></i>
                     </button>
-                    <a th:href="@{/web/tareas/pdf(prioridad=${selectedPrioridad}, estado=${selectedEstado})}" target="_blank" title="Exportar listado a PDF" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                    <a th:href="@{/web/tareas/pdf(prioridad=${selectedPrioridad}, estado=${selectedEstado}, voluntarioIdFiltro=${voluntarioIdFiltro})}" target="_blank" title="Exportar listado a PDF" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
                         <img src="/images/pdf.png" alt="PDF" style="height: 48px; width: 48px; object-fit: contain;">
                     </a>
-                    <a th:href="@{/web/tareas/excel(prioridad=${selectedPrioridad}, estado=${selectedEstado})}" target="_blank" title="Exportar listado a Excel" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                    <a th:href="@{/web/tareas/excel(prioridad=${selectedPrioridad}, estado=${selectedEstado}, voluntarioIdFiltro=${voluntarioIdFiltro})}" target="_blank" title="Exportar listado a Excel" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
                         <img src="/images/excel.png" alt="Excel" style="height: 48px; width: 48px; object-fit: contain;">
                     </a>
                     <a th:if="${isAdmin}" class="btn btn-primary" th:href="@{/web/tareas/nueva}">
