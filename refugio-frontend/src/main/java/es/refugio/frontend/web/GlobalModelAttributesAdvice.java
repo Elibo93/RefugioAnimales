@@ -2,11 +2,10 @@ package es.refugio.frontend.web;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.client.RestTemplate;
+import es.refugio.frontend.service.GlobalAttributesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,13 +21,7 @@ public class GlobalModelAttributesAdvice {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalModelAttributesAdvice.class);
 
-    private final RestTemplate restTemplate;
-
-    @Value("${auth.api.url}")
-    private String authUrl;
-
-    @Value("${backend.api.url}")
-    private String apiUrl;
+    private final GlobalAttributesService globalAttributesService;
 
     @ModelAttribute("currentUri")
     public String currentUri(HttpServletRequest request) {
@@ -56,7 +49,7 @@ public class GlobalModelAttributesAdvice {
 
         // 2. Atributos de usuario (inyectados si hay sesión)
         try {
-            Map<String, Object> me = restTemplate.getForObject(authUrl + "/v1/me", Map.class);
+            Map<String, Object> me = globalAttributesService.fetchMe();
 
             if (me != null) {
                 Object idObj = me.get("id");
@@ -73,8 +66,7 @@ public class GlobalModelAttributesAdvice {
 
                 // Obtener el nombre del PerfilLegal del backend
                 try {
-                    Map<String, Object> perfil = restTemplate.getForObject(
-                            apiUrl + "/v1/perfiles-legales/usuario/" + userId, Map.class);
+                    Map<String, Object> perfil = globalAttributesService.fetchPerfilLegal(userId);
                     if (perfil != null) {
                         model.addAttribute("currentUserName", perfil.get("nombre") + " " + perfil.get("apellido"));
                     } else {
@@ -98,8 +90,7 @@ public class GlobalModelAttributesAdvice {
                 try {
                     // Usamos el endpoint personal para que el badge "SOLICITADO" sea solo del
                     // usuario actual
-                    List<Map<String, Object>> solicitudes = restTemplate
-                            .getForObject(apiUrl + "/v1/solicitudes-adopcion/mis-solicitudes", List.class);
+                    List<Map<String, Object>> solicitudes = globalAttributesService.fetchMisSolicitudes();
                     if (solicitudes != null) {
                         Set<Integer> animalesSolicitadosIds = solicitudes.stream()
                                 .map(s -> {
@@ -120,8 +111,7 @@ public class GlobalModelAttributesAdvice {
 
                 // 4. Comprobar preferencias
                 try {
-                    Map<String, Object> prefs = restTemplate.getForObject(apiUrl + "/v1/preferencias/usuario/" + userId,
-                            Map.class);
+                    Map<String, Object> prefs = globalAttributesService.fetchPreferencias(userId);
                     model.addAttribute("hasPreferences", prefs != null);
                 } catch (Exception e) {
                     model.addAttribute("hasPreferences", false);
@@ -130,10 +120,8 @@ public class GlobalModelAttributesAdvice {
                 // 5. Conteos pendientes para la barra lateral (si es Administrador)
                 if (isAdmin) {
                     try {
-                        Long pendingAdoptions = restTemplate
-                                .getForObject(apiUrl + "/v1/solicitudes-adopcion/count/pendiente", Long.class);
-                        Long pendingVolunteers = restTemplate.getForObject(apiUrl + "/v1/voluntarios/count/pendiente",
-                                Long.class);
+                        Long pendingAdoptions = globalAttributesService.fetchPendingAdoptionsCount();
+                        Long pendingVolunteers = globalAttributesService.fetchPendingVolunteersCount();
                         model.addAttribute("pendingAdoptionsCount", pendingAdoptions != null ? pendingAdoptions : 0L);
                         model.addAttribute("pendingVolunteersCount",
                                 pendingVolunteers != null ? pendingVolunteers : 0L);
@@ -162,6 +150,7 @@ public class GlobalModelAttributesAdvice {
         model.addAttribute("isAdoptante", false);
         model.addAttribute("isPublico", false);
         model.addAttribute("animalesSolicitadosIds", new HashSet<>());
-        model.addAttribute("hasPreferences", true); // Valor por defecto verdadero para ocultar el banner a los usuarios anónimos
+        model.addAttribute("hasPreferences", true); // Valor por defecto verdadero para ocultar el banner a los usuarios
+                                                    // anónimos
     }
 }

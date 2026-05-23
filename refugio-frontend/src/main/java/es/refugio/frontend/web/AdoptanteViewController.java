@@ -1,12 +1,10 @@
 package es.refugio.frontend.web;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.RestClientResponseException;
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.dto.*;
@@ -29,6 +27,8 @@ import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import es.refugio.common.util.ExcelExportHelper;
 
+import es.refugio.frontend.service.AdoptanteService;
+
 /**
  * AdoptanteViewController — gestiona el flujo de conversión de usuario a adoptante.
  * Delega completamente en el backend a través de la API REST.
@@ -39,15 +39,9 @@ public class AdoptanteViewController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdoptanteViewController.class);
 
-    private final RestTemplate restTemplate;
+    private final AdoptanteService adoptanteService;
     private final TemplateEngine templateEngine;
     private final ViewControllerHelper helper;
-
-    @Value("${backend.api.url}")
-    private String apiUrl;
-
-    @Value("${auth.api.url}")
-    private String authUrl;
 
     @GetMapping(WebRoutes.ADOPTANTES_BASE)
     @PreAuthorize("hasRole('ADMIN')")
@@ -57,16 +51,11 @@ public class AdoptanteViewController {
                         @RequestParam(required = false) String q,
                         HttpServletRequest request) {
         
-        String url = apiUrl + "/v1/adoptantes";
-        if (q != null && !q.trim().isEmpty()) {
-            url += "?q=" + q;
-        }
-        
-        PaginatedResponse<AdoptanteRecord> pagination = helper.fetchPaginated(url, page, size, AdoptanteRecord.class);
+        PaginatedResponse<AdoptanteRecord> pagination = adoptanteService.fetchPaginatedAdoptantes(page, size, q);
         List<AdoptanteRecord> adoptantes = pagination.items();
-        logger.info("[ADOPTANTES] URL: {}, page={}, size={}, total={}, items={}", url, page, size, pagination.total(), adoptantes.size());
-        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
-        List<PerfilLegalRecord> perfilesLegales = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+        logger.info("[ADOPTANTES] page={}, size={}, total={}, items={}", page, size, pagination.total(), adoptantes.size());
+        List<UsuarioRecord> usuarios = adoptanteService.fetchAllUsuarios();
+        List<PerfilLegalRecord> perfilesLegales = adoptanteService.fetchAllPerfilesLegales();
 
         Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
         for (UsuarioRecord u : usuarios) {
@@ -128,18 +117,18 @@ public class AdoptanteViewController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ADOPTANTE')")
     public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
         try {
-            AdoptanteRecord adoptante = helper.fetchObject(apiUrl + "/v1/adoptantes/" + id, AdoptanteRecord.class);
+            AdoptanteRecord adoptante = adoptanteService.fetchAdoptanteById(id);
             model.addAttribute(ModelAttribute.SINGLE_Adoptante.getName(), adoptante);
             
             if (adoptante != null && adoptante.usuarioId() != null) {
                 Integer uId = adoptante.usuarioId();
-                UsuarioRecord user = helper.fetchObject(authUrl + "/v1/usuarios/" + uId, UsuarioRecord.class);
+                UsuarioRecord user = adoptanteService.fetchUsuarioById(uId);
                 if (user != null) {
                     model.addAttribute("userEmail", user.email());
                 }
                 
                 try {
-                    PerfilLegalRecord perfil = helper.fetchObject(apiUrl + "/v1/perfiles-legales/usuario/" + uId, PerfilLegalRecord.class);
+                    PerfilLegalRecord perfil = adoptanteService.fetchPerfilLegalByUsuarioId(uId);
                     if (perfil != null) {
                         model.addAttribute("nombreCompleto", perfil.nombre() + " " + perfil.apellido());
                         model.addAttribute("userPhone", perfil.telefono());
@@ -177,21 +166,7 @@ public class AdoptanteViewController {
             @RequestParam String fechaNacimiento,
             RedirectAttributes redirectAttributes) {
         try {
-            // 1. Crear/Actualizar PerfilLegal (Fuente de verdad para identidad)
-            Map<String, Object> bodyPerfil = new HashMap<>();
-            bodyPerfil.put("usuarioId", usuarioId);
-            bodyPerfil.put("nombre", nombre);
-            bodyPerfil.put("apellido", apellido);
-            bodyPerfil.put("dni", dni);
-            bodyPerfil.put("direccion", direccion);
-            bodyPerfil.put("telefono", (telefono != null && !telefono.isEmpty()) ? telefono : "000000000");
-            bodyPerfil.put("fechaNacimiento", fechaNacimiento);
-            restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
-
-            // 2. Crear Perfil de Adoptante (Rol operativo)
-            Map<String, Object> bodyAdoptante = new HashMap<>();
-            bodyAdoptante.put("usuarioId", usuarioId);
-            restTemplate.postForObject(apiUrl + "/v1/adoptantes", bodyAdoptante, Object.class);
+            adoptanteService.crearAdoptanteYPerfil(usuarioId, nombre, apellido, dni, direccion, telefono, fechaNacimiento);
 
             redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.adoptante_creado"));
             return "redirect:" + WebRoutes.ADOPTANTES_BASE;
@@ -215,22 +190,7 @@ public class AdoptanteViewController {
             @RequestParam(required = false) String estadoValidacion,
             RedirectAttributes redirectAttributes) {
         try {
-            Map<String, Object> body = new HashMap<>();
-            body.put("usuarioId", usuarioId);
-            if (estadoValidacion != null) {
-                body.put("estadoValidacion", estadoValidacion);
-            }
-            restTemplate.put(apiUrl + "/v1/adoptantes/" + id, body);
-
-            // 2. Actualizar PerfilLegal
-            Map<String, Object> bodyPerfil = new HashMap<>();
-            bodyPerfil.put("usuarioId", usuarioId);
-            bodyPerfil.put("nombre", nombre);
-            bodyPerfil.put("apellido", apellido);
-            bodyPerfil.put("dni", dni);
-            bodyPerfil.put("direccion", direccion);
-            bodyPerfil.put("fechaNacimiento", fechaNacimiento);
-            restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
+            adoptanteService.editarAdoptanteYPerfil(id, usuarioId, nombre, apellido, dni, direccion, fechaNacimiento, estadoValidacion);
 
             redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.adoptante_editado"));
             return "redirect:" + WebRoutes.ADOPTANTES_BASE;
@@ -248,7 +208,7 @@ public class AdoptanteViewController {
     @PreAuthorize("hasRole('ADMIN')")
     public String eliminar(@PathVariable Integer id, Model model) {
         try {
-            restTemplate.delete(apiUrl + "/v1/adoptantes/" + id);
+            adoptanteService.eliminarAdoptante(id);
         } catch (Exception ignored) {}
         return "redirect:" + WebRoutes.ADOPTANTES_BASE;
     }
@@ -256,7 +216,7 @@ public class AdoptanteViewController {
     @PostMapping(WebRoutes.ADOPTANTES_APROBAR)
     public String aprobar(@PathVariable Integer id) {
         try {
-            restTemplate.patchForObject(apiUrl + "/v1/adoptantes/" + id + "/approve", null, Object.class);
+            adoptanteService.aprobarAdoptante(id);
         } catch (Exception ignored) {}
         return "redirect:" + WebRoutes.ADOPTANTES_BASE;
     }
@@ -264,16 +224,16 @@ public class AdoptanteViewController {
     @PostMapping(WebRoutes.ADOPTANTES_RECHAZAR)
     public String rechazar(@PathVariable Integer id) {
         try {
-            restTemplate.patchForObject(apiUrl + "/v1/adoptantes/" + id + "/reject", null, Object.class);
+            adoptanteService.rechazarAdoptante(id);
         } catch (Exception ignored) {}
         return "redirect:" + WebRoutes.ADOPTANTES_BASE;
     }
 
     @GetMapping(WebRoutes.ADOPTANTES_PDF)
     public void exportPdf(HttpServletResponse response) throws Exception {
-        List<AdoptanteRecord> adoptantes = helper.fetchList(apiUrl + "/v1/adoptantes", AdoptanteRecord.class);
-        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
-        List<PerfilLegalRecord> perfilesLegales = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+        List<AdoptanteRecord> adoptantes = adoptanteService.fetchAllAdoptantes();
+        List<UsuarioRecord> usuarios = adoptanteService.fetchAllUsuarios();
+        List<PerfilLegalRecord> perfilesLegales = adoptanteService.fetchAllPerfilesLegales();
 
         Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
         for (UsuarioRecord u : usuarios) {
@@ -306,9 +266,9 @@ public class AdoptanteViewController {
 
     @GetMapping(WebRoutes.ADOPTANTES_EXCEL)
     public void exportarExcel(HttpServletResponse response) throws Exception {
-        List<AdoptanteRecord> adoptantes = helper.fetchList(apiUrl + "/v1/adoptantes", AdoptanteRecord.class);
-        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
-        List<PerfilLegalRecord> perfilesLegales = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+        List<AdoptanteRecord> adoptantes = adoptanteService.fetchAllAdoptantes();
+        List<UsuarioRecord> usuarios = adoptanteService.fetchAllUsuarios();
+        List<PerfilLegalRecord> perfilesLegales = adoptanteService.fetchAllPerfilesLegales();
 
         Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
         for (UsuarioRecord u : usuarios) {

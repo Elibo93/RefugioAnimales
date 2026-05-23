@@ -3,14 +3,10 @@ package es.refugio.frontend.web;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.HttpStatusCodeException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -25,12 +21,14 @@ import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
 import es.refugio.frontend.web.dto.*;
 import es.refugio.frontend.web.util.ViewControllerHelper;
-import es.refugio.frontend.web.util.ErrorMessageExtractor;
 
 import java.io.OutputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+
+import es.refugio.frontend.service.TareaService;
+import es.refugio.frontend.service.VoluntarioService;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -39,15 +37,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'VOLUNTARIO_ADOPTANTE')")
 public class TareaViewController {
 
-    private final RestTemplate restTemplate;
+    private final TareaService tareaService;
+    private final VoluntarioService voluntarioService;
     private final TemplateEngine templateEngine;
     private final ViewControllerHelper helper;
-
-    @Value("${backend.api.url}")
-    private String apiUrl;
-
-    @Value("${auth.api.url}")
-    private String authUrl;
 
     @GetMapping(WebRoutes.TAREAS_BASE)
     public String listar(Model model,
@@ -60,19 +53,20 @@ public class TareaViewController {
             @RequestParam(required = false) String successMessage,
             HttpServletRequest request,
             HttpServletResponse response) {
-        
+
         response.setHeader("Vary", "HX-Request");
 
         if (modoSeleccion && voluntarioIdSeleccion != null) {
             try {
-                VoluntarioRecord v = helper.fetchObject(apiUrl + "/v1/voluntarios/" + voluntarioIdSeleccion, VoluntarioRecord.class);
+                VoluntarioRecord v = voluntarioService.fetchVoluntarioById(voluntarioIdSeleccion);
                 if (v != null && v.usuarioId() != null) {
-                    PerfilLegalRecord p = helper.fetchObject(apiUrl + "/v1/perfiles-legales/usuario/" + v.usuarioId(), PerfilLegalRecord.class);
+                    PerfilLegalRecord p = voluntarioService.fetchPerfilLegalByUsuarioId(v.usuarioId());
                     if (p != null) {
                         model.addAttribute("voluntarioNombreSeleccion", p.nombre() + " " + p.apellido());
                     }
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         Object isAdminObj = model.getAttribute("isAdmin");
@@ -82,26 +76,43 @@ public class TareaViewController {
         Integer myVoluntarioId = null;
         if (!isAdmin && currentUserId != null) {
             try {
-                VoluntarioRecord vObj = helper.fetchObject(apiUrl + "/v1/voluntarios/usuario/" + currentUserId, VoluntarioRecord.class);
+                VoluntarioRecord vObj = voluntarioService.fetchVoluntarioByUsuarioId((Integer) currentUserId);
                 if (vObj != null) {
                     myVoluntarioId = vObj.id();
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         List<DisponibilidadRecord> disponibilidades = Collections.emptyList();
         if (modoSeleccion && voluntarioIdSeleccion != null) {
             try {
-                disponibilidades = helper.fetchList(apiUrl + "/v1/voluntarios/" + voluntarioIdSeleccion + "/disponibilidad", DisponibilidadRecord.class);
-            } catch (Exception ignored) {}
+                List<Map<String, Object>> listDisponibilidad = voluntarioService
+                        .fetchDisponibilidad(voluntarioIdSeleccion);
+                if (listDisponibilidad != null) {
+                    List<DisponibilidadRecord> mapped = new ArrayList<>();
+                    for (Map<String, Object> map : listDisponibilidad) {
+                        try {
+                            String f = map.get("fecha") != null ? map.get("fecha").toString() : null;
+                            LocalDate date = f != null ? LocalDate.parse(f) : null;
+                            String st = map.get("estado") != null ? map.get("estado").toString() : null;
+                            mapped.add(new DisponibilidadRecord(null, date, null, st));
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    disponibilidades = mapped;
+                }
+            } catch (Exception ignored) {
+            }
         }
 
-        List<TareaRecord> todasTareasFiltradas = fetchFiltered(prioridad, estado, myVoluntarioId, voluntarioIdSeleccion, disponibilidades);
+        List<TareaRecord> todasTareasFiltradas = fetchFiltered(prioridad, estado, myVoluntarioId, voluntarioIdSeleccion,
+                disponibilidades);
         PaginatedResponse<TareaRecord> pagination = paginateList(todasTareasFiltradas, page, size);
         List<TareaRecord> tareas = pagination.items();
         model.addAttribute("todasTareasFiltradas", todasTareasFiltradas);
-        
-        List<VoluntarioRecord> voluntarios = helper.fetchList(apiUrl + "/v1/voluntarios", VoluntarioRecord.class);
+
+        List<VoluntarioRecord> voluntarios = voluntarioService.fetchAllVoluntarios();
 
         Set<Integer> assignedTaskIds = new HashSet<>();
         if (modoSeleccion && voluntarioIdSeleccion != null) {
@@ -137,11 +148,12 @@ public class TareaViewController {
         model.addAttribute("modoSeleccion", modoSeleccion);
         model.addAttribute("voluntarioIdSeleccion", voluntarioIdSeleccion);
         model.addAttribute("myVoluntarioId", myVoluntarioId);
-        
+
         if (successMessage != null)
             model.addAttribute("successMessage", successMessage);
 
-        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request"))
+                && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Tarea_LIST.getPath() + " :: content";
         }
 
@@ -164,13 +176,14 @@ public class TareaViewController {
         if (voluntarioId != null) {
             tarea.put("voluntarioIds", List.of(voluntarioId));
             try {
-                VoluntarioRecord v = helper.fetchObject(apiUrl + "/v1/voluntarios/" + voluntarioId, VoluntarioRecord.class);
+                VoluntarioRecord v = voluntarioService.fetchVoluntarioById(voluntarioId);
                 if (v != null && v.usuarioId() != null) {
-                    UsuarioRecord u = helper.fetchObject(authUrl + "/v1/usuarios/" + v.usuarioId(), UsuarioRecord.class);
+                    UsuarioRecord u = voluntarioService.fetchUsuarioById(v.usuarioId());
                     PerfilLegalRecord p = null;
                     try {
-                        p = helper.fetchObject(apiUrl + "/v1/perfiles-legales/usuario/" + v.usuarioId(), PerfilLegalRecord.class);
-                    } catch (Exception ignored) {}
+                        p = voluntarioService.fetchPerfilLegalByUsuarioId(v.usuarioId());
+                    } catch (Exception ignored) {
+                    }
 
                     if (u != null) {
                         Map<String, Object> displayVol = new HashMap<>();
@@ -187,24 +200,27 @@ public class TareaViewController {
                         model.addAttribute("voluntarioPreseleccionado", displayVol);
                     }
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
             model.addAttribute("returnUrl", WebRoutes.VOLUNTARIOS_BASE);
         } else {
             model.addAttribute("returnUrl", WebRoutes.TAREAS_BASE);
         }
 
         model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
-        model.addAttribute("estados", List.of("PENDIENTE", "PROPUESTA", "ACEPTADA", "EN_PROCESO", "COMPLETADA", "FINALIZADA", "RECHAZADA", "CANCELADA"));
+        model.addAttribute("estados", List.of("PENDIENTE", "PROPUESTA", "ACEPTADA", "EN_PROCESO", "COMPLETADA",
+                "FINALIZADA", "RECHAZADA", "CANCELADA"));
         model.addAttribute("voluntarioNombres", fetchVoluntarioNombres());
 
-        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+        List<UsuarioRecord> usuarios = voluntarioService.fetchAllUsuarios();
         Map<Integer, UsuarioRecord> usuariosMap = new HashMap<>();
         for (UsuarioRecord u : usuarios) {
             usuariosMap.put(u.id(), u);
         }
         model.addAttribute("usuariosMap", usuariosMap);
 
-        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request"))
+                && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Tarea_FORM.getPath() + " :: content";
         }
 
@@ -231,12 +247,12 @@ public class TareaViewController {
         body.put("voluntarioActorId", model.getAttribute("currentUserId"));
 
         try {
-            restTemplate.postForObject(apiUrl + "/v1/tareas", body, Object.class);
+            tareaService.crearTarea(body);
             redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.tarea_creada"));
             return "redirect:" + WebRoutes.TAREAS_BASE;
-        } catch (RestClientException e) {
+        } catch (org.springframework.web.client.RestClientException e) {
             String msg = e.getMessage();
-            if (e instanceof HttpStatusCodeException httpException) {
+            if (e instanceof org.springframework.web.client.HttpStatusCodeException httpException) {
                 String responseBody = httpException.getResponseBodyAsString();
                 try {
                     JsonNode root = new ObjectMapper().readTree(responseBody);
@@ -254,15 +270,25 @@ public class TareaViewController {
         }
     }
 
+    @GetMapping("/web/tareas/{id}/imprimir")
+    public void imprimir(@PathVariable Integer id, HttpServletResponse response) throws Exception {
+        byte[] pdfBytes = tareaService.descargarPdfTarea(id).getBody();
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=\"tarea_" + id + ".pdf\"");
+        response.getOutputStream().write(pdfBytes);
+    }
+
     @GetMapping(WebRoutes.TAREAS_EDITAR)
     public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
-        TareaRecord tarea = helper.fetchObject(apiUrl + "/v1/tareas/" + id, TareaRecord.class);
+        TareaRecord tarea = tareaService.fetchTareaById(id);
         model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
-        model.addAttribute("estados", List.of("PENDIENTE", "PROPUESTA", "ACEPTADA", "EN_PROCESO", "COMPLETADA", "FINALIZADA", "RECHAZADA", "CANCELADA"));
+        model.addAttribute("estados", List.of("PENDIENTE", "PROPUESTA", "ACEPTADA", "EN_PROCESO", "COMPLETADA",
+                "FINALIZADA", "RECHAZADA", "CANCELADA"));
         model.addAttribute("returnUrl", WebRoutes.TAREAS_BASE);
         model.addAttribute("voluntarioNombres", fetchVoluntarioNombres());
 
-        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request"))
+                && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Tarea_FORM.getPath() + " :: content";
         }
 
@@ -290,12 +316,13 @@ public class TareaViewController {
         body.put("voluntarioActorId", voluntarioActorId);
 
         try {
-            restTemplate.put(apiUrl + "/v1/tareas/" + id, body);
-            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.tarea_editada"));
+            tareaService.editarTarea(id, body);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    helper.getMessage("toast.success.tarea_editada"));
             return "redirect:" + WebRoutes.TAREAS_BASE;
-        } catch (RestClientException e) {
+        } catch (org.springframework.web.client.RestClientException e) {
             String msg = e.getMessage();
-            if (e instanceof HttpStatusCodeException httpException) {
+            if (e instanceof org.springframework.web.client.HttpStatusCodeException httpException) {
                 String responseBody = httpException.getResponseBodyAsString();
                 try {
                     JsonNode root = new ObjectMapper().readTree(responseBody);
@@ -316,20 +343,26 @@ public class TareaViewController {
     @PostMapping(WebRoutes.TAREAS_ELIMINAR)
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
-        restTemplate.delete(apiUrl + "/v1/tareas/" + id);
-        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request")))
+        tareaService.eliminarTarea(id);
+        if ("true".equals(request.getHeader("HX-Request"))
+                && !"true".equals(request.getHeader("HX-History-Restore-Request")))
             return ResponseEntity.ok("");
         return ResponseEntity.status(302).header("Location", WebRoutes.TAREAS_BASE).build();
     }
 
     @SuppressWarnings("unchecked")
     @GetMapping(WebRoutes.TAREAS_HISTORIAL)
-    public String verHistorial(@PathVariable Integer id, Model model, HttpServletRequest request, HttpServletResponse response) {
+    public String verHistorial(@PathVariable Integer id, Model model, HttpServletRequest request,
+            HttpServletResponse response) {
         response.setHeader("Vary", "HX-Request");
+        TareaRecord tarea = null;
         try {
-            TareaRecord tarea = helper.fetchObject(apiUrl + "/v1/tareas/" + id, TareaRecord.class);
-            List<Map<String, Object>> historialRaw = (List<Map<String, Object>>) restTemplate.getForObject(apiUrl + "/v1/tareas/" + id + "/historial", List.class);
-            
+            tarea = tareaService.fetchTareaById(id);
+        } catch (Exception ignored) {
+        }
+        try {
+            List<Map<String, Object>> historialRaw = tareaService.fetchHistorial(id);
+
             List<Map<String, Object>> historial = new ArrayList<>();
             if (historialRaw != null) {
                 for (Map<String, Object> h : historialRaw) {
@@ -338,12 +371,13 @@ public class TareaViewController {
                     if (fechaRaw instanceof String) {
                         try {
                             hMod.put("fechaCambio", LocalDateTime.parse((String) fechaRaw));
-                        } catch (Exception ignored) {}
+                        } catch (Exception ignored) {
+                        }
                     }
                     historial.add(hMod);
                 }
             }
-            
+
             model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
             model.addAttribute("historial", historial);
             model.addAttribute("returnUrl", WebRoutes.TAREAS_BASE);
@@ -351,7 +385,8 @@ public class TareaViewController {
             return "redirect:" + WebRoutes.TAREAS_BASE;
         }
 
-        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request"))
+                && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Tarea_HISTORIAL.getPath() + " :: content";
         }
 
@@ -364,9 +399,8 @@ public class TareaViewController {
             @RequestParam(required = false) String prioridad,
             @RequestParam(required = false) String estado,
             HttpServletResponse response) throws Exception {
-        String allUrl = apiUrl + "/v1/tareas?size=9999";
-        List<TareaRecord> tareas = helper.fetchList(allUrl, TareaRecord.class);
-        
+        List<TareaRecord> tareas = tareaService.fetchAllTareas();
+
         Integer myVoluntarioId = getMyVoluntarioId();
 
         List<TareaRecord> filtered = tareas.stream()
@@ -389,7 +423,7 @@ public class TareaViewController {
                     return true;
                 })
                 .toList();
-        
+
         Map<String, String> voluntarioNombres = fetchVoluntarioNombres();
 
         Context context = new Context(org.springframework.context.i18n.LocaleContextHolder.getLocale());
@@ -411,9 +445,8 @@ public class TareaViewController {
             @RequestParam(required = false) String prioridad,
             @RequestParam(required = false) String estado,
             HttpServletResponse response) throws Exception {
-        String allUrl = apiUrl + "/v1/tareas?size=9999";
-        List<TareaRecord> tareas = helper.fetchList(allUrl, TareaRecord.class);
-        
+        List<TareaRecord> tareas = tareaService.fetchAllTareas();
+
         Integer myVoluntarioId = getMyVoluntarioId();
 
         List<TareaRecord> filtered = tareas.stream()
@@ -440,30 +473,30 @@ public class TareaViewController {
         Map<String, String> voluntarioNombres = fetchVoluntarioNombres();
 
         byte[] excelBytes = ExcelExportHelper.exportToExcel(
-            "Tareas",
-            List.of("ID", "Descripción", "Prioridad", "Estado", "Voluntarios Asignados", "Fecha", "Fecha Límite", "Instrucciones"),
-            filtered,
-            List.of(
-                TareaRecord::id,
-                TareaRecord::descripcion,
-                TareaRecord::prioridad,
-                TareaRecord::estado,
-                t -> {
-                    if (t.voluntarioIds() == null || t.voluntarioIds().isEmpty()) {
-                        return "-";
-                    }
-                    List<String> names = new ArrayList<>();
-                    for (Integer vId : t.voluntarioIds()) {
-                        String name = voluntarioNombres.get(String.valueOf(vId));
-                        if (name != null) names.add(name);
-                    }
-                    return String.join(", ", names);
-                },
-                t -> t.fecha() != null ? t.fecha().toString() : "",
-                t -> t.fechaLimite() != null ? t.fechaLimite().toString() : "",
-                t -> t.instrucciones() != null ? t.instrucciones() : ""
-            )
-        );
+                "Tareas",
+                List.of("ID", "Descripción", "Prioridad", "Estado", "Voluntarios Asignados", "Fecha", "Fecha Límite",
+                        "Instrucciones"),
+                filtered,
+                List.of(
+                        TareaRecord::id,
+                        TareaRecord::descripcion,
+                        TareaRecord::prioridad,
+                        TareaRecord::estado,
+                        t -> {
+                            if (t.voluntarioIds() == null || t.voluntarioIds().isEmpty()) {
+                                return "-";
+                            }
+                            List<String> names = new ArrayList<>();
+                            for (Integer vId : t.voluntarioIds()) {
+                                String name = voluntarioNombres.get(String.valueOf(vId));
+                                if (name != null)
+                                    names.add(name);
+                            }
+                            return String.join(", ", names);
+                        },
+                        t -> t.fecha() != null ? t.fecha().toString() : "",
+                        t -> t.fechaLimite() != null ? t.fechaLimite().toString() : "",
+                        t -> t.instrucciones() != null ? t.instrucciones() : ""));
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename=tareas.xlsx");
         try (OutputStream out = response.getOutputStream()) {
@@ -472,26 +505,26 @@ public class TareaViewController {
     }
 
     @PostMapping("/web/tareas/{id}/vincular-seleccion")
-    public String vincularSeleccion(@PathVariable Integer id, 
-                                     @RequestParam Integer voluntarioId, 
-                                     @RequestParam(required = false) String prioridad,
-                                     @RequestParam(required = false) String estado,
-                                     @RequestParam(required = false) String message,
-                                     Model model,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response) {
-        TareaRecord tarea = helper.fetchObject(apiUrl + "/v1/tareas/" + id, TareaRecord.class);
-        
+    public String vincularSeleccion(@PathVariable Integer id,
+            @RequestParam Integer voluntarioId,
+            @RequestParam(required = false) String prioridad,
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) String message,
+            Model model,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        TareaRecord tarea = tareaService.fetchTareaById(id);
+
         if (tarea != null) {
             List<Integer> vIds = new ArrayList<>();
             if (tarea.voluntarioIds() != null) {
                 vIds.addAll(tarea.voluntarioIds());
             }
-            
+
             if (!vIds.contains(voluntarioId)) {
                 vIds.add(voluntarioId);
             }
-            
+
             Map<String, Object> updateBody = new HashMap<>();
             updateBody.put("descripcion", tarea.descripcion());
             updateBody.put("estado", "PROPUESTA");
@@ -502,12 +535,14 @@ public class TareaViewController {
             updateBody.put("fechaLimite", tarea.fechaLimite() != null ? tarea.fechaLimite().toString() : null);
 
             try {
-                restTemplate.put(apiUrl + "/v1/tareas/" + id, updateBody);
-                String toastMsg = (message != null && !message.isEmpty()) ? message : "Voluntario asignado correctamente";
-                response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"" + toastMsg + "\", \"type\": \"success\"}}");
-            } catch (RestClientException e) {
+                tareaService.editarTarea(id, updateBody);
+                String toastMsg = (message != null && !message.isEmpty()) ? message
+                        : "Voluntario asignado correctamente";
+                response.setHeader("HX-Trigger",
+                        "{\"showToast\": {\"message\": \"" + toastMsg + "\", \"type\": \"success\"}}");
+            } catch (org.springframework.web.client.RestClientException e) {
                 String msg = e.getMessage();
-                if (e instanceof HttpStatusCodeException httpException) {
+                if (e instanceof org.springframework.web.client.HttpStatusCodeException httpException) {
                     String responseBody = httpException.getResponseBodyAsString();
                     try {
                         JsonNode root = new ObjectMapper().readTree(responseBody);
@@ -523,22 +558,23 @@ public class TareaViewController {
                         msg = responseBody;
                     }
                 }
-                
+
                 // Escape comillas para el JSON del header
                 msg = msg.replace("\"", "\\\"");
-                response.setHeader("HX-Trigger", "{\"showToast\": {\"message\": \"" + msg + "\", \"type\": \"error\"}}");
+                response.setHeader("HX-Trigger",
+                        "{\"showToast\": {\"message\": \"" + msg + "\", \"type\": \"error\"}}");
             }
         }
-        
+
         return listar(model, prioridad, estado, false, null, 1, 10, null, request, response);
     }
 
     private Map<String, String> fetchVoluntarioNombres() {
         Map<String, String> nombres = new HashMap<>();
         try {
-            List<VoluntarioRecord> voluntarios = helper.fetchList(apiUrl + "/v1/voluntarios", VoluntarioRecord.class);
-            List<PerfilLegalRecord> perfiles = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
-            List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
+            List<VoluntarioRecord> voluntarios = voluntarioService.fetchAllVoluntarios();
+            List<PerfilLegalRecord> perfiles = voluntarioService.fetchAllPerfilesLegales();
+            List<UsuarioRecord> usuarios = voluntarioService.fetchAllUsuarios();
 
             Map<Integer, String> perfilMap = new HashMap<>();
             for (PerfilLegalRecord p : perfiles) {
@@ -562,7 +598,8 @@ public class TareaViewController {
                     nombres.put(v.id().toString(), nombre.trim());
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return nombres;
     }
 
@@ -574,32 +611,30 @@ public class TareaViewController {
     @SuppressWarnings("unchecked")
     private Integer getMyVoluntarioId() {
         try {
-            Map<String, Object> me = restTemplate.getForObject(authUrl + "/v1/me", Map.class);
+            UsuarioRecord me = voluntarioService.fetchMe();
             if (me != null) {
-                String rol = me.get("rol") != null ? String.valueOf(me.get("rol")).toUpperCase() : "";
+                String rol = me.rol() != null ? me.rol().toUpperCase() : "";
                 boolean isAdmin = rol.contains("ADMIN");
                 if (!isAdmin) {
-                    Object idObj = me.get("id");
-                    if (idObj instanceof Map)
-                        idObj = ((Map<?, ?>) idObj).get("value");
-                    Integer userId = (idObj instanceof Number) ? ((Number) idObj).intValue() : null;
+                    Integer userId = me.id();
                     if (userId != null) {
-                        VoluntarioRecord vObj = helper.fetchObject(apiUrl + "/v1/voluntarios/usuario/" + userId, VoluntarioRecord.class);
+                        VoluntarioRecord vObj = voluntarioService.fetchVoluntarioByUsuarioId(userId);
                         if (vObj != null) {
                             return vObj.id();
                         }
                     }
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return null;
     }
 
-    private List<TareaRecord> fetchFiltered(String prioridad, String estado, Integer myVoluntarioId, Integer voluntarioIdSeleccion, List<DisponibilidadRecord> disponibilidades) {
+    private List<TareaRecord> fetchFiltered(String prioridad, String estado, Integer myVoluntarioId,
+            Integer voluntarioIdSeleccion, List<DisponibilidadRecord> disponibilidades) {
         try {
-            String allUrl = apiUrl + "/v1/tareas?size=9999";
-            List<TareaRecord> allTareas = helper.fetchList(allUrl, TareaRecord.class);
-            
+            List<TareaRecord> allTareas = tareaService.fetchAllTareas();
+
             return allTareas.stream()
                     .filter(t -> {
                         if (myVoluntarioId != null) {
@@ -614,7 +649,8 @@ public class TareaViewController {
                             if (t.fechaLimite() != null) {
                                 LocalDate taskDate = t.fechaLimite().toLocalDate();
                                 boolean isUnavailable = disponibilidades.stream()
-                                    .anyMatch(d -> d.fecha() != null && d.fecha().equals(taskDate) && "NO_DISPONIBLE".equals(d.estado()));
+                                        .anyMatch(d -> d.fecha() != null && d.fecha().equals(taskDate)
+                                                && "NO_DISPONIBLE".equals(d.estado()));
                                 if (isUnavailable) {
                                     return false;
                                 }
@@ -641,18 +677,18 @@ public class TareaViewController {
     private PaginatedResponse<TareaRecord> paginateList(List<TareaRecord> filtered, int page, int size) {
         int totalElements = filtered.size();
         int totalPages = (int) Math.ceil((double) totalElements / size);
-        
+
         int fromIndex = (page - 1) * size;
         int toIndex = Math.min(fromIndex + size, totalElements);
-        
+
         List<TareaRecord> paginatedItems = Collections.emptyList();
         if (fromIndex < totalElements && fromIndex >= 0) {
             paginatedItems = filtered.subList(fromIndex, toIndex);
         }
-        
+
         boolean hasNext = page < totalPages;
         boolean hasPrevious = page > 1;
-        
+
         return new PaginatedResponse<>(paginatedItems, totalPages, totalElements, page, size, hasNext, hasPrevious);
     }
 }

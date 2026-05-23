@@ -43,7 +43,6 @@ import java.util.stream.Collectors;
 import java.util.Arrays;
 
 import es.refugio.refugio.application.service.storage.FileStorageService;
-import java.util.Arrays;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
@@ -119,10 +118,12 @@ public class AnimalController {
             @RequestParam(required = false) String sexo,
             @RequestParam(required = false) Boolean urgencia,
             @RequestParam(required = false) String q) {
-        
-        System.out.println("DEBUG: Backend - findFiltered with q=" + q + ", estado=" + estado + ", page=" + pageable.getPageNumber());
+
+        System.out.println("DEBUG: Backend - findFiltered with q=" + q + ", estado=" + estado + ", page="
+                + pageable.getPageNumber());
         Page<Animal> page = findAnimalService.findFiltered(q, estado, especie, tamano, edad, sexo, urgencia, pageable);
-        System.out.println("DEBUG: Backend - Results found: " + page.getContent().size() + ", Total elements: " + page.getTotalElements());
+        System.out.println("DEBUG: Backend - Results found: " + page.getContent().size() + ", Total elements: "
+                + page.getTotalElements());
 
         Map<Integer, Long> conteos = solicitudAdopcionRepository.getAll().stream()
                 .filter(s -> s.getEstado() == EstadoSolicitud.PENDIENTE || s.getEstado() == EstadoSolicitud.EN_REVISION)
@@ -179,9 +180,9 @@ public class AnimalController {
             return ResponseEntity.ok(false); // Retorna false si lo ha quitado
         } else {
             FavoritoAnimalEntity nuevo = FavoritoAnimalEntity.builder()
-                .usuarioId(usuarioId)
-                .animalId(id)
-                .build();
+                    .usuarioId(usuarioId)
+                    .animalId(id)
+                    .build();
             favoritoAnimalRepository.save(nuevo);
             return ResponseEntity.ok(true); // Retorna true si lo ha añadido
         }
@@ -191,9 +192,9 @@ public class AnimalController {
     @GetMapping("/favoritos")
     public List<Integer> getFavoritosByUsuario(@RequestParam Integer usuarioId) {
         return favoritoAnimalRepository.findByUsuarioId(usuarioId)
-            .stream()
-            .map(FavoritoAnimalEntity::getAnimalId)
-            .toList();
+                .stream()
+                .map(FavoritoAnimalEntity::getAnimalId)
+                .toList();
     }
 
     @Operation(summary = "Obtener el contador de favoritos de un animal")

@@ -7,14 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import es.refugio.frontend.web.enums.ThymTemplates;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.util.ErrorMessageExtractor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
+import es.refugio.frontend.service.AuthService;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.client.RestTemplate;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
@@ -28,13 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AuthViewController {
 
-    private final RestTemplate restTemplate;
-
-    @Value("${auth.api.url}")
-    private String authUrl;
-
-    @Value("${backend.api.url}")
-    private String apiUrl;
+    private final AuthService authService;
 
     @GetMapping("/login")
     public String loginPage(Model model) {
@@ -65,8 +56,7 @@ public class AuthViewController {
             authBody.put("contrasena", password);
             authBody.put("rol", "ROLE_PUBLICO"); // El rol por defecto es Público/Simpatizante
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> createdUser = restTemplate.postForObject(authUrl + "/v1/usuarios/publico", authBody, Map.class);
+            Map<String, Object> createdUser = authService.registrarUsuario(authBody);
 
             if (createdUser == null || createdUser.get("id") == null) {
                 return "redirect:/registro?error=Error al crear usuario";
@@ -77,18 +67,7 @@ public class AuthViewController {
             // decida convertirse en voluntario o adoptante.
 
             // 2. Inicio de sesión automático (Llamar a Auth Login para obtener la Cookie)
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-            
-            // El servicio de autenticación requiere el parámetro 'username' (mapeado a email en CustomUserDetailsService)
-            String loginBody = "username=" + email + "&password=" + password;
-            HttpEntity<String> entity = new HttpEntity<>(loginBody, headers);
-            
-            // Quitar /api de authUrl para obtener la base de /login-post
-            String authBaseUrl = authUrl.substring(0, authUrl.lastIndexOf("/api"));
-            String loginUrl = authBaseUrl + "/login-post";
-            
-            ResponseEntity<String> loginResponse = restTemplate.postForEntity(loginUrl, entity, String.class);
+            ResponseEntity<String> loginResponse = authService.login(email, password);
 
             // Extraer la cookie JWT_TOKEN de loginResponse
             List<String> cookies = loginResponse.getHeaders().get(HttpHeaders.SET_COOKIE);

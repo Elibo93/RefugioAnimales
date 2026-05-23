@@ -105,7 +105,7 @@
 
                     <div class="form-group">
                         <label th:text="#{tarea.auto.fecha.y.hora.limite.vencimiento}"></label>
-                        <input type="datetime-local" name="fechaLimite" th:value="${tarea.fechaLimite}">
+                        <input type="datetime-local" name="fechaLimite" th:value="${tarea.fechaLimite != null ? #temporals.format(tarea.fechaLimite, 'yyyy-MM-dd''T''HH:mm') : ''}">
                     </div>
 
                     <div class="form-group" style="grid-column: 1 / -1;">
@@ -214,6 +214,8 @@
 
                         // Inicializar
                         document.addEventListener('DOMContentLoaded', initVolunteers);
+                        document.addEventListener('htmx:afterSettle', initVolunteers);
+                        initVolunteers(); // Fallback para ejecución directa si HTMX no dispara el evento en reemplazos locales
                         
                         // HTMX hook para reinicializar iconos después de cargar sugerencias
                         document.addEventListener('htmx:afterOnLoad', function(evt) {

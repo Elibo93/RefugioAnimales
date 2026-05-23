@@ -3,13 +3,11 @@ package es.refugio.frontend.web;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -28,19 +26,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import es.refugio.frontend.service.AdopcionService;
+import es.refugio.frontend.service.AnimalService;
+
 @Controller
 @RequiredArgsConstructor
 public class AdopcionViewController {
 
-    private final RestTemplate restTemplate;
+    private final AdopcionService adopcionService;
+    private final AnimalService animalService;
     private final TemplateEngine templateEngine;
     private final ViewControllerHelper helper;
-
-    @Value("${backend.api.url}")
-    private String apiUrl;
-
-    @Value("${auth.api.url}")
-    private String authUrl;
 
     @GetMapping(WebRoutes.ADOPCIONES_BASE)
     @PreAuthorize("hasRole('ADMIN')")
@@ -53,17 +49,12 @@ public class AdopcionViewController {
             @RequestParam(required = false) String successMessage,
             HttpServletRequest request) {
 
-        String path = "/v1/adopciones";
-        if (q != null && !q.trim().isEmpty()) {
-            path += "?q=" + q;
-        }
-
-        PaginatedResponse<AdopcionRecord> paginationMap = helper.fetchPaginated(apiUrl + path, page, size, AdopcionRecord.class);
+        PaginatedResponse<AdopcionRecord> paginationMap = adopcionService.fetchPaginatedAdopciones(page, size, q);
         List<AdopcionRecord> adopciones = paginationMap.items();
-        List<AdoptanteRecord> adoptantes = helper.fetchList(apiUrl + "/v1/adoptantes", AdoptanteRecord.class);
-        List<AnimalRecord> animales   = helper.fetchList(apiUrl + "/v1/animales?size=1000", AnimalRecord.class);
-        List<UsuarioRecord> usuarios   = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
-        List<PerfilLegalRecord> perfiles   = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+        List<AdoptanteRecord> adoptantes = adopcionService.fetchAllAdoptantes();
+        List<AnimalRecord> animales   = animalService.fetchAllAnimals();
+        List<UsuarioRecord> usuarios   = adopcionService.fetchAllUsuarios();
+        List<PerfilLegalRecord> perfiles   = adopcionService.fetchAllPerfiles();
 
         Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
         for (UsuarioRecord u : usuarios) {
@@ -161,30 +152,14 @@ public class AdopcionViewController {
             @RequestParam(required = false) String fechaAdopcion,
             RedirectAttributes redirectAttributes) {
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("adoptanteId", idPersona);
-        body.put("animalId",    idAnimal);
-        body.put("estado",      estado);
-        
-        String formattedDate = fechaAdopcion;
-        if (formattedDate != null && !formattedDate.trim().isEmpty()) {
-            if (!formattedDate.contains("T")) {
-                formattedDate = formattedDate.trim() + "T00:00:00";
-            }
-        } else {
-            formattedDate = java.time.LocalDateTime.now().toString();
-        }
-        body.put("fechaAdopcion", formattedDate);
-        body.put("contrato",    "Contrato formalizado");
-
-        restTemplate.postForObject(apiUrl + "/v1/adopciones", body, Object.class);
+        adopcionService.crearAdopcion(idPersona, idAnimal, estado, fechaAdopcion);
         redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.adopcion_creada"));
         return "redirect:" + WebRoutes.ADOPCIONES_BASE;
     }
 
     @GetMapping(WebRoutes.ADOPCIONES_EDITAR)
     public String editarFormulario(@PathVariable Integer id, Model model) {
-        AdopcionRecord adopcion = helper.fetchObject(apiUrl + "/v1/adopciones/" + id, AdopcionRecord.class);
+        AdopcionRecord adopcion = adopcionService.fetchAdopcionById(id);
         model.addAttribute(ModelAttribute.SINGLE_Adopcion.getName(), adopcion);
         
         if (adopcion != null) {
@@ -192,17 +167,17 @@ public class AdopcionViewController {
             Integer adoptanteId = adopcion.adoptanteId();
             
             if (animalId != null) {
-                AnimalRecord animal = helper.fetchObject(apiUrl + "/v1/animales/" + animalId, AnimalRecord.class);
+                AnimalRecord animal = animalService.fetchAnimalById(animalId);
                 model.addAttribute("animalData", animal);
             }
             
             if (adoptanteId != null) {
                 try {
-                    AdoptanteRecord adoptante = helper.fetchObject(apiUrl + "/v1/adoptantes/" + adoptanteId, AdoptanteRecord.class);
+                    AdoptanteRecord adoptante = adopcionService.fetchAdoptanteById(adoptanteId);
                     if (adoptante != null) {
                         Integer usuarioId = adoptante.usuarioId();
                         if (usuarioId != null) {
-                            PerfilLegalRecord perfilObj = helper.fetchObject(apiUrl + "/v1/perfiles-legales/usuario/" + usuarioId, PerfilLegalRecord.class);
+                            PerfilLegalRecord perfilObj = adopcionService.fetchPerfilByUsuarioId(usuarioId);
                             if (perfilObj != null) {
                                 String nombre = perfilObj.nombre() + " " + perfilObj.apellido();
                                 model.addAttribute("nombreAdoptante", nombre.trim());
@@ -231,22 +206,7 @@ public class AdopcionViewController {
             @RequestParam(required = false) String fechaAdopcion,
             RedirectAttributes redirectAttributes) {
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("adoptanteId", idPersona);
-        body.put("animalId",    idAnimal);
-        body.put("estado",      estado);
-        
-        String formattedDate = fechaAdopcion;
-        if (formattedDate != null && !formattedDate.trim().isEmpty()) {
-            if (!formattedDate.contains("T")) {
-                formattedDate = formattedDate.trim() + "T00:00:00";
-            }
-        } else {
-            formattedDate = java.time.LocalDateTime.now().toString();
-        }
-        body.put("fechaAdopcion", formattedDate);
-
-        restTemplate.put(apiUrl + "/v1/adopciones/" + id, body);
+        adopcionService.editarAdopcion(id, idPersona, idAnimal, estado, fechaAdopcion);
         redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.adopcion_editada"));
         return "redirect:" + WebRoutes.ADOPCIONES_BASE;
     }
@@ -254,18 +214,18 @@ public class AdopcionViewController {
     @PostMapping(WebRoutes.ADOPCIONES_ELIMINAR)
     @ResponseBody
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
-        restTemplate.delete(apiUrl + "/v1/adopciones/" + id);
+        adopcionService.eliminarAdopcion(id);
         if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) return ResponseEntity.ok("");
         return ResponseEntity.status(302).header("Location", WebRoutes.ADOPCIONES_BASE).build();
     }
 
     @GetMapping(WebRoutes.ADOPCIONES_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
-        List<AdopcionRecord> adopciones = helper.fetchList(apiUrl + "/v1/adopciones", AdopcionRecord.class);
-        List<AdoptanteRecord> adoptantes = helper.fetchList(apiUrl + "/v1/adoptantes", AdoptanteRecord.class);
-        List<AnimalRecord> animales   = helper.fetchList(apiUrl + "/v1/animales?size=1000", AnimalRecord.class);
-        List<UsuarioRecord> usuarios   = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
-        List<PerfilLegalRecord> perfiles   = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+        List<AdopcionRecord> adopciones = adopcionService.fetchAllAdopciones();
+        List<AdoptanteRecord> adoptantes = adopcionService.fetchAllAdoptantes();
+        List<AnimalRecord> animales   = animalService.fetchAllAnimals();
+        List<UsuarioRecord> usuarios   = adopcionService.fetchAllUsuarios();
+        List<PerfilLegalRecord> perfiles   = adopcionService.fetchAllPerfiles();
 
         Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
         for (UsuarioRecord u : usuarios) {
@@ -324,11 +284,11 @@ public class AdopcionViewController {
 
     @GetMapping(WebRoutes.ADOPCIONES_EXCEL)
     public void exportarExcel(HttpServletResponse response) throws Exception {
-        List<AdopcionRecord> adopciones = helper.fetchList(apiUrl + "/v1/adopciones", AdopcionRecord.class);
-        List<AdoptanteRecord> adoptantes = helper.fetchList(apiUrl + "/v1/adoptantes", AdoptanteRecord.class);
-        List<AnimalRecord> animales   = helper.fetchList(apiUrl + "/v1/animales?size=1000", AnimalRecord.class);
-        List<UsuarioRecord> usuarios   = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
-        List<PerfilLegalRecord> perfiles   = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+        List<AdopcionRecord> adopciones = adopcionService.fetchAllAdopciones();
+        List<AdoptanteRecord> adoptantes = adopcionService.fetchAllAdoptantes();
+        List<AnimalRecord> animales   = animalService.fetchAllAnimals();
+        List<UsuarioRecord> usuarios   = adopcionService.fetchAllUsuarios();
+        List<PerfilLegalRecord> perfiles   = adopcionService.fetchAllPerfiles();
 
         Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
         for (UsuarioRecord u : usuarios) {
@@ -394,6 +354,6 @@ public class AdopcionViewController {
 
     @GetMapping(WebRoutes.ADOPCIONES_CONTRATO)
     public ResponseEntity<byte[]> descargarContrato(@PathVariable Integer id) {
-        return restTemplate.getForEntity(apiUrl + "/v1/reports/adopcion/" + id + "/contrato", byte[].class);
+        return adopcionService.descargarContrato(id);
     }
 }

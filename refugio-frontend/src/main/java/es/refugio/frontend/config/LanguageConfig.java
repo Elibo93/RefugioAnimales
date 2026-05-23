@@ -20,6 +20,7 @@ public class LanguageConfig implements WebMvcConfigurer {
     public LocaleResolver localeResolver() {
         CookieLocaleResolver clr = new CookieLocaleResolver("language_cookie");
         clr.setDefaultLocale(Locale.forLanguageTag(IDIOMA));
+        clr.setCookiePath("/");
         return clr;
     }
 

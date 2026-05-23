@@ -50,7 +50,8 @@
                                 th:text="#{animal.field.name}">Nombre</label>
                             <input type="text" name="nombre" th:value="${animal.nombre}" required
                                 th:readonly="${animal.id != null}"
-                                th:style="'width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; transition: all 0.3s; outline: none; background: ' + (${animal.id != null} ? '#f8fafc' : 'white') + ';'">
+                                style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; transition: all 0.3s; outline: none;"
+                                th:styleappend="${animal.id != null ? 'background-color: #f8fafc;' : 'background-color: white;'}">
                         </div>
 
                         <!-- Especie -->
@@ -60,7 +61,8 @@
                                 th:text="#{animal.field.species}">Especie</label>
                             <select name="especie" id="especieSelect" required onchange="toggleEspeciePersonalizada()"
                                 th:disabled="${animal.id != null}"
-                                th:style="'width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url(''data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'') no-repeat right 1.25rem center/1.2rem; background-color: ' + (${animal.id != null} ? '#f8fafc' : 'white') + ';'">
+                                style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem;"
+                                th:styleappend="${animal.id != null ? 'background-color: #f8fafc;' : 'background-color: white;'}">
                                 <option value="" th:text="#{animal.auto.selecciona}"></option>
                                 <option th:each="e : ${especies}" th:value="${e}"
                                     th:text="#{enum.Especie.__${e}__}"
