@@ -53,6 +53,7 @@ public class TareaViewController {
     public String listar(Model model,
             @RequestParam(required = false) String prioridad,
             @RequestParam(required = false) String estado,
+            @RequestParam(required = false) Integer voluntarioIdFiltro,
             @RequestParam(required = false, defaultValue = "false") boolean modoSeleccion,
             @RequestParam(required = false) Integer voluntarioIdSeleccion,
             @RequestParam(required = false, defaultValue = "1") int page,
@@ -113,7 +114,7 @@ public class TareaViewController {
             }
         }
 
-        List<TareaRecord> todasTareasFiltradas = fetchFiltered(prioridad, estado, myVoluntarioId, voluntarioIdSeleccion,
+        List<TareaRecord> todasTareasFiltradas = fetchFiltered(prioridad, estado, myVoluntarioId, voluntarioIdFiltro, voluntarioIdSeleccion,
                 disponibilidades);
         PaginatedResponse<TareaRecord> pagination = paginateList(todasTareasFiltradas, page, size);
         List<TareaRecord> tareas = pagination.items();
@@ -154,6 +155,7 @@ public class TareaViewController {
         model.addAttribute("voluntarioUsuarioIds", voluntarioUsuarioIds);
         model.addAttribute("modoSeleccion", modoSeleccion);
         model.addAttribute("voluntarioIdSeleccion", voluntarioIdSeleccion);
+        model.addAttribute("voluntarioIdFiltro", voluntarioIdFiltro);
         model.addAttribute("myVoluntarioId", myVoluntarioId);
 
         if (successMessage != null)
@@ -405,6 +407,7 @@ public class TareaViewController {
     public void exportarPDF(
             @RequestParam(required = false) String prioridad,
             @RequestParam(required = false) String estado,
+            @RequestParam(required = false) Integer voluntarioIdFiltro,
             HttpServletResponse response) throws Exception {
         List<TareaRecord> tareas = tareaService.fetchAllTareas();
 
@@ -414,6 +417,11 @@ public class TareaViewController {
                 .filter(t -> {
                     if (myVoluntarioId != null) {
                         if (t.voluntarioIds() == null || !t.voluntarioIds().contains(myVoluntarioId)) {
+                            return false;
+                        }
+                    }
+                    if (voluntarioIdFiltro != null) {
+                        if (t.voluntarioIds() == null || !t.voluntarioIds().contains(voluntarioIdFiltro)) {
                             return false;
                         }
                     }
@@ -451,6 +459,7 @@ public class TareaViewController {
     public void exportarExcel(
             @RequestParam(required = false) String prioridad,
             @RequestParam(required = false) String estado,
+            @RequestParam(required = false) Integer voluntarioIdFiltro,
             HttpServletResponse response) throws Exception {
         List<TareaRecord> tareas = tareaService.fetchAllTareas();
 
@@ -460,6 +469,11 @@ public class TareaViewController {
                 .filter(t -> {
                     if (myVoluntarioId != null) {
                         if (t.voluntarioIds() == null || !t.voluntarioIds().contains(myVoluntarioId)) {
+                            return false;
+                        }
+                    }
+                    if (voluntarioIdFiltro != null) {
+                        if (t.voluntarioIds() == null || !t.voluntarioIds().contains(voluntarioIdFiltro)) {
                             return false;
                         }
                     }
@@ -573,7 +587,7 @@ public class TareaViewController {
             }
         }
 
-        return listar(model, prioridad, estado, false, null, 1, 10, null, request, response);
+        return listar(model, prioridad, estado, null, false, null, 1, 10, null, request, response);
     }
 
     private Map<String, String> fetchVoluntarioNombres() {
@@ -637,7 +651,7 @@ public class TareaViewController {
         return null;
     }
 
-    private List<TareaRecord> fetchFiltered(String prioridad, String estado, Integer myVoluntarioId,
+    private List<TareaRecord> fetchFiltered(String prioridad, String estado, Integer myVoluntarioId, Integer voluntarioIdFiltro,
             Integer voluntarioIdSeleccion, List<DisponibilidadRecord> disponibilidades) {
         try {
             List<TareaRecord> allTareas = tareaService.fetchAllTareas();
@@ -646,6 +660,11 @@ public class TareaViewController {
                     .filter(t -> {
                         if (myVoluntarioId != null) {
                             if (t.voluntarioIds() == null || !t.voluntarioIds().contains(myVoluntarioId)) {
+                                return false;
+                            }
+                        }
+                        if (voluntarioIdFiltro != null) {
+                            if (t.voluntarioIds() == null || !t.voluntarioIds().contains(voluntarioIdFiltro)) {
                                 return false;
                             }
                         }

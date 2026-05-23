@@ -49,10 +49,11 @@
                                             hx-trigger="keyup changed delay:300ms, focus"
                                             hx-target="#animal-suggestions"
                                             style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; transition: all 0.3s; outline: none;">
-                                    <input type="hidden" name="animalId" id="animalId-input" required th:value="${historial.animalId}">
                                 </div>
                                 <div id="animal-suggestions" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 100;"></div>
                             </div>
+                            <!-- Input oculto de animalId, fuera del th:if para que siempre se envíe en POST -->
+                            <input type="hidden" name="animalId" id="animalId-input" required th:value="${historial.animalId}">
 
                             <!-- Card de Animal Seleccionado -->
                             <div id="selected-animal-card" 
@@ -113,10 +114,8 @@
 
                 <!-- ACCIONES -->
                 <div style="margin-top: 4rem; display: flex; gap: 1.5rem; justify-content: flex-end; border-top: 1px solid #f1f5f9; padding-top: 2rem;">
-                    <a th:hx-get="${historial.id == null ? '/web/historiales' : '/web/historiales/' + historial.id + '/detalle'}"
-                       hx-target="#contenido-dinamico" hx-replace-url="true" hx-swap="innerHTML show:window:top"
-                       class="btn" 
-                       style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: #64748b; background: #f1f5f9; text-decoration: none; transition: all 0.2s; cursor: pointer;" th:text="#{generic.auto.cancelar}"></a>
+                    <button type="button" class="btn" onclick="window.history.back()"
+                       style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: #64748b; background: #f1f5f9; text-decoration: none; transition: all 0.2s; cursor: pointer; border: none;" th:text="#{generic.auto.cancelar}"></button>
                     <button type="submit" class="btn btn-primary" 
                             style="padding: 1rem 3rem; border-radius: 16px; font-weight: 700; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.2); background: #ef4444; border: none; color: white; display: flex; align-items: center; gap: 8px;">
                         <i data-lucide="save" style="width: 20px;"></i>

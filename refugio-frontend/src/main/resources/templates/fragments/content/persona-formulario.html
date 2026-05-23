@@ -112,6 +112,17 @@
                             </div>
                         </div>
 
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                <i data-lucide="map-pin" style="width: 16px; color: #64748b;"></i>
+                                <span th:text="#{persona.field.address}">Dirección</span>
+                            </label>
+                            <input type="text" name="direccion" th:value="${persona.direccion}"
+                                class="form-control"
+                                th:attr="placeholder=#{persona.placeholder.address}"
+                                style="width: 100%; border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; transition: all 0.2s;">
+                        </div>
+
                         <div class="form-grid" 
                              th:style="${isAdmin} ? 'display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;' : 'display: block; margin-bottom: 1.5rem;'">
                             <div class="form-group">

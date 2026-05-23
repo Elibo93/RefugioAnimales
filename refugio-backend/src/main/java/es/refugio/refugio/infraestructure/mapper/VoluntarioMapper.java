@@ -84,7 +84,7 @@ public interface VoluntarioMapper {
         if (tareas == null) {
             return null;
         }
-        return tareas.stream().map(tid -> TareaEntity.builder().id(tid.getValue()).build()).toList();
+        return tareas.stream().map(tid -> TareaEntity.builder().id(tid.getValue()).build()).collect(java.util.stream.Collectors.toList());
     }
 
     @Named("mapEntitiesToTareas")
@@ -92,7 +92,7 @@ public interface VoluntarioMapper {
         if (tareas == null) {
             return new ArrayList<>();
         }
-        return tareas.stream().map(te -> new TareaId(te.getId())).toList();
+        return tareas.stream().map(te -> new TareaId(te.getId())).collect(java.util.stream.Collectors.toList());
     }
 
     @Named("mapDisponibilidadesToEntities")
@@ -105,7 +105,7 @@ public interface VoluntarioMapper {
                 .fecha(d.getFecha())
                 .turno(d.getTurno())
                 .estado(d.getEstado())
-                .build()).toList();
+                .build()).collect(java.util.stream.Collectors.toList());
     }
 
     @Named("mapEntitiesToDisponibilidades")
@@ -114,11 +114,11 @@ public interface VoluntarioMapper {
             return new ArrayList<>();
         }
         return disponibilidades.stream().map(de -> DisponibilidadVoluntario.builder()
-                .id(new DisponibilidadVoluntarioId(de.getId()))
+                .id(de.getId() != null ? new DisponibilidadVoluntarioId(de.getId()) : null)
                 .voluntarioId(de.getVoluntario() != null ? new VoluntarioId(de.getVoluntario().getId()) : null)
                 .fecha(de.getFecha())
                 .turno(de.getTurno())
                 .estado(de.getEstado())
-                .build()).toList();
+                .build()).collect(java.util.stream.Collectors.toList());
     }
 }

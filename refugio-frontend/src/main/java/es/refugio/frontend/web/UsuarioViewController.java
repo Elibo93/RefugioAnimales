@@ -213,18 +213,27 @@ public class UsuarioViewController {
             if (createdUser != null && createdUser.get("id") != null) {
                 Integer usuarioId = ((Number) createdUser.get("id")).intValue();
 
-                // Crear PerfilLegal
-                Map<String, Object> legalBody = new HashMap<>();
-                legalBody.put("usuarioId", usuarioId);
-                legalBody.put("nombre", nombre);
-                legalBody.put("apellido", apellido);
-                legalBody.put("dni", dni);
-                legalBody.put("telefono", telefono);
-                legalBody.put("direccion", direccion);
-                legalBody.put("fechaNacimiento",
-                        (fechaNacimiento != null && !fechaNacimiento.isEmpty()) ? fechaNacimiento : "2000-01-01");
+                boolean hasLegalFields = (nombre != null && !nombre.trim().isEmpty()) ||
+                                         (apellido != null && !apellido.trim().isEmpty()) ||
+                                         (dni != null && !dni.trim().isEmpty()) ||
+                                         (telefono != null && !telefono.trim().isEmpty()) ||
+                                         (direccion != null && !direccion.trim().isEmpty()) ||
+                                         (fechaNacimiento != null && !fechaNacimiento.trim().isEmpty());
 
-                usuarioService.createPerfilLegal(legalBody);
+                if (hasLegalFields) {
+                    // Crear PerfilLegal
+                    Map<String, Object> legalBody = new HashMap<>();
+                    legalBody.put("usuarioId", usuarioId);
+                    legalBody.put("nombre", nombre);
+                    legalBody.put("apellido", apellido);
+                    legalBody.put("dni", dni);
+                    legalBody.put("telefono", telefono);
+                    legalBody.put("direccion", direccion);
+                    legalBody.put("fechaNacimiento",
+                            (fechaNacimiento != null && !fechaNacimiento.isEmpty()) ? fechaNacimiento : "2000-01-01");
+
+                    usuarioService.createPerfilLegal(legalBody);
+                }
             }
             redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.usuario_creado"));
         } catch (Exception e) {
@@ -296,6 +305,7 @@ public class UsuarioViewController {
             @RequestParam String dni,
             @RequestParam String fechaNacimiento,
             @RequestParam(required = false) String rol,
+            @RequestParam(required = false) String direccion,
             HttpServletRequest request,
             RedirectAttributes redirectAttributes) {
 
@@ -312,14 +322,35 @@ public class UsuarioViewController {
         usuarioService.updateUserAuth(id, userBody);
 
         // 2. Actualizar PerfilLegal
-        Map<String, Object> legalBody = new HashMap<>();
-        legalBody.put("usuarioId", id);
-        legalBody.put("nombre", nombre);
-        legalBody.put("apellido", apellido);
-        legalBody.put("dni", dni);
-        legalBody.put("telefono", telefono);
-        legalBody.put("fechaNacimiento", fechaNacimiento);
-        usuarioService.createPerfilLegal(legalBody);
+        boolean hasLegalFields = (nombre != null && !nombre.trim().isEmpty()) ||
+                                 (apellido != null && !apellido.trim().isEmpty()) ||
+                                 (dni != null && !dni.trim().isEmpty()) ||
+                                 (telefono != null && !telefono.trim().isEmpty()) ||
+                                 (direccion != null && !direccion.trim().isEmpty()) ||
+                                 (fechaNacimiento != null && !fechaNacimiento.trim().isEmpty());
+
+        boolean shouldUpdateLegal = hasLegalFields;
+        if (!shouldUpdateLegal) {
+            try {
+                PerfilLegalRecord legal = helper.fetchObject(apiUrl + "/v1/perfiles-legales/usuario/" + id, PerfilLegalRecord.class);
+                if (legal != null) {
+                    shouldUpdateLegal = true;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        if (shouldUpdateLegal) {
+            Map<String, Object> legalBody = new HashMap<>();
+            legalBody.put("usuarioId", id);
+            legalBody.put("nombre", nombre);
+            legalBody.put("apellido", apellido);
+            legalBody.put("dni", dni);
+            legalBody.put("telefono", telefono);
+            legalBody.put("direccion", direccion);
+            legalBody.put("fechaNacimiento", fechaNacimiento);
+            usuarioService.createPerfilLegal(legalBody);
+        }
 
         redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.perfil_actualizado"));
         

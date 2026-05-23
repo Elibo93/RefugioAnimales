@@ -70,7 +70,7 @@
                         <span th:text="#{donacion.auto.total.a.pagar} + ' ' + ${#numbers.formatDecimal(donacion['cantidad'], 1, 'POINT', 2, 'COMMA')} + ' €'"></span>
                     </button>
                     
-                    <a th:href="@{/web/donaciones}" style="display: block; text-align: center; margin-top: 1.5rem; color: var(--text-muted); font-size: 0.9rem; text-decoration: none;" th:text="#{donacion.auto.cancelar.y.volver}"></a>
+                    <button type="button" onclick="window.history.back()" style="display: block; width: 100%; text-align: center; margin-top: 1.5rem; color: var(--text-muted); font-size: 0.9rem; border: none; background: transparent; cursor: pointer;" th:text="#{donacion.auto.cancelar.y.volver}"></button>
                 </form>
             </div>
 

@@ -182,22 +182,28 @@ async function handlePasswordUpdatePremium(event) {
     btn.innerHTML = '<i class="animate-spin" data-lucide="loader-2"></i> ' + (window.refugioI18n?.saving || 'Guardando...');
     if (window.lucide) lucide.createIcons();
 
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+    const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+    if (csrfHeader && csrfToken) {
+        headers[csrfHeader] = csrfToken;
+    }
+
     try {
         const response = await fetch(`/web/personas/${userId}/cambiar-password`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: headers,
             body: `newPassword=${encodeURIComponent(newPassword)}`
         });
 
         if (response.ok) {
+            closePasswordModal();
             Swal.fire({
                 icon: 'success',
                 title: window.refugioI18n?.successTitle || '¡Seguridad actualizada!',
                 text: window.refugioI18n?.successDesc || 'Tu contraseña ha sido cambiada correctamente.',
                 confirmButtonColor: '#4f46e5',
                 customClass: { popup: 'premium-swal' }
-            }).then(() => {
-                closePasswordModal();
             });
         } else {
             const data = await response.json().catch(() => ({ message: window.refugioI18n?.errServer || "Error en el servidor" }));
@@ -406,11 +412,29 @@ function toggleShareMenu(event, nombre) {
         return;
     }
 
+    menu.style.display = 'flex';
+
     const animalNombre = nombre || 'el animal';
-    const currentUrl = window.location.href;
-    const shareText = 'Mira el perfil de ' + animalNombre + ' en el Refugio de Animales. ¡Ayúdanos a encontrarle un hogar!';
+    const currentUrl = encodeURIComponent(window.location.href);
+    const shareText = encodeURIComponent('¡Mira a ' + animalNombre + ' en adopción!');
 
-    // Configurar enlaces de redes sociales
     const waBtn = document.getElementById('share-wa');
+    if (waBtn) waBtn.href = 'https://wa.me/?text=' + shareText + '%20' + currentUrl;
 
+    const fbBtn = document.getElementById('share-fb');
+    if (fbBtn) fbBtn.href = 'https://www.facebook.com/sharer/sharer.php?u=' + currentUrl;
+
+    const xBtn = document.getElementById('share-x');
+    if (xBtn) xBtn.href = 'https://twitter.com/intent/tweet?text=' + shareText + '&url=' + currentUrl;
+
+    const mailBtn = document.getElementById('share-mail');
+    if (mailBtn) mailBtn.href = 'mailto:?subject=¡Adopta a ' + animalNombre + '!&body=Mira su perfil aquí: ' + window.location.href;
 }
+
+// Cerrar el menú de compartición al hacer clic fuera
+document.addEventListener('click', function(event) {
+    const menu = document.getElementById('share-dropdown-menu');
+    if (menu && menu.style.display === 'flex' && !event.target.closest('.share-container')) {
+        menu.style.display = 'none';
+    }
+});

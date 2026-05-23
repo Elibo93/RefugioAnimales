@@ -64,6 +64,11 @@ public class AuthController {
             return;
         }
 
+        if (userRepository.findByUsername(registroDto.getUsername()).isPresent()) {
+            response.sendRedirect("/registro?error=El nombre de usuario ya esta registrado");
+            return;
+        }
+
         UsuarioEntity newUser = UsuarioEntity.builder()
                 .email(registroDto.getEmail())
                 .username(registroDto.getUsername())

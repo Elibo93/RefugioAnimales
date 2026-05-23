@@ -7,6 +7,7 @@ import es.refugio.refugio.application.command.voluntario.SetDisponibilidadComman
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
 import es.refugio.refugio.domain.model.voluntario.DisponibilidadVoluntario;
 import es.refugio.refugio.domain.repository.VoluntarioRepository;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,16 +29,22 @@ public class SetDisponibilidadService {
             voluntario.setDisponibilidades(new ArrayList<>());
         }
         
-        voluntario.getDisponibilidades().removeIf(d -> d.getFecha().equals(command.fecha()));
-        
-        DisponibilidadVoluntario nuevaDisponibilidad = DisponibilidadVoluntario.builder()
-                .voluntarioId(command.voluntarioId())
-                .fecha(command.fecha())
-                .turno(command.turno())
-                .estado(command.estado())
-                .build();
-                
-        voluntario.getDisponibilidades().add(nuevaDisponibilidad);
+        Optional<DisponibilidadVoluntario> existente = voluntario.getDisponibilidades().stream()
+                .filter(d -> d.getFecha().equals(command.fecha()))
+                .findFirst();
+
+        if (existente.isPresent()) {
+            existente.get().setTurno(command.turno());
+            existente.get().setEstado(command.estado());
+        } else {
+            DisponibilidadVoluntario nuevaDisponibilidad = DisponibilidadVoluntario.builder()
+                    .voluntarioId(command.voluntarioId())
+                    .fecha(command.fecha())
+                    .turno(command.turno())
+                    .estado(command.estado())
+                    .build();
+            voluntario.getDisponibilidades().add(nuevaDisponibilidad);
+        }
         
         return voluntarioRepository.save(voluntario);
     }

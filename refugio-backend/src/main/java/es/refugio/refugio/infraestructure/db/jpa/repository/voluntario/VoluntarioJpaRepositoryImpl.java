@@ -30,7 +30,51 @@ public class VoluntarioJpaRepositoryImpl implements VoluntarioRepository {
 
     @Override
     public Voluntario save(Voluntario voluntario) {
+        if (voluntario.getId() != null) {
+            Optional<VoluntarioEntity> existingOpt = repository.findById(voluntario.getId().getValue());
+            if (existingOpt.isPresent()) {
+                VoluntarioEntity existing = existingOpt.get();
+                VoluntarioEntity mapped = voluntarioMapper.toEntity(voluntario);
+                
+                existing.setDisponibilidad(mapped.getDisponibilidad());
+                existing.setEspecialidad(mapped.getEspecialidad());
+                existing.setStatus(mapped.getStatus());
+                existing.setTareas(mapped.getTareas());
+                
+                if (existing.getDisponibilidades() == null) {
+                    existing.setDisponibilidades(new ArrayList<>());
+                }
+                
+                List<DisponibilidadVoluntarioEntity> currentList = existing.getDisponibilidades();
+                List<DisponibilidadVoluntarioEntity> newList = mapped.getDisponibilidades();
+                if (newList == null) newList = new ArrayList<>();
+                
+                final List<DisponibilidadVoluntarioEntity> finalList = newList;
+                currentList.removeIf(curr -> finalList.stream().noneMatch(n -> 
+                    n.getId() != null && n.getId().equals(curr.getId())
+                ));
+                
+                for (DisponibilidadVoluntarioEntity newItem : finalList) {
+                    if (newItem.getId() != null) {
+                        currentList.stream().filter(c -> c.getId().equals(newItem.getId())).findFirst().ifPresent(c -> {
+                            c.setFecha(newItem.getFecha());
+                            c.setTurno(newItem.getTurno());
+                            c.setEstado(newItem.getEstado());
+                        });
+                    } else {
+                        newItem.setVoluntario(existing);
+                        currentList.add(newItem);
+                    }
+                }
+                
+                return voluntarioMapper.toDomain(repository.save(existing));
+            }
+        }
+        
         VoluntarioEntity entity = voluntarioMapper.toEntity(voluntario);
+        if (entity.getDisponibilidades() != null) {
+            entity.getDisponibilidades().forEach(d -> d.setVoluntario(entity));
+        }
         return voluntarioMapper.toDomain(repository.save(entity));
     }
 

@@ -159,8 +159,8 @@
             </div>
 
             <div style="grid-column: 1 / -1; margin-top: 2rem; display: flex; gap: 1rem;">
-                <a th:href="@{/web/home}" class="btn btn-secondary"
-                    style="flex: 1; justify-content: center; height: 56px; border-radius: 16px;" th:text="#{generic.auto.cancelar}"></a>
+                <button type="button" class="btn btn-secondary" onclick="window.history.back()"
+                    style="flex: 1; justify-content: center; height: 56px; border-radius: 16px; border: none; cursor: pointer;" th:text="#{generic.auto.cancelar}"></button>
                 <button type="submit" class="btn btn-primary"
                     style="flex: 2; justify-content: center; height: 56px; border-radius: 16px;">
                     <i data-lucide="send"></i>

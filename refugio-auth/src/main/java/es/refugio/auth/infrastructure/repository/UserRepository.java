@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<AuthCredentialEntity, Integer> {
     Optional<AuthCredentialEntity> findByEmail(String email);
+    Optional<AuthCredentialEntity> findByUsername(String username);
 }
