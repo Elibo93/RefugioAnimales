@@ -47,14 +47,14 @@
             <tr th:each="t : ${animales}">
                 <td th:text="${t.id}"></td>
                 <td th:text="${t.nombre}"></td>
-                <td th:text="${t.especie == 'OTRO' ? t.especiePersonalizada : t.especie}"></td>
+                <td th:text="${t.especie.toString() == 'OTRO' ? t.especiePersonalizada : #messages.msg('enum.Especie.' + t.especie)}"></td>
                 <td th:text="${t.raza}"></td>
-                <td th:text="${t.sexo}"></td>
+                <td th:text="#{enum.Sexo.__${t.sexo}__}"></td>
                 <td th:text="${t.chipId}"></td>
                 <td>
                     <span class="badge" 
                           th:classappend="${t.estado == 'DISPONIBLE' ? 'badge-success' : (t.estado == 'ADOPTADO' ? 'badge-info' : (t.estado == 'FALLECIDO' ? 'badge-danger' : 'badge-warning'))}"
-                          th:text="${t.estado}"></span>
+                          th:text="#{enum.EstadoAnimal.__${t.estado}__}"></span>
                 </td>
                 <td th:text="${t.edad != null ? t.edad + ' años' : '-'}"></td>
                 <td th:text="${t.tamano != null ? t.tamano : '-'}"></td>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Informe Clínico</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 2cm;
+            @top-right {
+                content: "Refugio Animales - Informe Oficial";
+                font-size: 9pt;
+                color: #666;
+            }
+            @bottom-center {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 9pt;
+                color: #666;
+            }
+        }
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 11pt;
+            color: #333;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #22c55e;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: #14532d;
+            margin: 0 0 5px 0;
+            font-size: 24pt;
+        }
+        .header p {
+            margin: 0;
+            color: #64748b;
+            font-size: 10pt;
+        }
+        .section-title {
+            background-color: #f0fdf4;
+            color: #14532d;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 14pt;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-left: 4px solid #22c55e;
+        }
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .info-table th {
+            text-align: left;
+            background-color: #f8fafc;
+            color: #475569;
+            padding: 8px;
+            width: 25%;
+            font-weight: bold;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .info-table td {
+            padding: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .text-block {
+            background-color: #fdf2f8;
+            border-left: 4px solid #ec4899;
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+        .text-block.treatment {
+            background-color: #f0fdf4;
+            border-left-color: #22c55e;
+        }
+        .footer-note {
+            margin-top: 40px;
+            font-size: 9pt;
+            color: #64748b;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>INFORME CLÍNICO OFICIAL</h1>
+        <p>Refugio Animales • Documento Confidencial</p>
+        <p>Registro #<span th:text="${historial.id}"></span> • Fecha de Emisión: <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}"></span></p>
+    </div>
+
+    <div class="section-title">DATOS DEL PACIENTE</div>
+    <table class="info-table">
+        <tr>
+            <th>Nombre:</th>
+            <td th:text="${animal != null ? animal.nombre : '-'}"></td>
+            <th>Especie:</th>
+            <td th:text="${animal != null ? animal.especie : '-'}"></td>
+        </tr>
+        <tr>
+            <th>Raza:</th>
+            <td th:text="${animal != null ? animal.raza : '-'}"></td>
+            <th>Sexo:</th>
+            <td th:text="${animal != null ? animal.sexo : '-'}"></td>
+        </tr>
+        <tr>
+            <th>Edad:</th>
+            <td th:text="${animal != null ? animal.edad : '-'}"></td>
+            <th>ID Chip:</th>
+            <td th:text="${animal != null ? animal.chipId : '-'}"></td>
+        </tr>
+    </table>
+
+    <div class="section-title">DATOS DEL EXAMEN</div>
+    <table class="info-table">
+        <tr>
+            <th>Fecha del Historial:</th>
+            <td th:text="${historial.fecha != null ? historial.fecha.toString().substring(0,10) : '-'}"></td>
+        </tr>
+        <tr>
+            <th>Veterinario Responsable:</th>
+            <td th:text="${historial.veterinario}"></td>
+        </tr>
+    </table>
+
+    <div class="section-title" style="border-left-color: #ec4899; background-color: #fdf2f8; color: #831843;">DIAGNÓSTICO Y OBSERVACIONES</div>
+    <div class="text-block">
+        <p style="white-space: pre-wrap; margin: 0;" th:text="${historial.descripcion}"></p>
+    </div>
+
+    <div class="section-title">PROTOCOLO DE TRATAMIENTO</div>
+    <div class="text-block treatment">
+        <p style="white-space: pre-wrap; margin: 0;" th:text="${historial.tratamiento}"></p>
+    </div>
+
+    <div class="footer-note">
+        Este informe clínico es parte del expediente oficial del refugio. 
+        Cualquier modificación queda registrada en el historial del sistema.
+    </div>
+
+</body>
+</html>

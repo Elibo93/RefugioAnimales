@@ -19,7 +19,7 @@
             </div>
             
             <div style="display: flex; gap: 12px;">
-                <a th:href="@{/web/historiales/pdf}" target="_blank" class="btn btn-secondary">
+                <a th:href="@{/web/historiales/{id}/pdf(id=${historial.id})}" target="_blank" class="btn btn-secondary">
                     <i data-lucide="printer" style="width: 18px;"></i>
                     <span th:text="#{historial.auto.imprimir.informe}"></span>
                 </a>

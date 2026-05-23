@@ -132,7 +132,7 @@
                                 <select name="rol" class="form-control" 
                                     style="width: 100%; border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; transition: all 0.2s;">
                                     <option th:each="r : ${roles}" th:value="${r}"
-                                        th:text="${#strings.capitalize(r.replace('ROLE_', '').toLowerCase())}"
+                                        th:text="#{enum.Rol.__${r}__}"
                                         th:selected="${persona.rol == r}">Rol</option>
                                 </select>
                             </div>

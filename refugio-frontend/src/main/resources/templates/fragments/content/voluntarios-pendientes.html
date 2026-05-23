@@ -150,7 +150,7 @@
                         th:hx-post="'/web/voluntarios/' + ${v.id} + '/aprobar'"
                         th:hx-target="'#solicitud-' + ${v.id}"
                         hx-swap="outerHTML"
-                        hx-confirm="¿Estás seguro de que quieres aprobar a este voluntario? Se le notificará por email y se activará su cuenta.">
+                        th:hx-confirm="#{confirm.voluntario.aprobar.largo}">
                     <i data-lucide="user-check" style="width: 20px;"></i>
                     [[#{solicitud.auto.approve.request}]]
                 </button>
@@ -159,7 +159,7 @@
                         th:hx-post="'/web/voluntarios/' + ${v.id} + '/rechazar'"
                         th:hx-target="'#solicitud-' + ${v.id}"
                         hx-swap="outerHTML"
-                        hx-confirm="¿Deseas rechazar esta solicitud de voluntariado? Esta acción no se puede deshacer." th:text="#{generic.auto.rechazar}"></button>
+                        th:hx-confirm="#{confirm.voluntario.rechazar.largo}" th:text="#{generic.auto.rechazar}"></button>
             </div>
         </div>
     </div>

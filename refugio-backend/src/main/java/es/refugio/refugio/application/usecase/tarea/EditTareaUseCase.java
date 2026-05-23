@@ -11,6 +11,7 @@ import es.refugio.refugio.domain.model.tarea.enums.EstadoTarea;
 import es.refugio.refugio.domain.model.tarea.event.TareaStatusChangedEvent;
 import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
 import es.refugio.refugio.domain.repository.TareaRepository;
+import es.refugio.refugio.domain.model.voluntario.enums.EstadoDisponibilidad;
 import es.refugio.refugio.domain.repository.VoluntarioRepository;
 import es.refugio.refugio.domain.repository.PerfilLegalRepository;
 import es.refugio.refugio.domain.model.perfil_legal.PerfilLegal;
@@ -36,9 +37,9 @@ public class EditTareaUseCase {
                     if (vol.getDisponibilidades() != null) {
                         boolean noDisponible = vol.getDisponibilidades().stream()
                                 .anyMatch(d -> d.getFecha().equals(limitDate) 
-                                            && d.getEstado() == es.refugio.refugio.domain.model.voluntario.enums.EstadoDisponibilidad.NO_DISPONIBLE);
+                                            && d.getEstado() == EstadoDisponibilidad.NO_DISPONIBLE);
                         if (noDisponible) {
-                            throw new IllegalArgumentException("Uno de los voluntarios seleccionados ha marcado como 'No Disponible' la fecha límite de la tarea.");
+                            throw new IllegalArgumentException("error.tarea.voluntario_no_disponible");
                         }
                     }
                 });
@@ -98,16 +99,13 @@ public class EditTareaUseCase {
                     if ((estadoEnum == EstadoTarea.ACEPTADA || estadoEnum == EstadoTarea.RECHAZADA)
                             && tarea.getEstado() != estadoEnum) {
 
-                        String volunteerName = "Un voluntario";
+                        String volunteerName = "Un usuario";
                         if (command.voluntarioActorId() != null) {
-                            var volOpt = voluntarioRepository.getById(new VoluntarioId(command.voluntarioActorId()));
-                            if (volOpt.isPresent()) {
-                                var perfilOpt = perfilLegalRepository
-                                        .findByUsuarioId(volOpt.get().getUsuarioId().getValue());
-                                if (perfilOpt.isPresent()) {
-                                    PerfilLegal p = perfilOpt.get();
-                                    volunteerName = p.getNombre() + " " + p.getApellido();
-                                }
+                            var perfilOpt = perfilLegalRepository
+                                    .findByUsuarioId(command.voluntarioActorId());
+                            if (perfilOpt.isPresent()) {
+                                PerfilLegal p = perfilOpt.get();
+                                volunteerName = p.getNombre() + " " + p.getApellido();
                             }
                         }
 

@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConvertirAdoptanteRequest {
-    @NotNull(message = "El ID del animal es obligatorio")
+    @NotNull(message = "{error.validation.animal_id_obligatorio}")
     private Integer animalId;
 
     private String comentario;

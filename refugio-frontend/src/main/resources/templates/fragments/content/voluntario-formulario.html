@@ -40,12 +40,12 @@
                     </div>
 
                     <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--text-main); margin-bottom: 1rem;" 
-                        th:text="${estado == 'PENDIENTE' ? 'Solicitud en Revisión' : (estado == 'APROBADO' ? '¡Ya eres Voluntario!' : 'Solicitud no aprobada')}">
+                        th:text="${estado == 'PENDIENTE' ? #messages.msg('voluntario.estado.pendiente.title') : (estado == 'APROBADO' ? #messages.msg('voluntario.estado.aprobado.title') : #messages.msg('voluntario.estado.rechazado.title'))}">
                         Estado [[#{html.auto.de}]] Solicitud
                     </h2>
                     
                     <p style="color:var(--text-muted); font-size: 1.1rem; max-width: 500px; margin: 0 auto 2.5rem; line-height: 1.6;"
-                       th:text="${estado == 'PENDIENTE' ? 'Ya hemos recibido tu solicitud. Nuestro equipo la está revisando y te notificaremos muy pronto.' : (estado == 'APROBADO' ? 'Tu cuenta ya tiene acceso a las funciones de voluntariado. ¡Gracias por tu compromiso!' : 'Lamentamos informarte que tu solicitud no ha sido aceptada en este momento. Contacta con nosotros para más información.')}">
+                       th:text="${estado == 'PENDIENTE' ? #messages.msg('voluntario.estado.pendiente.msg') : (estado == 'APROBADO' ? #messages.msg('voluntario.estado.aprobado.msg') : #messages.msg('voluntario.estado.rechazado.msg'))}">
                         Mensaje [[#{html.auto.de}]] estado
                     </p>
 
@@ -213,7 +213,7 @@
                         <a th:href="${#authorization.expression('hasRole(''ADMIN'')') ? '/web/voluntarios' : '/'}" class="btn" 
                            style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: #64748b; background: #f1f5f9; text-decoration: none;" th:text="#{generic.auto.cancelar}"></a>
                         <button type="submit" class="btn btn-primary" style="padding: 1rem 3rem; border-radius: 16px; font-weight: 700; background: #0891b2; border: none; color: white; cursor: pointer;">
-                            <span th:text="${voluntario.id == null ? 'Enviar Solicitud' : 'Guardar Cambios'}">Enviar</span>
+                            <span th:text="${voluntario.id == null ? #messages.msg('voluntario.btn.enviar_solicitud') : #messages.msg('voluntario.btn.guardar_cambios')}">Enviar</span>
                         </button>
                     </div>
                 </form>

@@ -33,7 +33,7 @@ spring:
   # i18n — usa los mismos archivos messages copiados del backend
   messages:
     encoding: UTF-8
-    basename: messages
+    basename: messages,common_messages
 
   # Jackson — soporte para LocalDateTime
   jackson:

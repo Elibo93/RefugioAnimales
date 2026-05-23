@@ -147,7 +147,8 @@
                         <div style="flex: 1.5;" th:text="#{tarea.auto.asignado.a}"></div>
                         <div style="flex: 1; text-align: center;" th:text="#{generic.auto.estado}"></div>
                         <div style="flex: 1.2; text-align: center;" th:text="#{tarea.auto.prioridad.fecha}"></div>
-                        <div style="width: 100px; text-align: right;" th:text="#{tarea.auto.accion}"></div>
+                        <div th:if="${!modoSeleccion}" style="width: 140px; text-align: center;" th:text="#{tarea.auto.accion}"></div>
+                        <div th:if="${modoSeleccion}" style="width: 120px; text-align: center;" th:text="#{tarea.auto.accion}"></div>
                     </div>
 
                     <div class="list-rows" style="display: flex; flex-direction: column; gap: 12px;">
@@ -203,7 +204,7 @@
                                                     (t.estado == 'CANCELADA' or t.estado == 'RECHAZADA' ? 'danger' : 
                                                     (t.estado == 'EN_PROCESO' or t.estado == 'ACEPTADA' ? 'info' : 
                                                     (t.estado == 'PROPUESTA' ? 'primary' : 'warning')))}"
-                                    th:text="${t.estado != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(t.estado, '_', ' '))) : 'Pendiente'}">
+                                    th:text="${t.estado != null ? #messages.msg('enum.EstadoTarea.' + t.estado) : #messages.msg('enum.EstadoTarea.PENDIENTE')}">
                                 </span>
                             </div>
 
@@ -242,7 +243,7 @@
                                 </a>
                                 <button class="btn-icon delete" th:hx-post="@{/web/tareas/{id}/borrar(id=${t.id})}"
                                     th:hx-target="'#row-' + ${t.id}" hx-swap="outerHTML swap:0.3s"
-                                    hx-confirm="¿Deseas eliminar esta tarea?">
+                                    th:hx-confirm="#{confirm.tarea.eliminar}">
                                     <i data-lucide="trash-2"></i>
                                 </button>
                             </div>
@@ -355,7 +356,7 @@
                                             <label class="dot-radio pending" title="Aceptada">
                                                 <input type="radio" th:name="'estado-' + ${t.id}" value="ACEPTADA" 
                                                        th:checked="${t.estado == 'ACEPTADA'}"
-                                                       th:onchange="'document.getElementById(\'input-estado-\' + ' + ${t.id} + ').value = this.value; document.getElementById(\'btn-save-\' + ' + ${t.id} + ').style.display = \'flex\''">
+                                                       th:onclick="|document.getElementById('input-estado-${t.id}').value = this.value; document.getElementById('btn-save-${t.id}').style.display = 'flex';|">
                                                 <span class="checkmark"></span>
                                             </label>
                                         </div>
@@ -365,7 +366,7 @@
                                             <label class="dot-radio in-progress" title="En Proceso">
                                                 <input type="radio" th:name="'estado-' + ${t.id}" value="EN_PROCESO" 
                                                        th:checked="${t.estado == 'EN_PROCESO'}"
-                                                       th:onchange="'document.getElementById(\'input-estado-\' + ' + ${t.id} + ').value = this.value; document.getElementById(\'btn-save-\' + ' + ${t.id} + ').style.display = \'flex\''">
+                                                       th:onclick="|document.getElementById('input-estado-${t.id}').value = this.value; document.getElementById('btn-save-${t.id}').style.display = 'flex';|">
                                                 <span class="checkmark"></span>
                                             </label>
                                         </div>
@@ -375,7 +376,7 @@
                                             <label class="dot-radio completed" title="Finalizada">
                                                 <input type="radio" th:name="'estado-' + ${t.id}" value="FINALIZADA" 
                                                        th:checked="${t.estado == 'FINALIZADA' or t.estado == 'COMPLETADA'}"
-                                                       th:onchange="'document.getElementById(\'input-estado-\' + ' + ${t.id} + ').value = this.value; document.getElementById(\'btn-save-\' + ' + ${t.id} + ').style.display = \'flex\''">
+                                                       th:onclick="|document.getElementById('input-estado-${t.id}').value = this.value; document.getElementById('btn-save-${t.id}').style.display = 'flex';|">
                                                 <span class="checkmark"></span>
                                             </label>
                                         </div>

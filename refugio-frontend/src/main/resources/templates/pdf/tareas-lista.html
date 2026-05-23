@@ -35,10 +35,10 @@
                 <td th:text="${t.id}"></td>
                 <td th:text="${t.descripcion}"></td>
                 <td>
-                    <span class="badge" th:classappend="${t.prioridad == 'ALTA' ? 'badge-danger' : (t.prioridad == 'MEDIA' ? 'badge-warning' : 'badge-info')}" th:text="${t.prioridad}"></span>
+                    <span class="badge" th:classappend="${t.prioridad == 'ALTA' ? 'badge-danger' : (t.prioridad == 'MEDIA' ? 'badge-warning' : 'badge-info')}" th:text="#{enum.PrioridadObjetivo.__${t.prioridad}__}"></span>
                 </td>
                 <td>
-                    <span class="badge" th:classappend="${t.estado == 'COMPLETADA' ? 'badge-success' : 'badge-warning'}" th:text="${t.estado}"></span>
+                    <span class="badge" th:classappend="${t.estado == 'COMPLETADA' ? 'badge-success' : 'badge-warning'}" th:text="#{enum.EstadoTarea.__${t.estado}__}"></span>
                 </td>
                 <td>
                     <ul style="margin: 0; padding-left: 12px;" th:if="${t.voluntarioIds != null and !t.voluntarioIds.isEmpty()}">

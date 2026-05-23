@@ -38,9 +38,12 @@ import es.refugio.refugio.infraestructure.web.dto.animal.AnimalRequest;
 import es.refugio.refugio.infraestructure.web.dto.animal.AnimalResponse;
 import es.refugio.refugio.domain.repository.SolicitudAdopcionRepository;
 import es.refugio.refugio.domain.model.solicitud_adopcion.enums.EstadoSolicitud;
+import es.refugio.refugio.domain.model.animal.enums.Especie;
 import java.util.stream.Collectors;
+import java.util.Arrays;
 
 import es.refugio.refugio.application.service.storage.FileStorageService;
+import java.util.Arrays;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
@@ -133,11 +136,8 @@ public class AnimalController {
     @Operation(summary = "Obtener lista única de especies activas")
     @GetMapping("/especies")
     public List<String> getEspeciesActivas() {
-        return findAnimalService.findAll().stream()
-                .map(Animal::getEspecie)
-                .filter(e -> e != null)
+        return Arrays.stream(Especie.values())
                 .map(Enum::name)
-                .distinct()
                 .toList();
     }
 

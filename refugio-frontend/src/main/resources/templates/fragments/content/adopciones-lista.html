@@ -152,7 +152,7 @@
                                                   (i.estado == 'CANCELADA' ? 'danger' : 
                                                   (i.estado == 'PENDIENTE_FIRMA' ? 'primary' : 
                                                   (i.estado == 'EN_PERIODO_ADAPTACION' ? 'warning' : 'info')))}"
-                                  th:text="${i.estado != null ? #strings.replace(#strings.capitalize(#strings.toLowerCase(i.estado)), '_', ' ') : 'En proceso'}">Completada</span>
+                                  th:text="${i.estado != null ? #messages.msg('enum.EstadoAdopcion.' + i.estado) : #messages.msg('enum.EstadoAdopcion.EN_PERIODO_ADAPTACION')}">Completada</span>
                         </div>
 
                         <div class="row-cell"
@@ -171,7 +171,7 @@
                             <button class="btn-icon delete"
                                 th:hx-post="@{/web/adopciones/{id}/borrar(id=${i.id})}"
                                 th:hx-target="'#row-' + ${i.id}" hx-swap="outerHTML swap:0.3s"
-                                hx-confirm="¿Eliminar inscripción?">
+                                th:hx-confirm="#{confirm.adopcion.eliminar}">
                                 <i data-lucide="trash-2" style="width: 16px;"></i>
                             </button>
                         </div>

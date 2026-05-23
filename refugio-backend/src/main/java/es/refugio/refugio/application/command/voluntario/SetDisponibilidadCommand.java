@@ -13,7 +13,7 @@ public record SetDisponibilidadCommand(
 ) {
     public SetDisponibilidadCommand {
         if (fecha != null && fecha.isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("La fecha no puede ser anterior a hoy.");
+            throw new IllegalArgumentException("error.fecha.pasada");
         }
     }
 }

@@ -60,10 +60,10 @@
                                 th:text="#{animal.field.species}">Especie</label>
                             <select name="especie" id="especieSelect" required onchange="toggleEspeciePersonalizada()"
                                 th:disabled="${animal.id != null}"
-                                th:style="'width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url(\'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E\') no-repeat right 1.25rem center/1.2rem; background-color: ' + (${animal.id != null} ? '#f8fafc' : 'white') + ';'">
+                                th:style="'width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url(''data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'') no-repeat right 1.25rem center/1.2rem; background-color: ' + (${animal.id != null} ? '#f8fafc' : 'white') + ';'">
                                 <option value="" th:text="#{animal.auto.selecciona}"></option>
                                 <option th:each="e : ${especies}" th:value="${e}"
-                                    th:text="${#strings.capitalize(e.toLowerCase())}"
+                                    th:text="#{enum.Especie.__${e}__}"
                                     th:selected="${animal.especie == e}"></option>
                             </select>
                             <input type="hidden" th:if="${animal.id != null}" name="especie"
@@ -100,7 +100,7 @@
                             <select name="sexo" th:disabled="${animal.id != null}"
                                 style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem; background-color: white;">
                                 <option th:each="s : ${sexos}" th:value="${s}"
-                                    th:text="${#strings.capitalize(s.toLowerCase())}"
+                                    th:text="#{enum.Sexo.__${s}__}"
                                     th:selected="${animal.sexo == s}"></option>
                             </select>
                             <input type="hidden" th:if="${animal.id != null}" name="sexo"
@@ -146,7 +146,7 @@
                             <select name="estado"
                                 style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem; background-color: white;">
                                 <option th:each="e : ${estados}" th:value="${e}"
-                                    th:text="${#strings.capitalize(e.toLowerCase().replace('_', ' '))}"
+                                    th:text="#{enum.EstadoAnimal.__${e}__}"
                                     th:selected="${animal.estado == e}"></option>
                             </select>
                         </div>
@@ -168,7 +168,7 @@
                             <select name="tamano"
                                 style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem; background-color: white;">
                                 <option th:each="t : ${tamanos}" th:value="${t}"
-                                    th:text="${#strings.capitalize(t.toLowerCase())}"
+                                    th:text="#{enum.Tamano.__${t}__}"
                                     th:selected="${animal.tamano == t}"></option>
                             </select>
                         </div>

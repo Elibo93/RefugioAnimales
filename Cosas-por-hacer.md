@@ -67,20 +67,24 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 - [✅] **OAuth:** Registro/Login con Google y Apple (Opcional).
 
 ### 10) Calidad y DevOps
-- [ ] **i18n:** Traducir toda la app (ES/EN) usando archivos de propiedades.
+- [✅] **i18n:** Traducir toda la app (ES/EN) usando archivos de propiedades.
 - [ ] **Docker:** Unificar toda la infraestructura (Gateway, Auth, Backend, Frontend, DB) en un `docker-compose.yml`.
 - [ ] **Código:** Refactorizar controladores, unificar mappers, CSS en el front y archivos scripts y completar JavaDoc, .
 
 
 ### 11) Restaurar validaciones de DNI
-- [] Falta la validación de DNI
-- [] Archivos modificados para que funcione:
-- [] AdoptanteRequest.java
-- [] PublicSolicitudAdopcionRequest.java
-- [] ConvertAdoptanteRequest.java
-- [] ConvertirAdoptanteRequest.java
+- [✅] Falta la validación de DNI
+- [✅] Archivos modificados para que funcione:
+- [✅] AdoptanteRequest.java (no aplica, no tiene DNI)
+- [✅] PublicSolicitudAdopcionRequest.java
+- [✅] ConvertAdoptanteRequest.java
+- [✅] ConvertirAdoptanteRequest.java (no aplica, no tiene DNI)
+
+### 12) Implemtar Calendario de Tareas del Voluntario
+- [✅] 
+
+
 ---
+
 *Este documento es una guía viva para el desarrollo del TFG - Refugio de Animales.*
 
-### Implemtar Calendario de Tareas del Voluntario
-- [✅] 

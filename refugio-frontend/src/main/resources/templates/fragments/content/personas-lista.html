@@ -145,7 +145,7 @@
                         <div class="row-cell" style="flex: 2; justify-content: center;">
                             <span class="badge-premium"
                                 th:classappend="${a.rol == 'ROLE_ADMIN' ? 'danger' : (a.rol == 'ROLE_VOLUNTARIO' ? 'info' : (a.rol == 'ROLE_ADOPTANTE' ? 'primary' : 'success'))}"
-                                th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(a.rol.toString().replace('ROLE_', ''), '_', ' ')))}">Rol</span>
+                                th:text="${#messages.msg('enum.Rol.' + a.rol.toString())}">Rol</span>
                         </div>
 
                         <!-- Contacto -->
@@ -172,7 +172,7 @@
                             </a>
                             <button class="btn-icon delete" th:hx-post="@{/web/personas/{id}/borrar(id=${a.id})}"
                                 th:hx-target="'#row-' + ${a.id}" hx-swap="outerHTML swap:0.3s"
-                                hx-confirm="¿Eliminar persona?">
+                                th:hx-confirm="#{confirm.persona.eliminar}">
                                 <i data-lucide="trash-2" style="width: 18px;"></i>
                             </button>
                         </div>

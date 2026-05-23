@@ -9,11 +9,11 @@
 <body>
 <div th:fragment="toast">
     <div th:if="${successMessage}" class="toast success">
-        <i data-lucide="check-circle" style="width:20px;"></i> <span th:text="${successMessage != null and !successMessage.isEmpty() ? successMessage : #messages.msg('toast.success')}">Operación correcta</span>
+        <i data-lucide="check-circle" style="width:20px;"></i> <span th:text="${#messages.msgOrNull(successMessage) != null ? #messages.msg(successMessage) : successMessage}">Operación correcta</span>
     </div>
 
     <div th:if="${errorMessage}" class="toast error">
-        <i data-lucide="alert-circle" style="width:20px;"></i> <span th:text="${errorMessage != null and !errorMessage.isEmpty() ? errorMessage : #messages.msg('toast.error')}">[[#{html.auto.error}]]</span>
+        <i data-lucide="alert-circle" style="width:20px;"></i> <span th:text="${#messages.msgOrNull(errorMessage) != null ? #messages.msg(errorMessage) : errorMessage}">[[#{html.auto.error}]]</span>
     </div>
 </div>
 

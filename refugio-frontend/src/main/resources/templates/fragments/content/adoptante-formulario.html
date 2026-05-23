@@ -169,7 +169,7 @@
                             </label>
                             <select name="estadoValidacion" class="form-control"
                                 style="width: 100%; border-radius: 12px; height: 48px;">
-                                <option th:each="e : ${estados}" th:value="${e}" th:text="${e}"
+                                <option th:each="e : ${estados}" th:value="${e}" th:text="#{enum.EstadoValidacion.__${e}__}"
                                     th:selected="${e == adoptante.estadoValidacion}"></option>
                             </select>
                         </div>

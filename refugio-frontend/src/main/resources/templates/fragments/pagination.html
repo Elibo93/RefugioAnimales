@@ -6,14 +6,15 @@
         Uso: th:replace="~{fragments/pagination :: controls(pagination=${paginationObj}, target='#mi-tabla', url='/web/entidad')}"
     -->
     <div th:fragment="controls(pagination, target, url)" class="pagination-container" 
+         th:if="${pagination != null}"
          style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: var(--bg-main); border-top: 1px solid var(--border); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
         
         <div class="pagination-info" style="color: var(--text-muted); font-size: 0.85rem;">
             <th:block th:if="${pagination.total > 0}">
                 [[#{generic.auto.showing}]] <span th:text="${(pagination.page - 1) * pagination.pageSize + 1}" style="font-weight: 600; color: var(--text-main);">1</span> 
-                a <span th:text="${(pagination.page * pagination.pageSize) < pagination.total ? (pagination.page * pagination.pageSize) : pagination.total}" style="font-weight: 600; color: var(--text-main);">10</span> 
+                - <span th:text="${(pagination.page * pagination.pageSize) < pagination.total ? (pagination.page * pagination.pageSize) : pagination.total}" style="font-weight: 600; color: var(--text-main);">10</span> 
                 [[#{html.auto.de}]] <span th:text="${pagination.total}" style="font-weight: 600; color: var(--text-main);">100</span> 
-                <span th:text="${pagination.total == 1 ? 'resultado' : 'resultados'}">resultados</span>
+                <span th:text="${pagination.total == 1 ? #messages.msg('generic.auto.resultado') : #messages.msg('generic.auto.resultados')}">resultados</span>
             </th:block>
             <th:block th:unless="${pagination.total > 0}">
                 [[#{generic.auto.no.results}]]

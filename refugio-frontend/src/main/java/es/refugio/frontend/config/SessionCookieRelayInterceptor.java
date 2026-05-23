@@ -9,6 +9,8 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.context.i18n.LocaleContextHolder;
+import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +41,12 @@ public class SessionCookieRelayInterceptor implements ClientHttpRequestIntercept
             String cookieHeader = currentRequest.getHeader("Cookie");
             if (cookieHeader != null && !cookieHeader.isBlank()) {
                 request.getHeaders().add("Cookie", cookieHeader);
+            }
+
+            // Reenviar el header Accept-Language para la i18n del backend usando el Locale activo de Spring
+            Locale activeLocale = LocaleContextHolder.getLocale();
+            if (activeLocale != null) {
+                request.getHeaders().add("Accept-Language", activeLocale.getLanguage());
             }
 
             // 2. Buscar específicamente el JWT_TOKEN en los objetos Cookie

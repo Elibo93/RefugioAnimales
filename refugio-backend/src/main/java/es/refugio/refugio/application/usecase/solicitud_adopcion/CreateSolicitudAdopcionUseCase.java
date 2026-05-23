@@ -30,7 +30,7 @@ public class CreateSolicitudAdopcionUseCase {
                 .orElseThrow(() -> new AnimalNotFoundException(animalId.getValue()));
 
         if (animal.getEstado() == EstadoAnimal.ADOPTADO) {
-            throw new IllegalStateException("Este animal ya ha sido adoptado.");
+            throw new IllegalStateException("error.solicitud.ya_adoptado");
         }
 
         // Evitar duplicidad de solicitudes pendientes para el mismo animal
@@ -38,7 +38,7 @@ public class CreateSolicitudAdopcionUseCase {
                 .anyMatch(s -> s.getAnimalId().equals(animalId) && s.getEstado() == EstadoSolicitud.PENDIENTE);
 
         if (yaTieneSolicitud) {
-            throw new IllegalStateException("Ya tienes una solicitud pendiente para este animal.");
+            throw new IllegalStateException("error.solicitud.ya_pendiente");
         }
 
         SolicitudAdopcion solicitud = SolicitudAdopcion.builder()

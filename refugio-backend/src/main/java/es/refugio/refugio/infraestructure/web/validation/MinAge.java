@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MinAge {
     int value() default 18;
-    String message() default "Debes ser mayor de {value} años para poder adoptar";
+    String message() default "{error.validation.min_age}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

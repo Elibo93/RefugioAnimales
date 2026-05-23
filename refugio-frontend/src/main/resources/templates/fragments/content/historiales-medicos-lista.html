@@ -76,7 +76,7 @@
                             <a class="btn-icon" th:hx-get="@{/web/historiales/{id}/editar(id=${h.id()})}" hx-target="#contenido-dinamico" hx-push-url="true" title="Editar">
                                 <i data-lucide="edit-2"></i>
                             </a>
-                            <button class="btn-icon delete" th:hx-post="@{/web/historiales/{id}/borrar(id=${h.id()})}" th:hx-target="'#row-' + ${h.id()}" hx-swap="outerHTML swap:0.3s" hx-confirm="¿Eliminar?">
+                            <button class="btn-icon delete" th:hx-post="@{/web/historiales/{id}/borrar(id=${h.id()})}" th:hx-target="'#row-' + ${h.id()}" hx-swap="outerHTML swap:0.3s" th:hx-confirm="#{confirm.generic.eliminar}">
                                 <i data-lucide="trash-2"></i>
                             </button>
                         </div>

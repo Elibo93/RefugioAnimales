@@ -9,6 +9,7 @@ import es.refugio.refugio.domain.model.tarea.enums.EstadoTarea;
 import es.refugio.refugio.domain.model.tarea.event.TareaStatusChangedEvent;
 import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
 import es.refugio.refugio.domain.repository.TareaRepository;
+import es.refugio.refugio.domain.model.voluntario.enums.EstadoDisponibilidad;
 import es.refugio.refugio.domain.repository.VoluntarioRepository;
 import es.refugio.refugio.application.service.NotificacionService;
 import org.springframework.context.ApplicationEventPublisher;
@@ -24,7 +25,7 @@ public class CreateTareaUseCase {
 
     public Tarea create(CreateTareaCommand command) {
         if (command.fechaLimite() != null && command.fechaLimite().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("La fecha límite de la tarea no puede ser inferior a la fecha y hora actual.");
+            throw new IllegalArgumentException("error.tarea.fecha_limite_pasada");
         }
         
         if (command.voluntarioIds() != null && command.fechaLimite() != null) {
@@ -36,9 +37,9 @@ public class CreateTareaUseCase {
                     if (vol.getDisponibilidades() != null) {
                         boolean noDisponible = vol.getDisponibilidades().stream()
                                 .anyMatch(d -> d.getFecha().equals(limitDate) 
-                                            && d.getEstado() == es.refugio.refugio.domain.model.voluntario.enums.EstadoDisponibilidad.NO_DISPONIBLE);
+                                            && d.getEstado() == EstadoDisponibilidad.NO_DISPONIBLE);
                         if (noDisponible) {
-                            throw new IllegalArgumentException("Uno de los voluntarios seleccionados ha marcado como 'No Disponible' la fecha límite de la tarea.");
+                            throw new IllegalArgumentException("error.tarea.voluntario_no_disponible");
                         }
                     }
                 });

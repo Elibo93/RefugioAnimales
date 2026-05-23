@@ -308,44 +308,44 @@ function handleTypeChange() {
     if (type === 'DINERO') {
         if (panelDineroExtra) panelDineroExtra.style.setProperty('display', 'block', 'important');
         if (panelObjetivo) panelObjetivo.style.setProperty('display', 'block', 'important');
-        if (labelCant) labelCant.textContent = 'Importe de la donación (€)';
+        if (labelCant) labelCant.textContent = window.refugioI18n?.donacionImporte || 'Importe de la donación (€)';
         if (iconCant) iconCant.setAttribute('data-lucide', 'euro');
         if (inputCant) {
             inputCant.placeholder = '0.00';
             inputCant.type = 'number';
             inputCant.step = '0.01';
         }
-        if (labelDesc) labelDesc.textContent = 'Mensaje o dedicatoria (opcional)';
+        if (labelDesc) labelDesc.textContent = window.refugioI18n?.donacionMensaje || 'Mensaje o dedicatoria (opcional)';
     } else {
         if (panelDineroExtra) panelDineroExtra.style.setProperty('display', 'none', 'important');
         if (panelObjetivo) panelObjetivo.style.setProperty('display', 'none', 'important');
         
         if (type === 'COMIDA') {
-            if (labelCant) labelCant.textContent = 'Peso aproximado (Kg)';
+            if (labelCant) labelCant.textContent = window.refugioI18n?.donacionPeso || 'Peso aproximado (Kg)';
             if (iconCant) iconCant.setAttribute('data-lucide', 'package');
             if (inputCant) {
-                inputCant.placeholder = 'Ej: 15';
+                inputCant.placeholder = window.refugioI18n?.donacionPlaceholder15 || 'Ej: 15';
                 inputCant.type = 'number';
                 inputCant.step = '0.5';
             }
-            if (labelDesc) labelDesc.textContent = 'Marca y tipo de alimento';
+            if (labelDesc) labelDesc.textContent = window.refugioI18n?.donacionMarca || 'Marca y tipo de alimento';
         } else if (type === 'MEDICINAS' || type === 'MEDICAMENTO') {
-            if (labelCant) labelCant.textContent = 'Unidades / Cajas';
+            if (labelCant) labelCant.textContent = window.refugioI18n?.donacionUnidades || 'Unidades / Cajas';
             if (iconCant) iconCant.setAttribute('data-lucide', 'pill');
             if (inputCant) {
-                inputCant.placeholder = 'Ej: 2';
+                inputCant.placeholder = window.refugioI18n?.donacionPlaceholder2 || 'Ej: 2';
                 inputCant.type = 'number';
                 inputCant.step = '1';
             }
-            if (labelDesc) labelDesc.textContent = 'Nombre y uso del medicamento';
+            if (labelDesc) labelDesc.textContent = window.refugioI18n?.donacionMedicamento || 'Nombre y uso del medicamento';
         } else {
-            if (labelCant) labelCant.textContent = 'Cantidad / Unidades';
+            if (labelCant) labelCant.textContent = window.refugioI18n?.donacionCantidad || 'Cantidad / Unidades';
             if (iconCant) iconCant.setAttribute('data-lucide', 'gift');
             if (inputCant) {
-                inputCant.placeholder = 'Ej: 5';
+                inputCant.placeholder = window.refugioI18n?.donacionPlaceholder5 || 'Ej: 5';
                 inputCant.type = 'text';
             }
-            if (labelDesc) labelDesc.textContent = 'Descripción del material';
+            if (labelDesc) labelDesc.textContent = window.refugioI18n?.donacionMaterial || 'Descripción del material';
         }
     }
     if (window.lucide) lucide.createIcons();
@@ -401,7 +401,7 @@ function setRecurrence(type) {
     }
 
     const text = document.getElementById('submit-text');
-    if (text) text.textContent = type === 'mensual' ? 'Confirmar Donación Mensual' : 'Confirmar Donación';
+    if (text) text.textContent = type === 'mensual' ? (window.refugioI18n?.donacionConfirmarMensual || 'Confirmar Donación Mensual') : (window.refugioI18n?.donacionConfirmar || 'Confirmar Donación');
 }
 
 // Lógica de Selección de Usuario (Autocomplete)
@@ -447,18 +447,18 @@ async function verifyPasswordGate(btn) {
     const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
     
     const { value: password } = await Swal.fire({
-        title: 'Verificación de Seguridad',
+        title: window.refugioI18n?.securityTitle || 'Verificación de Seguridad',
         html: `
             <div style="text-align: center;">
                 <div style="width: 70px; height: 70px; background: var(--primary-light); border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
                     <i data-lucide="shield-check" style="width: 32px; color: var(--primary);"></i>
                 </div>
                 <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 25px;">
-                    Por seguridad, confirma tu identidad introduciendo tu contraseña actual.
+                    ${window.refugioI18n?.securityDesc || 'Por seguridad, confirma tu identidad introduciendo tu contraseña actual.'}
                 </p>
                 <div style="position: relative; max-width: 320px; margin: 0 auto; display: block;">
                     <input type="password" id="swal-input-password" class="swal2-input premium-modal-input" 
-                           placeholder="Tu contraseña actual" 
+                           placeholder="${window.refugioI18n?.securityPlaceholder || 'Tu contraseña actual'}" 
                            style="width: 100%; margin: 0; padding-right: 50px; padding-left: 20px; border-radius: 16px; height: 55px; border: 2px solid #e2e8f0; transition: all 0.3s ease;">
                     <button type="button" onclick="togglePasswordVisibility('swal-input-password', this)" 
                             style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: #f8fafc; border: none; cursor: pointer; color: var(--text-muted); width: 35px; height: 35px; border-radius: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; transition: all 0.2s;">
@@ -468,8 +468,8 @@ async function verifyPasswordGate(btn) {
             </div>
         `,
         showCancelButton: true,
-        confirmButtonText: 'Verificar ahora',
-        cancelButtonText: 'Cancelar',
+        confirmButtonText: window.refugioI18n?.btnVerify || 'Verificar ahora',
+        cancelButtonText: window.refugioI18n?.btnCancel || 'Cancelar',
         confirmButtonColor: 'var(--primary)',
         cancelButtonColor: '#94a3b8',
         padding: '2.5rem',
@@ -500,7 +500,7 @@ async function verifyPasswordGate(btn) {
 
     if (password) {
         Swal.fire({
-            title: 'Validando...',
+            title: window.refugioI18n?.validating || 'Validando...',
             allowOutsideClick: false,
             didOpen: () => { Swal.showLoading(); },
             customClass: { popup: 'premium-modal-radius' }
@@ -530,8 +530,8 @@ async function verifyPasswordGate(btn) {
                 
                 Swal.fire({
                     icon: 'error',
-                    title: 'Acceso Denegado',
-                    text: errorData.message || 'La contraseña actual no es correcta.',
+                    title: window.refugioI18n?.deniedTitle || 'Acceso Denegado',
+                    text: errorData.message || window.refugioI18n?.deniedDesc || 'La contraseña actual no es correcta.',
                     confirmButtonColor: '#ef4444',
                     customClass: { popup: 'premium-modal-radius', confirmButton: 'premium-modal-btn' }
                 });
@@ -539,8 +539,8 @@ async function verifyPasswordGate(btn) {
         } catch (error) {
             Swal.fire({
                 icon: 'error',
-                title: 'Error de Conexión',
-                text: 'No se pudo contactar con el servicio de seguridad.',
+                title: window.refugioI18n?.errorTitle || 'Error de Conexión',
+                text: window.refugioI18n?.errorDesc || 'No se pudo contactar con el servicio de seguridad.',
                 confirmButtonColor: '#ef4444',
                 customClass: { popup: 'premium-modal-radius' }
             });
@@ -555,7 +555,7 @@ function openPasswordModal() {
         modal.style.display = 'flex';
         // Resetear botón por seguridad al abrir
         if (btn) {
-            btn.innerHTML = '<i data-lucide="check-circle" style="width: 20px;"></i> Actualizar Contraseña';
+            btn.innerHTML = '<i data-lucide="check-circle" style="width: 20px;"></i> ' + (window.refugioI18n?.btnUpdate || 'Actualizar Contraseña');
             btn.disabled = false;
         }
         const input = document.getElementById('newPassword');
@@ -574,7 +574,7 @@ function closePasswordModal() {
     if (form) form.reset();
     if (errorDiv) errorDiv.style.display = 'none';
     if (btn) {
-        btn.innerHTML = '<i data-lucide="check-circle" style="width: 20px;"></i> Actualizar Contraseña';
+        btn.innerHTML = '<i data-lucide="check-circle" style="width: 20px;"></i> ' + (window.refugioI18n?.btnUpdate || 'Actualizar Contraseña');
         btn.disabled = false;
     }
     if (window.lucide) lucide.createIcons();
@@ -593,13 +593,13 @@ async function handlePasswordUpdatePremium(event) {
 
     // 1. VALIDACIONES LOCALES
     if (newPassword !== confirmPassword) {
-        errorDiv.innerText = "Las contraseñas no coinciden";
+        errorDiv.innerText = window.refugioI18n?.errMismatch || "Las contraseñas no coinciden";
         errorDiv.style.display = 'block';
         return;
     }
 
     if (newPassword.length < 6) {
-        errorDiv.innerText = "La contraseña debe tener al menos 6 caracteres";
+        errorDiv.innerText = window.refugioI18n?.errLength || "La contraseña debe tener al menos 6 caracteres";
         errorDiv.style.display = 'block';
         return;
     }
@@ -607,7 +607,7 @@ async function handlePasswordUpdatePremium(event) {
     // 2. UI FEEDBACK
     errorDiv.style.display = 'none';
     btn.disabled = true;
-    btn.innerHTML = '<i class="animate-spin" data-lucide="loader-2"></i> Guardando...';
+    btn.innerHTML = '<i class="animate-spin" data-lucide="loader-2"></i> ' + (window.refugioI18n?.saving || 'Guardando...');
     if (window.lucide) lucide.createIcons();
 
     try {
@@ -620,26 +620,26 @@ async function handlePasswordUpdatePremium(event) {
         if (response.ok) {
             Swal.fire({
                 icon: 'success',
-                title: '¡Seguridad actualizada!',
-                text: 'Tu contraseña ha sido cambiada correctamente.',
+                title: window.refugioI18n?.successTitle || '¡Seguridad actualizada!',
+                text: window.refugioI18n?.successDesc || 'Tu contraseña ha sido cambiada correctamente.',
                 confirmButtonColor: '#4f46e5',
                 customClass: { popup: 'premium-swal' }
             }).then(() => {
                 closePasswordModal();
             });
         } else {
-            const data = await response.json().catch(() => ({ message: "Error en el servidor" }));
-            errorDiv.innerText = data.message || "Error al actualizar la contraseña";
+            const data = await response.json().catch(() => ({ message: window.refugioI18n?.errServer || "Error en el servidor" }));
+            errorDiv.innerText = data.message || window.refugioI18n?.errUpdate || "Error al actualizar la contraseña";
             errorDiv.style.display = 'block';
         }
     } catch (error) {
-        errorDiv.innerText = "Error de conexión con el servidor";
+        errorDiv.innerText = window.refugioI18n?.errConnection || "Error de conexión con el servidor";
         errorDiv.style.display = 'block';
     } finally {
         // Siempre restauramos el botón si no se ha cerrado el modal
         if (document.getElementById('passwordModal').style.display !== 'none') {
             btn.disabled = false;
-            btn.innerHTML = '<i data-lucide="check-circle" style="width: 20px;"></i> Actualizar Contraseña';
+            btn.innerHTML = '<i data-lucide="check-circle" style="width: 20px;"></i> ' + (window.refugioI18n?.btnUpdate || 'Actualizar Contraseña');
             if (window.lucide) lucide.createIcons();
         }
     }
@@ -801,7 +801,7 @@ function celebrateAchievement(title, message, imageUrl = null) {
         Swal.fire({
             title: `${iconHtml} ${title}`,
             text: message,
-            confirmButtonText: '¡Excelente!',
+            confirmButtonText: window.refugioI18n?.btnExcellent || '¡Excelente!',
             confirmButtonColor: '#15803d',
             background: '#ffffff',
             padding: '2.5rem',
@@ -893,10 +893,10 @@ function openMapsSelector(event) {
 
     if (typeof Swal !== 'undefined') {
         Swal.fire({
-            title: '¿Cómo deseas llegar?',
+            title: window.refugioI18n?.mapTitle || '¿Cómo deseas llegar?',
             html: `
                 <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; text-align: center;">
-                    Selecciona tu aplicación favorita para ver la ubicación del refugio.
+                    ${window.refugioI18n?.mapDesc || 'Selecciona tu aplicación favorita para ver la ubicación del refugio.'}
                 </p>
                 <div style="display: flex; flex-direction: column; gap: 12px; max-width: 320px; margin: 0 auto;">
                     <a href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer" class="map-provider-btn google" style="display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-radius: 16px; text-decoration: none; border: 1.5px solid #e2e8f0; background: white; transition: all 0.3s ease;">
@@ -929,7 +929,7 @@ function openMapsSelector(event) {
             `,
             showConfirmButton: false,
             showCancelButton: true,
-            cancelButtonText: 'Cancelar',
+            cancelButtonText: window.refugioI18n?.btnCancel || 'Cancelar',
             cancelButtonColor: '#64748b',
             padding: '2rem',
             background: '#ffffff',

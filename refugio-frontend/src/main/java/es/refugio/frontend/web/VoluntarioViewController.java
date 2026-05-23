@@ -28,6 +28,7 @@ import es.refugio.frontend.web.enums.ThymTemplates;
 import es.refugio.frontend.security.CustomUserDetails;
 import es.refugio.frontend.web.dto.*;
 import es.refugio.frontend.web.util.ViewControllerHelper;
+import es.refugio.frontend.web.util.ErrorMessageExtractor;
 
 import java.io.OutputStream;
 import java.util.Collections;
@@ -366,7 +367,7 @@ public class VoluntarioViewController {
                             VoluntarioRecord existing = helper.fetchObject(apiUrl + "/v1/voluntarios/usuario/" + realUserId, VoluntarioRecord.class);
                             if (existing != null) {
                                 logger.info("Bloqueada solicitud duplicada para usuario {}", realUserId);
-                                redirectAttributes.addFlashAttribute("errorMessage", "Ya tienes una solicitud de voluntariado registrada.");
+                                redirectAttributes.addFlashAttribute("errorMessage", helper.getMessage("toast.error.voluntario_registrado"));
                                 return "redirect:" + WebRoutes.VOLUNTARIOS_NUEVO;
                             }
                         } catch (Exception e) {
@@ -394,7 +395,7 @@ public class VoluntarioViewController {
                 }
             } catch (Exception e) {
                 logger.error("Error al registrar usuario para voluntario: " + e.getMessage());
-                redirectAttributes.addFlashAttribute("errorMessage", "Error al crear la cuenta de usuario.");
+                redirectAttributes.addFlashAttribute("errorMessage", helper.getMessage("toast.error.crear_cuenta"));
                 return "redirect:" + WebRoutes.VOLUNTARIOS_NUEVO;
             }
         }
@@ -411,7 +412,10 @@ public class VoluntarioViewController {
         try {
             restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
         } catch (Exception e) {
-            logger.error("Error al sincronizar PerfilLegal en creación: " + e.getMessage());
+            String errorMsg = ErrorMessageExtractor.extract(e);
+            logger.error("Error al sincronizar PerfilLegal en creación: " + errorMsg);
+            redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
+            return "redirect:" + WebRoutes.VOLUNTARIOS_NUEVO;
         }
 
         Map<String, Object> bodyVol = new HashMap<>();
@@ -421,12 +425,11 @@ public class VoluntarioViewController {
 
         try {
             restTemplate.postForObject(apiUrl + "/v1/voluntarios", bodyVol, Object.class);
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "¡Solicitud enviada! Tu perfil de voluntario está pendiente de revisión por un administrador.");
+            redirectAttributes.addFlashAttribute("successMessage", "toast.success.solicitud_enviada");
         } catch (Exception e) {
-            String errorMsg = "Error al crear el perfil: " + e.getMessage();
+            String errorMsg = "Error al crear el perfil: " + ErrorMessageExtractor.extract(e);
             if (e.getCause() != null)
-                errorMsg += " (Causa: " + e.getCause().getMessage() + ")";
+                errorMsg += " (Causa: " + ErrorMessageExtractor.extract((Exception) e.getCause()) + ")";
             logger.error(errorMsg);
             redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
         }
@@ -496,7 +499,7 @@ public class VoluntarioViewController {
             logger.error("Error al actualizar usuario en Auth: " + e.getMessage());
         }
 
-        redirectAttributes.addFlashAttribute("successMessage", "Voluntario actualizado correctamente.");
+        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.voluntario_actualizado"));
 
         if (isAdmin) {
             return "redirect:" + WebRoutes.VOLUNTARIOS_BASE;

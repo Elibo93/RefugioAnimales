@@ -178,7 +178,7 @@ public class AdopcionViewController {
         body.put("contrato",    "Contrato formalizado");
 
         restTemplate.postForObject(apiUrl + "/v1/adopciones", body, Object.class);
-        redirectAttributes.addFlashAttribute("successMessage", "Adopción registrada correctamente");
+        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.adopcion_creada"));
         return "redirect:" + WebRoutes.ADOPCIONES_BASE;
     }
 
@@ -247,7 +247,7 @@ public class AdopcionViewController {
         body.put("fechaAdopcion", formattedDate);
 
         restTemplate.put(apiUrl + "/v1/adopciones/" + id, body);
-        redirectAttributes.addFlashAttribute("successMessage", "Adopción actualizada correctamente");
+        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.adopcion_editada"));
         return "redirect:" + WebRoutes.ADOPCIONES_BASE;
     }
 

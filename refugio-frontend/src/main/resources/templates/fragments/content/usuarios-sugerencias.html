@@ -14,8 +14,8 @@
             <li th:each="u : ${usuariosEncontrados}" 
                 class="suggestion-item"
                 th:style="'padding: 10px 15px; cursor: ' + (${u.yaRegistrado} ? 'not-allowed' : 'pointer') + '; border-radius: 8px; transition: all 0.2s; margin-bottom: 2px; opacity: ' + (${u.yaRegistrado} ? '0.7' : '1') + ';'"
-                th:onmouseover="${!u.yaRegistrado} ? 'this.style.background=\'var(--primary-light)\'; this.style.color=\'var(--primary)\'' : ''"
-                th:onmouseout="${!u.yaRegistrado} ? 'this.style.background=\'transparent\'; this.style.color=\'inherit\'' : ''"
+                th:onmouseover="${!u.yaRegistrado} ? 'this.style.background=''var(--primary-light)''; this.style.color=''var(--primary)''' : ''"
+                th:onmouseout="${!u.yaRegistrado} ? 'this.style.background=''transparent''; this.style.color=''inherit''' : ''"
                 th:attr="onclick=|selectUser('${u.id}', '${u.nombre} ${u.apellido}', ${u.yaRegistrado}, '${u.adoptanteId}')|">
                 
                 <div style="display: flex; justify-content: space-between; align-items: center;">
