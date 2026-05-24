@@ -65,6 +65,7 @@
                                         hx-get="/web/animales/buscar"
                                         hx-trigger="keyup changed delay:300ms, focus"
                                         hx-target="#animal-suggestions"
+                                        th:value="${animalData != null ? animalData.nombre : ''}"
                                         style="width: 100%; height: 54px; padding-left: 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; transition: all 0.3s;">
                                 <input type="hidden" name="animalId" id="animalId-input" required th:value="${solicitud.animalId}">
                             </div>
@@ -72,13 +73,13 @@
                             
                             <!-- Card de previsualización (Oculto inicialmente) -->
                             <div id="selected-animal-card" 
-                                 style="display: none; margin-top: 2rem; padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; align-items: center; gap: 1.25rem; box-shadow: var(--shadow-sm);">
+                                 th:style="${animalData != null ? 'display: flex; margin-top: 2rem; padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; align-items: center; gap: 1.25rem; box-shadow: var(--shadow-sm);' : 'display: none; margin-top: 2rem; padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; align-items: center; gap: 1.25rem; box-shadow: var(--shadow-sm);'}">
                                 <div style="width: 52px; height: 52px; border-radius: 12px; overflow: hidden; background: white; border: 1px solid #e2e8f0; flex-shrink: 0;">
-                                    <img id="selected-animal-img" src="" style="width: 100%; height: 100%; object-fit: cover;">
+                                    <img id="selected-animal-img" th:src="${animalData != null and animalData.foto != null ? animalData.foto : '/images/placeholder-animal.png'}" style="width: 100%; height: 100%; object-fit: cover;">
                                 </div>
                                 <div style="flex: 1;">
-                                    <strong id="selected-animal-name" style="display: block; font-size: 1.1rem; color: var(--text-main);"></strong>
-                                    <span id="selected-animal-species" style="font-size: 0.85rem; color: #64748b;"></span>
+                                    <strong id="selected-animal-name" style="display: block; font-size: 1.1rem; color: var(--text-main);" th:text="${animalData != null ? animalData.nombre : ''}"></strong>
+                                    <span id="selected-animal-species" style="font-size: 0.85rem; color: #64748b;" th:text="${animalData != null ? animalData.especie : ''}"></span>
                                 </div>
                                 <button type="button" onclick="clearAnimalSelection()" style="background: #fee2e2; border: none; color: #ef4444; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                                     <i data-lucide="x" style="width: 18px;"></i>

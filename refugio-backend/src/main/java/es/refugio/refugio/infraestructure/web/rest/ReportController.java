@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
@@ -31,7 +32,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Tag(name = "Informes", description = "Endpoints para la generación de documentos PDF")
 /**
- * Controlador REST que expone los endpoints HTTP de la API para la gestión de Report.
+ * Controlador REST que expone los endpoints HTTP de la API para la gestión de
+ * Reportes.
  *
  * @author Elisabeth
  * @author Diego
@@ -57,22 +59,22 @@ public class ReportController {
         // Cargar logo en Base64
         try {
             String userDir = System.getProperty("user.dir");
-            java.io.File logoFile = new java.io.File(
-                    userDir + "/refugio-frontend/src/main/resources/static/images/icono_con_eslogan.png");
+            File logoFile = new File(
+                    userDir + "/refugio-frontend/src/main/resources/static/images/logo-con-eslogan-sin-fondo.png");
             if (!logoFile.exists()) {
 
-                logoFile = new java.io.File(
-                        userDir + "/../refugio-frontend/src/main/resources/static/images/icono_con_eslogan.png");
+                logoFile = new File(
+                        userDir + "/../refugio-frontend/src/main/resources/static/images/logo-con-eslogan-sin-fondo.png");
             }
             if (!logoFile.exists()) {
 
-                logoFile = new java.io.File(
-                        "/home/srromer0/workspace/RefugioAnimales/refugio-frontend/src/main/resources/static/images/icono_con_eslogan.png");
+                logoFile = new File(
+                        "/home/srromer0/workspace/RefugioAnimales/refugio-frontend/src/main/resources/static/images/logo-con-eslogan-sin-fondo.png");
             }
             if (!logoFile.exists()) {
 
-                logoFile = new java.io.File(
-                        "/home/ely/workspace/RefugioAnimales/refugio-frontend/src/main/resources/static/images/icono_con_eslogan.png");
+                logoFile = new File(
+                        "/home/ely/workspace/RefugioAnimales/refugio-frontend/src/main/resources/static/images/logo-con-eslogan-sin-fondo.png");
             }
             if (logoFile.exists()) {
                 byte[] logoBytes = Files.readAllBytes(logoFile.toPath());
@@ -95,13 +97,8 @@ public class ReportController {
         data.put("animalEdad", adopcion.getAnimal().getEdad());
         data.put("animalChip", adopcion.getAnimal().getChipId() != null ? adopcion.getAnimal().getChipId() : "N/A");
         data.put("animalSexo", adopcion.getAnimal().getSexo() != null ? adopcion.getAnimal().getSexo().name() : "-");
-        data.put("animalEstado", adopcion.getAnimal().getEstado() != null ? adopcion.getAnimal().getEstado().name() : "-");
         data.put("animalPeso", adopcion.getAnimal().getPeso() != null ? adopcion.getAnimal().getPeso() + " kg" : "-");
         data.put("animalTamano", adopcion.getAnimal().getTamano() != null ? adopcion.getAnimal().getTamano().name() : "-");
-        data.put("animalNivelEnergia", adopcion.getAnimal().getNivelEnergia() != null ? adopcion.getAnimal().getNivelEnergia() : "-");
-        data.put("animalUrgencia", adopcion.getAnimal().getUrgencia() != null && adopcion.getAnimal().getUrgencia() ? "SÍ" : "NO");
-        data.put("animalDescripcion", adopcion.getAnimal().getDescripcion() != null ? adopcion.getAnimal().getDescripcion() : "-");
-        data.put("animalFechaIngreso", adopcion.getAnimal().getFechaIngreso() != null ? adopcion.getAnimal().getFechaIngreso().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "-");
 
         data.put("fechaActual", adopcion.getFechaAdopcion().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 

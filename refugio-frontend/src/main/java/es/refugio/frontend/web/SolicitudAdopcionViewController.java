@@ -12,6 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClientResponseException;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -249,6 +252,17 @@ public class SolicitudAdopcionViewController {
         solicitud.put("comentarioAdmin", null);
         solicitud.put("fecha", LocalDateTime.now().toString());
 
+        if (animalId != null) {
+            try {
+                var animal = solicitudService.fetchAnimalById(animalId);
+                if (animal != null) {
+                    model.addAttribute("animalData", animal);
+                }
+            } catch (Exception e) {
+                logger.error("Error al cargar animal para nueva solicitud: " + e.getMessage());
+            }
+        }
+
         model.addAttribute(ModelAttribute.SINGLE_Solicitud.getName(), solicitud);
         model.addAttribute("animales", solicitudService.fetchAllAnimales());
         model.addAttribute("adoptantes", solicitudService.fetchAllAdoptantes());
@@ -279,7 +293,7 @@ public class SolicitudAdopcionViewController {
 
         if ("true".equals(request.getHeader("HX-Request"))
                 && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
-            return "fragments/content/solicitud-creada :: success-modal";
+            return "fragments/content/solicitudes_adopcion/solicitud-creada :: success-modal";
         }
 
         redirectAttributes.addFlashAttribute("successMessage", "Solicitud creada correctamente");
@@ -731,7 +745,7 @@ public class SolicitudAdopcionViewController {
         logger.info("Enviando solicitud de conversión y adopción para usuario: " + usuarioId);
         try {
             solicitudService.convertirYAdopcion(bodySolicitud);
-        } catch (org.springframework.web.client.RestClientResponseException e) {
+        } catch (RestClientResponseException e) {
             Map<?, ?> responseBody = e.getResponseBodyAs(Map.class);
             String errorMsg = "Error al procesar la adopción. Es posible que el DNI ya esté en uso.";
 
@@ -831,10 +845,10 @@ public class SolicitudAdopcionViewController {
 
         try {
             solicitudService.crearAdopcionDirecta(body);
-        } catch (org.springframework.web.client.HttpClientErrorException.Unauthorized e) {
+        } catch (HttpClientErrorException.Unauthorized e) {
             redirectAttributes.addFlashAttribute("errorMessage", helper.getMessage("toast.error.iniciar_sesion"));
             return "redirect:" + WebRoutes.SOLICITUDES_OPCIONES + "?animalId=" + animalId;
-        } catch (org.springframework.web.client.HttpStatusCodeException e) {
+        } catch (HttpStatusCodeException e) {
             String errorMsg = "Error al procesar la solicitud.";
             try {
                 Map<?, ?> errorMap = e.getResponseBodyAs(Map.class);
@@ -886,8 +900,8 @@ public class SolicitudAdopcionViewController {
             }
         } catch (Exception e) {
             String errorMsg = "Error inesperado al contactar con el servicio de autenticación.";
-            if (e instanceof org.springframework.web.client.RestClientResponseException) {
-                var ex = (org.springframework.web.client.RestClientResponseException) e;
+            if (e instanceof RestClientResponseException) {
+                var ex = (RestClientResponseException) e;
                 try {
                     Map<?, ?> errorMap = ex.getResponseBodyAs(Map.class);
                     if (errorMap != null) {
@@ -937,8 +951,8 @@ public class SolicitudAdopcionViewController {
             solicitudService.registrarYAdopcionPublico(bodySolicitud);
         } catch (Exception e) {
             String errorMsg = "Error inesperado al procesar la adopción en el backend.";
-            if (e instanceof org.springframework.web.client.RestClientResponseException) {
-                var ex = (org.springframework.web.client.RestClientResponseException) e;
+            if (e instanceof RestClientResponseException) {
+                var ex = (RestClientResponseException) e;
                 try {
                     Map<?, ?> errorMap = ex.getResponseBodyAs(Map.class);
                     if (errorMap != null && errorMap.containsKey("message")) {

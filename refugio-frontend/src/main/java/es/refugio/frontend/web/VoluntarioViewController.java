@@ -66,31 +66,61 @@ public class VoluntarioViewController {
 
         response.setHeader("Vary", "HX-Request");
 
+        PaginatedResponse<VoluntarioRecord> pagination = voluntarioService.fetchPaginatedVoluntarios(page, size, q);
+        List<VoluntarioRecord> voluntarios = new java.util.ArrayList<>(pagination.items());
+
         if (modoSeleccion && tareaIdSeleccion != null) {
             try {
                 TareaRecord tarea = voluntarioService.fetchTareaById(tareaIdSeleccion);
                 if (tarea != null) {
                     model.addAttribute("tareaNombreSeleccion", tarea.descripcion());
 
-                    List<Integer> assignedIds = new ArrayList<>();
+                    List<Integer> assignedIds = new java.util.ArrayList<>();
                     List<Integer> vIds = tarea.voluntarioIds();
                     if (vIds != null) {
                         assignedIds.addAll(vIds);
                     }
                     model.addAttribute("assignedVoluntarioIds", assignedIds);
+
+                    java.time.LocalDateTime limit = tarea.fechaLimite();
+                    boolean isWeekend = false;
+                    String dayOfWeekSpanish = "";
+                    if (limit != null) {
+                        java.time.DayOfWeek dow = limit.getDayOfWeek();
+                        isWeekend = (dow == java.time.DayOfWeek.SATURDAY || dow == java.time.DayOfWeek.SUNDAY);
+                        switch (dow) {
+                            case MONDAY: dayOfWeekSpanish = "LUNES"; break;
+                            case TUESDAY: dayOfWeekSpanish = "MARTES"; break;
+                            case WEDNESDAY: dayOfWeekSpanish = "MIERCOLES"; break;
+                            case THURSDAY: dayOfWeekSpanish = "JUEVES"; break;
+                            case FRIDAY: dayOfWeekSpanish = "VIERNES"; break;
+                            case SATURDAY: dayOfWeekSpanish = "SABADO"; break;
+                            case SUNDAY: dayOfWeekSpanish = "DOMINGO"; break;
+                        }
+                    }
+
+                    final boolean finalIsWeekend = isWeekend;
+                    final String finalDayOfWeekSpanish = dayOfWeekSpanish;
+
+                    voluntarios.removeIf(v -> {
+                        if (assignedIds.contains(v.id())) return true;
+                        
+                        if (limit != null && v.disponibilidad() != null) {
+                            String disp = v.disponibilidad().toUpperCase();
+                            if (disp.contains("FINES DE SEMANA") && !finalIsWeekend) return true;
+                            if ((disp.equals("LUNES") || disp.equals("MARTES") || disp.equals("MIERCOLES") || disp.equals("MIÉRCOLES") || 
+                                 disp.equals("JUEVES") || disp.equals("VIERNES") || disp.equals("SABADO") || disp.equals("SÁBADO") || disp.equals("DOMINGO"))
+                                 && !disp.replace("Á", "A").replace("É", "E").equals(finalDayOfWeekSpanish)) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    });
                 }
             } catch (Exception e) {
                 logger.warn("No se pudo obtener la información de la tarea para el modo selección: " + e.getMessage());
             }
         }
-
-        if (modoSeleccion && tareaIdSeleccion != null) {
-            // Se asume que el servicio de Voluntarios ahora recibe tareaIdSeleccion o maneja la lógica
-            // Para simplificar, la búsqueda se limitará a `q` por ahora.
-        }
-
-        PaginatedResponse<VoluntarioRecord> pagination = voluntarioService.fetchPaginatedVoluntarios(page, size, q);
-        List<VoluntarioRecord> voluntarios = pagination.items();
         List<UsuarioRecord> usuarios = voluntarioService.fetchAllUsuarios();
         List<PerfilLegalRecord> perfilesLegales = voluntarioService.fetchAllPerfilesLegales();
 
@@ -588,7 +618,7 @@ public class VoluntarioViewController {
         model.addAttribute("voluntarioId", id);
         model.addAttribute("voluntarioNombre", voluntarioNombre);
         model.addAttribute("disponibilidades", disponibilidades);
-        return "fragments/content/voluntario-disponibilidad-modal :: modal";
+        return "fragments/content/voluntarios/voluntario-disponibilidad-modal :: modal";
     }
 
     @GetMapping("/web/voluntarios/pendientes")
@@ -614,10 +644,10 @@ public class VoluntarioViewController {
         model.addAttribute("currentUri", "/web/voluntarios/pendientes");
 
         if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
-            return "fragments/content/voluntarios-pendientes :: content";
+            return "fragments/content/voluntarios/voluntarios-pendientes :: content";
         }
 
-        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), "fragments/content/voluntarios-pendientes");
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), "fragments/content/voluntarios/voluntarios-pendientes");
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 

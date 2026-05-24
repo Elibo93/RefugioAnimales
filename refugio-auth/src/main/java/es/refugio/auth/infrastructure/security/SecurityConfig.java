@@ -19,6 +19,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import es.refugio.auth.social_login.infrastructure.CustomOAuth2UserService;
 import es.refugio.auth.social_login.infrastructure.OAuth2SuccessHandler;
+import java.io.IOException;
+import jakarta.servlet.ServletException;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -78,9 +81,9 @@ public class SecurityConfig {
                         }
 
                         @Override
-                        public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                                        public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication)
-                                        throws java.io.IOException, jakarta.servlet.ServletException {
+                                        throws IOException, ServletException {
 
                                 String token = tokenProvider.generateToken(authentication);
                                 Cookie authCookie = new Cookie("JWT_TOKEN", token);
@@ -110,11 +113,11 @@ public class SecurityConfig {
                                                                 "/oauth2/**", "/login/oauth2/**")
                                                 .permitAll()
                                                 // API pública (lectura de animales, donaciones y me-info sin login)
-                                                .requestMatchers(org.springframework.http.HttpMethod.GET,
+                                                .requestMatchers(HttpMethod.GET,
                                                                 "/api/v1/animales/**", "/api/v1/me",
                                                                 "/api/v1/donaciones/total")
                                                 .permitAll()
-                                                .requestMatchers(org.springframework.http.HttpMethod.POST,
+                                                .requestMatchers(HttpMethod.POST,
                                                                 "/api/v1/donaciones", "/api/v1/usuarios/publico",
                                                                 "/api/v1/solicitudes-adopcion/publico/registro-y-adopcion")
                                                 .permitAll()
