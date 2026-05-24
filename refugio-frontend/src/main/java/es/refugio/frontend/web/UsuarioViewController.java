@@ -20,6 +20,7 @@ import org.springframework.ui.Model;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import es.refugio.frontend.service.UsuarioService;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
@@ -152,7 +153,7 @@ public class UsuarioViewController {
 
         model.addAttribute(ModelAttribute.Persona_LIST.getName(), paginatedItems);
         model.addAttribute("pagination", pagination);
-        model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_ADMIN"));
+        model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_VOLUNTARIO_ADOPTANTE", "ROLE_ADMIN"));
         model.addAttribute("selectedRol", rol);
         model.addAttribute("query", q);
 
@@ -178,7 +179,7 @@ public class UsuarioViewController {
         emptyPersona.put("fechaNacimiento", null);
         emptyPersona.put("rol", null);
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), emptyPersona);
-        model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_ADMIN"));
+        model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_VOLUNTARIO_ADOPTANTE", "ROLE_ADMIN"));
 
         if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Persona_FORM.getPath() + " :: content";
@@ -284,7 +285,7 @@ public class UsuarioViewController {
         }
 
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), persona);
-        model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_ADMIN"));
+        model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_VOLUNTARIO_ADOPTANTE", "ROLE_ADMIN"));
 
         if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Persona_FORM.getPath() + " :: content";
@@ -362,7 +363,7 @@ public class UsuarioViewController {
     public ResponseEntity<?> verificarPassword(@PathVariable Integer id, @RequestParam String password) {
         try {
             return (ResponseEntity<Map>) usuarioService.verificarPassword(id, password);
-        } catch (org.springframework.web.client.HttpClientErrorException.Forbidden e) {
+        } catch (HttpClientErrorException.Forbidden e) {
             logger.warn("Acceso denegado al verificar password para ID {}: {}", id, e.getResponseBodyAsString());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Contraseña actual incorrecta o falta de permisos"));
         } catch (Exception e) {

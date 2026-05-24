@@ -88,7 +88,7 @@ public class AnimalViewController {
         } catch (Exception e) {
             model.addAttribute("animalesEncontrados", List.of());
         }
-        return "fragments/content/animales-sugerencias :: suggestions";
+        return "fragments/content/animales/animales-sugerencias :: suggestions";
     }
 
     @GetMapping(WebRoutes.ANIMALES_BASE)
@@ -447,7 +447,7 @@ public class AnimalViewController {
 
         model.addAttribute("favoritosCount", animalService.countFavoritos(id));
 
-        return "fragments/content/animales-detalle-modal :: detalle";
+        return "fragments/content/animales/animales-detalle-modal :: detalle";
     }
 
     @SuppressWarnings("rawtypes")

@@ -27,6 +27,8 @@ import java.io.OutputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import es.refugio.frontend.service.TareaService;
 import es.refugio.frontend.service.VoluntarioService;
@@ -259,9 +261,9 @@ public class TareaViewController {
             tareaService.crearTarea(body);
             redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.tarea_creada"));
             return "redirect:" + WebRoutes.TAREAS_BASE;
-        } catch (org.springframework.web.client.RestClientException e) {
+        } catch (RestClientException e) {
             String msg = e.getMessage();
-            if (e instanceof org.springframework.web.client.HttpStatusCodeException httpException) {
+            if (e instanceof HttpStatusCodeException httpException) {
                 String responseBody = httpException.getResponseBodyAsString();
                 try {
                     JsonNode root = new ObjectMapper().readTree(responseBody);
@@ -329,9 +331,9 @@ public class TareaViewController {
             redirectAttributes.addFlashAttribute("successMessage",
                     helper.getMessage("toast.success.tarea_editada"));
             return "redirect:" + WebRoutes.TAREAS_BASE;
-        } catch (org.springframework.web.client.RestClientException e) {
+        } catch (RestClientException e) {
             String msg = e.getMessage();
-            if (e instanceof org.springframework.web.client.HttpStatusCodeException httpException) {
+            if (e instanceof HttpStatusCodeException httpException) {
                 String responseBody = httpException.getResponseBodyAsString();
                 try {
                     JsonNode root = new ObjectMapper().readTree(responseBody);
@@ -561,9 +563,9 @@ public class TareaViewController {
                         : "Voluntario asignado correctamente";
                 response.setHeader("HX-Trigger",
                         "{\"showToast\": {\"message\": \"" + toastMsg + "\", \"type\": \"success\"}}");
-            } catch (org.springframework.web.client.RestClientException e) {
+            } catch (RestClientException e) {
                 String msg = e.getMessage();
-                if (e instanceof org.springframework.web.client.HttpStatusCodeException httpException) {
+                if (e instanceof HttpStatusCodeException httpException) {
                     String responseBody = httpException.getResponseBodyAsString();
                     try {
                         JsonNode root = new ObjectMapper().readTree(responseBody);
@@ -581,6 +583,7 @@ public class TareaViewController {
                 }
 
                 // Escape comillas para el JSON del header
+                if (msg == null) msg = "Error de comunicación con el servidor";
                 msg = msg.replace("\"", "\\\"");
                 response.setHeader("HX-Trigger",
                         "{\"showToast\": {\"message\": \"" + msg + "\", \"type\": \"error\"}}");

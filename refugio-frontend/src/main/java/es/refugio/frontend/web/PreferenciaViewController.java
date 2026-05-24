@@ -23,7 +23,7 @@ public class PreferenciaViewController {
 
     @GetMapping("/encuesta")
     public String mostrarEncuesta(Model model) {
-        return "fragments/content/encuesta-preferencias :: content";
+        return "fragments/content/encuestas/encuesta-preferencias :: content";
     }
 
     @PostMapping("/guardar")

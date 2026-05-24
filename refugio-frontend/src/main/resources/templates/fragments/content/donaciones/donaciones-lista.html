@@ -9,12 +9,12 @@
 <body>
 <div th:fragment="content">
         <!-- Impact Section (Ahora filtrado dentro del fragmento para admin/user) -->
-        <div th:replace="~{fragments/content/donacion-impacto :: impact}"></div>
+        <div th:replace="~{fragments/content/donaciones/donacion-impacto :: impact}"></div>
 
         <!-- Integrated Donation Form (Ocultable para el administrador) -->
         <div id="donacion-form-container"
              th:style="${isAdmin} ? 'display: none; opacity: 0; transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);' : ''">
-             <div th:replace="~{fragments/content/donacion-formulario :: content}"></div>
+             <div th:replace="~{fragments/content/donaciones/donacion-formulario :: content}"></div>
         </div>
 
         <!-- Panel de Lista para Admin -->

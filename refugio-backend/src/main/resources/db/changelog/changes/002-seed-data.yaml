@@ -2709,63 +2709,187 @@ databaseChangeLog:
     id: 015-seed-disponibilidad-voluntario
     author: refugio
     changes:
+    # Voluntario 1 (Tareas asig: 2 DAY, 10 DAY)
     - insert:
         tableName: disponibilidad_voluntario
         columns:
-        - column:
-            name: voluntario_id
-            valueNumeric: 1
-        - column:
-            name: fecha
-            valueComputed: DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY)
-        - column:
-            name: turno
-            value: MANANA
-        - column:
-            name: estado
-            value: DISPONIBLE
+        - column: {name: voluntario_id, valueNumeric: 1}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 1 DAY)"}
+        - column: {name: turno, value: MANANA}
+        - column: {name: estado, value: DISPONIBLE}
     - insert:
         tableName: disponibilidad_voluntario
         columns:
-        - column:
-            name: voluntario_id
-            valueNumeric: 2
-        - column:
-            name: fecha
-            valueComputed: DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY)
-        - column:
-            name: turno
-            value: TARDE
-        - column:
-            name: estado
-            value: NO_DISPONIBLE
+        - column: {name: voluntario_id, valueNumeric: 1}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 2 DAY)"}
+        - column: {name: turno, value: TARDE}
+        - column: {name: estado, value: DISPONIBLE}
     - insert:
         tableName: disponibilidad_voluntario
         columns:
-        - column:
-            name: voluntario_id
-            valueNumeric: 3
-        - column:
-            name: fecha
-            valueComputed: DATE_ADD(CURRENT_DATE, INTERVAL 3 DAY)
-        - column:
-            name: turno
-            value: MANANA
-        - column:
-            name: estado
-            value: NO_DISPONIBLE
+        - column: {name: voluntario_id, valueNumeric: 1}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY)"}
+        - column: {name: turno, value: MANANA}
+        - column: {name: estado, value: DISPONIBLE}
     - insert:
         tableName: disponibilidad_voluntario
         columns:
-        - column:
-            name: voluntario_id
-            valueNumeric: 4
-        - column:
-            name: fecha
-            valueComputed: DATE_ADD(CURRENT_DATE, INTERVAL 4 DAY)
-        - column:
-            name: turno
-            value: TARDE
-        - column:
-            name: estado
-            value: NO_DISPONIBLE
+        - column: {name: voluntario_id, valueNumeric: 1}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 8 DAY)"}
+        - column: {name: turno, value: TARDE}
+        - column: {name: estado, value: NO_DISPONIBLE}
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 1}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 10 DAY)"}
+        - column: {name: turno, value: MANANA}
+        - column: {name: estado, value: DISPONIBLE}
+    
+    # Voluntario 2 (Tareas asig: 5 DAY)
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 2}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 1 DAY)"}
+        - column: {name: turno, value: MANANA}
+        - column: {name: estado, value: DISPONIBLE}
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 2}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 3 DAY)"}
+        - column: {name: turno, value: TARDE}
+        - column: {name: estado, value: NO_DISPONIBLE}
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 2}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY)"}
+        - column: {name: turno, value: MANANA}
+        - column: {name: estado, value: DISPONIBLE}
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 2}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 6 DAY)"}
+        - column: {name: turno, value: TARDE}
+        - column: {name: estado, value: NO_DISPONIBLE}
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 2}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 7 DAY)"}
+        - column: {name: turno, value: MANANA}
+        - column: {name: estado, value: DISPONIBLE}
+        
+    # Voluntario 3 (Tareas asig: 3 DAY)
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 3}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 2 DAY)"}
+        - column: {name: turno, value: MANANA}
+        - column: {name: estado, value: DISPONIBLE}
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 3}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 3 DAY)"}
+        - column: {name: turno, value: MANANA}
+        - column: {name: estado, value: DISPONIBLE}
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 3}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 4 DAY)"}
+        - column: {name: turno, value: TARDE}
+        - column: {name: estado, value: NO_DISPONIBLE}
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 3}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 6 DAY)"}
+        - column: {name: turno, value: MANANA}
+        - column: {name: estado, value: DISPONIBLE}
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 3}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 9 DAY)"}
+        - column: {name: turno, value: TARDE}
+        - column: {name: estado, value: NO_DISPONIBLE}
+        
+    # Voluntario 4 (Sin tareas asignadas)
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 4}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 1 DAY)"}
+        - column: {name: turno, value: MANANA}
+        - column: {name: estado, value: DISPONIBLE}
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 4}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 2 DAY)"}
+        - column: {name: turno, value: TARDE}
+        - column: {name: estado, value: DISPONIBLE}
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 4}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 3 DAY)"}
+        - column: {name: turno, value: MANANA}
+        - column: {name: estado, value: NO_DISPONIBLE}
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 4}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 4 DAY)"}
+        - column: {name: turno, value: TARDE}
+        - column: {name: estado, value: NO_DISPONIBLE}
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 4}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY)"}
+        - column: {name: turno, value: MANANA}
+        - column: {name: estado, value: DISPONIBLE}
+        
+    # Voluntario 5 (Tareas asig: 14 DAY)
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 5}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 1 DAY)"}
+        - column: {name: turno, value: MANANA}
+        - column: {name: estado, value: DISPONIBLE}
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 5}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY)"}
+        - column: {name: turno, value: TARDE}
+        - column: {name: estado, value: DISPONIBLE}
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 5}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 10 DAY)"}
+        - column: {name: turno, value: MANANA}
+        - column: {name: estado, value: NO_DISPONIBLE}
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 5}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 12 DAY)"}
+        - column: {name: turno, value: TARDE}
+        - column: {name: estado, value: NO_DISPONIBLE}
+    - insert:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column: {name: voluntario_id, valueNumeric: 5}
+        - column: {name: fecha, valueComputed: "DATE_ADD(CURRENT_DATE, INTERVAL 14 DAY)"}
+        - column: {name: turno, value: MANANA}
+        - column: {name: estado, value: DISPONIBLE}

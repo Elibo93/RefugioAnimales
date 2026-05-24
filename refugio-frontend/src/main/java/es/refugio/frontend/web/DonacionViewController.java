@@ -26,6 +26,7 @@ import es.refugio.frontend.web.util.ErrorMessageExtractor;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.*;
+import org.springframework.web.client.RestClientResponseException;
 
 /**
  * Controlador para la gestión de donaciones en la capa de vista.
@@ -189,8 +190,8 @@ public class DonacionViewController {
                 return ThymTemplates.MAIN_LAYOUT.getPath();
             } catch (Exception e) {
                 String errorMsg = "Error al registrar la donación física.";
-                if (e instanceof org.springframework.web.client.RestClientResponseException) {
-                    org.springframework.web.client.RestClientResponseException re = (org.springframework.web.client.RestClientResponseException) e;
+                if (e instanceof RestClientResponseException) {
+                    RestClientResponseException re = (RestClientResponseException) e;
                     try {
                         Map<?, ?> errorMap = re.getResponseBodyAs(Map.class);
                         if (errorMap != null && errorMap.containsKey("message")) {
@@ -252,7 +253,7 @@ public class DonacionViewController {
 
         try {
             donacionService.crearDonacion(body);
-        } catch (org.springframework.web.client.RestClientResponseException e) {
+        } catch (RestClientResponseException e) {
             String errorMsg = "Error al procesar la donación.";
             try {
                 Map<?, ?> errorMap = e.getResponseBodyAs(Map.class);
@@ -298,7 +299,7 @@ public class DonacionViewController {
         model.addAttribute("objetivo", nuevoObjetivo);
         model.addAttribute("prioridades", List.of("BAJA", "MEDIA", "ALTA", "CRITICA"));
         model.addAttribute("formActionUrl", "/web/donaciones/objetivos/nuevo");
-        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), "fragments/content/objetivo-donacion-form");
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), "fragments/content/donaciones/objetivo-donacion-form");
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 

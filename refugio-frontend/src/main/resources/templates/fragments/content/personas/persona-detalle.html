@@ -722,7 +722,7 @@
     <!-- VITRINA DE HONOR: SECCIÓN INFERIOR PREMIUM -->
     <div th:if="${!persona.rol.toString().contains('ADMIN')}" 
          style="margin-top: 4rem; border-top: 1px solid var(--border); padding-top: 4rem;">
-        <div th:replace="~{fragments/content/gamificacion-perfil :: perfil}"></div>
+        <div th:replace="~{fragments/content/gamificacion/gamificacion-perfil :: perfil}"></div>
     </div>
 
     <script>

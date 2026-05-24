@@ -36,14 +36,14 @@ public class AuthViewController {
     @GetMapping("/login")
     public String loginPage(Model model) {
         model.addAttribute("currentUri", "/login");
-        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), "fragments/content/login");
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), "fragments/content/core/login");
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
     @GetMapping("/registro")
     public String registroPage(Model model) {
         model.addAttribute("currentUri", "/registro");
-        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), "fragments/content/registro");
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), "fragments/content/core/registro");
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 

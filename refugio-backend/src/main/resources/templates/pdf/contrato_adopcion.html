@@ -197,7 +197,9 @@
     <div class="watermark">ADOPTIFY</div>
     <div class="header-container">
         <div class="logo-container">
-            <span class="logo-text">Adoptify<span class="logo-dot">.</span></span>
+            <img th:if="${logoBase64 != null}" th:src="${logoBase64}" alt="Logo" height="100"
+                style="margin-top: 5px;" />
+            <span th:unless="${logoBase64 != null}" class="logo-text">Adoptify<span class="logo-dot">.</span></span>
         </div>
         <div class="meta-container">
             <div class="doc-title">Contrato de Adopción Responsable</div>

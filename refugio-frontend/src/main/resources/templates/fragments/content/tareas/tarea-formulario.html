@@ -146,96 +146,93 @@
                     </div>
 
                     <script th:inline="javascript">
-                        const assignedIds = new Set();
-                        const voluntarioNombres = /*[[${voluntarioNombres}]]*/ {};
-                        const tareaVolIds = /*[[${tarea.voluntarioIds}]]*/ [];
-                        const preselected = /*[[${voluntarioPreseleccionado}]]*/ null;
+                        (function() {
+                            // Usamos el objeto window para evitar errores de redeclaración en recargas parciales HTMX
+                            window.tareaAssignedIds = new Set();
+                            const voluntarioNombres = /*[[${voluntarioNombres}]]*/ {};
+                            const tareaVolIds = /*[[${tarea.voluntarioIds}]]*/ [];
+                            const preselected = /*[[${voluntarioPreseleccionado}]]*/ null;
 
-                        function initVolunteers() {
-                            console.log("DEBUG: Initializing volunteers", { tareaVolIds, preselected });
-                            // 1. Cargar desde la tarea si existe
-                            if (tareaVolIds && Array.isArray(tareaVolIds)) {
-                                tareaVolIds.forEach(vid => {
-                                    if (!vid) return;
-                                    const id = (typeof vid === 'object' && vid !== null) ? (vid.value || vid.id) : vid;
-                                    if (id) {
-                                        const name = (voluntarioNombres && voluntarioNombres[id.toString()]) 
-                                                     ? voluntarioNombres[id.toString()] 
-                                                     : ('Voluntario ' + id);
-                                        addVolunteerChip(id, name);
-                                    }
-                                });
+                            function initVolunteers() {
+                                // 1. Cargar desde la tarea si existe
+                                if (tareaVolIds && Array.isArray(tareaVolIds)) {
+                                    tareaVolIds.forEach(vid => {
+                                        if (!vid) return;
+                                        const id = (typeof vid === 'object' && vid !== null) ? (vid.value || vid.id) : vid;
+                                        if (id) {
+                                            const name = (voluntarioNombres && voluntarioNombres[id.toString()]) 
+                                                         ? voluntarioNombres[id.toString()] 
+                                                         : ('Voluntario ' + id);
+                                            window.addVolunteerChip(id, name);
+                                        }
+                                    });
+                                }
+
+                                // 2. Cargar preseleccionado si existe
+                                if (preselected && preselected.id) {
+                                    window.addVolunteerChip(preselected.id, preselected.nombre + ' ' + (preselected.apellido || ''));
+                                }
                             }
 
-                            // 2. Cargar preseleccionado si existe
-                            if (preselected && preselected.id) {
-                                addVolunteerChip(preselected.id, preselected.nombre + ' ' + (preselected.apellido || ''));
+                            window.toggleSearch = function(show) {
+                                const wrapper = document.getElementById('search-wrapper');
+                                const btn = document.getElementById('btn-show-search');
+                                const input = document.getElementById('volunteer-search-input');
+                                if (wrapper) wrapper.style.display = show ? 'block' : 'none';
+                                if (btn) btn.style.display = show ? 'none' : 'inline-flex';
+                                if (show && input) input.focus();
+                            };
+
+                            window.selectVolunteer = function(id, name) {
+                                window.addVolunteerChip(id, name);
+                                window.toggleSearch(false);
+                                const sugg = document.getElementById('volunteer-suggestions');
+                                const input = document.getElementById('volunteer-search-input');
+                                if (sugg) sugg.innerHTML = '';
+                                if (input) input.value = '';
+                            };
+
+                            window.addVolunteerChip = function(id, name) {
+                                if (window.tareaAssignedIds.has(id)) return;
+                                window.tareaAssignedIds.add(id);
+
+                                const container = document.getElementById('assigned-volunteers-container');
+                                if (!container) return;
+                                const chip = document.createElement('div');
+                                chip.className = 'volunteer-chip';
+                                chip.id = `vol-chip-${id}`;
+                                chip.innerHTML = `
+                                    <i data-lucide="user" style="width: 14px; color: var(--primary);"></i>
+                                    <span>${name}</span>
+                                    <input type="hidden" name="voluntarioIds" value="${id}">
+                                    <button type="button" class="remove-btn" onclick="removeVolunteer(${id})">
+                                        <i data-lucide="x" style="width: 12px;"></i>
+                                    </button>
+                                `;
+                                container.appendChild(chip);
+                                if (window.lucide) lucide.createIcons();
+                            };
+
+                            window.removeVolunteer = function(id) {
+                                window.tareaAssignedIds.delete(id);
+                                const chip = document.getElementById(`vol-chip-${id}`);
+                                if (chip) chip.remove();
+                            };
+
+                            // Limitar la fecha mínima de fechaLimite
+                            function initDateLimits() {
+                                const dateInput = document.querySelector('input[name="fechaLimite"]');
+                                if (dateInput) {
+                                    const now = new Date();
+                                    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                                    dateInput.min = now.toISOString().slice(0, 16);
+                                }
                             }
-                        }
-
-                        function toggleSearch(show) {
-                            document.getElementById('search-wrapper').style.display = show ? 'block' : 'none';
-                            document.getElementById('btn-show-search').style.display = show ? 'none' : 'inline-flex';
-                            if (show) document.getElementById('volunteer-search-input').focus();
-                        }
-
-                        function selectVolunteer(id, name) {
-                            addVolunteerChip(id, name);
-                            toggleSearch(false);
-                            document.getElementById('volunteer-suggestions').innerHTML = '';
-                            document.getElementById('volunteer-search-input').value = '';
-                        }
-
-                        function addVolunteerChip(id, name) {
-                            if (assignedIds.has(id)) return;
-                            assignedIds.add(id);
-
-                            const container = document.getElementById('assigned-volunteers-container');
-                            const chip = document.createElement('div');
-                            chip.className = 'volunteer-chip';
-                            chip.id = `vol-chip-${id}`;
-                            chip.innerHTML = `
-                                <i data-lucide="user" style="width: 14px; color: var(--primary);"></i>
-                                <span>${name}</span>
-                                <input type="hidden" name="voluntarioIds" value="${id}">
-                                <button type="button" class="remove-btn" onclick="removeVolunteer(${id})">
-                                    <i data-lucide="x" style="width: 12px;"></i>
-                                </button>
-                            `;
-                            container.appendChild(chip);
-                            if (window.lucide) lucide.createIcons();
-                        }
-
-                        function removeVolunteer(id) {
-                            assignedIds.delete(id);
-                            const chip = document.getElementById(`vol-chip-${id}`);
-                            if (chip) chip.remove();
-                        }
-
-                        // Inicializar
-                        document.addEventListener('DOMContentLoaded', initVolunteers);
-                        document.addEventListener('htmx:afterSettle', initVolunteers);
-                        initVolunteers(); // Fallback para ejecución directa si HTMX no dispara el evento en reemplazos locales
-                        
-                        // HTMX hook para reinicializar iconos después de cargar sugerencias
-                        document.addEventListener('htmx:afterOnLoad', function(evt) {
-                            if (evt.detail.target.id === 'volunteer-suggestions' && window.lucide) {
-                                lucide.createIcons();
-                            }
-                        });
-
-                        // Limitar la fecha mínima de fechaLimite
-                        function initDateLimits() {
-                            const dateInput = document.querySelector('input[name="fechaLimite"]');
-                            if (dateInput) {
-                                const now = new Date();
-                                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-                                dateInput.min = now.toISOString().slice(0, 16);
-                            }
-                        }
-                        
-                        document.addEventListener('DOMContentLoaded', initDateLimits);
-                        document.addEventListener('htmx:afterSettle', initDateLimits);
+                            
+                            // Ejecutar inicializaciones directamente al cargar el script
+                            initVolunteers();
+                            initDateLimits();
+                        })();
                     </script>
 
                 </div>

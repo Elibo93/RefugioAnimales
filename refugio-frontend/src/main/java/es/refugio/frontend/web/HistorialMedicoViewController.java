@@ -302,10 +302,10 @@ public class HistorialMedicoViewController {
 
         if ("true".equals(request.getHeader("HX-Request"))
                 && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
-            return "fragments/content/historial-medico-detalle :: content";
+            return "fragments/content/historial_medico/historial-medico-detalle :: content";
         }
 
-        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), "fragments/content/historial-medico-detalle");
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), "fragments/content/historial_medico/historial-medico-detalle");
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 }
