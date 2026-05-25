@@ -73,17 +73,32 @@
                         </h2>
 
                         <!-- CASO A: Invitado O Usuario logueado sin PerfilLegal (Registro de identidad) -->
-                        <div th:if="${(voluntario.id == null) and (!isAuthenticated or (isAuthenticated and !perfilLegalExists))}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                        <div th:if="${voluntario.id == null and (!isAuthenticated or (!isAdmin and !perfilLegalExists) or (isAdmin and targetUserId != null and !perfilLegalExists))}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
                             <!-- ID del usuario si ya está autenticado pero le falta el perfil -->
-                            <input type="hidden" name="idUsuario" th:if="${isAuthenticated}" th:value="${currentUserId}">
+                            <input type="hidden" name="idUsuario" th:if="${isAuthenticated}" th:value="${targetUserId != null ? targetUserId : currentUserId}">
 
                             <div th:if="${!isAuthenticated}" style="grid-column: span 2; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start;">
                                 <i data-lucide="info" style="color: #0284c7; width: 22px;"></i>
                                 <p style="margin: 0; font-size: 0.95rem; color: #0369a1; line-height: 1.6;" th:text="#{voluntario.auto.al.enviar.este.formulario.se.creara.tu.c}"></p>
                             </div>
-                            <div th:if="${isAuthenticated and !perfilLegalExists}" style="grid-column: span 2; background: #fff7ed; border: 1px solid #ffedd5; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start;">
+                            <div th:if="${isAuthenticated and !isAdmin and !perfilLegalExists}" style="grid-column: span 2; background: #fff7ed; border: 1px solid #ffedd5; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start;">
                                 <i data-lucide="alert-circle" style="color: #ea580c; width: 22px;"></i>
                                 <p style="margin: 0; font-size: 0.95rem; color: #9a3412; line-height: 1.6;" th:text="#{voluntario.auto.necesitamos.completar.tu.informacion.leg}"></p>
+                            </div>
+
+                            <!-- Target User Info Card para Admin cuando no hay Perfil Legal -->
+                            <div th:if="${isAdmin and targetUserId != null and !perfilLegalExists}" style="grid-column: span 2; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start; position: relative;">
+                                <a th:href="@{/web/voluntarios/nuevo}" style="position: absolute; top: 1rem; right: 1rem; color: #0284c7; background: transparent; border: none; cursor: pointer; padding: 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s;" onmouseover="this.style.background='#e0f2fe'" onmouseout="this.style.background='transparent'" title="Quitar selección">
+                                    <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+                                </a>
+                                <div style="background: white; color: #0284c7; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid #bae6fd; flex-shrink: 0;">
+                                    <i data-lucide="user" style="width: 20px;"></i>
+                                </div>
+                                <div>
+                                    <p style="margin: 0 0 0.25rem 0; font-size: 0.85rem; color: #0284c7; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Usuario seleccionado</p>
+                                    <p style="margin: 0; font-size: 1rem; color: #0369a1; font-weight: 600;" th:text="${targetUserUsername + ' (' + targetUserEmail + ')'}"></p>
+                                    <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #0c4a6e;">Este usuario aún no tiene un perfil legal. Por favor, rellena los datos a continuación para completarlo antes de darlo de alta.</p>
+                                </div>
                             </div>
 
                             <div class="form-group">
@@ -121,25 +136,28 @@
                         </div>
 
                         <!-- CASO B: Admin creando voluntario (Buscador) -->
-                        <div th:if="${isAdmin and voluntario.id == null}" class="form-group">
+                        <div th:if="${isAdmin and voluntario.id == null and targetUserId == null}" class="form-group">
                             <div style="position: relative;">
                                 <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{voluntario.auto.buscar.usuario.existente}"></label>
                                 <input type="text" id="user-search" name="q" placeholder="Nombre, email o ID..." autocomplete="off"
                                        hx-get="/web/personas/buscar?context=voluntario" hx-trigger="keyup changed delay:300ms" hx-target="#user-suggestions"
                                        style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
-                                <input type="hidden" name="idUsuario" id="usuarioId-input" required th:value="${param.idUsuario}">
+                                <input type="hidden" name="idUsuario" id="usuarioId-input" required>
                                 <div id="user-suggestions" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 100;"></div>
                             </div>
                         </div>
 
                         <!-- CASO C: Edición o Usuario Logueado con PerfilLegal (Solo lectura/confirmación) -->
-                        <div th:if="${voluntario.id != null or (isAuthenticated and !isAdmin and perfilLegalExists)}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
-                             <div style="grid-column: span 2; padding: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.5rem;">
+                        <div th:if="${voluntario.id != null or (voluntario.id == null and !isAdmin and perfilLegalExists) or (voluntario.id == null and isAdmin and targetUserId != null and perfilLegalExists)}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                             <div style="grid-column: span 2; padding: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.5rem; position: relative;">
+                                <a th:if="${voluntario.id == null and isAdmin and targetUserId != null}" th:href="@{/web/voluntarios/nuevo}" style="position: absolute; top: 1rem; right: 1rem; color: #64748b; background: transparent; border: none; cursor: pointer; padding: 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'" title="Quitar selección">
+                                    <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+                                </a>
                                 <div style="background: white; color: #0891b2; width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0;">
                                     <i data-lucide="user" style="width: 28px;"></i>
                                 </div>
                                 <div>
-                                    <span style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600;" th:text="${voluntario.id != null ? 'Editando Voluntario' : 'Tu Perfil'}">Perfil</span>
+                                    <span style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600;" th:text="${voluntario.id != null ? 'Editando Voluntario' : (isAdmin and targetUserId != null ? 'Identidad Confirmada' : 'Tu Perfil')}">Perfil</span>
                                     <h3 style="margin: 0; font-weight: 800; color: var(--text-main);" th:text="${nombreCompleto ?: currentUserName}">Nombre</h3>
                                     <p th:if="${perfilExistente and voluntario.id == null}" style="margin: 4px 0 0; font-size: 0.8rem; color: #0891b2; font-weight: 500;">
                                         <i data-lucide="check-circle" style="width: 12px; vertical-align: middle; margin-right: 4px;"></i>
@@ -151,7 +169,7 @@
                              <!-- Datos legales ocultos (para preservarlos sin mostrarlos) -->
 
                              <!-- ID del usuario y datos legales ocultos (para preservarlos sin mostrarlos) -->
-                             <input type="hidden" name="idUsuario" th:if="${voluntario.id == null}" th:value="${currentUserId}">
+                             <input type="hidden" name="idUsuario" th:if="${voluntario.id == null}" th:value="${targetUserId != null ? targetUserId : currentUserId}">
                              <input type="hidden" name="nombre" th:value="${userNombre}">
                              <input type="hidden" name="apellido" th:value="${userApellido}">
                              <input type="hidden" name="dni" th:value="${userDni}">
@@ -178,8 +196,8 @@
                                     <input type="text" name="telefono" th:value="${userPhone ?: voluntario.telefono}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
                                 </div>
                                 <div class="form-group">
-                                    <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.fecha.de.nacimiento}"></label>
-                                    <input type="date" name="fechaNacimiento" th:value="${userFechaNacimiento}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.direccion}"></label>
+                                    <input type="text" name="direccion" th:value="${userDireccion ?: voluntario.direccion}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
                                 </div>
                             </th:block>
 
@@ -220,40 +238,6 @@
             </div>
         </div>
 
-        <script>
-            if (window.lucide) { lucide.createIcons(); }
-
-            function handleEspecialidadChange() {
-                const select = document.getElementById('especialidadSelect');
-                const customGroup = document.getElementById('especialidadCustomGroup');
-                const customInput = document.getElementById('especialidadCustomInput');
-                
-                if (select.value === 'OTRA') {
-                    customGroup.style.display = 'block';
-                    customInput.setAttribute('name', 'especialidad');
-                    customInput.setAttribute('required', 'required');
-                    select.removeAttribute('name');
-                } else {
-                    customGroup.style.display = 'none';
-                    customInput.removeAttribute('name');
-                    customInput.removeAttribute('required');
-                    select.setAttribute('name', 'especialidad');
-                }
-            }
-
-            function selectUser(userId, userName, alreadyRegistered) {
-                if (alreadyRegistered) {
-                    alert('Este usuario ya está registrado como voluntario.');
-                    return;
-                }
-                document.getElementById('usuarioId-input').value = userId;
-                document.getElementById('user-search').value = userName;
-                document.getElementById('user-suggestions').innerHTML = '';
-                document.getElementById('user-search').style.borderColor = '#22c55e';
-            }
-
-            document.addEventListener('DOMContentLoaded', handleEspecialidadChange);
-        </script>
     </div>
 </body>
 

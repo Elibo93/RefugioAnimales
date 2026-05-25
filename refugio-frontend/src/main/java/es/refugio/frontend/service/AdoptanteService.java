@@ -65,7 +65,7 @@ public class AdoptanteService {
         return helper.fetchObject(apiUrl + "/v1/perfiles-legales/usuario/" + usuarioId, PerfilLegalRecord.class);
     }
 
-    public void crearAdoptanteYPerfil(Integer usuarioId, String nombre, String apellido, String dni, String direccion, String telefono, String fechaNacimiento) {
+    public void crearAdoptanteYPerfil(Integer usuarioId, String nombre, String apellido, String dni, String direccion, String telefono, String fechaNacimiento, String estadoValidacion) {
         // 1. Crear/Actualizar PerfilLegal (Fuente de verdad para identidad)
         Map<String, Object> bodyPerfil = new HashMap<>();
         bodyPerfil.put("usuarioId", usuarioId);
@@ -80,10 +80,13 @@ public class AdoptanteService {
         // 2. Crear Perfil de Adoptante (Rol operativo)
         Map<String, Object> bodyAdoptante = new HashMap<>();
         bodyAdoptante.put("usuarioId", usuarioId);
+        if (estadoValidacion != null) {
+            bodyAdoptante.put("estadoValidacion", estadoValidacion);
+        }
         restTemplate.postForObject(apiUrl + "/v1/adoptantes", bodyAdoptante, Object.class);
     }
 
-    public void editarAdoptanteYPerfil(Integer id, Integer usuarioId, String nombre, String apellido, String dni, String direccion, String fechaNacimiento, String estadoValidacion) {
+    public void editarAdoptanteYPerfil(Integer id, Integer usuarioId, String nombre, String apellido, String dni, String direccion, String telefono, String fechaNacimiento, String estadoValidacion) {
         // 1. Actualizar Adoptante
         Map<String, Object> body = new HashMap<>();
         body.put("usuarioId", usuarioId);
@@ -99,6 +102,7 @@ public class AdoptanteService {
         bodyPerfil.put("apellido", apellido);
         bodyPerfil.put("dni", dni);
         bodyPerfil.put("direccion", direccion);
+        bodyPerfil.put("telefono", (telefono != null && !telefono.isEmpty()) ? telefono : "000000000");
         bodyPerfil.put("fechaNacimiento", fechaNacimiento);
         restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
     }

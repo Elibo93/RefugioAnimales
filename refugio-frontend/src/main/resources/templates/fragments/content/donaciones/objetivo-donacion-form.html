@@ -66,7 +66,7 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 1rem;">
                         <!-- Icono Heart -->
                         <label class="icon-selector-card" style="cursor: pointer; position: relative;">
-                            <input type="radio" name="icono" value="heart" checked style="position: absolute; opacity: 0;" onchange="updateIconSelection(this)">
+                            <input type="radio" name="icono" value="heart" checked style="position: absolute; opacity: 0;">
                             <div class="icon-inner" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 1.5rem; border: 2px solid #e2e8f0; border-radius: 18px; transition: all 0.3s;">
                                 <i data-lucide="heart" style="width: 28px; height: 28px; color: #64748b;"></i>
                                 <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;" th:text="#{donacion.auto.salud}"></span>
@@ -74,7 +74,7 @@
                         </label>
                         <!-- Icono Home -->
                         <label class="icon-selector-card" style="cursor: pointer; position: relative;">
-                            <input type="radio" name="icono" value="home" style="position: absolute; opacity: 0;" onchange="updateIconSelection(this)">
+                            <input type="radio" name="icono" value="home" style="position: absolute; opacity: 0;">
                             <div class="icon-inner" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 1.5rem; border: 2px solid #e2e8f0; border-radius: 18px; transition: all 0.3s;">
                                 <i data-lucide="home" style="width: 28px; height: 28px; color: #64748b;"></i>
                                 <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;" th:text="#{donacion.auto.hogar}"></span>
@@ -82,7 +82,7 @@
                         </label>
                         <!-- Icono Truck -->
                         <label class="icon-selector-card" style="cursor: pointer; position: relative;">
-                            <input type="radio" name="icono" value="truck" style="position: absolute; opacity: 0;" onchange="updateIconSelection(this)">
+                            <input type="radio" name="icono" value="truck" style="position: absolute; opacity: 0;">
                             <div class="icon-inner" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 1.5rem; border: 2px solid #e2e8f0; border-radius: 18px; transition: all 0.3s;">
                                 <i data-lucide="truck" style="width: 28px; height: 28px; color: #64748b;"></i>
                                 <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;" th:text="#{donacion.auto.rescate}"></span>
@@ -90,7 +90,7 @@
                         </label>
                         <!-- Icono Syringe -->
                         <label class="icon-selector-card" style="cursor: pointer; position: relative;">
-                            <input type="radio" name="icono" value="syringe" style="position: absolute; opacity: 0;" onchange="updateIconSelection(this)">
+                            <input type="radio" name="icono" value="syringe" style="position: absolute; opacity: 0;">
                             <div class="icon-inner" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 1.5rem; border: 2px solid #e2e8f0; border-radius: 18px; transition: all 0.3s;">
                                 <i data-lucide="syringe" style="width: 28px; height: 28px; color: #64748b;"></i>
                                 <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;" th:text="#{donacion.auto.medico}"></span>
@@ -98,7 +98,7 @@
                         </label>
                         <!-- Icono Shield -->
                         <label class="icon-selector-card" style="cursor: pointer; position: relative;">
-                            <input type="radio" name="icono" value="shield" style="position: absolute; opacity: 0;" onchange="updateIconSelection(this)">
+                            <input type="radio" name="icono" value="shield" style="position: absolute; opacity: 0;">
                             <div class="icon-inner" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 1.5rem; border: 2px solid #e2e8f0; border-radius: 18px; transition: all 0.3s;">
                                 <i data-lucide="shield" style="width: 28px; height: 28px; color: #64748b;"></i>
                                 <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;" th:text="#{donacion.auto.seguro}"></span>
@@ -139,16 +139,6 @@
         }
     </style>
 
-    <script>
-        function updateIconSelection(input) {
-            // CSS handles the visual part, but we can trigger lucide if needed
-        }
-        
-        // Inicializar iconos
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-        }
-    </script>
 </div>
 </body>
 

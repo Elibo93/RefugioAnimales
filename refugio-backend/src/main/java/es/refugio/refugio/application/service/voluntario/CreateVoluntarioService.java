@@ -16,7 +16,7 @@ public class CreateVoluntarioService {
 
     private final CreateVoluntarioUseCase useCase;
 
-    public Voluntario createVoluntario(CreateVoluntarioCommand command) {
-        return useCase.create(command);
+    public Voluntario createVoluntario(CreateVoluntarioCommand command, boolean isAdmin, String adminToken) {
+        return useCase.create(command, isAdmin, adminToken);
     }
 }

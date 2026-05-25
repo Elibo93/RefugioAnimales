@@ -188,71 +188,7 @@
         </div>
     </div>
 
-    <!-- SCRIPTS DE INTERACCIÓN -->
-    <script>
-        function selectAnimal(id, nombre, especie, foto) {
-            document.getElementById('animalId-input').value = id;
-            document.getElementById('animal-search').value = nombre;
-            document.getElementById('animal-suggestions').innerHTML = '';
-
-            const card = document.getElementById('selected-animal-card');
-            const img = document.getElementById('selected-animal-img');
-            const nameTxt = document.getElementById('selected-animal-name');
-            const speciesTxt = document.getElementById('selected-animal-species');
-
-            img.src = (foto && foto !== 'null' && foto !== '') ? foto : '/images/placeholder-animal.png';
-            nameTxt.innerText = nombre;
-            speciesTxt.innerText = especie.charAt(0).toUpperCase() + especie.slice(1).toLowerCase();
-            card.style.display = 'flex';
-            lucide.createIcons();
-        }
-
-        function clearAnimalSelection() {
-            document.getElementById('animalId-input').value = '';
-            document.getElementById('animal-search').value = '';
-            document.getElementById('selected-animal-card').style.display = 'none';
-            document.getElementById('animal-search').focus();
-        }
-
-        function selectUser(userId, userName, alreadyRegistered, adoptanteId) {
-            document.getElementById('usuarioId-input').value = adoptanteId;
-            document.getElementById('user-search').value = userName;
-            document.getElementById('user-suggestions').innerHTML = '';
-
-            const card = document.getElementById('selected-user-card');
-            const nameTxt = document.getElementById('selected-user-name');
-            nameTxt.innerText = userName;
-            card.style.display = 'flex';
-            lucide.createIcons();
-        }
-
-        function clearUserSelection() {
-            document.getElementById('usuarioId-input').value = '';
-            document.getElementById('user-search').value = '';
-            document.getElementById('selected-user-card').style.display = 'none';
-            document.getElementById('user-search').focus();
-        }
-
-        // Ocultar sugerencias al hacer clic fuera
-        document.addEventListener('click', function (event) {
-            const animalSearch = document.getElementById('animal-search');
-            const animalSugg = document.getElementById('animal-suggestions');
-            const userSearch = document.getElementById('user-search');
-            const userSugg = document.getElementById('user-suggestions');
-
-            if (animalSearch && !animalSearch.contains(event.target) && !animalSugg.contains(event.target)) {
-                animalSugg.innerHTML = '';
-            }
-            if (userSearch && !userSearch.contains(event.target) && !userSugg.contains(event.target)) {
-                userSugg.innerHTML = '';
-            }
-        });
-
-        if (window.lucide) {
-            lucide.createIcons();
-        }
-    </script>
-</div>
+    </div>
 </body>
 
 </html>

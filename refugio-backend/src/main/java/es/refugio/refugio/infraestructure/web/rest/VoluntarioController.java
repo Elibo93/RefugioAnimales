@@ -74,9 +74,16 @@ public class VoluntarioController {
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Voluntario creado"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
-    public ResponseEntity<VoluntarioResponse> create(@Valid @RequestBody VoluntarioRequest request) {
+    public ResponseEntity<VoluntarioResponse> create(@Valid @RequestBody VoluntarioRequest request, Authentication authentication, HttpServletRequest httpRequest) {
+        boolean isAdmin = false;
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            isAdmin = userDetails.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        }
+        
         CreateVoluntarioCommand command = voluntarioMapper.toCommand(request);
-        Voluntario voluntario = createVoluntarioService.createVoluntario(command);
+        Voluntario voluntario = createVoluntarioService.createVoluntario(command, isAdmin, getJwtToken(httpRequest));
         return ResponseEntity.status(HttpStatus.CREATED).body(voluntarioMapper.toResponse(voluntario));
     }
 
