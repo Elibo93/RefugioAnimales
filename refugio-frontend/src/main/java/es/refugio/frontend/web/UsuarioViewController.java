@@ -176,6 +176,7 @@ public class UsuarioViewController {
         emptyPersona.put("apellido", null);
         emptyPersona.put("telefono", null);
         emptyPersona.put("dni", null);
+        emptyPersona.put("direccion", null);
         emptyPersona.put("fechaNacimiento", null);
         emptyPersona.put("rol", null);
         model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), emptyPersona);
@@ -678,8 +679,8 @@ public class UsuarioViewController {
         }
 
         logger.info("buscarUsuarios called with q: '{}', context: '{}'", q, context);
-        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
-        List<PerfilLegalRecord> perfiles = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios?size=1000", UsuarioRecord.class);
+        List<PerfilLegalRecord> perfiles = helper.fetchList(apiUrl + "/v1/perfiles-legales?size=1000", PerfilLegalRecord.class);
         List<AdoptanteRecord> adoptantes = helper.fetchList(apiUrl + "/v1/adoptantes?size=1000", AdoptanteRecord.class);
         List<VoluntarioRecord> voluntarios = helper.fetchList(apiUrl + "/v1/voluntarios?size=1000", VoluntarioRecord.class);
         logger.info("buscarUsuarios - Fetched {} usuarios, {} perfiles, {} adoptantes, {} voluntarios", 
@@ -716,6 +717,12 @@ public class UsuarioViewController {
             String apellido = perfil != null && perfil.apellido() != null ? perfil.apellido() : "";
             String email = u.email() != null ? u.email() : "";
             String username = u.username() != null ? u.username() : "";
+            
+            // Fallback: Si no tiene PerfilLegal, usamos el username como nombre a mostrar
+            if (nombre.isEmpty() && apellido.isEmpty() && !username.isEmpty()) {
+                nombre = username;
+            }
+            
             String nombreCompleto = (nombre + " " + apellido).trim();
             String idStr = String.valueOf(u.id());
 
@@ -769,6 +776,8 @@ public class UsuarioViewController {
                 
                 if (adoptantesUserIds.containsKey(u.id())) {
                     result.put("adoptanteId", adoptantesUserIds.get(u.id()));
+                } else {
+                    result.put("adoptanteId", null);
                 }
                 
                 result.put("yaRegistrado", yaRegistrado);

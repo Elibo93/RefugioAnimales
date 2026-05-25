@@ -38,11 +38,10 @@ public class SecurityConfig {
                 .anyRequest().permitAll()
             )
             .exceptionHandling(ex -> ex
-                // Redirigir usuarios no autenticados. Si es petición HTMX, forzamos un full-page redirect.
                 .authenticationEntryPoint((request, response, authException) -> {
                     if ("true".equals(request.getHeader("HX-Request"))) {
                         response.setHeader("HX-Redirect", "/login");
-                        response.setStatus(401); // HTMX capturará el header y hará redirect
+                        response.setStatus(200); // 200 es necesario para que HTMX procese el HX-Redirect y no se quede en bucle
                     } else {
                         response.sendRedirect("/login");
                     }

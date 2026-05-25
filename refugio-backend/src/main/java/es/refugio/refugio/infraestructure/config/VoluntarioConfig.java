@@ -31,8 +31,8 @@ public class VoluntarioConfig {
 
     @Bean
     public CreateVoluntarioUseCase createVoluntarioUseCase(VoluntarioRepository repository,
-            PerfilLegalRepository perfilLegalRepository, NotificacionService notificacionService) {
-        return new CreateVoluntarioUseCase(repository, perfilLegalRepository, notificacionService);
+            PerfilLegalRepository perfilLegalRepository, NotificacionService notificacionService, RestTemplate restTemplate) {
+        return new CreateVoluntarioUseCase(repository, perfilLegalRepository, notificacionService, restTemplate);
     }
 
     @Bean

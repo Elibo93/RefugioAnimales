@@ -42,7 +42,8 @@ import es.refugio.frontend.web.util.ViewControllerHelper;
 import java.time.LocalDateTime;
 
 import java.io.OutputStream;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import es.refugio.frontend.service.SolicitudAdopcionService;
 
 @Controller
@@ -366,9 +367,40 @@ public class SolicitudAdopcionViewController {
             @RequestParam(required = false) String redireccion,
             RedirectAttributes redirectAttributes) {
 
-        solicitudService.editarSolicitud(id, animalId, adoptanteId, estado, comentario, comentarioAdmin,
-                LocalDateTime.now());
-        redirectAttributes.addFlashAttribute("successMessage", "Solicitud actualizada correctamente");
+        try {
+            solicitudService.editarSolicitud(id, animalId, adoptanteId, estado, comentario, comentarioAdmin,
+                    LocalDateTime.now());
+            redirectAttributes.addFlashAttribute("successMessage", "Solicitud actualizada correctamente");
+        } catch (HttpStatusCodeException e) {
+            String errorMsg = "Error al actualizar la solicitud.";
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(e.getResponseBodyAsString());
+                if (root.has("message")) {
+                    String backendMsg = root.get("message").asText();
+                    if (backendMsg.contains("ya tiene una adopción activa o en proceso")) {
+                        String nombreAnimal = "El animal";
+                        try {
+                            AnimalRecord animal = solicitudService.fetchAnimalById(animalId);
+                            if (animal != null && animal.nombre() != null) {
+                                nombreAnimal = animal.nombre();
+                            }
+                        } catch (Exception ignore) {}
+                        errorMsg = helper.getMessage("error.animal.ya.adoptado", nombreAnimal);
+                    } else {
+                        errorMsg = backendMsg;
+                    }
+                }
+            } catch (Exception ex) {
+                // Ignorar error de parseo JSON y usar mensaje genérico
+            }
+            redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
+            return "redirect:/web/solicitudes/" + id + "/editar";
+        } catch (Exception e) {
+            logger.error("Error inesperado en procesarEdicion: ", e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Ocurrió un error inesperado al actualizar la solicitud.");
+            return "redirect:/web/solicitudes/" + id + "/editar";
+        }
 
         if ("detalle".equals(redireccion)) {
             return "redirect:/web/solicitudes/" + id + "/detalle";

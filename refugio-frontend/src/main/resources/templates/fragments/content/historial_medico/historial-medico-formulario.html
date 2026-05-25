@@ -125,47 +125,6 @@
             </form>
         </div>
 
-        <script>
-            function selectAnimal(id, nombre, especie, foto) {
-                document.getElementById('animalId-input').value = id;
-                document.getElementById('animal-search').value = nombre;
-                document.getElementById('animal-suggestions').innerHTML = '';
-                
-                const card = document.getElementById('selected-animal-card');
-                const img = document.getElementById('selected-animal-img');
-                const nameTxt = document.getElementById('selected-animal-name');
-                const speciesTxt = document.getElementById('selected-animal-species');
-                
-                img.src = (foto && foto !== 'null' && foto !== '') ? foto : '/images/placeholder-animal.png';
-                nameTxt.innerText = nombre;
-                speciesTxt.innerText = especie.charAt(0).toUpperCase() + especie.slice(1).toLowerCase();
-                card.style.display = 'flex';
-                if (window.lucide) {
-                    lucide.createIcons();
-                }
-            }
-
-            function clearAnimalSelection() {
-                document.getElementById('animalId-input').value = '';
-                document.getElementById('animal-search').value = '';
-                document.getElementById('selected-animal-card').style.display = 'none';
-                document.getElementById('animal-search').focus();
-            }
-
-            // Ocultar sugerencias al hacer clic fuera
-            document.addEventListener('click', function(event) {
-                const animalSearch = document.getElementById('animal-search');
-                const animalSugg = document.getElementById('animal-suggestions');
-                if (animalSearch && !animalSearch.contains(event.target) && !animalSugg.contains(event.target)) {
-                    animalSugg.innerHTML = '';
-                }
-            });
-
-            // Inicializar iconos
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        </script>
     </div>
 </body>
 

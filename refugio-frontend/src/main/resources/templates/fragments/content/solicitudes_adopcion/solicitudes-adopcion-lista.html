@@ -104,8 +104,12 @@
                         <!-- Body de la Card: Clean Spacing -->
                         <div style="padding: 1.75rem; display: flex; flex-direction: column; gap: 1.5rem;">
                             <!-- Info Animal: Hero Style -->
-                            <div style="display: flex; align-items: center; gap: 16px;">
-                                <div
+                            <div style="display: flex; align-items: center; gap: 16px;" th:with="a=${animalesMap['' + s.animalId()]}">
+                                <div th:if="${a != null and a.foto() != null and !a.foto().isEmpty()}"
+                                    style="width: 52px; height: 52px; border-radius: 16px; overflow: hidden; border: 1px solid var(--border);">
+                                    <img th:src="${a.foto()}" style="width: 100%; height: 100%; object-fit: cover;" alt="Foto animal">
+                                </div>
+                                <div th:unless="${a != null and a.foto() != null and !a.foto().isEmpty()}"
                                     style="width: 52px; height: 52px; background: #f0f9ff; color: #0369a1; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
                                     <i data-lucide="dog" style="width: 24px;"></i>
                                 </div>
@@ -114,7 +118,6 @@
                                         style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;" th:text="#{generic.auto.animal}"></span>
                                     <a th:href="@{/web/animales/{id}(id=${s.animalId()})}"
                                         style="font-weight: 900; color: var(--secondary); text-decoration: none; font-size: 1.2rem; display: block; margin-top: 2px;"
-                                        th:with="a=${animalesMap['' + s.animalId()]}"
                                         th:text="${a != null ? a.nombre() : 'Desconocido'}">Rocky</a>
                                 </div>
                                 <div
@@ -280,9 +283,6 @@
 
             </div><!-- fin #solicitudes-container -->
 
-            <script>
-                if (typeof lucide !== 'undefined') lucide.createIcons();
-            </script>
         </div>
     </div>
 </body>

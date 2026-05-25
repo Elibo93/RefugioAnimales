@@ -163,62 +163,7 @@
         }
     </style>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const consent = localStorage.getItem('cookie-consent');
-            if (!consent) {
-                setTimeout(() => {
-                    const banner = document.getElementById('cookie-banner');
-                    banner.style.display = 'block';
-                    if (window.lucide) lucide.createIcons();
-                }, 1000);
-            }
-        });
 
-        function acceptCookies(type) {
-            localStorage.setItem('cookie-consent', type);
-            localStorage.setItem('cookie-consent-date', new Date().toISOString());
-            
-            const banner = document.getElementById('cookie-banner');
-            banner.style.transition = 'all 0.5s ease';
-            banner.style.opacity = '0';
-            banner.style.transform = 'translate(-50%, 50px)';
-            
-            setTimeout(() => banner.remove(), 500);
-            
-            console.log('Cookies accepted:', type);
-        }
-
-        function toggleCookieSettings() {
-            const banner = document.getElementById('cookie-banner');
-            banner.style.opacity = '0';
-            banner.style.pointerEvents = 'none';
-
-            // Aquí se podría abrir un modal más detallado
-            Swal.fire({
-                title: 'Preferencias de Cookies',
-                html: `
-                    <div style="text-align: left; font-size: 0.9rem;">
-                        <p><input type="checkbox" checked disabled> <strong th:text="#{generic.auto.necesarias}"></strong> Esenciales para el funcionamiento del sitio.</p>
-                        <p><input type="checkbox" id="check-analytics"> <strong th:text="#{generic.auto.analiticas}"></strong> Nos ayudan a saber qué animales se visitan más.</p>
-                        <p><input type="checkbox" id="check-marketing"> <strong th:text="#{generic.auto.marketing}"></strong> Para mostrarte contenido relevante.</p>
-                    </div>
-                `,
-                confirmButtonText: 'Guardar preferencias',
-                confirmButtonColor: '#15803d',
-                showCancelButton: true,
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    acceptCookies('custom');
-                } else {
-                    // Si cancela, volvemos a mostrar el banner
-                    banner.style.opacity = '1';
-                    banner.style.pointerEvents = 'auto';
-                }
-            });
-        }
-    </script>
 </div>
 </body>
 

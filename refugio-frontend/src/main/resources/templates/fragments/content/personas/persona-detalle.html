@@ -169,6 +169,13 @@
                             <span th:text="${persona.fechaNacimiento ?: 'No proporcionada'}">2000-01-01</span>
                         </div>
                     </div>
+                    <div th:if="${persona.telefono != null and !persona.telefono.isEmpty() and persona.telefono != '000000000'}">
+                        <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;" th:text="#{generic.auto.telefono}"></span>
+                        <div style="display: flex; align-items: center; gap: 10px; color: var(--text-main); font-weight: 600;">
+                            <i data-lucide="phone" style="width: 16px; opacity: 0.6;"></i>
+                            <span th:text="${persona.telefono}">123456789</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -725,9 +732,6 @@
         <div th:replace="~{fragments/content/gamificacion/gamificacion-perfil :: perfil}"></div>
     </div>
 
-    <script>
-        if (window.lucide) lucide.createIcons();
-    </script>
 </div>
 </body>
 

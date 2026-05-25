@@ -102,15 +102,48 @@ public class AdoptanteViewController {
 
     @GetMapping(WebRoutes.ADOPTANTES_NUEVO)
     @PreAuthorize("hasRole('ADMIN')")
-    public String nuevo(Model model, HttpServletRequest request) {
+    public String nuevo(@RequestParam(required = false) Integer usuarioId, Model model, HttpServletRequest request) {
         Map<String, Object> emptyAdoptante = new HashMap<>();
         emptyAdoptante.put("id", null);
-        emptyAdoptante.put("usuarioId", null);
+        emptyAdoptante.put("usuarioId", usuarioId);
         emptyAdoptante.put("dni", null);
         emptyAdoptante.put("direccion", null);
         emptyAdoptante.put("estadoValidacion", null);
         model.addAttribute(ModelAttribute.SINGLE_Adoptante.getName(), emptyAdoptante);
         model.addAttribute("currentUri", WebRoutes.ADOPTANTES_BASE);
+        
+        model.addAttribute("perfilLegalExists", false);
+        model.addAttribute("perfilExistente", false);
+        
+        if (usuarioId != null) {
+            try {
+                UsuarioRecord targetUser = adoptanteService.fetchUsuarioById(usuarioId);
+                if (targetUser != null) {
+                    model.addAttribute("targetUserEmail", targetUser.email());
+                    model.addAttribute("targetUserUsername", targetUser.username());
+                }
+            } catch (Exception e) {
+                logger.info("No se pudo obtener el usuario objetivo: " + e.getMessage());
+            }
+            try {
+                PerfilLegalRecord perfil = adoptanteService.fetchPerfilLegalByUsuarioId(usuarioId);
+                if (perfil != null) {
+                    model.addAttribute("userPhone",           perfil.telefono());
+                    model.addAttribute("userDni",             perfil.dni());
+                    model.addAttribute("userDireccion",       perfil.direccion());
+                    model.addAttribute("userFechaNacimiento", perfil.fechaNacimiento());
+                    model.addAttribute("userNombre",          perfil.nombre());
+                    model.addAttribute("userApellido",        perfil.apellido());
+                    model.addAttribute("nombreCompleto",      perfil.nombre() + " " + perfil.apellido());
+                    model.addAttribute("perfilLegalExists",   true);
+                    model.addAttribute("perfilExistente",     true);
+                }
+            } catch (Exception e) {
+                logger.info("El usuario objetivo no tiene perfil legal aún: " + e.getMessage());
+            }
+        }
+        
+        model.addAttribute("estados", List.of("PENDIENTE", "APROBADO", "RECHAZADO"));
         
         if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Adoptante_FORM.getPath() + " :: content";
@@ -171,11 +204,12 @@ public class AdoptanteViewController {
             @RequestParam String direccion,
             @RequestParam(required = false) String telefono,
             @RequestParam String fechaNacimiento,
+            @RequestParam(required = false) String estadoValidacion,
             RedirectAttributes redirectAttributes) {
         try {
-            adoptanteService.crearAdoptanteYPerfil(usuarioId, nombre, apellido, dni, direccion, telefono, fechaNacimiento);
+            adoptanteService.crearAdoptanteYPerfil(usuarioId, nombre, apellido, dni, direccion, telefono, fechaNacimiento, estadoValidacion);
 
-            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.adoptante_creado"));
+            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.adoptante_creado_admin"));
             return "redirect:" + WebRoutes.ADOPTANTES_BASE;
         } catch (Exception e) {
             logger.error("Error al crear adoptante: " + ErrorMessageExtractor.extract(e));
@@ -193,11 +227,12 @@ public class AdoptanteViewController {
             @RequestParam String apellido,
             @RequestParam String dni,
             @RequestParam String direccion,
+            @RequestParam String telefono,
             @RequestParam String fechaNacimiento,
             @RequestParam(required = false) String estadoValidacion,
             RedirectAttributes redirectAttributes) {
         try {
-            adoptanteService.editarAdoptanteYPerfil(id, usuarioId, nombre, apellido, dni, direccion, fechaNacimiento, estadoValidacion);
+            adoptanteService.editarAdoptanteYPerfil(id, usuarioId, nombre, apellido, dni, direccion, telefono, fechaNacimiento, estadoValidacion);
 
             redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.adoptante_editado"));
             return "redirect:" + WebRoutes.ADOPTANTES_BASE;

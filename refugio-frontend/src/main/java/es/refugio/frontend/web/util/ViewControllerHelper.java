@@ -33,6 +33,14 @@ public class ViewControllerHelper {
         }
     }
 
+    public String getMessage(String code, Object... args) {
+        try {
+            return messageSource.getMessage(code, args, LocaleContextHolder.getLocale());
+        } catch (NoSuchMessageException e) {
+            return code;
+        }
+    }
+
     /**
      * Hace un fetch de una lista de objetos y los mapea fuertemente a una clase/record.
      */

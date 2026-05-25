@@ -152,7 +152,10 @@ public class VoluntarioViewController {
     }
 
     @GetMapping("/web/voluntarios/sugerencias")
-    public String sugerencias(@RequestParam(required = false) String q, Model model) {
+    public String sugerencias(@RequestParam(required = false) String q,
+                              @RequestParam(required = false) String fechaLimite,
+                              @RequestParam(required = false) List<Integer> voluntarioIds,
+                              Model model) {
         if (q == null || q.trim().isEmpty()) {
             return FragmentoContenido.VOLUNTARIO_SUGERENCIAS.getPath() + " :: suggestions";
         }
@@ -160,6 +163,25 @@ public class VoluntarioViewController {
         List<VoluntarioRecord> voluntarios = voluntarioService.fetchAllVoluntarios();
         List<PerfilLegalRecord> perfiles = voluntarioService.fetchAllPerfilesLegales();
         List<UsuarioRecord> usuarios = voluntarioService.fetchAllUsuarios();
+
+        // Extraer el día de la semana de fechaLimite si se proporciona
+        String diaSemanaRequerido = null;
+        if (fechaLimite != null && !fechaLimite.trim().isEmpty()) {
+            try {
+                java.time.LocalDateTime fecha = java.time.LocalDateTime.parse(fechaLimite);
+                java.time.DayOfWeek day = fecha.getDayOfWeek();
+                switch (day) {
+                    case MONDAY: case TUESDAY: case WEDNESDAY: case THURSDAY: case FRIDAY:
+                        diaSemanaRequerido = "ENTRE_SEMANA";
+                        break;
+                    case SATURDAY: case SUNDAY:
+                        diaSemanaRequerido = "FINES_DE_SEMANA";
+                        break;
+                }
+            } catch (Exception e) {
+                // Ignorar si hay un error de parseo de fecha
+            }
+        }
 
         Map<Integer, PerfilLegalRecord> perfilesMap = new HashMap<>();
         for (PerfilLegalRecord p : perfiles) {
@@ -176,6 +198,30 @@ public class VoluntarioViewController {
         List<Map<String, Object>> voluntariosEncontrados = new ArrayList<>();
 
         for (VoluntarioRecord v : voluntarios) {
+            // Filtrar voluntarios no aprobados o que ya están asignados
+            if (!"APROBADO".equals(v.estado())) continue;
+            if (voluntarioIds != null && voluntarioIds.contains(v.id())) continue;
+
+            // Filtrar por disponibilidad si hay un requerimiento
+            if (diaSemanaRequerido != null && v.disponibilidad() != null) {
+                String disp = v.disponibilidad().toUpperCase();
+                if (!disp.contains(diaSemanaRequerido) && !disp.contains("FLEXIBLE") && !disp.contains("CUALQUIERA")) {
+                    // Si requiere fin de semana pero solo tiene mañanas/tardes entre semana, lo saltamos
+                    // Asumimos que FLEXIBLE o CUALQUIERA u opciones que contengan el dia requerido son válidas
+                    if (diaSemanaRequerido.equals("FINES_DE_SEMANA") && (disp.contains("MAÑANAS") || disp.contains("TARDES"))) {
+                        // En realidad "MAÑANAS" y "TARDES" puede aplicar a toda la semana, dependiendo de la BD. 
+                        // Pero para ser estrictos, si el usuario explícitamente marcó FINES_DE_SEMANA, o ENTRE_SEMANA
+                        // Y esta disponibilidad es un enum: MAÑANAS, TARDES, FINES_DE_SEMANA, FLEXIBLE.
+                        // Si la disponibilidad de V no es compatible, lo saltamos.
+                        if (!disp.equals("MAÑANAS") && !disp.equals("TARDES") && !disp.equals("FLEXIBLE")) {
+                            continue;
+                        }
+                    } else if (diaSemanaRequerido.equals("ENTRE_SEMANA") && disp.equals("FINES_DE_SEMANA")) {
+                        continue; // No está disponible entre semana
+                    }
+                }
+            }
+
             if (v.usuarioId() != null) {
                 int uId = v.usuarioId();
                 PerfilLegalRecord perfil = perfilesMap.get(uId);
@@ -206,10 +252,10 @@ public class VoluntarioViewController {
 
     @GetMapping(WebRoutes.VOLUNTARIOS_NUEVO)
     @PreAuthorize("hasAnyRole('ADMIN', 'PUBLICO', 'VOLUNTARIO', 'ADOPTANTE') or isAnonymous()")
-    public String formulario(Model model, HttpServletRequest request) {
+    public String formulario(@RequestParam(required = false) Integer usuarioId, Model model, HttpServletRequest request) {
         Map<String, Object> emptyVoluntario = new HashMap<>();
         emptyVoluntario.put("id", null);
-        emptyVoluntario.put("usuarioId", null);
+        emptyVoluntario.put("usuarioId", usuarioId);
         emptyVoluntario.put("telefono", null);
         emptyVoluntario.put("especialidad", null);
         emptyVoluntario.put("disponibilidad", null);
@@ -220,12 +266,37 @@ public class VoluntarioViewController {
         model.addAttribute("perfilExistente", false);
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth != null && auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             try {
-                Object currentUserIdObj = model.getAttribute("currentUserId");
-                if (currentUserIdObj instanceof Number) {
-                    Integer currentUserId = ((Number) currentUserIdObj).intValue();
-                    PerfilLegalRecord perfil = voluntarioService.fetchPerfilLegalByUsuarioId(currentUserId);
+                Integer targetUserId = null;
+                
+                if (isAdmin) {
+                    // Si es admin, debe venir el usuarioId explícitamente
+                    targetUserId = usuarioId;
+                } else {
+                    // Si es usuario normal, se preselecciona a sí mismo
+                    Object currentUserIdObj = model.getAttribute("currentUserId");
+                    if (currentUserIdObj instanceof Number) {
+                        targetUserId = ((Number) currentUserIdObj).intValue();
+                    }
+                }
+                
+                model.addAttribute("targetUserId", targetUserId);
+                
+                if (targetUserId != null) {
+                    try {
+                        UsuarioRecord targetUser = voluntarioService.fetchUsuarioById(targetUserId);
+                        if (targetUser != null) {
+                            model.addAttribute("targetUserEmail", targetUser.email());
+                            model.addAttribute("targetUserUsername", targetUser.username());
+                        }
+                    } catch (Exception e) {
+                        logger.info("No se pudo obtener el usuario objetivo: " + e.getMessage());
+                    }
+                    
+                    PerfilLegalRecord perfil = voluntarioService.fetchPerfilLegalByUsuarioId(targetUserId);
                     if (perfil != null) {
                         model.addAttribute("userPhone",           perfil.telefono());
                         model.addAttribute("userDni",             perfil.dni());
@@ -242,7 +313,7 @@ public class VoluntarioViewController {
                     }
 
                     try {
-                        VoluntarioRecord voluntarioExistente = voluntarioService.fetchVoluntarioByUsuarioId(currentUserId);
+                        VoluntarioRecord voluntarioExistente = voluntarioService.fetchVoluntarioByUsuarioId(targetUserId);
                         if (voluntarioExistente != null) {
                             model.addAttribute("voluntarioExistente", voluntarioExistente);
                         }
@@ -407,7 +478,11 @@ public class VoluntarioViewController {
 
         try {
             voluntarioService.crearVoluntarioYPerfil(finalUsuarioId, nombre, apellido, dni, direccion, telefono, fechaNacimiento, especialidad, disponibilidad);
-            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("voluntario.estado.pendiente.msg"));
+            if (isAuthenticated && auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+                redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.voluntario_creado_admin"));
+            } else {
+                redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("voluntario.estado.pendiente.msg"));
+            }
         } catch (Exception e) {
             String errorMsg = "Error al crear el perfil: " + ErrorMessageExtractor.extract(e);
             logger.error(errorMsg);
