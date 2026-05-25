@@ -128,7 +128,7 @@ public class SolicitudAdopcionController {
 
         // 2. Crear Adoptante
         var adoptanteCommand = new CreateAdoptanteCommand(usuarioId);
-        var adoptante = createAdoptanteService.createAdoptante(adoptanteCommand);
+        var adoptante = createAdoptanteService.createAdoptante(adoptanteCommand, false);
 
         // 3. Crear Solicitud
         var solicitudCommand = new CreateSolicitudAdopcionCommand(
@@ -174,7 +174,7 @@ public class SolicitudAdopcionController {
 
         // 2. Crear perfil de Adoptante
         var adoptanteCommand = new CreateAdoptanteCommand(usuarioId);
-        var adoptante = createAdoptanteService.createAdoptante(adoptanteCommand);
+        var adoptante = createAdoptanteService.createAdoptante(adoptanteCommand, false);
 
         // Actualización de rol es manejada remotamente (por el frontend que orquesta)
 

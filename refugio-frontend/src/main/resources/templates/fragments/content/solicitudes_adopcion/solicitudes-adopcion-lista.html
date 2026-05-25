@@ -8,25 +8,25 @@
 
 <body>
     <div th:fragment="content" class="fade-in">
-        <div class="table-wrapper" style="padding: 2.5rem 3rem;">
+        <div class="table-wrapper admin-table-wrapper">
             <div class="actions-bar" style="margin-bottom: 3.5rem; padding: 0;">
                 <div style="display: flex; align-items: center; gap: 15px;">
                     <div
-                        style="background: var(--primary-light); color: var(--primary); width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center;">
+                        class="admin-title-icon-box">
                         <i data-lucide="file-text" style="width: 24px;"></i>
                     </div>
                     <div>
-                        <h1 style="margin: 0; font-size: 1.5rem; font-weight: 800; color: var(--text-main);"
+                        <h1 class="admin-title-text"
                             th:text="#{solicitud.list.title}">[[#{solicitud.auto.adoption.requests}]]</h1>
-                        <p style="margin: 2px 0 0; font-size: 0.9rem; color: var(--text-muted);" th:text="#{adopcion.auto.gestiona.las}"></p>
+                        <p class="admin-title-desc" th:text="#{solicitud.auto.gestiona.solicitudes}">Gestión de solicitudes de adopción</p>
                     </div>
                 </div>
                 <div style="display:flex; gap:10px;">
-                    <a th:href="@{/web/solicitudes/pdf}" target="_blank" title="Exportar listado a PDF" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                        <img src="/images/pdf.png" alt="PDF" style="height: 48px; width: 48px; object-fit: contain;">
+                    <a th:href="@{/web/solicitudes/pdf}" target="_blank" title="Exportar listado a PDF" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/pdf.png" alt="PDF" class="admin-export-img">
                     </a>
-                    <a th:href="@{/web/solicitudes/excel}" target="_blank" title="Exportar listado a Excel" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                        <img src="/images/excel.png" alt="Excel" style="height: 48px; width: 48px; object-fit: contain;">
+                    <a th:href="@{/web/solicitudes/excel}" target="_blank" title="Exportar listado a Excel" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/excel.png" alt="Excel" class="admin-export-img">
                     </a>
                     <a class="btn btn-primary" th:href="@{/web/solicitudes/nueva}">
                         <i data-lucide="plus" style="width:18px;"></i>
@@ -105,13 +105,8 @@
                         <div style="padding: 1.75rem; display: flex; flex-direction: column; gap: 1.5rem;">
                             <!-- Info Animal: Hero Style -->
                             <div style="display: flex; align-items: center; gap: 16px;" th:with="a=${animalesMap['' + s.animalId()]}">
-                                <div th:if="${a != null and a.foto() != null and !a.foto().isEmpty()}"
-                                    style="width: 52px; height: 52px; border-radius: 16px; overflow: hidden; border: 1px solid var(--border);">
-                                    <img th:src="${a.foto()}" style="width: 100%; height: 100%; object-fit: cover;" alt="Foto animal">
-                                </div>
-                                <div th:unless="${a != null and a.foto() != null and !a.foto().isEmpty()}"
-                                    style="width: 52px; height: 52px; background: #f0f9ff; color: #0369a1; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
-                                    <i data-lucide="dog" style="width: 24px;"></i>
+                                <div style="width: 52px; height: 52px; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); flex-shrink: 0;">
+                                    <img th:src="${a != null and a.foto() != null and !a.foto().isEmpty() ? a.foto() : '/images/placeholder-animal.png'}" style="width: 100%; height: 100%; object-fit: cover;" alt="Foto animal">
                                 </div>
                                 <div style="flex: 1;">
                                     <span
@@ -189,8 +184,7 @@
             </div>
 
             <div class="premium-list-container">
-                <div class="list-header"
-                    style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
+                <div class="list-header admin-list-header">
                     <div style="flex: 0.5; text-align: center;" th:text="#{generic.auto.id}"></div>
                     <div style="flex: 3;" th:text="#{adopcion.auto.animal.y.solicitante}"></div>
                     <div style="flex: 1.2; text-align: center;" th:text="#{generic.auto.estado}"></div>

@@ -9,7 +9,7 @@
 <body>
 <div th:fragment="content">
 
-        <div class="table-wrapper">
+        <div class="table-wrapper admin-table-wrapper">
             <!-- Banner de Selección Activa -->
             <div th:if="${modoSeleccion}" 
                  style="background: #eff6ff; border: 1px solid #93c5fd; padding: 16px 24px; border-radius: 20px; display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 2rem; animation: slideInDown 0.4s ease; box-shadow: var(--shadow-md);">
@@ -28,41 +28,51 @@
                    class="btn-premium secondary" style="height: 36px; padding: 0 15px; font-size: 0.8rem; border-radius: 10px;" th:text="#{generic.auto.cancelar.seleccion}"></a>
             </div>
 
-                <div id="voluntarios-main-container" style="width: 100%;">
-                    <div class="actions-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 20px; background: white; padding: 1.25rem; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
-                        <div style="display:flex; align-items:center; gap:20px; flex: 1;">
-                            <span class="user-name page" style="white-space: nowrap; margin: 0; font-size: 1.5rem;" th:text="#{voluntario.list.title}">voluntarios</span>
-                            
-                            <form id="search-form-vol" hx-get="/web/voluntarios" hx-target="#voluntarios-main-container" hx-select="#voluntarios-main-container" hx-swap="outerHTML" hx-trigger="keyup changed delay:800ms from:#search-input, search" hx-vals='{"page": 1}' hx-replace-url="true" style="position: relative; max-width: 450px; flex: 1;">
-                        <i data-lucide="search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; color: var(--text-muted);"></i>
-                        <input type="text" id="search-input" name="q" th:value="${query}" placeholder="Buscar por nombre, email o DNI..." class="form-control" style="padding-left: 48px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-main); width: 100%; font-size: 0.9rem;">
-                        
-                        <!-- Inputs ocultos para mantener el modo selección al buscar -->
-                        <input type="hidden" name="modoSeleccion" th:value="${modoSeleccion}">
-                        <input type="hidden" name="tareaIdSeleccion" th:value="${tareaIdSeleccion}">
-                    </form>
-                </div>
+            <div id="voluntarios-main-container" style="width: 100%;">
+                <div class="actions-bar admin-actions-bar">
+                    
+                    <!-- 1. TÍTULO E ICONO -->
+                    <div class="admin-title-container">
+                        <div class="admin-title-icon-box">
+                            <i data-lucide="clipboard-list" style="width: 24px;"></i>
+                        </div>
+                        <div>
+                            <h1 class="admin-title-text" th:text="#{voluntario.list.title}">Voluntarios</h1>
+                            <p class="admin-title-desc" th:text="#{voluntario.auto.gestiona.equipo}">Gestión del equipo de voluntarios</p>
+                        </div>
+                    </div>
 
-                <div style="display:flex; gap:10px; flex-shrink: 0;">
-                    <a th:href="@{/web/voluntarios/pdf}" target="_blank" title="Exportar listado a PDF" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                        <img src="/images/pdf.png" alt="PDF" style="height: 48px; width: 48px; object-fit: contain;">
-                    </a>
-                    <a th:href="@{/web/voluntarios/excel}" target="_blank" title="Exportar listado a Excel" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                        <img src="/images/excel.png" alt="Excel" style="height: 48px; width: 48px; object-fit: contain;">
-                    </a>
-                    <a class="btn btn-primary" th:href="@{/web/voluntarios/nuevo}"
-                       style="height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 15px; border-radius: 10px; font-weight: 600;">
-                        <i data-lucide="plus" style="width:18px;"></i>
-                        <span th:text="#{generic.link.create}">+ Nuevo</span>
-                    </a>
+                    <!-- 2. FILTROS Y BÚSQUEDA (Centrados) -->
+                    <div class="admin-filters-container">
+                        <form id="search-form-vol" hx-get="/web/voluntarios" hx-target="#voluntarios-main-container" hx-select="#voluntarios-main-container" hx-swap="outerHTML" hx-trigger="keyup changed delay:800ms from:#search-input, search" hx-vals='{"page": 1}' hx-replace-url="true" style="position: relative; width: 100%; max-width: 450px;">
+                            <i data-lucide="search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; color: var(--text-muted);"></i>
+                            <input type="text" id="search-input" name="q" th:value="${query}" placeholder="Buscar por nombre, email o DNI..." class="form-control" style="padding-left: 48px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-main); width: 100%; font-size: 0.9rem;">
+                            
+                            <!-- Inputs ocultos para mantener el modo selección al buscar -->
+                            <input type="hidden" name="modoSeleccion" th:value="${modoSeleccion}">
+                            <input type="hidden" name="tareaIdSeleccion" th:value="${tareaIdSeleccion}">
+                        </form>
+                    </div>
+
+                    <!-- 3. ACCIONES Y EXPORTACIÓN -->
+                    <div class="admin-actions-group">
+                        <a th:href="@{/web/voluntarios/pdf}" target="_blank" title="Exportar listado a PDF" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                            <img src="/images/pdf.png" alt="PDF" class="admin-export-img">
+                        </a>
+                        <a th:href="@{/web/voluntarios/excel}" target="_blank" title="Exportar listado a Excel" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                            <img src="/images/excel.png" alt="Excel" class="admin-export-img">
+                        </a>
+                        <a class="btn btn-primary" th:href="@{/web/voluntarios/nuevo}">
+                            <i data-lucide="plus" style="width:18px;"></i>
+                            <span th:text="#{generic.link.create}">+ Nuevo</span>
+                        </a>
+                    </div>
                 </div>
-            </div>
 
             <!-- LISTA PREMIUM DE VOLUNTARIOS -->
-            <div class="premium-list-container" style="margin-top: 1.5rem;">
+            <div class="premium-list-container">
                 <!-- Encabezados -->
-                <div class="list-header"
-                    style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
+                <div class="list-header admin-list-header">
                     <div style="flex: 0.5; text-align: center;" th:text="#{generic.auto.id}"></div>
                     <div style="flex: 2.5; padding-left: 10px;" th:text="#{voluntario.auto.voluntario.usuario}"></div>
                     <div style="flex: 2.5; text-align: center;" th:text="#{generic.auto.contacto.y.direccion}"></div>

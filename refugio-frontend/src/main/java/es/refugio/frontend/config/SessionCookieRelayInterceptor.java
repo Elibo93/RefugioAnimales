@@ -37,12 +37,6 @@ public class SessionCookieRelayInterceptor implements ClientHttpRequestIntercept
                     (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
             HttpServletRequest currentRequest = attrs.getRequest();
 
-            // 1. Reenviar el header Cookie completo si existe
-            String cookieHeader = currentRequest.getHeader("Cookie");
-            if (cookieHeader != null && !cookieHeader.isBlank()) {
-                request.getHeaders().add("Cookie", cookieHeader);
-            }
-
             // Reenviar el header Accept-Language para la i18n del backend usando el Locale activo de Spring
             Locale activeLocale = LocaleContextHolder.getLocale();
             if (activeLocale != null) {
@@ -60,7 +54,7 @@ public class SessionCookieRelayInterceptor implements ClientHttpRequestIntercept
                 }
             }
 
-            if (cookieHeader == null && currentRequest.getCookies() == null) {
+            if (currentRequest.getCookies() == null) {
                 logger.warn("No cookies found in current request to relay to " + request.getURI());
             }
         } catch (IllegalStateException e) {

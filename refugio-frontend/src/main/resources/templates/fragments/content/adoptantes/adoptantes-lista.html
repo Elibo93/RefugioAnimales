@@ -20,20 +20,29 @@
             <span th:text="${errorMessage}">Mensaje [[#{html.auto.de}]] error</span>
         </div>
 
-        <div class="table-wrapper">
-            <div class="actions-bar"
-                style="display: flex; align-items: center; justify-content: space-between; gap: 20px; background: white; padding: 1.25rem; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
-                <div style="display:flex; align-items:center; gap:20px; flex: 1;">
-                    <span class="user-name page" style="white-space: nowrap; margin: 0; font-size: 1.5rem;"
-                        th:text="#{adoptante.list.title}">Adoptantes</span>
+        <div class="table-wrapper admin-table-wrapper">
+            <!-- BARRA DE ACCIONES SUPERIOR -->
+            <div class="actions-bar admin-actions-bar">
+                
+                <!-- 1. TÍTULO E ICONO -->
+                <div class="admin-title-container">
+                    <div class="admin-title-icon-box">
+                        <i data-lucide="user-check" style="width: 24px;"></i>
+                    </div>
+                    <div>
+                        <h1 class="admin-title-text" th:text="#{adoptante.list.title}">Adoptantes</h1>
+                        <p class="admin-title-desc" th:text="#{adoptante.auto.gestiona.adoptantes}">Gestión y seguimiento de adoptantes</p>
+                    </div>
+                </div>
 
+                <!-- 2. FILTROS Y BÚSQUEDA (Centrados) -->
+                <div class="admin-filters-container">
                     <!-- Barra de Búsqueda Reactiva -->
-                    <div style="position: relative; flex: 1; max-width: 400px;">
+                    <div class="admin-search-wrapper">
                         <i data-lucide="search"
-                            style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; color: var(--text-muted);"></i>
+                            class="admin-search-icon"></i>
                         <input type="text" name="q" th:value="${query}" placeholder="Buscar adoptante..."
-                            class="form-control"
-                            style="padding-left: 38px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-main); width: 100%; font-size: 0.9rem;"
+                            class="form-control admin-search-input"
                              th:hx-get="@{/web/adoptantes}" hx-trigger="keyup delay:800ms, search" 
                             hx-vals='{"page": 1}'
                             hx-target="#adoptantes-container"
@@ -41,25 +50,24 @@
                     </div>
                 </div>
 
-                <div style="display:flex; gap:10px; flex-shrink: 0;">
-                    <a th:href="@{/web/adoptantes/pdf}" target="_blank" title="Exportar listado a PDF" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                        <img src="/images/pdf.png" alt="PDF" style="height: 48px; width: 48px; object-fit: contain;">
+                <!-- 3. ACCIONES Y EXPORTACIÓN -->
+                <div class="admin-actions-group">
+                    <a th:href="@{/web/adoptantes/pdf}" target="_blank" title="Exportar listado a PDF" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/pdf.png" alt="PDF" class="admin-export-img">
                     </a>
-                    <a th:href="@{/web/adoptantes/excel}" target="_blank" title="Exportar listado a Excel" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                        <img src="/images/excel.png" alt="Excel" style="height: 48px; width: 48px; object-fit: contain;">
+                    <a th:href="@{/web/adoptantes/excel}" target="_blank" title="Exportar listado a Excel" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/excel.png" alt="Excel" class="admin-export-img">
                     </a>
-                    <a class="btn btn-primary" th:href="@{/web/adoptantes/nuevo}"
-                        style="height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 15px; border-radius: 10px; font-weight: 600;">
+                    <a class="btn btn-primary" th:href="@{/web/adoptantes/nuevo}">
                         <i data-lucide="plus" style="width:18px;"></i>
                         <span th:text="#{generic.link.create}">+ Nuevo</span>
                     </a>
                 </div>
             </div>
             <!-- LISTA PREMIUM DE ADOPTANTES -->
-            <div class="premium-list-container" style="margin-top: 1.5rem;">
+            <div class="premium-list-container">
                 <!-- Encabezados -->
-                <div class="list-header"
-                    style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
+                <div class="list-header admin-list-header">
                     <div style="flex: 0.5; text-align: center;" th:text="#{generic.auto.id}"></div>
                     <div style="flex: 3;" th:text="#{adoptante.auto.adoptante.perfil}"></div>
                     <div style="flex: 3; text-align: center;" th:text="#{generic.auto.contacto.y.direccion}"></div>
