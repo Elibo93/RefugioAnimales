@@ -11,9 +11,11 @@ import es.refugio.refugio.domain.repository.AdopcionRepository;
 import es.refugio.refugio.infraestructure.db.jpa.entity.AdopcionEntity;
 import es.refugio.refugio.infraestructure.db.jpa.entity.PerfilLegalEntity;
 import es.refugio.refugio.infraestructure.mapper.AdopcionMapper;
+import es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion;
 import lombok.RequiredArgsConstructor;
 import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -82,30 +84,42 @@ public class AdopcionJpaRepositoryImpl implements AdopcionRepository {
     }
 
     @Override
-    public Page<Adopcion> findFiltered(String q, Pageable pageable) {
-        if (q == null || q.trim().isEmpty()) {
-            return findAll(pageable);
-        }
-
+    public Page<Adopcion> findFiltered(String q, String estado, Pageable pageable) {
         return repository.findAll((root, query, cb) -> {
-            String pattern = "%" + q.toLowerCase().trim() + "%";
+            Predicate finalPredicate = cb.conjunction();
             
-            // 1. Buscar en Animal por nombre
-            var animalNombreLike = cb.like(cb.lower(root.get("animal").get("nombre")), pattern);
-            
-            // 2. Buscar en Adoptante -> PerfilLegal por nombre/apellido/dni
-            Subquery<Integer> subquery = query.subquery(Integer.class);
-            Root<PerfilLegalEntity> perfilRoot = subquery.from(PerfilLegalEntity.class);
-            subquery.select(perfilRoot.get("usuarioId"));
-            subquery.where(cb.or(
-                cb.like(cb.lower(perfilRoot.get("nombre")), pattern),
-                cb.like(cb.lower(perfilRoot.get("apellido")), pattern),
-                cb.like(cb.lower(perfilRoot.get("dni")), pattern)
-            ));
+            if (estado != null && !estado.trim().isEmpty()) {
+                try {
+                    EstadoAdopcion estadoEnum = 
+                        EstadoAdopcion.valueOf(estado.toUpperCase().trim());
+                    finalPredicate = cb.and(finalPredicate, cb.equal(root.get("estado"), estadoEnum));
+                } catch (IllegalArgumentException e) {
+                    // ignore invalid estado
+                }
+            }
 
-            var adoptanteNombreLike = root.get("adoptante").get("usuarioId").in(subquery);
+            if (q != null && !q.trim().isEmpty()) {
+                String pattern = "%" + q.toLowerCase().trim() + "%";
+                
+                // 1. Buscar en Animal por nombre
+                var animalNombreLike = cb.like(cb.lower(root.get("animal").get("nombre")), pattern);
+                
+                // 2. Buscar en Adoptante -> PerfilLegal por nombre/apellido/dni
+                Subquery<Integer> subquery = query.subquery(Integer.class);
+                Root<PerfilLegalEntity> perfilRoot = subquery.from(PerfilLegalEntity.class);
+                subquery.select(perfilRoot.get("usuarioId"));
+                subquery.where(cb.or(
+                    cb.like(cb.lower(perfilRoot.get("nombre")), pattern),
+                    cb.like(cb.lower(perfilRoot.get("apellido")), pattern),
+                    cb.like(cb.lower(perfilRoot.get("dni")), pattern)
+                ));
 
-            return cb.or(animalNombreLike, adoptanteNombreLike);
+                var adoptanteNombreLike = root.get("adoptante").get("usuarioId").in(subquery);
+
+                finalPredicate = cb.and(finalPredicate, cb.or(animalNombreLike, adoptanteNombreLike));
+            }
+
+            return finalPredicate;
         }, pageable).map(adopcionMapper::toDomain);
     }
 }

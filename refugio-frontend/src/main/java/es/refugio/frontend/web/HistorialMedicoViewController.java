@@ -48,6 +48,7 @@ public class HistorialMedicoViewController {
     @GetMapping(WebRoutes.HISTORIALES_BASE)
     public String listar(Model model,
             @RequestParam(required = false) Integer animalId,
+            @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String successMessage,
@@ -61,28 +62,63 @@ public class HistorialMedicoViewController {
 
         if (animalId != null) {
             historiales = historialMedicoService.fetchByAnimalId(animalId);
+        } else if (q != null && !q.trim().isEmpty()) {
+            historiales = historialMedicoService.fetchAllHistoriales();
         } else {
             pagination = historialMedicoService.fetchPaginated(page, size);
             historiales = pagination.items();
         }
         List<AnimalRecord> animales = historialMedicoService.fetchAllAnimales();
 
+        Map<Integer, AnimalRecord> animalesMap = new HashMap<>();
+        for (AnimalRecord a : animales) {
+            animalesMap.put(a.id(), a);
+        }
+
         if (animalId != null) {
             final Integer finalAnimalId = animalId;
             historiales = historiales.stream()
                     .filter(h -> Objects.equals(h.animalId(), finalAnimalId))
                     .toList();
-        }
+        } else if (q != null && !q.trim().isEmpty()) {
+            final String query = q.toLowerCase().trim();
+            historiales = historiales.stream()
+                    .filter(h -> {
+                        AnimalRecord a = h.animalId() != null ? animalesMap.get(h.animalId()) : null;
+                        if (a == null) return false;
+                        String nombre = a.nombre() != null ? a.nombre().toLowerCase() : "";
+                        String chipId = a.chipId() != null ? a.chipId().toLowerCase() : "";
+                        String idStr = String.valueOf(a.id());
+                        return nombre.contains(query) || chipId.contains(query) || idStr.contains(query);
+                    })
+                    .toList();
 
-        Map<Integer, AnimalRecord> animalesMap = new HashMap<>();
-        for (AnimalRecord a : animales) {
-            animalesMap.put(a.id(), a);
+            // Paginar manualmente el resultado
+            int total = historiales.size();
+            int totalPages = (int) Math.ceil((double) total / size);
+            int start = (page - 1) * size;
+            int end = Math.min(start + size, total);
+            if (start < total) {
+                historiales = historiales.subList(start, end);
+            } else {
+                historiales = List.of();
+            }
+            pagination = new PaginatedResponse<>(
+                    historiales,
+                    totalPages,
+                    total,
+                    page,
+                    size,
+                    page < totalPages,
+                    page > 1
+            );
         }
 
         model.addAttribute(ModelAttribute.Historial_LIST.getName(), historiales);
         model.addAttribute("pagination", pagination);
         model.addAttribute("animalesMap", animalesMap);
         model.addAttribute("selectedAnimalId", animalId);
+        model.addAttribute("q", q);
         if (successMessage != null)
             model.addAttribute("successMessage", successMessage);
 

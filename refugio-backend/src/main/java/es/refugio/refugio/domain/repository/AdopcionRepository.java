@@ -28,5 +28,5 @@ public interface AdopcionRepository extends CRUDRepository<Adopcion, AdopcionId>
         return Page.empty();
     }
 
-    Page<Adopcion> findFiltered(String q, Pageable pageable);
+    Page<Adopcion> findFiltered(String q, String estado, Pageable pageable);
 }

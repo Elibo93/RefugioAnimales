@@ -17,7 +17,7 @@ import org.springframework.data.domain.Pageable;
 public class AdopcionRepositoryMockImpl implements AdopcionRepository {
 
     @Override
-    public Page<Adopcion> findFiltered(String q, Pageable pageable) {
+    public Page<Adopcion> findFiltered(String q, String estado, Pageable pageable) {
         return Page.empty();
     }
 

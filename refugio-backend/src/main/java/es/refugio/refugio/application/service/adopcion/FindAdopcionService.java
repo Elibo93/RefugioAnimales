@@ -29,8 +29,8 @@ public class FindAdopcionService {
         return useCase.findAll(pageable);
     }
 
-    public Page<Adopcion> findFiltered(String q, Pageable pageable) {
-        return useCase.findFiltered(q, pageable);
+    public Page<Adopcion> findFiltered(String q, String estado, Pageable pageable) {
+        return useCase.findFiltered(q, estado, pageable);
     }
 
     public Adopcion findById(AdopcionId id) {

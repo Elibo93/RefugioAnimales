@@ -19,11 +19,11 @@
 
         <!-- Panel de Lista para Admin -->
         <div class="table-wrapper"
-            style="margin-top: 2rem; padding: 2.5rem 3rem; background: transparent; border: none; box-shadow: none;"
+            style="padding-top: 1.7rem;"
             th:if="${isAdmin}">
 
             <!-- BARRA DE ACCIONES SUPERIOR -->
-            <div class="actions-bar admin-actions-bar">
+            <div class="actions-bar admin-actions-bar" style="border-bottom: 1px solid var(--border); padding-bottom: 1.7rem; margin-bottom: 2rem;">
                 
                 <!-- 1. TÍTULO E ICONO -->
                 <div class="admin-title-container">
@@ -60,25 +60,28 @@
             <div id="donacion-results-container" class="premium-list-container">
                 <div th:fragment="list-body">
                 <!-- Encabezados -->
-                <div class="list-header" style="background: transparent; padding: 0 3rem 1rem; display: flex; align-items: center; gap: 2rem;">
-                    <div style="flex: 2;" th:text="#{donacion.auto.donante}"></div>
-                    <div style="flex: 1.2; text-align: center;" th:text="#{donacion.auto.tipo}"></div>
-                    <div style="flex: 1.2; text-align: center;" th:text="#{donacion.auto.cantidad}"></div>
-                    <div style="flex: 1.2; text-align: center;" th:text="#{generic.auto.fecha}"></div>
-                    <div style="flex: 2.5; padding-left: 2rem;" th:text="#{generic.auto.descripcion}"></div>
+                <div class="premium-grid-header grid-cols-donaciones admin-list-header">
+                    <div class="cell-left" th:text="#{donacion.auto.donante}"></div>
+                    <div class="cell-center" th:text="#{donacion.auto.tipo}"></div>
+                    <div class="cell-center" th:text="#{donacion.auto.cantidad}"></div>
+                    <div class="cell-center" th:text="#{generic.auto.fecha}"></div>
+                    <div class="cell-center" th:text="#{generic.auto.descripcion}"></div>
                 </div>
 
                 <div class="list-body" style="display: flex; flex-direction: column; gap: 12px;">
-                    <div th:each="d : ${donaciones}" class="premium-row-card" style="display: flex; align-items: center; padding: 1.5rem 3rem; gap: 2rem;">
+                    <div th:each="d : ${donaciones}" class="premium-row-card borderless premium-grid-row grid-cols-donaciones">
                         <!-- Donante -->
-                        <div class="row-cell" style="flex: 2; min-width: 180px;">
+                        <div class="row-cell cell-left">
                             <div style="display: flex; align-items: center; gap: 12px;">
                                 <div class="task-icon-box" style="background: #f0fdf4; flex-shrink: 0;">
                                     <i data-lucide="user" style="width: 18px; color: var(--primary);"></i>
                                 </div>
                                 <div th:with="u=${usuariosMap != null and d.usuarioId != null ? usuariosMap.get(d.usuarioId) : null}" style="overflow: hidden;">
-                                    <span style="display: block; font-weight: 700; color: var(--text-main); font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" 
-                                          th:text="${u != null ? (u.username == 'anonimo' ? #messages.msg('donacion.auto.donante.anonimo') : u.username) : #messages.msg('donacion.auto.donante.anonimo')}"></span>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="color: #94a3b8; font-weight: 700; font-size: 0.8rem;" th:text="${'#' + d.id}"></span>
+                                        <span style="display: block; font-weight: 700; color: var(--text-main); font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" 
+                                              th:text="${u != null ? (u.username == 'anonimo' ? #messages.msg('donacion.auto.donante.anonimo') : u.username) : #messages.msg('donacion.auto.donante.anonimo')}"></span>
+                                    </div>
                                     <span style="font-size: 0.75rem; color: var(--text-muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" 
                                           th:text="${u != null and u.username != 'anonimo' ? u.email : #messages.msg('donacion.auto.contribucion.sin.registro')}"></span>
                                 </div>
@@ -86,19 +89,19 @@
                         </div>
 
                         <!-- Tipo -->
-                        <div class="row-cell" style="flex: 1.2; justify-content: center; display: flex;">
+                        <div class="row-cell cell-center">
                             <span class="badge-premium info" style="min-width: 85px; text-align: center;"
                                   th:text="${d.tipo != null ? #messages.msg('enum.TipoDonacion.' + d.tipo) : '-'}">DINERO</span>
                         </div>
 
                         <!-- Cantidad -->
-                        <div class="row-cell" style="flex: 1.2; justify-content: center; display: flex; align-items: baseline; gap: 2px;">
+                        <div class="row-cell cell-center" style="align-items: baseline; gap: 2px;">
                             <span style="font-weight: 800; color: var(--text-main); font-size: 1.15rem;" th:text="${d.cantidad}">100.0</span>
                             <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted);">€</span>
                         </div>
 
                         <!-- Fecha -->
-                        <div class="row-cell" style="flex: 1.2; justify-content: center; display: flex;">
+                        <div class="row-cell cell-center">
                             <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
                                 <div style="font-size: 0.9rem; font-weight: 700; color: var(--text-main); white-space: nowrap;" 
                                      th:text="${d.fecha != null ? #strings.substring(d.fecha.toString().replace('T', ' '), 0, 10) : '-'}">2026-05-07</div>
@@ -108,8 +111,8 @@
                         </div>
 
                         <!-- Descripción -->
-                        <div class="row-cell" style="flex: 2.5; padding-left: 2rem; border-left: 1px solid #f1f5f9;">
-                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" 
+                        <div class="row-cell cell-center" style="border-left: 1px solid #f1f5f9; justify-content: center; width: 100%;">
+                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-align: center; width: 100%;" 
                                th:text="${d.descripcion} ?: #{generic.auto.sin.descripcion}">Descripción...</p>
                         </div>
                     </div>

@@ -385,25 +385,24 @@
                                 <!-- LISTA PREMIUM DE ANIMALES (ADMIN) -->
                                 <div class="premium-list-container" id="animal-grid-admin">
                                     <!-- Encabezados -->
-                                    <div class="list-header admin-list-header" style="background: transparent; display: grid; grid-template-columns: 90px 1fr 0.7fr 1.3fr 120px; gap: 1.5rem; align-items: center; width: 100%; padding: 0 3rem 1rem;">
-                                        <div style="text-align: left; padding-left: 1.5rem;"
+                                    <div class="premium-grid-header grid-cols-animales admin-list-header">
+                                        <div class="cell-padded-left cell-left"
                                             th:text="#{generic.auto.animal}">
                                         </div>
-                                        <div style="text-align: left;"
+                                        <div class="cell-left"
                                             th:text="#{animal.auto.nombre.raza}"></div>
-                                        <div style="text-align: center;" th:text="#{generic.auto.edad}"></div>
-                                        <div style="text-align: center;" th:text="#{generic.auto.estado}">
+                                        <div class="cell-center" th:text="#{generic.auto.edad}"></div>
+                                        <div class="cell-center" th:text="#{generic.auto.estado}">
                                         </div>
-                                        <div style="text-align: center;" th:text="#{generic.auto.acciones}">
+                                        <div class="cell-center" th:text="#{generic.auto.acciones}">
                                         </div>
                                     </div>
 
                                     <div class="list-body" style="display: flex; flex-direction: column; gap: 12px;">
-                                        <div th:each="a : ${animales}" class="premium-row-card borderless"
-                                            th:id="'card-' + ${a.id()}"
-                                            style="display: grid; grid-template-columns: 90px 1fr 0.7fr 1.3fr 120px; gap: 1.5rem; align-items: center; width: 100%; padding: 1rem 3rem;">
+                                        <div th:each="a : ${animales}" class="premium-row-card borderless premium-grid-row grid-cols-animales"
+                                            th:id="'card-' + ${a.id()}">
                                             <!-- Foto -->
-                                            <div class="row-cell" style="justify-content: flex-start;">
+                                            <div class="row-cell cell-left">
                                                 <div style="position: relative; width: 55px; height: 55px; margin-left: 1.5rem;">
                                                     <img th:src="${a.foto() != null ? a.foto() : '/images/placeholder-animal.png'}"
                                                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
@@ -411,7 +410,7 @@
                                             </div>
 
                                             <!-- ID + Nombre / Especie + Raza -->
-                                            <div class="row-cell" style="justify-content: flex-start;">
+                                            <div class="row-cell cell-left">
                                                 <div style="overflow: hidden;">
                                                     <div style="display: flex; align-items: center; gap: 8px;">
                                                         <span
@@ -440,20 +439,19 @@
                                             </div>
 
                                             <!-- Edad -->
-                                            <div class="row-cell"
-                                                style="justify-content: center; font-weight: 700; color: var(--text-main); font-size: 0.95rem;"
+                                            <div class="row-cell cell-center"
+                                                style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;"
                                                 th:text="${a.edad() != null ? a.edad() + ' años' : '-'}">2 años</div>
 
                                             <!-- Estado -->
-                                            <div class="row-cell" style="justify-content: center;">
+                                            <div class="row-cell cell-center">
                                                 <span class="badge-pastel"
                                                     th:classappend="${a.estado() != null ? a.estado().toString().toLowerCase() : ''}"
                                                     th:text="${a.estado() != null ? #messages.msg('enum.EstadoAnimal.' + a.estado()) : ''}">Disponible</span>
                                             </div>
 
                                             <!-- Acciones -->
-                                            <div class="row-cell"
-                                                style="justify-content: center; gap: 10px;">
+                                            <div class="row-cell cell-center" style="gap: 10px;">
                                                 <a class="btn-action-premium view"
                                                     th:href="@{/web/historiales(animalId=${a.id()})}"
                                                     title="Historial Médico">

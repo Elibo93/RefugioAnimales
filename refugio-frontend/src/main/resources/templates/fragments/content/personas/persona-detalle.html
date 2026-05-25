@@ -33,7 +33,7 @@
                             style="margin: 0; font-size: 2.2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em;">Nombre Completo</h1>
                         <span class="badge-premium" 
                               th:if="${persona.rol != null}"
-                              th:classappend="${persona.rol.toString().contains('ADMIN') ? 'danger' : (persona.rol.toString().contains('VOLUNTARIO') ? 'info' : (persona.rol.toString().contains('ADOPTANTE') ? 'primary' : 'success'))}"
+                              th:classappend="${persona.rol.toString().contains('ADMIN') ? 'danger' : (persona.rol.toString().contains('VOLUNTARIO_ADOPTANTE') ? 'warning' : (persona.rol.toString().contains('VOLUNTARIO') ? 'info' : (persona.rol.toString().contains('ADOPTANTE') ? 'primary' : 'success')))}"
                               th:text="${#messages.msg('enum.Rol.' + persona.rol.toString())}">Rol</span>
                         <span class="badge-premium" 
                               th:if="${persona.rol == null}"

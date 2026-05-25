@@ -739,12 +739,13 @@ body.modal-open {
 }
 
 .badge-premium {
-    padding: 6px 12px;
+    padding: 6px 14px;
     border-radius: 20px;
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.05em;
+    display: inline-block;
 }
 
 .badge-premium.success {

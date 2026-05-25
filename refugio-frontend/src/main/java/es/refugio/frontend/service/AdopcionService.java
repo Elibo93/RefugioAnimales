@@ -34,10 +34,15 @@ public class AdopcionService {
     @Value("${auth.api.url}")
     private String authUrl;
 
-    public PaginatedResponse<AdopcionRecord> fetchPaginatedAdopciones(int page, int size, String q) {
+    public PaginatedResponse<AdopcionRecord> fetchPaginatedAdopciones(int page, int size, String q, String estado) {
         String path = "/v1/adopciones";
+        String separator = "?";
         if (q != null && !q.trim().isEmpty()) {
-            path += "?q=" + q;
+            path += separator + "q=" + q;
+            separator = "&";
+        }
+        if (estado != null && !estado.trim().isEmpty()) {
+            path += separator + "estado=" + estado;
         }
         return helper.fetchPaginated(apiUrl + path, page, size, AdopcionRecord.class);
     }

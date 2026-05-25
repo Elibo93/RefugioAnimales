@@ -12,17 +12,17 @@
         <div th:if="${successMessage}" class="alert alert-success"
             style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-radius: 12px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;">
             <i data-lucide="check-circle" style="width: 20px;"></i>
-            <span th:text="${successMessage}">Mensaje [[#{html.auto.de}]] éxito</span>
+            <span th:text="${successMessage}">Mensaje de éxito</span>
         </div>
         <div th:if="${errorMessage}" class="alert alert-danger"
             style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-radius: 12px; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca;">
             <i data-lucide="alert-circle" style="width: 20px;"></i>
-            <span th:text="${errorMessage}">Mensaje [[#{html.auto.de}]] error</span>
+            <span th:text="${errorMessage}">Mensaje de error</span>
         </div>
 
-        <div class="table-wrapper admin-table-wrapper">
+        <div class="table-wrapper" style="padding-top: 1.7rem;">
             <!-- BARRA DE ACCIONES SUPERIOR -->
-            <div class="actions-bar admin-actions-bar">
+            <div class="actions-bar admin-actions-bar" style="border-bottom: none; margin-bottom: 1rem;">
                 
                 <!-- 1. TÍTULO E ICONO -->
                 <div class="admin-title-container">
@@ -32,21 +32,6 @@
                     <div>
                         <h1 class="admin-title-text" th:text="#{adoptante.list.title}">Adoptantes</h1>
                         <p class="admin-title-desc" th:text="#{adoptante.auto.gestiona.adoptantes}">Gestión y seguimiento de adoptantes</p>
-                    </div>
-                </div>
-
-                <!-- 2. FILTROS Y BÚSQUEDA (Centrados) -->
-                <div class="admin-filters-container">
-                    <!-- Barra de Búsqueda Reactiva -->
-                    <div class="admin-search-wrapper">
-                        <i data-lucide="search"
-                            class="admin-search-icon"></i>
-                        <input type="text" name="q" th:value="${query}" placeholder="Buscar adoptante..."
-                            class="form-control admin-search-input"
-                             th:hx-get="@{/web/adoptantes}" hx-trigger="keyup delay:800ms, search" 
-                            hx-vals='{"page": 1}'
-                            hx-target="#adoptantes-container"
-                            hx-swap="innerHTML">
                     </div>
                 </div>
 
@@ -64,110 +49,124 @@
                     </a>
                 </div>
             </div>
+
+            <!-- 2. FILTROS Y BÚSQUEDA (Barra separada tipo premium) -->
+            <div class="admin-filters-bar">
+                <form id="adoptantes-admin-form" onsubmit="return false;"
+                    style="display: flex; align-items: center; gap: 1rem; width: 100%;">
+                    
+                    <!-- Buscador -->
+                    <div style="flex: 3; position: relative;">
+                        <i data-lucide="search" class="admin-search-icon"></i>
+                        <input type="text" name="q" th:value="${query}" placeholder="Buscar adoptante por nombre, usuario..."
+                            hx-get="/web/adoptantes" hx-trigger="keyup changed delay:800ms, search" 
+                            hx-target="#adoptantes-container" hx-vals='{"page": 1}'
+                            hx-select="#adoptantes-container" hx-swap="outerHTML"
+                            class="form-control admin-search-input-medium">
+                    </div>
+
+                    <!-- Botón Limpiar -->
+                    <a th:href="@{/web/adoptantes}" hx-get="/web/adoptantes" hx-target="#adoptantes-container"
+                       hx-select="#adoptantes-container" hx-swap="outerHTML" hx-push-url="true"
+                       class="btn-icon admin-btn-clear-medium" title="Limpiar Filtros">
+                        <i data-lucide="rotate-ccw" style="width: 16px;"></i>
+                    </a>
+                </form>
+            </div>
+
             <!-- LISTA PREMIUM DE ADOPTANTES -->
             <div class="premium-list-container">
                 <!-- Encabezados -->
-                <div class="list-header admin-list-header">
-                    <div style="flex: 0.5; text-align: center;" th:text="#{generic.auto.id}"></div>
-                    <div style="flex: 3;" th:text="#{adoptante.auto.adoptante.perfil}"></div>
-                    <div style="flex: 3; text-align: center;" th:text="#{generic.auto.contacto.y.direccion}"></div>
-                    <div style="flex: 2; text-align: center;" th:text="#{adoptante.auto.estado.validacion}"></div>
-                    <div style="flex: 2; text-align: center;" th:text="#{generic.auto.acciones}"></div>
+                <div th:if="${not #lists.isEmpty(adoptantes)}" class="premium-grid-header grid-cols-adoptantes admin-list-header">
+                    <div class="cell-left" style="padding-left: 0.5rem;" th:text="#{adoptante.auto.adoptante.perfil}">Adoptante / Perfil</div>
+                    <div class="cell-center" th:text="#{generic.auto.contacto.y.direccion}">Contacto y Dirección</div>
+                    <div class="cell-center" th:text="#{adoptante.auto.estado.validacion}">Estado Validación</div>
+                    <div class="cell-center" th:text="#{generic.auto.acciones}">Acciones</div>
                 </div>
 
                 <div id="adoptantes-container">
-                <div class="list-body" th:fragment="list-body"
-                    style="display: flex; flex-direction: column; gap: 12px; margin-top: 1rem;">
-                    <!-- Mensaje si no hay resultados -->
-                    <div th:if="${#lists.isEmpty(adoptantes)}"
-                        style="background: white; padding: 4rem 2rem; border-radius: 16px; border: 1px dashed var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; text-align: center;">
-                        <div
-                            style="background: var(--bg-main); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                            <i data-lucide="search-x" style="width: 32px; color: var(--text-muted);"></i>
+                    <div class="list-body" th:fragment="list-body"
+                        style="display: flex; flex-direction: column; gap: 12px; margin-top: 1rem;">
+                        <!-- Mensaje si no hay resultados -->
+                        <div th:if="${#lists.isEmpty(adoptantes)}"
+                            style="background: white; padding: 4rem 2rem; border-radius: 16px; border: 1px dashed var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; text-align: center;">
+                            <div
+                                style="background: var(--bg-main); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i data-lucide="search-x" style="width: 32px; color: var(--text-muted);"></i>
+                            </div>
+                            <div>
+                                <h3 style="margin: 0; color: var(--text-main); font-weight: 700;" th:text="#{adoptante.auto.no.se.encontraron}">No se encontraron adoptantes</h3>
+                                <p style="margin: 5px 0 0; color: var(--text-muted); font-size: 0.9rem;" th:text="#{adoptante.auto.prueba.con.otros}">Prueba con otros términos de búsqueda</p>
+                            </div>
+                            <a th:href="@{/web/adoptantes}" hx-get="/web/adoptantes" hx-target="#adoptantes-container" hx-select="#adoptantes-container"
+                                hx-swap="outerHTML" class="btn-premium secondary" style="height: 40px; padding: 0 1.5rem;" th:text="#{generic.auto.ver.todos}">Ver Todos</a>
                         </div>
-                        <div>
-                            <h3 style="margin: 0; color: var(--text-main); font-weight: 700;" th:text="#{adoptante.auto.no.se.encontraron}"></h3>
-                            <p style="margin: 5px 0 0; color: var(--text-muted); font-size: 0.9rem;" th:text="#{adoptante.auto.prueba.con.otros}"></p>
+
+                        <!-- Filas de datos -->
+                        <div th:each="a : ${adoptantes}" class="premium-row-card borderless premium-grid-row grid-cols-adoptantes" th:id="'row-' + ${a.id()}"
+                            th:with="u=${usuariosMap != null ? usuariosMap['' + a.usuarioId()] : null}, p=${perfilesMap != null ? perfilesMap['' + a.usuarioId()] : null}">
+
+                            <div class="row-cell cell-left">
+                                <div style="display: flex; align-items: center; gap: 12px; margin-left: 0.5rem;">
+                                    <div class="task-icon-box" style="background: #f3e8ff;">
+                                        <i data-lucide="heart" style="width: 18px; color: #a855f7;"></i>
+                                    </div>
+                                    <div>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="color: #94a3b8; font-weight: 700; font-size: 0.8rem;" th:text="${'#' + a.id()}"></span>
+                                            <a th:href="@{/web/personas/{id}(id=${a.usuarioId()})}"
+                                                style="font-weight: 800; color: var(--text-main); font-size: 1.05rem; text-decoration: none;"
+                                                th:text="${p != null ? (p.nombre() + ' ' + (p.apellido() ?: '')) : 'Anónimo'}">Juan Pérez</a>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 4px; margin-top: 1px;">
+                                            <i data-lucide="at-sign" style="width: 12px; color: var(--text-muted);"></i>
+                                            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;"
+                                                th:text="${u != null ? u.username : 'No user'}">@juanp</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contacto y Dirección -->
+                            <div class="row-cell cell-center"
+                                style="flex-direction: column; gap: 4px; text-align: center; align-items: center; max-width: 250px; margin: 0 auto;">
+                                <div style="display: flex; align-items: center; gap: 8px; color: var(--text-main); font-size: 0.9rem; font-weight: 600;">
+                                    <i data-lucide="phone" style="width: 14px; color: var(--text-muted); stroke-width: 2.5;"></i>
+                                    <span th:text="${p != null && p.telefono() != null && !p.telefono().isEmpty() ? p.telefono() : '-'}">911223344</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.8rem; font-weight: 500;">
+                                    <i data-lucide="map-pin" style="width: 13px; color: var(--text-muted); stroke-width: 2.5;"></i>
+                                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;" 
+                                          th:text="${p != null && p.direccion() != null && !p.direccion().isEmpty() ? p.direccion() : '-'}">Calle Falsa 123</span>
+                                </div>
+                            </div>
+
+                            <div class="row-cell cell-center">
+                                <span class="badge-premium"
+                                    th:classappend="${a.estadoValidacion() != null ? (a.estadoValidacion().toString() == 'APROBADO' ? 'success' : (a.estadoValidacion().toString() == 'RECHAZADO' ? 'danger' : 'warning')) : 'warning'}"
+                                    th:text="${a.estadoValidacion()}">PENDIENTE</span>
+                            </div>
+
+                            <div class="row-cell cell-center" style="gap: 12px;">
+                                <a class="btn-action-premium edit" th:hx-get="@{/web/adoptantes/{id}/editar(id=${a.id()})}"
+                                    hx-target="#contenido-dinamico" hx-push-url="true" title="Editar">
+                                    <i data-lucide="edit-2" style="width: 18px;"></i>
+                                </a>
+                                <button class="btn-action-premium delete"
+                                    th:hx-post="@{/web/adoptantes/{id}/borrar(id=${a.id()})}"
+                                    th:hx-target="'#row-' + ${a.id()}" hx-swap="outerHTML swap:0.3s"
+                                    th:hx-confirm="#{confirm.adoptante.eliminar}">
+                                    <i data-lucide="trash-2" style="width: 18px;"></i>
+                                </button>
+                            </div>
                         </div>
-                        <a th:href="@{/web/adoptantes}" hx-get="/web/adoptantes" hx-target=".list-body"
-                            hx-swap="outerHTML" class="btn-premium secondary" style="height: 40px; padding: 0 1.5rem;" th:text="#{generic.auto.ver.todos}"></a>
                     </div>
 
-                    <div th:each="a : ${adoptantes}" class="premium-row-card" th:id="'row-' + ${a.id()}"
-                        th:with="u=${usuariosMap != null ? usuariosMap['' + a.usuarioId()] : null}, p=${perfilesMap != null ? perfilesMap['' + a.usuarioId()] : null}">
-
-                        <div class="row-cell"
-                            style="flex: 0.5; justify-content: center; font-weight: 700; color: var(--text-muted);"
-                            th:text="${a.id()}">1</div>
-
-                        <div class="row-cell" style="flex: 3;">
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <div class="task-icon-box" style="background: #e0f2fe;">
-                                    <i data-lucide="user-check" style="width: 18px; color: #0ea5e9;"></i>
-                                </div>
-                                <div>
-                                    <a th:href="@{/web/personas/{id}(id=${a.usuarioId()})}"
-                                        style="display: block; font-weight: 800; color: var(--text-main); font-size: 1rem; text-decoration: none;"
-                                        th:text="${p != null ? (p.nombre() + ' ' + (p.apellido() ?: '')) : 'Anónimo'}">Juan
-                                        Pérez</a>
-                                    <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;"
-                                        th:text="${u != null ? '@' + u.username : 'No user'}">@juanp</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Contacto y Dirección -->
-                        <div class="row-cell"
-                            style="flex: 3; display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: center;">
-                            <div
-                                style="display: flex; align-items: center; gap: 8px; color: var(--text-main); font-size: 0.9rem; font-weight: 600;">
-                                <i data-lucide="phone" style="width: 14px; color: var(--text-muted);"></i>
-                                <span th:text="${p != null ? p.telefono() : '-'}">911223344</span>
-                            </div>
-                            <div
-                                style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.8rem;">
-                                <i data-lucide="map-pin" style="width: 12px;"></i>
-                                <span th:text="${p != null ? p.direccion() : '-'}">Calle Falsa 123</span>
-                            </div>
-                        </div>
-
-                        <div class="row-cell" style="flex: 2; justify-content: center;">
-                            <span class="badge-premium"
-                                th:classappend="${a.estadoValidacion() != null ? (a.estadoValidacion().toString() == 'APROBADO' ? 'success' : (a.estadoValidacion().toString() == 'RECHAZADO' ? 'danger' : 'warning')) : 'warning'}"
-                                th:text="${a.estadoValidacion()}">PENDIENTE</span>
-                        </div>
-
-                        <div class="row-cell" style="flex: 2; justify-content: center; gap: 12px;">
-                            <a class="btn-icon" th:hx-get="@{/web/adoptantes/{id}/editar(id=${a.id()})}"
-                                hx-target="#contenido-dinamico" hx-push-url="true" title="Editar">
-                                <i data-lucide="edit-2" style="width: 18px;"></i>
-                            </a>
-                            <button class="btn-icon delete"
-                                th:hx-post="@{/web/adoptantes/{id}/borrar(id=${a.id()})}"
-                                th:hx-target="'#row-' + ${a.id()}" hx-swap="outerHTML swap:0.3s"
-                                th:hx-confirm="#{confirm.adoptante.eliminar}">
-                                <i data-lucide="trash-2" style="width: 18px;"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Paginación -->
-                <div th:replace="~{fragments/pagination :: controls(pagination=${pagination}, url='/web/adoptantes', target='#adoptantes-container')}"></div>
-
-                </div>
-
-                <div th:if="${#lists.isEmpty(adoptantes)}"
-                    style="text-align:center; padding:5rem; background:white; border-radius:24px; border:1px solid var(--border); margin-top: 1rem;">
-                    <i data-lucide="users"
-                        style="width:48px; height:48px; margin-bottom:1rem; color: var(--text-muted); opacity: 0.3;"></i>
-                    <p style="color: var(--text-muted); font-weight: 600;" th:text="#{adoptante.list.empty}">No hay
-                        adoptantes registrados.</p>
+                    <!-- Paginación -->
+                    <div th:replace="~{fragments/pagination :: controls(pagination=${pagination}, url='/web/adoptantes', target='#adoptantes-container')}"></div>
                 </div>
             </div>
         </div>
-    </div>
-
     </div>
 </body>
 

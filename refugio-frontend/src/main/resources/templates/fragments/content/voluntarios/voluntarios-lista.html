@@ -9,7 +9,7 @@
 <body>
 <div th:fragment="content">
 
-        <div class="table-wrapper admin-table-wrapper">
+        <div class="table-wrapper" style="padding-top: 1.7rem;">
             <!-- Banner de Selección Activa -->
             <div th:if="${modoSeleccion}" 
                  style="background: #eff6ff; border: 1px solid #93c5fd; padding: 16px 24px; border-radius: 20px; display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 2rem; animation: slideInDown 0.4s ease; box-shadow: var(--shadow-md);">
@@ -29,7 +29,7 @@
             </div>
 
             <div id="voluntarios-main-container" style="width: 100%;">
-                <div class="actions-bar admin-actions-bar">
+                <div class="actions-bar admin-actions-bar" style="border-bottom: none; margin-bottom: 1rem;">
                     
                     <!-- 1. TÍTULO E ICONO -->
                     <div class="admin-title-container">
@@ -40,18 +40,6 @@
                             <h1 class="admin-title-text" th:text="#{voluntario.list.title}">Voluntarios</h1>
                             <p class="admin-title-desc" th:text="#{voluntario.auto.gestiona.equipo}">Gestión del equipo de voluntarios</p>
                         </div>
-                    </div>
-
-                    <!-- 2. FILTROS Y BÚSQUEDA (Centrados) -->
-                    <div class="admin-filters-container">
-                        <form id="search-form-vol" hx-get="/web/voluntarios" hx-target="#voluntarios-main-container" hx-select="#voluntarios-main-container" hx-swap="outerHTML" hx-trigger="keyup changed delay:800ms from:#search-input, search" hx-vals='{"page": 1}' hx-replace-url="true" style="position: relative; width: 100%; max-width: 450px;">
-                            <i data-lucide="search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; color: var(--text-muted);"></i>
-                            <input type="text" id="search-input" name="q" th:value="${query}" placeholder="Buscar por nombre, email o DNI..." class="form-control" style="padding-left: 48px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-main); width: 100%; font-size: 0.9rem;">
-                            
-                            <!-- Inputs ocultos para mantener el modo selección al buscar -->
-                            <input type="hidden" name="modoSeleccion" th:value="${modoSeleccion}">
-                            <input type="hidden" name="tareaIdSeleccion" th:value="${tareaIdSeleccion}">
-                        </form>
                     </div>
 
                     <!-- 3. ACCIONES Y EXPORTACIÓN -->
@@ -69,21 +57,45 @@
                     </div>
                 </div>
 
+                <!-- 2. FILTROS Y BÚSQUEDA (Barra separada tipo premium) -->
+                <div class="admin-filters-bar">
+                    <form id="search-form-vol" hx-get="/web/voluntarios" hx-target="#voluntarios-main-container" hx-select="#voluntarios-main-container" hx-swap="outerHTML" hx-trigger="keyup changed delay:800ms from:#search-input, search" hx-vals='{"page": 1}' hx-replace-url="true"
+                        style="display: flex; align-items: center; gap: 1rem; width: 100%;">
+                        
+                        <!-- Buscador -->
+                        <div style="flex: 3; position: relative;">
+                            <i data-lucide="search" class="admin-search-icon"></i>
+                            <input type="text" id="search-input" name="q" th:value="${query}" placeholder="Buscar por nombre, email o DNI..."
+                                class="form-control admin-search-input-medium">
+                        </div>
+
+                        <!-- Botón Limpiar -->
+                        <a th:href="@{/web/voluntarios}" hx-get="/web/voluntarios" hx-target="#voluntarios-main-container"
+                           hx-select="#voluntarios-main-container" hx-swap="outerHTML" hx-push-url="true"
+                           class="btn-icon admin-btn-clear-medium" title="Limpiar Filtros">
+                            <i data-lucide="rotate-ccw" style="width: 16px;"></i>
+                        </a>
+                        
+                        <!-- Inputs ocultos para mantener el modo selección al buscar -->
+                        <input type="hidden" name="modoSeleccion" th:value="${modoSeleccion}">
+                        <input type="hidden" name="tareaIdSeleccion" th:value="${tareaIdSeleccion}">
+                    </form>
+                </div>
+
             <!-- LISTA PREMIUM DE VOLUNTARIOS -->
             <div class="premium-list-container">
                 <!-- Encabezados -->
-                <div class="list-header admin-list-header">
-                    <div style="flex: 0.5; text-align: center;" th:text="#{generic.auto.id}"></div>
-                    <div style="flex: 2.5; padding-left: 10px;" th:text="#{voluntario.auto.voluntario.usuario}"></div>
-                    <div style="flex: 2.5; text-align: center;" th:text="#{generic.auto.contacto.y.direccion}"></div>
-                    <div style="flex: 2; text-align: center;" th:text="#{voluntario.auto.especialidad}"></div>
-                    <div style="flex: 2; text-align: center;" th:text="#{voluntario.auto.disponibilidad}"></div>
-                    <div style="flex: 2; text-align: center;" th:text="#{generic.auto.acciones}"></div>
+                <div class="premium-grid-header grid-cols-voluntarios admin-list-header">
+                    <div class="cell-left" th:text="#{voluntario.auto.voluntario.usuario}"></div>
+                    <div class="cell-center" th:text="#{generic.auto.contacto.y.direccion}"></div>
+                    <div class="cell-center" th:text="#{voluntario.auto.especialidad}"></div>
+                    <div class="cell-center" th:text="#{voluntario.auto.disponibilidad}"></div>
+                    <div class="cell-center" th:text="#{generic.auto.acciones}"></div>
                 </div>
 
                 <div id="voluntarios-container">
                     <div id="voluntarios-list-body" class="list-body" th:fragment="list-body" style="display: flex; flex-direction: column; gap: 12px; margin-top: 1rem;">
-                        <!-- Mensaje si no hay resultados -->
+                        <!-- ... (No changes to empty message) ... -->
                         <div th:if="${#lists.isEmpty(voluntarios)}" 
                              style="background: white; padding: 4rem 2rem; border-radius: 16px; border: 1px dashed var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; text-align: center;">
                             <div style="background: var(--bg-main); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
@@ -102,25 +114,22 @@
                                class="btn-premium secondary" style="height: 40px; padding: 0 1.5rem;" th:text="#{generic.auto.ver.todos}"></a>
                         </div>
 
-                        <div th:each="p_item : ${voluntarios}" class="premium-row-card" th:id="'row-' + ${p_item.id}"
+                        <div th:each="p_item : ${voluntarios}" class="premium-row-card borderless premium-grid-row grid-cols-voluntarios" th:id="'row-' + ${p_item.id}"
                             th:with="u=${usuariosMap != null ? usuariosMap['' + p_item.usuarioId] : null}, p=${perfilesMap != null ? perfilesMap['' + p_item.usuarioId] : null}">
 
-                            <!-- ID -->
-                            <div class="row-cell"
-                                style="flex: 0.5; justify-content: center; font-weight: 700; color: var(--text-muted);"
-                                th:text="${p_item.id}">1</div>
-
                             <!-- Voluntario -->
-                            <div class="row-cell" style="flex: 2.5; padding-left: 10px;">
+                            <div class="row-cell cell-left">
                                 <div style="display: flex; align-items: center; gap: 12px;">
                                     <div class="task-icon-box" style="background: #e0f2fe;">
                                         <i data-lucide="clipboard-list" style="width: 18px; color: #0ea5e9;"></i>
                                     </div>
                                     <div>
-                                        <a th:href="@{/web/voluntarios/{id}(id=${p_item.id})}"
-                                            style="display: block; font-weight: 800; color: var(--text-main); font-size: 1rem; text-decoration: none;"
-                                            th:text="${p != null ? (p.nombre + ' ' + (p.apellido ?: '')) : 'Sin perfil'}">Juan
-                                            Pérez</a>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="color: #94a3b8; font-weight: 700; font-size: 0.8rem;" th:text="${'#' + p_item.id}"></span>
+                                            <a th:href="@{/web/voluntarios/{id}(id=${p_item.id})}"
+                                                style="font-weight: 800; color: var(--text-main); font-size: 1rem; text-decoration: none;"
+                                                th:text="${p != null ? (p.nombre + ' ' + (p.apellido ?: '')) : 'Sin perfil'}">Juan Pérez</a>
+                                        </div>
                                         <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;"
                                             th:text="${u != null ? '@' + u.username : 'Sin usuario'}">@juanp</span>
                                     </div>
@@ -128,8 +137,8 @@
                             </div>
 
                             <!-- Contacto y Dirección -->
-                            <div class="row-cell"
-                                style="flex: 2.5; display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: center;">
+                            <div class="row-cell cell-center"
+                                style="flex-direction: column; gap: 4px; text-align: center; align-items: center;">
                                 <div
                                     style="display: flex; align-items: center; gap: 8px; color: var(--text-main); font-size: 0.9rem; font-weight: 600;">
                                     <i data-lucide="phone" style="width: 14px; color: var(--text-muted);"></i>
@@ -143,22 +152,22 @@
                             </div>
 
                             <!-- Especialidad -->
-                            <div class="row-cell" style="flex: 2; justify-content: center;">
+                            <div class="row-cell cell-center">
                                 <span class="badge-premium info"
                                     style="min-width: 100px; text-align: center; font-size: 0.75rem;"
                                     th:text="${p_item.especialidad != null ? (#messages.msgOrNull('enum.EspecialidadVoluntario.' + p_item.especialidad) ?: #strings.capitalize(#strings.toLowerCase(p_item.especialidad))) : 'General'}">Especialidad</span>
                             </div>
 
                             <!-- Disponibilidad -->
-                            <div class="row-cell" style="flex: 2; justify-content: center;">
+                            <div class="row-cell cell-center">
                                 <span class="badge-premium"
                                     style="background:#F3E8FF; color:#9333EA; min-width: 100px; text-align: center; font-size: 0.75rem;"
                                     th:text="${p_item.disponibilidad}">Tarde</span>
                             </div>
 
                             <!-- Acciones Normales -->
-                            <div th:if="${!modoSeleccion}" class="row-cell" style="flex: 2; justify-content: center; gap: 12px;">
-                                <button class="btn-icon" 
+                            <div th:if="${!modoSeleccion}" class="row-cell cell-center" style="gap: 12px;">
+                                <button class="btn-action-premium" 
                                         style="cursor: pointer; display: flex; align-items: center; justify-content: center;"
                                         th:hx-get="@{/web/tareas(modoSeleccion=true, voluntarioIdSeleccion=${p_item.id})}"
                                         hx-target="#contenido-dinamico"
@@ -166,7 +175,7 @@
                                         title="Asignar Tarea">
                                     <i data-lucide="plus-circle" style="width: 18px; color: var(--secondary);"></i>
                                 </button>
-                                <button class="btn-icon"
+                                <button class="btn-action-premium view"
                                         style="cursor: pointer; display: flex; align-items: center; justify-content: center;"
                                         th:hx-get="@{/web/voluntarios/{id}/modal-disponibilidad(id=${p_item.id})}"
                                         hx-target="#modals-container"
@@ -174,11 +183,11 @@
                                         title="Ver disponibilidad">
                                     <i data-lucide="calendar-days" style="width: 18px; color: var(--primary);"></i>
                                 </button>
-                                <a class="btn-icon" th:hx-get="@{/web/voluntarios/{id}/editar(id=${p_item.id})}"
+                                <a class="btn-action-premium edit" th:hx-get="@{/web/voluntarios/{id}/editar(id=${p_item.id})}"
                                     hx-target="#contenido-dinamico" hx-push-url="true" title="Editar">
                                     <i data-lucide="edit-2" style="width: 18px;"></i>
                                 </a>
-                                <button class="btn-icon delete"
+                                <button class="btn-action-premium delete"
                                     th:hx-post="@{/web/voluntarios/{id}/borrar(id=${p_item.id})}"
                                     th:hx-target="'#row-' + ${p_item.id}" hx-swap="outerHTML swap:0.3s"
                                     th:hx-confirm="#{confirm.voluntario.eliminar}">
@@ -187,7 +196,7 @@
                             </div>
 
                             <!-- Acciones Modo Selección -->
-                            <div th:if="${modoSeleccion}" class="row-cell" style="flex: 2; justify-content: center;">
+                            <div th:if="${modoSeleccion}" class="row-cell cell-center">
                                 <th:block th:with="vId=${p_item.id}, isAssigned=${assignedVoluntarioIds != null and assignedVoluntarioIds.contains(vId)}">
                                     <button th:if="${!isAssigned}"
                                             class="btn btn-secondary btn-sm" 
