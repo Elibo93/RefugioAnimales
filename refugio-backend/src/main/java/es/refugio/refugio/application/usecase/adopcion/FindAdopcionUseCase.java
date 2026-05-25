@@ -30,8 +30,8 @@ public class FindAdopcionUseCase {
         return adopcionRepository.findAll(pageable);
     }
 
-    public Page<Adopcion> findFiltered(String q, Pageable pageable) {
-        return adopcionRepository.findFiltered(q, pageable);
+    public Page<Adopcion> findFiltered(String q, String estado, Pageable pageable) {
+        return adopcionRepository.findFiltered(q, estado, pageable);
     }
 
     public Adopcion findById(AdopcionId id) {

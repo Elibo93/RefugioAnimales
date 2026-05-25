@@ -96,7 +96,8 @@ public class AdopcionController {
     public PaginatedResponse<AdopcionResponse> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String q) {
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String estado) {
         boolean isStaff = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_VOLUNTARIO"));
 
@@ -111,12 +112,17 @@ public class AdopcionController {
 
             List<Adopcion> adopciones = findAdopcionService.findByAdoptanteId(adoptante.getId());
             
-            // Si hay búsqueda, filtramos en memoria para el usuario (caso simple)
             if (q != null && !q.trim().isEmpty()) {
                 String pattern = q.toLowerCase().trim();
                 adopciones = adopciones.stream()
                         .filter(a -> String.valueOf(a.getId().getValue()).contains(pattern) || 
                                      a.getEstado().name().toLowerCase().contains(pattern))
+                        .toList();
+            }
+            if (estado != null && !estado.trim().isEmpty()) {
+                String est = estado.toUpperCase().trim();
+                adopciones = adopciones.stream()
+                        .filter(a -> a.getEstado().name().equals(est))
                         .toList();
             }
 
@@ -140,7 +146,7 @@ public class AdopcionController {
         }
 
         Pageable pageable = PageRequest.of(Math.max(0, page), size);
-        Page<Adopcion> adopcionesPage = findAdopcionService.findFiltered(q, pageable);
+        Page<Adopcion> adopcionesPage = findAdopcionService.findFiltered(q, estado, pageable);
         return PaginatedResponse.fromPage(adopcionesPage, adopcionesPage.getContent().stream()
                 .map(adopcionMapper::toResponse)
                 .toList());

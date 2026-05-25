@@ -53,10 +53,11 @@ public class AdopcionViewController {
             @RequestParam(required = false) Integer adoptanteId,
             @RequestParam(required = false) Integer animalId,
             @RequestParam(required = false) String q,
+            @RequestParam(required = false) String estado,
             @RequestParam(required = false) String successMessage,
             HttpServletRequest request) {
 
-        PaginatedResponse<AdopcionRecord> paginationMap = adopcionService.fetchPaginatedAdopciones(page, size, q);
+        PaginatedResponse<AdopcionRecord> paginationMap = adopcionService.fetchPaginatedAdopciones(page, size, q, estado);
         List<AdopcionRecord> adopciones = paginationMap.items();
         List<AdoptanteRecord> adoptantes = adopcionService.fetchAllAdoptantes();
         List<AnimalRecord> animales   = animalService.fetchAllAnimals();
@@ -122,6 +123,7 @@ public class AdopcionViewController {
         model.addAttribute("selectedAdoptanteId", adoptanteId);
         model.addAttribute("selectedanimalId",    animalId);
         model.addAttribute("q", q);
+        model.addAttribute("selectedEstado", estado);
 
         if (successMessage != null) model.addAttribute("successMessage", successMessage);
         

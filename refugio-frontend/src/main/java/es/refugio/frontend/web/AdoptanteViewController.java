@@ -58,15 +58,18 @@ public class AdoptanteViewController {
                         @RequestParam(required = false) String q,
                         HttpServletRequest request) {
         
-        PaginatedResponse<AdoptanteRecord> pagination = adoptanteService.fetchPaginatedAdoptantes(page, size, q);
-        List<AdoptanteRecord> adoptantes = pagination.items();
-        logger.info("[ADOPTANTES] page={}, size={}, total={}, items={}", page, size, pagination.total(), adoptantes.size());
+        List<AdoptanteRecord> allAdoptantes = adoptanteService.fetchAllAdoptantes();
         List<UsuarioRecord> usuarios = adoptanteService.fetchAllUsuarios();
         List<PerfilLegalRecord> perfilesLegales = adoptanteService.fetchAllPerfilesLegales();
 
         Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
         for (UsuarioRecord u : usuarios) {
             usuariosMap.put(String.valueOf(u.id()), u);
+        }
+
+        Map<String, PerfilLegalRecord> perfilesMap = new HashMap<>();
+        for (PerfilLegalRecord p : perfilesLegales) {
+            if (p.usuarioId() != null) perfilesMap.put(String.valueOf(p.usuarioId()), p);
         }
 
         // Solo mostrar adoptantes con rol ROLE_ADOPTANTE o ROLE_VOLUNTARIO_ADOPTANTE
@@ -76,16 +79,62 @@ public class AdoptanteViewController {
                         u.rol().equalsIgnoreCase("ROLE_VOLUNTARIO_ADOPTANTE")))
                 .map(u -> u.id())
                 .collect(Collectors.toSet());
-        adoptantes = adoptantes.stream()
-                .filter(a -> a.usuarioId() != null && adoptanteRoleIds.contains(a.usuarioId()))
-                .toList();
 
-        Map<String, PerfilLegalRecord> perfilesMap = new HashMap<>();
-        for (PerfilLegalRecord p : perfilesLegales) {
-            if (p.usuarioId() != null) perfilesMap.put(String.valueOf(p.usuarioId()), p);
+        String query = q != null ? q.toLowerCase().trim() : "";
+        List<AdoptanteRecord> filteredAdoptantes = new ArrayList<>();
+        
+        for (AdoptanteRecord a : allAdoptantes) {
+            if (a.usuarioId() == null || !adoptanteRoleIds.contains(a.usuarioId())) {
+                continue;
+            }
+            
+            if (!query.isEmpty()) {
+                PerfilLegalRecord perfil = perfilesMap.get(String.valueOf(a.usuarioId()));
+                UsuarioRecord usuario = usuariosMap.get(String.valueOf(a.usuarioId()));
+                
+                String nombreCompleto = perfil != null ? (perfil.nombre() + " " + (perfil.apellido() != null ? perfil.apellido() : "")).toLowerCase() : "";
+                String username = usuario != null ? usuario.username().toLowerCase() : "";
+                String email = usuario != null ? usuario.email().toLowerCase() : "";
+                String dni = perfil != null && perfil.dni() != null ? perfil.dni().toLowerCase() : "";
+                
+                if (!nombreCompleto.contains(query) && !username.contains(query) && !email.contains(query) && !dni.contains(query)) {
+                    continue;
+                }
+            }
+            filteredAdoptantes.add(a);
         }
 
-        model.addAttribute(ModelAttribute.Adoptante_LIST.getName(), adoptantes);
+        // Paginación en memoria
+        int totalElements = filteredAdoptantes.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        if (totalPages == 0) totalPages = 1;
+
+        int activePage = page;
+        if (activePage < 1) activePage = 1;
+        if (activePage > totalPages) activePage = totalPages;
+
+        int fromIndex = (activePage - 1) * size;
+        int toIndex = Math.min(fromIndex + size, totalElements);
+
+        List<AdoptanteRecord> paginatedItems = new ArrayList<>();
+        if (fromIndex < totalElements && fromIndex >= 0) {
+            paginatedItems = filteredAdoptantes.subList(fromIndex, toIndex);
+        }
+
+        boolean hasNext = activePage < totalPages;
+        boolean hasPrevious = activePage > 1;
+
+        PaginatedResponse<AdoptanteRecord> pagination = new PaginatedResponse<>(
+                paginatedItems,
+                totalPages,
+                totalElements,
+                activePage,
+                size,
+                hasNext,
+                hasPrevious
+        );
+
+        model.addAttribute(ModelAttribute.Adoptante_LIST.getName(), paginatedItems);
         model.addAttribute("pagination", pagination);
         model.addAttribute("usuariosMap", usuariosMap);
         model.addAttribute("perfilesMap", perfilesMap);
@@ -93,7 +142,7 @@ public class AdoptanteViewController {
         model.addAttribute("currentUri", WebRoutes.ADOPTANTES_BASE);
 
         if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
-            return FragmentoContenido.Adoptante_LIST.getPath() + " :: list-body";
+            return FragmentoContenido.Adoptante_LIST.getPath();
         }
 
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Adoptante_LIST.getPath());

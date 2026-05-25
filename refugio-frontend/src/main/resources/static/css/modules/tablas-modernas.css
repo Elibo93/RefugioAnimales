@@ -528,3 +528,106 @@ tbody tr:hover {
     background: #fee2e2;
     color: #dc2626;
 }
+
+/* ==========================================================================
+   SISTEMA DE CUADRÍCULA (GRID) PARA TABLAS MODERNAS
+   ========================================================================== */
+
+/* Contenedores Base */
+.premium-grid-row {
+    display: grid !important;
+    gap: 1.5rem;
+    align-items: center;
+    width: 100%;
+}
+
+.premium-grid-header {
+    background: transparent;
+    padding: 0 3rem 1rem;
+    display: grid !important;
+    gap: 1.5rem;
+    align-items: center;
+    width: 100%;
+}
+
+.premium-row-card.premium-grid-row {
+    padding: 1rem 3rem;
+    gap: 1.5rem;
+}
+
+/* Configuraciones de Columnas Específicas por Entidad */
+
+/* Animales: Foto (90px) | Nombre (1fr) | Edad (0.7fr) | Estado (1.3fr) | Acciones (120px) */
+.grid-cols-animales {
+    grid-template-columns: 90px 1fr 0.7fr 1.3fr 120px;
+}
+
+/* Personas: Detalles (1.5fr) | Rol (1fr) | Contacto (1.5fr) | Acciones (120px) */
+.grid-cols-personas {
+    grid-template-columns: 1.5fr 1fr 1.5fr 120px;
+}
+
+/* Voluntarios: Nombre (1.5fr) | Contacto (1.5fr) | Especialidad (1fr) | Disponibilidad (1fr) | Acciones (150px) */
+.grid-cols-voluntarios {
+    grid-template-columns: 1.5fr 1.5fr 1fr 1fr 150px;
+}
+
+/* Notificaciones: ID (80px) | Mensaje (2fr) | Fecha (1fr) | Estado (1fr) | Acciones (120px) */
+.grid-cols-notificaciones {
+    grid-template-columns: 80px 2fr 1fr 1fr 120px;
+}
+
+/* Donaciones: Donante (1.5fr) | Tipo (1fr) | Cantidad (1fr) | Fecha (1fr) | Descripción (2fr) */
+.grid-cols-donaciones {
+    grid-template-columns: 1.5fr 1fr 1fr 1fr 2fr;
+}
+
+/* Tareas (Admin): Desc (2.5fr) | Asignado (1.5fr) | Estado (1fr) | Prioridad (1fr) | Acciones (150px) */
+.grid-cols-tareas-admin {
+    grid-template-columns: 2.5fr 1.5fr 1fr 1fr 150px;
+}
+
+/* Tareas (Voluntario): Desc (2fr) | Prioridad (1fr) | Estado (2fr) | Acciones (150px) */
+.grid-cols-tareas-voluntario {
+    grid-template-columns: 2fr 1fr 2fr 150px;
+}
+
+/* Historiales Médicos: Animal (1.5fr) | Fecha (0.8fr) | Veterinario (2fr) | Acciones (120px) */
+.grid-cols-historiales {
+    grid-template-columns: 1.5fr 0.8fr 2fr 120px;
+}
+
+/* Adoptantes: Nombre (1.5fr) | Contacto (2fr) | Estado (1fr) | Acciones (120px) */
+.grid-cols-adoptantes {
+    grid-template-columns: 1.5fr 2fr 1fr 120px;
+}
+
+/* Adopciones: Foto (90px) | Detalles (1fr) | Estado (1fr) | Fecha (1fr) | Acciones (120px) */
+.grid-cols-adopciones {
+    grid-template-columns: 90px 1fr 1fr 1fr 120px;
+}
+
+/* Mis Adoptados (User): ID (80px) | Animal (1.5fr) | Fecha (1fr) | Estado (1fr) | Acciones (120px) */
+.grid-cols-mis-adoptados {
+    grid-template-columns: 80px 1.5fr 1fr 1fr 120px;
+}
+
+/* Utilidades de Alineación de Celdas */
+.cell-left {
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.cell-center {
+    justify-content: center;
+    text-align: center;
+}
+
+.cell-right {
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.cell-padded-left {
+    padding-left: 1.5rem;
+}

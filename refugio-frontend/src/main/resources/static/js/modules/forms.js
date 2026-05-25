@@ -339,7 +339,8 @@ function applyViewMode() {
             emptyMessage.style.display = 'none';
         }
         if (pagination) pagination.style.display = 'none';
-        if (filterForm) filterForm.style.display = 'none';
+        // Mantener visibles los filtros en el calendario
+        // if (filterForm) filterForm.style.display = 'none';
         
         if (calView) calView.style.display = 'block';
         if (icon) icon.setAttribute('data-lucide', 'list');
@@ -401,9 +402,9 @@ function initCalendar() {
             if (!t.fechaLimite) return;
             
             var color = '#3b82f6';
-            if (t.estado === 'COMPLETADA' || t.estado === 'FINALIZADA') color = '#10b981';
-            else if (t.estado === 'PENDIENTE' || t.estado === 'PROPUESTA') color = '#f59e0b';
-            else if (t.estado === 'RECHAZADA' || t.estado === 'CANCELADA') color = '#ef4444';
+            if (t.prioridad === 'ALTA') color = '#ef4444';
+            else if (t.prioridad === 'MEDIA') color = '#f59e0b';
+            else if (t.prioridad === 'BAJA') color = '#10b981';
             
             eventsData.push({
                 id: t.id,
@@ -981,7 +982,13 @@ window.selectAnimal = function(id, nombre, especie, foto) {
     const idInput = document.getElementById('animalId-input');
     const searchInput = document.getElementById('animal-search');
     const suggContainer = document.getElementById('animal-suggestions');
-    if (idInput) idInput.value = id;
+    if (idInput) {
+        idInput.value = id;
+        idInput.dispatchEvent(new Event('change', { bubbles: true }));
+        if (typeof htmx !== 'undefined' && (idInput.hasAttribute('hx-get') || idInput.hasAttribute('hx-post') || idInput.hasAttribute('hx-put') || idInput.hasAttribute('hx-patch') || idInput.hasAttribute('hx-delete'))) {
+            htmx.trigger(idInput, 'change');
+        }
+    }
     if (searchInput) searchInput.value = nombre;
     if (suggContainer) suggContainer.innerHTML = '';
     
@@ -1007,7 +1014,13 @@ window.clearAnimalSelection = function() {
     const searchInput = document.getElementById('animal-search');
     const card = document.getElementById('selected-animal-card');
     
-    if (idInput) idInput.value = '';
+    if (idInput) {
+        idInput.value = '';
+        idInput.dispatchEvent(new Event('change', { bubbles: true }));
+        if (typeof htmx !== 'undefined' && (idInput.hasAttribute('hx-get') || idInput.hasAttribute('hx-post') || idInput.hasAttribute('hx-put') || idInput.hasAttribute('hx-patch') || idInput.hasAttribute('hx-delete'))) {
+            htmx.trigger(idInput, 'change');
+        }
+    }
     if (searchInput) {
         searchInput.value = '';
         searchInput.focus();
@@ -1015,11 +1028,38 @@ window.clearAnimalSelection = function() {
     if (card) card.style.display = 'none';
 };
 
-// Ocultar sugerencias de animal al hacer clic fuera
+// Ocultar sugerencias de animal al hacer clic fuera y gestionar borrado manual
 document.addEventListener('click', function(event) {
     const animalSearch = document.getElementById('animal-search');
     const animalSugg = document.getElementById('animal-suggestions');
     if (animalSearch && animalSugg && !animalSearch.contains(event.target) && !animalSugg.contains(event.target)) {
         animalSugg.innerHTML = '';
     }
+});
+
+function setupAnimalSearchListeners() {
+    const searchInput = document.getElementById('animal-search');
+    const idInput = document.getElementById('animalId-input');
+    if (searchInput && idInput) {
+        if (!searchInput.dataset.hasClearListener) {
+            searchInput.addEventListener('input', function() {
+                if (this.value.trim() === '') {
+                    idInput.value = '';
+                    idInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    if (typeof htmx !== 'undefined' && (idInput.hasAttribute('hx-get') || idInput.hasAttribute('hx-post') || idInput.hasAttribute('hx-put') || idInput.hasAttribute('hx-patch') || idInput.hasAttribute('hx-delete'))) {
+                        htmx.trigger(idInput, 'change');
+                    }
+                }
+            });
+            searchInput.dataset.hasClearListener = 'true';
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    setupAnimalSearchListeners();
+});
+
+document.body.addEventListener('htmx:afterSettle', function() {
+    setupAnimalSearchListeners();
 });
