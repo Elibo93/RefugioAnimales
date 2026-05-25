@@ -38,6 +38,8 @@ import es.refugio.refugio.domain.model.adoptante.AdoptanteId;
 import es.refugio.refugio.infraestructure.mapper.AdoptanteMapper;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteRequest;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteResponse;
+import org.springframework.security.core.Authentication;
+import jakarta.servlet.http.HttpServletRequest;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.AdoptanteUpdateRequest;
 import es.refugio.refugio.infraestructure.web.dto.adoptante.ConvertirAdoptanteRequest;
 import es.refugio.common.infraestructure.web.dto.common.PaginatedResponse;
@@ -49,7 +51,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Tag(name = "Adoptantes", description = "Gestión de adoptantes del refugio")
 /**
- * Controlador REST que expone los endpoints HTTP de la API para la gestión de Adoptante.
+ * Controlador REST que expone los endpoints HTTP de la API para la gestión de
+ * Adoptante.
  *
  * @author Elisabeth
  * @author Diego
@@ -69,9 +72,18 @@ public class AdoptanteController {
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Adoptante creado"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
-    public ResponseEntity<AdoptanteResponse> createAdoptante(@Valid @RequestBody AdoptanteRequest request) {
-        CreateAdoptanteCommand command = adoptanteMapper.toCommand(request);
-        Adoptante adoptante = createService.createAdoptante(command);
+    public ResponseEntity<AdoptanteResponse> create(@Valid @RequestBody AdoptanteRequest request,
+            HttpServletRequest httpRequest) {
+        boolean isAdmin = false;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            isAdmin = userDetails.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        }
+
+        CreateAdoptanteCommand command = new CreateAdoptanteCommand(request.usuarioId());
+        Adoptante adoptante = createService.createAdoptante(command, false);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -79,9 +91,9 @@ public class AdoptanteController {
     }
 
     @Operation(summary = "Listar adoptantes")
-    @ApiResponse(responseCode = "200", description = "Listado obtenido")
+    @ApiResponse(responseCode = "200", description = "Listado retornado")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public PaginatedResponse<AdoptanteResponse> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -173,7 +185,7 @@ public class AdoptanteController {
         Integer usuarioId = userDetails.getId();
 
         // 2. Crear Perfil de Adoptante
-        Adoptante adoptante = createService.createAdoptante(new CreateAdoptanteCommand(usuarioId));
+        Adoptante adoptante = createService.createAdoptante(new CreateAdoptanteCommand(usuarioId), false);
 
         // 3. Crear Solicitud de Adopción
         solicitudService.create(new CreateSolicitudAdopcionCommand(

@@ -19,31 +19,40 @@
 
         <!-- Panel de Lista para Admin -->
         <div class="table-wrapper"
-            style="margin-top: 2rem; padding: 2rem; background: transparent; border: none; box-shadow: none;"
+            style="margin-top: 2rem; padding: 2.5rem 3rem; background: transparent; border: none; box-shadow: none;"
             th:if="${isAdmin}">
 
-            <!-- Cabecera de Auditoría -->
-            <div
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;">
-                <div>
-                    <h2 style="font-weight: 800; color: var(--text-main); margin: 0; font-size: 1.85rem; letter-spacing: -0.02em;"
-                        th:text="#{donacion.list.title}">Registro [[#{html.auto.de}]] Donaciones</h2>
-                    <p style="color: var(--text-muted); margin-top: 0.25rem;" th:text="#{donacion.auto.historial.completo.e.inmutable.de}"></p>
+            <!-- BARRA DE ACCIONES SUPERIOR -->
+            <div class="actions-bar admin-actions-bar">
+                
+                <!-- 1. TÍTULO E ICONO -->
+                <div class="admin-title-container">
+                    <div class="admin-title-icon-box">
+                        <i data-lucide="coins" style="width: 24px;"></i>
+                    </div>
+                    <div>
+                        <h1 class="admin-title-text" th:text="#{donacion.list.title}">Registro de Donaciones</h1>
+                        <p class="admin-title-desc" th:text="#{donacion.auto.gestiona.aportaciones}">Historial de aportaciones</p>
+                    </div>
                 </div>
-                <div style="display: flex; gap: 0.75rem;">
-                    <!-- Botón para alternar formulario de donación para el Administrador -->
-                    <button id="btn-admin-donar" class="btn btn-primary"
-                        style="padding: 0.7rem 1.25rem; border-radius: 14px; font-weight: 700; background: var(--primary); color: white; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm); border: none; cursor: pointer; transition: all 0.3s ease;">
-                        <i data-lucide="heart" style="width: 18px; fill: white;"></i>
-                        <span th:text="#{donacion.auto.registrar.aportacion}"></span>
-                    </button>
 
-                    <a th:href="@{/web/donaciones/pdf}" target="_blank" title="Exportar listado a PDF" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                        <img src="/images/pdf.png" alt="PDF" style="height: 48px; width: 48px; object-fit: contain;">
+                <!-- 2. FILTROS Y BÚSQUEDA (Centrados) -->
+                <div class="admin-filters-container">
+                    <!-- Espacio para futuros filtros -->
+                </div>
+
+                <!-- 3. ACCIONES Y EXPORTACIÓN -->
+                <div class="admin-actions-group">
+                    <a th:href="@{/web/donaciones/pdf}" target="_blank" title="Exportar listado a PDF" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/pdf.png" alt="PDF" class="admin-export-img">
                     </a>
-                    <a th:href="@{/web/donaciones/excel}" target="_blank" title="Exportar listado a Excel" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                        <img src="/images/excel.png" alt="Excel" style="height: 48px; width: 48px; object-fit: contain;">
+                    <a th:href="@{/web/donaciones/excel}" target="_blank" title="Exportar listado a Excel" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/excel.png" alt="Excel" class="admin-export-img">
                     </a>
+                    <button id="btn-admin-donar" class="btn btn-primary">
+                        <i data-lucide="plus" style="width:18px;"></i>
+                        <span th:text="#{donacion.auto.registrar.aportacion}">+ Registrar</span>
+                    </button>
                 </div>
             </div>
 
@@ -69,9 +78,9 @@
                                 </div>
                                 <div th:with="u=${usuariosMap != null and d.usuarioId != null ? usuariosMap.get(d.usuarioId) : null}" style="overflow: hidden;">
                                     <span style="display: block; font-weight: 700; color: var(--text-main); font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" 
-                                          th:text="${u != null ? (u.username == 'anonimo' ? 'Donante Anónimo' : u.username) : 'Donante Anónimo'}"></span>
+                                          th:text="${u != null ? (u.username == 'anonimo' ? #messages.msg('donacion.auto.donante.anonimo') : u.username) : #messages.msg('donacion.auto.donante.anonimo')}"></span>
                                     <span style="font-size: 0.75rem; color: var(--text-muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" 
-                                          th:text="${u != null and u.username != 'anonimo' ? u.email : 'Contribución sin registro'}"></span>
+                                          th:text="${u != null and u.username != 'anonimo' ? u.email : #messages.msg('donacion.auto.contribucion.sin.registro')}"></span>
                                 </div>
                             </div>
                         </div>
@@ -79,7 +88,7 @@
                         <!-- Tipo -->
                         <div class="row-cell" style="flex: 1.2; justify-content: center; display: flex;">
                             <span class="badge-premium info" style="min-width: 85px; text-align: center;"
-                                  th:text="${d.tipo != null ? #strings.replace(d.tipo, '_', ' ') : '-'}">DINERO</span>
+                                  th:text="${d.tipo != null ? #messages.msg('enum.TipoDonacion.' + d.tipo) : '-'}">DINERO</span>
                         </div>
 
                         <!-- Cantidad -->
@@ -101,7 +110,7 @@
                         <!-- Descripción -->
                         <div class="row-cell" style="flex: 2.5; padding-left: 2rem; border-left: 1px solid #f1f5f9;">
                             <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" 
-                               th:text="${d.descripcion} ?: 'Sin descripción'">Descripción...</p>
+                               th:text="${d.descripcion} ?: #{generic.auto.sin.descripcion}">Descripción...</p>
                         </div>
                     </div>
                 </div>

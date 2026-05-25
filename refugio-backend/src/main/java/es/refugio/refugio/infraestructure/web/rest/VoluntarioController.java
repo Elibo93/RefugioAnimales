@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import es.refugio.refugio.application.command.voluntario.CreateVoluntarioCommand;
 import es.refugio.refugio.application.command.voluntario.EditVoluntarioCommand;
@@ -74,8 +75,9 @@ public class VoluntarioController {
     @ApiResponses({ @ApiResponse(responseCode = "201", description = "Voluntario creado"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos") })
     @PostMapping
-    public ResponseEntity<VoluntarioResponse> create(@Valid @RequestBody VoluntarioRequest request, Authentication authentication, HttpServletRequest httpRequest) {
+    public ResponseEntity<VoluntarioResponse> create(@Valid @RequestBody VoluntarioRequest request, HttpServletRequest httpRequest) {
         boolean isAdmin = false;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             isAdmin = userDetails.getAuthorities().stream()
@@ -83,7 +85,15 @@ public class VoluntarioController {
         }
         
         CreateVoluntarioCommand command = voluntarioMapper.toCommand(request);
-        Voluntario voluntario = createVoluntarioService.createVoluntario(command, isAdmin, getJwtToken(httpRequest));
+        // Intentar obtener el token de Authorization si la cookie no está
+        String jwtToken = getJwtToken(httpRequest);
+        if (jwtToken.isEmpty()) {
+            String bearerToken = httpRequest.getHeader("Authorization");
+            if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+                jwtToken = bearerToken.substring(7);
+            }
+        }
+        Voluntario voluntario = createVoluntarioService.createVoluntario(command, isAdmin, jwtToken);
         return ResponseEntity.status(HttpStatus.CREATED).body(voluntarioMapper.toResponse(voluntario));
     }
 

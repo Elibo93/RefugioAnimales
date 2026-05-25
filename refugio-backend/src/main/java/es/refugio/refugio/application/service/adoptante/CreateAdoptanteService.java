@@ -19,8 +19,7 @@ public class CreateAdoptanteService {
 
     private final CreateAdoptanteUseCase createAdoptanteUseCase;
 
-    public Adoptante createAdoptante(CreateAdoptanteCommand command) {
-        // Delegamos la lógica de creación al caso de uso
-        return createAdoptanteUseCase.create(command);
+    public Adoptante createAdoptante(CreateAdoptanteCommand command, boolean isAdmin) {
+        return createAdoptanteUseCase.create(command, isAdmin);
     }
 }

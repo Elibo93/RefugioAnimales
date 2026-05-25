@@ -111,6 +111,18 @@
             }
         });
 
+        // Manejar expiración de sesión (JWT inválido) en peticiones HTMX
+        document.body.addEventListener('htmx:beforeOnLoad', function(evt) {
+            if (evt.detail.xhr && evt.detail.xhr.responseURL) {
+                // Si la URL de respuesta es la página de login (HTMX siguió un 302) o si es 401/403
+                if (evt.detail.xhr.responseURL.includes('/login') || evt.detail.xhr.status === 401 || evt.detail.xhr.status === 403) {
+                    evt.preventDefault(); // Cancelar el swap
+                    // Redirigir a toda la página para evitar bucles anidados
+                    window.location.href = evt.detail.xhr.responseURL.includes('/login') ? evt.detail.xhr.responseURL : '/login';
+                }
+            }
+        });
+
         // Gestión de estados de carga en formularios
         document.addEventListener('submit', function (e) {
             const form = e.target;

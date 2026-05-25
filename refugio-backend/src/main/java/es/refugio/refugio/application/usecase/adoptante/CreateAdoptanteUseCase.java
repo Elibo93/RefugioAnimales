@@ -22,7 +22,7 @@ public class CreateAdoptanteUseCase {
     private final AdoptanteRepository adoptanteRepository;
     private final PerfilLegalRepository perfilLegalRepository;
 
-    public Adoptante create(CreateAdoptanteCommand comando) {
+    public Adoptante create(CreateAdoptanteCommand comando, boolean isAdmin) {
         // 1. Verificar si ya es adoptante (Idempotencia)
         var byUsuario = adoptanteRepository.getByUsuarioId(new UsuarioId(comando.usuarioId()));
         if (byUsuario.isPresent()) {
@@ -36,7 +36,7 @@ public class CreateAdoptanteUseCase {
         // Crear adoptante
         Adoptante adoptante = Adoptante.builder()
                 .usuarioId(comando.usuarioId())
-                .estadoValidacion(EstadoValidacion.PENDIENTE)
+                .estadoValidacion(isAdmin ? EstadoValidacion.APROBADO : EstadoValidacion.PENDIENTE)
                 .fechaRegistro(LocalDateTime.now())
                 .solicitudesIds(new ArrayList<>())
                 .adopcionesIds(new ArrayList<>())

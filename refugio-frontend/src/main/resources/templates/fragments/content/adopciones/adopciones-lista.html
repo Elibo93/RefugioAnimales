@@ -9,90 +9,44 @@
 <body>
 <div th:fragment="content">
 
-        <div class="table-wrapper">
-            <div class="actions-bar">
-                <span class="user-name page" th:text="#{adopcion.list.title}">adopciones</span>
-                <div style="display:flex; gap:10px; align-items: center;">
-    <style>
-        .adopcion-search-wrapper {
-            position: relative !important;
-            width: 360px !important;
-            height: 44px !important;
-            display: flex !important;
-            align-items: center !important;
-        }
-        .adopcion-search-wrapper .form-control {
-            height: 100% !important;
-            width: 100% !important;
-            padding-left: 40px !important;
-            padding-right: 40px !important;
-            border-radius: 14px !important;
-            border: 2px solid #f1f5f9 !important;
-            background: #f8fafc !important;
-            font-size: 0.95rem !important;
-            font-weight: 500 !important;
-            transition: all 0.3s ease !important;
-        }
-        .adopcion-search-icon {
-            position: absolute !important;
-            left: 14px !important;
-            top: 50% !important;
-            transform: translateY(-50%) !important;
-            color: #94a3b8 !important;
-            pointer-events: none !important;
-            z-index: 10 !important;
-            display: flex !important;
-            align-items: center !important;
-        }
-        .adopcion-clear-btn {
-            position: absolute !important;
-            right: 12px !important;
-            top: 50% !important;
-            transform: translateY(-50%) !important;
-            cursor: pointer !important;
-            color: #94a3b8 !important;
-            z-index: 10 !important;
-            display: none;
-            align-items: center !important;
-            justify-content: center !important;
-            width: 24px !important;
-            height: 24px !important;
-            transition: color 0.2s !important;
-        }
-        .adopcion-clear-btn:hover {
-            color: #ef4444 !important;
-        }
-    </style>
+        <div class="table-wrapper admin-table-wrapper">
+            <!-- BARRA DE ACCIONES SUPERIOR -->
+            <div class="actions-bar admin-actions-bar">
+                
+                <!-- 1. TÍTULO E ICONO -->
+                <div class="admin-title-container">
+                    <div class="admin-title-icon-box">
+                        <i data-lucide="home" style="width: 24px;"></i>
+                    </div>
+                    <div>
+                        <h1 class="admin-title-text" th:text="#{adopcion.list.title}">Adopciones</h1>
+                        <p class="admin-title-desc" th:text="#{adopcion.auto.gestiona.historial}">Historial y gestión de adopciones</p>
+                    </div>
+                </div>
 
-                    <form id="filterForm" th:action="@{/web/adopciones}" method="get"
-                        hx-boost="true" hx-target="#adopcion-results" hx-select="#adopcion-results"
-                        hx-trigger="submit, keyup changed delay:800ms from:input[name='q']"
-                        hx-vals='{"page": 1}'
-                        hx-swap="innerHTML show:none"
-                        style="display:flex; gap:10px; margin:0; align-items: center;">
-                        
-                        <div class="adopcion-search-wrapper">
-                            <input type="text" name="q" th:value="${q}" class="form-control"
-                                id="searchInputAdop"
-                                placeholder="Buscar por animal, adoptante..." autocomplete="off"
-                                oninput="document.getElementById('clearBtnAdop').style.display = this.value ? 'flex' : 'none'">
-                            
-                            <div class="adopcion-search-icon">
-                                <i data-lucide="search" style="width: 18px; height: 18px;"></i>
-                            </div>
-                            
-                            <div id="clearBtnAdop" class="adopcion-clear-btn"
-                                 th:style="${q != null and !q.isEmpty() ? 'display: flex !important;' : ''}"
-                                 onclick="const input = document.getElementById('searchInputAdop'); input.value=''; input.dispatchEvent(new Event('keyup')); this.style.display='none'; input.focus();">
-                                <i data-lucide="x" style="width: 18px; height: 18px;"></i>
-                            </div>
-                        </div>
-                    </form>
-                    <a th:href="@{/web/adopciones/pdf}" target="_blank" title="Exportar listado a PDF" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                        <img src="/images/pdf.png" alt="PDF" style="height: 48px; width: 48px; object-fit: contain;">
+                <!-- 2. FILTROS Y BÚSQUEDA (Centrados) -->
+                <div class="admin-filters-container">
+                    <!-- Barra de Búsqueda Reactiva -->
+                    <div class="admin-search-wrapper">
+                        <i data-lucide="search"
+                            class="admin-search-icon"></i>
+                        <input type="text" name="q" th:value="${q}" placeholder="Buscar por animal, adoptante..."
+                            class="form-control admin-search-input"
+                             th:hx-get="@{/web/adopciones}" hx-trigger="keyup delay:800ms, search" 
+                            hx-vals='{"page": 1}'
+                            hx-target="#adopcion-results"
+                            hx-select="#adopcion-results"
+                            hx-swap="outerHTML">
+                    </div>
+                </div>
+
+                <!-- 3. ACCIONES Y EXPORTACIÓN -->
+                <div class="admin-actions-group">
+                    <a th:href="@{/web/adopciones/pdf}" target="_blank" title="Exportar listado a PDF" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/pdf.png" alt="PDF" class="admin-export-img">
                     </a>
-                    <a th:href="@{/web/adopciones/excel}" target="_blank" title="Exportar listado a Excel" style="display: flex; align-items: center; justify-content: center; transition: transform 0.2s; padding: 0 4px;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                        <img src="/images/excel.png" alt="Excel" style="height: 48px; width: 48px; object-fit: contain;">
+                    <a th:href="@{/web/adopciones/excel}" target="_blank" title="Exportar listado a Excel" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/excel.png" alt="Excel" class="admin-export-img">
                     </a>
                     <a class="btn btn-primary" th:href="@{/web/adopciones/nueva}">
                         <i data-lucide="plus" style="width:18px;"></i>
@@ -102,9 +56,8 @@
             </div>
 
             <!-- LISTA PREMIUM DE ADOPCIONES -->
-            <div id="adopcion-results" class="premium-list-container" style="margin-top: 1.5rem;">
-                <div class="list-header"
-                    style="background: transparent; padding: 0 1.5rem 1rem; display: flex; align-items: center; gap: 1rem;">
+            <div id="adopcion-results" class="premium-list-container">
+                <div class="list-header admin-list-header">
                     <div style="flex: 0.5; text-align: center;" th:text="#{generic.auto.id}"></div>
                     <div style="flex: 2;" th:text="#{generic.auto.adoptante}"></div>
                     <div style="flex: 2;" th:text="#{generic.auto.animal}"></div>
