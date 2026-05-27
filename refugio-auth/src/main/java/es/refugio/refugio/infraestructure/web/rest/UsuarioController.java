@@ -235,6 +235,28 @@ public class UsuarioController {
         return ResponseEntity.ok(UsuarioMapper.toResponse(usuario));
     }
 
+    // Endpoint for internal service resolution or public lookups of specific users (like anonimo)
+    @GetMapping("/email/{email}")
+    public ResponseEntity<UsuarioResponse> findUsuarioByEmail(@PathVariable String email) {
+        // Por seguridad, evitamos enumeración de cuentas. 
+        // Solo permitimos la búsqueda pública del usuario anónimo.
+        // Cualquier otra búsqueda por email requerirá rol ADMIN.
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin && !"anonimo@refugio.es".equalsIgnoreCase(email)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        try {
+            Usuario usuario = findUsuarioService.findByEmail(email);
+            return ResponseEntity.ok(UsuarioMapper.toResponse(usuario));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @Operation(summary = "Elimina un Usuario", description = "Elimina de forma permanente la cuenta de un usuario")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Usuario eliminado"),

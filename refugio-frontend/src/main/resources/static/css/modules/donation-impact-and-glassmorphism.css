@@ -1602,3 +1602,134 @@ body.modal-open {
     background-color: var(--bg-body);
     transition: background-color 0.2s;
 }
+
+/* =============================================
+   DONACIÓN GRACIAS
+   Extraído de: donacion-gracias.html
+   ============================================= */
+
+@keyframes fadeInScaleGracias {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes pulse-heart {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    }
+
+    70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+.image-wrapper img:hover {
+    transform: scale(1.02);
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =============================================
+   OBJETIVO DONACIÓN FORMULARIO
+   Extraído de: objetivo-donacion-form.html
+   ============================================= */
+
+.icon-selector-card input:checked + .icon-inner {
+    border-color: var(--primary) !important;
+    background: rgba(22, 101, 52, 0.05);
+    box-shadow: 0 10px 20px -5px rgba(22, 101, 52, 0.15);
+}
+.icon-selector-card input:checked + .icon-inner i {
+    color: var(--primary) !important;
+}
+.icon-selector-card input:checked + .icon-inner span {
+    color: var(--primary) !important;
+}
+.icon-inner:hover {
+    border-color: #cbd5e1 !important;
+    transform: translateY(-2px);
+}
+
+/* =============================================
+   ENCUESTA PREFERENCIAS
+   Extraído de: encuesta-preferencias.html
+   ============================================= */
+
+.pref-card {
+    cursor: pointer;
+    perspective: 1000px;
+}
+.pref-card .card-content {
+    padding: 1.5rem;
+    background: white;
+    border: 2px solid #f1f5f9;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #64748b;
+    font-weight: 700;
+    text-align: center;
+}
+.pref-card input:checked + .card-content {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(var(--primary-rgb), 0.15);
+}
+.pref-card:hover .card-content {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+.step-dot.active {
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: white !important;
+    box-shadow: 0 0 0 4px var(--primary-light);
+}
+.step-item.completed .step-dot {
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: white !important;
+}
+
+/* =============================================
+   GAMIFICACIÓN PERFIL
+   Extraído de: gamificacion-perfil.html
+   ============================================= */
+
+.badge-card.unlocked.oro {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 20px 25px -5px rgba(251, 191, 36, 0.1), 0 10px 10px -5px rgba(251, 191, 36, 0.04) !important;
+}
+.badge-card.unlocked.plata {
+    border-color: #94a3b8 !important;
+    box-shadow: 0 20px 25px -5px rgba(148, 163, 184, 0.1) !important;
+}
+.badge-card.unlocked.bronce {
+    border-color: #d97706 !important;
+    box-shadow: 0 20px 25px -5px rgba(217, 119, 6, 0.1) !important;
+}
+.badge-card.unlocked:hover {
+    transform: translateY(-12px) scale(1.02);
+    z-index: 10;
+}
+.badge-card.oro:hover { background: #fffdf5 !important; }
+.badge-card.plata:hover { background: #f8fafc !important; }
+.badge-card.bronce:hover { background: #fff9f5 !important; }

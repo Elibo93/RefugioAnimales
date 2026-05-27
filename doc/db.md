@@ -271,13 +271,15 @@ erDiagram
 
 ---
 
-#### 3. Gestión de Cambios (Liquibase)
+#### 3. Gestión de Cambios (Liquibase) y Semillas de Datos
 
 No se utiliza `ddl-auto: update` en producción. En su lugar, todos los cambios de esquema se definen en archivos YAML bajo `src/main/resources/db/changelog/`.
 
 *   **001-initial-schema.yaml**: Creación de tablas base.
-*   **002-seed-data.yaml**: Datos maestros (animales, usuarios de prueba).
-*   **Changes posteriores**: Añaden columnas (como `peso`, `nivel_energia`) o nuevas tablas (`notificaciones`).
+*   **002-seed-data.yaml**: Datos maestros de la plataforma (ej. catálogo de animales precargados).
+
+**Gestión Segura de Contraseñas Semilla:**
+Para poblar los usuarios de prueba no se insertan contraseñas en texto plano. Se utiliza el archivo `data.sql` (en `refugio-auth`) donde las contraseñas (ej. `password123`) ya están **hasheadas con BCrypt**. Además, el usuario "Admin Supremo" se genera dinámicamente mediante un componente de Spring (`AdminInitializer.java`) para asegurar que su contraseña no dependa de un script estático.
 
 ---
 

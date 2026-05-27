@@ -16,6 +16,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.ResponseEntity;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import java.util.Map;
+
 @RequiredArgsConstructor
 /**
  * Caso de uso que encapsula la lógica de negocio de la aplicación para Create Donacion.
@@ -29,15 +35,29 @@ public class CreateDonacionUseCase {
     private final ObjetivoDonacionRepository objetivoRepository;
     private final NotificacionService notificacionService;
     private final ApplicationEventPublisher eventPublisher;
+    private final RestTemplate restTemplate;
 
     public Donacion create(CreateDonacionCommand command) {
         Integer targetUserId = command.getUsuarioId();
         boolean esAnonima = targetUserId == null;
 
-        // Si no hay usuarioId (donación anónima), buscar el usuario 'anonimo@refugio.es'
-        // El ID 2 corresponde al usuario anónimo en el seed data
+        // Si no hay usuarioId (donación anónima), buscar dinámicamente el usuario 'anonimo@refugio.es'
         if (targetUserId == null) {
-            targetUserId = 2; 
+            try {
+                ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                        "http://REFUGIO-AUTH/api/v1/usuarios/email/anonimo@refugio.es",
+                        HttpMethod.GET,
+                        null,
+                        new ParameterizedTypeReference<Map<String, Object>>() {}
+                );
+                
+                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                    targetUserId = (Integer) response.getBody().get("id");
+                }
+            } catch (Exception e) {
+                // Fallback de seguridad en caso de que el microservicio Auth no responda
+                targetUserId = 21; 
+            }
         }
 
         Donacion donacion = Donacion.builder()

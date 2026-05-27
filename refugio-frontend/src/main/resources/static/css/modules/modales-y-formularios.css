@@ -123,3 +123,63 @@
     justify-content: center;
 }
 
+/* Estandarización de botones de acción en formularios */
+.form-actions {
+    margin-top: 4rem; 
+    padding-top: 2rem; 
+    border-top: 1px solid var(--border); 
+    display: flex; 
+    gap: 1rem; 
+}
+
+.btn-form-cancel, .btn-form-submit {
+    flex: 1;
+}
+
+.btn-form-cancel {
+    padding: 0.75rem 1.5rem; 
+    border-radius: 8px; 
+    font-weight: 600; 
+    font-size: 0.95rem;
+    color: #ef4444; 
+    background: transparent; 
+    border: 2px solid #fee2e2; 
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.btn-form-cancel:hover {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #dc2626;
+}
+.btn-form-cancel:active, .btn-form-submit:active {
+    transform: scale(0.98);
+}
+
+.btn-form-submit {
+    padding: 0.75rem 1.5rem; 
+    border-radius: 8px; 
+    font-weight: 600; 
+    font-size: 0.95rem;
+    border: none; 
+    color: white; 
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--btn-color, var(--primary));
+    box-shadow: 0 4px 6px var(--btn-shadow, rgba(21, 128, 61, 0.2));
+}
+.btn-form-submit:hover {
+    background: var(--btn-hover, var(--primary-hover));
+    transform: translateY(-1px);
+    box-shadow: 0 6px 8px var(--btn-shadow, rgba(21, 128, 61, 0.3));
+}
+

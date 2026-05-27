@@ -26,4 +26,38 @@ Para la implementación del sistema del refugio, se ha seleccionado un ecosistem
 
 ---
 
+## 🚀 Guía de Arranque Local (Onboarding)
+
+Esta sección está diseñada para levantar el código fuente del proyecto en un entorno de desarrollo local (IDE como IntelliJ, Eclipse o VSCode).
+
+### 1. Requisitos Previos
+* **Java 17 (JDK):** Versión requerida para la compilación.
+* **MySQL Server (8.0+):** Para las bases de datos locales. (Si prefieres no instalar MySQL, revisa el [Despliegue con Docker](despliegue.md) o el perfil `dev` en [Gestión de Perfiles](gestiónPerfiles.md)).
+
+### 2. Variables de Entorno (`.env`)
+1. En la raíz del proyecto copia el archivo `.env.example` y renómbralo a **`.env`**.
+2. Rellena los valores correspondientes (como `DB_USER` y `DB_PASSWORD`).
+> **Nota:** La mayoría de los IDEs modernos detectan automáticamente el archivo `.env` al arrancar.
+
+### 3. Configuración de las Bases de Datos
+Debes crear los esquemas vacíos en tu MySQL local antes de arrancar los servicios (Liquibase se encargará automáticamente de crear las tablas):
+```sql
+CREATE DATABASE auth_db;
+CREATE DATABASE backend_db;
+```
+
+### 4. Orden de Arranque Estricto
+Dado que es una arquitectura de microservicios, **el orden de ejecución es muy importante**. Arranca las aplicaciones (`*Application.java`) así:
+
+1. **Eureka Server (`eureka-server` - Puerto 8761):** Servidor de descubrimiento. Todos los demás servicios buscarán conectarse a él.
+2. **Auth (`refugio-auth` - 8081) y Backend (`refugio-backend` - 8082):** Servicios de negocio. Se conectan a MySQL, ejecutan Liquibase y se registran en Eureka.
+3. **API Gateway (`api-gateway` - 8080):** Puerta de enlace. Necesita que Auth y Backend estén listos.
+4. **Frontend UI (`refugio-frontend` - 8083):** Aplicación web que interactúa con el usuario.
+
+### 5. ¡Todo listo!
+Una vez que los 5 microservicios estén en ejecución sin errores, accede a:
+🔗 **[http://localhost:8083](http://localhost:8083)**
+
+---
+
 [Volver al README](/README.md)

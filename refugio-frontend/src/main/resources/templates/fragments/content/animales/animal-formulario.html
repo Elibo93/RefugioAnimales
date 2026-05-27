@@ -271,13 +271,13 @@
                 </div>
 
                 <!-- ACCIONES -->
-                <div
-                    style="margin-top: 4rem; display: flex; gap: 1.5rem; justify-content: flex-end; border-top: 1px solid #f1f5f9; padding-top: 2rem;">
-                    <button type="button" class="btn" onclick="window.history.back()"
-                        style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: #64748b; background: #f1f5f9; text-decoration: none; transition: all 0.2s; cursor: pointer; border: none;" th:text="#{generic.auto.cancelar}"></button>
-                    <button type="submit" class="btn btn-primary"
-                        style="padding: 1rem 3rem; border-radius: 16px; font-weight: 700; box-shadow: 0 10px 25px rgba(45, 157, 88, 0.25);">
-                        <i data-lucide="save" style="width: 20px; margin-right: 8px;"></i>
+                <div class="form-actions">
+                    <button type="button" class="btn-form-cancel" onclick="window.history.back()">
+                        <i data-lucide="x" style="width: 18px;"></i>
+                        <span th:text="#{generic.auto.cancelar}"></span>
+                    </button>
+                    <button type="submit" class="btn-form-submit">
+                        <i data-lucide="save" style="width: 20px;"></i>
                         [[#{animal.auto.save.file}]]
                     </button>
                 </div>

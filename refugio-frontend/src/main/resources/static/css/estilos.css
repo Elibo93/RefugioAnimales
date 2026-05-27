@@ -2,6 +2,8 @@
 @import url('modules/reset-and-variables.css');
 @import url('modules/main-layout.css');
 @import url('modules/header-and-nav.css');
+@import url('modules/footer.css');
+@import url('modules/cookie-consent.css');
 @import url('modules/home-page-redesign.css');
 @import url('modules/admin-dashboard-home.css');
 @import url('modules/cards-and-dashboard.css');
@@ -11,3 +13,7 @@
 @import url('modules/utilidades.css');
 @import url('modules/payment-gateway-pasarela.css');
 @import url('modules/donation-impact-and-glassmorphism.css');
+@import url('modules/auth.css');
+@import url('modules/detalle-perfil.css');
+@import url('modules/tareas.css');
+@import url('modules/voluntarios.css');

@@ -108,11 +108,12 @@
                 </div>
 
                 <!-- ACCIONES -->
-                <div style="margin-top: 3rem; display: flex; gap: 1.5rem; justify-content: flex-end; border-top: 1px solid #f1f5f9; padding-top: 2rem;">
-                    <a th:href="@{/web/donaciones}" class="btn" 
-                       style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: #64748b; background: #f1f5f9; text-decoration: none; transition: all 0.2s;" th:text="#{generic.auto.cancelar}"></a>
-                    <button type="submit" class="btn btn-primary" 
-                            style="padding: 1rem 3rem; border-radius: 16px; font-weight: 700; background: var(--primary); color: white; border: none; cursor: pointer; box-shadow: 0 10px 25px rgba(22, 101, 52, 0.25); display: flex; align-items: center; gap: 10px;">
+                <div class="form-actions">
+                    <a th:href="@{/web/donaciones}" class="btn-form-cancel">
+                        <i data-lucide="x" style="width: 18px;"></i>
+                        <span th:text="#{generic.auto.cancelar}"></span>
+                    </a>
+                    <button type="submit" class="btn-form-submit">
                         <i data-lucide="save" style="width: 20px;"></i>
                         [[#{html.auto.publicar.objetivo}]]
                     </button>
@@ -120,25 +121,6 @@
             </form>
         </div>
     </div>
-
-    <style>
-        .icon-selector-card input:checked + .icon-inner {
-            border-color: var(--primary) !important;
-            background: rgba(22, 101, 52, 0.05);
-            box-shadow: 0 10px 20px -5px rgba(22, 101, 52, 0.15);
-        }
-        .icon-selector-card input:checked + .icon-inner i {
-            color: var(--primary) !important;
-        }
-        .icon-selector-card input:checked + .icon-inner span {
-            color: var(--primary) !important;
-        }
-        .icon-inner:hover {
-            border-color: #cbd5e1 !important;
-            transform: translateY(-2px);
-        }
-    </style>
-
 </div>
 </body>
 

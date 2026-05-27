@@ -38,19 +38,10 @@ A diferencia de aplicaciones monolíticas, la seguridad perimetral se gestiona d
 
 ## 3. Guía de Inicio Rápido para Desarrolladores
 
-### Modo Desarrollo Rápido (Sin MySQL)
-Si solo quieres probar cambios en la UI o lógica simple:
-```bash
-# Activa el perfil dev en el arranque
--Dspring.profiles.active=dev
-```
-*Acceso a DB: [http://localhost:8081/h2-console](http://localhost:8081/h2-console)*
+Para las instrucciones paso a paso sobre cómo preparar tu entorno local (instalación de MySQL, configuración del `.env` y el **orden estricto de arranque de los microservicios** en tu IDE), por favor consulta el documento [**Entorno de Desarrollo y Onboarding**](entornoDesarrollo.md).
 
-### Modo Integración (Con Docker)
-Para probar el sistema completo con persistencia real:
-1. Asegúrate de tener el archivo `.env` configurado.
-2. Levanta la infraestructura: `docker-compose up -d mysql eureka-server`.
-3. Ejecuta el backend sin perfiles adicionales (tomará la configuración de `application.properties`).
+> **Consejo para pruebas rápidas:** Si solo quieres probar cambios en la UI o lógica simple sin levantar bases de datos MySQL, puedes arrancar el Backend y Auth con el argumento `-Dspring.profiles.active=dev` para usar bases de datos H2 en memoria de usar y tirar.
+*Acceso a DB: [http://localhost:8081/h2-console](http://localhost:8081/h2-console)*
 
 ---
 

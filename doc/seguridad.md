@@ -36,29 +36,53 @@ Dado que el sistema corre tras un **API Gateway**, se han implementado mecanismo
 
 ---
 
-#### 4. Flujo de Autenticación y Autorización
+#### 4. Flujo de Autenticación y Trazabilidad (JWT)
+
+Para garantizar la seguridad en nuestra arquitectura distribuida, el token JWT actúa como un "pasaporte" que se propaga entre los distintos microservicios, asegurando la identidad sin mantener sesiones en memoria.
 
 ```mermaid
 sequenceDiagram
-    participant U as Usuario (Navegador)
-    participant G as API Gateway
-    participant A as Auth Service (Spring Security)
-    participant D as Base de Datos (Auth DB)
+    autonumber
+    actor Cliente as Usuario (Navegador)
+    participant Front as Frontend (UI)
+    participant GW as API Gateway
+    participant Auth as Auth Service
+    participant DB as Auth DB
+    participant Back as Backend Service
 
-    U->>G: POST /login-post (Credenciales)
-    G->>A: Forward Request
-    A->>D: Verificar Usuario y Hashing BCrypt
-    D-->>A: Usuario Válido + Roles
-    A->>A: Generar JWT (Firmado con Clave Secreta)
-    A-->>U: Set-Cookie: JWT_TOKEN (HttpOnly) + Redirect 302
-    
-    Note over U, G: Siguientes peticiones incluyen la Cookie
-    
-    U->>G: GET /api/admin/dashboard
-    G->>A: JwtAuthenticationFilter valida el Token
-    A-->>G: Autorizado (SecurityContextHolder poblado)
-    G-->>U: Envío de Datos Protegidos
+    %% Flujo de Autenticación
+    rect rgb(235, 245, 255)
+    Note over Cliente, Auth: 1. FASE DE AUTENTICACIÓN (LOGIN)
+    Cliente->>Front: POST /login-post (email, password)
+    Front->>GW: Forward POST /api/v1/auth/login
+    GW->>Auth: Enruta petición
+    Auth->>DB: Busca usuario y verifica hash BCrypt
+    DB-->>Auth: OK (Usuario Válido + Roles)
+    Auth->>Auth: Genera JWT firmado con Clave Secreta
+    Auth-->>GW: 200 OK + Token JWT
+    GW-->>Front: Token JWT
+    Front-->>Cliente: Set-Cookie: JWT_TOKEN (HttpOnly) + Redirect
+    end
+
+    %% Flujo de Petición Segura (Trazabilidad)
+    rect rgb(235, 255, 235)
+    Note over Cliente, Back: 2. FASE DE TRAZABILIDAD (PETICIÓN SEGURA)
+    Cliente->>Front: GET /animales (Cookie: JWT_TOKEN)
+    Front->>Front: Extrae Token de la Cookie HTTP
+    Front->>GW: GET /api/v1/animales (Header: Authorization: Bearer <token>)
+    GW->>GW: Filtro API Gateway: Valida firma del Token JWT (Opcional)
+    GW->>Back: Enruta petición (Mantiene Header: Authorization)
+    Back->>Back: JwtAuthenticationFilter: Valida Token y extrae Roles
+    Back-->>GW: 200 OK (Lista de Animales JSON)
+    GW-->>Front: Respuesta JSON
+    Front-->>Cliente: HTML Renderizado (Thymeleaf)
+    end
 ```
+
+**Explicación de la Trazabilidad:**
+1. **Almacenamiento Seguro:** El Frontend guarda el JWT en una Cookie `HttpOnly` para evitar ataques XSS en el navegador del usuario.
+2. **Propagación Inter-servicios:** Cuando el Frontend necesita datos, extrae el token de la cookie y lo inyecta en la cabecera HTTP (`Authorization: Bearer <token>`) de la llamada `RestClient` hacia el Gateway.
+3. **Validación Distribuida:** Al ser *Stateless*, el Backend no necesita preguntar al servicio de Auth si la sesión es válida. Simplemente usa la misma `JWT_SECRET` compartida (vía variables de entorno) para desencriptar el token, verificar la firma y extraer los permisos (Roles) del usuario que hace la petición.
 
 ---
 

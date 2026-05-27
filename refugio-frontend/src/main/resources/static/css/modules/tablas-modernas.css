@@ -417,6 +417,7 @@ tbody tr:hover {
     height: 48px;
     width: 48px;
     object-fit: contain;
+    color: transparent;
 }
 
 /* Estilos de Tabla Premium */

@@ -8,37 +8,7 @@
 
 <body>
 <div th:fragment="content">
-        <style>
-            .status-dots-container .dot-radio { position: relative; cursor: pointer; display: block; width: 18px; height: 18px; }
-            .status-dots-container .dot-radio input { position: absolute; opacity: 0; cursor: pointer; }
-            .status-dots-container .checkmark { position: absolute; top: 0; left: 0; height: 18px; width: 18px; border-radius: 50%; border: 2px solid #e2e8f0; transition: all 0.2s ease; }
-            
-            .dot-radio.pending .checkmark { border-color: #f59e0b; background: transparent; }
-            .dot-radio.pending input:checked ~ .checkmark { background: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2); }
-            
-            .dot-radio.in-progress .checkmark { border-color: #3b82f6; background: transparent; }
-            .dot-radio.in-progress input:checked ~ .checkmark { background: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-            
-            .dot-radio.completed .checkmark { border-color: #10b981; background: transparent; }
-            .dot-radio.completed input:checked ~ .checkmark { background: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
-            
-            .dot-radio.cancelled .checkmark { border-color: #94a3b8; background: transparent; }
-            .dot-radio.cancelled input:checked ~ .checkmark { background: #94a3b8; box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.2); }
-            
-            /* Permitir que el título de las tareas en el calendario use múltiples líneas */
-            .fc-event-title {
-                white-space: normal !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
-                display: -webkit-box !important;
-                -webkit-line-clamp: 3 !important;
-                line-clamp: 3 !important;
-                -webkit-box-orient: vertical !important;
-                line-height: 1.2 !important;
-                font-size: 0.85em !important;
-            }
-        </style>
-        <div class="table-wrapper" style="padding-top: 1.7rem;">
+<div class="table-wrapper" style="padding-top: 1.7rem;">
             <div th:if="${modoSeleccion}" 
                  style="background: #fdf2f8; border: 1px solid #f9a8d4; padding: 16px 24px; border-radius: 20px; display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 2rem; animation: slideInDown 0.4s ease; box-shadow: var(--shadow-md);">
                 <div style="display: flex; align-items: center; gap: 15px;">

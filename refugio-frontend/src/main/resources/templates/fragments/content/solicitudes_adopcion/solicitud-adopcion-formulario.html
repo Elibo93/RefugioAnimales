@@ -174,9 +174,12 @@
                     </div>
 
                     <!-- ACCIONES -->
-                    <div class="modal-actions" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #f1f5f9; display: flex; gap: 1rem; justify-content: flex-end;">
-                        <button type="button" class="btn btn-outline" onclick="window.history.back()" style="border-radius: 14px; padding: 0.75rem 2rem; font-weight: 600; color: #64748b; border: 2px solid #e2e8f0; text-decoration: none; display: flex; align-items: center; cursor: pointer; background: transparent;" th:text="#{generic.auto.cancelar}"></button>
-                        <button type="submit" class="btn btn-primary" id="btn-submit" style="border-radius: 14px; padding: 0.75rem 2.5rem; font-weight: 700; background: var(--primary); border: none; box-shadow: 0 4px 6px -1px rgba(var(--primary-rgb), 0.2); display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <div class="form-actions">
+                        <button type="button" class="btn-form-cancel" onclick="window.history.back()">
+                            <i data-lucide="x" style="width: 18px;"></i>
+                            <span th:text="#{generic.auto.cancelar}"></span>
+                        </button>
+                        <button type="submit" class="btn-form-submit" id="btn-submit">
                             <i data-lucide="save" style="width: 20px;"></i>
                             <span id="btn-text" th:text="${solicitud.id == null ? #messages.msg('generic.btn.create') : #messages.msg('generic.btn.save')}">[[#{generic.auto.save}]]</span>
                         </button>

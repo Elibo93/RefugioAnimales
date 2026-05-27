@@ -62,9 +62,12 @@
                 <textarea name="comentario" rows="4" placeholder="Cuéntanos un poco sobre por qué has elegido a este peludo..."></textarea>
             </div>
 
-            <div style="grid-column: 1 / -1; margin-top: 2rem; display: flex; gap: 1rem;">
-                <a th:href="@{/web/home}" class="btn btn-secondary" style="flex: 1; justify-content: center; height: 56px; border-radius: 16px;" th:text="#{generic.auto.cancelar}"></a>
-                <button type="submit" class="btn btn-primary" style="flex: 2; justify-content: center; height: 56px; border-radius: 16px;">
+            <div class="form-actions">
+                <a th:href="@{/web/home}" class="btn-form-cancel">
+                    <i data-lucide="x" style="width: 18px;"></i>
+                    <span th:text="#{generic.auto.cancelar}"></span>
+                </a>
+                <button type="submit" class="btn-form-submit">
                     <i data-lucide="send"></i>
                     <span th:text="#{solicitud.auto.enviar.solicitud}"></span>
                 </button>

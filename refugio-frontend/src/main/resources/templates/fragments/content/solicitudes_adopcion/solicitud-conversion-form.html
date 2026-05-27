@@ -158,11 +158,12 @@
                     placeholder="Cuéntanos un poco sobre tu hogar y por qué has elegido a este peludo..."></textarea>
             </div>
 
-            <div style="grid-column: 1 / -1; margin-top: 2rem; display: flex; gap: 1rem;">
-                <button type="button" class="btn btn-secondary" onclick="window.history.back()"
-                    style="flex: 1; justify-content: center; height: 56px; border-radius: 16px; border: none; cursor: pointer;" th:text="#{generic.auto.cancelar}"></button>
-                <button type="submit" class="btn btn-primary"
-                    style="flex: 2; justify-content: center; height: 56px; border-radius: 16px;">
+            <div class="form-actions">
+                <button type="button" class="btn-form-cancel" onclick="window.history.back()">
+                    <i data-lucide="x" style="width: 18px;"></i>
+                    <span th:text="#{generic.auto.cancelar}"></span>
+                </button>
+                <button type="submit" class="btn-form-submit">
                     <i data-lucide="send"></i>
                     <span th:text="#{solicitud.auto.enviar.solicitud}"></span>
                 </button>

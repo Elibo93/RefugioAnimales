@@ -51,6 +51,19 @@ Aunque el desarrollo está en curso, se establece que:
 1.  Cada nuevo **Caso de Uso** debe ir acompañado de su correspondiente test unitario.
 2.  Antes de cada despliegue, se debe ejecutar la suite completa de integración en el entorno Docker para validar la conectividad.
 
+#### 5. Integración y Entrega Continua (CI/CD)
+Para automatizar la calidad del software, la arquitectura está preparada para integrarse en un pipeline de CI/CD (por ejemplo, mediante **GitHub Actions** o **GitLab CI**).
+
+**Fase de Integración Continua (CI):**
+Al abrir un *Pull Request* o subir código a la rama principal (`main`), el pipeline ejecutará automáticamente:
+1. **Build & Test:** `mvn clean verify`. Esto compila todos los microservicios y ejecuta los tests unitarios y de integración de forma aislada.
+2. **Análisis de Calidad:** Ejecución de SonarQube/SonarLint en el código fuente para bloquear código con vulnerabilidades o deuda técnica.
+
+**Fase de Entrega Continua (CD):**
+Si la fase CI pasa con éxito, el pipeline procederá a la paquetización:
+1. **Construcción de Imágenes:** Se ejecutan los `Dockerfile` de cada microservicio (`auth`, `backend`, `gateway`, `frontend`, `eureka`).
+2. **Registro:** Las imágenes generadas se etiquetan (ej. `v1.1`) y se suben a un registro de contenedores (como Docker Hub o GitHub Container Registry), dejándolas listas para su despliegue automatizado en el servidor de producción mediante `docker-compose`.
+
 ---
 
 [Volver al Índice de Documentación](/README.md)
