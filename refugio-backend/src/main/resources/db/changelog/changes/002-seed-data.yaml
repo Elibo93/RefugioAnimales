@@ -1026,7 +1026,7 @@ databaseChangeLog:
             value: CHIP002
         - column:
             name: estado
-            value: DISPONIBLE
+            value: ADOPTADO
         - column:
             name: edad
             valueNumeric: 2

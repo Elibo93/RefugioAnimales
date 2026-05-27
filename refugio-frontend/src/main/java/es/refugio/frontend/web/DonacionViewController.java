@@ -144,16 +144,7 @@ public class DonacionViewController {
             @RequestParam(required = false) String descripcion,
             Model model) {
 
-        // Si no hay usuarioId, buscamos el usuario anónimo del sistema
-        if (usuarioId == null) {
-            List<UsuarioRecord> usuarios = donacionService.fetchUsuarios();
-            for (UsuarioRecord u : usuarios) {
-                if ("anonimo@refugio.es".equals(u.email())) {
-                    usuarioId = u.id();
-                    break;
-                }
-            }
-        }
+        // El backend se encarga de resolver el usuario anónimo dinámicamente si usuarioId es null
 
         Map<String, Object> donacionTemp = new HashMap<>();
         donacionTemp.put("usuarioId", usuarioId);
@@ -231,16 +222,7 @@ public class DonacionViewController {
             @RequestParam String descripcion,
             Model model) {
 
-        // Asegurar que tenemos un usuarioId (si sigue siendo null, buscamos el anónimo)
-        if (usuarioId == null) {
-            List<UsuarioRecord> usuarios = donacionService.fetchUsuarios();
-            for (UsuarioRecord u : usuarios) {
-                if ("anonimo@refugio.es".equals(u.email())) {
-                    usuarioId = u.id();
-                    break;
-                }
-            }
-        }
+        // El backend se encarga de resolver el usuario anónimo dinámicamente si usuarioId es null
 
         Map<String, Object> body = new HashMap<>();
         body.put("usuarioId", usuarioId);

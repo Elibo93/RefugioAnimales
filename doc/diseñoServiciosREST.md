@@ -14,6 +14,8 @@ La plataforma del **Refugio de Animales** expone una interfaz programática (API
     *   `403 Forbidden` (Permisos insuficientes)
     *   `404 Not Found` (Recurso inexistente)
 
+Para ver el flujo completo de autenticación y cómo se propaga el token JWT entre los microservicios, consulta la [Documentación de Seguridad](seguridad.md).
+
 ---
 
 ### 1. Gestión de Seguridad y Usuarios (Auth)
@@ -104,10 +106,16 @@ Gestionado por el microservicio `refugio-auth`.
 
 ---
 
-### 🚀 Documentación Interactiva (Swagger/OpenAPI)
+### 🚀 Documentación Interactiva y Pruebas (Postman)
 Para consultar los esquemas de datos (JSON) y probar los endpoints en tiempo real:
-*   **URL**: `http://localhost:8080/swagger-ui.html` (vía API Gateway).
-*   **OpenAPI Spec**: `/v3/api-docs`
+
+1. **Swagger/OpenAPI UI**: 
+   *   URL de acceso: `http://localhost:8080/swagger-ui.html` (vía API Gateway).
+   *   OpenAPI Spec crudo: `/v3/api-docs`
+
+2. **Colección de Postman**: 
+   *   Se ha preparado una colección de pruebas lista para importar. Incluye scripts automáticos que capturan el JWT en el login y lo inyectan en las siguientes peticiones.
+   *   Descárgala aquí: [**RefugioAnimales_API.postman_collection.json**](postman/RefugioAnimales_API.postman_collection.json)
 
 ---
 

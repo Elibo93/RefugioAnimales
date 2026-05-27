@@ -8,71 +8,8 @@
 
 <body>
     <div th:fragment="content" class="fade-in">
-        <style>
-            @keyframes pulse-badge {
-                0% {
-                    transform: scale(1);
-                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
-                }
 
-                50% {
-                    transform: scale(1.05);
-                    box-shadow: 0 4px 18px rgba(239, 68, 68, 0.4);
-                }
 
-                100% {
-                    transform: scale(1);
-                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
-                }
-            }
-
-            @keyframes pulse-border {
-                0% {
-                    border-color: #fca5a5;
-                    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.05);
-                }
-
-                50% {
-                    border-color: #ef4444;
-                    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.15);
-                }
-
-                100% {
-                    border-color: #fca5a5;
-                    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.05);
-                }
-            }
-
-            .share-option-btn {
-                background: transparent;
-                transition: all 0.2s ease;
-            }
-
-            .share-option-btn:hover {
-                background: #f1f5f9;
-                transform: translateX(4px);
-            }
-
-            #share-wa:hover {
-                background: #f0fdf4 !important;
-                color: #166534 !important;
-            }
-
-            #share-fb:hover {
-                background: #eff6ff !important;
-                color: #1e40af !important;
-            }
-
-            #share-x:hover {
-                background: #f8fafc !important;
-                color: #0f172a !important;
-            }
-
-            #share-mail:hover {
-                background: #fef2f2 !important;
-                color: #991b1b !important;
-            }
-        </style>
         <div class="profile-header">
             <div class="profile-cover"
                 style="height: 200px; background: linear-gradient(135deg, var(--primary-light), var(--primary)); border-radius: 20px 20px 0 0; position: relative;">
@@ -81,30 +18,8 @@
                     <!-- Favorito (Solo usuarios logueados no admins) -->
                     <div th:if="${isAuthenticated and !isAdmin}"
                         style="background: rgba(255,255,255,0.9); border-radius: 50%; padding: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
-                        <style>
-                            .btn-favorito-detalle {
-                                background: transparent;
-                                border: none;
-                                width: 42px;
-                                height: 42px;
-                                border-radius: 50%;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                color: #94a3b8;
-                                cursor: pointer;
-                                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                            }
 
-                            .btn-favorito-detalle:hover {
-                                transform: scale(1.1);
-                                color: #ef4444;
-                            }
 
-                            .btn-favorito-detalle.active {
-                                color: #ef4444;
-                            }
-                        </style>
                         <button th:if="${misFavoritosIds != null and misFavoritosIds.contains(animal.id)}" type="button"
                             class="btn-favorito-detalle active"
                             th:attr="hx-post=@{/web/animales/{id}/favorito(id=${animal.id})}" hx-swap="outerHTML">

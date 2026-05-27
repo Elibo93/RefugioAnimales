@@ -34,7 +34,7 @@ Bienvenido a la plataforma de gestión de **Refugio de Animales**, una solución
 
 ### ⚙️ Fase 3: Arquitectura y Diseño Técnico
 *   [**Base de Datos (DB)**](doc/db.md): Modelo E-R, tablas e integridad referencial.
-*   [**Entorno de Desarrollo**](doc/entornoDesarrollo.md): Stack tecnológico y configuración del entorno.
+*   [**Entorno de Desarrollo**](doc/entornoDesarrollo.md): Stack tecnológico, configuración y guía de arranque local (Onboarding).
 *   [**Diseño de Servicios REST**](doc/diseñoServiciosREST.md): Documentación de la API de comunicación.
 *   [**Componentes**](doc/componenentes.md): Estructura modular del software.
 *   [**Gestión de Perfiles**](doc/gestiónPerfiles.md): Lógica de permisos y seguridad de usuarios.

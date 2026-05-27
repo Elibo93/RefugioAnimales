@@ -38,6 +38,13 @@ Abra su navegador (se recomienda Chrome o Firefox) y acceda a:
 > [!IMPORTANT]
 > Al acceder por primera vez, verá una advertencia de "Conexión no privada". Esto es normal en entornos de desarrollo. Haga clic en **Configuración avanzada** y luego en **Continuar a localhost (no seguro)**.
 
+> [!TIP]
+> **Credenciales por Defecto (Seed Data):**
+> Para probar el sistema sin registrarse, utilice estas credenciales pre-cargadas:
+> *   **Administrador:** `admin@refugio.es` / `admin123`
+> *   **Voluntario:** `laura@mail.com` / `password123`
+> *   **Adoptante:** `diego@mail.com` / `password123`
+
 ---
 
 ## 2. Guía de Módulos Operativos

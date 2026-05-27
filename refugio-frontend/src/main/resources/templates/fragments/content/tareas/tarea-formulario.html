@@ -8,69 +8,7 @@
 
 <body>
 <div th:fragment="content">
-        <style>
-            .volunteer-chips-container {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 10px;
-                margin-top: 10px;
-            }
-            .volunteer-chip {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                background: var(--bg-main);
-                border: 1px solid var(--border);
-                padding: 6px 12px;
-                border-radius: 100px;
-                font-size: 0.85rem;
-                color: var(--text-main);
-                transition: all 0.2s;
-            }
-            .volunteer-chip:hover {
-                border-color: var(--primary);
-                background: white;
-            }
-            .volunteer-chip .remove-btn {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 18px;
-                height: 18px;
-                border-radius: 50%;
-                background: #f3f4f6;
-                color: #9ca3af;
-                border: none;
-                cursor: pointer;
-                padding: 0;
-                transition: all 0.2s;
-            }
-            .volunteer-chip .remove-btn:hover {
-                background: #fee2e2;
-                color: #ef4444;
-            }
-            .btn-add-vol {
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                background: white;
-                border: 1px dashed var(--border);
-                padding: 6px 14px;
-                border-radius: 100px;
-                font-size: 0.85rem;
-                color: var(--text-muted);
-                cursor: pointer;
-                transition: all 0.2s;
-                margin-top: 5px;
-            }
-            .btn-add-vol:hover {
-                border-color: var(--primary);
-                color: var(--primary);
-                background: var(--primary-light);
-            }
-        </style>
-
-        <div class="page-header" style="text-align:center; margin-bottom: 2rem;">
+<div class="page-header" style="text-align:center; margin-bottom: 2rem;">
             <h1 class="page-title" style="display: flex; align-items: center; justify-content: center; gap: 12px;">
                 <div class="premium-modal-icon-wrapper" style="margin: 0; width: 48px; height: 48px; background: #f3f4f6; color: #4b5563;">
                     <i data-lucide="clipboard-list"></i>
@@ -157,9 +95,12 @@
 
                 </div>
 
-                <div class="modal-actions" style="margin-top: 3rem; display: flex; gap: 15px; justify-content: flex-end;">
-                    <button type="button" onclick="window.history.back()" class="btn btn-secondary" style="border: none; cursor: pointer;" th:text="#{generic.auto.cancelar}"></button>
-                    <button type="submit" class="btn btn-primary">
+                <div class="form-actions">
+                    <button type="button" onclick="window.history.back()" class="btn-form-cancel">
+                        <i data-lucide="x" style="width: 18px;"></i>
+                        <span th:text="#{generic.auto.cancelar}"></span>
+                    </button>
+                    <button type="submit" class="btn-form-submit">
                         <i data-lucide="save" style="width: 18px;"></i>
                         <span th:text="${tarea.id == null ? #messages.msg('tarea.auto.crear.tarea') : #messages.msg('generic.auto.guardar.cambios')}">Crear Tarea</span>
                     </button>

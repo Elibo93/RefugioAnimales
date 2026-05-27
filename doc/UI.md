@@ -14,9 +14,17 @@ Para un proyecto de TFG, la estética es clave. Hemos definido un sistema de dis
 
 ---
 
-#### 2. Mapa de Vistas por Módulos
+#### 2. Arquitectura CSS y Sistema de Diseño Técnico
+A nivel de ingeniería frontend, se ha implementado un sistema modular y mantenible basado en Vanilla CSS avanzado:
+*   **Variables Globales (Custom Properties):** Centralizadas en `reset-and-variables.css`. Permiten mantener la consistencia (colores `--primary`, espaciados `--spacing-md`, sombras) y cambiar el tema completo modificando un solo archivo.
+*   **Modularidad:** Los estilos se dividen en módulos independientes (`botones.css`, `formularios.css`, `tablas-modernas.css`) para evitar colisiones de especificidad y facilitar su reutilización en los fragmentos de Thymeleaf.
+*   **Gestión de Caché y Content Versioning:** Para garantizar un alto rendimiento sin problemas de "caché obsoleta", Spring Boot inyecta un *hash* criptográfico en el nombre de los archivos estáticos en tiempo real (`chain.strategy.content`). Esto permite cachear el CSS/JS agresivamente en el navegador pero fuerza la descarga de la nueva versión automáticamente si el desarrollador modifica el código.
 
-##### 2.1. Módulo de Administración (Control Total)
+---
+
+#### 3. Mapa de Vistas por Módulos
+
+##### 3.1. Módulo de Administración (Control Total)
 Herramientas de gestión estratégica para el personal directivo del refugio.
 
 | ID Vista | Nombre | Descripción |
@@ -29,7 +37,7 @@ Herramientas de gestión estratégica para el personal directivo del refugio.
 
 ---
 
-##### 2.2. Módulo de Voluntariado (Operativa Diaria)
+##### 3.2. Módulo de Voluntariado (Operativa Diaria)
 Optimizado para el uso en movilidad y el cuidado directo.
 
 | ID Vista | Nombre | Descripción |
@@ -39,7 +47,7 @@ Optimizado para el uso en movilidad y el cuidado directo.
 
 ---
 
-##### 2.3. Módulo del Adoptante (Usuario Registrado)
+##### 3.3. Módulo del Adoptante (Usuario Registrado)
 Panel personal para la interacción directa y seguimiento de procesos.
 
 | ID Vista | Nombre | Descripción |
@@ -51,7 +59,7 @@ Panel personal para la interacción directa y seguimiento de procesos.
 
 ---
 
-##### 2.4. Módulo Público y Visitante
+##### 3.4. Módulo Público y Visitante
 Enfocado en el descubrimiento y la captación de nuevos colaboradores.
 
 | ID Vista | Nombre | Descripción |
@@ -63,7 +71,7 @@ Enfocado en el descubrimiento y la captación de nuevos colaboradores.
 
 ---
 
-#### 3. Interactividad Avanzada con HTMX
+#### 4. Interactividad Avanzada con HTMX
 Para mejorar la eficiencia y evitar recargas completas, se han implementado patrones de **actualización parcial**:
 *   **Inline Editing:** Los estados de las tareas se actualizan mediante peticiones HTMX que refrescan solo el componente afectado.
 *   **Filtros Dinámicos:** El catálogo se filtra en tiempo real sin perder la posición del scroll, enviando fragmentos de HTML desde el servidor.
@@ -71,7 +79,7 @@ Para mejorar la eficiencia y evitar recargas completas, se han implementado patr
 
 ---
 
-#### 4. Diseño Responsive
+#### 5. Diseño Responsive
 La UI utiliza un sistema de rejilla flexible (CSS Grid/Flexbox) que garantiza:
 - **Desktop:** Panel de administración denso con toda la información visible.
 - **Tablet/Mobile:** Vistas simplificadas con botones de gran tamaño (44x44px mín.) para facilitar el registro de datos mientras se atiende a los animales.

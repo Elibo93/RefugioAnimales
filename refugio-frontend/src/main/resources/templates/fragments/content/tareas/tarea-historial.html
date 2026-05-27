@@ -5,44 +5,7 @@
 </head>
 <body>
     <div th:fragment="content">
-        <style>
-            .timeline-container { position: relative; padding: 20px 0; }
-            .timeline-container::before { content: ''; position: absolute; left: 81px; top: 0; bottom: 0; width: 2px; background: #e2e8f0; }
-            
-            .timeline-item { position: relative; margin-bottom: 30px; padding-left: 120px; animation: slideInUp 0.4s ease forwards; opacity: 0; }
-            .timeline-item:nth-child(1) { animation-delay: 0.1s; }
-            .timeline-item:nth-child(2) { animation-delay: 0.2s; }
-            .timeline-item:nth-child(3) { animation-delay: 0.3s; }
-            
-            .timeline-dot { position: absolute; left: 74px; top: 0; width: 16px; height: 16px; border-radius: 50%; background: white; border: 3px solid var(--primary); z-index: 1; box-shadow: 0 0 0 4px white; }
-            
-            .timeline-date { position: absolute; left: 0; top: 0; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; width: 65px; text-align: right; line-height: 1.2; }
-            
-            .timeline-content { background: white; border-radius: 16px; padding: 16px 20px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); transition: all 0.3s ease; }
-            .timeline-content:hover { transform: translateX(5px); box-shadow: var(--shadow-md); border-color: var(--primary-light); }
-            
-            .status-change { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-            .status-pill { font-size: 0.7rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; }
-            
-            .status-pill.prev { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
-            .status-pill.new { background: rgba(79, 70, 229, 0.1); color: var(--primary); border: 1px solid rgba(79, 70, 229, 0.2); }
-            
-            /* Colores dinámicos para el nuevo estado */
-            .status-pill.new.COMPLETADA, .status-pill.new.FINALIZADA { background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.2); }
-            .status-pill.new.RECHAZADA, .status-pill.new.CANCELADA { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.2); }
-            .status-pill.new.EN_PROCESO, .status-pill.new.ACEPTADA { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-color: rgba(59, 130, 246, 0.2); }
-            .status-pill.new.PROPUESTA { background: rgba(236, 72, 153, 0.1); color: var(--secondary); border-color: rgba(236, 72, 153, 0.2); }
-            
-            .timeline-user { font-size: 0.85rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
-            .timeline-obs { font-size: 0.8rem; color: var(--text-muted); margin-top: 6px; font-style: italic; }
-            
-            @keyframes slideInUp {
-                from { transform: translateY(20px); opacity: 0; }
-                to { transform: translateY(0); opacity: 1; }
-            }
-        </style>
-
-        <div class="header-section" style="margin-bottom: 2rem;">
+<div class="header-section" style="margin-bottom: 2rem;">
             <div style="display: flex; align-items: center; justify-content: space-between;">
                 <div>
                     <a th:href="@{/web/tareas}" 

@@ -227,10 +227,12 @@
                     </div>
 
                     <!-- ACCIONES -->
-                    <div class="modal-actions" style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid #f1f5f9; display: flex; gap: 1.5rem; justify-content: flex-end;">
-                        <button type="button" class="btn" onclick="window.history.back()"
-                           style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: #64748b; background: #f1f5f9; border: none; cursor: pointer;" th:text="#{generic.auto.cancelar}"></button>
-                        <button type="submit" class="btn btn-primary" style="padding: 1rem 3rem; border-radius: 16px; font-weight: 700; background: #0891b2; border: none; color: white; cursor: pointer;">
+                    <div class="form-actions" style="--btn-color: #0891b2; --btn-hover: #0e7490; --btn-shadow: rgba(8, 145, 178, 0.2);">
+                        <button type="button" class="btn-form-cancel" onclick="window.history.back()">
+                            <i data-lucide="x" style="width: 18px;"></i>
+                            <span th:text="#{generic.auto.cancelar}"></span>
+                        </button>
+                        <button type="submit" class="btn-form-submit">
                             <span th:text="${voluntario.id == null ? #messages.msg('voluntario.btn.enviar_solicitud') : #messages.msg('voluntario.btn.guardar_cambios')}">Enviar</span>
                         </button>
                     </div>

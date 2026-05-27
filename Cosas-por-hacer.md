@@ -69,7 +69,7 @@ Este documento contiene la lista detallada de tareas pendientes para completar e
 ### 10) Calidad y DevOps
 - [✅] **i18n:** Traducir toda la app (ES/EN) usando archivos de propiedades.
 - [ ] **Docker:** Unificar toda la infraestructura (Gateway, Auth, Backend, Frontend, DB) en un `docker-compose.yml`.
-- [ ] **Código:** Refactorizar controladores, unificar mappers, CSS en el front y archivos scripts y completar JavaDoc, -> 
+- [✅] **Código:** Refactorizar controladores, unificar mappers, CSS en el front y archivos scripts y completar JavaDoc, -> 
 
 ### 11) Restaurar validaciones de DNI
 - [✅] Falta la validación de DNI

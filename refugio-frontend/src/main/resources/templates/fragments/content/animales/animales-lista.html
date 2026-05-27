@@ -141,75 +141,8 @@
                         </a>
                     </div>
 
-                    <style>
-                        .filter-chip-premium {
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            height: 38px;
-                            border-radius: 12px;
-                            background: white;
-                            border: 2px solid #f1f5f9;
-                            color: #64748b;
-                            font-size: 0.85rem;
-                            font-weight: 600;
-                            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-                        }
 
-                        input:checked+.filter-chip-premium {
-                            background: var(--primary);
-                            border-color: var(--primary);
-                            color: white;
-                            box-shadow: 0 8px 15px rgba(var(--primary-rgb), 0.25);
-                            transform: translateY(-2px);
-                        }
 
-                        .filter-chip-premium:hover {
-                            border-color: var(--primary);
-                            color: var(--primary);
-                        }
-
-                        input:checked+.filter-chip-premium:hover {
-                            color: white;
-                        }
-
-                        .urgencia-card:hover {
-                            background: #fee2e2 !important;
-                            border-color: #fecaca !important;
-                            transform: scale(1.02);
-                        }
-
-                        .favorito-card:hover {
-                            background: #fce7f3 !important;
-                            border-color: #fbcfe8 !important;
-                            transform: scale(1.02);
-                        }
-
-                        .btn-favorito {
-                            background: rgba(255, 255, 255, 0.9);
-                            border: none;
-                            width: 38px;
-                            height: 38px;
-                            border-radius: 50%;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            color: #94a3b8;
-                            cursor: pointer;
-                            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-                        }
-
-                        .btn-favorito:hover {
-                            transform: scale(1.1);
-                            color: #ef4444;
-                        }
-
-                        .btn-favorito.active {
-                            color: #ef4444;
-                            background: white;
-                        }
-                    </style>
                     <!-- BOTÓN PDF (Solo para personal del refugio) -->
                     <div sec:authorize="hasRole('ADMIN')"
                         style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: center; gap: 12px;">
