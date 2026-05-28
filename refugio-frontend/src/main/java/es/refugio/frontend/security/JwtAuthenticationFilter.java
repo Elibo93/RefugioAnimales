@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -44,9 +45,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .filter(role -> !role.isEmpty())
                         .flatMap(role -> {
                             if ("ROLE_VOLUNTARIO_ADOPTANTE".equals(role)) {
-                                return java.util.stream.Stream.of(role, "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE");
+                                return Stream.of(role, "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE");
                             }
-                            return java.util.stream.Stream.of(role);
+                            return Stream.of(role);
                         })
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
@@ -60,7 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception ex) {
-            logger.error("Could not set user authentication in security context", ex);
+            logger.error("No se pudo establecer la autenticación de usuario en el contexto de seguridad", ex);
         }
 
         filterChain.doFilter(request, response);

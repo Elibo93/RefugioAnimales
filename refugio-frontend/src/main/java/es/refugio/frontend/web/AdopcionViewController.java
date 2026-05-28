@@ -1,6 +1,6 @@
 package es.refugio.frontend.web;
-import org.springframework.context.i18n.LocaleContextHolder;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,36 +14,33 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import es.refugio.common.util.ExcelExportHelper;
-
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
 import es.refugio.frontend.web.dto.*;
-import es.refugio.frontend.web.util.ViewControllerHelper;
-
+import es.refugio.frontend.service.MessageService;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import es.refugio.frontend.service.AdopcionService;
 import es.refugio.frontend.service.AnimalService;
 
-@Controller
-@RequiredArgsConstructor
 /**
  * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Adopcion.
  *
  * @author Elisabeth
  * @author Diego
  */
+@Controller
+@RequiredArgsConstructor
 public class AdopcionViewController {
 
     private final AdopcionService adopcionService;
     private final AnimalService animalService;
     private final TemplateEngine templateEngine;
-    private final ViewControllerHelper helper;
+    private final MessageService messageService;
 
     @GetMapping(WebRoutes.ADOPCIONES_BASE)
     @PreAuthorize("hasRole('ADMIN')")
@@ -162,7 +159,7 @@ public class AdopcionViewController {
             RedirectAttributes redirectAttributes) {
 
         adopcionService.crearAdopcion(idPersona, idAnimal, estado, fechaAdopcion);
-        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.adopcion_creada"));
+        redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.adopcion_creada"));
         return "redirect:" + WebRoutes.ADOPCIONES_BASE;
     }
 
@@ -216,7 +213,7 @@ public class AdopcionViewController {
             RedirectAttributes redirectAttributes) {
 
         adopcionService.editarAdopcion(id, idPersona, idAnimal, estado, fechaAdopcion);
-        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.adopcion_editada"));
+        redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.adopcion_editada"));
         return "redirect:" + WebRoutes.ADOPCIONES_BASE;
     }
 

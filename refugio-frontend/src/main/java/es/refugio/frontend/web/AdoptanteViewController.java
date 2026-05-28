@@ -1,6 +1,6 @@
 package es.refugio.frontend.web;
-import org.springframework.context.i18n.LocaleContextHolder;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -9,12 +9,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientResponseException;
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.dto.*;
-import es.refugio.frontend.web.util.ViewControllerHelper;
+import es.refugio.frontend.service.MessageService;
 import es.refugio.frontend.web.util.ErrorMessageExtractor;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import jakarta.servlet.http.HttpServletRequest;
 import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
@@ -27,28 +26,25 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import es.refugio.common.util.ExcelExportHelper;
-
 import es.refugio.frontend.service.AdoptanteService;
 
 /**
  * AdoptanteViewController — gestiona el flujo de conversión de usuario a adoptante.
  * Delega completamente en el backend a través de la API REST.
- */
-@Controller
-@RequiredArgsConstructor
-/**
  * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Adoptante.
  *
  * @author Elisabeth
  * @author Diego
  */
+@Controller
+@RequiredArgsConstructor
 public class AdoptanteViewController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdoptanteViewController.class);
 
     private final AdoptanteService adoptanteService;
     private final TemplateEngine templateEngine;
-    private final ViewControllerHelper helper;
+    private final MessageService messageService;
 
     @GetMapping(WebRoutes.ADOPTANTES_BASE)
     @PreAuthorize("hasRole('ADMIN')")
@@ -258,7 +254,7 @@ public class AdoptanteViewController {
         try {
             adoptanteService.crearAdoptanteYPerfil(usuarioId, nombre, apellido, dni, direccion, telefono, fechaNacimiento, estadoValidacion);
 
-            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.adoptante_creado_admin"));
+            redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.adoptante_creado_admin"));
             return "redirect:" + WebRoutes.ADOPTANTES_BASE;
         } catch (Exception e) {
             logger.error("Error al crear adoptante: " + ErrorMessageExtractor.extract(e));
@@ -283,7 +279,7 @@ public class AdoptanteViewController {
         try {
             adoptanteService.editarAdoptanteYPerfil(id, usuarioId, nombre, apellido, dni, direccion, telefono, fechaNacimiento, estadoValidacion);
 
-            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.adoptante_editado"));
+            redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.adoptante_editado"));
             return "redirect:" + WebRoutes.ADOPTANTES_BASE;
         } catch (RestClientResponseException e) {
             logger.error("Error inesperado al actualizar adoptante: " + ErrorMessageExtractor.extract(e));

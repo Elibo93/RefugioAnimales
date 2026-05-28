@@ -1,6 +1,7 @@
 package es.refugio.common.infraestructure.web.error;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 
@@ -15,7 +16,7 @@ public class CustomResponse {
 	private final LocalDateTime date;
 	private final HttpStatus status;
 	private final String message;
-	private final java.util.Map<String, Object> details;
+	private final Map<String, Object> details;
 
     public CustomResponse(LocalDateTime date, HttpStatus status, String message) {
         this.date = date;

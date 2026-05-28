@@ -15,6 +15,7 @@ import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Join;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -134,7 +135,7 @@ public class VoluntarioJpaRepositoryImpl implements VoluntarioRepository {
                 Root<DisponibilidadVoluntarioEntity> rootD = subD.from(DisponibilidadVoluntarioEntity.class);
                 subD.select(rootD.get("voluntario").get("id"));
                 subD.where(
-                    cb.equal(rootD.get("fecha"), java.time.LocalDate.parse(excludeDate)),
+                    cb.equal(rootD.get("fecha"), LocalDate.parse(excludeDate)),
                     cb.equal(rootD.get("estado"), EstadoDisponibilidad.NO_DISPONIBLE)
                 );
                 predicates.add(cb.not(root.get("id").in(subD)));

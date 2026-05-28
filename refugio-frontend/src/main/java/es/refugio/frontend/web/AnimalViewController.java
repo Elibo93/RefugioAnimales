@@ -1,10 +1,9 @@
 package es.refugio.frontend.web;
-import org.springframework.context.i18n.LocaleContextHolder;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -17,37 +16,42 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import es.refugio.common.util.ExcelExportHelper;
-
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
 import es.refugio.frontend.web.dto.*;
-import es.refugio.frontend.web.util.ViewControllerHelper;
-
+import es.refugio.frontend.service.MessageService;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import es.refugio.frontend.service.AnimalService;
+import es.refugio.frontend.service.VoluntarioService;
+import es.refugio.frontend.service.HistorialMedicoService;
+import es.refugio.frontend.service.AdopcionService;
+import es.refugio.frontend.service.AdoptanteService;
 
-@Controller
-@RequiredArgsConstructor
 /**
  * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Animal.
  *
  * @author Elisabeth
  * @author Diego
  */
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequiredArgsConstructor
 public class AnimalViewController {
 
     private final AnimalService animalService;
+    private final VoluntarioService voluntarioService;
+    private final HistorialMedicoService historialMedicoService;
+    private final AdopcionService adopcionService;
+    private final AdoptanteService adoptanteService;
     private final TemplateEngine templateEngine;
-    private final ViewControllerHelper helper;
-
-    @Value("${backend.api.url}")
-    private String apiUrl;
+    private final MessageService messageService;
 
     @GetMapping("/web/animales/buscar")
     public String buscarAnimales(@RequestParam(required = false) String animal_q, Model model) {
@@ -169,7 +173,7 @@ public class AnimalViewController {
         }
 
         try {
-            List<VoluntarioRecord> voluntarios = helper.fetchList(apiUrl + "/v1/voluntarios", VoluntarioRecord.class);
+            List<VoluntarioRecord> voluntarios = voluntarioService.fetchAllVoluntarios();
             model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), voluntarios);
         } catch (Exception e) {
             model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), List.of());
@@ -221,7 +225,7 @@ public class AnimalViewController {
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
 
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(),
-                helper.fetchList(apiUrl + "/v1/voluntarios", VoluntarioRecord.class));
+                voluntarioService.fetchAllVoluntarios());
         model.addAttribute("tamanos", List.of("PEQUEÑO", "MEDIANO", "GRANDE", "GIGANTE"));
         model.addAttribute("sexos", List.of("MACHO", "HEMBRA"));
         model.addAttribute("estados", List.of("DISPONIBLE", "ADOPTADO", "EN_TRATAMIENTO", "RESERVADO"));
@@ -288,7 +292,7 @@ public class AnimalViewController {
 
         try {
             animalService.crearAnimal(body, fotoArchivo);
-            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.animal_creado"));
+            redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.animal_creado"));
         } catch (HttpClientErrorException e) {
             throw e;
         }
@@ -302,7 +306,7 @@ public class AnimalViewController {
         AnimalRecord animal = animalService.fetchAnimalById(id);
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
         model.addAttribute(ModelAttribute.Voluntario_LIST.getName(),
-                helper.fetchList(apiUrl + "/v1/voluntarios", VoluntarioRecord.class));
+                voluntarioService.fetchAllVoluntarios());
         model.addAttribute("tamanos", List.of("PEQUEÑO", "MEDIANO", "GRANDE", "GIGANTE"));
         model.addAttribute("sexos", List.of("MACHO", "HEMBRA"));
         model.addAttribute("estados", List.of("DISPONIBLE", "ADOPTADO", "EN_TRATAMIENTO", "RESERVADO"));
@@ -367,9 +371,9 @@ public class AnimalViewController {
         try {
             animalService.editarAnimal(id, body, fotoArchivo);
         } catch (Exception e) {
-            System.err.println("Error editando animal: " + e.getMessage());
+            log.error("Error editando animal: {}", e.getMessage());
         }
-        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.animal_editado"));
+        redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.animal_editado"));
         return "redirect:" + WebRoutes.ANIMALES_BASE;
     }
 
@@ -450,7 +454,6 @@ public class AnimalViewController {
         return "fragments/content/animales/animales-detalle-modal :: detalle";
     }
 
-    @SuppressWarnings("rawtypes")
     @GetMapping(WebRoutes.ANIMALES_DETALLE)
     public String verDetalle(@PathVariable Integer id, Model model, HttpServletRequest request,
             HttpServletResponse response) {
@@ -468,11 +471,10 @@ public class AnimalViewController {
 
         model.addAttribute("favoritosCount", animalService.countFavoritos(id));
 
-        model.addAttribute("historiales", helper.fetchList(apiUrl + "/v1/historial-medico/animal/" + id, Map.class));
+        model.addAttribute("historiales", historialMedicoService.fetchByAnimalId(id));
 
         try {
-            List<AdopcionRecord> adopciones = helper.fetchList(apiUrl + "/v1/adopciones/animal/" + id,
-                    AdopcionRecord.class);
+            List<AdopcionRecord> adopciones = adopcionService.fetchAdopcionesByAnimalId(id);
             if (adopciones != null && !adopciones.isEmpty()) {
                 AdopcionRecord adopcion = adopciones.get(0);
 
@@ -488,8 +490,7 @@ public class AnimalViewController {
 
                 Integer adoptanteId = adopcion.adoptanteId();
                 if (adoptanteId != null) {
-                    AdoptanteRecord adoptante = helper.fetchObject(apiUrl + "/v1/adoptantes/" + adoptanteId,
-                            AdoptanteRecord.class);
+                    AdoptanteRecord adoptante = adoptanteService.fetchAdoptanteById(adoptanteId);
                     if (adoptante != null) {
                         Map<String, Object> adoptanteMap = new HashMap<>();
                         adoptanteMap.put("id", adoptante.id());
@@ -502,9 +503,7 @@ public class AnimalViewController {
 
                         if (adoptante.usuarioId() != null) {
                             try {
-                                PerfilLegalRecord legal = helper.fetchObject(
-                                        apiUrl + "/v1/perfiles-legales/usuario/" + adoptante.usuarioId(),
-                                        PerfilLegalRecord.class);
+                                PerfilLegalRecord legal = voluntarioService.fetchPerfilLegalByUsuarioId(adoptante.usuarioId());
                                 if (legal != null) {
                                     adoptanteMap.put("nombre", legal.nombre());
                                     adoptanteMap.put("apellido", legal.apellido());
@@ -512,7 +511,7 @@ public class AnimalViewController {
                                     adoptanteMap.put("direccion", legal.direccion());
                                 }
                             } catch (Exception e) {
-                                System.err.println("Error fetching PerfilLegal for adoptante: " + e.getMessage());
+                                log.error("Error obteniendo PerfilLegal para adoptante: {}", e.getMessage());
                             }
                         }
                         model.addAttribute("adoptante", adoptanteMap);
@@ -520,7 +519,7 @@ public class AnimalViewController {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Error fetching adopcion/adoptante: " + e.getMessage());
+            log.error("Error obteniendo adopción/adoptante: {}", e.getMessage());
         }
 
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Animal_DETALLE.getPath());

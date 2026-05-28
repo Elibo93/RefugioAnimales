@@ -7,6 +7,8 @@ import es.refugio.refugio.domain.repository.gamificacion.LogroRepository;
 import es.refugio.refugio.domain.repository.gamificacion.UsuarioLogroRepository;
 import es.refugio.refugio.domain.repository.gamificacion.UsuarioMetricasRepository;
 import lombok.RequiredArgsConstructor;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,8 +37,8 @@ public class GamificacionController {
     public ResponseEntity<UsuarioMetricas> getMetricas(@PathVariable Long usuarioId) {
         return metricasRepository.findByUsuarioId(usuarioId)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.ok(new UsuarioMetricas(usuarioId, 0, java.math.BigDecimal.ZERO, null,
-                        java.time.LocalDateTime.now())));
+                .orElse(ResponseEntity.ok(new UsuarioMetricas(usuarioId, 0, BigDecimal.ZERO, null,
+                        LocalDateTime.now())));
     }
 
     @GetMapping("/logros/usuario/{usuarioId}")

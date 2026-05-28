@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -32,14 +33,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             String jwt = getJwtFromRequest(request);
-            logger.info("Checking JWT from cookie in backend: " + (jwt != null ? "Found (length " + jwt.length() + ")" : "Not Found"));
+            logger.info("Comprobando JWT desde la cookie en backend: " + (jwt != null ? "Encontrado (longitud " + jwt.length() + ")" : "No encontrado"));
 
             if (jwt != null && tokenProvider.validateToken(jwt)) {
                 Claims claims = tokenProvider.getClaimsFromJWT(jwt);
                 String username = claims.getSubject();
                 String rolesStr = claims.get("roles", String.class);
                 
-                logger.info("JWT Validated for user: " + username + " with roles: " + rolesStr);
+                logger.info("JWT validado para usuario: " + username + " con roles: " + rolesStr);
                 
                 Integer usuarioId = null; 
                 Object o = claims.get("usuarioId"); 
@@ -49,11 +50,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     try {
                         usuarioId = Integer.parseInt((String)o);
                     } catch (NumberFormatException e) {
-                        logger.error("Invalid usuarioId format in JWT: " + o);
+                        logger.error("Formato de usuarioId inválido en JWT: " + o);
                     }
                 }
                 
-                logger.info("Resolved usuarioId from token: " + usuarioId);
+                logger.info("usuarioId resuelto desde token: " + usuarioId);
 
                 if (rolesStr == null) {
                     rolesStr = "";
@@ -64,9 +65,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .filter(role -> !role.isEmpty())
                         .flatMap(role -> {
                             if ("ROLE_VOLUNTARIO_ADOPTANTE".equals(role)) {
-                                return java.util.stream.Stream.of(role, "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE");
+                                return Stream.of(role, "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE");
                             }
-                            return java.util.stream.Stream.of(role);
+                            return Stream.of(role);
                         })
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
@@ -79,10 +80,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else if (jwt != null) {
-                logger.warn("JWT was found but validation failed in backend.");
+                logger.warn("Se encontró JWT pero la validación falló en el backend.");
             }
         } catch (Exception ex) {
-            logger.error("Error in JwtAuthenticationFilter: " + ex.getMessage(), ex);
+            logger.error("Error en JwtAuthenticationFilter: " + ex.getMessage(), ex);
         }
 
         filterChain.doFilter(request, response);

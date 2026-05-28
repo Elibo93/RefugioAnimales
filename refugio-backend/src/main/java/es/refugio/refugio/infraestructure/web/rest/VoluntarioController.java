@@ -1,5 +1,6 @@
 package es.refugio.refugio.infraestructure.web.rest;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -244,7 +245,7 @@ public class VoluntarioController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        setDisponibilidadService.deleteDisponibilidad(new VoluntarioId(id), java.time.LocalDate.parse(fecha));
+        setDisponibilidadService.deleteDisponibilidad(new VoluntarioId(id), LocalDate.parse(fecha));
         return ResponseEntity.noContent().build();
     }
 

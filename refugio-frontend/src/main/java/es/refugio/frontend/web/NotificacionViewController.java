@@ -14,18 +14,22 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import es.refugio.frontend.service.NotificacionService;
 import org.springframework.context.MessageSource;
-
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-@Controller
-@RequiredArgsConstructor
 /**
  * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Notificacion.
  *
  * @author Elisabeth
  * @author Diego
  */
+@Controller
+@RequiredArgsConstructor
 public class NotificacionViewController {
 
     private final NotificacionService notificacionService;
@@ -34,7 +38,7 @@ public class NotificacionViewController {
     @GetMapping("/web/notificaciones")
     public String listar(Model model,
             HttpServletRequest request,
-            java.util.Locale locale) {
+            Locale locale) {
         try {
             List<Map<String, Object>> notificaciones = notificacionService.fetchMisNotificaciones();
 
@@ -97,7 +101,7 @@ public class NotificacionViewController {
     }
 
     @GetMapping("/web/notificaciones/check-celebraciones")
-    public ResponseEntity<Void> checkCelebraciones(java.util.Locale locale) {
+    public ResponseEntity<Void> checkCelebraciones(Locale locale) {
         try {
             List<Map<String, Object>> notificaciones = notificacionService.fetchMisNotificaciones();
             for (Map<String, Object> n : notificaciones) {
@@ -134,12 +138,12 @@ public class NotificacionViewController {
                     HttpHeaders headers = new HttpHeaders();
                     headers.add("X-Celebrate", "true");
                     headers.add("X-Celebrate-Title",
-                            java.net.URLEncoder.encode(translatedTitle, java.nio.charset.StandardCharsets.UTF_8));
+                            URLEncoder.encode(translatedTitle, StandardCharsets.UTF_8));
                     headers.add("X-Celebrate-Msg",
-                            java.net.URLEncoder.encode(translatedMsg, java.nio.charset.StandardCharsets.UTF_8));
+                            URLEncoder.encode(translatedMsg, StandardCharsets.UTF_8));
                     if (!imageUrl.isEmpty()) {
                         headers.add("X-Celebrate-Img",
-                                java.net.URLEncoder.encode(imageUrl, java.nio.charset.StandardCharsets.UTF_8));
+                                URLEncoder.encode(imageUrl, StandardCharsets.UTF_8));
                     }
                     headers.add("HX-Trigger", "notificacionLeida"); // Actualizar badge también
 
@@ -160,7 +164,7 @@ public class NotificacionViewController {
      * 2. Claves i18n almacenadas directamente en BD (voluntario, adopción) →
      * resolución por clave
      */
-    private void translateNotification(Map<String, Object> n, java.util.Locale locale) {
+    private void translateNotification(Map<String, Object> n, Locale locale) {
         String titulo = (String) n.get("titulo");
         String mensaje = (String) n.get("mensaje");
         if (titulo == null)
@@ -217,13 +221,13 @@ public class NotificacionViewController {
             }
         } else if (titulo.contains("Gracias por tu donaci\u00f3n")) {
             n.put("titulo", messageSource.getMessage("notification.donation.title", null, titulo, locale));
-            java.util.regex.Matcher m = java.util.regex.Pattern.compile("(\\d+(\\.\\d+)?)").matcher(mensaje);
+            Matcher m = Pattern.compile("(\\d+(\\.\\d+)?)").matcher(mensaje);
             String amount = m.find() ? m.group(1) : "";
             n.put("mensaje", messageSource.getMessage("notification.donation.message", new Object[] { amount }, mensaje,
                     locale));
         } else if (titulo.contains("Nueva Donaci\u00f3n Recibida")) {
             n.put("titulo", messageSource.getMessage("notification.donation.admin.title", null, titulo, locale));
-            java.util.regex.Matcher m = java.util.regex.Pattern.compile("([\\w.@+-]+).*?(\\d+\\.?\\d*)")
+            Matcher m = Pattern.compile("^(.*?) ha donado (\\d+(?:\\.\\d+)?)")
                     .matcher(mensaje);
             if (m.find()) {
                 n.put("mensaje", messageSource.getMessage("notification.donation.admin.message",

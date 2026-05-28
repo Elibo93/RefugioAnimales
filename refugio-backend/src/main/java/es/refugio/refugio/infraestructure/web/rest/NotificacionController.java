@@ -14,6 +14,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/notificaciones")
 @RequiredArgsConstructor
@@ -33,7 +36,7 @@ public class NotificacionController {
         Integer usuarioId = obtenerIdUsuarioActual();
         Collection<String> roles = obtenerRolesUsuarioActual();
         
-        System.out.println("DEBUG: Cargando notificaciones para ID=" + usuarioId + ", Roles=" + roles);
+        log.debug("Cargando notificaciones para ID={}, Roles={}", usuarioId, roles);
         
         if (roles.isEmpty()) {
             return repository.findByUsuarioIdOrderByFechaDesc(usuarioId);

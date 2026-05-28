@@ -1,28 +1,23 @@
 package es.refugio.frontend.service;
 
+import es.refugio.frontend.client.BackendFeignClient;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
 import java.util.Map;
 
-@Service
-@RequiredArgsConstructor
 /**
  * Servicio de aplicación que orquesta las operaciones relacionadas con Preferencia.
  *
  * @author Elisabeth
  * @author Diego
  */
+@Service
+@RequiredArgsConstructor
 public class PreferenciaService {
 
-    private final RestTemplate restTemplate;
-
-    @Value("${backend.api.url}")
-    private String apiUrl;
+    private final BackendFeignClient backendClient;
 
     public void guardarPreferencias(Map<String, Object> payload) {
-        restTemplate.postForObject(apiUrl + "/v1/preferencias", payload, Map.class);
+        backendClient.guardarPreferencias(payload);
     }
 }

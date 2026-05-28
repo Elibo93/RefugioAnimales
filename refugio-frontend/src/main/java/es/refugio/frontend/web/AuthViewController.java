@@ -3,7 +3,6 @@ package es.refugio.frontend.web;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-
 import es.refugio.frontend.web.enums.ThymTemplates;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.util.ErrorMessageExtractor;
@@ -20,15 +19,15 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
-@Controller
-@RequiredArgsConstructor
 /**
  * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Auth.
  *
  * @author Elisabeth
  * @author Diego
  */
+@Slf4j
+@Controller
+@RequiredArgsConstructor
 public class AuthViewController {
 
     private final AuthService authService;

@@ -1,6 +1,6 @@
 package es.refugio.frontend.web;
-import org.springframework.context.i18n.LocaleContextHolder;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Cookie;
@@ -25,42 +25,39 @@ import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.springframework.security.core.Authentication;
 import es.refugio.common.util.ExcelExportHelper;
-
 import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ArrayList;
-
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
 import es.refugio.frontend.web.dto.*;
-import es.refugio.frontend.web.util.ViewControllerHelper;
+import es.refugio.frontend.service.MessageService;
 import java.time.LocalDateTime;
-
 import java.io.OutputStream;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import es.refugio.frontend.service.SolicitudAdopcionService;
 
-@Controller
-@RequiredArgsConstructor
 /**
  * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Solicitud Adopcion.
  *
  * @author Elisabeth
  * @author Diego
  */
+@Controller
+@RequiredArgsConstructor
 public class SolicitudAdopcionViewController {
 
     private static final Logger logger = LoggerFactory.getLogger(SolicitudAdopcionViewController.class);
 
     private final SolicitudAdopcionService solicitudService;
     private final TemplateEngine templateEngine;
-    private final ViewControllerHelper helper;
+    private final MessageService messageService;
 
     @GetMapping(WebRoutes.SOLICITUDES_BASE)
     @PreAuthorize("hasRole('ADMIN')")
@@ -73,77 +70,9 @@ public class SolicitudAdopcionViewController {
         if (response != null)
             response.setHeader("Vary", "HX-Request");
 
-        PaginatedResponse<SolicitudAdopcionRecord> pagination = solicitudService.fetchPaginatedSolicitudes(page, size);
-        List<SolicitudAdopcionRecord> solicitudes = pagination.items();
-
-        List<SolicitudAdopcionRecord> pendientes = solicitudes.stream()
-                .filter(s -> "PENDIENTE".equals(s.estado()) || "EN_REVISION".equals(s.estado()))
-                .toList();
-
-        List<AnimalRecord> animales = solicitudService.fetchAllAnimales();
-        List<AdoptanteRecord> adoptantes = solicitudService.fetchAllAdoptantes();
-        List<UsuarioRecord> usuarios = solicitudService.fetchAllUsuarios();
-
-        Map<String, AnimalRecord> animalesMap = new HashMap<>();
-        for (AnimalRecord a : animales) {
-            animalesMap.put(String.valueOf(a.id()), a);
-        }
-
-        Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
-        for (UsuarioRecord u : usuarios) {
-            usuariosMap.put(String.valueOf(u.id()), u);
-        }
-
-        Map<String, String> adoptanteNombres = new HashMap<>();
-        for (AdoptanteRecord a : adoptantes) {
-            if (a.usuarioId() != null) {
-                try {
-                    PerfilLegalRecord perfil = solicitudService.fetchPerfilLegalByUsuarioId(a.usuarioId());
-                    if (perfil != null) {
-                        String nombre = perfil.nombre();
-                        String apellido = perfil.apellido();
-                        adoptanteNombres.put(String.valueOf(a.id()),
-                                ((nombre != null ? nombre : "") + " " + (apellido != null ? apellido : "")).trim());
-                    }
-                } catch (Exception e) {
-                    logger.warn("No se encontró PerfilLegal para adoptante con usuario " + a.usuarioId());
-                }
-            }
-        }
-
-        Map<String, String> adoptanteUsuarioIds = new HashMap<>();
-        for (AdoptanteRecord a : adoptantes) {
-            if (a.usuarioId() != null) {
-                adoptanteUsuarioIds.put(String.valueOf(a.id()), a.usuarioId().toString());
-            }
-        }
-
-        Map<String, String> solicitudToAdopcionMap = new HashMap<>();
-        try {
-            List<AdopcionRecord> allAdopciones = solicitudService.fetchAllAdopciones();
-            if (allAdopciones != null && solicitudes != null) {
-                for (SolicitudAdopcionRecord s : solicitudes) {
-                    if ("APROBADA".equals(s.estado())) {
-                        String key = s.adoptanteId() + "_" + s.animalId();
-                        allAdopciones.stream()
-                                .filter(ad -> key.equals(ad.adoptanteId() + "_" + ad.animalId()))
-                                .findFirst()
-                                .ifPresent(ad -> solicitudToAdopcionMap.put(String.valueOf(s.id()),
-                                        String.valueOf(ad.id())));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.warn("Error al cargar mapa de adopciones para lista: " + e.getMessage());
-        }
-
-        model.addAttribute(ModelAttribute.Solicitud_LIST.getName(), solicitudes);
-        model.addAttribute("pagination", pagination);
-        model.addAttribute("pendientes", pendientes);
-        model.addAttribute("animalesMap", animalesMap);
-        model.addAttribute("adoptanteNombres", adoptanteNombres);
-        model.addAttribute("adoptanteUsuarioIds", adoptanteUsuarioIds);
-        model.addAttribute("solicitudToAdopcionMap", solicitudToAdopcionMap);
+        Map<String, Object> modelData = solicitudService.buildListarModelData(page, size);
+        model.addAllAttributes(modelData);
+        model.addAttribute(ModelAttribute.Solicitud_LIST.getName(), modelData.get("solicitudList"));
         if (successMessage != null)
             model.addAttribute("successMessage", successMessage);
         model.addAttribute("currentUri", WebRoutes.SOLICITUDES_BASE);
@@ -170,49 +99,12 @@ public class SolicitudAdopcionViewController {
         Integer currentUserId = (userIdObj instanceof Number) ? ((Number) userIdObj).intValue()
                 : Integer.parseInt(userIdObj.toString());
 
-        Integer adoptanteId = null;
-        try {
-            AdoptanteRecord adoptante = solicitudService.fetchAdoptanteByUsuarioId(currentUserId);
-            if (adoptante != null) {
-                adoptanteId = adoptante.id();
-            }
-        } catch (Exception e) {
-            logger.warn("El usuario " + currentUserId + " no tiene un perfil de adoptante activo.");
-        }
+        Map<String, Object> modelData = solicitudService.buildMisAdoptadosModelData(currentUserId);
+        
+        @SuppressWarnings("unchecked")
+        List<SolicitudAdopcionRecord> misSolicitudes = (List<SolicitudAdopcionRecord>) modelData.get("solicitudList");
 
-        List<SolicitudAdopcionRecord> todas = solicitudService.fetchAllSolicitudes();
-        List<SolicitudAdopcionRecord> misSolicitudes = new ArrayList<>();
-
-        if (adoptanteId != null) {
-            for (SolicitudAdopcionRecord s : todas) {
-                if (s.adoptanteId() != null && s.adoptanteId().equals(adoptanteId)) {
-                    misSolicitudes.add(s);
-                }
-            }
-
-            try {
-                List<AdopcionRecord> adopciones = solicitudService.fetchAdopcionesByAdoptanteId(adoptanteId);
-                if (adopciones != null) {
-                    for (AdopcionRecord adopcion : adopciones) {
-                        if (adopcion.solicitudAdopcionId() == null) {
-                            SolicitudAdopcionRecord fakeSolicitud = new SolicitudAdopcionRecord(
-                                    -adopcion.id(),
-                                    adopcion.animalId(),
-                                    adopcion.adoptanteId(),
-                                    adopcion.fechaAdopcion(),
-                                    "APROBADA",
-                                    "Adopción directa",
-                                    "");
-                            misSolicitudes.add(fakeSolicitud);
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                logger.warn("No se pudieron obtener adopciones directas para adoptante " + adoptanteId);
-            }
-        }
-
-        if (misSolicitudes.isEmpty()) {
+        if (misSolicitudes == null || misSolicitudes.isEmpty()) {
             model.addAttribute("mensajeVacio",
                     "Vaya, parece que aún no te has hecho con ninguno de nuestros amiguitos");
             model.addAttribute("currentUri", WebRoutes.SOLICITUDES_MIS_ADOPTADOS);
@@ -221,14 +113,8 @@ public class SolicitudAdopcionViewController {
             return ThymTemplates.MAIN_LAYOUT.getPath();
         }
 
-        List<AnimalRecord> animales = solicitudService.fetchAllAnimales();
-        Map<String, AnimalRecord> animalesMap = new HashMap<>();
-        for (AnimalRecord a : animales) {
-            animalesMap.put(String.valueOf(a.id()), a);
-        }
-
+        model.addAllAttributes(modelData);
         model.addAttribute(ModelAttribute.Solicitud_LIST.getName(), misSolicitudes);
-        model.addAttribute("animalesMap", animalesMap);
         model.addAttribute("currentUri", WebRoutes.SOLICITUDES_MIS_ADOPTADOS);
         model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
                 FragmentoContenido.MIS_ADOPTADOS_LISTA.getPath());
@@ -351,7 +237,7 @@ public class SolicitudAdopcionViewController {
                     FragmentoContenido.Solicitud_FORM.getPath());
             return ThymTemplates.MAIN_LAYOUT.getPath();
         } catch (Throwable t) {
-            logger.error("DIAGNOSTIC ERROR IN EDITAR FORMULARIO:", t);
+            logger.error("ERROR DIAGNÓSTICO EN EDITAR FORMULARIO:", t);
             throw new RuntimeException(t);
         }
     }
@@ -386,7 +272,7 @@ public class SolicitudAdopcionViewController {
                                 nombreAnimal = animal.nombre();
                             }
                         } catch (Exception ignore) {}
-                        errorMsg = helper.getMessage("error.animal.ya.adoptado", nombreAnimal);
+                        errorMsg = messageService.getMessage("error.animal.ya.adoptado", nombreAnimal);
                     } else {
                         errorMsg = backendMsg;
                     }
@@ -878,7 +764,7 @@ public class SolicitudAdopcionViewController {
         try {
             solicitudService.crearAdopcionDirecta(body);
         } catch (HttpClientErrorException.Unauthorized e) {
-            redirectAttributes.addFlashAttribute("errorMessage", helper.getMessage("toast.error.iniciar_sesion"));
+            redirectAttributes.addFlashAttribute("errorMessage", messageService.getMessage("toast.error.iniciar_sesion"));
             return "redirect:" + WebRoutes.SOLICITUDES_OPCIONES + "?animalId=" + animalId;
         } catch (HttpStatusCodeException e) {
             String errorMsg = "Error al procesar la solicitud.";
@@ -894,7 +780,7 @@ public class SolicitudAdopcionViewController {
         }
 
         redirectAttributes.addFlashAttribute("successMessage",
-                helper.getMessage("toast.success.solicitud_enviada_exito"));
+                messageService.getMessage("toast.success.solicitud_enviada_exito"));
         return "redirect:" + WebRoutes.HOME;
     }
 
@@ -1025,7 +911,7 @@ public class SolicitudAdopcionViewController {
 
         logger.info("Registro exitoso para usuario ID: " + usuarioId);
 
-        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.registro_completado"));
+        redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.registro_completado"));
         return "redirect:" + WebRoutes.HOME;
     }
 

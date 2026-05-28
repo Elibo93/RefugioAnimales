@@ -54,6 +54,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping("api/v1/usuarios")
 @RequiredArgsConstructor
@@ -109,7 +112,7 @@ public class UsuarioController {
     }
 
     @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
-    @org.springframework.web.bind.annotation.PutMapping("/{id}/rol")
+    @PutMapping("/{id}/rol")
     public ResponseEntity<Map<String, String>> updateRole(@PathVariable int id, @RequestBody Map<String, String> body) {
         var userOptional = usuarioEntityJpaRepository.findById(id);
         if (userOptional.isPresent()) {
@@ -160,7 +163,7 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     @PostMapping("/{id}/verificar-password")
     public ResponseEntity<?> verifyPassword(@PathVariable int id, @RequestParam String password) {
-        System.out.println("[DEBUG] Verificando password para usuario ID: " + id);
+        log.debug("Verificando password para usuario ID: {}", id);
         var userOptional = usuarioEntityJpaRepository.findById(id);
         if (userOptional.isPresent()) {
             var user = userOptional.get();

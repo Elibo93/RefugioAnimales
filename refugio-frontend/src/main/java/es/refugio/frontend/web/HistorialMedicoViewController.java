@@ -1,6 +1,6 @@
 package es.refugio.frontend.web;
-import org.springframework.context.i18n.LocaleContextHolder;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,6 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import es.refugio.common.util.ExcelExportHelper;
-
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
@@ -22,28 +21,26 @@ import es.refugio.frontend.web.enums.ThymTemplates;
 import es.refugio.frontend.web.dto.HistorialMedicoRecord;
 import es.refugio.frontend.web.dto.AnimalRecord;
 import es.refugio.frontend.web.dto.PaginatedResponse;
-import es.refugio.frontend.web.util.ViewControllerHelper;
-
+import es.refugio.frontend.service.MessageService;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.*;
-
 import es.refugio.frontend.service.HistorialMedicoService;
 
-@Controller
-@RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
 /**
  * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Historial Medico.
  *
  * @author Elisabeth
  * @author Diego
  */
+@Controller
+@RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
 public class HistorialMedicoViewController {
 
     private final HistorialMedicoService historialMedicoService;
     private final TemplateEngine templateEngine;
-    private final ViewControllerHelper helper;
+    private final MessageService messageService;
 
     @GetMapping(WebRoutes.HISTORIALES_BASE)
     public String listar(Model model,
@@ -173,7 +170,7 @@ public class HistorialMedicoViewController {
         }
 
         historialMedicoService.crearHistorial(body);
-        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.historial_creado"));
+        redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.historial_creado"));
         return "redirect:" + WebRoutes.HISTORIALES_BASE;
     }
 
@@ -225,7 +222,7 @@ public class HistorialMedicoViewController {
         }
 
         historialMedicoService.editarHistorial(id, body);
-        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.historial_editado"));
+        redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.historial_editado"));
         return "redirect:" + WebRoutes.HISTORIALES_BASE + "/" + id + "/detalle";
     }
 

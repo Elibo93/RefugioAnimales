@@ -5,18 +5,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import es.refugio.frontend.service.PreferenciaService;
-
 import java.util.Map;
 
-@Controller
-@RequestMapping("/web/preferencias")
-@RequiredArgsConstructor
 /**
  * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Preferencia.
  *
  * @author Elisabeth
  * @author Diego
  */
+@Controller
+@RequestMapping("/web/preferencias")
+@RequiredArgsConstructor
 public class PreferenciaViewController {
 
     private final PreferenciaService preferenciaService;

@@ -1,56 +1,85 @@
 package es.refugio.frontend.service;
 
+import es.refugio.frontend.client.AuthFeignClient;
+import es.refugio.frontend.client.BackendFeignClient;
+import es.refugio.frontend.web.dto.UsuarioRecord;
+import es.refugio.frontend.web.dto.PerfilLegalRecord;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
 import java.util.List;
 import java.util.Map;
 
-@Service
-@RequiredArgsConstructor
 /**
  * Servicio de aplicación que orquesta las operaciones relacionadas con Global Attributes.
  *
  * @author Elisabeth
  * @author Diego
  */
+@Service
+@RequiredArgsConstructor
 public class GlobalAttributesService {
 
-    private final RestTemplate restTemplate;
+    private final BackendFeignClient backendClient;
+    private final AuthFeignClient authClient;
 
-    @Value("${auth.api.url}")
-    private String authUrl;
-
-    @Value("${backend.api.url}")
-    private String apiUrl;
-
-    @SuppressWarnings("unchecked")
     public Map<String, Object> fetchMe() {
-        return restTemplate.getForObject(authUrl + "/v1/me", Map.class);
+        try {
+            UsuarioRecord record = authClient.getMe();
+            if (record == null) return null;
+            return Map.of(
+                "id", record.id(),
+                "email", record.email(),
+                "rol", record.rol(),
+                "username", record.username()
+            );
+        } catch (Exception e) {
+            return null;
+        }
     }
 
-    @SuppressWarnings("unchecked")
     public Map<String, Object> fetchPerfilLegal(Integer userId) {
-        return restTemplate.getForObject(apiUrl + "/v1/perfiles-legales/usuario/" + userId, Map.class);
+        try {
+            PerfilLegalRecord record = backendClient.getPerfilLegalByUsuarioId(userId);
+            if (record == null) return null;
+            return Map.of(
+                "usuarioId", record.usuarioId(),
+                "nombre", record.nombre() != null ? record.nombre() : "",
+                "apellido", record.apellido() != null ? record.apellido() : ""
+            );
+        } catch (Exception e) {
+            return null;
+        }
     }
 
-    @SuppressWarnings("unchecked")
     public List<Map<String, Object>> fetchMisSolicitudes() {
-        return restTemplate.getForObject(apiUrl + "/v1/solicitudes-adopcion/mis-solicitudes", List.class);
+        try {
+            return backendClient.getMisSolicitudes();
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
-    @SuppressWarnings("unchecked")
     public Map<String, Object> fetchPreferencias(Integer userId) {
-        return restTemplate.getForObject(apiUrl + "/v1/preferencias/usuario/" + userId, Map.class);
+        try {
+            return backendClient.getPreferenciasByUsuarioId(userId);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public Long fetchPendingAdoptionsCount() {
-        return restTemplate.getForObject(apiUrl + "/v1/solicitudes-adopcion/count/pendiente", Long.class);
+        try {
+            return backendClient.countSolicitudesPendientes();
+        } catch (Exception e) {
+            return 0L;
+        }
     }
 
     public Long fetchPendingVolunteersCount() {
-        return restTemplate.getForObject(apiUrl + "/v1/voluntarios/count/pendiente", Long.class);
+        try {
+            return backendClient.countVoluntariosPendientes();
+        } catch (Exception e) {
+            return 0L;
+        }
     }
 }

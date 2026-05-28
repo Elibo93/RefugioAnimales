@@ -1,6 +1,6 @@
 package es.refugio.frontend.web;
-import org.springframework.context.i18n.LocaleContextHolder;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -8,48 +8,40 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import es.refugio.common.util.ExcelExportHelper;
-
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
 import es.refugio.frontend.web.dto.*;
-import es.refugio.frontend.web.util.ViewControllerHelper;
-
+import es.refugio.frontend.service.MessageService;
 import java.io.OutputStream;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.HttpStatusCodeException;
-
 import es.refugio.frontend.service.TareaService;
 import es.refugio.frontend.service.VoluntarioService;
-
 import org.springframework.security.access.prepost.PreAuthorize;
 
-@Controller
-@RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'VOLUNTARIO_ADOPTANTE')")
 /**
- * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Tarea.
+ * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para
+ * Tarea.
  *
  * @author Elisabeth
  * @author Diego
  */
+@Controller
+@RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO', 'VOLUNTARIO_ADOPTANTE')")
 public class TareaViewController {
 
     private final TareaService tareaService;
     private final VoluntarioService voluntarioService;
     private final TemplateEngine templateEngine;
-    private final ViewControllerHelper helper;
+    private final MessageService messageService;
 
     @GetMapping(WebRoutes.TAREAS_BASE)
     public String listar(Model model,
@@ -66,95 +58,11 @@ public class TareaViewController {
 
         response.setHeader("Vary", "HX-Request");
 
-        if (modoSeleccion && voluntarioIdSeleccion != null) {
-            try {
-                VoluntarioRecord v = voluntarioService.fetchVoluntarioById(voluntarioIdSeleccion);
-                if (v != null && v.usuarioId() != null) {
-                    PerfilLegalRecord p = voluntarioService.fetchPerfilLegalByUsuarioId(v.usuarioId());
-                    if (p != null) {
-                        model.addAttribute("voluntarioNombreSeleccion", p.nombre() + " " + p.apellido());
-                    }
-                }
-            } catch (Exception ignored) {
-            }
-        }
-
-        Object isAdminObj = model.getAttribute("isAdmin");
-        boolean isAdmin = isAdminObj != null && (Boolean) isAdminObj;
-        Object currentUserId = model.getAttribute("currentUserId");
-
-        Integer myVoluntarioId = null;
-        if (!isAdmin && currentUserId != null) {
-            try {
-                VoluntarioRecord vObj = voluntarioService.fetchVoluntarioByUsuarioId((Integer) currentUserId);
-                if (vObj != null) {
-                    myVoluntarioId = vObj.id();
-                }
-            } catch (Exception ignored) {
-            }
-        }
-
-        List<DisponibilidadRecord> disponibilidades = Collections.emptyList();
-        if (modoSeleccion && voluntarioIdSeleccion != null) {
-            try {
-                List<Map<String, Object>> listDisponibilidad = voluntarioService
-                        .fetchDisponibilidad(voluntarioIdSeleccion);
-                if (listDisponibilidad != null) {
-                    List<DisponibilidadRecord> mapped = new ArrayList<>();
-                    for (Map<String, Object> map : listDisponibilidad) {
-                        try {
-                            String f = map.get("fecha") != null ? map.get("fecha").toString() : null;
-                            LocalDate date = f != null ? LocalDate.parse(f) : null;
-                            String st = map.get("estado") != null ? map.get("estado").toString() : null;
-                            mapped.add(new DisponibilidadRecord(null, date, null, st));
-                        } catch (Exception ignored) {
-                        }
-                    }
-                    disponibilidades = mapped;
-                }
-            } catch (Exception ignored) {
-            }
-        }
-
-        List<TareaRecord> todasTareasFiltradas = fetchFiltered(prioridad, estado, myVoluntarioId, voluntarioIdFiltro, voluntarioIdSeleccion,
-                disponibilidades);
-        PaginatedResponse<TareaRecord> pagination = paginateList(todasTareasFiltradas, page, size);
-        List<TareaRecord> tareas = pagination.items();
-        model.addAttribute("todasTareasFiltradas", todasTareasFiltradas);
-
-        List<VoluntarioRecord> voluntarios = voluntarioService.fetchAllVoluntarios();
-
-        Set<Integer> assignedTaskIds = new HashSet<>();
-        if (modoSeleccion && voluntarioIdSeleccion != null) {
-            for (TareaRecord t : tareas) {
-                if (t.voluntarioIds() != null && t.voluntarioIds().contains(voluntarioIdSeleccion)) {
-                    if (t.id() != null) {
-                        assignedTaskIds.add(t.id());
-                    }
-                }
-            }
-        }
-        model.addAttribute("alreadyAssignedTaskIds", assignedTaskIds);
-
-        boolean hasFilters = (prioridad != null && !"ALL".equals(prioridad))
-                || (estado != null && !"ALL".equals(estado));
-
-        model.addAttribute("selectedPrioridad", prioridad != null ? prioridad : "ALL");
-        model.addAttribute("selectedEstado", estado != null ? estado : "ALL");
-        model.addAttribute("hasFilters", hasFilters);
-
-        Map<String, String> voluntarioUsuarioIds = new HashMap<>();
-        for (VoluntarioRecord v : voluntarios) {
-            if (v.id() != null && v.usuarioId() != null) {
-                voluntarioUsuarioIds.put(v.id().toString(), v.usuarioId().toString());
-            }
-        }
-
-        Map<String, String> voluntarioNombres = fetchVoluntarioNombres();
-        model.addAttribute(ModelAttribute.Tarea_LIST.getName(), tareas);
-        model.addAttribute("pagination", pagination);
-        model.addAttribute("voluntarioNombres", voluntarioNombres);
-        model.addAttribute("voluntarioUsuarioIds", voluntarioUsuarioIds);
+        Integer myVoluntarioId = getMyVoluntarioId();
+        Map<String, Object> modelData = tareaService.buildListarModelData(prioridad, estado, myVoluntarioId,
+                voluntarioIdFiltro, modoSeleccion, voluntarioIdSeleccion, page, size);
+        model.addAllAttributes(modelData);
+        model.addAttribute(ModelAttribute.Tarea_LIST.getName(), modelData.get("tareaList"));
         model.addAttribute("modoSeleccion", modoSeleccion);
         model.addAttribute("voluntarioIdSeleccion", voluntarioIdSeleccion);
         model.addAttribute("voluntarioIdFiltro", voluntarioIdFiltro);
@@ -221,7 +129,7 @@ public class TareaViewController {
         model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
         model.addAttribute("estados", List.of("PENDIENTE", "PROPUESTA", "ACEPTADA", "EN_PROCESO", "COMPLETADA",
                 "FINALIZADA", "RECHAZADA", "CANCELADA"));
-        model.addAttribute("voluntarioNombres", fetchVoluntarioNombres());
+        model.addAttribute("voluntarioNombres", tareaService.fetchVoluntarioNombres());
 
         List<UsuarioRecord> usuarios = voluntarioService.fetchAllUsuarios();
         Map<Integer, UsuarioRecord> usuariosMap = new HashMap<>();
@@ -259,24 +167,11 @@ public class TareaViewController {
 
         try {
             tareaService.crearTarea(body);
-            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.tarea_creada"));
+            redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.tarea_creada"));
             return "redirect:" + WebRoutes.TAREAS_BASE;
-        } catch (RestClientException e) {
-            String msg = e.getMessage();
-            if (e instanceof HttpStatusCodeException httpException) {
-                String responseBody = httpException.getResponseBodyAsString();
-                try {
-                    JsonNode root = new ObjectMapper().readTree(responseBody);
-                    if (root.has("message")) {
-                        msg = root.get("message").asText();
-                    } else {
-                        msg = responseBody;
-                    }
-                } catch (Exception parseEx) {
-                    msg = responseBody;
-                }
-            }
-            redirectAttributes.addFlashAttribute("errorMessage", msg);
+        } catch (Exception e) {
+            String msg = es.refugio.frontend.web.util.ErrorMessageExtractor.extract(e);
+            redirectAttributes.addFlashAttribute("errorMessage", messageService.getMessage(msg));
             return "redirect:" + WebRoutes.TAREAS_NUEVA;
         }
     }
@@ -296,7 +191,7 @@ public class TareaViewController {
         model.addAttribute("estados", List.of("PENDIENTE", "PROPUESTA", "ACEPTADA", "EN_PROCESO", "COMPLETADA",
                 "FINALIZADA", "RECHAZADA", "CANCELADA"));
         model.addAttribute("returnUrl", WebRoutes.TAREAS_BASE);
-        model.addAttribute("voluntarioNombres", fetchVoluntarioNombres());
+        model.addAttribute("voluntarioNombres", tareaService.fetchVoluntarioNombres());
 
         if ("true".equals(request.getHeader("HX-Request"))
                 && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
@@ -329,24 +224,11 @@ public class TareaViewController {
         try {
             tareaService.editarTarea(id, body);
             redirectAttributes.addFlashAttribute("successMessage",
-                    helper.getMessage("toast.success.tarea_editada"));
+                    messageService.getMessage("toast.success.tarea_editada"));
             return "redirect:" + WebRoutes.TAREAS_BASE;
-        } catch (RestClientException e) {
-            String msg = e.getMessage();
-            if (e instanceof HttpStatusCodeException httpException) {
-                String responseBody = httpException.getResponseBodyAsString();
-                try {
-                    JsonNode root = new ObjectMapper().readTree(responseBody);
-                    if (root.has("message")) {
-                        msg = root.get("message").asText();
-                    } else {
-                        msg = responseBody;
-                    }
-                } catch (Exception parseEx) {
-                    msg = responseBody;
-                }
-            }
-            redirectAttributes.addFlashAttribute("errorMessage", msg);
+        } catch (Exception e) {
+            String msg = es.refugio.frontend.web.util.ErrorMessageExtractor.extract(e);
+            redirectAttributes.addFlashAttribute("errorMessage", messageService.getMessage(msg));
             return "redirect:" + WebRoutes.TAREAS_EDITAR.replace("{id}", id.toString());
         }
     }
@@ -411,37 +293,11 @@ public class TareaViewController {
             @RequestParam(required = false) String estado,
             @RequestParam(required = false) Integer voluntarioIdFiltro,
             HttpServletResponse response) throws Exception {
-        List<TareaRecord> tareas = tareaService.fetchAllTareas();
 
         Integer myVoluntarioId = getMyVoluntarioId();
-
-        List<TareaRecord> filtered = tareas.stream()
-                .filter(t -> {
-                    if (myVoluntarioId != null) {
-                        if (t.voluntarioIds() == null || !t.voluntarioIds().contains(myVoluntarioId)) {
-                            return false;
-                        }
-                    }
-                    if (voluntarioIdFiltro != null) {
-                        if (t.voluntarioIds() == null || !t.voluntarioIds().contains(voluntarioIdFiltro)) {
-                            return false;
-                        }
-                    }
-                    if (prioridad != null && !"ALL".equalsIgnoreCase(prioridad)) {
-                        if (t.prioridad() == null || !prioridad.equalsIgnoreCase(t.prioridad())) {
-                            return false;
-                        }
-                    }
-                    if (estado != null && !"ALL".equalsIgnoreCase(estado)) {
-                        if (t.estado() == null || !estado.equalsIgnoreCase(t.estado())) {
-                            return false;
-                        }
-                    }
-                    return true;
-                })
-                .toList();
-
-        Map<String, String> voluntarioNombres = fetchVoluntarioNombres();
+        List<TareaRecord> filtered = tareaService.fetchFiltered(prioridad, estado, myVoluntarioId, voluntarioIdFiltro,
+                null, Collections.emptyList());
+        Map<String, String> voluntarioNombres = tareaService.fetchVoluntarioNombres();
 
         Context context = new Context(LocaleContextHolder.getLocale());
         context.setVariable("tareas", filtered);
@@ -463,37 +319,11 @@ public class TareaViewController {
             @RequestParam(required = false) String estado,
             @RequestParam(required = false) Integer voluntarioIdFiltro,
             HttpServletResponse response) throws Exception {
-        List<TareaRecord> tareas = tareaService.fetchAllTareas();
 
         Integer myVoluntarioId = getMyVoluntarioId();
-
-        List<TareaRecord> filtered = tareas.stream()
-                .filter(t -> {
-                    if (myVoluntarioId != null) {
-                        if (t.voluntarioIds() == null || !t.voluntarioIds().contains(myVoluntarioId)) {
-                            return false;
-                        }
-                    }
-                    if (voluntarioIdFiltro != null) {
-                        if (t.voluntarioIds() == null || !t.voluntarioIds().contains(voluntarioIdFiltro)) {
-                            return false;
-                        }
-                    }
-                    if (prioridad != null && !"ALL".equalsIgnoreCase(prioridad)) {
-                        if (t.prioridad() == null || !prioridad.equalsIgnoreCase(t.prioridad())) {
-                            return false;
-                        }
-                    }
-                    if (estado != null && !"ALL".equalsIgnoreCase(estado)) {
-                        if (t.estado() == null || !estado.equalsIgnoreCase(t.estado())) {
-                            return false;
-                        }
-                    }
-                    return true;
-                })
-                .toList();
-
-        Map<String, String> voluntarioNombres = fetchVoluntarioNombres();
+        List<TareaRecord> filtered = tareaService.fetchFiltered(prioridad, estado, myVoluntarioId, voluntarioIdFiltro,
+                null, Collections.emptyList());
+        Map<String, String> voluntarioNombres = tareaService.fetchVoluntarioNombres();
 
         byte[] excelBytes = ExcelExportHelper.exportToExcel(
                 "Tareas",
@@ -563,27 +393,12 @@ public class TareaViewController {
                         : "Voluntario asignado correctamente";
                 response.setHeader("HX-Trigger",
                         "{\"showToast\": {\"message\": \"" + toastMsg + "\", \"type\": \"success\"}}");
-            } catch (RestClientException e) {
-                String msg = e.getMessage();
-                if (e instanceof HttpStatusCodeException httpException) {
-                    String responseBody = httpException.getResponseBodyAsString();
-                    try {
-                        JsonNode root = new ObjectMapper().readTree(responseBody);
-                        if (root.has("message")) {
-                            msg = root.get("message").asText();
-                            msg = helper.getMessage(msg); // Intentar traducir si es una clave i18n
-                        } else if (root.has("error")) {
-                            msg = root.get("error").asText();
-                        } else {
-                            msg = responseBody;
-                        }
-                    } catch (Exception parseEx) {
-                        msg = responseBody;
-                    }
+            } catch (Exception e) {
+                String msg = es.refugio.frontend.web.util.ErrorMessageExtractor.extract(e);
+                msg = messageService.getMessage(msg); // Intentar traducir si es una clave i18n
+                if (msg == null) {
+                    msg = "Error de comunicación con el servidor";
                 }
-
-                // Escape comillas para el JSON del header
-                if (msg == null) msg = "Error de comunicación con el servidor";
                 msg = msg.replace("\"", "\\\"");
                 response.setHeader("HX-Trigger",
                         "{\"showToast\": {\"message\": \"" + msg + "\", \"type\": \"error\"}}");
@@ -591,45 +406,6 @@ public class TareaViewController {
         }
 
         return listar(model, prioridad, estado, null, false, null, 1, 10, null, request, response);
-    }
-
-    private Map<String, String> fetchVoluntarioNombres() {
-        Map<String, String> nombres = new HashMap<>();
-        try {
-            List<VoluntarioRecord> voluntarios = voluntarioService.fetchAllVoluntarios();
-            List<PerfilLegalRecord> perfiles = voluntarioService.fetchAllPerfilesLegales();
-            List<UsuarioRecord> usuarios = voluntarioService.fetchAllUsuarios();
-
-            Map<Integer, String> perfilMap = new HashMap<>();
-            for (PerfilLegalRecord p : perfiles) {
-                if (p.usuarioId() != null) {
-                    perfilMap.put(p.usuarioId(), p.nombre() + " " + p.apellido());
-                }
-            }
-
-            Map<Integer, String> userMap = new HashMap<>();
-            for (UsuarioRecord u : usuarios) {
-                userMap.put(u.id(), u.username());
-            }
-
-            for (VoluntarioRecord v : voluntarios) {
-                if (v.id() != null && v.usuarioId() != null) {
-                    String nombre = perfilMap.get(v.usuarioId());
-                    if (nombre == null)
-                        nombre = userMap.get(v.usuarioId());
-                    if (nombre == null)
-                        nombre = "Voluntario " + v.id();
-                    nombres.put(v.id().toString(), nombre.trim());
-                }
-            }
-        } catch (Exception ignored) {
-        }
-        return nombres;
-    }
-
-    @GetMapping("/web/tareas/{id}")
-    public String redireccionDetalle(@PathVariable Integer id) {
-        return "redirect:/web/tareas/" + id + "/editar";
     }
 
     @SuppressWarnings("unchecked")
@@ -652,72 +428,5 @@ public class TareaViewController {
         } catch (Exception ignored) {
         }
         return null;
-    }
-
-    private List<TareaRecord> fetchFiltered(String prioridad, String estado, Integer myVoluntarioId, Integer voluntarioIdFiltro,
-            Integer voluntarioIdSeleccion, List<DisponibilidadRecord> disponibilidades) {
-        try {
-            List<TareaRecord> allTareas = tareaService.fetchAllTareas();
-
-            return allTareas.stream()
-                    .filter(t -> {
-                        if (myVoluntarioId != null) {
-                            if (t.voluntarioIds() == null || !t.voluntarioIds().contains(myVoluntarioId)) {
-                                return false;
-                            }
-                        }
-                        if (voluntarioIdFiltro != null) {
-                            if (t.voluntarioIds() == null || !t.voluntarioIds().contains(voluntarioIdFiltro)) {
-                                return false;
-                            }
-                        }
-                        if (voluntarioIdSeleccion != null) {
-                            if (t.voluntarioIds() != null && t.voluntarioIds().contains(voluntarioIdSeleccion)) {
-                                return false;
-                            }
-                            if (t.fechaLimite() != null) {
-                                LocalDate taskDate = t.fechaLimite().toLocalDate();
-                                boolean isUnavailable = disponibilidades.stream()
-                                        .anyMatch(d -> d.fecha() != null && d.fecha().equals(taskDate)
-                                                && "NO_DISPONIBLE".equals(d.estado()));
-                                if (isUnavailable) {
-                                    return false;
-                                }
-                            }
-                        }
-                        if (prioridad != null && !"ALL".equalsIgnoreCase(prioridad)) {
-                            if (t.prioridad() == null || !prioridad.equalsIgnoreCase(t.prioridad())) {
-                                return false;
-                            }
-                        }
-                        if (estado != null && !"ALL".equalsIgnoreCase(estado)) {
-                            if (t.estado() == null || !estado.equalsIgnoreCase(t.estado())) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    })
-                    .toList();
-        } catch (Exception e) {
-            return Collections.emptyList();
-        }
-    }
-
-    private PaginatedResponse<TareaRecord> paginateList(List<TareaRecord> filtered, int page, int size) {
-        int totalElements = filtered.size();
-        int totalPages = (int) Math.ceil((double) totalElements / size);
-
-        int fromIndex = (page - 1) * size;
-        int toIndex = Math.min(fromIndex + size, totalElements);
-
-        List<TareaRecord> paginatedItems = Collections.emptyList();
-        if (fromIndex < totalElements && fromIndex >= 0) {
-            paginatedItems = filtered.subList(fromIndex, toIndex);
-        }
-
-        boolean hasNext = page < totalPages;
-        boolean hasPrevious = page > 1;
-
-        return new PaginatedResponse<>(paginatedItems, totalPages, totalElements, page, size, hasNext, hasPrevious);
     }
 }

@@ -1,64 +1,68 @@
 package es.refugio.frontend.service;
 
+import es.refugio.frontend.client.AuthFeignClient;
+import es.refugio.frontend.client.BackendFeignClient;
 import es.refugio.frontend.web.dto.*;
-import es.refugio.frontend.web.util.ViewControllerHelper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
-
+import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Servicio para gestionar las operaciones relacionadas con Solicitudes de Adopción en el Frontend.
- */
-@Service
-@RequiredArgsConstructor
-/**
- * Servicio de aplicación que orquesta las operaciones relacionadas con Solicitud Adopcion.
  *
  * @author Elisabeth
  * @author Diego
  */
+@Service
+@RequiredArgsConstructor
 public class SolicitudAdopcionService {
 
-    private final RestTemplate restTemplate;
-    private final ViewControllerHelper helper;
-
-    @Value("${backend.api.url}")
-    private String apiUrl;
-
-    @Value("${auth.api.url}")
-    private String authUrl;
+    private final BackendFeignClient backendClient;
+    private final AuthFeignClient authClient;
 
     public PaginatedResponse<SolicitudAdopcionRecord> fetchPaginatedSolicitudes(int page, int size) {
-        return helper.fetchPaginated(apiUrl + "/v1/solicitudes-adopcion", page, size, SolicitudAdopcionRecord.class);
+        try {
+            return backendClient.getSolicitudesAdopcionPaginated(page - 1, size);
+        } catch (Exception e) {
+            return new PaginatedResponse<>(List.of(), 0, 0, page, size, false, false);
+        }
     }
 
     public List<SolicitudAdopcionRecord> fetchAllSolicitudes() {
-        return helper.fetchList(apiUrl + "/v1/solicitudes-adopcion?size=1000", SolicitudAdopcionRecord.class);
+        try {
+            PaginatedResponse<SolicitudAdopcionRecord> res = backendClient.getSolicitudesAdopcion(1000);
+            return res != null && res.items() != null ? res.items() : List.of();
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public SolicitudAdopcionRecord fetchSolicitudById(Integer id) {
-        return helper.fetchObject(apiUrl + "/v1/solicitudes-adopcion/" + id, SolicitudAdopcionRecord.class);
+        try {
+            return backendClient.getSolicitudAdopcionById(id);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
-    public void crearSolicitud(Integer animalId, Integer adoptanteId, String estado, String comentario, String comentarioAdmin, java.time.LocalDateTime fecha) {
+    public void crearSolicitud(Integer animalId, Integer adoptanteId, String estado, String comentario, String comentarioAdmin, LocalDateTime fecha) {
         Map<String, Object> body = new HashMap<>();
         body.put("animalId", animalId);
         body.put("adoptanteId", adoptanteId);
         body.put("estado", estado);
         body.put("comentario", comentario);
         body.put("comentarioAdmin", comentarioAdmin);
-        body.put("fecha", fecha != null ? fecha.toString() : java.time.LocalDateTime.now().toString());
+        body.put("fecha", fecha != null ? fecha.toString() : LocalDateTime.now().toString());
         
-        restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion", body, Object.class);
+        backendClient.createSolicitudAdopcion(body);
     }
 
-    public void editarSolicitud(Integer id, Integer animalId, Integer adoptanteId, String estado, String comentario, String comentarioAdmin, java.time.LocalDateTime fecha) {
+    public void editarSolicitud(Integer id, Integer animalId, Integer adoptanteId, String estado, String comentario, String comentarioAdmin, LocalDateTime fecha) {
         Map<String, Object> body = new HashMap<>();
         body.put("animalId", animalId);
         body.put("adoptanteId", adoptanteId);
@@ -69,7 +73,7 @@ public class SolicitudAdopcionService {
             body.put("fecha", fecha.toString());
         }
         
-        restTemplate.put(apiUrl + "/v1/solicitudes-adopcion/" + id, body);
+        backendClient.updateSolicitudAdopcion(id, body);
     }
 
     public void actualizarEstadoSolicitud(Integer id, String estado) {
@@ -80,94 +84,241 @@ public class SolicitudAdopcionService {
     }
 
     public void eliminarSolicitud(Integer id) {
-        restTemplate.delete(apiUrl + "/v1/solicitudes-adopcion/" + id);
+        backendClient.deleteSolicitudAdopcion(id);
     }
 
     public void aprobarSolicitud(Integer id) {
-        restTemplate.postForEntity(apiUrl + "/v1/solicitudes-adopcion/" + id + "/aprobar", null, Object.class);
+        backendClient.aprobarSolicitud(id);
     }
 
     public void rechazarSolicitud(Integer id) {
-        restTemplate.postForEntity(apiUrl + "/v1/solicitudes-adopcion/" + id + "/rechazar", null, Object.class);
+        backendClient.rechazarSolicitud(id);
     }
 
     public List<AnimalRecord> fetchAllAnimales() {
-        return helper.fetchList(apiUrl + "/v1/animales?size=1000", AnimalRecord.class);
+        try {
+            return backendClient.getAllAnimales(1000).items();
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public AnimalRecord fetchAnimalById(Integer id) {
-        return helper.fetchObject(apiUrl + "/v1/animales/" + id, AnimalRecord.class);
+        try {
+            return backendClient.getAnimalById(id);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public List<AdoptanteRecord> fetchAllAdoptantes() {
-        return helper.fetchList(apiUrl + "/v1/adoptantes?size=1000", AdoptanteRecord.class);
+        try {
+            PaginatedResponse<AdoptanteRecord> res = backendClient.getAdoptantes(1000);
+            return res != null && res.items() != null ? res.items() : List.of();
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public AdoptanteRecord fetchAdoptanteById(Integer id) {
-        return helper.fetchObject(apiUrl + "/v1/adoptantes/" + id, AdoptanteRecord.class);
+        try {
+            return backendClient.getAdoptanteById(id);
+        } catch (Exception e) {
+            return null;
+        }
     }
     
     public AdoptanteRecord fetchAdoptanteByUsuarioId(Integer usuarioId) {
-        return helper.fetchObject(apiUrl + "/v1/adoptantes/usuario/" + usuarioId, AdoptanteRecord.class);
+        try {
+            PaginatedResponse<AdoptanteRecord> res = backendClient.getAdoptantes(1000);
+            List<AdoptanteRecord> all = res != null && res.items() != null ? res.items() : List.of();
+            return all.stream().filter(a -> usuarioId.equals(a.usuarioId())).findFirst().orElse(null);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public List<UsuarioRecord> fetchAllUsuarios() {
-        return helper.fetchList(authUrl + "/v1/usuarios?size=1000", UsuarioRecord.class);
+        try {
+            PaginatedResponse<UsuarioRecord> res = authClient.getUsuarios(1000);
+            return res != null && res.items() != null ? res.items() : List.of();
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public List<PerfilLegalRecord> fetchAllPerfilesLegales() {
-        return helper.fetchList(apiUrl + "/v1/perfiles-legales?size=1000", PerfilLegalRecord.class);
+        try {
+            return backendClient.getPerfilesLegales(1000);
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public PerfilLegalRecord fetchPerfilLegalByUsuarioId(Integer usuarioId) {
-        return helper.fetchObject(apiUrl + "/v1/perfiles-legales/usuario/" + usuarioId, PerfilLegalRecord.class);
+        try {
+            return backendClient.getPerfilLegalByUsuarioId(usuarioId);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public List<AdopcionRecord> fetchAllAdopciones() {
-        return helper.fetchList(apiUrl + "/v1/adopciones?size=1000", AdopcionRecord.class);
+        try {
+            PaginatedResponse<AdopcionRecord> res = backendClient.getAdopciones(1000);
+            return res != null && res.items() != null ? res.items() : List.of();
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public List<AdopcionRecord> fetchAdopcionesByAdoptanteId(Integer adoptanteId) {
-        return helper.fetchList(apiUrl + "/v1/adopciones/adoptante/" + adoptanteId + "?size=1000", AdopcionRecord.class);
+        try {
+            return backendClient.getAdopcionesByAdoptanteId(adoptanteId, 1000);
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public ResponseEntity<byte[]> descargarPdfSolicitud(Integer id) {
-        return restTemplate.getForEntity(apiUrl + "/v1/reports/solicitud/" + id, byte[].class);
+        return backendClient.descargarPdfSolicitud(id);
     }
 
     public UsuarioRecord fetchMe() {
-        return helper.fetchObject(authUrl + "/v1/me", UsuarioRecord.class);
+        try {
+            return authClient.getMe();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public void convertirYAdopcion(Map<String, Object> bodySolicitud) {
-        restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/convertir-y-adopcion", bodySolicitud, Object.class);
+        backendClient.convertirYAdopcion(bodySolicitud);
     }
 
     public ResponseEntity<Map<String, Object>> actualizarRolUsuario(Integer usuarioId, String nuevoRol) {
         Map<String, String> patchBody = new HashMap<>();
         patchBody.put("rol", nuevoRol);
-        return restTemplate.exchange(authUrl + "/v1/usuarios/" + usuarioId + "/rol", org.springframework.http.HttpMethod.PUT, new org.springframework.http.HttpEntity<>(patchBody), new org.springframework.core.ParameterizedTypeReference<Map<String, Object>>() {});
+        return authClient.actualizarRolUsuario(usuarioId, patchBody);
     }
 
     public void crearAdopcionDirecta(Map<String, Object> body) {
-        restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/directa", body, Object.class);
+        backendClient.crearAdopcionDirecta(body);
     }
 
-    public Map<?, ?> registrarUsuarioPublico(Map<String, Object> userBody) {
-        return restTemplate.postForObject(authUrl + "/v1/usuarios/publico", userBody, Map.class);
+    public Map<String, Object> registrarUsuarioPublico(Map<String, Object> userBody) {
+        return authClient.registrarUsuario(userBody);
     }
 
     public void registrarYAdopcionPublico(Map<String, Object> bodySolicitud) {
-        restTemplate.postForObject(apiUrl + "/v1/solicitudes-adopcion/publico/registro-y-adopcion", bodySolicitud, Object.class);
+        backendClient.registrarYAdopcionPublico(bodySolicitud);
     }
 
     public ResponseEntity<String> loginPost(String email, String password) {
-        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-        headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
-        String loginBody = "username=" + email + "&password=" + password;
-        org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(loginBody, headers);
-        String authBaseUrl = authUrl.substring(0, authUrl.lastIndexOf("/api"));
-        String loginUrl = authBaseUrl + "/login-post";
-        return restTemplate.postForEntity(loginUrl, entity, String.class);
+        return authClient.login(email, password);
+    }
+
+    public Map<String, Object> buildListarModelData(int page, int size) {
+        Map<String, Object> modelData = new HashMap<>();
+        PaginatedResponse<SolicitudAdopcionRecord> pagination = fetchPaginatedSolicitudes(page, size);
+        List<SolicitudAdopcionRecord> solicitudes = pagination.items();
+        
+        List<SolicitudAdopcionRecord> pendientes = solicitudes.stream()
+                .filter(s -> "PENDIENTE".equals(s.estado()) || "EN_REVISION".equals(s.estado()))
+                .toList();
+
+        List<AnimalRecord> animales = fetchAllAnimales();
+        List<AdoptanteRecord> adoptantes = fetchAllAdoptantes();
+        
+        Map<String, AnimalRecord> animalesMap = new HashMap<>();
+        for (AnimalRecord a : animales) {
+            animalesMap.put(String.valueOf(a.id()), a);
+        }
+
+        Map<String, String> adoptanteNombres = new HashMap<>();
+        Map<String, String> adoptanteUsuarioIds = new HashMap<>();
+        
+        for (AdoptanteRecord a : adoptantes) {
+            if (a.usuarioId() != null) {
+                adoptanteUsuarioIds.put(String.valueOf(a.id()), a.usuarioId().toString());
+                try {
+                    PerfilLegalRecord perfil = fetchPerfilLegalByUsuarioId(a.usuarioId());
+                    if (perfil != null) {
+                        String nombre = perfil.nombre() != null ? perfil.nombre() : "";
+                        String apellido = perfil.apellido() != null ? perfil.apellido() : "";
+                        adoptanteNombres.put(String.valueOf(a.id()), (nombre + " " + apellido).trim());
+                    }
+                } catch (Exception e) {}
+            }
+        }
+
+        Map<String, String> solicitudToAdopcionMap = new HashMap<>();
+        try {
+            List<AdopcionRecord> allAdopciones = fetchAllAdopciones();
+            if (allAdopciones != null && solicitudes != null) {
+                for (SolicitudAdopcionRecord s : solicitudes) {
+                    if ("APROBADA".equals(s.estado())) {
+                        String key = s.adoptanteId() + "_" + s.animalId();
+                        allAdopciones.stream()
+                                .filter(ad -> key.equals(ad.adoptanteId() + "_" + ad.animalId()))
+                                .findFirst()
+                                .ifPresent(ad -> solicitudToAdopcionMap.put(String.valueOf(s.id()), String.valueOf(ad.id())));
+                    }
+                }
+            }
+        } catch (Exception e) {}
+
+        modelData.put("solicitudList", solicitudes);
+        modelData.put("pagination", pagination);
+        modelData.put("pendientes", pendientes);
+        modelData.put("animalesMap", animalesMap);
+        modelData.put("adoptanteNombres", adoptanteNombres);
+        modelData.put("adoptanteUsuarioIds", adoptanteUsuarioIds);
+        modelData.put("solicitudToAdopcionMap", solicitudToAdopcionMap);
+        return modelData;
+    }
+
+    public Map<String, Object> buildMisAdoptadosModelData(Integer currentUserId) {
+        Map<String, Object> modelData = new HashMap<>();
+        Integer adoptanteId = null;
+        try {
+            AdoptanteRecord adoptante = fetchAdoptanteByUsuarioId(currentUserId);
+            if (adoptante != null) adoptanteId = adoptante.id();
+        } catch (Exception e) {}
+
+        List<SolicitudAdopcionRecord> todas = fetchAllSolicitudes();
+        List<SolicitudAdopcionRecord> misSolicitudes = new ArrayList<>();
+
+        if (adoptanteId != null) {
+            for (SolicitudAdopcionRecord s : todas) {
+                if (s.adoptanteId() != null && s.adoptanteId().equals(adoptanteId)) {
+                    misSolicitudes.add(s);
+                }
+            }
+            try {
+                List<AdopcionRecord> adopciones = fetchAdopcionesByAdoptanteId(adoptanteId);
+                if (adopciones != null) {
+                    for (AdopcionRecord adopcion : adopciones) {
+                        if (adopcion.solicitudAdopcionId() == null) {
+                            SolicitudAdopcionRecord fakeSolicitud = new SolicitudAdopcionRecord(
+                                    -adopcion.id(), adopcion.animalId(), adopcion.adoptanteId(),
+                                    adopcion.fechaAdopcion(), "APROBADA", "Adopción directa", "");
+                            misSolicitudes.add(fakeSolicitud);
+                        }
+                    }
+                }
+            } catch (Exception e) {}
+        }
+        
+        if (!misSolicitudes.isEmpty()) {
+            List<AnimalRecord> animales = fetchAllAnimales();
+            Map<String, AnimalRecord> animalesMap = new HashMap<>();
+            for (AnimalRecord a : animales) animalesMap.put(String.valueOf(a.id()), a);
+            modelData.put("animalesMap", animalesMap);
+        }
+        
+        modelData.put("solicitudList", misSolicitudes);
+        return modelData;
     }
 }
+

@@ -1,14 +1,21 @@
-package es.refugio.frontend.web.util;
+package es.refugio.frontend.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.stereotype.Service;
 
-@Component
+/**
+ * Servicio centralizado para resolver mensajes i18n.
+ * Reemplaza la funcionalidad getMessage() de ViewControllerHelper.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
+@Service
 @RequiredArgsConstructor
-public class ViewControllerHelper {
+public class MessageService {
 
     private final MessageSource messageSource;
 
