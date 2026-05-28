@@ -54,6 +54,9 @@ import es.refugio.refugio.infraestructure.db.jpa.entity.FavoritoAnimalEntity;
 import es.refugio.refugio.infraestructure.db.jpa.repository.FavoritoAnimalJpaRepository;
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/animales")
 @RequiredArgsConstructor
@@ -126,11 +129,9 @@ public class AnimalController {
             @RequestParam(required = false) Boolean urgencia,
             @RequestParam(required = false) String q) {
 
-        System.out.println("DEBUG: Backend - findFiltered with q=" + q + ", estado=" + estado + ", page="
-                + pageable.getPageNumber());
+        log.debug("Backend - findFiltered con q={}, estado={}, página={}", q, estado, pageable.getPageNumber());
         Page<Animal> page = findAnimalService.findFiltered(q, estado, especie, tamano, edad, sexo, urgencia, pageable);
-        System.out.println("DEBUG: Backend - Results found: " + page.getContent().size() + ", Total elements: "
-                + page.getTotalElements());
+        log.debug("Backend - Resultados encontrados: {}, Elementos totales: {}", page.getContent().size(), page.getTotalElements());
 
         Map<Integer, Long> conteos = solicitudAdopcionRepository.getAll().stream()
                 .filter(s -> s.getEstado() == EstadoSolicitud.PENDIENTE || s.getEstado() == EstadoSolicitud.EN_REVISION)

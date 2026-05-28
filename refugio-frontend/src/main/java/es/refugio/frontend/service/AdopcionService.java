@@ -1,78 +1,102 @@
 package es.refugio.frontend.service;
 
+import es.refugio.frontend.client.AuthFeignClient;
+import es.refugio.frontend.client.BackendFeignClient;
 import es.refugio.frontend.web.dto.*;
-import es.refugio.frontend.web.util.ViewControllerHelper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Servicio para gestionar las operaciones relacionadas con Adopciones en el Frontend.
- */
-@Service
-@RequiredArgsConstructor
-/**
- * Servicio de aplicación que orquesta las operaciones relacionadas con Adopcion.
  *
  * @author Elisabeth
  * @author Diego
  */
+@Service
+@RequiredArgsConstructor
 public class AdopcionService {
 
-    private final RestTemplate restTemplate;
-    private final ViewControllerHelper helper;
-
-    @Value("${backend.api.url}")
-    private String apiUrl;
-
-    @Value("${auth.api.url}")
-    private String authUrl;
+    private final BackendFeignClient backendClient;
+    private final AuthFeignClient authClient;
 
     public PaginatedResponse<AdopcionRecord> fetchPaginatedAdopciones(int page, int size, String q, String estado) {
-        String path = "/v1/adopciones";
-        String separator = "?";
-        if (q != null && !q.trim().isEmpty()) {
-            path += separator + "q=" + q;
-            separator = "&";
+        try {
+            return backendClient.getAdopcionesPaginated(page - 1, size, q, estado);
+        } catch (Exception e) {
+            return new PaginatedResponse<>(List.of(), 0, 0, page, size, false, false);
         }
-        if (estado != null && !estado.trim().isEmpty()) {
-            path += separator + "estado=" + estado;
-        }
-        return helper.fetchPaginated(apiUrl + path, page, size, AdopcionRecord.class);
     }
 
     public List<AdopcionRecord> fetchAllAdopciones() {
-        return helper.fetchList(apiUrl + "/v1/adopciones?size=1000", AdopcionRecord.class);
+        try {
+            PaginatedResponse<AdopcionRecord> res = backendClient.getAdopciones(1000);
+            return res != null && res.items() != null ? res.items() : List.of();
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
+    public List<AdopcionRecord> fetchAdopcionesByAnimalId(Integer animalId) {
+        try {
+            return backendClient.getAdopcionesByAnimalId(animalId, 1000);
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public AdopcionRecord fetchAdopcionById(Integer id) {
-        return helper.fetchObject(apiUrl + "/v1/adopciones/" + id, AdopcionRecord.class);
+        try {
+            return backendClient.getAdopcionById(id);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public List<AdoptanteRecord> fetchAllAdoptantes() {
-        return helper.fetchList(apiUrl + "/v1/adoptantes?size=1000", AdoptanteRecord.class);
+        try {
+            PaginatedResponse<AdoptanteRecord> res = backendClient.getAdoptantes(1000);
+            return res != null && res.items() != null ? res.items() : List.of();
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public AdoptanteRecord fetchAdoptanteById(Integer id) {
-        return helper.fetchObject(apiUrl + "/v1/adoptantes/" + id, AdoptanteRecord.class);
+        try {
+            return backendClient.getAdoptanteById(id);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public List<PerfilLegalRecord> fetchAllPerfiles() {
-        return helper.fetchList(apiUrl + "/v1/perfiles-legales?size=1000", PerfilLegalRecord.class);
+        try {
+            return backendClient.getPerfilesLegales(1000);
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public PerfilLegalRecord fetchPerfilByUsuarioId(Integer usuarioId) {
-        return helper.fetchObject(apiUrl + "/v1/perfiles-legales/usuario/" + usuarioId, PerfilLegalRecord.class);
+        try {
+            return backendClient.getPerfilLegalByUsuarioId(usuarioId);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public List<UsuarioRecord> fetchAllUsuarios() {
-        return helper.fetchList(authUrl + "/v1/usuarios?size=1000", UsuarioRecord.class);
+        try {
+            PaginatedResponse<UsuarioRecord> res = authClient.getUsuarios(1000);
+            return res != null && res.items() != null ? res.items() : List.of();
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public void crearAdopcion(Integer idPersona, Integer idAnimal, String estado, String fechaAdopcion) {
@@ -87,12 +111,12 @@ public class AdopcionService {
                 formattedDate = formattedDate.trim() + "T00:00:00";
             }
         } else {
-            formattedDate = java.time.LocalDateTime.now().toString();
+            formattedDate = LocalDateTime.now().toString();
         }
         body.put("fechaAdopcion", formattedDate);
         body.put("contrato", "Contrato formalizado");
 
-        restTemplate.postForObject(apiUrl + "/v1/adopciones", body, Object.class);
+        backendClient.createAdopcion(body);
     }
 
     public void editarAdopcion(Integer id, Integer idPersona, Integer idAnimal, String estado, String fechaAdopcion) {
@@ -107,18 +131,18 @@ public class AdopcionService {
                 formattedDate = formattedDate.trim() + "T00:00:00";
             }
         } else {
-            formattedDate = java.time.LocalDateTime.now().toString();
+            formattedDate = LocalDateTime.now().toString();
         }
         body.put("fechaAdopcion", formattedDate);
 
-        restTemplate.put(apiUrl + "/v1/adopciones/" + id, body);
+        backendClient.updateAdopcion(id, body);
     }
 
     public void eliminarAdopcion(Integer id) {
-        restTemplate.delete(apiUrl + "/v1/adopciones/" + id);
+        backendClient.deleteAdopcion(id);
     }
 
     public ResponseEntity<byte[]> descargarContrato(Integer id) {
-        return restTemplate.getForEntity(apiUrl + "/v1/reports/adopcion/" + id + "/contrato", byte[].class);
+        return backendClient.descargarContrato(id);
     }
 }

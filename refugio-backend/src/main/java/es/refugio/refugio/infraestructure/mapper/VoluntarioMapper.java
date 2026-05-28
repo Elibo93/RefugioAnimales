@@ -2,6 +2,7 @@ package es.refugio.refugio.infraestructure.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -84,7 +85,7 @@ public interface VoluntarioMapper {
         if (tareas == null) {
             return null;
         }
-        return tareas.stream().map(tid -> TareaEntity.builder().id(tid.getValue()).build()).collect(java.util.stream.Collectors.toList());
+        return tareas.stream().map(tid -> TareaEntity.builder().id(tid.getValue()).build()).collect(Collectors.toList());
     }
 
     @Named("mapEntitiesToTareas")
@@ -92,7 +93,7 @@ public interface VoluntarioMapper {
         if (tareas == null) {
             return new ArrayList<>();
         }
-        return tareas.stream().map(te -> new TareaId(te.getId())).collect(java.util.stream.Collectors.toList());
+        return tareas.stream().map(te -> new TareaId(te.getId())).collect(Collectors.toList());
     }
 
     @Named("mapDisponibilidadesToEntities")
@@ -105,7 +106,7 @@ public interface VoluntarioMapper {
                 .fecha(d.getFecha())
                 .turno(d.getTurno())
                 .estado(d.getEstado())
-                .build()).collect(java.util.stream.Collectors.toList());
+                .build()).collect(Collectors.toList());
     }
 
     @Named("mapEntitiesToDisponibilidades")
@@ -119,6 +120,6 @@ public interface VoluntarioMapper {
                 .fecha(de.getFecha())
                 .turno(de.getTurno())
                 .estado(de.getEstado())
-                .build()).collect(java.util.stream.Collectors.toList());
+                .build()).collect(Collectors.toList());
     }
 }

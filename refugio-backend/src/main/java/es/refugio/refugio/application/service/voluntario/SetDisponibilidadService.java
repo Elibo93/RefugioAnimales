@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import es.refugio.refugio.application.command.voluntario.SetDisponibilidadCommand;
+import java.time.LocalDate;
 import es.refugio.refugio.domain.model.voluntario.Voluntario;
+import es.refugio.refugio.domain.model.voluntario.VoluntarioId;
 import es.refugio.refugio.domain.model.voluntario.DisponibilidadVoluntario;
 import es.refugio.refugio.domain.repository.VoluntarioRepository;
 import java.util.Optional;
@@ -49,7 +51,7 @@ public class SetDisponibilidadService {
         return voluntarioRepository.save(voluntario);
     }
 
-    public Voluntario deleteDisponibilidad(es.refugio.refugio.domain.model.voluntario.VoluntarioId id, java.time.LocalDate fecha) {
+    public Voluntario deleteDisponibilidad(VoluntarioId id, LocalDate fecha) {
         Voluntario voluntario = voluntarioRepository.getById(id)
                 .orElseThrow(() -> new RuntimeException("Voluntario no encontrado"));
                 

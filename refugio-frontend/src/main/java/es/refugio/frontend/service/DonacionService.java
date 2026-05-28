@@ -1,61 +1,71 @@
 package es.refugio.frontend.service;
 
+import es.refugio.frontend.client.AuthFeignClient;
+import es.refugio.frontend.client.BackendFeignClient;
 import es.refugio.frontend.web.dto.*;
-import es.refugio.frontend.web.util.ViewControllerHelper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
 import java.util.List;
 import java.util.Map;
 
 /**
  * Servicio para gestionar las operaciones relacionadas con Donaciones en el Frontend.
- */
-@Service
-@RequiredArgsConstructor
-/**
- * Servicio de aplicación que orquesta las operaciones relacionadas con Donacion.
  *
  * @author Elisabeth
  * @author Diego
  */
+@Service
+@RequiredArgsConstructor
 public class DonacionService {
 
-    private final RestTemplate restTemplate;
-    private final ViewControllerHelper helper;
-
-    @Value("${backend.api.url}")
-    private String apiUrl;
-
-    @Value("${auth.api.url}")
-    private String authUrl;
+    private final BackendFeignClient backendClient;
+    private final AuthFeignClient authClient;
 
     public PaginatedResponse<DonacionRecord> fetchPaginated(int page, int size) {
-        return helper.fetchPaginated(apiUrl + "/v1/donaciones", page, size, DonacionRecord.class);
+        try {
+            return backendClient.getDonacionesPaginated(page - 1, size);
+        } catch (Exception e) {
+            return new PaginatedResponse<>(List.of(), 0, 0, page, size, false, false);
+        }
     }
 
     public List<DonacionRecord> fetchAllDonaciones() {
-        return helper.fetchList(apiUrl + "/v1/donaciones?size=1000", DonacionRecord.class);
+        try {
+            PaginatedResponse<DonacionRecord> res = backendClient.getDonaciones(1000);
+            return res != null && res.items() != null ? res.items() : List.of();
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public DonacionRecord fetchDonacionById(Integer id) {
-        return helper.fetchObject(apiUrl + "/v1/donaciones/" + id, DonacionRecord.class);
+        try {
+            return backendClient.getDonacionById(id);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public List<UsuarioRecord> fetchUsuarios() {
-        return helper.fetchList(authUrl + "/v1/usuarios?size=1000", UsuarioRecord.class);
+        try {
+            PaginatedResponse<UsuarioRecord> res = authClient.getUsuarios(1000);
+            return res != null && res.items() != null ? res.items() : List.of();
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
-    @SuppressWarnings("rawtypes")
-    public List<Map> fetchObjetivos() {
-        return helper.fetchList(apiUrl + "/v1/objetivos-donacion?size=1000", Map.class);
+    public List<Map<String, Object>> fetchObjetivos() {
+        try {
+            return backendClient.getObjetivosDonacion(1000);
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public Double fetchTotalDinero() {
         try {
-            Double total = restTemplate.getForObject(apiUrl + "/v1/donaciones/total", Double.class);
+            Double total = backendClient.getTotalDineroDonaciones();
             return total != null ? total : 0.0;
         } catch (Exception e) {
             return 0.0;
@@ -63,18 +73,18 @@ public class DonacionService {
     }
 
     public void crearDonacion(Map<String, Object> body) {
-        restTemplate.postForObject(apiUrl + "/v1/donaciones", body, Object.class);
+        backendClient.createDonacion(body);
     }
 
     public void editarDonacion(Integer id, Map<String, Object> body) {
-        restTemplate.put(apiUrl + "/v1/donaciones/" + id, body);
+        backendClient.updateDonacion(id, body);
     }
 
     public void eliminarDonacion(Integer id) {
-        restTemplate.delete(apiUrl + "/v1/donaciones/" + id);
+        backendClient.deleteDonacion(id);
     }
 
     public void crearObjetivo(Map<String, Object> body) {
-        restTemplate.postForObject(apiUrl + "/v1/objetivos-donacion", body, Object.class);
+        backendClient.createObjetivoDonacion(body);
     }
 }

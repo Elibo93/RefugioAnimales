@@ -19,6 +19,9 @@ import es.refugio.refugio.infraestructure.db.jpa.entity.AnimalEntity;
 import es.refugio.refugio.infraestructure.mapper.AnimalMapper;
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RequiredArgsConstructor
 public class AnimalJpaRepositoryImpl implements AnimalRepository {
 
@@ -89,7 +92,7 @@ public class AnimalJpaRepositoryImpl implements AnimalRepository {
 
             if (q != null && !q.trim().isEmpty()) {
                 String pattern = "%" + q.toLowerCase().trim() + "%";
-                System.out.println("DEBUG: Applying search filter 'q' with pattern: " + pattern);
+                log.debug("Aplicando filtro de búsqueda 'q' con patrón: {}", pattern);
                 predicates.add(cb.or(
                         cb.like(cb.lower(root.get("nombre")), pattern),
                         cb.like(cb.lower(root.get("raza")), pattern),
@@ -98,17 +101,17 @@ public class AnimalJpaRepositoryImpl implements AnimalRepository {
             }
 
             if (estado != null && !estado.isEmpty() && !"ALL".equalsIgnoreCase(estado)) {
-                System.out.println("DEBUG: Applying estado filter: " + estado);
+                log.debug("Aplicando filtro de estado: {}", estado);
                 predicates.add(cb.equal(root.get("estado"), EstadoAnimal.valueOf(estado.toUpperCase())));
             }
 
             if (especie != null && !especie.isEmpty() && !"ALL".equalsIgnoreCase(especie)) {
-                System.out.println("DEBUG: Applying especie filter: " + especie);
+                log.debug("Aplicando filtro de especie: {}", especie);
                 predicates.add(cb.equal(root.get("especie"), Especie.valueOf(especie.toUpperCase())));
             }
 
             if (tamano != null && !tamano.isEmpty() && !"ALL".equalsIgnoreCase(tamano)) {
-                System.out.println("DEBUG: Applying tamano filter: " + tamano);
+                log.debug("Aplicando filtro de tamaño: {}", tamano);
                 Tamano tEnum = null;
                 String tLower = tamano.toLowerCase();
                 if (tLower.contains("pequ")) {
@@ -131,17 +134,17 @@ public class AnimalJpaRepositoryImpl implements AnimalRepository {
             }
 
             if (sexo != null && !sexo.isEmpty() && !"ALL".equalsIgnoreCase(sexo)) {
-                System.out.println("DEBUG: Applying sexo filter: " + sexo);
+                log.debug("Aplicando filtro de sexo: {}", sexo);
                 predicates.add(cb.equal(root.get("sexo"), Sexo.valueOf(sexo.toUpperCase())));
             }
 
             if (urgencia != null && urgencia) {
-                System.out.println("DEBUG: Applying urgencia filter: true");
+                log.debug("Aplicando filtro de urgencia: true");
                 predicates.add(cb.equal(root.get("urgencia"), true));
             }
 
             if (edad != null && !edad.isEmpty()) {
-                System.out.println("DEBUG: Applying edad filters: " + edad);
+                log.debug("Aplicando filtros de edad: {}", edad);
                 var agePredicates = new ArrayList<Predicate>();
                 for (String e : edad) {
                     if ("cachorro".equalsIgnoreCase(e)) {

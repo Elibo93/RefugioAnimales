@@ -1,68 +1,83 @@
 package es.refugio.frontend.service;
 
+import es.refugio.frontend.client.AuthFeignClient;
+import es.refugio.frontend.client.BackendFeignClient;
 import es.refugio.frontend.web.dto.*;
-import es.refugio.frontend.web.util.ViewControllerHelper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Servicio para gestionar las operaciones relacionadas con Adoptantes en el Frontend.
- */
-@Service
-@RequiredArgsConstructor
-/**
- * Servicio de aplicación que orquesta las operaciones relacionadas con Adoptante.
  *
  * @author Elisabeth
  * @author Diego
  */
+@Service
+@RequiredArgsConstructor
 public class AdoptanteService {
 
-    private final RestTemplate restTemplate;
-    private final ViewControllerHelper helper;
-
-    @Value("${backend.api.url}")
-    private String apiUrl;
-
-    @Value("${auth.api.url}")
-    private String authUrl;
+    private final BackendFeignClient backendClient;
+    private final AuthFeignClient authClient;
 
     public PaginatedResponse<AdoptanteRecord> fetchPaginatedAdoptantes(int page, int size, String q) {
-        String url = apiUrl + "/v1/adoptantes";
-        if (q != null && !q.trim().isEmpty()) {
-            url += "?q=" + q;
+        try {
+            return backendClient.getAdoptantesPaginated(page - 1, size, q);
+        } catch (Exception e) {
+            return new PaginatedResponse<>(List.of(), 0, 0, page, size, false, false);
         }
-        return helper.fetchPaginated(url, page, size, AdoptanteRecord.class);
     }
 
     public List<AdoptanteRecord> fetchAllAdoptantes() {
-        return helper.fetchList(apiUrl + "/v1/adoptantes?size=1000", AdoptanteRecord.class);
+        try {
+            PaginatedResponse<AdoptanteRecord> res = backendClient.getAdoptantes(1000);
+            return res != null && res.items() != null ? res.items() : List.of();
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public AdoptanteRecord fetchAdoptanteById(Integer id) {
-        return helper.fetchObject(apiUrl + "/v1/adoptantes/" + id, AdoptanteRecord.class);
+        try {
+            return backendClient.getAdoptanteById(id);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public List<UsuarioRecord> fetchAllUsuarios() {
-        return helper.fetchList(authUrl + "/v1/usuarios?size=1000", UsuarioRecord.class);
+        try {
+            PaginatedResponse<UsuarioRecord> res = authClient.getUsuarios(1000);
+            return res != null && res.items() != null ? res.items() : List.of();
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public UsuarioRecord fetchUsuarioById(Integer id) {
-        return helper.fetchObject(authUrl + "/v1/usuarios/" + id, UsuarioRecord.class);
+        try {
+            return authClient.getUsuarioById(id);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public List<PerfilLegalRecord> fetchAllPerfilesLegales() {
-        return helper.fetchList(apiUrl + "/v1/perfiles-legales?size=1000", PerfilLegalRecord.class);
+        try {
+            return backendClient.getPerfilesLegales(1000);
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public PerfilLegalRecord fetchPerfilLegalByUsuarioId(Integer usuarioId) {
-        return helper.fetchObject(apiUrl + "/v1/perfiles-legales/usuario/" + usuarioId, PerfilLegalRecord.class);
+        try {
+            return backendClient.getPerfilLegalByUsuarioId(usuarioId);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public void crearAdoptanteYPerfil(Integer usuarioId, String nombre, String apellido, String dni, String direccion, String telefono, String fechaNacimiento, String estadoValidacion) {
@@ -75,7 +90,7 @@ public class AdoptanteService {
         bodyPerfil.put("direccion", direccion);
         bodyPerfil.put("telefono", (telefono != null && !telefono.isEmpty()) ? telefono : "000000000");
         bodyPerfil.put("fechaNacimiento", fechaNacimiento);
-        restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
+        backendClient.createPerfilLegal(bodyPerfil);
 
         // 2. Crear Perfil de Adoptante (Rol operativo)
         Map<String, Object> bodyAdoptante = new HashMap<>();
@@ -83,7 +98,7 @@ public class AdoptanteService {
         if (estadoValidacion != null) {
             bodyAdoptante.put("estadoValidacion", estadoValidacion);
         }
-        restTemplate.postForObject(apiUrl + "/v1/adoptantes", bodyAdoptante, Object.class);
+        backendClient.createAdoptante(bodyAdoptante);
     }
 
     public void editarAdoptanteYPerfil(Integer id, Integer usuarioId, String nombre, String apellido, String dni, String direccion, String telefono, String fechaNacimiento, String estadoValidacion) {
@@ -93,7 +108,7 @@ public class AdoptanteService {
         if (estadoValidacion != null) {
             body.put("estadoValidacion", estadoValidacion);
         }
-        restTemplate.put(apiUrl + "/v1/adoptantes/" + id, body);
+        backendClient.updateAdoptante(id, body);
 
         // 2. Actualizar PerfilLegal
         Map<String, Object> bodyPerfil = new HashMap<>();
@@ -104,18 +119,19 @@ public class AdoptanteService {
         bodyPerfil.put("direccion", direccion);
         bodyPerfil.put("telefono", (telefono != null && !telefono.isEmpty()) ? telefono : "000000000");
         bodyPerfil.put("fechaNacimiento", fechaNacimiento);
-        restTemplate.postForObject(apiUrl + "/v1/perfiles-legales", bodyPerfil, Object.class);
+        backendClient.createPerfilLegal(bodyPerfil); // Asumiendo que el backend maneja upsert basado en usuarioId
     }
 
     public void eliminarAdoptante(Integer id) {
-        restTemplate.delete(apiUrl + "/v1/adoptantes/" + id);
+        backendClient.deleteAdoptante(id);
     }
 
     public void aprobarAdoptante(Integer id) {
-        restTemplate.patchForObject(apiUrl + "/v1/adoptantes/" + id + "/approve", null, Object.class);
+        backendClient.approveAdoptante(id);
     }
 
     public void rechazarAdoptante(Integer id) {
-        restTemplate.patchForObject(apiUrl + "/v1/adoptantes/" + id + "/reject", null, Object.class);
+        backendClient.rejectAdoptante(id);
     }
 }
+

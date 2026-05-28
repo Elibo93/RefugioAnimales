@@ -1,6 +1,6 @@
 package es.refugio.frontend.web;
-import org.springframework.context.i18n.LocaleContextHolder;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -19,39 +19,39 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
 import es.refugio.frontend.security.CustomUserDetails;
+import es.refugio.frontend.web.dto.VoluntarioRecord;
+import es.refugio.frontend.web.dto.VoluntarioEncontradoRecord;
 import es.refugio.frontend.web.dto.*;
-import es.refugio.frontend.web.util.ViewControllerHelper;
+import es.refugio.frontend.service.MessageService;
 import es.refugio.frontend.web.util.ErrorMessageExtractor;
-
 import java.io.OutputStream;
 import java.util.Collections;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import es.refugio.frontend.service.VoluntarioService;
 
-@Controller
-@RequiredArgsConstructor
 /**
- * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Voluntario.
+ * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para
+ * Voluntario.
  *
  * @author Elisabeth
  * @author Diego
  */
+@Controller
+@RequiredArgsConstructor
 public class VoluntarioViewController {
 
     private static final Logger logger = LoggerFactory.getLogger(VoluntarioViewController.class);
 
     private final VoluntarioService voluntarioService;
     private final TemplateEngine templateEngine;
-    private final ViewControllerHelper helper;
+    private final MessageService messageService;
 
     @GetMapping(WebRoutes.VOLUNTARIOS_BASE)
     @PreAuthorize("hasRole('ADMIN')")
@@ -66,84 +66,15 @@ public class VoluntarioViewController {
 
         response.setHeader("Vary", "HX-Request");
 
-        PaginatedResponse<VoluntarioRecord> pagination = voluntarioService.fetchPaginatedVoluntarios(page, size, q);
-        List<VoluntarioRecord> voluntarios = new java.util.ArrayList<>(pagination.items());
-
-        if (modoSeleccion && tareaIdSeleccion != null) {
-            try {
-                TareaRecord tarea = voluntarioService.fetchTareaById(tareaIdSeleccion);
-                if (tarea != null) {
-                    model.addAttribute("tareaNombreSeleccion", tarea.descripcion());
-
-                    List<Integer> assignedIds = new java.util.ArrayList<>();
-                    List<Integer> vIds = tarea.voluntarioIds();
-                    if (vIds != null) {
-                        assignedIds.addAll(vIds);
-                    }
-                    model.addAttribute("assignedVoluntarioIds", assignedIds);
-
-                    java.time.LocalDateTime limit = tarea.fechaLimite();
-                    boolean isWeekend = false;
-                    String dayOfWeekSpanish = "";
-                    if (limit != null) {
-                        java.time.DayOfWeek dow = limit.getDayOfWeek();
-                        isWeekend = (dow == java.time.DayOfWeek.SATURDAY || dow == java.time.DayOfWeek.SUNDAY);
-                        switch (dow) {
-                            case MONDAY: dayOfWeekSpanish = "LUNES"; break;
-                            case TUESDAY: dayOfWeekSpanish = "MARTES"; break;
-                            case WEDNESDAY: dayOfWeekSpanish = "MIERCOLES"; break;
-                            case THURSDAY: dayOfWeekSpanish = "JUEVES"; break;
-                            case FRIDAY: dayOfWeekSpanish = "VIERNES"; break;
-                            case SATURDAY: dayOfWeekSpanish = "SABADO"; break;
-                            case SUNDAY: dayOfWeekSpanish = "DOMINGO"; break;
-                        }
-                    }
-
-                    final boolean finalIsWeekend = isWeekend;
-                    final String finalDayOfWeekSpanish = dayOfWeekSpanish;
-
-                    voluntarios.removeIf(v -> {
-                        if (assignedIds.contains(v.id())) return true;
-                        
-                        if (limit != null && v.disponibilidad() != null) {
-                            String disp = v.disponibilidad().toUpperCase();
-                            if (disp.contains("FINES DE SEMANA") && !finalIsWeekend) return true;
-                            if ((disp.equals("LUNES") || disp.equals("MARTES") || disp.equals("MIERCOLES") || disp.equals("MIÉRCOLES") || 
-                                 disp.equals("JUEVES") || disp.equals("VIERNES") || disp.equals("SABADO") || disp.equals("SÁBADO") || disp.equals("DOMINGO"))
-                                 && !disp.replace("Á", "A").replace("É", "E").equals(finalDayOfWeekSpanish)) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    });
-                }
-            } catch (Exception e) {
-                logger.warn("No se pudo obtener la información de la tarea para el modo selección: " + e.getMessage());
-            }
-        }
-        List<UsuarioRecord> usuarios = voluntarioService.fetchAllUsuarios();
-        List<PerfilLegalRecord> perfilesLegales = voluntarioService.fetchAllPerfilesLegales();
-
-        Map<String, UsuarioRecord> usuariosMap = new HashMap<>();
-        for (UsuarioRecord u : usuarios) {
-            usuariosMap.put(String.valueOf(u.id()), u);
-        }
-
-        Map<String, PerfilLegalRecord> perfilesMap = new HashMap<>();
-        for (PerfilLegalRecord p : perfilesLegales) {
-            if (p.usuarioId() != null) perfilesMap.put(String.valueOf(p.usuarioId()), p);
-        }
-
-        model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), voluntarios);
-        model.addAttribute("pagination", pagination);
-        model.addAttribute("usuariosMap", usuariosMap);
-        model.addAttribute("perfilesMap", perfilesMap);
-        model.addAttribute("query", q);
-        model.addAttribute("modoSeleccion", modoSeleccion);
-        model.addAttribute("tareaIdSeleccion", tareaIdSeleccion);
+        Map<String, Object> modelData = voluntarioService.buildListarModelData(page, size, q, modoSeleccion,
+                tareaIdSeleccion);
+        model.addAllAttributes(modelData);
+        model.addAttribute(ModelAttribute.Voluntario_LIST.getName(), modelData.get("voluntarios"));
+        model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_BASE);
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_BASE);
 
-        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request"))
+                && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Voluntario_LIST.getPath() + " :: content";
         }
 
@@ -153,106 +84,23 @@ public class VoluntarioViewController {
 
     @GetMapping("/web/voluntarios/sugerencias")
     public String sugerencias(@RequestParam(required = false) String q,
-                              @RequestParam(required = false) String fechaLimite,
-                              @RequestParam(required = false) List<Integer> voluntarioIds,
-                              Model model) {
+            @RequestParam(required = false) String fechaLimite,
+            @RequestParam(required = false) List<Integer> voluntarioIds,
+            Model model) {
         if (q == null || q.trim().isEmpty()) {
             return FragmentoContenido.VOLUNTARIO_SUGERENCIAS.getPath() + " :: suggestions";
         }
 
-        List<VoluntarioRecord> voluntarios = voluntarioService.fetchAllVoluntarios();
-        List<PerfilLegalRecord> perfiles = voluntarioService.fetchAllPerfilesLegales();
-        List<UsuarioRecord> usuarios = voluntarioService.fetchAllUsuarios();
-
-        // Extraer el día de la semana de fechaLimite si se proporciona
-        String diaSemanaRequerido = null;
-        if (fechaLimite != null && !fechaLimite.trim().isEmpty()) {
-            try {
-                java.time.LocalDateTime fecha = java.time.LocalDateTime.parse(fechaLimite);
-                java.time.DayOfWeek day = fecha.getDayOfWeek();
-                switch (day) {
-                    case MONDAY: case TUESDAY: case WEDNESDAY: case THURSDAY: case FRIDAY:
-                        diaSemanaRequerido = "ENTRE_SEMANA";
-                        break;
-                    case SATURDAY: case SUNDAY:
-                        diaSemanaRequerido = "FINES_DE_SEMANA";
-                        break;
-                }
-            } catch (Exception e) {
-                // Ignorar si hay un error de parseo de fecha
-            }
-        }
-
-        Map<Integer, PerfilLegalRecord> perfilesMap = new HashMap<>();
-        for (PerfilLegalRecord p : perfiles) {
-            if (p.usuarioId() != null)
-                perfilesMap.put(p.usuarioId(), p);
-        }
-
-        Map<Integer, UsuarioRecord> usuariosMap = new HashMap<>();
-        for (UsuarioRecord u : usuarios) {
-            usuariosMap.put(u.id(), u);
-        }
-
-        String query = q.toLowerCase();
-        List<Map<String, Object>> voluntariosEncontrados = new ArrayList<>();
-
-        for (VoluntarioRecord v : voluntarios) {
-            // Filtrar voluntarios no aprobados o que ya están asignados
-            if (!"APROBADO".equals(v.estado())) continue;
-            if (voluntarioIds != null && voluntarioIds.contains(v.id())) continue;
-
-            // Filtrar por disponibilidad si hay un requerimiento
-            if (diaSemanaRequerido != null && v.disponibilidad() != null) {
-                String disp = v.disponibilidad().toUpperCase();
-                if (!disp.contains(diaSemanaRequerido) && !disp.contains("FLEXIBLE") && !disp.contains("CUALQUIERA")) {
-                    // Si requiere fin de semana pero solo tiene mañanas/tardes entre semana, lo saltamos
-                    // Asumimos que FLEXIBLE o CUALQUIERA u opciones que contengan el dia requerido son válidas
-                    if (diaSemanaRequerido.equals("FINES_DE_SEMANA") && (disp.contains("MAÑANAS") || disp.contains("TARDES"))) {
-                        // En realidad "MAÑANAS" y "TARDES" puede aplicar a toda la semana, dependiendo de la BD. 
-                        // Pero para ser estrictos, si el usuario explícitamente marcó FINES_DE_SEMANA, o ENTRE_SEMANA
-                        // Y esta disponibilidad es un enum: MAÑANAS, TARDES, FINES_DE_SEMANA, FLEXIBLE.
-                        // Si la disponibilidad de V no es compatible, lo saltamos.
-                        if (!disp.equals("MAÑANAS") && !disp.equals("TARDES") && !disp.equals("FLEXIBLE")) {
-                            continue;
-                        }
-                    } else if (diaSemanaRequerido.equals("ENTRE_SEMANA") && disp.equals("FINES_DE_SEMANA")) {
-                        continue; // No está disponible entre semana
-                    }
-                }
-            }
-
-            if (v.usuarioId() != null) {
-                int uId = v.usuarioId();
-                PerfilLegalRecord perfil = perfilesMap.get(uId);
-                UsuarioRecord user = usuariosMap.get(uId);
-
-                String nombre = perfil != null && perfil.nombre() != null ? perfil.nombre() : "";
-                String apellido = perfil != null && perfil.apellido() != null ? perfil.apellido() : "";
-                String email = user != null && user.email() != null ? user.email() : "";
-                String username = user != null && user.username() != null ? user.username() : "";
-
-                if (nombre.toLowerCase().contains(query) || apellido.toLowerCase().contains(query) ||
-                        email.toLowerCase().contains(query) || username.toLowerCase().contains(query)) {
-
-                    Map<String, Object> suggestion = new HashMap<>();
-                    suggestion.put("id", v.id());
-                    suggestion.put("nombre", nombre);
-                    suggestion.put("apellido", apellido);
-                    suggestion.put("email", email);
-                    suggestion.put("username", username);
-                    voluntariosEncontrados.add(suggestion);
-                }
-            }
-        }
-
+        List<VoluntarioEncontradoRecord> voluntariosEncontrados = voluntarioService.buildSugerenciasModelData(q,
+                fechaLimite, voluntarioIds);
         model.addAttribute("voluntariosEncontrados", voluntariosEncontrados);
         return FragmentoContenido.VOLUNTARIO_SUGERENCIAS.getPath() + " :: suggestions";
     }
 
     @GetMapping(WebRoutes.VOLUNTARIOS_NUEVO)
     @PreAuthorize("hasAnyRole('ADMIN', 'PUBLICO', 'VOLUNTARIO', 'ADOPTANTE') or isAnonymous()")
-    public String formulario(@RequestParam(required = false) Integer usuarioId, Model model, HttpServletRequest request) {
+    public String formulario(@RequestParam(required = false) Integer usuarioId, Model model,
+            HttpServletRequest request) {
         Map<String, Object> emptyVoluntario = new HashMap<>();
         emptyVoluntario.put("id", null);
         emptyVoluntario.put("usuarioId", usuarioId);
@@ -261,17 +109,17 @@ public class VoluntarioViewController {
         emptyVoluntario.put("disponibilidad", null);
         model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), emptyVoluntario);
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_NUEVO);
-        
+
         model.addAttribute("perfilLegalExists", false);
         model.addAttribute("perfilExistente", false);
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = auth != null && auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
-        
+
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             try {
                 Integer targetUserId = null;
-                
+
                 if (isAdmin) {
                     // Si es admin, debe venir el usuarioId explícitamente
                     targetUserId = usuarioId;
@@ -282,9 +130,9 @@ public class VoluntarioViewController {
                         targetUserId = ((Number) currentUserIdObj).intValue();
                     }
                 }
-                
+
                 model.addAttribute("targetUserId", targetUserId);
-                
+
                 if (targetUserId != null) {
                     try {
                         UsuarioRecord targetUser = voluntarioService.fetchUsuarioById(targetUserId);
@@ -295,25 +143,26 @@ public class VoluntarioViewController {
                     } catch (Exception e) {
                         logger.info("No se pudo obtener el usuario objetivo: " + e.getMessage());
                     }
-                    
+
                     PerfilLegalRecord perfil = voluntarioService.fetchPerfilLegalByUsuarioId(targetUserId);
                     if (perfil != null) {
-                        model.addAttribute("userPhone",           perfil.telefono());
-                        model.addAttribute("userDni",             perfil.dni());
-                        model.addAttribute("userDireccion",       perfil.direccion());
+                        model.addAttribute("userPhone", perfil.telefono());
+                        model.addAttribute("userDni", perfil.dni());
+                        model.addAttribute("userDireccion", perfil.direccion());
                         model.addAttribute("userFechaNacimiento", perfil.fechaNacimiento());
-                        model.addAttribute("userNombre",          perfil.nombre());
-                        model.addAttribute("userApellido",        perfil.apellido());
-                        model.addAttribute("nombreCompleto",      perfil.nombre() + " " + perfil.apellido());
-                        model.addAttribute("perfilLegalExists",   true);
-                        model.addAttribute("perfilExistente",     true);
+                        model.addAttribute("userNombre", perfil.nombre());
+                        model.addAttribute("userApellido", perfil.apellido());
+                        model.addAttribute("nombreCompleto", perfil.nombre() + " " + perfil.apellido());
+                        model.addAttribute("perfilLegalExists", true);
+                        model.addAttribute("perfilExistente", true);
                     } else {
                         model.addAttribute("perfilLegalExists", false);
                         model.addAttribute("perfilExistente", false);
                     }
 
                     try {
-                        VoluntarioRecord voluntarioExistente = voluntarioService.fetchVoluntarioByUsuarioId(targetUserId);
+                        VoluntarioRecord voluntarioExistente = voluntarioService
+                                .fetchVoluntarioByUsuarioId(targetUserId);
                         if (voluntarioExistente != null) {
                             model.addAttribute("voluntarioExistente", voluntarioExistente);
                         }
@@ -326,7 +175,8 @@ public class VoluntarioViewController {
             }
         }
 
-        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request"))
+                && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Voluntario_FORM.getPath() + " :: content";
         }
 
@@ -343,14 +193,14 @@ public class VoluntarioViewController {
         CustomUserDetails currentUser = (CustomUserDetails) auth.getPrincipal();
         boolean isAdmin = auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
         model.addAttribute("isAdmin", isAdmin);
-        
+
         model.addAttribute("perfilLegalExists", false);
         model.addAttribute("perfilExistente", false);
 
         try {
             VoluntarioRecord voluntario = voluntarioService.fetchVoluntarioById(id);
             model.addAttribute(ModelAttribute.SINGLE_Voluntario.getName(), voluntario);
-            
+
             if (voluntario == null) {
                 logger.warn("No se encontró el voluntario con ID: {}", id);
                 return "redirect:/web/home";
@@ -370,19 +220,20 @@ public class VoluntarioViewController {
                         model.addAttribute("userEmail", user.email());
                     }
                 } catch (Exception e) {
-                    logger.warn("No se pudo obtener datos de usuario {} para el voluntario {}", voluntarioUsuarioId, id);
+                    logger.warn("No se pudo obtener datos de usuario {} para el voluntario {}", voluntarioUsuarioId,
+                            id);
                 }
 
                 try {
                     PerfilLegalRecord perfil = voluntarioService.fetchPerfilLegalByUsuarioId(voluntarioUsuarioId);
                     if (perfil != null) {
                         model.addAttribute("nombreCompleto", perfil.nombre() + " " + perfil.apellido());
-                        model.addAttribute("userPhone",         perfil.telefono());
-                        model.addAttribute("userDni",           perfil.dni());
-                        model.addAttribute("userDireccion",     perfil.direccion());
+                        model.addAttribute("userPhone", perfil.telefono());
+                        model.addAttribute("userDni", perfil.dni());
+                        model.addAttribute("userDireccion", perfil.direccion());
                         model.addAttribute("userFechaNacimiento", perfil.fechaNacimiento());
-                        model.addAttribute("userNombre",        perfil.nombre());
-                        model.addAttribute("userApellido",      perfil.apellido());
+                        model.addAttribute("userNombre", perfil.nombre());
+                        model.addAttribute("userApellido", perfil.apellido());
                         model.addAttribute("perfilLegalExists", true);
                         model.addAttribute("perfilExistente", true);
                     } else {
@@ -402,7 +253,8 @@ public class VoluntarioViewController {
 
         model.addAttribute("currentUri", WebRoutes.VOLUNTARIOS_EDITAR);
 
-        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request"))
+                && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return FragmentoContenido.Voluntario_FORM.getPath() + " :: content";
         }
 
@@ -442,7 +294,8 @@ public class VoluntarioViewController {
 
                     if (!isAdmin) {
                         if (finalUsuarioId != null && !finalUsuarioId.equals(realUserId)) {
-                            logger.warn("Usuario {} intentó suplantar al ID {} en registro voluntario", realUserId, finalUsuarioId);
+                            logger.warn("Usuario {} intentó suplantar al ID {} en registro voluntario", realUserId,
+                                    finalUsuarioId);
                         }
                         finalUsuarioId = realUserId;
 
@@ -450,7 +303,8 @@ public class VoluntarioViewController {
                             VoluntarioRecord existing = voluntarioService.fetchVoluntarioByUsuarioId(realUserId);
                             if (existing != null) {
                                 logger.info("Bloqueada solicitud duplicada para usuario {}", realUserId);
-                                redirectAttributes.addFlashAttribute("errorMessage", helper.getMessage("toast.error.voluntario_registrado"));
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                        messageService.getMessage("toast.error.voluntario_registrado"));
                                 return "redirect:" + WebRoutes.VOLUNTARIOS_NUEVO;
                             }
                         } catch (Exception e) {
@@ -471,17 +325,20 @@ public class VoluntarioViewController {
                 }
             } catch (Exception e) {
                 logger.error("Error al registrar usuario para voluntario: " + e.getMessage());
-                redirectAttributes.addFlashAttribute("errorMessage", helper.getMessage("toast.error.crear_cuenta"));
+                redirectAttributes.addFlashAttribute("errorMessage", messageService.getMessage("toast.error.crear_cuenta"));
                 return "redirect:" + WebRoutes.VOLUNTARIOS_NUEVO;
             }
         }
 
         try {
-            voluntarioService.crearVoluntarioYPerfil(finalUsuarioId, nombre, apellido, dni, direccion, telefono, fechaNacimiento, especialidad, disponibilidad);
+            voluntarioService.crearVoluntarioYPerfil(finalUsuarioId, nombre, apellido, dni, direccion, telefono,
+                    fechaNacimiento, especialidad, disponibilidad);
             if (isAuthenticated && auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
-                redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.voluntario_creado_admin"));
+                redirectAttributes.addFlashAttribute("successMessage",
+                        messageService.getMessage("toast.success.voluntario_creado_admin"));
             } else {
-                redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("voluntario.estado.pendiente.msg"));
+                redirectAttributes.addFlashAttribute("successMessage",
+                        messageService.getMessage("voluntario.estado.pendiente.msg"));
             }
         } catch (Exception e) {
             String errorMsg = "Error al crear el perfil: " + ErrorMessageExtractor.extract(e);
@@ -518,12 +375,14 @@ public class VoluntarioViewController {
         }
 
         try {
-            voluntarioService.editarVoluntarioYPerfil(id, usuarioId, nombre, apellido, email, dni, direccion, telefono, fechaNacimiento, especialidad, disponibilidad);
+            voluntarioService.editarVoluntarioYPerfil(id, usuarioId, nombre, apellido, email, dni, direccion, telefono,
+                    fechaNacimiento, especialidad, disponibilidad);
         } catch (Exception e) {
             logger.error("Error al actualizar voluntario: " + e.getMessage());
         }
 
-        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.voluntario_actualizado"));
+        redirectAttributes.addFlashAttribute("successMessage",
+                messageService.getMessage("toast.success.voluntario_actualizado"));
 
         if (isAdmin) {
             return "redirect:" + WebRoutes.VOLUNTARIOS_BASE;
@@ -538,10 +397,12 @@ public class VoluntarioViewController {
     public ResponseEntity<String> borrar(@PathVariable Integer id, HttpServletRequest request) {
         try {
             voluntarioService.eliminarVoluntario(id);
-            if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request")))
+            if ("true".equals(request.getHeader("HX-Request"))
+                    && !"true".equals(request.getHeader("HX-History-Restore-Request")))
                 return ResponseEntity.ok("");
         } catch (Exception e) {
-            if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
+            if ("true".equals(request.getHeader("HX-Request"))
+                    && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
                 return ResponseEntity.unprocessableEntity()
                         .body("<div class='toast error'><span>No se puede eliminar: tiene animales asignados.</span></div>");
             }
@@ -603,49 +464,48 @@ public class VoluntarioViewController {
         }
 
         byte[] excelBytes = ExcelExportHelper.exportToExcel(
-            "Voluntarios",
-            List.of("ID", "ID Usuario", "Username", "Email", "Nombre", "Apellido", "DNI", "Teléfono", "Dirección", "Fecha Nacimiento", "Especialidad", "Disponibilidad", "Estado"),
-            voluntarios,
-            List.of(
-                VoluntarioRecord::id,
-                VoluntarioRecord::usuarioId,
-                v -> {
-                    UsuarioRecord u = usuariosMap.get(String.valueOf(v.usuarioId()));
-                    return u != null ? u.username() : "";
-                },
-                v -> {
-                    UsuarioRecord u = usuariosMap.get(String.valueOf(v.usuarioId()));
-                    return u != null ? u.email() : "";
-                },
-                v -> {
-                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
-                    return p != null ? p.nombre() : "";
-                },
-                v -> {
-                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
-                    return p != null ? p.apellido() : "";
-                },
-                v -> {
-                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
-                    return p != null ? p.dni() : "-";
-                },
-                v -> {
-                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
-                    return p != null ? p.telefono() : "-";
-                },
-                v -> {
-                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
-                    return p != null ? p.direccion() : "-";
-                },
-                v -> {
-                    PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
-                    return p != null ? p.fechaNacimiento() : "-";
-                },
-                v -> v.especialidad() != null ? v.especialidad() : "-",
-                v -> v.disponibilidad() != null ? v.disponibilidad() : "-",
-                v -> v.estado() != null ? v.estado() : "-"
-            )
-        );
+                "Voluntarios",
+                List.of("ID", "ID Usuario", "Username", "Email", "Nombre", "Apellido", "DNI", "Teléfono", "Dirección",
+                        "Fecha Nacimiento", "Especialidad", "Disponibilidad", "Estado"),
+                voluntarios,
+                List.of(
+                        VoluntarioRecord::id,
+                        VoluntarioRecord::usuarioId,
+                        v -> {
+                            UsuarioRecord u = usuariosMap.get(String.valueOf(v.usuarioId()));
+                            return u != null ? u.username() : "";
+                        },
+                        v -> {
+                            UsuarioRecord u = usuariosMap.get(String.valueOf(v.usuarioId()));
+                            return u != null ? u.email() : "";
+                        },
+                        v -> {
+                            PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
+                            return p != null ? p.nombre() : "";
+                        },
+                        v -> {
+                            PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
+                            return p != null ? p.apellido() : "";
+                        },
+                        v -> {
+                            PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
+                            return p != null ? p.dni() : "-";
+                        },
+                        v -> {
+                            PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
+                            return p != null ? p.telefono() : "-";
+                        },
+                        v -> {
+                            PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
+                            return p != null ? p.direccion() : "-";
+                        },
+                        v -> {
+                            PerfilLegalRecord p = perfilesMap.get(String.valueOf(v.usuarioId()));
+                            return p != null ? p.fechaNacimiento() : "-";
+                        },
+                        v -> v.especialidad() != null ? v.especialidad() : "-",
+                        v -> v.disponibilidad() != null ? v.disponibilidad() : "-",
+                        v -> v.estado() != null ? v.estado() : "-"));
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename=voluntarios.xlsx");
         try (OutputStream out = response.getOutputStream()) {
@@ -673,12 +533,14 @@ public class VoluntarioViewController {
         VoluntarioRecord voluntario = null;
         try {
             voluntario = voluntarioService.fetchVoluntarioById(id);
-        } catch (Exception ignored) {}
-        
+        } catch (Exception ignored) {
+        }
+
         List<Map<String, Object>> disponibilidades = Collections.emptyList();
         try {
             disponibilidades = voluntarioService.fetchDisponibilidad(id);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         String voluntarioNombre = "Voluntario #" + id;
         if (voluntario != null && voluntario.usuarioId() != null) {
@@ -687,7 +549,8 @@ public class VoluntarioViewController {
                 if (p != null) {
                     voluntarioNombre = p.nombre() + " " + p.apellido();
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         model.addAttribute("voluntarioId", id);
@@ -710,7 +573,8 @@ public class VoluntarioViewController {
 
         Map<String, PerfilLegalRecord> perfilesMap = new HashMap<>();
         for (PerfilLegalRecord p : perfilesLegales) {
-            if (p.usuarioId() != null) perfilesMap.put(String.valueOf(p.usuarioId()), p);
+            if (p.usuarioId() != null)
+                perfilesMap.put(String.valueOf(p.usuarioId()), p);
         }
 
         model.addAttribute("pendientes", pendientes);
@@ -718,11 +582,13 @@ public class VoluntarioViewController {
         model.addAttribute("perfilesMap", perfilesMap);
         model.addAttribute("currentUri", "/web/voluntarios/pendientes");
 
-        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
+        if ("true".equals(request.getHeader("HX-Request"))
+                && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
             return "fragments/content/voluntarios/voluntarios-pendientes :: content";
         }
 
-        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), "fragments/content/voluntarios/voluntarios-pendientes");
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(),
+                "fragments/content/voluntarios/voluntarios-pendientes");
         return ThymTemplates.MAIN_LAYOUT.getPath();
     }
 
@@ -732,11 +598,13 @@ public class VoluntarioViewController {
     public ResponseEntity<String> aprobar(@PathVariable Integer id, HttpServletRequest request) {
         try {
             voluntarioService.aprobarSolicitudVoluntario(id);
-            
-            if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
+
+            if ("true".equals(request.getHeader("HX-Request"))
+                    && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
                 return ResponseEntity.ok()
-                    .header("HX-Trigger", "{\"showToast\": {\"message\": \"¡Solicitud aprobada! El nuevo voluntario ya está activo en el equipo.\", \"type\": \"success\"}, \"volunteerStatusChanged\": {}}")
-                    .body("");
+                        .header("HX-Trigger",
+                                "{\"showToast\": {\"message\": \"¡Solicitud aprobada! El nuevo voluntario ya está activo en el equipo.\", \"type\": \"success\"}, \"volunteerStatusChanged\": {}}")
+                        .body("");
             }
         } catch (Exception e) {
             logger.error("Error al aprobar voluntario {}: {}", id, e.getMessage());
@@ -751,11 +619,13 @@ public class VoluntarioViewController {
     public ResponseEntity<String> rechazar(@PathVariable Integer id, HttpServletRequest request) {
         try {
             voluntarioService.rechazarSolicitudVoluntario(id);
-            
-            if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
+
+            if ("true".equals(request.getHeader("HX-Request"))
+                    && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
                 return ResponseEntity.ok()
-                    .header("HX-Trigger", "{\"showToast\": {\"message\": \"Solicitud rechazada. Se ha actualizado el estado del candidato correctamente.\", \"type\": \"warning\"}, \"volunteerStatusChanged\": {}}")
-                    .body("");
+                        .header("HX-Trigger",
+                                "{\"showToast\": {\"message\": \"Solicitud rechazada. Se ha actualizado el estado del candidato correctamente.\", \"type\": \"warning\"}, \"volunteerStatusChanged\": {}}")
+                        .body("");
             }
         } catch (Exception e) {
             logger.error("Error al rechazar voluntario {}: {}", id, e.getMessage());

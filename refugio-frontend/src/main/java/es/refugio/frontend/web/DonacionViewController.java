@@ -1,6 +1,6 @@
 package es.refugio.frontend.web;
-import org.springframework.context.i18n.LocaleContextHolder;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,44 +14,38 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import es.refugio.common.util.ExcelExportHelper;
-
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
 import es.refugio.frontend.web.dto.*;
-import es.refugio.frontend.web.util.ViewControllerHelper;
+import es.refugio.frontend.service.MessageService;
 import es.refugio.frontend.web.util.ErrorMessageExtractor;
-
 import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.*;
 import org.springframework.web.client.RestClientResponseException;
+import es.refugio.frontend.service.DonacionService;
 
 /**
  * Controlador para la gestión de donaciones en la capa de vista.
  * Maneja la visualización de listas, formularios y la integración con la pasarela de pago.
- */
-import es.refugio.frontend.service.DonacionService;
-
-@Controller
-@RequiredArgsConstructor
-/**
  * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Donacion.
  *
  * @author Elisabeth
  * @author Diego
  */
+@Controller
+@RequiredArgsConstructor
 public class DonacionViewController {
 
     private final DonacionService donacionService;
     private final TemplateEngine templateEngine;
-    private final ViewControllerHelper helper;
+    private final MessageService messageService;
 
     /**
      * Lista todas las donaciones y prepara el modelo para la vista principal.
      */
-    @SuppressWarnings("rawtypes")
     @GetMapping(WebRoutes.DONACIONES_BASE)
     public String listar(Model model,
             @RequestParam(defaultValue = "1") int page,
@@ -61,7 +55,7 @@ public class DonacionViewController {
         PaginatedResponse<DonacionRecord> pagination = donacionService.fetchPaginated(page, size);
         List<DonacionRecord> donaciones = pagination.items();
         List<UsuarioRecord> usuarios = donacionService.fetchUsuarios();
-        List<Map> objetivos = donacionService.fetchObjetivos();
+        List<Map<String, Object>> objetivos = donacionService.fetchObjetivos();
 
         // Construir mapa de usuarios para acceso rápido por ID en la vista
         Map<Integer, UsuarioRecord> usuariosMap = new HashMap<>();
@@ -107,11 +101,10 @@ public class DonacionViewController {
     /**
      * Muestra el formulario completo de nueva donación.
      */
-    @SuppressWarnings("rawtypes")
     @GetMapping(WebRoutes.DONACIONES_NUEVA)
     public String formulario(Model model) {
         List<UsuarioRecord> usuarios = donacionService.fetchUsuarios();
-        List<Map> objetivos = donacionService.fetchObjetivos();
+        List<Map<String, Object>> objetivos = donacionService.fetchObjetivos();
 
         Map<String, Object> nuevaDonacion = new HashMap<>();
         nuevaDonacion.put("fecha", LocalDateTime.now().toString());
@@ -134,7 +127,6 @@ public class DonacionViewController {
     /**
      * Procesa el envío del formulario y redirige a la pasarela de pago simulada.
      */
-    @SuppressWarnings("rawtypes")
     @PostMapping(WebRoutes.DONACIONES_NUEVA)
     public String crear(@RequestParam(required = false) Integer usuarioId,
             @RequestParam(required = false) Integer objetivoId,
@@ -212,7 +204,6 @@ public class DonacionViewController {
     /**
      * Confirma el pago y persiste la donación en el backend.
      */
-    @SuppressWarnings("rawtypes")
     @PostMapping("/web/donaciones/confirmar")
     public String confirmarPago(@RequestParam(required = false) Integer usuarioId,
             @RequestParam(required = false) Integer objetivoId,
@@ -306,14 +297,13 @@ public class DonacionViewController {
         body.put("icono", icono);
 
         donacionService.crearObjetivo(body);
-        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.objetivo_creado"));
+        redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.objetivo_creado"));
         return "redirect:" + WebRoutes.DONACIONES_BASE;
     }
 
     /**
      * Muestra el formulario de edición para una donación existente.
      */
-    @SuppressWarnings("rawtypes")
     @GetMapping(WebRoutes.DONACIONES_EDITAR)
     @PreAuthorize("hasRole('ADMIN')")
     public String editarFormulario(@PathVariable Integer id, Model model) {
@@ -351,7 +341,7 @@ public class DonacionViewController {
         body.put("fecha", LocalDateTime.now().toString());
 
         donacionService.editarDonacion(id, body);
-        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.donacion_editada"));
+        redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.donacion_editada"));
         return "redirect:" + WebRoutes.DONACIONES_BASE;
     }
 

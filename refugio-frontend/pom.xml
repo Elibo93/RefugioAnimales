@@ -57,6 +57,12 @@
             <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
 
+        <!-- OpenFeign para llamadas declarativas a microservicios -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+
         <!-- Generación de PDFs -->
         <dependency>
             <groupId>org.xhtmlrenderer</groupId>

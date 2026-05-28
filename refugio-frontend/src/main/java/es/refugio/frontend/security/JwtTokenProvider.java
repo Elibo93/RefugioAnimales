@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 import jakarta.annotation.PostConstruct;
 import java.security.Key;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class JwtTokenProvider {
 
@@ -36,7 +39,7 @@ public class JwtTokenProvider {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken);
             return true;
         } catch (JwtException | IllegalArgumentException ex) {
-            System.err.println("JWT Validation Error: " + ex.getMessage());
+            log.error("Error de validación JWT: {}", ex.getMessage());
             return false;
         }
     }

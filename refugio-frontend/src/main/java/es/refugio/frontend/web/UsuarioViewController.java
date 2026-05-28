@@ -1,19 +1,20 @@
 package es.refugio.frontend.web;
-import org.springframework.context.i18n.LocaleContextHolder;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import es.refugio.frontend.web.constants.WebRoutes;
 import es.refugio.frontend.web.dto.*;
 import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
-import es.refugio.frontend.web.util.ViewControllerHelper;
+import es.refugio.frontend.web.dto.VoluntarioRecord;
+import es.refugio.frontend.web.dto.UsuarioEncontradoRecord;
+import es.refugio.frontend.service.MessageService;
 import es.refugio.frontend.web.util.ErrorMessageExtractor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,31 +28,24 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import es.refugio.common.util.ExcelExportHelper;
-
 import java.io.OutputStream;
 import java.util.*;
 
-@Controller
-@RequiredArgsConstructor
 /**
  * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Usuario.
  *
  * @author Elisabeth
  * @author Diego
  */
+@Controller
+@RequiredArgsConstructor
 public class UsuarioViewController {
 
     private static final Logger logger = LoggerFactory.getLogger(UsuarioViewController.class);
 
     private final UsuarioService usuarioService;
     private final TemplateEngine templateEngine;
-    private final ViewControllerHelper helper;
-
-    @Value("${auth.api.url}")
-    private String authUrl;
-
-    @Value("${backend.api.url}")
-    private String apiUrl;
+    private final MessageService messageService;
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(WebRoutes.PERSONAS_BASE)
@@ -63,96 +57,9 @@ public class UsuarioViewController {
 
         logger.info("Filtrando personas - Query: '{}', Rol: '{}', Page: {}, Size: {}", q, rol, page, size);
 
-        List<UsuarioRecord> personasAuth = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
-        List<PerfilLegalRecord> perfilesLegales = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
-
-        Map<Integer, PerfilLegalRecord> perfilesMap = new HashMap<>();
-        for (PerfilLegalRecord p : perfilesLegales) {
-            if (p.usuarioId() != null) {
-                perfilesMap.put(p.usuarioId(), p);
-            }
-        }
-
-        List<PersonaCompletaRecord> personasCompletas = new ArrayList<>();
-        String query = q != null ? q.toLowerCase() : null;
-
-        for (UsuarioRecord u : personasAuth) {
-            PerfilLegalRecord perfil = perfilesMap.get(u.id());
-
-            String nombre = perfil != null ? perfil.nombre() : "";
-            String apellido = perfil != null ? perfil.apellido() : "";
-            String dni = perfil != null ? perfil.dni() : "";
-            String telefono = perfil != null ? perfil.telefono() : "";
-            String direccion = perfil != null ? perfil.direccion() : "";
-            String fechaNacimiento = perfil != null ? perfil.fechaNacimiento() : "";
-
-            PersonaCompletaRecord persona = new PersonaCompletaRecord(
-                    u.id(),
-                    u.email(),
-                    u.username(),
-                    u.rol(),
-                    nombre,
-                    apellido,
-                    dni,
-                    telefono,
-                    direccion,
-                    fechaNacimiento
-            );
-
-            // Filtrado por rol
-            if (rol != null && !rol.isEmpty() && !"ALL".equals(rol)) {
-                if (!String.valueOf(u.rol()).equals(rol))
-                    continue;
-            }
-
-            // Filtrado por búsqueda
-            if (query != null && !query.isEmpty()) {
-                String nombreLower = (nombre != null ? nombre : "").toLowerCase();
-                String apellidoLower = (apellido != null ? apellido : "").toLowerCase();
-                String emailLower = (u.email() != null ? u.email() : "").toLowerCase();
-                String usernameLower = (u.username() != null ? u.username() : "").toLowerCase();
-
-                if (!nombreLower.contains(query) && !apellidoLower.contains(query) &&
-                        !emailLower.contains(query) && !usernameLower.contains(query)) {
-                    continue;
-                }
-            }
-
-            personasCompletas.add(persona);
-        }
-
-        // Paginación en memoria
-        int totalElements = personasCompletas.size();
-        int totalPages = (int) Math.ceil((double) totalElements / size);
-        if (totalPages == 0) totalPages = 1;
-
-        int activePage = page;
-        if (activePage < 1) activePage = 1;
-        if (activePage > totalPages) activePage = totalPages;
-
-        int fromIndex = (activePage - 1) * size;
-        int toIndex = Math.min(fromIndex + size, totalElements);
-
-        List<PersonaCompletaRecord> paginatedItems = new ArrayList<>();
-        if (fromIndex < totalElements && fromIndex >= 0) {
-            paginatedItems = personasCompletas.subList(fromIndex, toIndex);
-        }
-
-        boolean hasNext = activePage < totalPages;
-        boolean hasPrevious = activePage > 1;
-
-        PaginatedResponse<PersonaCompletaRecord> pagination = new PaginatedResponse<>(
-                paginatedItems,
-                totalPages,
-                totalElements,
-                activePage,
-                size,
-                hasNext,
-                hasPrevious
-        );
-
-        model.addAttribute(ModelAttribute.Persona_LIST.getName(), paginatedItems);
-        model.addAttribute("pagination", pagination);
+        Map<String, Object> modelData = usuarioService.buildListarModelData(q, rol, page, size);
+        model.addAllAttributes(modelData);
+        model.addAttribute(ModelAttribute.Persona_LIST.getName(), modelData.get("personas"));
         model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_VOLUNTARIO_ADOPTANTE", "ROLE_ADMIN"));
         model.addAttribute("selectedRol", rol);
         model.addAttribute("query", q);
@@ -237,7 +144,7 @@ public class UsuarioViewController {
                     usuarioService.createPerfilLegal(legalBody);
                 }
             }
-            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.usuario_creado"));
+            redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.usuario_creado"));
         } catch (Exception e) {
             logger.error("Error al crear usuario: " + ErrorMessageExtractor.extract(e));
             redirectAttributes.addFlashAttribute("errorMessage", "Error al crear usuario: " + ErrorMessageExtractor.extract(e));
@@ -249,7 +156,7 @@ public class UsuarioViewController {
     @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     @GetMapping(WebRoutes.PERSONAS_EDITAR)
     public String editarPersonaForm(@PathVariable Integer id, Model model, HttpServletRequest request) {
-        UsuarioRecord user = helper.fetchObject(authUrl + "/v1/usuarios/" + id, UsuarioRecord.class);
+        UsuarioRecord user = usuarioService.fetchUsuarioById(id);
         Map<String, Object> persona = new HashMap<>();
         // Preinicializar todas las claves a nulo para evitar excepciones SpEL
         persona.put("id", null);
@@ -273,7 +180,7 @@ public class UsuarioViewController {
         }
 
         try {
-            PerfilLegalRecord legal = helper.fetchObject(apiUrl + "/v1/perfiles-legales/usuario/" + id, PerfilLegalRecord.class);
+            PerfilLegalRecord legal = usuarioService.fetchPerfilLegalByUsuarioId(id);
             if (legal != null) {
                 persona.put("nombre", legal.nombre());
                 persona.put("apellido", legal.apellido());
@@ -334,7 +241,7 @@ public class UsuarioViewController {
         boolean shouldUpdateLegal = hasLegalFields;
         if (!shouldUpdateLegal) {
             try {
-                PerfilLegalRecord legal = helper.fetchObject(apiUrl + "/v1/perfiles-legales/usuario/" + id, PerfilLegalRecord.class);
+                PerfilLegalRecord legal = usuarioService.fetchPerfilLegalByUsuarioId(id);
                 if (legal != null) {
                     shouldUpdateLegal = true;
                 }
@@ -354,7 +261,7 @@ public class UsuarioViewController {
             usuarioService.createPerfilLegal(legalBody);
         }
 
-        redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.perfil_actualizado"));
+        redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.perfil_actualizado"));
         
         return "redirect:/web/personas/" + id;
     }
@@ -407,7 +314,7 @@ public class UsuarioViewController {
             usuarioService.deleteUsuarioAuth(id);
             logger.info("Usuario ID {} eliminado con éxito de Auth", id);
 
-            redirectAttributes.addFlashAttribute("successMessage", helper.getMessage("toast.success.usuario_eliminado"));
+            redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.usuario_eliminado"));
         } catch (Exception e) {
             logger.error("Error crítico al borrar usuario {}: {}", id, ErrorMessageExtractor.extract(e));
             redirectAttributes.addFlashAttribute("errorMessage", "Error al borrar usuario: " + ErrorMessageExtractor.extract(e));
@@ -422,7 +329,7 @@ public class UsuarioViewController {
         model.addAttribute("vinculosAnimales", new ArrayList<>());
         model.addAttribute("animalNames", new HashMap<>());
 
-        UsuarioRecord userAuth = helper.fetchObject(authUrl + "/v1/usuarios/" + id, UsuarioRecord.class);
+        UsuarioRecord userAuth = usuarioService.fetchUsuarioById(id);
         Map<String, Object> persona = new HashMap<>();
         // Preinicializar todas las claves a nulo para evitar excepciones SpEL
         persona.put("id", null);
@@ -446,7 +353,7 @@ public class UsuarioViewController {
         }
 
         try {
-            PerfilLegalRecord legal = helper.fetchObject(apiUrl + "/v1/perfiles-legales/usuario/" + id, PerfilLegalRecord.class);
+            PerfilLegalRecord legal = usuarioService.fetchPerfilLegalByUsuarioId(id);
             if (legal != null) {
                 persona.put("nombre", legal.nombre());
                 persona.put("apellido", legal.apellido());
@@ -462,13 +369,13 @@ public class UsuarioViewController {
 
         // Obtener información de Adoptante y enlaces de animales
         try {
-            AdoptanteRecord adoptante = helper.fetchObject(apiUrl + "/v1/adoptantes/usuario/" + id, AdoptanteRecord.class);
+            AdoptanteRecord adoptante = usuarioService.fetchAdoptanteByUsuarioId(id);
             model.addAttribute("adoptante", adoptante);
             if (adoptante != null) {
                 int aId = adoptante.id();
 
-                List<SolicitudAdopcionRecord> solicitudes = helper.fetchList(apiUrl + "/v1/solicitudes-adopcion/adoptante/" + aId, SolicitudAdopcionRecord.class);
-                List<AdopcionRecord> adopciones = helper.fetchList(apiUrl + "/v1/adopciones/adoptante/" + aId, AdopcionRecord.class);
+                List<SolicitudAdopcionRecord> solicitudes = usuarioService.fetchSolicitudesAdopcionByAdoptanteId(aId);
+                List<AdopcionRecord> adopciones = usuarioService.fetchAdopcionesByAdoptanteId(aId);
 
                 List<Map<String, Object>> vinculos = new ArrayList<>();
                 Map<String, String> animalNames = new HashMap<>();
@@ -501,20 +408,20 @@ public class UsuarioViewController {
 
         // Obtener información de Voluntario
         try {
-            VoluntarioRecord voluntario = helper.fetchObject(apiUrl + "/v1/voluntarios/usuario/" + id, VoluntarioRecord.class);
+            VoluntarioRecord voluntario = usuarioService.fetchVoluntarioByUsuarioId(id);
             model.addAttribute("voluntario", voluntario);
 
             if (voluntario != null) {
                 Integer vId = voluntario.id();
                 if (vId != null) {
-                    List<TareaRecord> todasTareas = helper.fetchList(apiUrl + "/v1/tareas", TareaRecord.class);
+                    List<TareaRecord> todasTareas = usuarioService.fetchAllTareas();
                     List<TareaRecord> misTareas = todasTareas.stream()
                             .filter(t -> t.voluntarioIds() != null && t.voluntarioIds().contains(vId))
                             .toList();
                     model.addAttribute("tareas", misTareas);
                     
                     try {
-                        List<DisponibilidadRecord> disponibilidades = helper.fetchList(apiUrl + "/v1/voluntarios/" + vId + "/disponibilidad", DisponibilidadRecord.class);
+                        List<Map<String, Object>> disponibilidades = usuarioService.fetchDisponibilidades(vId);
                         model.addAttribute("disponibilidades", disponibilidades);
                     } catch (Exception e) {
                         model.addAttribute("disponibilidades", new ArrayList<>());
@@ -527,8 +434,8 @@ public class UsuarioViewController {
         // Gamificación
         try {
             model.addAttribute("metricas", usuarioService.fetchMetricasGamificacion(id));
-            model.addAttribute("logrosUsuario", helper.fetchList(apiUrl + "/v1/gamificacion/logros/usuario/" + id, Map.class));
-            model.addAttribute("todosLosLogros", helper.fetchList(apiUrl + "/v1/gamificacion/logros", Map.class));
+            model.addAttribute("logrosUsuario", usuarioService.fetchLogrosUsuario(id));
+            model.addAttribute("todosLosLogros", usuarioService.fetchTodosLosLogros());
         } catch (Exception e) {
             logger.warn("Error al cargar datos de gamificación para usuario {}: {}", id, e.getMessage());
         }
@@ -544,8 +451,8 @@ public class UsuarioViewController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(WebRoutes.PERSONAS_PDF)
     public void exportarPDF(HttpServletResponse response, @RequestParam(required = false) String rol) throws Exception {
-        List<UsuarioRecord> personasAuth = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
-        List<PerfilLegalRecord> perfilesLegales = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+        List<UsuarioRecord> personasAuth = usuarioService.fetchAllUsuarios();
+        List<PerfilLegalRecord> perfilesLegales = usuarioService.fetchAllPerfilesLegales();
 
         Map<Integer, PerfilLegalRecord> perfilesMap = new HashMap<>();
         for (PerfilLegalRecord p : perfilesLegales) {
@@ -602,8 +509,8 @@ public class UsuarioViewController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(WebRoutes.PERSONAS_EXCEL)
     public void exportarExcel(HttpServletResponse response, @RequestParam(required = false) String rol) throws Exception {
-        List<UsuarioRecord> personasAuth = helper.fetchList(authUrl + "/v1/usuarios", UsuarioRecord.class);
-        List<PerfilLegalRecord> perfilesLegales = helper.fetchList(apiUrl + "/v1/perfiles-legales", PerfilLegalRecord.class);
+        List<UsuarioRecord> personasAuth = usuarioService.fetchAllUsuarios();
+        List<PerfilLegalRecord> perfilesLegales = usuarioService.fetchAllPerfilesLegales();
 
         Map<Integer, PerfilLegalRecord> perfilesMap = new HashMap<>();
         for (PerfilLegalRecord p : perfilesLegales) {
@@ -678,113 +585,7 @@ public class UsuarioViewController {
             return FragmentoContenido.USUARIO_SUGERENCIAS.getPath() + " :: suggestions";
         }
 
-        logger.info("buscarUsuarios called with q: '{}', context: '{}'", q, context);
-        List<UsuarioRecord> usuarios = helper.fetchList(authUrl + "/v1/usuarios?size=1000", UsuarioRecord.class);
-        List<PerfilLegalRecord> perfiles = helper.fetchList(apiUrl + "/v1/perfiles-legales?size=1000", PerfilLegalRecord.class);
-        List<AdoptanteRecord> adoptantes = helper.fetchList(apiUrl + "/v1/adoptantes?size=1000", AdoptanteRecord.class);
-        List<VoluntarioRecord> voluntarios = helper.fetchList(apiUrl + "/v1/voluntarios?size=1000", VoluntarioRecord.class);
-        logger.info("buscarUsuarios - Fetched {} usuarios, {} perfiles, {} adoptantes, {} voluntarios", 
-                    usuarios.size(), perfiles.size(), adoptantes.size(), voluntarios.size());
-
-        Map<Integer, PerfilLegalRecord> perfilesMap = new HashMap<>();
-        for (PerfilLegalRecord p : perfiles) {
-            if (p.usuarioId() != null) {
-                perfilesMap.put(p.usuarioId(), p);
-            }
-        }
-
-        Map<Integer, Integer> adoptantesUserIds = new HashMap<>();
-        for (AdoptanteRecord a : adoptantes) {
-            if (a.usuarioId() != null) {
-                adoptantesUserIds.put(a.usuarioId(), a.id());
-            }
-        }
-
-        Set<Integer> voluntariosUserIds = new HashSet<>();
-        for (VoluntarioRecord v : voluntarios) {
-            if (v.usuarioId() != null) {
-                voluntariosUserIds.add(v.usuarioId());
-            }
-        }
-
-        String query = q.toLowerCase().trim();
-        List<Map<String, Object>> encontrados = new ArrayList<>();
-
-        for (UsuarioRecord u : usuarios) {
-            PerfilLegalRecord perfil = perfilesMap.get(u.id());
-
-            String nombre = perfil != null && perfil.nombre() != null ? perfil.nombre() : "";
-            String apellido = perfil != null && perfil.apellido() != null ? perfil.apellido() : "";
-            String email = u.email() != null ? u.email() : "";
-            String username = u.username() != null ? u.username() : "";
-            
-            // Fallback: Si no tiene PerfilLegal, usamos el username como nombre a mostrar
-            if (nombre.isEmpty() && apellido.isEmpty() && !username.isEmpty()) {
-                nombre = username;
-            }
-            
-            String nombreCompleto = (nombre + " " + apellido).trim();
-            String idStr = String.valueOf(u.id());
-
-            boolean matches = nombre.toLowerCase().contains(query) ||
-                              apellido.toLowerCase().contains(query) ||
-                              email.toLowerCase().contains(query) ||
-                              username.toLowerCase().contains(query) ||
-                              nombreCompleto.toLowerCase().contains(query) ||
-                              idStr.equals(query);
-
-            if (matches) {
-                // Si el contexto es de solicitud y el usuario no tiene perfil de adoptante, lo creamos sobre la marcha
-                if ("solicitud".equals(context) && !adoptantesUserIds.containsKey(u.id())) {
-                    try {
-                        Map<String, Object> adoptanteReq = new HashMap<>();
-                        adoptanteReq.put("usuarioId", u.id());
-                        adoptanteReq.put("estadoValidacion", "APROBADO");
-                        
-                        Map<?, ?> createdAdoptante = usuarioService.createAdoptante(adoptanteReq);
-                        if (createdAdoptante != null && createdAdoptante.get("id") != null) {
-                            Integer newAdoptanteId = ((Number) createdAdoptante.get("id")).intValue();
-                            adoptantesUserIds.put(u.id(), newAdoptanteId);
-                            logger.info("Creado perfil de adoptante ID {} para usuario {} automáticamente durante búsqueda", newAdoptanteId, u.id());
-                        }
-                    } catch (Exception e) {
-                        logger.error("No se pudo crear perfil de adoptante automático para usuario {}: {}", u.id(), e.getMessage());
-                    }
-                }
-
-                Map<String, Object> result = new HashMap<>();
-                result.put("id", u.id());
-                result.put("username", username);
-                result.put("email", email);
-                result.put("rol", u.rol());
-                result.put("nombre", nombre);
-                result.put("apellido", apellido);
-                
-                boolean yaRegistrado = false;
-                if ("adoptante".equals(context)) {
-                    yaRegistrado = adoptantesUserIds.containsKey(u.id());
-                } else if ("voluntario".equals(context)) {
-                    yaRegistrado = voluntariosUserIds.contains(u.id());
-                } else if ("adopcion_filter".equals(context)) {
-                    // Contexto especial para filtrado donde SOLO queremos adoptantes válidos
-                    if (adoptantesUserIds.containsKey(u.id())) {
-                        result.put("adoptanteId", adoptantesUserIds.get(u.id()));
-                    } else {
-                        continue;
-                    }
-                }
-                
-                if (adoptantesUserIds.containsKey(u.id())) {
-                    result.put("adoptanteId", adoptantesUserIds.get(u.id()));
-                } else {
-                    result.put("adoptanteId", null);
-                }
-                
-                result.put("yaRegistrado", yaRegistrado);
-                encontrados.add(result);
-            }
-        }
-
+        List<UsuarioEncontradoRecord> encontrados = usuarioService.buildBuscarSugerenciasModelData(q, context);
         logger.info("buscarUsuarios - Found {} matched users", encontrados.size());
         model.addAttribute("usuariosEncontrados", encontrados);
         model.addAttribute("context", context);
@@ -799,7 +600,7 @@ public class UsuarioViewController {
             return;
 
         try {
-            AnimalRecord animal = helper.fetchObject(apiUrl + "/v1/animales/" + animalId, AnimalRecord.class);
+            AnimalRecord animal = usuarioService.fetchAnimalById(Integer.parseInt(idStr));
             if (animal != null) {
                 names.put(String.valueOf(animal.id()), animal.nombre());
             }

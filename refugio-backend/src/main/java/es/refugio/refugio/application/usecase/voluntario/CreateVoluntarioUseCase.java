@@ -24,6 +24,9 @@ import java.util.Map;
  * @author Elisabeth
  * @author Diego
  */
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RequiredArgsConstructor
 public class CreateVoluntarioUseCase {
 
@@ -120,7 +123,7 @@ public class CreateVoluntarioUseCase {
                     }
                 } catch (Exception e) {
                     // Log the error but don't fail the transaction
-                    System.err.println("Error actualizando rol del voluntario desde ADMIN: " + e.getMessage());
+                    log.error("Error actualizando rol del voluntario desde ADMIN: {}", e.getMessage());
                 }
             }
 

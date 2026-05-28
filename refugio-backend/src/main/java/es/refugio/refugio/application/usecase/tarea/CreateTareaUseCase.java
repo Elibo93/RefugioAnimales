@@ -1,5 +1,6 @@
 package es.refugio.refugio.application.usecase.tarea;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 import java.util.Objects;
@@ -35,7 +36,7 @@ public class CreateTareaUseCase {
         }
         
         if (command.voluntarioIds() != null && command.fechaLimite() != null) {
-            java.time.LocalDate limitDate = command.fechaLimite().toLocalDate();
+            LocalDate limitDate = command.fechaLimite().toLocalDate();
             for (Integer vIdInt : command.voluntarioIds()) {
                 if (vIdInt == null) continue;
                 VoluntarioId volId = new VoluntarioId(vIdInt);

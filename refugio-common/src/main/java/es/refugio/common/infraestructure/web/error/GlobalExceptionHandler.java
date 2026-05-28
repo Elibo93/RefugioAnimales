@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.dao.DataIntegrityViolationException;
 import es.refugio.common.domain.error.EntityNotFoundException;
 
 import lombok.AllArgsConstructor;
@@ -49,8 +50,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(cr, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
-    public ResponseEntity<CustomResponse> handleDataIntegrityViolation(org.springframework.dao.DataIntegrityViolationException ex) {
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<CustomResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         Map<String, Object> details = new HashMap<>();
         String message = ex.getMostSpecificCause().getMessage();
         String friendlyMessage = messageSource.getMessage("common.error.data_integrity", null, LocaleContextHolder.getLocale());

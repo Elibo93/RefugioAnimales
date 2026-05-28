@@ -8,13 +8,15 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import es.refugio.frontend.service.GlobalAttributesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @ControllerAdvice
 @RequiredArgsConstructor
 public class GlobalModelAttributesAdvice {
@@ -58,8 +60,7 @@ public class GlobalModelAttributesAdvice {
                 // Garantizar que el ID sea siempre un Integer plano, nunca un Map
                 Integer userId = (idObj instanceof Number) ? ((Number) idObj).intValue() : null;
 
-                System.out.println("DEBUG: Usuario identificado: " + me.get("email") + " con ID: " + userId + " y ROL: "
-                        + me.get("rol"));
+                log.debug("Usuario identificado: {} con ID: {} y ROL: {}", me.get("email"), userId, me.get("rol"));
                 model.addAttribute("currentUserId", userId);
                 model.addAttribute("currentUserRol", me.get("rol"));
                 model.addAttribute("isAuthenticated", true);
