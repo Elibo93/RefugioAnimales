@@ -61,6 +61,8 @@ Gestionado por el microservicio `refugio-auth`.
 | `GET` | `/api/v1/solicitudes-adopcion` | Listado (filtra por dueño si no es staff). | Todos |
 | `POST` | `/api/v1/solicitudes-adopcion/{id}/aprobar` | Formalizar adopción (mueve animal a RESERVADO). | `ADMIN` |
 | `POST` | `/api/v1/solicitudes-adopcion/{id}/rechazar` | Cierre de solicitud con comentario. | `ADMIN` |
+| `POST` | `/api/v1/adopciones/{id}/periodo-adaptacion` | Iniciar período de adaptación (firma de contrato). | `ADMIN` |
+| `POST` | `/api/v1/adopciones/{id}/devolucion` | Registrar devolución del animal durante el proceso. | `ADMIN` |
 
 ---
 

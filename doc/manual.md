@@ -64,7 +64,9 @@ Orientado a la operativa diaria del refugio.
 ### 2.3. Proceso de Adopción y Contratos
 Gestiona el flujo legal desde que entra una solicitud hasta que el animal sale del refugio.
 1. **Revisión de Solicitudes:** Aparecerán en el panel de control. Se pueden filtrar por estado (Pendiente, En Estudio, Aprobada).
-2. **Generación de Contrato:** Una vez aprobada, el sistema permite descargar el **Contrato de Adopción Legal** autocompletado con los datos del adoptante y el animal.
+2. **Generación de Contrato y Firma:** Una vez aprobada, la adopción pasa a estado **Pendiente de Firma**. El sistema permite descargar el **Contrato de Adopción Legal** autocompletado con los datos del adoptante y el animal.
+3. **Período de Adaptación:** Cuando el adoptante firma el contrato, la adopción pasa al estado **En proceso de Adaptación**.
+4. **Finalización Automática:** Transcurrido un período de 30 días en adaptación, un proceso automático del sistema evalúa el tiempo transcurrido y finaliza la adopción pasando al estado **Aprobada/Completada**, completando el ciclo legal.
 
 ### 2.4. Exportación de Reportes
 El sistema permite descargar de forma rápida los datos que se visualizan en pantalla.
