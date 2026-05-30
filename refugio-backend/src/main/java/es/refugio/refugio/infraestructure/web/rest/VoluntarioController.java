@@ -160,7 +160,14 @@ public class VoluntarioController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/aprobar")
     public ResponseEntity<Void> approve(@PathVariable Integer id, HttpServletRequest request) {
-        approveVoluntarioService.approve(id, getJwtToken(request));
+        String jwtToken = getJwtToken(request);
+        if (jwtToken.isEmpty()) {
+            String bearerToken = request.getHeader("Authorization");
+            if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+                jwtToken = bearerToken.substring(7);
+            }
+        }
+        approveVoluntarioService.approve(id, jwtToken);
         return ResponseEntity.ok().build();
     }
 
@@ -168,7 +175,14 @@ public class VoluntarioController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/rechazar")
     public ResponseEntity<Void> reject(@PathVariable Integer id, HttpServletRequest request) {
-        approveVoluntarioService.reject(id, getJwtToken(request));
+        String jwtToken = getJwtToken(request);
+        if (jwtToken.isEmpty()) {
+            String bearerToken = request.getHeader("Authorization");
+            if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+                jwtToken = bearerToken.substring(7);
+            }
+        }
+        approveVoluntarioService.reject(id, jwtToken);
         return ResponseEntity.ok().build();
     }
 

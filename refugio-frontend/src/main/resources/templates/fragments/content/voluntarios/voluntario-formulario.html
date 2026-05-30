@@ -73,21 +73,21 @@
                         </h2>
 
                         <!-- CASO A: Invitado O Usuario logueado sin PerfilLegal (Registro de identidad) -->
-                        <div th:if="${voluntario.id == null and (!isAuthenticated or (!isAdmin and !perfilLegalExists) or (isAdmin and targetUserId != null and !perfilLegalExists))}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                        <div th:if="${voluntario.id == null and (!isAuthenticated or (!isAdmin and !perfilLegalExists) or (isAdmin and targetUserId != null and !perfilLegalExists))}">
                             <!-- ID del usuario si ya está autenticado pero le falta el perfil -->
                             <input type="hidden" name="idUsuario" th:if="${isAuthenticated}" th:value="${targetUserId != null ? targetUserId : currentUserId}">
 
-                            <div th:if="${!isAuthenticated}" style="grid-column: span 2; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start;">
+                            <div th:if="${!isAuthenticated}" style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start;">
                                 <i data-lucide="info" style="color: #0284c7; width: 22px;"></i>
                                 <p style="margin: 0; font-size: 0.95rem; color: #0369a1; line-height: 1.6;" th:text="#{voluntario.auto.al.enviar.este.formulario.se.creara.tu.c}"></p>
                             </div>
-                            <div th:if="${isAuthenticated and !isAdmin and !perfilLegalExists}" style="grid-column: span 2; background: #fff7ed; border: 1px solid #ffedd5; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start;">
+                            <div th:if="${isAuthenticated and !isAdmin and !perfilLegalExists}" style="background: #fff7ed; border: 1px solid #ffedd5; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start;">
                                 <i data-lucide="alert-circle" style="color: #ea580c; width: 22px;"></i>
                                 <p style="margin: 0; font-size: 0.95rem; color: #9a3412; line-height: 1.6;" th:text="#{voluntario.auto.necesitamos.completar.tu.informacion.leg}"></p>
                             </div>
 
                             <!-- Target User Info Card para Admin cuando no hay Perfil Legal -->
-                            <div th:if="${isAdmin and targetUserId != null and !perfilLegalExists}" style="grid-column: span 2; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start; position: relative;">
+                            <div th:if="${isAdmin and targetUserId != null and !perfilLegalExists}" style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start; position: relative;">
                                 <a th:href="@{/web/voluntarios/nuevo}" style="position: absolute; top: 1rem; right: 1rem; color: #0284c7; background: transparent; border: none; cursor: pointer; padding: 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s;" onmouseover="this.style.background='#e0f2fe'" onmouseout="this.style.background='transparent'" title="Quitar selección">
                                     <i data-lucide="x" style="width: 18px; height: 18px;"></i>
                                 </a>
@@ -101,37 +101,58 @@
                                 </div>
                             </div>
 
-                            <div class="form-group">
-                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.nombre}"></label>
-                                <input type="text" name="nombre" required placeholder="Ej: Juan" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
-                            </div>
-                            <div class="form-group">
-                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.apellidos.1}"></label>
-                                <input type="text" name="apellido" required placeholder="Ej: Pérez García" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
-                            </div>
-                            <div class="form-group">
-                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{voluntario.auto.dni}"></label>
-                                <input type="text" name="dni" required placeholder="12345678X" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
-                            </div>
-                            <div class="form-group">
-                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.fecha.de.nacimiento}"></label>
-                                <input type="date" name="fechaNacimiento" required style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
-                            </div>
-                            <div class="form-group">
-                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.telefono}"></label>
-                                <input type="text" name="telefono" required placeholder="Ej: 600000000" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
-                            </div>
-                            <div class="form-group" th:if="${!isAuthenticated}">
-                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.email}"></label>
-                                <input type="email" name="email" required placeholder="tu@email.com" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
-                            </div>
-                            <div class="form-group" style="grid-column: span 2;">
-                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.direccion}"></label>
-                                <input type="text" name="direccion" placeholder="Calle, número, piso..." style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
-                            </div>
-                            <div class="form-group" style="grid-column: span 1;" th:if="${!isAuthenticated}">
-                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.contrasena}"></label>
-                                <input type="password" name="contrasena" required th:placeholder="#{generic.auto.password.help}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem;">
+                                <!-- Columna 1: Cuenta de Usuario -->
+                                <div>
+                                    <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-main);">
+                                        <i data-lucide="user"></i> [[#{html.auto.datos.de.la.cuenta}]]
+                                    </h2>
+
+                                    <div class="form-group" th:if="${!isAuthenticated}">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.nombre.de.usuario}">Nombre de usuario</label>
+                                        <input type="text" name="username" required placeholder="Ej: voluntario123" th:value="${form_username}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.nombre}"></label>
+                                        <input type="text" name="nombre" required placeholder="Ej: Juan" th:value="${form_nombre}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.apellidos.1}"></label>
+                                        <input type="text" name="apellido" required placeholder="Ej: Pérez García" th:value="${form_apellido}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                    <div class="form-group" th:if="${!isAuthenticated}">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.email}"></label>
+                                        <input type="email" name="email" required placeholder="tu@email.com" th:value="${form_email}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                    <div class="form-group" th:if="${!isAuthenticated}">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.contrasena}"></label>
+                                        <input type="password" name="contrasena" required th:placeholder="#{generic.auto.password.help}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                </div>
+                                
+                                <!-- Columna 2: Datos del Voluntario -->
+                                <div>
+                                    <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-main);">
+                                        <i data-lucide="home"></i> Datos de Voluntario
+                                    </h2>
+
+                                    <div class="form-group">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{voluntario.auto.dni}"></label>
+                                        <input type="text" name="dni" required placeholder="12345678X" th:value="${form_dni}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.direccion}"></label>
+                                        <input type="text" name="direccion" placeholder="Calle, número, piso..." th:value="${form_direccion}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.fecha.de.nacimiento}"></label>
+                                        <input type="date" name="fechaNacimiento" required th:value="${form_fechaNacimiento}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.telefono}"></label>
+                                        <input type="text" name="telefono" required placeholder="Ej: 600000000" th:value="${form_telefono}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

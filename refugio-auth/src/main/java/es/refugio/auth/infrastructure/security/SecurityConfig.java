@@ -116,11 +116,15 @@ public class SecurityConfig {
                                                 // API pública (lectura de animales, donaciones y me-info sin login)
                                                 .requestMatchers(HttpMethod.GET,
                                                                 "/api/v1/animales/**", "/api/v1/me",
-                                                                "/api/v1/donaciones/total")
+                                                                "/api/v1/donaciones/total",
+                                                                "/api/v1/usuarios/email/anonimo@refugio.es")
                                                 .permitAll()
                                                 .requestMatchers(HttpMethod.POST,
                                                                 "/api/v1/donaciones", "/api/v1/usuarios/publico",
-                                                                "/api/v1/solicitudes-adopcion/publico/registro-y-adopcion")
+                                                                "/api/v1/solicitudes-adopcion/publico/registro-y-adopcion",
+                                                                "/api/v1/usuarios/internal/login")
+                                                .permitAll()
+                                                .requestMatchers(HttpMethod.DELETE, "/api/v1/usuarios/publico/rollback/**")
                                                 .permitAll()
                                                 // API de tareas y voluntarios requiere roles específicos
                                                 .requestMatchers("/api/v1/tareas/**").hasAnyRole("ADMIN", "VOLUNTARIO")

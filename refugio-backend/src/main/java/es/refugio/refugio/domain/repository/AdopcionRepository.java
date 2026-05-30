@@ -24,6 +24,8 @@ public interface AdopcionRepository extends CRUDRepository<Adopcion, AdopcionId>
     List<Adopcion> findByCriteria(AdoptanteId adoptanteId, AnimalId animalId);
     boolean existsByAnimalId(AnimalId animalId);
 
+    List<Adopcion> findByEstadoAndFechaAdopcionBefore(es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion estado, java.time.LocalDateTime date);
+
     default Page<Adopcion> findAll(Pageable pageable) {
         return Page.empty();
     }

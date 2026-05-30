@@ -15,6 +15,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.authority.AuthorityUtils;
 
 @Slf4j
 @ControllerAdvice
@@ -43,7 +48,7 @@ public class GlobalModelAttributesAdvice {
      */
     @ModelAttribute
     @SuppressWarnings("unchecked")
-    public void addGlobalAttributes(HttpServletRequest request, Model model) {
+    public void addGlobalAttributes(HttpServletRequest request, HttpServletResponse response, Model model) {
         // 1. Atributos de navegación
         String uri = request.getRequestURI();
         model.addAttribute("currentUri", uri);
@@ -133,15 +138,15 @@ public class GlobalModelAttributesAdvice {
                     }
                 }
             } else {
-                setAnonymous(model);
+                setAnonymous(model, response);
             }
         } catch (Exception e) {
             logger.error("Error en GlobalModelAttributesAdvice", e);
-            setAnonymous(model);
+            setAnonymous(model, response);
         }
     }
 
-    private void setAnonymous(Model model) {
+    private void setAnonymous(Model model, HttpServletResponse response) {
         model.addAttribute("currentUserId", null);
         model.addAttribute("currentUserName", null);
         model.addAttribute("currentUserRol", null);
@@ -151,7 +156,19 @@ public class GlobalModelAttributesAdvice {
         model.addAttribute("isAdoptante", false);
         model.addAttribute("isPublico", false);
         model.addAttribute("animalesSolicitadosIds", new HashSet<>());
-        model.addAttribute("hasPreferences", true); // Valor por defecto verdadero para ocultar el banner a los usuarios
-                                                    // anónimos
+        model.addAttribute("hasPreferences", true); // Valor por defecto verdadero para ocultar el banner a los usuarios anónimos
+
+        // Limpiar el contexto de seguridad y restablecer a anónimo para no romper @PreAuthorize
+        SecurityContextHolder.getContext().setAuthentication(
+            new AnonymousAuthenticationToken(
+                "anonymous", "anonymousUser", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS")
+            )
+        );
+        if (response != null) {
+            Cookie cookie = new Cookie("JWT_TOKEN", null);
+            cookie.setMaxAge(0);
+            cookie.setPath("/");
+            response.addCookie(cookie);
+        }
     }
 }

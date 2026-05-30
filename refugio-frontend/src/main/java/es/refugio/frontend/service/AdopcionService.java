@@ -145,4 +145,12 @@ public class AdopcionService {
     public ResponseEntity<byte[]> descargarContrato(Integer id) {
         return backendClient.descargarContrato(id);
     }
+
+    public void startPeriodoAdaptacion(Integer id) {
+        backendClient.startPeriodoAdaptacion(id);
+    }
+
+    public void registrarDevolucion(Integer id) {
+        backendClient.registrarDevolucion(id);
+    }
 }

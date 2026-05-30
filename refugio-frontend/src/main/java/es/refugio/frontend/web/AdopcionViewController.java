@@ -225,6 +225,37 @@ public class AdopcionViewController {
         return ResponseEntity.status(302).header("Location", WebRoutes.ADOPCIONES_BASE).build();
     }
 
+    @PostMapping(WebRoutes.ADOPCIONES_INICIAR_ADAPTACION)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> iniciarAdaptacion(@PathVariable Integer id, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        try {
+            adopcionService.startPeriodoAdaptacion(id);
+            redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.adopcion_adaptacion_iniciada"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", messageService.getMessage("toast.error.adopcion_adaptacion_iniciada") + ": " + e.getMessage());
+        }
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return ResponseEntity.ok().header("HX-Redirect", WebRoutes.ADOPCIONES_BASE).body("");
+        }
+        return ResponseEntity.status(302).header("Location", WebRoutes.ADOPCIONES_BASE).build();
+    }
+
+    @PostMapping(WebRoutes.ADOPCIONES_DEVOLVER)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> registrarDevolucion(@PathVariable Integer id, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        try {
+            adopcionService.registrarDevolucion(id);
+            redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.adopcion_devolucion_registrada"));
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", messageService.getMessage("toast.error.adopcion_devolucion_registrada"));
+        }
+        if ("true".equals(request.getHeader("HX-Request"))) {
+            return ResponseEntity.ok().header("HX-Redirect", WebRoutes.ADOPCIONES_BASE).body("");
+        }
+        return ResponseEntity.status(302).header("Location", WebRoutes.ADOPCIONES_BASE).build();
+    }
+
     @GetMapping(WebRoutes.ADOPCIONES_PDF)
     public void exportarPDF(HttpServletResponse response) throws Exception {
         List<AdopcionRecord> adopciones = adopcionService.fetchAllAdopciones();

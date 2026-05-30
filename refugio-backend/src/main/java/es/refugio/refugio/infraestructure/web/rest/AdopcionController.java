@@ -33,6 +33,8 @@ import es.refugio.refugio.application.service.adopcion.CreateAdopcionService;
 import es.refugio.refugio.application.service.adopcion.DeleteAdopcionService;
 import es.refugio.refugio.application.service.adopcion.EditAdopcionService;
 import es.refugio.refugio.application.service.adopcion.FindAdopcionService;
+import es.refugio.refugio.application.service.adopcion.StartPeriodoAdaptacionService;
+import es.refugio.refugio.application.service.adopcion.RegistrarDevolucionService;
 import es.refugio.refugio.infraestructure.mapper.AdopcionMapper;
 import es.refugio.refugio.infraestructure.security.CustomUserDetails;
 import es.refugio.refugio.infraestructure.web.dto.adopcion.AdopcionRequest;
@@ -66,6 +68,8 @@ public class AdopcionController {
     private final FindAdopcionService findAdopcionService;
     private final EditAdopcionService editAdopcionService;
     private final DeleteAdopcionService deleteAdopcionService;
+    private final StartPeriodoAdaptacionService startPeriodoAdaptacionService;
+    private final RegistrarDevolucionService registrarDevolucionService;
     private final FindAdoptanteService findAdoptanteService;
     private final AdopcionMapper adopcionMapper;
 
@@ -183,6 +187,22 @@ public class AdopcionController {
     public ResponseEntity<Void> deleteAdopcion(@PathVariable Integer id) {
         deleteAdopcionService.delete(new AdopcionId(id));
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Iniciar periodo de adaptación")
+    @PostMapping("/{id}/periodo-adaptacion")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AdopcionResponse> startPeriodoAdaptacion(@PathVariable Integer id) {
+        Adopcion adopcion = startPeriodoAdaptacionService.startPeriodoAdaptacion(id);
+        return ResponseEntity.ok(adopcionMapper.toResponse(adopcion));
+    }
+
+    @Operation(summary = "Registrar devolución")
+    @PostMapping("/{id}/devolucion")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AdopcionResponse> registrarDevolucion(@PathVariable Integer id) {
+        Adopcion adopcion = registrarDevolucionService.registrarDevolucion(id);
+        return ResponseEntity.ok(adopcionMapper.toResponse(adopcion));
     }
 
     private void checkOwnership(AdoptanteId adoptanteId) {

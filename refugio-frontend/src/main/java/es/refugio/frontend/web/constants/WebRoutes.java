@@ -54,6 +54,8 @@ public interface WebRoutes {
     String ADOPCIONES_PDF      = "/web/adopciones/pdf";
     String ADOPCIONES_EXCEL    = "/web/adopciones/excel";
     String ADOPCIONES_CONTRATO = "/web/adopciones/{id}/contrato";
+    String ADOPCIONES_INICIAR_ADAPTACION = "/web/adopciones/{id}/periodo-adaptacion";
+    String ADOPCIONES_DEVOLVER = "/web/adopciones/{id}/devolucion";
 
     // DONACIONES
     String DONACIONES_BASE     = "/web/donaciones";

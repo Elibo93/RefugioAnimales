@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,
                                 "/api/v1/donaciones",
                                 "/api/v1/voluntarios",
+                                "/api/v1/perfiles-legales",
                                 "/api/v1/solicitudes-adopcion/publico/registro-y-adopcion",
                                 "/api/v1/animales/*/visitas")
                         .permitAll()

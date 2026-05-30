@@ -4,6 +4,7 @@ import es.refugio.frontend.client.AuthFeignClient;
 import es.refugio.frontend.client.BackendFeignClient;
 import es.refugio.frontend.web.dto.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -130,9 +131,7 @@ public class SolicitudAdopcionService {
     
     public AdoptanteRecord fetchAdoptanteByUsuarioId(Integer usuarioId) {
         try {
-            PaginatedResponse<AdoptanteRecord> res = backendClient.getAdoptantes(1000);
-            List<AdoptanteRecord> all = res != null && res.items() != null ? res.items() : List.of();
-            return all.stream().filter(a -> usuarioId.equals(a.usuarioId())).findFirst().orElse(null);
+            return backendClient.getAdoptanteByUsuarioId(usuarioId);
         } catch (Exception e) {
             return null;
         }
@@ -214,8 +213,15 @@ public class SolicitudAdopcionService {
         backendClient.registrarYAdopcionPublico(bodySolicitud);
     }
 
+    @Value("${refugio.internal.secret}")
+    private String internalSecret;
+
+    public void eliminarUsuarioAuth(Integer id) {
+        authClient.rollbackUsuarioAuth(id, internalSecret);
+    }
+
     public ResponseEntity<String> loginPost(String email, String password) {
-        return authClient.login(email, password);
+        return authClient.login(email, password, internalSecret);
     }
 
     public Map<String, Object> buildListarModelData(int page, int size) {

@@ -11,6 +11,10 @@ import es.refugio.refugio.application.usecase.adopcion.CreateAdopcionUseCase;
 import es.refugio.refugio.application.usecase.adopcion.DeleteAdopcionUseCase;
 import es.refugio.refugio.application.usecase.adopcion.EditAdopcionUseCase;
 import es.refugio.refugio.application.usecase.adopcion.FindAdopcionUseCase;
+import es.refugio.refugio.application.usecase.adopcion.StartPeriodoAdaptacionUseCase;
+import es.refugio.refugio.application.usecase.adopcion.RegistrarDevolucionUseCase;
+import es.refugio.refugio.application.service.adopcion.StartPeriodoAdaptacionService;
+import es.refugio.refugio.application.service.adopcion.RegistrarDevolucionService;
 import es.refugio.refugio.domain.repository.AdopcionRepository;
 import es.refugio.refugio.domain.repository.AnimalRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.adopcion.AdopcionEntityJpaRepository;
@@ -62,5 +66,25 @@ public class AdopcionConfig {
     @Bean
     public DeleteAdopcionService deleteAdopcionService(DeleteAdopcionUseCase useCase) {
         return new DeleteAdopcionService(useCase);
+    }
+
+    @Bean
+    public StartPeriodoAdaptacionUseCase startPeriodoAdaptacionUseCase(AdopcionRepository adopcionRepository, AnimalRepository animalRepository) {
+        return new StartPeriodoAdaptacionUseCase(adopcionRepository, animalRepository);
+    }
+
+    @Bean
+    public StartPeriodoAdaptacionService startPeriodoAdaptacionService(StartPeriodoAdaptacionUseCase useCase) {
+        return new StartPeriodoAdaptacionService(useCase);
+    }
+
+    @Bean
+    public RegistrarDevolucionUseCase registrarDevolucionUseCase(AdopcionRepository adopcionRepository, AnimalRepository animalRepository) {
+        return new RegistrarDevolucionUseCase(adopcionRepository, animalRepository);
+    }
+
+    @Bean
+    public RegistrarDevolucionService registrarDevolucionService(RegistrarDevolucionUseCase useCase) {
+        return new RegistrarDevolucionService(useCase);
     }
 }

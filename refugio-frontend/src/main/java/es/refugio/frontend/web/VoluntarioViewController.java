@@ -14,6 +14,10 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpHeaders;
+import jakarta.servlet.http.Cookie;
+import java.util.ArrayList;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import es.refugio.common.util.ExcelExportHelper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -267,6 +271,7 @@ public class VoluntarioViewController {
     public String crearVoluntario(
             @RequestParam(required = false) Integer idUsuario,
             @RequestParam String disponibilidad,
+            @RequestParam(required = false) String username,
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) String apellido,
             @RequestParam(required = false) String email,
@@ -276,6 +281,7 @@ public class VoluntarioViewController {
             @RequestParam(required = false) String fechaNacimiento,
             @RequestParam(required = false) String contrasena,
             @RequestParam(required = false) String especialidad,
+            HttpServletResponse response,
             RedirectAttributes redirectAttributes) {
 
         Integer finalUsuarioId = idUsuario;
@@ -319,7 +325,7 @@ public class VoluntarioViewController {
 
         if (finalUsuarioId == null) {
             try {
-                UsuarioRecord createdUser = voluntarioService.crearUsuario(email, contrasena, "ROLE_VOLUNTARIO");
+                UsuarioRecord createdUser = voluntarioService.crearUsuario(username, email, contrasena, "ROLE_PUBLICO");
                 if (createdUser != null) {
                     finalUsuarioId = createdUser.id();
                 }
@@ -337,6 +343,32 @@ public class VoluntarioViewController {
                 redirectAttributes.addFlashAttribute("successMessage",
                         messageService.getMessage("toast.success.voluntario_creado_admin"));
             } else {
+                try {
+                    ResponseEntity<String> loginResponse = voluntarioService.loginPost(email, contrasena);
+
+                    List<String> cookies = loginResponse.getHeaders().get(HttpHeaders.SET_COOKIE);
+                    if (cookies != null) {
+                        for (String cookieStr : cookies) {
+                            if (cookieStr.startsWith("JWT_TOKEN=")) {
+                                int semiIndex = cookieStr.indexOf(";");
+                                String value = semiIndex > -1 ? cookieStr.substring(10, semiIndex) : cookieStr.substring(10);
+                                Cookie cookie = new Cookie("JWT_TOKEN", value);
+                                cookie.setHttpOnly(true);
+                                cookie.setPath("/");
+                                cookie.setMaxAge(86400);
+                                response.addCookie(cookie);
+
+                                List<SimpleGrantedAuthority> authoritiesList = new ArrayList<>();
+                                authoritiesList.add(new SimpleGrantedAuthority("ROLE_PUBLICO"));
+                                var authToken = new UsernamePasswordAuthenticationToken(email, null, authoritiesList);
+                                SecurityContextHolder.getContext().setAuthentication(authToken);
+                            }
+                        }
+                    }
+                } catch (Exception ex) {
+                    logger.error("Error en auto-login tras registro de voluntario: " + ex.getMessage());
+                }
+
                 redirectAttributes.addFlashAttribute("successMessage",
                         messageService.getMessage("voluntario.estado.pendiente.msg"));
             }
@@ -344,6 +376,16 @@ public class VoluntarioViewController {
             String errorMsg = "Error al crear el perfil: " + ErrorMessageExtractor.extract(e);
             logger.error(errorMsg);
             redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
+            redirectAttributes.addFlashAttribute("form_username", username);
+            redirectAttributes.addFlashAttribute("form_nombre", nombre);
+            redirectAttributes.addFlashAttribute("form_apellido", apellido);
+            redirectAttributes.addFlashAttribute("form_email", email);
+            redirectAttributes.addFlashAttribute("form_dni", dni);
+            redirectAttributes.addFlashAttribute("form_telefono", telefono);
+            redirectAttributes.addFlashAttribute("form_direccion", direccion);
+            redirectAttributes.addFlashAttribute("form_fechaNacimiento", fechaNacimiento);
+            redirectAttributes.addFlashAttribute("form_especialidad", especialidad);
+            redirectAttributes.addFlashAttribute("form_disponibilidad", disponibilidad);
             return "redirect:" + WebRoutes.VOLUNTARIOS_NUEVO;
         }
         return "redirect:" + WebRoutes.HOME;

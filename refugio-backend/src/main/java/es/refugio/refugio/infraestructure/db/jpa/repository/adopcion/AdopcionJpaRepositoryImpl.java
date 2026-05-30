@@ -79,6 +79,13 @@ public class AdopcionJpaRepositoryImpl implements AdopcionRepository {
     }
 
     @Override
+    public List<Adopcion> findByEstadoAndFechaAdopcionBefore(es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion estado, java.time.LocalDateTime date) {
+        return repository.findByEstadoAndFechaAdopcionBefore(estado, date).stream()
+                .map(adopcionMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public Page<Adopcion> findAll(Pageable pageable) {
         return repository.findAll(pageable).map(adopcionMapper::toDomain);
     }
