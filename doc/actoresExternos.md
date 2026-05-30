@@ -58,12 +58,15 @@ Cualquier ciudadano interesado en la adopción responsable.
 
 El sistema implementa un control de acceso robusto basado en **Spring Security** y **JWT** (JSON Web Tokens), asegurando que cada actor acceda únicamente a sus recursos:
 
-| Rol | Nivel de Acceso | Tecnologías |
+| Rol / Actor | Nivel de Acceso | Tecnologías |
 | :--- | :--- | :--- |
 | **PÚBLICO** | Lectura del Catálogo | Acceso Libre |
-| **ADMIN** | Acceso Total (Backoffice) | REST API, OAuth2 |
+| **ADMIN** | Acceso Total (Backoffice) | REST API, OAuth2 / JWT |
 | **VOLUNTARIO** | Gestión de Animales y Tareas | REST API |
-| **ADOPTANTE** | Perfil Público y Solicitudes | REST API |
+| **ADOPTANTE** | Perfil Público y Solicitudes | REST API, Google OAuth2 / JWT |
+| **GOOGLE IdP** | Proveedor de Identidad Externo | OAuth 2.0 / OpenID Connect |
+
+*   **Google Identity Provider (Google IdP):** Actor tecnológico externo federado. El sistema delega en esta plataforma la autenticación y verificación inicial de la identidad del usuario, devolviendo al Auth Service un token seguro con los datos básicos del perfil (email, nombre) para generar su sesión local.
 
 ---
 

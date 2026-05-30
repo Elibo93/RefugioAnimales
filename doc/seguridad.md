@@ -11,6 +11,7 @@ El microservicio `refugio-auth` centraliza la gestión de identidad:
 *   **Capa de Infraestructura:** Implementa el `SecurityFilterChain` de Spring Security, configurando la política de acceso a cada endpoint de forma centralizada.
 *   **JWT en Cookies (HttpOnly):** Para mitigar ataques de Cross-Site Scripting (XSS), el token JWT no se almacena en el `localStorage` del navegador, sino en una **Cookie cifrada con el flag `HttpOnly`**. Esto impide que scripts maliciosos accedan al token desde el lado del cliente.
 *   **Cifrado de Contraseñas:** Se utiliza **BCrypt** con un factor de trabajo robusto para el hashing de contraseñas, garantizando que nunca se almacenen en texto plano en la base de datos.
+*   **Autenticación Federada (Google OAuth2):** Integración del módulo **Spring Security OAuth2 Client** para delegar el inicio de sesión. Al autenticar con éxito a través de Google, el `Auth Service` procesa los claims de identidad, registra/recupera de forma transparente el usuario local en BD (utilizando contraseñas temporales aleatorias de alta entropía para cumplir con las restricciones de la base de datos) y finalmente emite la misma cookie con el JWT cifrado que el flujo clásico.
 
 ---
 
@@ -83,6 +84,32 @@ sequenceDiagram
 1. **Almacenamiento Seguro:** El Frontend guarda el JWT en una Cookie `HttpOnly` para evitar ataques XSS en el navegador del usuario.
 2. **Propagación Inter-servicios:** Cuando el Frontend necesita datos, extrae el token de la cookie y lo inyecta en la cabecera HTTP (`Authorization: Bearer <token>`) de la llamada `RestClient` hacia el Gateway.
 3. **Validación Distribuida:** Al ser *Stateless*, el Backend no necesita preguntar al servicio de Auth si la sesión es válida. Simplemente usa la misma `JWT_SECRET` compartida (vía variables de entorno) para desencriptar el token, verificar la firma y extraer los permisos (Roles) del usuario que hace la petición.
+##### Flujo de Autenticación Federada (Google OAuth2)
+
+Para los usuarios que acceden mediante sus cuentas de Google, el flujo de redirecciones, verificación y emisión de la sesión stateless es el siguiente:
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario (Navegador)
+    participant G as API Gateway
+    participant A as Auth Service (OAuth2 Client)
+    participant Go as Google Server (IdP)
+    participant D as Base de Datos (Auth DB)
+
+    U->>G: GET /oauth2/authorization/google
+    G->>A: Redirigir petición
+    A-->>U: Redirección 302 a Google Login Page
+    U->>Go: Autenticación de Usuario (Email & Contraseña de Google)
+    Go-->>U: Autorización concedida + Redirección 302 (con Authorization Code)
+    U->>G: GET /login/oauth2/code/google?code=XXX
+    G->>A: Redirigir petición de Callback
+    A->>Go: Intercambiar Code por Access Token
+    Go-->>A: Retorna Access Token + Datos de Perfil (Email, Nombre)
+    A->>D: ProcessGoogleUserUseCase (Buscar o Crear con clave aleatoria)
+    D-->>A: Retorna Usuario Confirmado + Rol
+    A->>A: Generar JWT (Firmado con Clave Secreta local)
+    A-->>U: Set-Cookie: JWT_TOKEN (HttpOnly) + Redirect 302 a la Home
+```
 
 ---
 

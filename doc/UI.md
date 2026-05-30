@@ -67,7 +67,7 @@ Enfocado en el descubrimiento y la captación de nuevos colaboradores.
 | **V-PUB-01** | **Landing Page** | Presentación del refugio, misión y llamada a la acción. |
 | **V-PUB-02** | **Catálogo Público** | Galería interactiva de animales disponibles con filtros rápidos. |
 | **V-PUB-03** | **Ficha de Animal** | Vista detallada con historia, fotos y botón de solicitud. |
-| **V-ACC-01** | **Login / Registro** | Formularios limpios con validación en tiempo real. |
+| **V-ACC-01** | **Login / Registro** | Formularios limpios con validación en tiempo real e integración de botón "Continuar con Google" para acceso rápido y sin contraseña. |
 
 ---
 

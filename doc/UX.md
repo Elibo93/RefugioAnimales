@@ -18,7 +18,7 @@ Hemos identificado tres perfiles clave con necesidades diferenciadas:
 Aplicamos las reglas de oro de la usabilidad para garantizar una interfaz robusta:
 *   **Prevención de Errores:** Los formularios utilizan validaciones en tiempo real (ej. formato de DNI o microchip) para evitar que el usuario guarde datos incorrectos.
 *   **Reconocimiento antes que Recuerdo:** Uso de iconos estandarizados (perro para animales, usuario para voluntarios) y menús persistentes que evitan que el usuario tenga que memorizar rutas.
-*   **Flexibilidad de Uso:** Los usuarios expertos pueden usar atajos y acciones rápidas en las tablas, mientras que los novatos son guiados por flujos paso a paso.
+*   **Flexibilidad y Eficiencia de Uso:** Los usuarios expertos pueden usar atajos y acciones rápidas en las tablas, mientras que los novatos son guiados por flujos paso a paso. Adicionalmente, se reduce la fricción y la carga cognitiva del usuario al integrar **Google OAuth2** (Single Sign-On), permitiendo un acceso rápido y seguro que elimina la fatiga de recordar y gestionar nuevas contraseñas.
 
 ---
 

@@ -294,7 +294,19 @@ Se ha optado por una estrategia de **Filesystem (Sistema de Archivos)** en lugar
 
 ---
 
-#### 5. Validaciones de Integridad
+#### 5. Estrategia de Compatibilidad para Login Social (Google OAuth2)
+
+Para integrar la autenticación con **Google OAuth2** sin vulnerar el esquema relacional de la base de datos `usuarios` (donde la columna `contrasena` es estrictamente obligatoria y no acepta nulos, garantizando la consistencia y seguridad del login local), se ha implementado una estrategia a nivel de aplicación en el caso de uso `ProcessGoogleUserUseCase`:
+
+1. **Persistencia Transparente:** La tabla `usuarios` no sufre alteraciones físicas ni requiere columnas especiales nullable.
+2. **Contraseñas Temporales Aleatorias:** Para los usuarios registrados mediante Google, el sistema genera de forma automática una contraseña aleatoria de alta entropía basada en un identificador único: `passwordEncoder.encode(UUID.randomUUID().toString())`.
+3. **Username Autogenerado:** El sistema limpia el nombre del usuario proporcionado por Google (reemplazando espacios por guiones bajos) y le concatena un hash corto único (ej. `nombre_usuario_4a2c1f`) para evitar colisiones en la columna `username`, que posee una restricción de unicidad (`UK`).
+
+De este modo, se garantiza el cumplimiento estricto de la integridad física de la base de datos sin comprometer la flexibilidad del inicio de sesión federado.
+
+---
+
+#### 6. Validaciones de Integridad
 
 *   **Chip ID Único**: El `chip_id` es obligatorio y único en la tabla de animales para evitar duplicidad de registros físicos.
 *   **DNI Único**: El identificador fiscal en `PERFILES_LEGALES` garantiza que una persona física no se registre varias veces en el sistema.
@@ -304,6 +316,7 @@ Se ha optado por una estrategia de **Filesystem (Sistema de Archivos)** en lugar
 *   **Validación de Estados**: Las adopciones y solicitudes solo pueden procesarse si el animal se encuentra en estado `DISPONIBLE`. Si el estado cambia a `ADOPTADO` o `RESERVADO`, las solicitudes pendientes quedan bloqueadas.
 *   **Asignación de Tareas**: La tabla intermedia `voluntarios_tareas` garantiza la integridad en la asignación de personal, impidiendo que un voluntario sea asignado múltiples veces a la misma tarea específica.
 *   **Gestión de Huérfanos (Orphan Removal)**: La eliminación de una entidad principal (como un Animal) desencadena la limpieza automática de sus entidades dependientes (Historiales, Solicitudes) para mantener la base de datos limpia de datos inconsistentes.
+*   **Auditoría de Tareas Inmutable y Gamificación**: La tabla `tarea_historial` actúa como un log de auditoría (append-only) que registra de forma inmutable quién y cuándo modificó una tarea. Esta tabla sirve como la fuente de verdad (Event Sourcing) para el motor que actualiza la tabla `gamificacion_usuario_metricas`, garantizando que la entrega de medallas y logros a los voluntarios esté auditada y libre de manipulaciones.
 
 ---
 

@@ -59,6 +59,8 @@ Para evitar repetir código, utilizamos un módulo **Common** que se inyecta com
 *   **Generic CRUD:** Abstracciones para operaciones básicas de base de datos.
 *   **DTOs Base:** Estructuras de datos comunes para la comunicación entre servicios.
 *   **Manejo Global de Errores:** Estandarización de las respuestas de error en toda la red.
+*   **`ExcelExportHelper` (Utilidad de Exportación):** Clase genérica (`<T>`) basada en **Apache POI** que genera archivos `.xlsx` en memoria sin depender del `Servlet API`. Es consumida por los 9 controladores del `refugio-frontend` para exportar cualquier listado maestro sin duplicar lógica.
+*   **`PaginatedResponse<T>` (Paginación):** DTO genérico centralizado que sirve los datos gradualmente bajo demanda, aliviando la carga de RAM del servidor y el ancho de banda.
 
 ---
 
