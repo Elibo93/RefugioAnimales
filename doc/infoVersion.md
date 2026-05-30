@@ -13,6 +13,7 @@ Para garantizar la estabilidad y escalabilidad del sistema, se han seleccionado 
 | **Hibernate** | **6.6.x** | Motor de mapeo objeto-relacional (ORM) para MySQL. |
 | **Liquibase** | **4.27.0** | Gestión y versionado del esquema de base de datos. |
 | **MySQL** | **8.3.0** | Motor de base de datos relacional (producción y Docker). |
+| **Spring Security OAuth2 Client** | **Managed** | Autenticación federada mediante Google OAuth2 (Single Sign-On). |
 
 ## 2. Frontend y Experiencia de Usuario
 
@@ -22,7 +23,8 @@ Para garantizar la estabilidad y escalabilidad del sistema, se han seleccionado 
 | **HTMX** | **2.0.4** | Reactividad y peticiones AJAX dinámicas sin JavaScript pesado. |
 | **SweetAlert2** | **11.x** | Sistema de alertas visuales y confirmaciones de usuario. |
 | **Lucide Icons** | **Latest** | Set de iconos vectoriales ligeros para la interfaz. |
-| **Flying Saucer** | **9.1.22** | Generación de documentos PDF (Contratos de Adopción). |
+| **Flying Saucer** | **9.1.22** | Generación de documentos PDF (Contratos de Adopción, Listados de Auditoría). |
+| **Apache POI** | **5.x** | Exportación de todos los listados maestros a formato Excel (.xlsx). |
 
 ---
 

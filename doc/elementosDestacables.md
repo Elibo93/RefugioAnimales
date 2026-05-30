@@ -29,8 +29,16 @@ Hemos conseguido una experiencia de usuario de **Single Page Application (SPA)**
 Uno de los puntos más potentes es el **Registro de Adopción en un paso**:
 *   El sistema es capaz de registrar a una nueva persona y crear su solicitud de adopción en una única transacción lógica, simplificando drásticamente el flujo para el usuario final sin comprometer la integridad de la base de datos.
 
-### 📄 6. Motor de Informes PDF Integrado
-Generación automatizada de documentos legales y clínicos (Contratos de adopción, Fichas médicas) directamente desde la aplicación, asegurando que la gestión administrativa sea tan ágil como la operativa.
+### 📄 6. Motor de Exportación Dual: PDF y Excel
+El sistema integra dos mecanismos de exportación complementarios que cubren necesidades legales y operativas:
+*   **Generación de PDFs Legales (Flying Saucer):** Los documentos jurídicos y clínicos (Contratos de Adopción, Fichas Médicas, Listados de Auditoría) se generan dinámicamente en el servidor. El motor renderiza plantillas **Thymeleaf** como documentos PDF formateados de forma profesional, listos para firma e impresión.
+*   **Exportación a Excel (Apache POI):** Para el análisis operativo y financiero, se ha desarrollado la clase utilitaria genérica `ExcelExportHelper` en el módulo `refugio-common`. Esta clase, basada en **Apache POI**, permite exportar a formato `.xlsx` cualquier listado maestro del sistema (animales, adopciones, adoptantes, voluntarios, solicitudes, donaciones, historiales médicos y tareas) desde un botón en cada vista de gestión, sin duplicar código entre controladores.
+
+### 🚀 7. Paginación Genérica Optimizada
+Se ha diseñado un DTO genérico (`PaginatedResponse<T>`) en la librería compartida `refugio-common` que estandariza la paginación en todo el ecosistema de microservicios. En lugar de sobrecargar la memoria del servidor y saturar la red extrayendo listas completas de la base de datos, el sistema sirve los datos gradualmente bajo demanda. Al ser un componente reutilizable, garantiza un alto rendimiento en todos los módulos (animales, adopciones, etc.) sin necesidad de reprogramar la lógica.
+
+### 🏅 8. Trazabilidad de Tareas y Gamificación basada en Eventos
+Para asegurar la fiabilidad de la operativa diaria, se diseñó un **Historial de Auditoría de Tareas** inmutable, accesible únicamente por los Administradores. Este historial registra de forma exacta qué usuario y en qué momento modifica el estado de una tarea o cuidado médico. Lejos de ser un simple *log* pasivo, este historial actúa como el motor central del **Sistema de Gamificación**: la asignación de logros y medallas a los voluntarios se nutre directamente de estos eventos de auditoría (tareas completadas reales), fomentando el compromiso a través de recompensas transparentes y matemáticamente verificadas.
 
 ---
 

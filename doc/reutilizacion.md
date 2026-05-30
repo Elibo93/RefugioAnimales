@@ -26,6 +26,8 @@ Para garantizar que todos los microservicios hablen el mismo idioma técnico, he
 *   **Modelos de Datos (DTOs):** Los objetos que viajan entre el frontend y los diferentes microservicios se definen una sola vez, evitando inconsistencias.
 *   **Excepciones Personalizadas:** Un sistema de gestión de errores unificado para que todos los servicios devuelvan mensajes coherentes al usuario.
 *   **Utilidades Transversales:** Validadores de formatos (DNI, microchip) y mappers que son utilizados tanto por el servicio de `auth` como por el de `backend`.
+*   **`ExcelExportHelper` (Exportación Genérica a Excel):** Clase utilitaria estática y genérica (`<T>`) basada en **Apache POI**, ubicada en `es.refugio.common.util`. Su diseño desacoplado del `Servlet API` (no depende de `HttpServletResponse`) permite que cualquier microservicio o capa del sistema pueda generar un archivo `.xlsx` en memoria pasando únicamente la lista de datos, las cabeceras y los extractores de columnas. Actualmente es utilizada por **9 controladores** del microservicio `refugio-frontend` para exportar todos los listados maestros (animales, adopciones, adoptantes, voluntarios, solicitudes, donaciones, tareas e historiales), eliminando por completo la duplicación de lógica de exportación.
+*   **`PaginatedResponse<T>` (Paginación Genérica):** DTO genérico que envuelve cualquier listado de Spring Data (`Page<T>`) y expone los metadatos de paginación de forma normalizada. Al estar centralizado en `common`, cualquier microservicio devuelve respuestas paginadas idénticas. Esto optimiza enormemente el rendimiento, ya que evita sobrecargar la RAM del servidor y el ancho de banda al servir los datos paulatinamente bajo demanda en lugar de listados completos.
 
 ---
 
