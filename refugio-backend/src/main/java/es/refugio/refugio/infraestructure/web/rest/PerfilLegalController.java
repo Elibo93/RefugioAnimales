@@ -43,7 +43,7 @@ public class PerfilLegalController {
 
     @Operation(summary = "Crear o actualizar perfil legal")
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<PerfilLegalResponse> save(@Valid @RequestBody PerfilLegalRequest request) {
         PerfilLegal domain = perfilLegalMapper.toDomain(request);
         

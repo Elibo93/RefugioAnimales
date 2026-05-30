@@ -18,4 +18,6 @@ public interface AdopcionEntityJpaRepository extends JpaRepository<AdopcionEntit
 
     boolean existsByAdoptanteIdAndAnimalId(Integer adoptanteId, Integer animalId);
     boolean existsByAnimalId(Integer animalId);
+
+    List<AdopcionEntity> findByEstadoAndFechaAdopcionBefore(es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion estado, java.time.LocalDateTime date);
 }

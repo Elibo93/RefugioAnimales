@@ -131,20 +131,32 @@ public class VoluntarioService {
         }
     }
 
-    public UsuarioRecord crearUsuario(String email, String contrasena, String rol) {
+    public UsuarioRecord crearUsuario(String username, String email, String contrasena, String rol) {
         Map<String, Object> userBody = new HashMap<>();
+        userBody.put("username", username);
         userBody.put("email", email);
         userBody.put("contrasena", contrasena);
         userBody.put("rol", rol);
         try {
-            // Utilizamos el endpoint create, pero como nos devuelve un Map necesitamos volver a recuperar el usuario.
-            // (Para simplicar, solo pasamos los params si podemos mapear a record. Si el feign devuelve Map, hacemos manual o cambiamos feign)
-            Map<String, Object> res = authClient.createUserAuth(userBody);
+            Map<String, Object> res = authClient.registrarUsuario(userBody);
             if (res != null && res.get("id") != null) {
-                return authClient.getUsuarioById(Integer.valueOf(res.get("id").toString()));
+                return new UsuarioRecord(
+                    Integer.valueOf(res.get("id").toString()),
+                    res.get("email") != null ? res.get("email").toString() : email,
+                    res.get("username") != null ? res.get("username").toString() : username,
+                    res.get("rol") != null ? res.get("rol").toString() : rol,
+                    null
+                );
             }
         } catch (Exception ignored) {}
         return null;
+    }
+
+    @org.springframework.beans.factory.annotation.Value("${refugio.internal.secret}")
+    private String internalSecret;
+
+    public org.springframework.http.ResponseEntity<String> loginPost(String email, String password) {
+        return authClient.login(email, password, internalSecret);
     }
 
     public List<VoluntarioRecord> fetchVoluntariosPendientes() {

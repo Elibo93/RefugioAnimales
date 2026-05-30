@@ -23,25 +23,53 @@ public class ErrorMessageExtractor {
         if (body != null && !body.isEmpty()) {
             try {
                 JsonNode root = mapper.readTree(body);
-                
-                StringBuilder sb = new StringBuilder();
-                if (root.has("message") && !root.get("message").isNull()) {
-                    sb.append(root.get("message").asText());
-                }
-                
-                if (root.has("details") && !root.get("details").isNull() && root.get("details").isObject()) {
-                    List<String> fieldErrors = new ArrayList<>();
-                    root.get("details").fields().forEachRemaining(entry -> {
-                        fieldErrors.add(entry.getValue().asText());
-                    });
-                    if (!fieldErrors.isEmpty()) {
-                        if (sb.length() > 0) sb.append(": ");
-                        sb.append(String.join(", ", fieldErrors));
+
+                if (root.isArray()) {
+                    List<String> arrayErrors = new ArrayList<>();
+                    for (JsonNode node : root) {
+                        if (node.isObject()) {
+                            node.fields().forEachRemaining(entry -> {
+                                arrayErrors.add(entry.getValue().asText());
+                            });
+                        } else {
+                            arrayErrors.add(node.asText());
+                        }
                     }
-                }
-                
-                if (sb.length() > 0) {
-                    return sb.toString();
+                    if (!arrayErrors.isEmpty()) {
+                        return String.join(", ", arrayErrors);
+                    }
+                } else if (root.isObject()) {
+                    StringBuilder sb = new StringBuilder();
+                    if (root.has("message") && !root.get("message").isNull()) {
+                        sb.append(root.get("message").asText());
+                    }
+                    
+                    if (root.has("details") && !root.get("details").isNull() && root.get("details").isObject()) {
+                        List<String> fieldErrors = new ArrayList<>();
+                        root.get("details").fields().forEachRemaining(entry -> {
+                            fieldErrors.add(entry.getValue().asText());
+                        });
+                        if (!fieldErrors.isEmpty()) {
+                            if (sb.length() > 0) sb.append(": ");
+                            sb.append(String.join(", ", fieldErrors));
+                        }
+                    }
+
+                    if (sb.length() == 0) {
+                        List<String> anyErrors = new ArrayList<>();
+                        root.fields().forEachRemaining(entry -> {
+                            if (!entry.getValue().isObject() && !entry.getValue().isArray()) {
+                                anyErrors.add(entry.getValue().asText());
+                            }
+                        });
+                        if (!anyErrors.isEmpty()) {
+                            sb.append(String.join(", ", anyErrors));
+                        }
+                    }
+                    
+                    if (sb.length() > 0) {
+                        return sb.toString();
+                    }
                 }
             } catch (Exception ignored) {
             }

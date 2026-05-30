@@ -13,7 +13,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -70,6 +74,7 @@ public class UsuarioController {
     private final UsuarioEntityJpaRepository usuarioEntityJpaRepository;
     private final JwtTokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
 
     @Operation(summary = "Crea un Usuario", description = "Registra un nuevo usuario con sus credenciales y rol")
     @ApiResponses(value = {
@@ -270,6 +275,51 @@ public class UsuarioController {
     public ResponseEntity<?> deleteUsuario(@PathVariable int id) {
         deleteUsuarioService.delete(new UsuarioId(id));
         return ResponseEntity.noContent().build();
+    }
+
+    @Value("${refugio.internal.secret}")
+    private String internalSecret;
+
+    @DeleteMapping("/publico/rollback/{id}")
+    public ResponseEntity<?> rollbackUsuario(@PathVariable int id, @RequestHeader(value = "X-Internal-Secret", required = false) String secret) {
+        if (secret == null || !secret.equals(internalSecret)) {
+            log.warn("Intento de rollback de usuario denegado por secret inválido");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        try {
+            Usuario usuario = findUsuarioService.findById(new UsuarioId(id));
+            // Seguridad: Solo permitir rollback de roles básicos creados públicamente y muy recientemente
+            if (usuario.getRol() == Rol.ROLE_ADOPTANTE || usuario.getRol() == Rol.ROLE_PUBLICO) {
+                if (usuario.getCreatedAt() != null && java.time.LocalDateTime.now().minusMinutes(5).isBefore(usuario.getCreatedAt())) {
+                    deleteUsuarioService.delete(new UsuarioId(id));
+                    return ResponseEntity.noContent().build();
+                }
+            }
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/internal/login")
+    public ResponseEntity<String> internalLogin(
+            @RequestParam String username,
+            @RequestParam String password,
+            @RequestHeader(value = "X-Internal-Secret", required = false) String secret) {
+        
+        if (secret == null || !secret.equals(internalSecret)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, password)
+        );
+
+        String token = tokenProvider.generateToken(authentication);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, "JWT_TOKEN=" + token + "; Path=/; Max-Age=86400; HttpOnly")
+                .body(token);
     }
 
     @Operation(summary = "Edita un Usuario", description = "Actualiza los datos básicos o el rol de un usuario")

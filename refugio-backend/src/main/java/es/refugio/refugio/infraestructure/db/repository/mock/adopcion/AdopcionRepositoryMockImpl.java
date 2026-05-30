@@ -97,4 +97,11 @@ public class AdopcionRepositoryMockImpl implements AdopcionRepository {
         return adopciones.values().stream()
                 .anyMatch(a -> a.getAnimalId().equals(animalId));
     }
+
+    @Override
+    public List<Adopcion> findByEstadoAndFechaAdopcionBefore(es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion estado, java.time.LocalDateTime date) {
+        return adopciones.values().stream()
+                .filter(a -> a.getEstado() == estado && a.getFechaAdopcion() != null && a.getFechaAdopcion().isBefore(date))
+                .collect(Collectors.toList());
+    }
 }

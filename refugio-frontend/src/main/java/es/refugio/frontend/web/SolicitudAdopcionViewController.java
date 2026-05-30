@@ -817,27 +817,9 @@ public class SolicitudAdopcionViewController {
                 throw new Exception("No se pudo obtener el ID del usuario tras el registro");
             }
         } catch (Exception e) {
-            String errorMsg = "Error inesperado al contactar con el servicio de autenticación.";
-            if (e instanceof RestClientResponseException) {
-                var ex = (RestClientResponseException) e;
-                try {
-                    Map<?, ?> errorMap = ex.getResponseBodyAs(Map.class);
-                    if (errorMap != null) {
-                        if (errorMap.containsKey("message")) {
-                            errorMsg = (String) errorMap.get("message");
-                        } else if (errorMap.containsKey("username")) {
-                            errorMsg = (String) errorMap.get("username");
-                        } else if (errorMap.containsKey("error")) {
-                            errorMsg = (String) errorMap.get("error");
-                        }
-                    } else {
-                        errorMsg = ex.getStatusText();
-                    }
-                } catch (Exception ignored) {
-                    errorMsg = ex.getMessage();
-                }
-            } else {
-                errorMsg = e.getMessage();
+            String errorMsg = es.refugio.frontend.web.util.ErrorMessageExtractor.extract(e);
+            if (errorMsg == null || errorMsg.contains("Exception") || errorMsg.contains("Error desconocido")) {
+                errorMsg = "Error inesperado al contactar con el servicio de autenticación.";
             }
 
             redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
@@ -868,24 +850,30 @@ public class SolicitudAdopcionViewController {
         try {
             solicitudService.registrarYAdopcionPublico(bodySolicitud);
         } catch (Exception e) {
-            String errorMsg = "Error inesperado al procesar la adopción en el backend.";
-            if (e instanceof RestClientResponseException) {
-                var ex = (RestClientResponseException) e;
-                try {
-                    Map<?, ?> errorMap = ex.getResponseBodyAs(Map.class);
-                    if (errorMap != null && errorMap.containsKey("message")) {
-                        errorMsg = (String) errorMap.get("message");
-                    } else {
-                        errorMsg = ex.getStatusText();
-                    }
-                } catch (Exception ignored) {
-                    errorMsg = ex.getMessage();
+            try {
+                if (usuarioId != null) {
+                    solicitudService.eliminarUsuarioAuth(usuarioId);
+                    logger.warn("Usuario " + usuarioId + " eliminado por rollback de adopción fallida.");
                 }
-            } else {
-                errorMsg = e.getMessage();
+            } catch (Exception ex) {
+                logger.error("Error al intentar hacer rollback (eliminar) el usuario auth: " + ex.getMessage());
+            }
+            
+            String errorMsg = es.refugio.frontend.web.util.ErrorMessageExtractor.extract(e);
+            if (errorMsg == null || errorMsg.contains("Exception") || errorMsg.contains("Error desconocido")) {
+                errorMsg = "Error inesperado al procesar la adopción en el backend.";
             }
 
             redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
+            redirectAttributes.addFlashAttribute("userName", userName);
+            redirectAttributes.addFlashAttribute("nombre", nombre);
+            redirectAttributes.addFlashAttribute("apellido", apellido);
+            redirectAttributes.addFlashAttribute("email", email);
+            redirectAttributes.addFlashAttribute("telefono", telefono);
+            redirectAttributes.addFlashAttribute("dni", dni);
+            redirectAttributes.addFlashAttribute("direccion", direccion);
+            redirectAttributes.addFlashAttribute("fechaNacimiento", fechaNacimiento);
+            redirectAttributes.addFlashAttribute("comentario", comentario);
             return "redirect:" + WebRoutes.SOLICITUDES_PUBLICO_REGISTRO + "?animalId=" + animalId;
         }
 
@@ -896,12 +884,18 @@ public class SolicitudAdopcionViewController {
             if (cookies != null) {
                 for (String cookieStr : cookies) {
                     if (cookieStr.startsWith("JWT_TOKEN=")) {
-                        String value = cookieStr.substring(10, cookieStr.indexOf(";"));
+                        int semiIndex = cookieStr.indexOf(";");
+                        String value = semiIndex > -1 ? cookieStr.substring(10, semiIndex) : cookieStr.substring(10);
                         Cookie cookie = new Cookie("JWT_TOKEN", value);
                         cookie.setHttpOnly(true);
                         cookie.setPath("/");
                         cookie.setMaxAge(86400);
                         response.addCookie(cookie);
+
+                        List<SimpleGrantedAuthority> authoritiesList = new ArrayList<>();
+                        authoritiesList.add(new SimpleGrantedAuthority("ROLE_ADOPTANTE"));
+                        var auth = new UsernamePasswordAuthenticationToken(email, null, authoritiesList);
+                        SecurityContextHolder.getContext().setAuthentication(auth);
                     }
                 }
             }

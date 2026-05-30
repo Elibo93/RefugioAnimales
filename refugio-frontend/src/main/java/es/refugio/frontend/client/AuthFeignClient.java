@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import es.refugio.frontend.web.dto.UsuarioRecord;
 import es.refugio.frontend.web.dto.PaginatedResponse;
 
@@ -22,8 +23,8 @@ public interface AuthFeignClient {
     @PostMapping(value = "/api/v1/usuarios/publico")
     Map<String, Object> registrarUsuario(@RequestBody Map<String, Object> body);
 
-    @PostMapping(value = "/login-post", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    ResponseEntity<String> login(@RequestParam("username") String username, @RequestParam("password") String password);
+    @PostMapping(value = "/api/v1/usuarios/internal/login", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    ResponseEntity<String> login(@RequestParam("username") String username, @RequestParam("password") String password, @RequestHeader("X-Internal-Secret") String secret);
 
     @GetMapping("/api/v1/usuarios")
     PaginatedResponse<UsuarioRecord> getUsuarios(@RequestParam(value = "size", required = false) Integer size);
@@ -51,5 +52,8 @@ public interface AuthFeignClient {
 
     @DeleteMapping("/api/v1/usuarios/{id}")
     void deleteUsuarioAuth(@PathVariable("id") Integer id);
+
+    @DeleteMapping("/api/v1/usuarios/publico/rollback/{id}")
+    void rollbackUsuarioAuth(@PathVariable("id") Integer id, @RequestHeader("X-Internal-Secret") String secret);
 
 }

@@ -226,6 +226,12 @@ public interface BackendFeignClient {
     @DeleteMapping("/adopciones/{id}")
     void deleteAdopcion(@PathVariable("id") Integer id);
 
+    @PostMapping("/adopciones/{id}/periodo-adaptacion")
+    void startPeriodoAdaptacion(@PathVariable("id") Integer id);
+
+    @PostMapping("/adopciones/{id}/devolucion")
+    void registrarDevolucion(@PathVariable("id") Integer id);
+
     @GetMapping("/adopciones/adoptante/{adoptanteId}")
     List<AdopcionRecord> getAdopcionesByAdoptanteId(@PathVariable("adoptanteId") Integer adoptanteId, @RequestParam(value = "size") Integer size);
 

@@ -134,6 +134,24 @@
                             th:text="${i.fechaAdopcion != null ? i.fechaAdopcion : '-'}">01/01/2023</div>
 
                         <div class="row-cell cell-center" style="gap: 8px;">
+                            <button th:if="${i.estado == 'PENDIENTE_FIRMA'}"
+                                    class="btn-action-premium"
+                                    style="color: #f59e0b;"
+                                    th:hx-post="@{/web/adopciones/{id}/periodo-adaptacion(id=${i.id})}"
+                                    th:title="#{adopciones.btn.iniciar_adaptacion}"
+                                    th:hx-confirm="#{adopciones.confirm.iniciar_adaptacion}">
+                                <i data-lucide="play-circle" style="width: 18px;"></i>
+                            </button>
+                            
+                            <button th:if="${i.estado == 'EN_PERIODO_ADAPTACION'}"
+                                    class="btn-action-premium"
+                                    style="color: #ef4444;"
+                                    th:hx-post="@{/web/adopciones/{id}/devolucion(id=${i.id})}"
+                                    th:title="#{adopciones.btn.registrar_devolucion}"
+                                    th:hx-confirm="#{adopciones.confirm.registrar_devolucion}">
+                                <i data-lucide="corner-down-left" style="width: 18px;"></i>
+                            </button>
+
                             <a class="btn-action-premium view" th:href="@{/web/adopciones/{id}/contrato(id=${i.id})}"
                                 title="Descargar Contrato" target="_blank" style="color: #4a90e2;">
                                 <i data-lucide="file-signature" style="width: 18px;"></i>
