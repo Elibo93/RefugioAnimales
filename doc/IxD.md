@@ -39,7 +39,8 @@ Para garantizar la consistencia y reducir la curva de aprendizaje, se han implem
 1.  **Descubrimiento (Visitante):** El usuario explora el catálogo público mediante *scroll* infinito o paginación clara.
 2.  **Interés (Visitante/Adoptante):** Al pulsar en un animal, una transición suave (fade-in) presenta la ficha técnica detallada.
 3.  **Acción (Adoptante):** El botón "Solicitar Adopción" (solo disponible tras el inicio de sesión) abre un formulario pre-cumplimentado con los datos del perfil.
-4.  **Confirmación (Adoptante):** Tras el envío, el sistema redirige a una pantalla de "Éxito" con los siguientes pasos explicados.
+4.  **Confirmación y Firma (Adoptante):** Tras el envío y la aprobación por parte del refugio, el usuario puede descargar y firmar su contrato de adopción legal, recibiendo un feedback visual claro de que inicia el "Período de adaptación".
+5.  **Período de Adaptación:** El usuario visualiza un indicador de estado en su panel mientras transcurren los 30 días, hasta que el sistema le notifica la finalización automática del proceso con éxito.
 
 ##### 3.2. Gestión de Tareas (Voluntariado)
 1.  **Vistazo rápido:** El Dashboard muestra las tareas del día con códigos de colores (Urgente = Rojo, Rutina = Azul).
