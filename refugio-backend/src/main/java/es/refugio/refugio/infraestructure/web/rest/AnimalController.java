@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,7 +43,6 @@ import java.util.stream.Collectors;
 import java.util.Arrays;
 
 import es.refugio.refugio.application.service.storage.FileStorageService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -63,7 +61,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Tag(name = "Animales", description = "Gestión de animales del refugio")
 /**
- * Controlador REST que expone los endpoints HTTP de la API para la gestión de Animal.
+ * Controlador REST que expone los endpoints HTTP de la API para la gestión de
+ * Animal.
  *
  * @author Elisabeth
  * @author Diego
@@ -140,7 +139,8 @@ public class AnimalController {
 
         log.debug("Backend - findFiltered con q={}, estado={}, página={}", q, estado, pageable.getPageNumber());
         Page<Animal> page = findAnimalService.findFiltered(q, estado, especie, tamano, edad, sexo, urgencia, pageable);
-        log.debug("Backend - Resultados encontrados: {}, Elementos totales: {}", page.getContent().size(), page.getTotalElements());
+        log.debug("Backend - Resultados encontrados: {}, Elementos totales: {}", page.getContent().size(),
+                page.getTotalElements());
 
         Map<Integer, Long> conteos = solicitudAdopcionRepository.getAll().stream()
                 .filter(s -> s.getEstado() == EstadoSolicitud.PENDIENTE || s.getEstado() == EstadoSolicitud.EN_REVISION)

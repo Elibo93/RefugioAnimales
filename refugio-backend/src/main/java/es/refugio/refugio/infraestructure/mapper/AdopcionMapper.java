@@ -19,8 +19,6 @@ import es.refugio.refugio.infraestructure.db.jpa.entity.SolicitudAdopcionEntity;
 import es.refugio.refugio.infraestructure.web.dto.adopcion.AdopcionRequest;
 import es.refugio.refugio.infraestructure.web.dto.adopcion.AdopcionResponse;
 
-import es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion;
-
 @Mapper(componentModel = "spring")
 public interface AdopcionMapper {
 
