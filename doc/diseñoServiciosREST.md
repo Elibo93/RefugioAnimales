@@ -120,3 +120,8 @@ Para consultar los esquemas de datos (JSON) y probar los endpoints en tiempo rea
 ---
 
 [Volver](/README.md)
+
+### Novedades Frontend
+
+*   **`POST /web/tareas/{id}/vincular-seleccion`**: Endpoint que permite asignar un voluntario a una tarea directamente desde la interfaz de selección de voluntarios, mejorando la usabilidad.
+*   **Manejo Global de Errores**: Integración de `ErrorMessageExtractor` en todos los controladores para proveer mensajes descriptivos desde los servicios REST al usuario.

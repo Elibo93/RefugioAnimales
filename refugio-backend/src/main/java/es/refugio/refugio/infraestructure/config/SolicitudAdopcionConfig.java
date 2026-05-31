@@ -23,11 +23,13 @@ import es.refugio.refugio.domain.repository.SolicitudAdopcionRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.solicitud_adopcion.SolicitudAdopcionEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.solicitud_adopcion.SolicitudAdopcionJpaRepositoryImpl;
 
+import es.refugio.refugio.infraestructure.mapper.SolicitudAdopcionMapper;
+
 @Configuration
 public class SolicitudAdopcionConfig {
 
     @Bean
-    public SolicitudAdopcionRepository solicitudAdopcionRepository(SolicitudAdopcionEntityJpaRepository jpaRepository, es.refugio.refugio.infraestructure.mapper.SolicitudAdopcionMapper mapper) {
+    public SolicitudAdopcionRepository solicitudAdopcionRepository(SolicitudAdopcionEntityJpaRepository jpaRepository, SolicitudAdopcionMapper mapper) {
         return new SolicitudAdopcionJpaRepositoryImpl(jpaRepository, mapper);
     }
 

@@ -2,6 +2,7 @@ package es.refugio.frontend.service;
 
 import es.refugio.frontend.client.BackendFeignClient;
 import es.refugio.frontend.web.dto.AnimalRecord;
+import es.refugio.frontend.web.dto.AnimalRequest;
 import es.refugio.frontend.web.dto.PaginatedResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -86,11 +87,45 @@ public class AnimalService {
     }
 
     public void crearAnimal(Map<String, Object> body, MultipartFile fotoArchivo) {
-        backendClient.crearAnimal(body, fotoArchivo);
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+            String animalJson = objectMapper.writeValueAsString(mapToAnimalRequest(body));
+            backendClient.crearAnimal(animalJson, fotoArchivo);
+        } catch (Exception e) {
+            throw new RuntimeException("Error serializando AnimalRequest", e);
+        }
     }
 
     public void editarAnimal(Integer id, Map<String, Object> body, MultipartFile fotoArchivo) {
-        backendClient.editarAnimal(id, body, fotoArchivo);
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+            String animalJson = objectMapper.writeValueAsString(mapToAnimalRequest(body));
+            backendClient.editarAnimal(id, animalJson, fotoArchivo);
+        } catch (Exception e) {
+            throw new RuntimeException("Error serializando AnimalRequest", e);
+        }
+    }
+
+    private AnimalRequest mapToAnimalRequest(Map<String, Object> body) {
+        return new AnimalRequest(
+            (String) body.get("nombre"),
+            (String) body.get("especie"),
+            (String) body.get("especiePersonalizada"),
+            (String) body.get("raza"),
+            (String) body.get("sexo"),
+            (String) body.get("chipId"),
+            (String) body.get("estado"),
+            body.get("edad") instanceof Number n ? n.intValue() : null,
+            (String) body.get("tamano"),
+            (String) body.get("descripcion"),
+            (String) body.get("foto"),
+            body.get("peso") instanceof Number n ? n.doubleValue() : null,
+            body.get("nivelEnergia") instanceof Number n ? n.intValue() : null,
+            body.get("urgencia") instanceof Boolean b ? b : null,
+            (String) body.get("fechaIngreso")
+        );
     }
 
     public void eliminarAnimal(Integer id) {

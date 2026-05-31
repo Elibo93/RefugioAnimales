@@ -22,6 +22,7 @@ import es.refugio.frontend.service.MessageService;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.*;
+import es.refugio.frontend.web.util.ErrorMessageExtractor;
 import es.refugio.frontend.service.TareaService;
 import es.refugio.frontend.service.VoluntarioService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -170,7 +171,7 @@ public class TareaViewController {
             redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.tarea_creada"));
             return "redirect:" + WebRoutes.TAREAS_BASE;
         } catch (Exception e) {
-            String msg = es.refugio.frontend.web.util.ErrorMessageExtractor.extract(e);
+            String msg = ErrorMessageExtractor.extract(e);
             redirectAttributes.addFlashAttribute("errorMessage", messageService.getMessage(msg));
             return "redirect:" + WebRoutes.TAREAS_NUEVA;
         }
@@ -185,6 +186,7 @@ public class TareaViewController {
     }
 
     @GetMapping(WebRoutes.TAREAS_EDITAR)
+    @PreAuthorize("hasRole('ADMIN')")
     public String editarFormulario(@PathVariable Integer id, Model model, HttpServletRequest request) {
         TareaRecord tarea = tareaService.fetchTareaById(id);
         model.addAttribute(ModelAttribute.SINGLE_Tarea.getName(), tarea);
@@ -218,7 +220,10 @@ public class TareaViewController {
         body.put("fecha", LocalDateTime.now().toString());
         body.put("fechaLimite", fechaLimite != null && !fechaLimite.isEmpty() ? fechaLimite : null);
         body.put("instrucciones", instrucciones);
-        body.put("voluntarioIds", voluntarioIds != null ? voluntarioIds : List.of());
+        List<Integer> uniqueVoluntarioIds = voluntarioIds != null 
+                ? new ArrayList<>(new LinkedHashSet<>(voluntarioIds)) 
+                : List.of();
+        body.put("voluntarioIds", uniqueVoluntarioIds);
         body.put("voluntarioActorId", voluntarioActorId);
 
         try {
@@ -227,9 +232,9 @@ public class TareaViewController {
                     messageService.getMessage("toast.success.tarea_editada"));
             return "redirect:" + WebRoutes.TAREAS_BASE;
         } catch (Exception e) {
-            String msg = es.refugio.frontend.web.util.ErrorMessageExtractor.extract(e);
+            String msg = ErrorMessageExtractor.extract(e);
             redirectAttributes.addFlashAttribute("errorMessage", messageService.getMessage(msg));
-            return "redirect:" + WebRoutes.TAREAS_EDITAR.replace("{id}", id.toString());
+            return "redirect:" + WebRoutes.TAREAS_BASE;
         }
     }
 
@@ -394,7 +399,7 @@ public class TareaViewController {
                 response.setHeader("HX-Trigger",
                         "{\"showToast\": {\"message\": \"" + toastMsg + "\", \"type\": \"success\"}}");
             } catch (Exception e) {
-                String msg = es.refugio.frontend.web.util.ErrorMessageExtractor.extract(e);
+                String msg = ErrorMessageExtractor.extract(e);
                 msg = messageService.getMessage(msg); // Intentar traducir si es una clave i18n
                 if (msg == null) {
                     msg = "Error de comunicación con el servidor";

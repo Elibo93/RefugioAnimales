@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+import es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion;
 
 import es.refugio.refugio.domain.model.adopcion.Adopcion;
 import es.refugio.refugio.domain.model.adopcion.AdopcionId;
@@ -99,7 +101,7 @@ public class AdopcionRepositoryMockImpl implements AdopcionRepository {
     }
 
     @Override
-    public List<Adopcion> findByEstadoAndFechaAdopcionBefore(es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion estado, java.time.LocalDateTime date) {
+    public List<Adopcion> findByEstadoAndFechaAdopcionBefore(EstadoAdopcion estado, LocalDateTime date) {
         return adopciones.values().stream()
                 .filter(a -> a.getEstado() == estado && a.getFechaAdopcion() != null && a.getFechaAdopcion().isBefore(date))
                 .collect(Collectors.toList());

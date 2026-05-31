@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -84,8 +85,12 @@ public class AnimalController {
     @PostMapping(consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AnimalResponse> createAnimal(
-            @RequestPart("animal") @Valid AnimalRequest request,
-            @RequestPart(value = "fotoArchivo", required = false) MultipartFile fotoArchivo) {
+            @RequestPart("animal") String animalJson,
+            @RequestPart(value = "fotoArchivo", required = false) MultipartFile fotoArchivo) throws Exception {
+
+        com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+        AnimalRequest request = objectMapper.readValue(animalJson, AnimalRequest.class);
 
         String fotoUrl = request.foto();
         if (fotoArchivo != null && !fotoArchivo.isEmpty()) {
@@ -103,8 +108,12 @@ public class AnimalController {
     @PutMapping(value = "/{id}", consumes = { "multipart/form-data" })
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTARIO')")
     public ResponseEntity<AnimalResponse> updateAnimal(@PathVariable Integer id,
-            @RequestPart("animal") @Valid AnimalRequest request,
-            @RequestPart(value = "fotoArchivo", required = false) MultipartFile fotoArchivo) {
+            @RequestPart("animal") String animalJson,
+            @RequestPart(value = "fotoArchivo", required = false) MultipartFile fotoArchivo) throws Exception {
+
+        com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+        AnimalRequest request = objectMapper.readValue(animalJson, AnimalRequest.class);
 
         String fotoUrl = request.foto();
         if (fotoArchivo != null && !fotoArchivo.isEmpty()) {
