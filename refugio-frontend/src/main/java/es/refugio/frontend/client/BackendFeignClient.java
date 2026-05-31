@@ -48,10 +48,10 @@ public interface BackendFeignClient {
     void registrarVisita(@PathVariable("animalId") Integer animalId);
 
     @PostMapping(value = "/animales", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    void crearAnimal(@RequestPart("animal") Map<String, Object> animal, @RequestPart(value = "fotoArchivo", required = false) MultipartFile fotoArchivo);
+    void crearAnimal(@RequestPart("animal") String animal, @RequestPart(value = "fotoArchivo", required = false) MultipartFile fotoArchivo);
 
     @PutMapping(value = "/animales/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    void editarAnimal(@PathVariable("id") Integer id, @RequestPart("animal") Map<String, Object> animal, @RequestPart(value = "fotoArchivo", required = false) MultipartFile fotoArchivo);
+    void editarAnimal(@PathVariable("id") Integer id, @RequestPart("animal") String animal, @RequestPart(value = "fotoArchivo", required = false) MultipartFile fotoArchivo);
 
     @DeleteMapping("/animales/{id}")
     void eliminarAnimal(@PathVariable("id") Integer id);

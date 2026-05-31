@@ -2,6 +2,8 @@ package es.refugio.refugio.infraestructure.db.jpa.repository.adopcion;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
+import es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -19,5 +21,5 @@ public interface AdopcionEntityJpaRepository extends JpaRepository<AdopcionEntit
     boolean existsByAdoptanteIdAndAnimalId(Integer adoptanteId, Integer animalId);
     boolean existsByAnimalId(Integer animalId);
 
-    List<AdopcionEntity> findByEstadoAndFechaAdopcionBefore(es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion estado, java.time.LocalDateTime date);
+    List<AdopcionEntity> findByEstadoAndFechaAdopcionBefore(EstadoAdopcion estado, LocalDateTime date);
 }

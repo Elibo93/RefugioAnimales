@@ -10,6 +10,10 @@ import es.refugio.refugio.infraestructure.db.jpa.entity.PreferenciaAdopcionEntit
 import es.refugio.refugio.infraestructure.web.dto.preferencia.PreferenciaAdopcionRequest;
 import es.refugio.refugio.infraestructure.web.dto.preferencia.PreferenciaAdopcionResponse;
 
+import es.refugio.refugio.domain.model.animal.enums.Especie;
+import es.refugio.refugio.domain.model.animal.enums.Tamano;
+import es.refugio.refugio.domain.model.animal.enums.Sexo;
+
 @Mapper(componentModel = "spring")
 public interface PreferenciaAdopcionMapper {
 
@@ -39,18 +43,18 @@ public interface PreferenciaAdopcionMapper {
         return id != null ? new PreferenciaAdopcionId(id) : null;
     }
 
-    default es.refugio.refugio.domain.model.animal.enums.Especie mapEspecie(String s) {
+    default Especie mapEspecie(String s) {
         if (s == null) return null;
-        return es.refugio.refugio.domain.model.animal.enums.Especie.valueOf(s.toUpperCase());
+        return Especie.valueOf(s.toUpperCase());
     }
 
-    default es.refugio.refugio.domain.model.animal.enums.Tamano mapTamano(String s) {
+    default Tamano mapTamano(String s) {
         if (s == null) return null;
-        return es.refugio.refugio.domain.model.animal.enums.Tamano.valueOf(s.toUpperCase());
+        return Tamano.valueOf(s.toUpperCase());
     }
 
-    default es.refugio.refugio.domain.model.animal.enums.Sexo mapSexo(String s) {
+    default Sexo mapSexo(String s) {
         if (s == null) return null;
-        return es.refugio.refugio.domain.model.animal.enums.Sexo.valueOf(s.toUpperCase());
+        return Sexo.valueOf(s.toUpperCase());
     }
 }

@@ -19,10 +19,12 @@ import es.refugio.refugio.infraestructure.db.jpa.entity.SolicitudAdopcionEntity;
 import es.refugio.refugio.infraestructure.web.dto.adopcion.AdopcionRequest;
 import es.refugio.refugio.infraestructure.web.dto.adopcion.AdopcionResponse;
 
+import es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion;
+
 @Mapper(componentModel = "spring")
 public interface AdopcionMapper {
 
-    @Mapping(target = "estado", expression = "java(req.estado() != null ? es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion.valueOf(req.estado()) : null)")
+    @Mapping(target = "estado", expression = "java(req.estado() != null ? EstadoAdopcion.valueOf(req.estado()) : null)")
     CreateAdopcionCommand toCommand(AdopcionRequest req);
 
     default EditAdopcionCommand toCommand(int id, AdopcionRequest req) {

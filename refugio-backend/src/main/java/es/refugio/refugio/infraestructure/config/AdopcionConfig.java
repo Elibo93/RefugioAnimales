@@ -19,12 +19,13 @@ import es.refugio.refugio.domain.repository.AdopcionRepository;
 import es.refugio.refugio.domain.repository.AnimalRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.adopcion.AdopcionEntityJpaRepository;
 import es.refugio.refugio.infraestructure.db.jpa.repository.adopcion.AdopcionJpaRepositoryImpl;
+import es.refugio.refugio.infraestructure.mapper.AdopcionMapper;
 
 @Configuration
 public class AdopcionConfig {
 
     @Bean
-    public AdopcionRepository adopcionRepository(AdopcionEntityJpaRepository jpaRepository, es.refugio.refugio.infraestructure.mapper.AdopcionMapper adopcionMapper) {
+    public AdopcionRepository adopcionRepository(AdopcionEntityJpaRepository jpaRepository, AdopcionMapper adopcionMapper) {
         return new AdopcionJpaRepositoryImpl(jpaRepository, adopcionMapper);
     }
 

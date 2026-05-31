@@ -2,6 +2,7 @@ package es.refugio.refugio.infraestructure.db.jpa.repository.adopcion;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 import es.refugio.refugio.domain.model.adopcion.Adopcion;
 import es.refugio.refugio.domain.model.adopcion.AdopcionId;
@@ -79,7 +80,7 @@ public class AdopcionJpaRepositoryImpl implements AdopcionRepository {
     }
 
     @Override
-    public List<Adopcion> findByEstadoAndFechaAdopcionBefore(es.refugio.refugio.domain.model.adopcion.enums.EstadoAdopcion estado, java.time.LocalDateTime date) {
+    public List<Adopcion> findByEstadoAndFechaAdopcionBefore(EstadoAdopcion estado, LocalDateTime date) {
         return repository.findByEstadoAndFechaAdopcionBefore(estado, date).stream()
                 .map(adopcionMapper::toDomain)
                 .toList();

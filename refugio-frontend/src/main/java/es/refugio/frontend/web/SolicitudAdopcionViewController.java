@@ -42,6 +42,7 @@ import java.io.OutputStream;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import es.refugio.frontend.service.SolicitudAdopcionService;
+import es.refugio.frontend.web.util.ErrorMessageExtractor;
 
 /**
  * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Solicitud Adopcion.
@@ -817,7 +818,7 @@ public class SolicitudAdopcionViewController {
                 throw new Exception("No se pudo obtener el ID del usuario tras el registro");
             }
         } catch (Exception e) {
-            String errorMsg = es.refugio.frontend.web.util.ErrorMessageExtractor.extract(e);
+            String errorMsg = ErrorMessageExtractor.extract(e);
             if (errorMsg == null || errorMsg.contains("Exception") || errorMsg.contains("Error desconocido")) {
                 errorMsg = "Error inesperado al contactar con el servicio de autenticación.";
             }
@@ -859,7 +860,7 @@ public class SolicitudAdopcionViewController {
                 logger.error("Error al intentar hacer rollback (eliminar) el usuario auth: " + ex.getMessage());
             }
             
-            String errorMsg = es.refugio.frontend.web.util.ErrorMessageExtractor.extract(e);
+            String errorMsg = ErrorMessageExtractor.extract(e);
             if (errorMsg == null || errorMsg.contains("Exception") || errorMsg.contains("Error desconocido")) {
                 errorMsg = "Error inesperado al procesar la adopción en el backend.";
             }

@@ -35,7 +35,10 @@ public class EditTareaUseCase {
     private final ApplicationEventPublisher eventPublisher;
 
     public Tarea update(EditTareaCommand command) {
-        if (command.voluntarioIds() != null && command.fechaLimite() != null) {
+        String estadoNuevo = command.estado() != null ? command.estado().toUpperCase() : "";
+        boolean esRechazoOCancelacion = "RECHAZADA".equals(estadoNuevo) || "CANCELADA".equals(estadoNuevo);
+
+        if (!esRechazoOCancelacion && command.voluntarioIds() != null && command.fechaLimite() != null) {
             LocalDate limitDate = command.fechaLimite().toLocalDate();
             for (Integer vIdInt : command.voluntarioIds()) {
                 if (vIdInt == null) continue;
