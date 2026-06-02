@@ -76,8 +76,10 @@
                         <div class="form-group" id="especiePersonalizadaGroup"
                             th:style="${animal.especie != null and animal.especie.toString() == 'OTRO' ? 'display:block' : 'display:none'}">
                             <label
-                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
-                                th:text="#{animal.field.especiePersonalizada.label}">¿Qué especie es?</label>
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">
+                                <span th:text="#{animal.field.especiePersonalizada.label}">¿Qué especie es?</span>
+                                <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                            </label>
                             <input type="text" name="especiePersonalizada"
                                 th:value="${animal.especiePersonalizada}" id="especiePersonalizadaInput"
                                 placeholder="Ej: Hámster..." th:readonly="${animal.id != null}"
@@ -156,8 +158,10 @@
                         <!-- Edad -->
                         <div class="form-group">
                             <label
-                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
-                                th:text="#{animal.field.age}">Edad (Años)</label>
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">
+                                <span th:text="#{animal.field.age}">Edad (Años)</span>
+                                <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                            </label>
                             <input type="number" name="edad" th:value="${animal.edad}"
                                 style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none;">
                         </div>
@@ -165,8 +169,10 @@
                         <!-- Tamaño -->
                         <div class="form-group">
                             <label
-                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
-                                th:text="#{animal.field.size}">Tamaño</label>
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">
+                                <span th:text="#{animal.field.size}">Tamaño</span>
+                                <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                            </label>
                             <select name="tamano"
                                 style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem; background-color: white;">
                                 <option th:each="t : ${tamanos}" th:value="${t}"
@@ -178,8 +184,10 @@
                         <!-- Peso -->
                         <div class="form-group">
                             <label
-                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
-                                th:text="#{animal.field.peso.label}">Peso (kg)</label>
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">
+                                <span th:text="#{animal.field.peso.label}">Peso (kg)</span>
+                                <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                            </label>
                             <input type="number" step="0.1" name="peso" th:value="${animal.peso}"
                                 style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none;">
                         </div>
@@ -190,8 +198,10 @@
                         <!-- Nivel Energía -->
                         <div class="form-group">
                             <label
-                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
-                                th:text="#{animal.field.nivelEnergia.label}">Nivel [[#{html.auto.de}]] Energía</label>
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">
+                                <span th:text="#{animal.field.nivelEnergia.label}">Nivel [[#{html.auto.de}]] Energía</span>
+                                <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                            </label>
                             <select name="nivelEnergia"
                                 style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; appearance: none; background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem; background-color: white;">
                                 <option value="1" th:selected="${animal.nivelEnergia == 1}" th:text="#{animal.auto.muy.bajo}"></option>
@@ -207,8 +217,10 @@
                             style="background: #fff1f2; padding: 1.25rem; border-radius: 18px; border: 1px solid #ffe4e6; display: flex; align-items: center; gap: 12px; margin-top: 1rem;">
                             <input type="checkbox" name="urgencia" th:checked="${animal.urgencia}"
                                 style="width: 20px; height: 20px; cursor: pointer; accent-color: #ef4444;">
-                            <label style="margin: 0; font-weight: 700; color: #be123c; cursor: pointer;"
-                                th:text="#{animal.field.urgencia.label}">¿Adopción [[#{html.auto.urgente}]]?</label>
+                            <label style="margin: 0; font-weight: 700; color: #be123c; cursor: pointer;">
+                                <span th:text="#{animal.field.urgencia.label}">¿Adopción [[#{html.auto.urgente}]]?</span>
+                                <span th:text="#{form.field.opcional}" style="font-size: 0.85em; font-weight: normal; margin-left: 4px; opacity: 0.8;"></span>
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -224,8 +236,10 @@
                     <!-- Fotografía -->
                     <div style="margin-bottom: 2rem;">
                         <label
-                            style="display: block; margin-bottom: 1rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
-                            th:text="#{animal.field.foto.label}">Fotografía del Animal</label>
+                            style="display: block; margin-bottom: 1rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">
+                            <span th:text="#{animal.field.foto.label}">Fotografía del Animal</span>
+                            <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                        </label>
 
                         <div style="display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap;">
                             <!-- Preview Actual -->
@@ -262,8 +276,10 @@
                     <!-- Descripción -->
                     <div class="form-group">
                         <label
-                            style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;"
-                            th:text="#{animal.field.description}">Descripción y Personalidad</label>
+                            style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">
+                            <span th:text="#{animal.field.description}">Descripción y Personalidad</span>
+                            <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                        </label>
                         <textarea name="descripcion" th:text="${animal.descripcion}"
                             placeholder="Cuéntanos sobre su carácter, gustos y necesidades..."
                             style="width: 100%; min-height: 150px; padding: 1.25rem; border-radius: 18px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; resize: vertical; transition: all 0.3s;"></textarea>

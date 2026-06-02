@@ -153,6 +153,7 @@
                             <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
                                 <i data-lucide="message-circle" style="width: 16px; color: #64748b;"></i>
                                 <span th:text="#{solicitud.field.comentario}">Comentarios Adicionales</span>
+                                <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
                             </label>
                             <textarea name="comentario" class="form-control" 
                                 placeholder="Indique cualquier detalle relevante para la solicitud..."
@@ -165,6 +166,7 @@
                             <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
                                 <i data-lucide="shield-check" style="width: 16px; color: #f97316;"></i>
                                 <span th:text="#{adopcion.auto.notas.internas.del.administrador.comenta}"></span>
+                                <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
                             </label>
                             <textarea name="comentarioAdmin" class="form-control" 
                                 th:placeholder="#{solicitud.auto.write.internal.notes}"

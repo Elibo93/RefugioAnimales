@@ -116,6 +116,7 @@
                             <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
                                 <i data-lucide="map-pin" style="width: 16px; color: #64748b;"></i>
                                 <span th:text="#{persona.field.address}">Dirección</span>
+                                <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
                             </label>
                             <input type="text" name="direccion" th:value="${persona.direccion}"
                                 class="form-control"

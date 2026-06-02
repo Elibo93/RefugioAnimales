@@ -141,7 +141,10 @@
                                         <input type="text" name="dni" required placeholder="12345678X" th:value="${form_dni}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
                                     </div>
                                     <div class="form-group">
-                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.direccion}"></label>
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">
+                                            <span th:text="#{generic.auto.direccion}"></span>
+                                            <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                                        </label>
                                         <input type="text" name="direccion" placeholder="Calle, número, piso..." th:value="${form_direccion}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
                                     </div>
                                     <div class="form-group">
@@ -217,7 +220,10 @@
                                     <input type="text" name="telefono" th:value="${userPhone ?: voluntario.telefono}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
                                 </div>
                                 <div class="form-group">
-                                    <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.direccion}"></label>
+                                    <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">
+                                        <span th:text="#{generic.auto.direccion}"></span>
+                                        <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                                    </label>
                                     <input type="text" name="direccion" th:value="${userDireccion ?: voluntario.direccion}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
                                 </div>
                             </th:block>

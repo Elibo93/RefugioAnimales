@@ -15,7 +15,6 @@ import es.refugio.frontend.web.dto.UsuarioRecord;
 import es.refugio.frontend.web.dto.PaginatedResponse;
 
 import java.util.Map;
-import java.util.List;
 
 @FeignClient(name = "refugio-auth")
 public interface AuthFeignClient {
@@ -24,7 +23,8 @@ public interface AuthFeignClient {
     Map<String, Object> registrarUsuario(@RequestBody Map<String, Object> body);
 
     @PostMapping(value = "/api/v1/usuarios/internal/login", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    ResponseEntity<String> login(@RequestParam("username") String username, @RequestParam("password") String password, @RequestHeader("X-Internal-Secret") String secret);
+    ResponseEntity<String> login(@RequestParam("username") String username, @RequestParam("password") String password,
+            @RequestHeader("X-Internal-Secret") String secret);
 
     @GetMapping("/api/v1/usuarios")
     PaginatedResponse<UsuarioRecord> getUsuarios(@RequestParam(value = "size", required = false) Integer size);
@@ -42,13 +42,15 @@ public interface AuthFeignClient {
     void updateUserAuth(@PathVariable("id") Integer id, @RequestBody Map<String, Object> userBody);
 
     @PostMapping(value = "/api/v1/usuarios/{id}/verificar-password", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    ResponseEntity<Map<String, Object>> verificarPassword(@PathVariable("id") Integer id, @RequestParam("password") String password);
+    ResponseEntity<Map<String, Object>> verificarPassword(@PathVariable("id") Integer id,
+            @RequestParam("password") String password);
 
     @PutMapping("/api/v1/usuarios/{id}/password")
     void cambiarPassword(@PathVariable("id") Integer id, @RequestBody Map<String, String> body);
 
     @PutMapping("/api/v1/usuarios/{id}/rol")
-    ResponseEntity<Map<String, Object>> actualizarRolUsuario(@PathVariable("id") Integer id, @RequestBody Map<String, String> body);
+    ResponseEntity<Map<String, Object>> actualizarRolUsuario(@PathVariable("id") Integer id,
+            @RequestBody Map<String, String> body);
 
     @DeleteMapping("/api/v1/usuarios/{id}")
     void deleteUsuarioAuth(@PathVariable("id") Integer id);

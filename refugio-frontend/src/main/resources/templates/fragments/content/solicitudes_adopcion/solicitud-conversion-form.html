@@ -133,11 +133,14 @@
 
                 <!-- Dirección -->
                 <div class="form-group" style="grid-column: 1 / -1;">
-                    <label th:text="#{solicitud.auto.direccion.completa.1}"></label>
+                    <label>
+                        <span th:text="#{solicitud.auto.direccion.completa.1}"></span>
+                        <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                    </label>
                     <div class="input-with-icon">
                         <i data-lucide="map-pin"></i>
                         <input type="text" name="direccion" th:value="${direccion}"
-                            placeholder="Calle, Número, Piso, Ciudad..." required>
+                            placeholder="Calle, Número, Piso, Ciudad...">
                     </div>
                 </div>
             </th:block>
@@ -153,7 +156,10 @@
             </div>
 
             <div class="form-group" style="grid-column: 1 / -1;">
-                <label>[[#{html.auto.por.qu.quieres.adoptar.a}]] <span th:text="${animal.nombre}"></span>?</label>
+                <label>
+                    <span>[[#{html.auto.por.qu.quieres.adoptar.a}]] <span th:text="${animal.nombre}"></span>?</span>
+                    <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                </label>
                 <textarea name="comentario" rows="4" th:text="${comentario}"
                     placeholder="Cuéntanos un poco sobre tu hogar y por qué has elegido a este peludo..."></textarea>
             </div>

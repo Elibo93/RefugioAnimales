@@ -149,3 +149,10 @@ function refreshDynamicComponents() {
         }
     });
 }
+
+function setOAuth2RedirectCookie() {
+    const redirectInput = document.querySelector('input[name="redirect"]');
+    if (redirectInput && redirectInput.value) {
+        document.cookie = "redirect_uri=" + encodeURIComponent(redirectInput.value) + "; path=/; max-age=300";
+    }
+}
