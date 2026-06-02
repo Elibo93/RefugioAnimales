@@ -1,0 +1,230 @@
+<!-- Vista de Listado de Voluntarios: Panel de gestión del equipo humano con filtros de búsqueda y modo de asignación de tareas -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="content">
+
+        <div class="table-wrapper" style="padding-top: 1.7rem;">
+            <!-- Banner de Selección Activa -->
+            <div th:if="${modoSeleccion}" 
+                 style="background: #eff6ff; border: 1px solid #93c5fd; padding: 16px 24px; border-radius: 20px; display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 2rem; animation: slideInDown 0.4s ease; box-shadow: var(--shadow-md);">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="background: var(--primary); color: white; width: 40px; height: 40px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                        <i data-lucide="clipboard-check" style="width: 20px;"></i>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0; font-size: 1rem; font-weight: 800; color: var(--text-main);" th:text="#{generic.auto.modo.seleccion.activo}"></h4>
+                        <p style="margin: 2px 0 0; font-size: 0.85rem; color: var(--text-muted);">
+                            [[#{html.auto.asignando.voluntario.para}]] <strong style="color: var(--primary);" th:text="${tareaNombreSeleccion != null ? tareaNombreSeleccion : 'Tarea #' + tareaIdSeleccion}">Tarea</strong>
+                        </p>
+                    </div>
+                </div>
+                <a th:href="@{/web/tareas}" hx-get="/web/tareas" hx-target="#contenido-dinamico" hx-push-url="true"
+                   class="btn-premium secondary" style="height: 36px; padding: 0 15px; font-size: 0.8rem; border-radius: 10px;" th:text="#{generic.auto.cancelar.seleccion}"></a>
+            </div>
+
+            <div id="voluntarios-main-container" style="width: 100%;">
+                <div class="actions-bar admin-actions-bar" style="border-bottom: none; margin-bottom: 1rem;">
+                    
+                    <!-- 1. TÍTULO E ICONO -->
+                    <div class="admin-title-container">
+                        <div class="admin-title-icon-box">
+                            <i data-lucide="clipboard-list" style="width: 24px;"></i>
+                        </div>
+                        <div>
+                            <h1 class="admin-title-text" th:text="#{voluntario.list.title}">Voluntarios</h1>
+                            <p class="admin-title-desc" th:text="#{voluntario.auto.gestiona.equipo}">Gestión del equipo de voluntarios</p>
+                        </div>
+                    </div>
+
+                    <!-- 3. ACCIONES Y EXPORTACIÓN -->
+                    <div class="admin-actions-group">
+                        <a th:href="@{/web/voluntarios/pdf}" target="_blank" title="Exportar listado a PDF" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                            <img src="/images/pdf.png" alt="PDF" class="admin-export-img">
+                        </a>
+                        <a th:href="@{/web/voluntarios/excel}" target="_blank" title="Exportar listado a Excel" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                            <img src="/images/excel.png" alt="Excel" class="admin-export-img">
+                        </a>
+                        <a class="btn btn-primary" th:href="@{/web/voluntarios/nuevo}">
+                            <i data-lucide="plus" style="width:18px;"></i>
+                            <span th:text="#{generic.link.create}">+ Nuevo</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 2. FILTROS Y BÚSQUEDA (Barra separada tipo premium) -->
+                <div class="admin-filters-bar">
+                    <form id="search-form-vol" hx-get="/web/voluntarios" hx-target="#voluntarios-main-container" hx-select="#voluntarios-main-container" hx-swap="outerHTML" hx-trigger="keyup changed delay:800ms from:#search-input, search" hx-vals='{"page": 1}' hx-replace-url="true"
+                        style="display: flex; align-items: center; gap: 1rem; width: 100%;">
+                        
+                        <!-- Buscador -->
+                        <div style="flex: 3; position: relative;">
+                            <i data-lucide="search" class="admin-search-icon"></i>
+                            <input type="text" id="search-input" name="q" th:value="${query}" placeholder="Buscar por nombre, email o DNI..."
+                                class="form-control admin-search-input-medium">
+                        </div>
+
+                        <!-- Botón Limpiar -->
+                        <a th:href="@{/web/voluntarios}" hx-get="/web/voluntarios" hx-target="#voluntarios-main-container"
+                           hx-select="#voluntarios-main-container" hx-swap="outerHTML" hx-push-url="true"
+                           class="btn-icon admin-btn-clear-medium" title="Limpiar Filtros">
+                            <i data-lucide="rotate-ccw" style="width: 16px;"></i>
+                        </a>
+                        
+                        <!-- Inputs ocultos para mantener el modo selección al buscar -->
+                        <input type="hidden" name="modoSeleccion" th:value="${modoSeleccion}">
+                        <input type="hidden" name="tareaIdSeleccion" th:value="${tareaIdSeleccion}">
+                    </form>
+                </div>
+
+            <!-- LISTA PREMIUM DE VOLUNTARIOS -->
+            <div class="premium-list-container">
+                <!-- Encabezados -->
+                <div class="premium-grid-header grid-cols-voluntarios admin-list-header">
+                    <div class="cell-left" th:text="#{voluntario.auto.voluntario.usuario}"></div>
+                    <div class="cell-center" th:text="#{generic.auto.contacto.y.direccion}"></div>
+                    <div class="cell-center" th:text="#{voluntario.auto.especialidad}"></div>
+                    <div class="cell-center" th:text="#{voluntario.auto.disponibilidad}"></div>
+                    <div class="cell-center" th:text="#{generic.auto.acciones}"></div>
+                </div>
+
+                <div id="voluntarios-container">
+                    <div id="voluntarios-list-body" class="list-body" th:fragment="list-body" style="display: flex; flex-direction: column; gap: 12px; margin-top: 1rem;">
+                        <!-- ... (No changes to empty message) ... -->
+                        <div th:if="${#lists.isEmpty(voluntarios)}" 
+                             style="background: white; padding: 4rem 2rem; border-radius: 16px; border: 1px dashed var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; text-align: center;">
+                            <div style="background: var(--bg-main); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i data-lucide="search-x" style="width: 32px; color: var(--text-muted);"></i>
+                            </div>
+                            <div>
+                                <h3 style="margin: 0; color: var(--text-main); font-weight: 700;" th:text="#{voluntario.auto.no.se.encontraron.voluntarios}"></h3>
+                                <p style="margin: 5px 0 0; color: var(--text-muted); font-size: 0.9rem;" th:text="#{voluntario.auto.prueba.con.otros.terminos.de.busqueda}"></p>
+                            </div>
+                            <a th:href="@{/web/voluntarios(modoSeleccion=${modoSeleccion}, tareaIdSeleccion=${tareaIdSeleccion})}" 
+                               th:hx-get="@{/web/voluntarios(modoSeleccion=${modoSeleccion}, tareaIdSeleccion=${tareaIdSeleccion})}" 
+                               hx-target="#voluntarios-container"
+                               hx-select="#voluntarios-container"
+                               hx-swap="outerHTML"
+                               hx-replace-url="true"
+                               class="btn-premium secondary" style="height: 40px; padding: 0 1.5rem;" th:text="#{generic.auto.ver.todos}"></a>
+                        </div>
+
+                        <div th:each="p_item : ${voluntarios}" class="premium-row-card borderless premium-grid-row grid-cols-voluntarios" th:id="'row-' + ${p_item.id}"
+                            th:with="u=${usuariosMap != null ? usuariosMap['' + p_item.usuarioId] : null}, p=${perfilesMap != null ? perfilesMap['' + p_item.usuarioId] : null}">
+
+                            <!-- Voluntario -->
+                            <div class="row-cell cell-left">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div class="task-icon-box" style="background: #e0f2fe;">
+                                        <i data-lucide="clipboard-list" style="width: 18px; color: #0ea5e9;"></i>
+                                    </div>
+                                    <div>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="color: #94a3b8; font-weight: 700; font-size: 0.8rem;" th:text="${'#' + p_item.id}"></span>
+                                            <a th:href="@{/web/voluntarios/{id}(id=${p_item.id})}"
+                                                style="font-weight: 800; color: var(--text-main); font-size: 1rem; text-decoration: none;"
+                                                th:text="${p != null ? (p.nombre + ' ' + (p.apellido ?: '')) : 'Sin perfil'}">Juan Pérez</a>
+                                        </div>
+                                        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;"
+                                            th:text="${u != null ? '@' + u.username : 'Sin usuario'}">@juanp</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contacto y Dirección -->
+                            <div class="row-cell cell-center"
+                                style="flex-direction: column; gap: 4px; text-align: center; align-items: center;">
+                                <div
+                                    style="display: flex; align-items: center; gap: 8px; color: var(--text-main); font-size: 0.9rem; font-weight: 600;">
+                                    <i data-lucide="phone" style="width: 14px; color: var(--text-muted);"></i>
+                                    <span th:text="${p != null ? p.telefono : '-'}">911223344</span>
+                                </div>
+                                <div
+                                    style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.8rem;">
+                                    <i data-lucide="map-pin" style="width: 12px;"></i>
+                                    <span th:text="${p != null ? p.direccion : '-'}">Calle...</span>
+                                </div>
+                            </div>
+
+                            <!-- Especialidad -->
+                            <div class="row-cell cell-center">
+                                <span class="badge-premium info"
+                                    style="min-width: 100px; text-align: center; font-size: 0.75rem;"
+                                    th:text="${p_item.especialidad != null ? (#messages.msgOrNull('enum.EspecialidadVoluntario.' + p_item.especialidad) ?: #strings.capitalize(#strings.toLowerCase(p_item.especialidad))) : 'General'}">Especialidad</span>
+                            </div>
+
+                            <!-- Disponibilidad -->
+                            <div class="row-cell cell-center">
+                                <span class="badge-premium"
+                                    style="background:#F3E8FF; color:#9333EA; min-width: 100px; text-align: center; font-size: 0.75rem;"
+                                    th:text="${p_item.disponibilidad}">Tarde</span>
+                            </div>
+
+                            <!-- Acciones Normales -->
+                            <div th:if="${!modoSeleccion}" class="row-cell cell-center" style="gap: 12px;">
+                                <button class="btn-action-premium" 
+                                        style="cursor: pointer; display: flex; align-items: center; justify-content: center;"
+                                        th:hx-get="@{/web/tareas(modoSeleccion=true, voluntarioIdSeleccion=${p_item.id})}"
+                                        hx-target="#contenido-dinamico"
+                                        hx-push-url="true"
+                                        title="Asignar Tarea">
+                                    <i data-lucide="plus-circle" style="width: 18px; color: var(--secondary);"></i>
+                                </button>
+                                <button class="btn-action-premium view"
+                                        style="cursor: pointer; display: flex; align-items: center; justify-content: center;"
+                                        th:hx-get="@{/web/voluntarios/{id}/modal-disponibilidad(id=${p_item.id})}"
+                                        hx-target="#modals-container"
+                                        hx-swap="innerHTML"
+                                        title="Ver disponibilidad">
+                                    <i data-lucide="calendar-days" style="width: 18px; color: var(--primary);"></i>
+                                </button>
+                                <a class="btn-action-premium edit" th:hx-get="@{/web/voluntarios/{id}/editar(id=${p_item.id})}"
+                                    hx-target="#contenido-dinamico" hx-push-url="true" title="Editar">
+                                    <i data-lucide="edit-2" style="width: 18px;"></i>
+                                </a>
+                                <button class="btn-action-premium delete"
+                                    th:hx-post="@{/web/voluntarios/{id}/borrar(id=${p_item.id})}"
+                                    th:hx-target="'#row-' + ${p_item.id}" hx-swap="outerHTML swap:0.3s"
+                                    th:hx-confirm="#{confirm.voluntario.eliminar}">
+                                    <i data-lucide="trash-2" style="width: 18px;"></i>
+                                </button>
+                            </div>
+
+                            <!-- Acciones Modo Selección -->
+                            <div th:if="${modoSeleccion}" class="row-cell cell-center">
+                                <th:block th:with="vId=${p_item.id}, isAssigned=${assignedVoluntarioIds != null and assignedVoluntarioIds.contains(vId)}">
+                                    <button th:if="${!isAssigned}"
+                                            class="btn btn-secondary btn-sm" 
+                                            style="padding: 6px 12px; font-size: 0.8rem; border-radius: 10px; gap: 6px;"
+                                            th:hx-post="@{/web/tareas/{id}/vincular-seleccion(id=${tareaIdSeleccion}, voluntarioId=${vId}, message='Tarea asignada correctamente')}"
+                                            hx-target="#contenido-dinamico"
+                                            hx-swap="innerHTML"
+                                            hx-push-url="/web/tareas">
+                                        <i data-lucide="plus-circle" style="width: 14px;"></i>
+                                        [[#{html.auto.asignar}]]
+                                    </button>
+                                    <span th:if="${isAssigned}" class="badge-premium success" style="font-size: 0.75rem; padding: 6px 12px; display: flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2);">
+                                        <i data-lucide="check-circle" style="width: 14px;"></i>
+                                        [[#{html.auto.ya.asignado}]]
+                                    </span>
+                                </th:block>
+                            </div>
+                        </div>
+                    </div>
+                    
+                            <!-- Paginación Voluntarios -->
+                            <div th:replace="~{fragments/pagination :: controls(pagination=${pagination}, target='#voluntarios-main-container', url='/web/voluntarios')}"></div>
+                        </div>
+                    </div>
+                </div>
+        <!-- Modal Container for HTMX injections -->
+        <div id="modals-container"></div>
+    </div>
+</body>
+
+</html>

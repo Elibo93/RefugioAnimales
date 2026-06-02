@@ -1,0 +1,100 @@
+<!-- Vista de Detalle Médico (Modal): Previsualización de diagnósticos y tratamientos de un animal -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="detalle" class="modal-overlay-custom" onclick="if(event.target === this) closeModal()">
+        <div id="historialDetalleModal" class="modal-content fade-in"
+            style="max-width: 550px; width: 90%; height: 98vh; background: #ffffff; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.2); display: flex; flex-direction: column; overflow: hidden;">
+
+            <!-- Header con foto del animal -->
+            <div class="modal-header-image"
+                style="position: relative; height: 280px; flex-shrink: 0; overflow: hidden;">
+                <img th:src="${animal != null and animal.foto() != null and !animal.foto().isEmpty() ? animal.foto() : '/img/placeholder-animal.png'}"
+                    style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;"
+                    alt="Foto del animal">
+                <div
+                    style="position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.8));">
+                </div>
+                <div style="position: absolute; bottom: 15px; left: 20px; right: 20px;">
+                    <span
+                        style="display: inline-block; padding: 3px 10px; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 20px; color: white; font-size: 0.7rem; font-weight: 600; margin-bottom: 6px; border: 1px solid rgba(255,255,255,0.3);"
+                        th:text="${historial.fecha() != null ? historial.fecha().toString().substring(0,10) : '-'}">2024-01-01</span>
+                    <h2 style="margin: 0; color: white; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px;"
+                        th:text="${animal != null ? 'Historial de ' + animal.nombre() : 'Detalle Médico'}">
+                        Historial [[#{html.auto.de}]] Rocky</h2>
+                </div>
+                <button type="button" onclick="closeModal()"
+                    style="position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.2s; z-index: 10;">
+                    <i data-lucide="x" style="width: 18px;"></i>
+                </button>
+            </div>
+
+            <!-- Contenido -->
+            <div class="modal-body" style="padding: 20px 25px; background: #ffffff; flex: 1; overflow-y: auto; display: flex; flex-direction: column; justify-content: space-between;">
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+
+                    <!-- Veterinario -->
+                    <div class="info-row">
+                        <label
+                            style="display: block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 1.2px; margin-bottom: 4px;" th:text="#{historial.auto.veterinario}"></label>
+                        <div
+                            style="display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 8px 14px; border-radius: 14px; border: 1px solid #f1f5f9;">
+                            <div
+                                style="width: 32px; height: 32px; border-radius: 10px; background: #e0f2fe; display: flex; align-items: center; justify-content: center; color: #0284c7;">
+                                <i data-lucide="user-check" style="width: 16px;"></i>
+                            </div>
+                            <div>
+                                <strong style="color: #1e293b; font-size: 0.9rem;"
+                                    th:text="${historial.veterinario()}">Dra. Silva</strong>
+                                <span style="display: block; font-size: 0.65rem; color: #64748b;" th:text="#{historial.auto.especialista}"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Diagnóstico -->
+                    <div class="info-row">
+                        <label
+                            style="display: block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 1.2px; margin-bottom: 4px;" th:text="#{historial.auto.diagnostico}"></label>
+                        <div
+                            style="background: #fdf2f8; padding: 12px 14px; border-radius: 14px; border-left: 4px solid #ec4899;">
+                            <p style="margin: 0; line-height: 1.4; color: #831843; font-weight: 500; font-size: 0.85rem;"
+                                th:text="${historial.descripcion()}">
+                                Problemas articulares detectados...
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Tratamiento -->
+                    <div class="info-row">
+                        <label
+                            style="display: block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 1.2px; margin-bottom: 4px;" th:text="#{historial.auto.tratamiento}"></label>
+                        <div
+                            style="background: #f0fdf4; padding: 12px 14px; border-radius: 14px; border-left: 4px solid #22c55e;">
+                            <p style="margin: 0; line-height: 1.4; color: #14532d; font-weight: 500; font-size: 0.85rem;"
+                                th:text="${historial.tratamiento()}">
+                                Medicación diaria articular...
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer Acciones -->
+                <div style="margin-top: 15px; display: flex; justify-content: flex-end;">
+                    <button type="button" onclick="closeModal()" class="btn-premium"
+                        style="background: #1e293b; color: white; padding: 8px 25px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 8px; font-size: 0.85rem;">
+                        <span th:text="#{historial.auto.cerrar.detalle}"></span>
+                        <i data-lucide="chevron-right" style="width: 14px;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

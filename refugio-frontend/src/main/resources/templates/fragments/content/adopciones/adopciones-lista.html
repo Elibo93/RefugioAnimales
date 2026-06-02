@@ -1,0 +1,189 @@
+<!-- Vista de Listado de Adopciones: Historial de adopciones completadas y gestión de contratos -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="content">
+
+        <div class="table-wrapper" style="padding-top: 1.7rem;">
+            <!-- BARRA DE ACCIONES SUPERIOR -->
+            <div class="actions-bar admin-actions-bar" style="border-bottom: none; margin-bottom: 1rem;">
+                
+                <!-- 1. TÍTULO E ICONO -->
+                <div class="admin-title-container">
+                    <div class="admin-title-icon-box">
+                        <i data-lucide="home" style="width: 24px;"></i>
+                    </div>
+                    <div>
+                        <h1 class="admin-title-text" th:text="#{adopcion.list.title}">Adopciones</h1>
+                        <p class="admin-title-desc" th:text="#{adopcion.auto.gestiona.historial}">Historial y gestión de adopciones</p>
+                    </div>
+                </div>
+
+                <!-- 3. ACCIONES Y EXPORTACIÓN (Movidas a la derecha) -->
+                <div class="admin-actions-group">
+                    <a th:href="@{/web/adopciones/pdf}" target="_blank" title="Exportar listado a PDF" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/pdf.png" alt="PDF" class="admin-export-img">
+                    </a>
+                    <a th:href="@{/web/adopciones/excel}" target="_blank" title="Exportar listado a Excel" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/excel.png" alt="Excel" class="admin-export-img">
+                    </a>
+                    <a class="btn btn-primary" th:href="@{/web/adopciones/nueva}">
+                        <i data-lucide="plus" style="width:18px;"></i>
+                        <span th:text="#{generic.link.create}">+ Nueva</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. FILTROS Y BÚSQUEDA (Barra separada) -->
+            <div class="admin-filters-bar">
+                <form id="adopcion-admin-form" onsubmit="return false;"
+                    style="display: flex; align-items: center; gap: 1rem; width: 100%;">
+                    
+                    <!-- Buscador -->
+                    <div style="flex: 3; position: relative;">
+                        <i data-lucide="search" class="admin-search-icon"></i>
+                        <input type="text" name="q" th:value="${q}" placeholder="Buscar por animal, adoptante..."
+                            hx-get="/web/adopciones" hx-trigger="keyup changed delay:800ms"
+                            hx-target="#adopcion-results" hx-vals='{"page": 1}'
+                            hx-select="#adopcion-results" hx-swap="outerHTML"
+                            hx-include="#adopcion-admin-form" class="form-control admin-search-input-medium">
+                    </div>
+
+                    <!-- Filtro Estado -->
+                    <div style="flex: 1.2; position: relative; min-width: 140px;">
+                        <i data-lucide="activity" class="admin-filter-icon"></i>
+                        <select name="estado" hx-get="/web/adopciones" hx-trigger="change"
+                            hx-vals='{"page": 1}' hx-target="#adopcion-results"
+                            hx-select="#adopcion-results" hx-swap="outerHTML"
+                            hx-include="#adopcion-admin-form" class="form-control admin-filter-select-medium">
+                            <option value="" th:text="#{adopcion.filter.any} ?: 'Todos los estados'">Todos los estados</option>
+                            <option value="COMPLETADA" th:selected="${selectedEstado == 'COMPLETADA'}" th:text="#{enum.EstadoAdopcion.COMPLETADA}">Completada</option>
+                            <option value="PENDIENTE_FIRMA" th:selected="${selectedEstado == 'PENDIENTE_FIRMA'}" th:text="#{enum.EstadoAdopcion.PENDIENTE_FIRMA}">Pendiente</option>
+                            <option value="EN_PERIODO_ADAPTACION" th:selected="${selectedEstado == 'EN_PERIODO_ADAPTACION'}" th:text="#{enum.EstadoAdopcion.EN_PERIODO_ADAPTACION}">En Adaptación</option>
+                            <option value="CANCELADA" th:selected="${selectedEstado == 'CANCELADA'}" th:text="#{enum.EstadoAdopcion.CANCELADA}">Cancelada</option>
+                        </select>
+                    </div>
+
+                    <!-- Botón Limpiar -->
+                    <a th:href="@{/web/adopciones}" class="btn-icon admin-btn-clear-medium" title="Limpiar Filtros">
+                        <i data-lucide="rotate-ccw" style="width: 16px;"></i>
+                    </a>
+                </form>
+            </div>
+
+            <!-- LISTA PREMIUM DE ADOPCIONES -->
+            <div id="adopcion-results" class="premium-list-container">
+                <div th:if="${not #lists.isEmpty(adopciones)}" class="premium-grid-header grid-cols-adopciones admin-list-header">
+                    <div class="cell-padded-left cell-left" th:text="#{generic.auto.animal}"></div>
+                    <div class="cell-left" th:text="#{adopcion.auto.detalles} ?: 'Detalles'"></div>
+                    <div class="cell-center" th:text="#{generic.auto.estado}"></div>
+                    <div class="cell-center" th:text="#{adopcion.auto.fecha.firma}"></div>
+                    <div class="cell-center" th:text="#{generic.auto.acciones}"></div>
+                </div>
+
+                <div th:if="${not #lists.isEmpty(adopciones)}" class="list-body" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div th:each="i : ${adopciones}" class="premium-row-card borderless premium-grid-row grid-cols-adopciones" th:id="'row-' + ${i.id}">
+                        <!-- 1. Foto del Animal -->
+                        <div class="row-cell cell-left" th:with="animalObj=${animalesMap != null ? animalesMap['' + i.animalId] : null}">
+                            <div style="position: relative; width: 55px; height: 55px; margin-left: 1.5rem;">
+                                <img th:src="${animalObj != null and animalObj.foto != null and animalObj.foto != '' ? animalObj.foto : '/images/placeholder-animal.png'}"
+                                     style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+                            </div>
+                        </div>
+
+                        <!-- 2. ID + Animal + Adoptante -->
+                        <div class="row-cell cell-left" th:with="
+                            animalObj=${animalesMap != null ? animalesMap['' + i.animalId] : null},
+                            usuarioId=${adoptanteUsuarioIds != null ? adoptanteUsuarioIds['' + i.adoptanteId] : null}, 
+                            perfilObj=${perfilesMap != null and usuarioId != null ? perfilesMap['' + usuarioId] : null},
+                            usuarioObj=${usuariosMap != null and usuarioId != null ? usuariosMap['' + usuarioId] : null}">
+                            
+                            <div style="overflow: hidden;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="color: #94a3b8; font-weight: 700; font-size: 0.8rem;" th:text="${'#' + i.id}"></span>
+                                    <a th:href="@{/web/animales/{id}(id=${i.animalId})}"
+                                        style="font-weight: 800; color: var(--text-main); font-size: 1.05rem; text-decoration: none;"
+                                        th:text="${animalObj != null ? animalObj.nombre : 'Animal'}">Rocky</a>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+                                    <i data-lucide="user" style="width: 14px; color: var(--text-muted); stroke-width: 2.5;"></i>
+                                    <a th:href="@{/web/personas/{id}(id=${usuarioId != null ? usuarioId : '0'})}"
+                                        style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500; text-decoration: none;"
+                                        th:text="${perfilObj != null and perfilObj.nombre != null ? (perfilObj.nombre + ' ' + (perfilObj.apellido ?: '')) : 
+                                                (usuarioObj != null ? usuarioObj.username : 'Adoptante #' + i.adoptanteId)}">Juan Pérez</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row-cell cell-center">
+                            <span class="badge-premium"
+                                  th:classappend="${i.estado == 'COMPLETADA' ? 'success' : 
+                                                  (i.estado == 'CANCELADA' ? 'danger' : 
+                                                  (i.estado == 'PENDIENTE_FIRMA' ? 'primary' : 
+                                                  (i.estado == 'EN_PERIODO_ADAPTACION' ? 'warning' : 'info')))}"
+                                  th:text="${i.estado != null ? #messages.msg('enum.EstadoAdopcion.' + i.estado) : #messages.msg('enum.EstadoAdopcion.EN_PERIODO_ADAPTACION')}">Completada</span>
+                        </div>
+
+                        <div class="row-cell cell-center"
+                            style="font-weight: 600; color: var(--text-muted);"
+                            th:text="${i.fechaAdopcion != null ? i.fechaAdopcion : '-'}">01/01/2023</div>
+
+                        <div class="row-cell cell-center" style="gap: 8px;">
+                            <button th:if="${i.estado == 'PENDIENTE_FIRMA'}"
+                                    class="btn-action-premium"
+                                    style="color: #f59e0b;"
+                                    th:hx-post="@{/web/adopciones/{id}/periodo-adaptacion(id=${i.id})}"
+                                    th:title="#{adopciones.btn.iniciar_adaptacion}"
+                                    th:hx-confirm="#{adopciones.confirm.iniciar_adaptacion}">
+                                <i data-lucide="play-circle" style="width: 18px;"></i>
+                            </button>
+                            
+                            <button th:if="${i.estado == 'EN_PERIODO_ADAPTACION'}"
+                                    class="btn-action-premium"
+                                    style="color: #ef4444;"
+                                    th:hx-post="@{/web/adopciones/{id}/devolucion(id=${i.id})}"
+                                    th:title="#{adopciones.btn.registrar_devolucion}"
+                                    th:hx-confirm="#{adopciones.confirm.registrar_devolucion}">
+                                <i data-lucide="corner-down-left" style="width: 18px;"></i>
+                            </button>
+
+                            <a class="btn-action-premium view" th:href="@{/web/adopciones/{id}/contrato(id=${i.id})}"
+                                title="Descargar Contrato" target="_blank" style="color: #4a90e2;">
+                                <i data-lucide="file-signature" style="width: 18px;"></i>
+                            </a>
+                            <a class="btn-action-premium edit" th:href="@{/web/adopciones/{id}/editar(id=${i.id})}"
+                                title="Editar">
+                                <i data-lucide="edit-2" style="width: 18px;"></i>
+                            </a>
+                            <button class="btn-action-premium delete"
+                                th:hx-post="@{/web/adopciones/{id}/borrar(id=${i.id})}"
+                                th:hx-target="'#row-' + ${i.id}" hx-swap="outerHTML swap:0.3s"
+                                th:hx-confirm="#{confirm.adopcion.eliminar}">
+                                <i data-lucide="trash-2" style="width: 18px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(adopciones)}"
+                    style="text-align:center; padding:5rem; background:white; border-radius:24px; border:1px solid var(--border); margin-top: 1rem; margin-bottom: 1rem;">
+                    <i data-lucide="heart-off"
+                        style="width:48px; height:48px; margin-bottom:1rem; color: var(--text-muted); opacity: 0.3;"></i>
+                    <p style="color: var(--text-muted); font-weight: 600;" th:text="#{adopcion.list.empty}">No hay
+                        adopciones registradas.</p>
+                </div>
+
+                <!-- Paginación -->
+                <div th:replace="~{fragments/pagination :: controls(pagination=${pagination}, url='/web/adopciones', target='#adopcion-results')}"></div>
+            </div>
+        </div>
+
+</div>
+</body>
+
+</html>

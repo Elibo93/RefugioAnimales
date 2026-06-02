@@ -1,0 +1,228 @@
+<!-- Vista de Detalle de Solicitud: Panel de revisión técnica para evaluar idoneidad de procesos de adopción -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="content">
+        <!-- Header de la página -->
+        <div class="page-header" style="margin-bottom: 2.5rem; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <h1 class="page-title" style="display: flex; align-items: center; gap: 12px; margin: 0;">
+                    <div class="premium-modal-icon-wrapper" style="margin: 0; width: 48px; height: 48px; background: var(--primary-light); color: var(--primary);">
+                        <i data-lucide="file-search"></i>
+                    </div>
+                    <span th:text="#{adopcion.auto.revision.de.solicitud}"></span>
+                </h1>
+                <p th:if="${isAdmin}" style="color: var(--text-muted); margin-top: 4px; margin-left: 60px;">[[#{html.auto.id.de.solicitud}]]<span th:text="${solicitud.id}"></span></p>
+            </div>
+            
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <a th:if="${adopcionId != null}" 
+                   th:href="@{/web/adopciones/{id}/contrato(id=${adopcionId})}" 
+                   target="_blank"
+                   class="btn btn-primary" 
+                   style="padding: 10px 24px; font-size: 1rem; border-radius: 14px; background: #2563eb; border: none; color: white; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">
+                    <i data-lucide="file-signature" style="width: 20px;"></i>
+                    <span style="font-weight: 700;" th:text="#{adopcion.auto.descargar.contrato.legal}"></span>
+                </a>
+                <span class="animal-status-badge" 
+                      style="padding: 8px 20px; height: auto; font-size: 0.9rem; text-transform: none; border-radius: 12px;"
+                      th:classappend="${'badge-' + solicitud.estado.toString().toLowerCase()}"
+                      th:text="#{solicitud.estado.__${solicitud.estado}__}">
+                    [[#{generic.auto.status}]]
+                </span>
+            </div>
+        </div>
+
+        <div class="grid-layout" style="display: grid; grid-template-columns: 1fr 350px; gap: 2rem;">
+            
+            <!-- Columna Principal: Datos del Adoptante y Comentario -->
+            <div class="main-column" style="display: flex; flex-direction: column; gap: 2rem;">
+                
+                <!-- Feedback del Administrador (NUEVO) -->
+                <div class="card premium-card" style="padding: 2rem; border-left: 4px solid var(--primary);">
+                    <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="shield-check" style="color: var(--primary);"></i>
+                        [[#{solicitud.auto.internal.notes}]]
+                    </h2>
+                    
+                    <!-- Modo Edición (Solo ADMIN) -->
+                    <form th:if="${isAdmin}" 
+                          th:action="@{/web/solicitudes/{id}/editar(id=${solicitud.id})}" method="POST">
+                        <input type="hidden" name="animalId" th:value="${solicitud.animalId}">
+                        <input type="hidden" name="adoptanteId" th:value="${solicitud.adoptanteId}">
+                        <input type="hidden" name="estado" th:value="${solicitud.estado}">
+                        <input type="hidden" name="comentario" th:value="${solicitud.comentario}">
+                        <input type="hidden" name="redireccion" value="detalle">
+                        
+                        <textarea name="comentarioAdmin" rows="3" 
+                                  style="width: 100%; padding: 1rem; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-main); font-family: inherit; margin-bottom: 1rem;"
+                                  th:placeholder="#{solicitud.auto.write.internal.notes}"
+                                  th:text="${solicitud.comentarioAdmin}"></textarea>
+                        <button type="submit" class="btn btn-secondary" style="height: 40px; font-size: 0.85rem;">
+                            <i data-lucide="save" style="width: 14px;"></i>
+                            [[#{solicitud.auto.save.note}]]
+                        </button>
+                    </form>
+
+                    <!-- Modo Lectura (No es Admin) -->
+                    <div th:unless="${isAdmin}" 
+                         style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; border: 1px solid #e2e8f0;">
+                        <p style="margin: 0; color: var(--text-main); line-height: 1.6;" 
+                           th:text="${solicitud.comentarioAdmin != null and !solicitud.comentarioAdmin.isEmpty() ? solicitud.comentarioAdmin : 'No hay notas del administrador todavía.'}">
+                            Notas...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Ficha del Adoptante -->
+                <div class="card premium-card" style="padding: 2rem;">
+                    <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="user" style="color: var(--primary);"></i>
+                        [[#{solicitud.auto.applicant.info}]]
+                    </h2>
+                    
+                    <div th:if="${perfilAdoptante != null}" class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <div class="detail-item">
+                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;" th:text="#{generic.auto.nombre.completo}"></label>
+                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="|${perfilAdoptante.nombre} ${perfilAdoptante.apellido}|">Nombre</span>
+                        </div>
+                        <div class="detail-item">
+                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;" th:text="#{generic.auto.dni.nie}"></label>
+                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.dni}">DNI</span>
+                        </div>
+                        <div class="detail-item">
+                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;" th:text="#{generic.auto.telefono}"></label>
+                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.telefono}">Teléfono</span>
+                        </div>
+                        <div class="detail-item">
+                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;" th:text="#{adopcion.auto.fecha.nacimiento}"></label>
+                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.fechaNacimiento}">Fecha</span>
+                        </div>
+                        <div class="detail-item" style="grid-column: span 2;">
+                            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;" th:text="#{generic.auto.direccion}"></label>
+                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-main);" th:text="${perfilAdoptante.direccion}">Dirección</span>
+                        </div>
+                    </div>
+                    
+                    <div th:unless="${perfilAdoptante != null}" style="padding: 2rem; text-align: center; background: #fef2f2; border-radius: 16px; border: 1px dashed #f87171;">
+                        <i data-lucide="alert-triangle" style="width: 32px; height: 32px; color: #ef4444; margin-bottom: 12px;"></i>
+                        <p style="margin: 0; color: #991b1b; font-weight: 600;" th:text="#{adopcion.auto.no.se.han.encontrado.los.datos.legales.d}"></p>
+                    </div>
+                </div>
+
+                <!-- Comentario de la Solicitud -->
+                <div class="card" style="padding: 2rem;">
+                    <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="message-square" style="color: var(--primary);"></i>
+                        [[#{solicitud.auto.motivation}]]
+                    </h2>
+                    <div style="background: var(--bg-main); padding: 1.5rem; border-radius: 16px; border-left: 4px solid var(--primary);">
+                        <p style="margin: 0; font-size: 1.05rem; line-height: 1.6; color: var(--text-main); font-style: italic;" 
+                           th:text="${solicitud.comentario != null and !solicitud.comentario.isEmpty() ? solicitud.comentario : 'El adoptante no ha incluido comentarios adicionales.'}">
+                            Comentario...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Acciones Rápidas (SOLO ADMIN) -->
+                <div th:if="${isAdmin and (solicitud.estado == 'PENDIENTE' or solicitud.estado == 'EN_REVISION')}" 
+                     class="card" style="padding: 2rem; background: var(--bg-main); border: 2px solid var(--border);">
+                    <div style="display: flex; gap: 1rem;">
+                        <form th:action="@{/web/solicitudes/{id}/aprobar(id=${solicitud.id})}" method="POST" style="flex: 1;">
+                            <button type="submit" class="btn btn-primary" style="width: 100%; height: 56px; justify-content: center; font-size: 1rem; border-radius: 16px;">
+                                <i data-lucide="check-circle"></i>
+                                [[#{solicitud.auto.approve.adoption}]]
+                            </button>
+                        </form>
+                        
+                        <form th:action="@{/web/solicitudes/{id}/rechazar(id=${solicitud.id})}" method="POST" style="flex: 1;">
+                            <button type="submit" class="btn btn-danger" style="width: 100%; height: 56px; justify-content: center; font-size: 1rem; border-radius: 16px;">
+                                <i data-lucide="x-circle"></i>
+                                [[#{solicitud.auto.decline.request}]]
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div style="margin-top: 1rem;">
+                        <form th:if="${solicitud.estado == 'PENDIENTE'}"
+                              th:action="@{/web/solicitudes/{id}/editar(id=${solicitud.id})}" method="POST">
+                            <input type="hidden" name="animalId" th:value="${solicitud.animalId}">
+                            <input type="hidden" name="adoptanteId" th:value="${solicitud.adoptanteId}">
+                            <input type="hidden" name="estado" value="EN_REVISION">
+                            <input type="hidden" name="comentario" th:value="${solicitud.comentario}">
+                            <input type="hidden" name="comentarioAdmin" th:value="${solicitud.comentarioAdmin}">
+                            <input type="hidden" name="redireccion" value="detalle">
+                            <button type="submit" class="btn btn-secondary" style="width: 100%; height: 48px; justify-content: center; border-radius: 12px;">
+                                <i data-lucide="clock"></i>
+                                [[#{html.auto.poner.en.revisi.n}]]
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Lateral: Información del Animal -->
+            <div class="side-column" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div class="card premium-card" style="padding: 0; overflow: hidden;">
+                    <div style="position: relative; height: 250px;">
+                        <img th:src="${animalData != null and animalData.foto != null ? animalData.foto : '/images/placeholder-animal.png'}" 
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; background: linear-gradient(transparent, rgba(0,0,0,0.8));">
+                            <h3 style="margin: 0; color: white; font-size: 1.5rem; font-weight: 800;" th:text="${animalData != null ? animalData.nombre : 'Animal'}">Nombre</h3>
+                            <span style="color: rgba(255,255,255,0.9); font-size: 0.9rem;" th:text="${animalData != null ? #messages.msg('enum.Especie.' + animalData.especie) : ''}">Especie</span>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 1.5rem;">
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+                                <span style="color: var(--text-muted);" th:text="#{generic.auto.sexo}"></span>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <i th:if="${animalData != null and animalData.sexo != null}"
+                                       th:data-lucide="${animalData.sexo.toString() == 'MACHO' ? 'mars' : 'venus'}"
+                                       th:style="${animalData.sexo.toString() == 'MACHO' ? 'color: #3B82F6; width: 16px; height: 16px; stroke-width: 2.5;' : 'color: #EC4899; width: 16px; height: 16px; stroke-width: 2.5;'}"></i>
+                                    <strong style="font-weight: 700;" th:text="${animalData != null ? #messages.msg('enum.Sexo.' + animalData.sexo) : '-'}">Macho</strong>
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                                <span style="color: var(--text-muted);" th:text="#{generic.auto.edad}"></span>
+                                <span style="font-weight: 700;" th:text="${animalData != null ? animalData.edad : '-'}">2 años</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                                <span style="color: var(--text-muted);" th:text="#{generic.auto.tamano}"></span>
+                                <span style="font-weight: 700;" th:text="${animalData != null ? #messages.msg('enum.Tamano.' + animalData.tamano) : '-'}">Mediano</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                            <a th:href="@{/web/animales/{id}(id=${solicitud.animalId})}" class="btn btn-secondary" style="width: 100%; justify-content: center; font-size: 0.85rem;">
+                                <i data-lucide="external-link" style="width: 14px;"></i>
+                                <span th:text="#{generic.auto.see.file} + ' ' + #{generic.auto.animal}">Ver Ficha Animal</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card" style="padding: 1rem;">
+                    <a th:if="${isAdmin}" 
+                       th:href="@{/web/solicitudes}" class="btn btn-secondary" style="width: 100%; justify-content: center; height: 48px; border-radius: 12px;">
+                        <i data-lucide="arrow-left"></i>
+                        [[#{generic.btn.back}]]
+                    </a>
+                    <a th:unless="${isAdmin}" 
+                       th:href="@{/web/solicitudes/mis-adoptados}" class="btn btn-secondary" style="width: 100%; justify-content: center; height: 48px; border-radius: 12px;">
+                        <i data-lucide="arrow-left"></i>
+                        [[#{html.auto.mis.solicitudes}]]
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

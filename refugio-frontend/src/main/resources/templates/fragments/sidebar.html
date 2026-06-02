@@ -1,0 +1,320 @@
+<!-- Fragmento de Menú Lateral (Sidebar): Panel de navegación dinámico adaptado según el rol y estado del usuario -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="sidebar(currentPage)">
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <aside id="app-sidebar" class="app-sidebar">
+        <!-- Sidebar Header -->
+        <div class="sidebar-header">
+            <a th:href="@{/web/home}" class="header-left" style="text-decoration: none; color: inherit;">
+                <img th:src="@{/images/logo-Refugio.png}" class="sidebar-logo">
+                <div class="app-brand">
+                    <span class="app-name" th:text="#{app.name}">Refugio</span>
+                    <span class="app-subtitle" th:text="#{app.subtitle}">Gestión</span>
+                </div>
+            </a>
+            <button id="close-sidebar" class="btn-icon close-btn">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+
+        <!-- Sidebar Content -->
+        <div class="sidebar-content">
+            <!-- User Profile Section -->
+            <div class="sidebar-section">
+                <a th:if="${isAuthenticated}" th:href="@{|/web/personas/${currentUserId}|}" class="user-profile-link" style="text-decoration: none;">
+                    <div class="user-profile-large">
+                        <div class="avatar-large"><i data-lucide="user"></i></div>
+                        <div class="user-info">
+                            <span class="user-fullname"
+                                th:text="${currentUserName != null ? currentUserName : 'Usuario'}">User</span>
+                            <span class="user-email" style="font-size: 0.75rem; color: var(--text-muted);" th:text="#{home.auto.ver.mi.perfil}"></span>
+                        </div>
+                    </div>
+                </a>
+
+                <div class="user-profile-large" th:if="${!isAuthenticated}">
+                    <a th:href="@{/login}" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                        <i data-lucide="log-in"></i>
+                        <span th:text="#{auth.login.title}">Iniciar Sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 1. MENÚ PARA ADMINISTRADOR -->
+            <th:block th:if="${isAdmin}">
+                <div class="sidebar-section">
+                    <div class="sidebar-menu">
+                        <a th:href="@{/web/home}" class="sidebar-item"
+                            th:classappend="${currentUri == '/web/home' or currentUri == '/'} ? 'active' : ''">
+                            <i data-lucide="home"></i>
+                            <span th:text="#{home.auto.inicio}"></span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Solicitudes Section -->
+                <div class="sidebar-section sidebar-item-group">
+                    <div class="sidebar-section-title submenu-toggle">
+                        <div class="title-content">
+                            <i data-lucide="clipboard-list"></i>
+                            <span th:text="#{home.auto.revisiones}"></span>
+                            <span th:if="${totalPendingCount != null and totalPendingCount > 0}" 
+                                  class="sidebar-badge-dot" id="sidebar-revisiones-dot"></span>
+                        </div>
+                        <i data-lucide="chevron-down" class="chevron-icon"></i>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <div class="sidebar-menu">
+                            <a th:href="@{/web/solicitudes}" class="sidebar-item"
+                                th:classappend="${#strings.contains(currentUri, '/web/solicitudes')} ? 'active' : ''">
+                                <i data-lucide="file-text"></i>
+                                <span th:text="#{solicitud.list.title}">[[#{home.auto.adoptions}]]</span>
+                                <span th:if="${pendingAdoptionsCount != null and pendingAdoptionsCount > 0}" 
+                                      class="sidebar-badge" id="sidebar-adopciones-badge" th:text="${pendingAdoptionsCount}">0</span>
+                            </a>
+                            <a th:href="@{/web/voluntarios/pendientes}" class="sidebar-item"
+                                th:classappend="${#strings.contains(currentUri, '/web/voluntarios/pendientes')} ? 'active' : ''">
+                                <i data-lucide="user-plus"></i>
+                                <span th:text="#{home.auto.voluntarios}"></span>
+                                <span th:if="${pendingVolunteersCount != null and pendingVolunteersCount > 0}" 
+                                      class="sidebar-badge" id="sidebar-voluntarios-badge" th:text="${pendingVolunteersCount}">0</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1. EL REFUGIO Section -->
+                <div class="sidebar-section sidebar-item-group">
+                    <div class="sidebar-section-title submenu-toggle">
+                        <div class="title-content"><i data-lucide="dog"></i><span th:text="#{home.auto.el.refugio}"></span></div>
+                        <i data-lucide="chevron-down" class="chevron-icon"></i>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <div class="sidebar-menu">
+                            <a th:href="@{/web/animales}" class="sidebar-item"
+                                th:classappend="${#strings.contains(currentUri, '/web/animales')} ? 'active' : ''">
+                                <i data-lucide="dog"></i><span th:text="#{menu.animales.card.title}">Animales</span>
+                            </a>
+                            <a th:href="@{/web/tareas}" class="sidebar-item"
+                                th:classappend="${#strings.contains(currentUri, '/web/tareas')} ? 'active' : ''">
+                                <i data-lucide="check-square"></i><span th:text="#{tarea.list.title}">Tareas</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. COMUNIDAD Section -->
+                <div class="sidebar-section sidebar-item-group">
+                    <div class="sidebar-section-title submenu-toggle">
+                        <div class="title-content"><i data-lucide="users"></i><span th:text="#{home.auto.comunidad}"></span></div>
+                        <i data-lucide="chevron-down" class="chevron-icon"></i>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <div class="sidebar-menu">
+                            <a th:href="@{/web/personas}" class="sidebar-item"
+                                th:classappend="${#strings.contains(currentUri, '/web/personas')} ? 'active' : ''">
+                                <i data-lucide="users"></i><span th:text="#{home.auto.usuarios}"></span>
+                            </a>
+                            <a th:href="@{/web/adoptantes}" class="sidebar-item"
+                                th:classappend="${#strings.contains(currentUri, '/web/adoptantes')} ? 'active' : ''">
+                                <i data-lucide="user-check"></i><span th:text="#{home.auto.adoptantes}"></span>
+                            </a>
+                            <a th:href="@{/web/voluntarios}" class="sidebar-item"
+                                th:classappend="${#strings.equals(currentUri, '/web/voluntarios')} ? 'active' : ''">
+                                <i data-lucide="heart"></i><span
+                                    th:text="#{menu.voluntarios.card.title}">[[#{home.auto.volunteers}]]</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. ADMINISTRACIÓN Section -->
+                <div class="sidebar-section sidebar-item-group">
+                    <div class="sidebar-section-title submenu-toggle">
+                        <div class="title-content"><i data-lucide="settings"></i><span th:text="#{home.auto.administracion}"></span></div>
+                        <i data-lucide="chevron-down" class="chevron-icon"></i>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <div class="sidebar-menu">
+                            <a th:href="@{/web/donaciones}" class="sidebar-item"
+                                th:classappend="${#strings.contains(currentUri, '/web/donaciones')} ? 'active' : ''">
+                                <i data-lucide="coins"></i><span th:text="#{donacion.list.title}">[[#{home.auto.donations}]]</span>
+                            </a>
+                            <a th:href="@{/web/adopciones}" class="sidebar-item"
+                                th:classappend="${#strings.contains(currentUri, '/web/adopciones')} ? 'active' : ''">
+                                <i data-lucide="clipboard-check"></i><span
+                                    th:text="#{menu.adopciones.card.title}">[[#{home.auto.adoptions}]]</span>
+                            </a>
+                            <a th:href="@{/web/historiales}" class="sidebar-item"
+                                th:classappend="${#strings.contains(currentUri, '/web/historiales')} ? 'active' : ''">
+                                <i data-lucide="stethoscope"></i><span
+                                    th:text="#{historial.list.title}">Historiales</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+
+            <!-- 2. MENÚ PARA ADOPTANTE -->
+            <th:block th:if="${isAdoptante and !isAdmin and !isVoluntario}">
+                <div class="sidebar-section">
+                    <div class="sidebar-menu">
+                        <a th:href="@{/web/home}" class="sidebar-item"
+                            th:classappend="${currentUri == '/web/home' or currentUri == '/'} ? 'active' : ''">
+                            <i data-lucide="home"></i>
+                            <span th:text="#{home.auto.inicio}"></span>
+                        </a>
+                        <a th:href="@{/web/animales}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/animales')} ? 'active' : ''">
+                            <i data-lucide="dog"></i>
+                            <span th:text="#{menu.animales.card.title}">Animales</span>
+                        </a>
+                        <a th:href="@{/web/solicitudes/mis-adoptados}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/solicitudes/mis-adoptados')} ? 'active' : ''">
+                            <i data-lucide="heart"></i>
+                            <span th:text="#{home.auto.mis.adoptados}"></span>
+                        </a>
+                        <a th:href="@{/web/voluntarios/nuevo}" class="sidebar-item"
+                            th:classappend="${currentUri == '/web/voluntarios/nuevo'} ? 'active' : ''">
+                            <i data-lucide="users"></i>
+                            <span th:text="#{home.auto.quiero.ser.voluntario}"></span>
+                        </a>
+                        <a th:href="@{/web/donaciones}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/donaciones')} ? 'active' : ''">
+                            <i data-lucide="coins"></i>
+                            <span th:text="#{menu.colaborar}">Aportar</span>
+                        </a>
+                    </div>
+                </div>
+            </th:block>
+            
+            <!-- 2.5 MENÚ PARA VOLUNTARIO-ADOPTANTE -->
+            <th:block th:if="${isVoluntario and isAdoptante and !isAdmin}">
+                <div class="sidebar-section">
+                    <div class="sidebar-menu">
+                        <a th:href="@{/web/home}" class="sidebar-item"
+                            th:classappend="${currentUri == '/web/home' or currentUri == '/'} ? 'active' : ''">
+                            <i data-lucide="home"></i><span th:text="#{home.auto.inicio}"></span>
+                        </a>
+                        <a th:href="@{/web/animales}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/animales')} ? 'active' : ''">
+                            <i data-lucide="dog"></i><span th:text="#{home.auto.animales}"></span>
+                        </a>
+                        <a th:href="@{/web/solicitudes/mis-adoptados}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/solicitudes/mis-adoptados')} ? 'active' : ''">
+                            <i data-lucide="heart"></i>
+                            <span th:text="#{home.auto.mis.adoptados}"></span>
+                        </a>
+                        <a th:href="@{/web/tareas}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/tareas')} ? 'active' : ''">
+                            <i data-lucide="check-square"></i><span th:text="#{home.auto.mis.tareas}"></span>
+                        </a>
+                        <a th:href="@{/web/historiales}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/historiales')} ? 'active' : ''">
+                            <i data-lucide="stethoscope"></i><span th:text="#{home.auto.historiales}"></span>
+                        </a>
+                        <a th:href="@{/web/donaciones}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/donaciones')} ? 'active' : ''">
+                            <i data-lucide="coins"></i><span th:text="#{menu.colaborar}">Colaborar</span>
+                        </a>
+                    </div>
+                </div>
+            </th:block>
+
+            <!-- 3. MENÚ PARA VOLUNTARIO (PROVISIONAL) -->
+            <th:block th:if="${isVoluntario and !isAdmin and !isAdoptante}">
+                <div class="sidebar-section">
+                    <div class="sidebar-menu">
+                        <a th:href="@{/web/home}" class="sidebar-item"
+                            th:classappend="${currentUri == '/web/home' or currentUri == '/'} ? 'active' : ''">
+                            <i data-lucide="home"></i><span th:text="#{home.auto.inicio}"></span>
+                        </a>
+                        <a th:href="@{/web/animales}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/animales')} ? 'active' : ''">
+                            <i data-lucide="dog"></i><span th:text="#{home.auto.animales}"></span>
+                        </a>
+                        <a th:href="@{/web/tareas}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/tareas')} ? 'active' : ''">
+                            <i data-lucide="check-square"></i><span th:text="#{home.auto.mis.tareas}"></span>
+                        </a>
+                        <a th:href="@{/web/historiales}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/historiales')} ? 'active' : ''">
+                            <i data-lucide="stethoscope"></i><span th:text="#{home.auto.historiales}"></span>
+                        </a>
+                        <a th:href="@{/web/donaciones}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/donaciones')} ? 'active' : ''">
+                            <i data-lucide="coins"></i><span th:text="#{menu.colaborar}">Colaborar</span>
+                        </a>
+                    </div>
+                </div>
+            </th:block>
+
+            <!-- 4. MENÚ PARA PÚBLICO (NO AUTENTICADO O ROL PÚBLICO) -->
+            <th:block th:if="${!isAuthenticated or isPublico}">
+                <div class="sidebar-section">
+                    <div class="sidebar-menu">
+                        <a th:href="@{/web/home}" class="sidebar-item"
+                            th:classappend="${currentUri == '/web/home' or currentUri == '/'} ? 'active' : ''">
+                            <i data-lucide="home"></i><span th:text="#{home.auto.inicio}"></span>
+                        </a>
+                        <a th:href="@{/web/animales}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/animales')} ? 'active' : ''">
+                            <i data-lucide="dog"></i><span th:text="#{home.auto.nuestros.animales}"></span>
+                        </a>
+                        <a th:href="@{/web/voluntarios/nuevo}" class="sidebar-item"
+                            th:classappend="${currentUri == '/web/voluntarios/nuevo'} ? 'active' : ''">
+                            <i data-lucide="heart"></i><span th:text="#{home.auto.hazte.voluntario}"></span>
+                        </a>
+                        <a th:href="@{/web/donaciones}" class="sidebar-item"
+                            th:classappend="${#strings.contains(currentUri, '/web/donaciones')} ? 'active' : ''">
+                            <i data-lucide="coins"></i><span th:text="#{menu.colaborar}">Donar</span>
+                        </a>
+                    </div>
+                </div>
+            </th:block>
+
+            <!-- Languages Section -->
+            <div class="sidebar-section">
+                <div class="lang-selector-grid">
+                    <a th:href="@{${currentPage}(lang=es)}" class="lang-option"
+                        th:classappend="${#locale.language == 'es'} ? 'active' : ''">
+                        <span class="flag" th:text="#{home.auto.symbol}"></span><span th:text="#{home.auto.espanol}"></span>
+                    </a>
+                    <a th:href="@{${currentPage}(lang=en)}" class="lang-option"
+                        th:classappend="${#locale.language == 'en'} ? 'active' : ''">
+                        <span class="flag" th:text="#{home.auto.symbol.1}"></span><span th:text="#{home.auto.english}"></span>
+                    </a>
+                    <a th:href="@{${currentPage}(lang=ar)}" class="lang-option"
+                        th:classappend="${#locale.language == 'ar'} ? 'active' : ''">
+                        <span class="flag" th:text="#{home.auto.symbol.2}"></span><span th:text="#{home.auto.symbol.3}"></span>
+                    </a>
+                    <a th:href="@{${currentPage}(lang=it)}" class="lang-option"
+                        th:classappend="${#locale.language == 'it'} ? 'active' : ''">
+                        <span class="flag" th:text="#{home.auto.symbol.4}"></span><span th:text="#{home.auto.italiano}"></span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer" th:if="${isAuthenticated}">
+            <form th:action="@{/logout}" method="post" style="width: 100%;">
+                <button type="submit" class="btn-logout">
+                    <i data-lucide="log-out"></i>
+                    <span th:text="#{header.logout}">Cerrar Sesión</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+</div>
+</body>
+
+</html>

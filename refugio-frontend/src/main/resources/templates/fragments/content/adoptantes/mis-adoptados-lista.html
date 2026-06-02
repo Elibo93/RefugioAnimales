@@ -1,0 +1,123 @@
+<!-- Vista de Mis Animales Adoptados: Muestra la lista de animales que el usuario actual ha adoptado o solicitado -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="content">
+    <div class="actions-bar" style="margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1 class="page-title" style="margin: 0; font-weight: 900; font-size: 2.5rem; letter-spacing: -0.02em;" th:text="#{home.auto.mis.adoptados}"></h1>
+            <p style="color: var(--text-muted); margin: 0.5rem 0 0 0; font-size: 1.1rem;" th:text="#{generic.auto.seguimiento.en.tiempo.real.de.tus.proces}"></p>
+        </div>
+        <a th:href="@{/web/animales}" class="btn btn-primary" style="height: 52px; border-radius: 14px; padding: 0 1.5rem; display: flex; align-items: center; gap: 0.8rem; box-shadow: 0 10px 20px rgba(45, 157, 88, 0.2);">
+            <div style="background: rgba(255,255,255,0.2); width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+            </div>
+            <span style="font-weight: 700;" th:text="#{generic.auto.nueva.solicitud}"></span>
+        </a>
+    </div>
+
+    <!-- SECCIÓN 1: TUS COMPAÑEROS (ADOPTADOS) -->
+    <div class="section-container" style="margin-bottom: 4rem;" 
+         th:if="${solicitudes != null and solicitudes.?[estado.toString() == 'APROBADA'].size() > 0}">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+            <div style="background: #dcfce7; color: #166534; width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="heart" style="width: 22px; height: 22px; fill: currentColor;"></i>
+            </div>
+            <h2 style="margin: 0; font-weight: 800; font-size: 1.75rem; color: var(--text-main);" th:text="#{generic.auto.tus.companeros}"></h2>
+        </div>
+
+        <div class="solicitudes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 2rem;">
+            <th:block th:each="s : ${solicitudes}" th:if="${s.estado.toString() == 'APROBADA'}">
+                <div class="glass-card solicitud-card-premium adopted-border" 
+                     style="padding: 1.8rem; border-radius: 28px; border: 1px solid rgba(255,255,255,0.6); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; position: relative; overflow: hidden; border-left: 6px solid #10b981;"
+                     th:onclick="${s.id < 0} ? |window.location.href='/web/animales/' + ${s.animalId}| : |window.location.href='/web/solicitudes/' + ${s.id} + '/detalle'|">
+                    
+                    <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, #10b981 0%, transparent 70%); opacity: 0.1; z-index: 0;"></div>
+ 
+                    <div style="display: flex; gap: 1.8rem; align-items: flex-start; position: relative; z-index: 1;">
+                        <div class="animal-avatar" style="position: relative; flex-shrink: 0;">
+                            <img th:src="${animalesMap[s.animalId.toString()] != null ? animalesMap[s.animalId.toString()].foto : '/images/placeholder-animal.png'}"
+                                 style="width: 120px; height: 120px; object-fit: cover; border-radius: 22px; box-shadow: 0 12px 25px rgba(0,0,0,0.12); border: 4px solid white;">
+                        </div>
+ 
+                        <div class="solicitud-content" style="flex: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                                <h3 style="margin: 0; font-weight: 800; font-size: 1.4rem; color: var(--text-main);" 
+                                    th:text="${animalesMap[s.animalId.toString()]?.nombre}">Nombre</h3>
+                                <span class="status-badge badge-aprobada" style="padding: 0.5rem 0.8rem; border-radius: 12px; font-size: 0.7rem; background: #dcfce7; color: #166534; font-weight: 800;" th:text="#{generic.auto.adoptado}"></span>
+                            </div>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.2rem;" th:text="#{generic.auto.ya.forma.parte.de.tu.familia}"></p>
+                            <div style="display: flex; justify-content: flex-end;">
+                                <span style="color: var(--primary); font-weight: 800; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem;">
+                                    [[#{html.auto.ver.perfil}]] <i data-lucide="chevron-right" style="width: 18px;"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 2: SOLICITUDES EN PROCESO -->
+    <div class="section-container" th:if="${solicitudes != null and solicitudes.?[estado.toString() != 'APROBADA'].size() > 0}">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+            <div style="background: #fef3c7; color: #d97706; width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="clock" style="width: 22px; height: 22px;"></i>
+            </div>
+            <h2 style="margin: 0; font-weight: 800; font-size: 1.75rem; color: var(--text-main);" th:text="#{generic.auto.solicitudes.en.curso}"></h2>
+        </div>
+
+        <div class="solicitudes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 2rem;">
+            <th:block th:each="s : ${solicitudes}" th:if="${s.estado.toString() != 'APROBADA'}">
+                <div class="glass-card solicitud-card-premium" 
+                     style="padding: 1.8rem; border-radius: 28px; border: 1px solid rgba(255,255,255,0.6); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; position: relative; overflow: hidden;"
+                     th:onclick="${s.id < 0} ? |window.location.href='/web/animales/' + ${s.animalId}| : |window.location.href='/web/solicitudes/' + ${s.id} + '/detalle'|">
+                    
+                    <div style="display: flex; gap: 1.8rem; align-items: flex-start; position: relative; z-index: 1;">
+                        <div class="animal-avatar" style="position: relative; flex-shrink: 0;">
+                            <img th:src="${animalesMap[s.animalId.toString()] != null ? animalesMap[s.animalId.toString()].foto : '/images/placeholder-animal.png'}"
+                                 style="width: 120px; height: 120px; object-fit: cover; border-radius: 22px; box-shadow: 0 12px 25px rgba(0,0,0,0.12); border: 4px solid white;">
+                            <div style="position: absolute; bottom: -8px; right: -8px; background: white; width: 40px; height: 40px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05); z-index: 2;">
+                                <i th:data-lucide="${animalesMap[s.animalId.toString()]?.especie == 'GATO' ? 'cat' : 'dog'}" 
+                                   style="width: 22px; height: 22px; color: var(--primary);"></i>
+                            </div>
+                        </div>
+
+                        <div class="solicitud-content" style="flex: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                                <h3 style="margin: 0; font-weight: 800; font-size: 1.4rem; color: var(--text-main);" 
+                                    th:text="${animalesMap[s.animalId.toString()]?.nombre}">Nombre</h3>
+                                <span class="status-badge" th:classappend="${'badge-' + s.estado.toString().toLowerCase()}" 
+                                      style="padding: 0.5rem 0.8rem; border-radius: 12px; font-size: 0.7rem;"
+                                      th:text="#{enum.EstadoSolicitud.__${s.estado}__}">ESTADO</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.2rem;">
+                                <i data-lucide="calendar" style="width: 14px;"></i>
+                                <span>[[#{html.auto.solicitado.el}]] <strong th:text="${#strings.substring(s.fecha, 0, 10)}">2024-01-01</strong></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.05);">
+                                <span style="font-size: 0.8rem; font-weight: 700; color: #f59e0b; display: flex; align-items: center; gap: 4px;">
+                                    <div style="width: 6px; height: 6px; background: #f59e0b; border-radius: 50%; animation: pulse 2s infinite;"></div>
+                                    [[#{html.auto.en.gesti.n}]]
+                                </span>
+                                <span style="color: var(--primary); font-weight: 800; font-size: 0.85rem;">[[#{generic.auto.details}]] <i data-lucide="chevron-right" style="width: 16px;"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+        </div>
+    </div>
+
+
+
+</div>
+</body>
+
+</html>

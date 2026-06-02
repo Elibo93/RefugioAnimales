@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>[[#{html.auto.error}]]</title>
+</head>
+<body>
+    <h1>[[#{html.auto.error}]] <span th:text="${status}">500</span></h1>
+    <p th:text="${error}">[[#{html.auto.error}]] interno</p>
+    <p th:text="${message}">Detalle</p>
+    <pre th:text="${trace}"></pre>
+</body>
+</html>

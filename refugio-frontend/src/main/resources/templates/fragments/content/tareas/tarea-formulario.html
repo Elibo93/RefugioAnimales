@@ -1,0 +1,122 @@
+<!-- Vista de Formulario de Tarea: Configuración de tareas operativas con asignación dinámica de voluntarios y estados -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="content">
+<div class="page-header" style="text-align:center; margin-bottom: 2rem;">
+            <h1 class="page-title" style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+                <div class="premium-modal-icon-wrapper" style="margin: 0; width: 48px; height: 48px; background: #f3f4f6; color: #4b5563;">
+                    <i data-lucide="clipboard-list"></i>
+                </div>
+                <span th:text="${tarea.id == null ? #messages.msg('tarea.form.title') : #messages.msg('tarea.modal.edit.title')}">
+                    Crear tarea
+                </span>
+            </h1>
+            <p style="color:var(--text-muted); margin-top:0.5rem;" th:text="#{tarea.auto.configure.los.detalles.y.asigne.responsa}"></p>
+        </div>
+
+        <div class="card" style="max-width:800px; margin:0 auto;">
+            <form th:action="${tarea.id == null ? '/web/tareas/nueva' : '/web/tareas/' + tarea.id + '/editar'}"
+                method="post">
+
+                <div class="form-grid">
+                    
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label th:text="#{tarea.auto.descripcion.de.la.tarea}"></label>
+                        <input type="text" name="descripcion" th:value="${tarea.descripcion}" 
+                               th:placeholder="#{tarea.placeholder.descripcion}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label th:text="#{generic.auto.estado}"></label>
+                        <select name="estado" required>
+                            <option th:each="e : ${estados}" th:value="${e}" 
+                                th:text="#{enum.EstadoTarea.__${e}__}"
+                                th:selected="${e == tarea.estado}"></option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <span th:text="#{tarea.auto.fecha.y.hora.limite.vencimiento}"></span>
+                            <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                        </label>
+                        <input type="datetime-local" name="fechaLimite" th:value="${tarea.fechaLimite != null ? #temporals.format(tarea.fechaLimite, 'yyyy-MM-dd''T''HH:mm') : ''}">
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>
+                            <span th:text="#{tarea.auto.instrucciones.detalladas}"></span>
+                            <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                        </label>
+                        <textarea name="instrucciones" rows="3" th:placeholder="#{tarea.placeholder.instrucciones}"
+                                  th:text="${tarea.instrucciones}"></textarea>
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>
+                            <span th:text="#{tarea.auto.personal.asignado}"></span>
+                            <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                        </label>
+                        
+                        <div id="assigned-volunteers-container" class="volunteer-chips-container">
+                            <!-- Chips se insertarán aquí por JS -->
+                        </div>
+
+                        <button type="button" id="btn-show-search" class="btn-add-vol" onclick="toggleSearch(true)">
+                            <i data-lucide="plus" style="width: 14px;"></i>
+                            [[#{html.auto.asignar.voluntario}]]
+                        </button>
+
+                        <div id="search-wrapper" style="display: none; position: relative; margin-top: 15px;">
+                            <div style="position: relative;">
+                                <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; color: var(--text-muted);"></i>
+                                <input type="text" 
+                                       id="volunteer-search-input"
+                                       th:placeholder="#{generic.placeholder.buscar.usuario}" 
+                                       style="padding-left: 40px; border-radius: 12px;"
+                                       hx-get="/web/voluntarios/sugerencias"
+                                       hx-trigger="keyup[target.value.length >= 2] delay:300ms, search"
+                                       hx-include="[name='fechaLimite'], [name='voluntarioIds']"
+                                       hx-target="#volunteer-suggestions"
+                                       name="q">
+                                <button type="button" onclick="toggleSearch(false)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); border: none; background: none; color: var(--text-muted); cursor: pointer;">
+                                    <i data-lucide="x" style="width: 16px;"></i>
+                                </button>
+                            </div>
+                            <div id="volunteer-suggestions"></div>
+                        </div>
+                    </div>
+
+
+                    <script id="tarea-form-data" type="application/json" th:inline="javascript">
+                        {
+                            "voluntarioNombres": /*[[${voluntarioNombres}]]*/ {},
+                            "tareaVolIds": /*[[${tarea.voluntarioIds}]]*/ [],
+                            "preselected": /*[[${voluntarioPreseleccionado}]]*/ null
+                        }
+                    </script>
+
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" onclick="window.history.back()" class="btn-form-cancel">
+                        <i data-lucide="x" style="width: 18px;"></i>
+                        <span th:text="#{generic.auto.cancelar}"></span>
+                    </button>
+                    <button type="submit" class="btn-form-submit">
+                        <i data-lucide="save" style="width: 18px;"></i>
+                        <span th:text="${tarea.id == null ? #messages.msg('tarea.auto.crear.tarea') : #messages.msg('generic.auto.guardar.cambios')}">Crear Tarea</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

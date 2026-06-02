@@ -1,0 +1,974 @@
+databaseChangeLog:
+- changeSet:
+    id: 001-create-perfiles-legales
+    author: refugio
+    changes:
+    - createTable:
+        tableName: perfiles_legales
+        columns:
+        - column:
+            name: id
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: usuario_id
+            type: INT
+            constraints:
+              nullable: false
+              unique: true
+        - column:
+            name: nombre
+            type: VARCHAR(255)
+            constraints:
+              nullable: false
+        - column:
+            name: apellido
+            type: VARCHAR(255)
+            constraints:
+              nullable: false
+        - column:
+            name: dni
+            type: VARCHAR(20)
+            constraints:
+              nullable: false
+              unique: true
+        - column:
+            name: telefono
+            type: VARCHAR(20)
+            constraints:
+              nullable: false
+        - column:
+            name: direccion
+            type: VARCHAR(255)
+        - column:
+            name: fecha_nacimiento
+            type: VARCHAR(50)
+- changeSet:
+    id: 002-create-animales
+    author: refugio
+    changes:
+    - createTable:
+        tableName: animales
+        columns:
+        - column:
+            name: id
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: nombre
+            type: VARCHAR(255)
+            constraints:
+              nullable: false
+        - column:
+            name: especie
+            type: VARCHAR(50)
+            constraints:
+              nullable: false
+        - column:
+            name: especie_personalizada
+            type: VARCHAR(255)
+        - column:
+            name: raza
+            type: VARCHAR(255)
+            constraints:
+              nullable: false
+        - column:
+            name: sexo
+            type: VARCHAR(50)
+            constraints:
+              nullable: false
+        - column:
+            name: chip_id
+            type: VARCHAR(255)
+            constraints:
+              nullable: false
+              unique: true
+              uniqueConstraintName: uq_animales_chip_id
+        - column:
+            name: estado
+            type: VARCHAR(50)
+            constraints:
+              nullable: false
+        - column:
+            name: edad
+            type: INT
+        - column:
+            name: tamano
+            type: VARCHAR(50)
+        - column:
+            name: descripcion
+            type: VARCHAR(1000)
+        - column:
+            name: foto
+            type: LONGTEXT
+        - column:
+            name: fecha_ingreso
+            type: DATETIME
+            constraints:
+              nullable: false
+        - column:
+            name: peso
+            type: DOUBLE
+        - column:
+            name: nivel_energia
+            type: INT
+        - column:
+            name: urgencia
+            type: BIT
+            defaultValueBoolean: false
+        - column:
+            name: visitas
+            type: INT
+            defaultValueNumeric: 0
+            constraints:
+              nullable: false
+- changeSet:
+    id: 003-create-adoptantes-voluntarios
+    author: refugio
+    changes:
+    - createTable:
+        tableName: adoptantes
+        columns:
+        - column:
+            name: id
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: estado_validacion
+            type: VARCHAR(50)
+            constraints:
+              nullable: false
+        - column:
+            name: fecha_registro
+            type: DATETIME
+            constraints:
+              nullable: false
+        - column:
+            name: usuario_id
+            type: INT
+            constraints:
+              nullable: false
+              unique: true
+    - createTable:
+        tableName: voluntarios
+        columns:
+        - column:
+            name: id
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: disponibilidad
+            type: VARCHAR(500)
+            constraints:
+              nullable: false
+        - column:
+            name: usuario_id
+            type: INT
+            constraints:
+              nullable: false
+              unique: true
+        - column:
+            name: especialidad
+            type: VARCHAR(100)
+        - column:
+            name: created_at
+            type: DATETIME
+            constraints:
+              nullable: false
+- changeSet:
+    id: 004-create-operaciones-y-tareas
+    author: refugio
+    changes:
+    - createTable:
+        tableName: donaciones
+        columns:
+        - column:
+            name: id
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: usuario_id
+            type: INT
+            constraints:
+              nullable: false
+        - column:
+            name: tipo
+            type: VARCHAR(50)
+            constraints:
+              nullable: false
+        - column:
+            name: cantidad
+            type: DOUBLE
+            constraints:
+              nullable: false
+        - column:
+            name: fecha
+            type: DATETIME
+            constraints:
+              nullable: false
+        - column:
+            name: descripcion
+            type: VARCHAR(500)
+        - column:
+            name: frecuencia
+            type: VARCHAR(20)
+            defaultValue: UNICA
+        - column:
+            name: proxima_fecha_pago
+            type: DATETIME
+        - column:
+            name: objetivo_id
+            type: INT
+    - createTable:
+        tableName: historial_medicos
+        columns:
+        - column:
+            name: id
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: id_animal
+            type: INT
+            constraints:
+              nullable: false
+        - column:
+            name: fecha
+            type: DATETIME
+            constraints:
+              nullable: false
+        - column:
+            name: descripcion
+            type: VARCHAR(1000)
+            constraints:
+              nullable: false
+        - column:
+            name: tratamiento
+            type: VARCHAR(1000)
+        - column:
+            name: veterinario
+            type: VARCHAR(255)
+    - createTable:
+        tableName: tareas
+        columns:
+        - column:
+            name: id
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: descripcion
+            type: VARCHAR(500)
+            constraints:
+              nullable: false
+        - column:
+            name: fecha
+            type: DATETIME
+            constraints:
+              nullable: false
+        - column:
+            name: estado
+            type: VARCHAR(50)
+            constraints:
+              nullable: false
+        - column:
+            name: fecha_limite
+            type: DATETIME
+        - column:
+            name: instrucciones
+            type: VARCHAR(1000)
+    - createTable:
+        tableName: voluntarios_tareas
+        columns:
+        - column:
+            name: tarea_id
+            type: INT
+            constraints:
+              nullable: false
+              primaryKey: true
+        - column:
+            name: voluntario_id
+            type: INT
+            constraints:
+              nullable: false
+              primaryKey: true
+- changeSet:
+    id: 005-create-solicitudes-adopciones
+    author: refugio
+    changes:
+    - createTable:
+        tableName: solicitudes_adopcion
+        columns:
+        - column:
+            name: id
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: animal_id
+            type: INT
+            constraints:
+              nullable: false
+        - column:
+            name: adoptante_id
+            type: INT
+            constraints:
+              nullable: false
+        - column:
+            name: fecha
+            type: DATETIME
+            constraints:
+              nullable: false
+        - column:
+            name: estado
+            type: VARCHAR(50)
+            constraints:
+              nullable: false
+        - column:
+            name: comentario
+            type: VARCHAR(1000)
+    - createTable:
+        tableName: adopciones
+        columns:
+        - column:
+            name: id
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: adoptante_id
+            type: INT
+            constraints:
+              nullable: false
+        - column:
+            name: animal_id
+            type: INT
+            constraints:
+              nullable: false
+              unique: true
+        - column:
+            name: fecha_adopcion
+            type: DATETIME
+            constraints:
+              nullable: false
+        - column:
+            name: estado
+            type: VARCHAR(50)
+            constraints:
+              nullable: false
+        - column:
+            name: contrato
+            type: VARCHAR(500)
+        - column:
+            name: solicitud_adopcion_id
+            type: INT
+- changeSet:
+    id: 006-add-fks
+    author: refugio
+    changes:
+    - addForeignKeyConstraint:
+        baseTableName: historial_medicos
+        baseColumnNames: id_animal
+        referencedTableName: animales
+        referencedColumnNames: id
+        constraintName: fk_historial_animal
+        onDelete: CASCADE
+    - addForeignKeyConstraint:
+        baseTableName: solicitudes_adopcion
+        baseColumnNames: animal_id
+        referencedTableName: animales
+        referencedColumnNames: id
+        constraintName: fk_solicitudes_animal
+        onDelete: CASCADE
+    - addForeignKeyConstraint:
+        baseTableName: solicitudes_adopcion
+        baseColumnNames: adoptante_id
+        referencedTableName: adoptantes
+        referencedColumnNames: id
+        constraintName: fk_solicitudes_adoptante
+        onDelete: CASCADE
+    - addForeignKeyConstraint:
+        baseTableName: adopciones
+        baseColumnNames: adoptante_id
+        referencedTableName: adoptantes
+        referencedColumnNames: id
+        constraintName: fk_adopciones_adoptante
+        onDelete: CASCADE
+    - addForeignKeyConstraint:
+        baseTableName: adopciones
+        baseColumnNames: animal_id
+        referencedTableName: animales
+        referencedColumnNames: id
+        constraintName: fk_adopciones_animal
+        onDelete: CASCADE
+    - addForeignKeyConstraint:
+        baseTableName: adopciones
+        baseColumnNames: solicitud_adopcion_id
+        referencedTableName: solicitudes_adopcion
+        referencedColumnNames: id
+        constraintName: fk_adopciones_solicitud
+        onDelete: SET NULL
+    - addForeignKeyConstraint:
+        baseTableName: voluntarios_tareas
+        baseColumnNames: tarea_id
+        referencedTableName: tareas
+        referencedColumnNames: id
+        constraintName: fk_vt_tarea
+        onDelete: CASCADE
+    - addForeignKeyConstraint:
+        baseTableName: voluntarios_tareas
+        baseColumnNames: voluntario_id
+        referencedTableName: voluntarios
+        referencedColumnNames: id
+        constraintName: fk_vt_voluntario
+        onDelete: CASCADE
+- changeSet:
+    id: 007-create-objetivos-donacion
+    author: refugio
+    changes:
+    - createTable:
+        tableName: objetivos_donacion
+        columns:
+        - column:
+            name: id
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: titulo
+            type: VARCHAR(255)
+            constraints:
+              nullable: false
+        - column:
+            name: descripcion
+            type: TEXT
+        - column:
+            name: monto_objetivo
+            type: DOUBLE
+            constraints:
+              nullable: false
+        - column:
+            name: monto_recaudado
+            type: DOUBLE
+            defaultValueNumeric: 0.0
+        - column:
+            name: prioridad
+            type: VARCHAR(20)
+            defaultValue: MEDIA
+        - column:
+            name: estado
+            type: VARCHAR(20)
+            defaultValue: ACTIVO
+        - column:
+            name: fecha_inicio
+            type: DATETIME
+            defaultValueComputed: now()
+        - column:
+            name: fecha_limite
+            type: DATETIME
+        - column:
+            name: icono
+            type: VARCHAR(50)
+- changeSet:
+    id: 008-add-fk-donaciones-objetivo
+    author: refugio
+    changes:
+    - addForeignKeyConstraint:
+        baseTableName: donaciones
+        baseColumnNames: objetivo_id
+        referencedTableName: objetivos_donacion
+        referencedColumnNames: id
+        constraintName: fk_donaciones_objetivo
+- changeSet:
+    id: 009-create-notificaciones
+    author: refugio
+    changes:
+    - createTable:
+        tableName: notificaciones
+        columns:
+        - column:
+            name: id
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: usuario_id
+            type: INT
+            constraints:
+              nullable: false
+        - column:
+            name: titulo
+            type: VARCHAR(255)
+            constraints:
+              nullable: false
+        - column:
+            name: mensaje
+            type: TEXT
+            constraints:
+              nullable: false
+        - column:
+            name: fecha
+            type: DATETIME
+            constraints:
+              nullable: false
+        - column:
+            name: leida
+            type: BIT
+            defaultValueBoolean: false
+            constraints:
+              nullable: false
+        - column:
+            name: tipo
+            type: VARCHAR(50)
+        - column:
+            name: enlace
+            type: VARCHAR(255)
+- changeSet:
+    id: 010-add-rol-to-notificaciones-v4
+    author: refugio
+    changes:
+    - addColumn:
+        tableName: notificaciones
+        columns:
+        - column:
+            name: rol
+            type: VARCHAR(50)
+            constraints:
+              nullable: true
+    - dropNotNullConstraint:
+        tableName: notificaciones
+        columnName: usuario_id
+        columnDataType: INT
+- changeSet:
+    id: 005-add-comentario-admin-solicitud
+    author: refugio
+    changes:
+    - addColumn:
+        tableName: solicitudes_adopcion
+        columns:
+        - column:
+            name: comentario_admin
+            type: TEXT
+            remarks: Comentario o feedback dejado por el administrador sobre la solicitud
+- changeSet:
+    id: 006-create-preferencias-adopcion
+    author: refugio
+    changes:
+    - createTable:
+        tableName: preferencias_adopcion
+        columns:
+        - column:
+            name: id
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: usuario_id
+            type: INT
+            constraints:
+              nullable: false
+              unique: true
+        - column:
+            name: especies
+            type: VARCHAR(255)
+        - column:
+            name: tamanos
+            type: VARCHAR(255)
+        - column:
+            name: sexos
+            type: VARCHAR(255)
+        - column:
+            name: edad_max
+            type: INT
+        - column:
+            name: nivel_energia_max
+            type: INT
+        - column:
+            name: notificaciones_activas
+            type: BIT
+            defaultValueBoolean: true
+        - column:
+            name: created_at
+            type: DATETIME
+            constraints:
+              nullable: false
+        - column:
+            name: updated_at
+            type: DATETIME
+            constraints:
+              nullable: false
+- changeSet:
+    id: 007-refactor-preferencias-to-join-tables
+    author: refugio
+    changes:
+    - dropColumn:
+        tableName: preferencias_adopcion
+        columnName: especies
+    - dropColumn:
+        tableName: preferencias_adopcion
+        columnName: tamanos
+    - dropColumn:
+        tableName: preferencias_adopcion
+        columnName: sexos
+    - createTable:
+        tableName: preferencias_especies
+        columns:
+        - column:
+            name: preferencia_id
+            type: INT
+            constraints:
+              nullable: false
+        - column:
+            name: especie
+            type: VARCHAR(50)
+            constraints:
+              nullable: false
+    - createTable:
+        tableName: preferencias_tamanos
+        columns:
+        - column:
+            name: preferencia_id
+            type: INT
+            constraints:
+              nullable: false
+        - column:
+            name: tamano
+            type: VARCHAR(50)
+            constraints:
+              nullable: false
+    - createTable:
+        tableName: preferencias_sexos
+        columns:
+        - column:
+            name: preferencia_id
+            type: INT
+            constraints:
+              nullable: false
+        - column:
+            name: sexo
+            type: VARCHAR(50)
+            constraints:
+              nullable: false
+    - addForeignKeyConstraint:
+        baseTableName: preferencias_especies
+        baseColumnNames: preferencia_id
+        referencedTableName: preferencias_adopcion
+        referencedColumnNames: id
+        constraintName: fk_pref_especies_id
+        onDelete: CASCADE
+    - addForeignKeyConstraint:
+        baseTableName: preferencias_tamanos
+        baseColumnNames: preferencia_id
+        referencedTableName: preferencias_adopcion
+        referencedColumnNames: id
+        constraintName: fk_pref_tamanos_id
+        onDelete: CASCADE
+    - addForeignKeyConstraint:
+        baseTableName: preferencias_sexos
+        baseColumnNames: preferencia_id
+        referencedTableName: preferencias_adopcion
+        referencedColumnNames: id
+        constraintName: fk_pref_sexos_id
+        onDelete: CASCADE
+- changeSet:
+    id: 008-add-encuesta-omitida-to-preferencias
+    author: refugio
+    changes:
+    - addColumn:
+        tableName: preferencias_adopcion
+        columns:
+        - column:
+            name: encuesta_omitida
+            type: BIT
+            defaultValueBoolean: false
+- changeSet:
+    id: 009-add-notificado-vencimiento-to-tareas
+    author: refugio
+    changes:
+    - addColumn:
+        tableName: tareas
+        columns:
+        - column:
+            name: notificado_vencimiento
+            type: BIT
+            defaultValueBoolean: false
+- changeSet:
+    id: 010-add-status-to-voluntarios
+    author: refugio
+    changes:
+    - addColumn:
+        tableName: voluntarios
+        columns:
+        - column:
+            name: status
+            type: VARCHAR(20)
+            defaultValue: PENDIENTE
+            constraints:
+              nullable: false
+- changeSet:
+    id: 011-fix-existing-voluntarios-status
+    author: refugio
+    changes:
+    - update:
+        tableName: voluntarios
+        column:
+        - name: status
+          value: APROBADO
+        where: status = 'PENDIENTE'
+- changeSet:
+    id: 012-create-tarea-historial
+    author: refugio
+    changes:
+    - createTable:
+        tableName: tarea_historial
+        columns:
+        - column:
+            name: id
+            type: int
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: tarea_id
+            type: int
+            constraints:
+              nullable: false
+              foreignKeyName: fk_historial_tarea
+              referencedTableName: tareas
+              referencedColumnNames: id
+        - column:
+            name: estado_anterior
+            type: varchar(50)
+        - column:
+            name: estado_nuevo
+            type: varchar(50)
+            constraints:
+              nullable: false
+        - column:
+            name: usuario_id
+            type: int
+            constraints:
+              nullable: false
+        - column:
+            name: fecha_cambio
+            type: timestamp
+            defaultValueComputed: CURRENT_TIMESTAMP
+            constraints:
+              nullable: false
+        - column:
+            name: observaciones
+            type: varchar(255)
+- changeSet:
+    id: 20240512-013-1
+    author: refugio
+    changes:
+    - createTable:
+        tableName: gamificacion_logro
+        columns:
+        - column:
+            name: id
+            type: BIGINT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: codigo
+            type: VARCHAR(50)
+            constraints:
+              unique: true
+              nullable: false
+        - column:
+            name: nombre
+            type: VARCHAR(100)
+            constraints:
+              nullable: false
+        - column:
+            name: descripcion
+            type: VARCHAR(255)
+        - column:
+            name: categoria
+            type: VARCHAR(20)
+            constraints:
+              nullable: false
+        - column:
+            name: requisito_tipo
+            type: VARCHAR(50)
+            constraints:
+              nullable: false
+        - column:
+            name: requisito_valor
+            type: DECIMAL(10,2)
+            constraints:
+              nullable: false
+        - column:
+            name: icono_lucide
+            type: VARCHAR(50)
+        - column:
+            name: rareza
+            type: VARCHAR(20)
+            constraints:
+              nullable: false
+- changeSet:
+    id: 20240512-013-2
+    author: refugio
+    changes:
+    - createTable:
+        tableName: gamificacion_usuario_metricas
+        columns:
+        - column:
+            name: usuario_id
+            type: BIGINT
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: tareas_completadas
+            type: INT
+            defaultValueNumeric: 0
+        - column:
+            name: total_donado
+            type: DECIMAL(10,2)
+            defaultValueNumeric: 0.0
+        - column:
+            name: fecha_primer_aporte
+            type: DATETIME
+        - column:
+            name: ultima_actualizacion
+            type: DATETIME
+- changeSet:
+    id: 20240512-013-3
+    author: refugio
+    changes:
+    - createTable:
+        tableName: gamificacion_usuario_logros
+        columns:
+        - column:
+            name: usuario_id
+            type: BIGINT
+            constraints:
+              nullable: false
+        - column:
+            name: logro_id
+            type: BIGINT
+            constraints:
+              nullable: false
+        - column:
+            name: fecha_desbloqueo
+            type: DATETIME
+            constraints:
+              nullable: false
+    - addPrimaryKey:
+        tableName: gamificacion_usuario_logros
+        columnNames: usuario_id, logro_id
+- changeSet:
+    id: 016-animal-favorito-1
+    author: refugio
+    changes:
+    - createTable:
+        tableName: animal_favorito
+        columns:
+        - column:
+            name: id
+            type: int
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: usuario_id
+            type: int
+            constraints:
+              nullable: false
+        - column:
+            name: animal_id
+            type: int
+            constraints:
+              nullable: false
+              foreignKeyName: fk_animal_favorito_animal
+              references: animales(id)
+        - column:
+            name: fecha_creacion
+            type: datetime
+            defaultValueComputed: CURRENT_TIMESTAMP
+            constraints:
+              nullable: false
+- changeSet:
+    id: 016-animal-favorito-2
+    author: refugio
+    changes:
+    - addUniqueConstraint:
+        tableName: animal_favorito
+        columnNames: usuario_id, animal_id
+        constraintName: uq_animal_favorito_usuario_animal
+- changeSet:
+    id: 014-create-disponibilidad-voluntario
+    author: refugio
+    changes:
+    - createTable:
+        tableName: disponibilidad_voluntario
+        columns:
+        - column:
+            name: id
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: voluntario_id
+            type: INT
+            constraints:
+              nullable: false
+        - column:
+            name: fecha
+            type: DATE
+            constraints:
+              nullable: false
+        - column:
+            name: turno
+            type: VARCHAR(20)
+            constraints:
+              nullable: false
+        - column:
+            name: estado
+            type: VARCHAR(20)
+            constraints:
+              nullable: false
+    - addForeignKeyConstraint:
+        baseTableName: disponibilidad_voluntario
+        baseColumnNames: voluntario_id
+        referencedTableName: voluntarios
+        referencedColumnNames: id
+        constraintName: fk_disp_voluntario
+        onDelete: CASCADE

@@ -1,0 +1,26 @@
+<!-- Fragmento de Notificaciones Toast: Sistema de avisos emergentes para feedback de operaciones del sistema -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="toast">
+    <div th:if="${successMessage}" class="toast success">
+        <i data-lucide="check-circle" style="width:20px;"></i> <span th:text="${#messages.msgOrNull(successMessage) != null ? #messages.msg(successMessage) : successMessage}">Operación correcta</span>
+    </div>
+
+    <div th:if="${errorMessage}" class="toast error">
+        <i data-lucide="alert-circle" style="width:20px;"></i> <span th:text="${#messages.msgOrNull(errorMessage) != null ? #messages.msg(errorMessage) : errorMessage}">[[#{html.auto.error}]]</span>
+    </div>
+</div>
+
+<!-- Fragmento para actualizaciones OOB (Out-of-Band) con HTMX -->
+<div th:fragment="toast-oob" id="toast-container" hx-swap-oob="true">
+    <div th:replace="~{fragments/toast :: toast}"></div>
+</div>
+</body>
+
+</html>

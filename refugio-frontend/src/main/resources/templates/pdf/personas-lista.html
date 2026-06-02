@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{pdf/pdf-layout :: pdf-head-landscape(#{pdf.personas.title})}"></th:block>
+</head>
+<body>
+    <div class="watermark" th:text="#{generic.auto.adoptify}"></div>
+    <div class="header-container">
+        <div class="logo-container">
+            <span class="logo-text">[[#{html.auto.adoptify}]]<span class="logo-dot">.</span></span>
+        </div>
+        <div class="meta-container">
+            <div class="doc-title" th:text="#{pdf.personas.title}">Listado [[#{html.auto.de}]] personas</div>
+            <div class="doc-date" th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}">19/05/2026 09:00</div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+    <h1 th:text="#{pdf.personas.title}">Listado [[#{html.auto.de}]] personas</h1>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 4%;" th:text="#{pdf.column.id}">ID</th>
+                <th style="width: 10%;" th:text="#{pdf.column.username}">Username</th>
+                <th style="width: 14%;" th:text="#{pdf.column.email}">[[#{generic.auto.email}]]</th>
+                <th style="width: 10%;" th:text="#{pdf.column.name}">Nombre</th>
+                <th style="width: 11%;" th:text="#{pdf.column.surname}">Apellidos</th>
+                <th style="width: 9%;" th:text="#{pdf.column.dni}">DNI</th>
+                <th style="width: 9%;" th:text="#{pdf.column.phone}">Teléfono</th>
+                <th style="width: 8%;" th:text="#{pdf.column.role}">Rol</th>
+                <th style="width: 17%;" th:text="#{pdf.column.address}">Dirección</th>
+                <th style="width: 8%;" th:text="#{pdf.column.birthdate}">F. Nacimiento</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="a : ${personas}">
+                <td th:text="${a.id}"></td>
+                <td th:text="${a.username}"></td>
+                <td th:text="${a.email}"></td>
+                <td th:text="${a.nombre}"></td>
+                <td th:text="${a.apellido}"></td>
+                <td th:text="${a.dni}"></td>
+                <td th:text="${a.telefono}"></td>
+                <td th:text="${a.rol}"></td>
+                <td th:text="${a.direccion != null ? a.direccion : '-'}"></td>
+                <td th:text="${a.fechaNacimiento != null ? a.fechaNacimiento : '-'}"></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

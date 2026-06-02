@@ -1,0 +1,39 @@
+server:
+  port: 8761
+
+spring:
+  application:
+    name: eureka-server
+  cloud:
+    compatibility-verifier:
+      enabled: false   # Spring Boot 3.4.4 con Spring Cloud 2024.0.0 — deshabilitar verificador
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    # El servidor NO se registra a sí mismo
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+  server:
+    # No esperar a que haya otros servidores al arrancar
+    wait-time-in-ms-when-sync-empty: 0
+    # Desactivar la protección de auto-preservación en desarrollo
+    enable-self-preservation: false
+
+# Actuator - exponer endpoint de salud
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.netflix.eureka: WARN
+    com.netflix.discovery: WARN

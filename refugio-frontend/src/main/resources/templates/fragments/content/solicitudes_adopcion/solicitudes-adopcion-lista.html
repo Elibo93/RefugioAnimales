@@ -1,0 +1,284 @@
+<!-- Vista de Listado de Solicitudes: Panel administrativo para la gestión de peticiones de adopción con filtros y exportación -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <div th:fragment="content" class="fade-in">
+        <div class="table-wrapper admin-table-wrapper">
+            <div class="actions-bar" style="margin-bottom: 3.5rem; padding: 0;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div
+                        class="admin-title-icon-box">
+                        <i data-lucide="file-text" style="width: 24px;"></i>
+                    </div>
+                    <div>
+                        <h1 class="admin-title-text"
+                            th:text="#{solicitud.list.title}">[[#{solicitud.auto.adoption.requests}]]</h1>
+                        <p class="admin-title-desc" th:text="#{solicitud.auto.gestiona.solicitudes}">Gestión de solicitudes de adopción</p>
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <a th:href="@{/web/solicitudes/pdf}" target="_blank" title="Exportar listado a PDF" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/pdf.png" alt="PDF" class="admin-export-img">
+                    </a>
+                    <a th:href="@{/web/solicitudes/excel}" target="_blank" title="Exportar listado a Excel" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/excel.png" alt="Excel" class="admin-export-img">
+                    </a>
+                    <a class="btn btn-primary" th:href="@{/web/solicitudes/nueva}">
+                        <i data-lucide="plus" style="width:18px;"></i>
+                        <span th:text="#{generic.link.create}">+ Nueva solicitud</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 1: SOLICITUDES PENDIENTES (CARDS PREMIUM) -->
+            <div th:if="${not #lists.isEmpty(pendientes)}" style="margin-bottom: 4rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+                    <h2
+                        style="font-size: 1.25rem; font-weight: 900; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 12px; letter-spacing: -0.02em;">
+                        <span
+                            style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: #fff7ed; border-radius: 10px; border: 1px solid #ffedd5;">
+                            <span
+                                style="background: #f59e0b; width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);"></span>
+                        </span>
+                        [[#{solicitud.auto.pending.requests}]]
+                        <span
+                            style="font-family: inherit; background: #f59e0b; color: white; font-size: 0.75rem; font-weight: 900; padding: 2px 10px; border-radius: 8px; margin-left: 8px; vertical-align: middle; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);"
+                            th:text="${pendientes.size()}">0</span>
+                    </h2>
+                    <div
+                        style="height: 1px; flex: 1; background: linear-gradient(to right, #e2e8f0, transparent); margin-left: 2rem;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 2rem;">
+                    <div th:each="s : ${pendientes}" th:id="'card-solicitud-' + ${s.id()}"
+                        class="premium-card-interaction"
+                        style="background: white; border-radius: 28px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); overflow: hidden; display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+
+                        <!-- Header de la Card: Glassy Gradient -->
+                        <div
+                            style="padding: 1.5rem 1.75rem; background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border-bottom: 1px solid rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div
+                                    style="width: 44px; height: 44px; background: white; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid var(--border);">
+                                    <i data-lucide="clipboard-check" style="width: 20px; color: var(--primary);"></i>
+                                </div>
+                                <div>
+                                    <span
+                                        style="display: block; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;" th:text="#{adopcion.auto.referencia}"></span>
+                                    <h3
+                                        style="margin: 0; font-size: 1.05rem; font-weight: 900; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                                        <span th:text="'ID #' + ${s.id()}">#123</span>
+                                        <a th:href="@{/web/solicitudes/{id}/detalle(id=${s.id()})}"
+                                            th:hx-get="@{/web/solicitudes/{id}/detalle(id=${s.id()})}"
+                                            hx-target="#contenido-dinamico" hx-push-url="true"
+                                            style="text-decoration: none; color: var(--primary); font-size: 0.75rem; font-weight: 800; background: #f0fdf4; padding: 4px 10px; border-radius: 8px; display: flex; align-items: center; gap: 5px; transition: all 0.2s; border: 1px solid #dcfce7;"
+                                            onmouseover="this.style.background='var(--primary)'; this.style.color='white'"
+                                            onmouseout="this.style.background='#f0fdf4'; this.style.color='var(--primary)'">
+                                            <i data-lucide="eye" style="width: 14px;"></i>
+                                            [[#{solicitud.auto.see.details}]]
+                                        </a>
+                                        <a th:href="@{/web/solicitudes/{id}/editar(id=${s.id()})}"
+                                            th:hx-get="@{/web/solicitudes/{id}/editar(id=${s.id()})}"
+                                            hx-target="#contenido-dinamico" hx-push-url="true"
+                                            style="text-decoration: none; color: #4f46e5; font-size: 0.75rem; font-weight: 800; background: #e0e7ff; padding: 4px 10px; border-radius: 8px; display: flex; align-items: center; gap: 5px; transition: all 0.2s; border: 1px solid #c7d2fe;"
+                                            onmouseover="this.style.background='#4f46e5'; this.style.color='white'"
+                                            onmouseout="this.style.background='#e0e7ff'; this.style.color='#4f46e5'">
+                                            <i data-lucide="edit-3" style="width: 14px;"></i>
+                                            [[#{html.auto.editar}]]
+                                        </a>
+                                    </h3>
+                                </div>
+                            </div>
+                            <span class="badge-premium"
+                                style="padding: 6px 12px; border-radius: 10px; font-weight: 800; font-size: 0.7rem; border: none;"
+                                th:classappend="${s.estado() == 'EN_REVISION' ? 'info' : 'warning'}"
+                                th:text="${s.estado() == 'EN_REVISION' ? 'REVISIÓN' : 'NUEVA'}">[[#{solicitud.auto.new}]]</span>
+                        </div>
+
+                        <!-- Body de la Card: Clean Spacing -->
+                        <div style="padding: 1.75rem; display: flex; flex-direction: column; gap: 1.5rem;">
+                            <!-- Info Animal: Hero Style -->
+                            <div style="display: flex; align-items: center; gap: 16px;" th:with="a=${animalesMap['' + s.animalId()]}">
+                                <div style="width: 52px; height: 52px; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); flex-shrink: 0;">
+                                    <img th:src="${a != null and a.foto() != null and !a.foto().isEmpty() ? a.foto() : '/images/placeholder-animal.png'}" style="width: 100%; height: 100%; object-fit: cover;" alt="Foto animal">
+                                </div>
+                                <div style="flex: 1;">
+                                    <span
+                                        style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;" th:text="#{generic.auto.animal}"></span>
+                                    <a th:href="@{/web/animales/{id}(id=${s.animalId()})}"
+                                        style="font-weight: 900; color: var(--secondary); text-decoration: none; font-size: 1.2rem; display: block; margin-top: 2px;"
+                                        th:text="${a != null ? a.nombre() : 'Desconocido'}">Rocky</a>
+                                </div>
+                                <div
+                                    style="background: #f1f5f9; padding: 4px 8px; border-radius: 8px; font-size: 0.65rem; font-weight: 800; color: var(--text-muted);" th:text="#{adopcion.auto.ver.ficha}"></div>
+                            </div>
+
+                            <div style="height: 1px; background: #f1f5f9; width: 100%;"></div>
+
+                            <!-- Info Adoptante: Modern List Item -->
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div
+                                    style="width: 52px; height: 52px; background: #f0fdf4; color: #15803d; border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                                    <i data-lucide="user-check" style="width: 24px;"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <span
+                                        style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;" th:text="#{adopcion.auto.candidato}"></span>
+                                    <a th:href="@{/web/personas/{id}(id=${adoptanteUsuarioIds['' + s.adoptanteId()]})}"
+                                        th:hx-get="@{/web/personas/{id}(id=${adoptanteUsuarioIds['' + s.adoptanteId()]})}"
+                                        hx-target="#contenido-dinamico" hx-push-url="true"
+                                        style="font-weight: 800; color: var(--text-main); text-decoration: none; font-size: 1.1rem; display: block; margin-top: 2px;"
+                                        th:text="${adoptanteNombres['' + s.adoptanteId()]}">Juan Pérez</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Acciones de la Card: Premium Buttons -->
+                        <div
+                            style="padding: 1.5rem; background: #fcfcfd; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px;">
+                            <div style="display: flex; gap: 12px;">
+                                <button class="btn-premium primary"
+                                    style="flex: 1.5; height: 48px; font-size: 0.95rem; font-weight: 800; border-radius: 16px; background: linear-gradient(135deg, var(--primary) 0%, #166534 100%); box-shadow: 0 4px 12px rgba(22, 101, 52, 0.2); cursor: pointer; color: white; border: none;"
+                                    th:hx-post="@{/web/solicitudes/{id}/aprobar(id=${s.id()})}"
+                                    hx-target="#contenido-dinamico"
+                                    th:hx-confirm="#{confirm.solicitud.aprobar}" th:text="#{adopcion.auto.aprobar.solicitud}"></button>
+                                <button class="btn-premium secondary"
+                                    style="flex: 1; height: 48px; font-size: 0.95rem; font-weight: 800; border-radius: 16px; color: #be123c; border: 1.5px solid #fecdd3; background: white; transition: all 0.2s; cursor: pointer;"
+                                    onmouseover="this.style.background='#fff1f2'"
+                                    onmouseout="this.style.background='white'"
+                                    th:hx-post="@{/web/solicitudes/{id}/rechazar(id=${s.id()})}"
+                                    hx-target="#contenido-dinamico"
+                                    th:hx-confirm="#{confirm.solicitud.rechazar}" th:text="#{generic.auto.rechazar}"></button>
+                            </div>
+                            <button th:if="${s.estado() == 'PENDIENTE'}" class="btn-outline"
+                                style="width: 100%; height: 44px; font-size: 0.9rem; border-radius: 14px; font-weight: 700; background: white; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--text-muted); cursor: pointer; transition: all 0.2s;"
+                                onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)'"
+                                onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)'"
+                                th:hx-post="@{/web/solicitudes/{id}/revision(id=${s.id()})}"
+                                hx-target="#contenido-dinamico">
+                                <i data-lucide="eye" style="width: 18px;"></i>
+                                [[#{solicitud.auto.move.review}]]
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- fin sección pendientes -->
+
+            <!-- SECCIÓN 2: HISTORIAL Y GESTIÓN GLOBAL -->
+            <div id="solicitudes-container">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+                <h2
+                    style="font-size: 1rem; font-weight: 900; color: var(--text-muted); margin: 0; display: flex; align-items: center; gap: 12px; letter-spacing: 0.05em;">
+                    <i data-lucide="layers" style="width: 18px; opacity: 0.6;"></i>
+                    [[#{solicitud.auto.complete.history}]]
+                </h2>
+                <div
+                    style="height: 1px; flex: 1; background: linear-gradient(to right, #f1f5f9, transparent); margin-left: 2rem;">
+                </div>
+            </div>
+
+            <div class="premium-list-container">
+                <div class="list-header admin-list-header">
+                    <div style="flex: 0.5; text-align: center;" th:text="#{generic.auto.id}"></div>
+                    <div style="flex: 3;" th:text="#{adopcion.auto.animal.y.solicitante}"></div>
+                    <div style="flex: 1.2; text-align: center;" th:text="#{generic.auto.estado}"></div>
+                    <div style="flex: 2.5;" th:text="#{generic.auto.comentario}"></div>
+                    <div style="flex: 1.2; text-align: center;" th:text="#{generic.auto.fecha}"></div>
+                    <div style="flex: 2; text-align: center;" th:text="#{generic.auto.acciones}"></div>
+                </div>
+
+                <div class="list-body" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div th:each="s : ${solicitudes}" class="premium-row-card" th:id="'row-' + ${s.id()}">
+                        <div class="row-cell"
+                            style="flex: 0.5; justify-content: center; font-weight: 700; color: var(--text-muted);"
+                            th:text="${s.id()}">1</div>
+
+                        <div class="row-cell" style="flex: 3;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="task-icon-box" style="background: #f1f5f9;">
+                                    <i data-lucide="file-text" style="width: 18px; color: #64748b;"></i>
+                                </div>
+                                <div style="display: flex; flex-direction: column;">
+                                    <a th:href="@{/web/animales/{id}(id=${s.animalId()})}"
+                                        style="font-weight: 800; color: var(--secondary); text-decoration: none;"
+                                        th:with="a=${s.animalId() != null and animalesMap != null ? animalesMap['' + s.animalId()] : null}"
+                                        th:text="${a != null ? a.nombre() : 'Animal'}">Rocky</a>
+                                    <a th:href="@{/web/personas/{id}(id=${adoptanteUsuarioIds != null ? adoptanteUsuarioIds['' + s.adoptanteId()] : '0'})}"
+                                        th:hx-get="@{/web/personas/{id}(id=${adoptanteUsuarioIds != null ? adoptanteUsuarioIds['' + s.adoptanteId()] : '0'})}"
+                                        hx-target="#contenido-dinamico" hx-push-url="true"
+                                        style="font-size: 0.85rem; color: var(--text-main); font-weight: 600; text-decoration: none;"
+                                        th:with="n=${s.adoptanteId() != null and adoptanteNombres != null ? adoptanteNombres['' + s.adoptanteId()] : null}"
+                                        th:text="${'por ' + (n != null ? n : 'Anónimo')}">por Juan</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row-cell" style="flex: 1.2; justify-content: center;">
+                            <span class="badge-premium"
+                                th:classappend="${s.estado() != null ? (s.estado().toString() == 'APROBADA' ? 'success' : (s.estado().toString() == 'RECHAZADA' ? 'danger' : (s.estado().toString() == 'EN_REVISION' ? 'info' : 'warning'))) : 'warning'}"
+                                th:text="${s.estado() != null ? #messages.msg('enum.EstadoSolicitud.' + s.estado()) : #messages.msg('enum.EstadoSolicitud.PENDIENTE')}">PENDIENTE</span>
+                        </div>
+
+                        <div class="row-cell"
+                            style="flex: 2.5; color: var(--text-muted); font-size: 0.9rem; font-style: italic; border-left: 2px solid #f1f5f9; padding-left: 1rem;"
+                            th:text="${s.comentario() != null and s.comentario() != '' ? s.comentario() : 'Sin comentarios'}">
+                            Razón...</div>
+
+                        <div class="row-cell"
+                            style="flex: 1.2; justify-content: center; font-size: 0.85rem; color: var(--text-muted); font-weight: 500;"
+                            th:text="${s.fecha() != null ? s.fecha().toString().substring(0, 10) : '-'}">
+                            01/01/24</div>
+
+                        <div class="row-cell" style="flex: 2; justify-content: center; gap: 8px;">
+                            <a th:if="${solicitudToAdopcionMap != null and solicitudToAdopcionMap.containsKey(s.id().toString())}"
+                                class="btn-icon"
+                                th:href="@{/web/adopciones/{id}/contrato(id=${solicitudToAdopcionMap.get(s.id().toString())})}"
+                                title="Descargar Contrato" target="_blank" style="color: #2563eb;">
+                                <i data-lucide="file-signature" style="width: 16px;"></i>
+                            </a>
+                            <a class="btn-icon" th:href="@{/web/solicitudes/{id}/detalle(id=${s.id()})}"
+                                th:hx-get="@{/web/solicitudes/{id}/detalle(id=${s.id()})}"
+                                hx-target="#contenido-dinamico" hx-push-url="true" title="Ver Detalle">
+                                <i data-lucide="eye" style="width: 16px;"></i>
+                            </a>
+                            <a th:if="${isAdmin}" class="btn-icon" th:href="@{/web/solicitudes/{id}/editar(id=${s.id()})}"
+                                th:hx-get="@{/web/solicitudes/{id}/editar(id=${s.id()})}"
+                                hx-target="#contenido-dinamico" hx-push-url="true" title="Editar Solicitud"
+                                style="color: var(--primary);">
+                                <i data-lucide="edit-3" style="width: 16px;"></i>
+                            </a>
+                            <button th:if="${isAdmin}" class="btn-icon delete"
+                                th:hx-post="@{/web/solicitudes/{id}/borrar(id=${s.id()})}"
+                                th:hx-target="'#row-' + ${s.id()}" hx-swap="outerHTML swap:0.3s"
+                                th:hx-confirm="#{confirm.generic.eliminar}">
+                                <i data-lucide="trash-2" style="width: 16px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(solicitudes)}"
+                    style="text-align:center; padding:5rem; background:white; border-radius:24px; border:1px solid var(--border); margin-top: 1rem;">
+                    <i data-lucide="inbox"
+                        style="width:48px; height:48px; margin-bottom:1rem; color: var(--text-muted); opacity: 0.3;"></i>
+                    <p style="color: var(--text-muted); font-weight: 600;" th:text="#{solicitud.list.empty}">No hay
+                        solicitudes registradas.</p>
+                </div>
+            </div>
+
+            <!-- Paginación Universal -->
+            <div th:replace="~{fragments/pagination :: controls(pagination=${pagination}, target='#solicitudes-container', url='/web/solicitudes')}"></div>
+
+            </div><!-- fin #solicitudes-container -->
+
+        </div>
+    </div>
+</body>
+
+</html>

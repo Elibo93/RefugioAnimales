@@ -1,0 +1,186 @@
+<!-- Vista de Formulario de Persona: Registro y edición de perfiles de usuario y datos legales -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="content">
+        <!-- HEADER PREMIUM -->
+        <div class="page-header" style="text-align:center; margin-bottom: 3rem; animation: fadeInDown 0.5s ease-out;">
+            <div class="premium-modal-icon-wrapper" style="margin: 0 auto 1.5rem; width: 64px; height: 64px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e; border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(146, 64, 14, 0.1);">
+                <i data-lucide="users" style="width: 32px; height: 32px;"></i>
+            </div>
+            <h1 class="page-title" style="font-size: 2.25rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.75rem;">
+                <span th:text="${persona.id == null ? #messages.msg('persona.form.title') : #messages.msg('persona.modal.edit.title')}">Crear usuario</span>
+            </h1>
+            <p style="color:var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto;"
+                th:text="${persona.id == null ? #messages.msg('persona.form.subtitle.create') : #messages.msg('persona.form.subtitle.edit')}">
+                Complete la información del usuario
+            </p>
+        </div>
+
+        <div style="max-width: 800px; margin: 0 auto; padding-bottom: 5rem;">
+            <div class="card" style="padding: 2.5rem; border-radius: 24px; border: 1px solid var(--border); background: white; box-shadow: var(--shadow-xl);">
+                <form id="personaForm"
+                    th:action="${persona.id == null ? '/web/personas/nuevo' : '/web/personas/' + persona.id + '/editar'}"
+                    method="POST">
+                    
+                    <div class="form-section">
+                        <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="info" style="width: 18px;"></i>
+                            [[#{html.auto.informaci.n.de.la.cuenta}]]
+                        </h2>
+
+                        <!-- Username and Email Row -->
+                        <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                    <i data-lucide="user" style="width: 16px; color: #64748b;"></i>
+                                    <span th:text="#{persona.auto.nombre.de.usuario.1}"></span>
+                                </label>
+                                <input type="text" name="username" th:value="${persona.username}" required
+                                    class="form-control"
+                                    placeholder="Ej: juan_perez"
+                                    style="width: 100%; border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; transition: all 0.2s;">
+                            </div>
+
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                    <i data-lucide="mail" style="width: 16px; color: #64748b;"></i>
+                                    <span th:text="#{persona.field.email}">[[#{generic.auto.email}]]</span>
+                                </label>
+                                <input type="email" name="email" th:value="${persona.email}" required
+                                    class="form-control"
+                                    th:attr="placeholder=#{persona.placeholder.email}"
+                                    style="width: 100%; border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; transition: all 0.2s;">
+                            </div>
+                        </div>
+
+                        <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 1.5rem; margin-top: 2rem; display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="user-check" style="width: 18px;"></i>
+                            [[#{html.auto.perfil.legal.opcional}]]
+                        </h2>
+
+                        <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                    <i data-lucide="type" style="width: 16px; color: #64748b;"></i>
+                                    <span th:text="#{persona.field.name}">Nombre</span>
+                                </label>
+                                <input type="text" name="nombre" th:value="${persona.nombre}"
+                                    class="form-control"
+                                    th:attr="placeholder=#{persona.placeholder.name}"
+                                    style="width: 100%; border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; transition: all 0.2s;">
+                            </div>
+
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                    <i data-lucide="type" style="width: 16px; color: #64748b;"></i>
+                                    <span th:text="#{persona.field.surname}">Apellidos</span>
+                                </label>
+                                <input type="text" name="apellido" th:value="${persona.apellido}"
+                                    class="form-control"
+                                    th:attr="placeholder=#{persona.placeholder.surname}"
+                                    style="width: 100%; border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; transition: all 0.2s;">
+                            </div>
+                        </div>
+
+                        <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                    <i data-lucide="phone" style="width: 16px; color: #64748b;"></i>
+                                    <span th:text="#{persona.field.phone}">Teléfono</span>
+                                </label>
+                                <input type="text" name="telefono" th:value="${persona.telefono}" 
+                                    class="form-control"
+                                    th:attr="placeholder=#{persona.placeholder.phone}"
+                                    style="width: 100%; border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; transition: all 0.2s;">
+                            </div>
+
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                    <i data-lucide="credit-card" style="width: 16px; color: #64748b;"></i>
+                                    <span th:text="#{generic.auto.dni.nie}"></span>
+                                </label>
+                                <input type="text" name="dni" th:value="${persona.dni}"
+                                    class="form-control"
+                                    placeholder="12345678X"
+                                    style="width: 100%; border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; transition: all 0.2s;">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                <i data-lucide="map-pin" style="width: 16px; color: #64748b;"></i>
+                                <span th:text="#{persona.field.address}">Dirección</span>
+                                <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                            </label>
+                            <input type="text" name="direccion" th:value="${persona.direccion}"
+                                class="form-control"
+                                th:attr="placeholder=#{persona.placeholder.address}"
+                                style="width: 100%; border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; transition: all 0.2s;">
+                        </div>
+
+                        <div class="form-grid" 
+                             th:style="${isAdmin} ? 'display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;' : 'display: block; margin-bottom: 1.5rem;'">
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                    <i data-lucide="calendar" style="width: 16px; color: #64748b;"></i>
+                                    <span th:text="#{generic.auto.fecha.de.nacimiento}"></span>
+                                </label>
+                                <input type="date" name="fechaNacimiento" th:value="${persona.fechaNacimiento}"
+                                    class="form-control"
+                                    style="width: 100%; border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; transition: all 0.2s;">
+                            </div>
+
+                            <div class="form-group" th:if="${isAdmin}">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                    <i data-lucide="shield" style="width: 16px; color: #64748b;"></i>
+                                    <span th:text="#{persona.table.header.rol}">Rol</span>
+                                </label>
+                                <select name="rol" class="form-control" 
+                                    style="width: 100%; border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; transition: all 0.2s;">
+                                    <option th:each="r : ${roles}" th:value="${r}"
+                                        th:text="#{enum.Rol.__${r}__}"
+                                        th:selected="${persona.rol == r}">Rol</option>
+                                </select>
+                            </div>
+                            <input type="hidden" name="rol" th:if="${!isAdmin}" th:value="${persona.rol}">
+                        </div>
+
+                        <div class="form-grid" style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 1.5rem;" th:if="${persona.id == null}">
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                    <i data-lucide="lock" style="width: 16px; color: #64748b;"></i>
+                                    <span th:text="#{persona.field.contrasena}">Contraseña</span>
+                                </label>
+                                <input type="password" name="contrasena" required 
+                                    class="form-control"
+                                    th:attr="placeholder=#{persona.placeholder.contrasena}"
+                                    style="width:100%; border-radius: 12px; height: 48px; border: 2px solid #e2e8f0; transition: all 0.2s;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACCIONES -->
+                    <div class="form-actions">
+                        <a th:href="@{${(isAdmin and persona.id != currentUserId) ? '/web/personas' : '/web/personas/' + currentUserId}}" class="btn-form-cancel">
+                            <i data-lucide="x" style="width: 18px;"></i>
+                            <span th:text="#{generic.btn.cancel}"></span>
+                        </a>
+                        <button type="submit" class="btn-form-submit">
+                            <i data-lucide="save" style="width: 20px;"></i>
+                            <span th:text="${persona.id == null ? #messages.msg('generic.btn.create') : #messages.msg('generic.btn.save')}">Guardar usuario</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
