@@ -42,18 +42,27 @@
                     </div>
 
                     <div class="form-group">
-                        <label th:text="#{tarea.auto.fecha.y.hora.limite.vencimiento}"></label>
+                        <label>
+                            <span th:text="#{tarea.auto.fecha.y.hora.limite.vencimiento}"></span>
+                            <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                        </label>
                         <input type="datetime-local" name="fechaLimite" th:value="${tarea.fechaLimite != null ? #temporals.format(tarea.fechaLimite, 'yyyy-MM-dd''T''HH:mm') : ''}">
                     </div>
 
                     <div class="form-group" style="grid-column: 1 / -1;">
-                        <label th:text="#{tarea.auto.instrucciones.detalladas}"></label>
+                        <label>
+                            <span th:text="#{tarea.auto.instrucciones.detalladas}"></span>
+                            <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                        </label>
                         <textarea name="instrucciones" rows="3" th:placeholder="#{tarea.placeholder.instrucciones}"
                                   th:text="${tarea.instrucciones}"></textarea>
                     </div>
 
                     <div class="form-group" style="grid-column: 1 / -1;">
-                        <label th:text="#{tarea.auto.personal.asignado}"></label>
+                        <label>
+                            <span th:text="#{tarea.auto.personal.asignado}"></span>
+                            <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                        </label>
                         
                         <div id="assigned-volunteers-container" class="volunteer-chips-container">
                             <!-- Chips se insertarán aquí por JS -->

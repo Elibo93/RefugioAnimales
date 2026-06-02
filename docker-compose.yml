@@ -1,5 +1,13 @@
+version: '3.8'
+
+networks:
+  refugio_net:
+    driver: bridge
+
 services:
-  # Base de datos para el microservicio de Autenticación
+  # ==========================================
+  # BASES DE DATOS
+  # ==========================================
   db-auth:
     image: mysql:8.0
     container_name: mysql_refugio_auth
@@ -10,8 +18,14 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
       - "${DB_PORT_AUTH}:3306"
+    networks:
+      - refugio_net
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # Base de datos para el microservicio Backend (Negocio)
   db-backend:
     image: mysql:8.0
     container_name: mysql_refugio_backend
@@ -22,10 +36,125 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
       - "${DB_PORT_BACKEND}:3306"
-  # Adminer (Opcional - Interfaz web para visualizar la base de datos)
-  # adminer:
-  #   image: adminer
-  #   restart: always
-  #   ports:
-  #     - "8090:8080"
+    networks:
+      - refugio_net
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # ==========================================
+  # SERVICE DISCOVERY (EUREKA)
+  # ==========================================
+  eureka-server:
+    image: srromer0/eureka-server:v1
+    container_name: eureka_server
+    ports:
+      - "8761:8761"
+    networks:
+      - refugio_net
+    restart: always
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:8761/actuator/health" ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ==========================================
+  # MICROSERVICIOS
+  # ==========================================
+  refugio-auth:
+    image: srromer0/refugio-auth:v1
+    container_name: refugio_auth
+    ports:
+      - "8083:8083"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+      # Sobrescribimos host y puerto para conectar dentro de la red Docker
+      DB_HOST: "db-auth"
+      DB_PORT_AUTH: "3306"
+      DB_NAME_AUTH: "${DB_NAME_AUTH}"
+      DB_USER: "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      JWT_SECRET: "${JWT_SECRET}"
+      JWT_EXPIRATION: "${JWT_EXPIRATION}"
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET}"
+      REFUGIO_INTERNAL_SECRET: "${REFUGIO_INTERNAL_SECRET}"
+    networks:
+      - refugio_net
+    depends_on:
+      db-auth:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    restart: always
+
+  refugio-backend:
+    image: srromer0/refugio-backend:v1
+    container_name: refugio_backend
+    ports:
+      - "8081:8081"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+      # Sobrescribimos host y puerto para conectar dentro de la red Docker
+      DB_HOST: "db-backend"
+      DB_PORT_BACKEND: "3306"
+      DB_NAME_BACKEND: "${DB_NAME_BACKEND}"
+      DB_USER: "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      JWT_SECRET: "${JWT_SECRET}"
+      JWT_EXPIRATION: "${JWT_EXPIRATION}"
+      REFUGIO_INTERNAL_SECRET: "${REFUGIO_INTERNAL_SECRET}"
+    volumes:
+      - ./refugio-backend/uploads:/uploads
+    networks:
+      - refugio_net
+    depends_on:
+      db-backend:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    restart: always
+
+  refugio-frontend:
+    image: srromer0/refugio-frontend:v1
+    container_name: refugio_frontend
+    ports:
+      - "8082:8082"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+      JWT_SECRET: "${JWT_SECRET}"
+      JWT_EXPIRATION: "${JWT_EXPIRATION}"
+      REFUGIO_INTERNAL_SECRET: "${REFUGIO_INTERNAL_SECRET}"
+    networks:
+      - refugio_net
+    depends_on:
+      eureka-server:
+        condition: service_started
+    restart: always
+
+  # ==========================================
+  # API GATEWAY
+  # ==========================================
+  api-gateway:
+    image: srromer0/api-gateway:v1
+    container_name: api_gateway
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+    networks:
+      - refugio_net
+    depends_on:
+      eureka-server:
+        condition: service_started
+      refugio-frontend:
+        condition: service_started
+      refugio-backend:
+        condition: service_started
+      refugio-auth:
+        condition: service_started
+    restart: always

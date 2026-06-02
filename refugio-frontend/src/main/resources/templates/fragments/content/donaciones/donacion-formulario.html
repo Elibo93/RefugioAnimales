@@ -157,7 +157,10 @@
 
                         <div class="form-group" style="margin-top: 1.5rem;">
                             <label id="label-descripcion"
-                                style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);" th:text="#{donacion.auto.mensaje}"></label>
+                                style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">
+                                <span th:text="#{donacion.auto.mensaje}"></span>
+                                <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                            </label>
                             <textarea name="descripcion" id="input-descripcion"
                                 th:text="${donacion != null ? donacion.descripcion : ''}"
                                 style="width: 100%; height: 120px; padding: 1rem; border-radius: 12px; border: 2px solid #e2e8f0; font-family: inherit; font-size: 1rem;"

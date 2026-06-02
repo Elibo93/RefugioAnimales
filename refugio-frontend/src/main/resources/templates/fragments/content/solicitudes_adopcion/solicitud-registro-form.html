@@ -85,8 +85,11 @@
                         </div>
 
                         <div class="form-group">
-                            <label th:text="#{solicitud.auto.direccion.completa}"></label>
-                            <input type="text" name="direccion" required placeholder="Calle, Número, Ciudad, CP" th:value="${direccion}">
+                            <label>
+                                <span th:text="#{solicitud.auto.direccion.completa}"></span>
+                                <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                            </label>
+                            <input type="text" name="direccion" placeholder="Calle, Número, Ciudad, CP" th:value="${direccion}">
                         </div>
 
                         <div class="form-group">
@@ -95,7 +98,10 @@
                         </div>
 
                         <div class="form-group" style="margin-top: 1rem;">
-                            <label>[[#{html.auto.por.qu.quieres.adoptar.a}]] <span th:text="${animal.nombre}"></span>?</label>
+                            <label>
+                                <span>[[#{html.auto.por.qu.quieres.adoptar.a}]] <span th:text="${animal.nombre}"></span>?</span>
+                                <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                            </label>
                             <textarea name="comentario" rows="4" placeholder="Cuéntanos un poco sobre el futuro hogar del animal..." th:text="${comentario}"></textarea>
                         </div>
                     </div>

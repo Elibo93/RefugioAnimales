@@ -451,6 +451,12 @@ public class AnimalViewController {
 
         model.addAttribute("favoritosCount", animalService.countFavoritos(id));
 
+        Integer currentUserId = (Integer) model.getAttribute("currentUserId");
+        if (currentUserId != null) {
+            List<Integer> misFavoritosIds = animalService.fetchMisFavoritosIds(currentUserId);
+            model.addAttribute("misFavoritosIds", misFavoritosIds);
+        }
+
         return "fragments/content/animales/animales-detalle-modal :: detalle";
     }
 
@@ -470,6 +476,12 @@ public class AnimalViewController {
         model.addAttribute(ModelAttribute.SINGLE_Animal.getName(), animal);
 
         model.addAttribute("favoritosCount", animalService.countFavoritos(id));
+
+        Integer currentUserId = (Integer) model.getAttribute("currentUserId");
+        if (currentUserId != null) {
+            List<Integer> misFavoritosIds = animalService.fetchMisFavoritosIds(currentUserId);
+            model.addAttribute("misFavoritosIds", misFavoritosIds);
+        }
 
         model.addAttribute("historiales", historialMedicoService.fetchByAnimalId(id));
 

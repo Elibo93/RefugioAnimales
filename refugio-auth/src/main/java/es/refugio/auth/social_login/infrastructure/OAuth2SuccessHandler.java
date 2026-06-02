@@ -36,11 +36,36 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // 3. Determinar URL destino respetando el host de reenvío del Gateway
         String targetUrl = determineTargetUrl(request);
 
+        // 4. Borrar la cookie de redirección si existe
+        Cookie deleteCookie = new Cookie("redirect_uri", null);
+        deleteCookie.setPath("/");
+        deleteCookie.setMaxAge(0);
+        response.addCookie(deleteCookie);
+
         clearAuthenticationAttributes(request);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 
     private String determineTargetUrl(HttpServletRequest request) {
+        // Leer cookie de redirección guardada por el frontend
+        String redirectUri = null;
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("redirect_uri".equals(cookie.getName())) {
+                    redirectUri = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (redirectUri != null && !redirectUri.isBlank()) {
+            try {
+                return java.net.URLDecoder.decode(redirectUri, java.nio.charset.StandardCharsets.UTF_8.name());
+            } catch (java.io.UnsupportedEncodingException e) {
+                // Ignore and fall back
+            }
+        }
+
         String proto = request.getHeader("X-Forwarded-Proto");
         String host = request.getHeader("X-Forwarded-Host");
 

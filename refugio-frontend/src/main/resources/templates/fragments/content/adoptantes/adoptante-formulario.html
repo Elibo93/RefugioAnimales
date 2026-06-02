@@ -169,9 +169,10 @@
                                 <label
                                     style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
                                     <i data-lucide="map-pin" style="width: 16px; color: #64748b;"></i>
-                                    [[#{html.auto.direcci.n.completa}]]
+                                    <span th:text="#{html.auto.direcci.n.completa}">Dirección</span>
+                                    <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
                                 </label>
-                                <input type="text" name="direccion" required
+                                <input type="text" name="direccion"
                                     placeholder="Calle, Portal, Piso, Código Postal y Ciudad"
                                     th:value="${userDireccion}" class="form-control"
                                     style="width: 100%; border-radius: 12px; height: 48px;">

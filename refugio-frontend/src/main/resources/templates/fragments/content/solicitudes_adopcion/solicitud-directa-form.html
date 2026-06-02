@@ -58,7 +58,10 @@
             </div>
 
             <div class="form-group" style="grid-column: 1 / -1;">
-                <label>[[#{html.auto.por.qu.quieres.adoptar.a}]] <span th:text="${animal.nombre}"></span>?</label>
+                <label>
+                    <span>[[#{html.auto.por.qu.quieres.adoptar.a}]] <span th:text="${animal.nombre}"></span>?</span>
+                    <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                </label>
                 <textarea name="comentario" rows="4" placeholder="Cuéntanos un poco sobre por qué has elegido a este peludo..."></textarea>
             </div>
 

@@ -35,8 +35,11 @@
                     </div>
 
                     <div class="form-group">
-                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{donacion.auto.descripcion.detallada}"></label>
-                        <textarea name="descripcion" required placeholder="Explica detalladamente para qué se usará el dinero y qué impacto tendrá..." 
+                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">
+                            <span th:text="#{donacion.auto.descripcion.detallada}"></span>
+                            <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                        </label>
+                        <textarea name="descripcion" placeholder="Explica detalladamente para qué se usará el dinero y qué impacto tendrá..." 
                                   style="width: 100%; min-height: 120px; padding: 1.25rem; border-radius: 16px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; resize: vertical;"></textarea>
                     </div>
                 </div>
