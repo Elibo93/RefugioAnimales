@@ -196,6 +196,7 @@
                              <input type="hidden" name="idUsuario" th:if="${voluntario.id == null}" th:value="${targetUserId != null ? targetUserId : currentUserId}">
                              <input type="hidden" name="nombre" th:value="${userNombre}">
                              <input type="hidden" name="apellido" th:value="${userApellido}">
+                             <input type="hidden" name="email" th:value="${userEmail}">
                              <input type="hidden" name="dni" th:value="${userDni}">
                              <input type="hidden" name="telefono" th:value="${userPhone}">
                              <input type="hidden" name="direccion" th:value="${userDireccion}">
