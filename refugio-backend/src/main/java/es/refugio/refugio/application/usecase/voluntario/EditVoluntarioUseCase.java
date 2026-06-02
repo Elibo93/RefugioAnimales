@@ -21,6 +21,7 @@ public class EditVoluntarioUseCase {
         return voluntarioRepository.getById(command.id())
                 .map(voluntario -> {
                     voluntario.setDisponibilidad(command.disponibilidad());
+                    voluntario.setEspecialidad(command.especialidad());
                     return voluntarioRepository.save(voluntario);
                 })
                 .orElseThrow(() -> new VoluntarioNotFoundException(command.id().getValue()));
