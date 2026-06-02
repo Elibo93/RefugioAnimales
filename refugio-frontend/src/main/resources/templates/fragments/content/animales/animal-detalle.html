@@ -1,0 +1,422 @@
+<!-- Vista de Detalle de Animal: Información completa, salud e historia de un animal específico -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <div th:fragment="content" class="fade-in">
+
+
+        <div class="profile-header">
+            <div class="profile-cover"
+                style="height: 200px; background: linear-gradient(135deg, var(--primary-light), var(--primary)); border-radius: 20px 20px 0 0; position: relative;">
+                <div class="profile-actions"
+                    style="position: absolute; top: 20px; right: 20px; display: flex; gap: 10px;">
+                    <!-- Favorito (Solo usuarios logueados no admins) -->
+                    <div th:if="${isAuthenticated and !isAdmin}"
+                        style="background: rgba(255,255,255,0.9); border-radius: 50%; padding: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+
+
+                        <button th:if="${misFavoritosIds != null and misFavoritosIds.contains(animal.id)}" type="button"
+                            class="btn-favorito-detalle active"
+                            th:attr="hx-post=@{/web/animales/{id}/favorito(id=${animal.id})}" hx-swap="outerHTML">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="#ef4444" stroke="#ef4444" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path
+                                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                </path>
+                            </svg>
+                        </button>
+                        <button th:unless="${misFavoritosIds != null and misFavoritosIds.contains(animal.id)}"
+                            type="button" class="btn-favorito-detalle"
+                            th:attr="hx-post=@{/web/animales/{id}/favorito(id=${animal.id})}" hx-swap="outerHTML">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path
+                                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Botón Editar (Admin) -->
+                    <a th:if="${isAdmin}" th:hx-get="@{/web/animales/{id}/editar(id=${animal.id})}"
+                        hx-target="#contenido-dinamico" hx-push-url="true" class="btn btn-secondary"
+                        style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
+                        <i data-lucide="edit-3" style="width: 18px; margin-right: 8px;"></i>
+                        [[#{animal.auto.edit.file}]]
+                    </a>
+                </div>
+            </div>
+            <div class="profile-main-info"
+                style="margin-top: -60px; padding: 0 40px; display: flex; align-items: flex-end; gap: 30px;">
+                <div class="profile-avatar-wrapper" style="position: relative;">
+                    <img th:src="${animal.foto != null and !animal.foto.isEmpty() ? animal.foto : '/img/placeholder-animal.png'}"
+                        alt="Foto del animal"
+                        style="width: 180px; height: 180px; border-radius: 30px; object-fit: cover; border: 8px solid var(--bg-main); box-shadow: var(--shadow-lg);">
+                </div>
+                <div class="profile-title" style="padding-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap;">
+                        <span class="animal-status-badge"
+                            th:classappend="${animal.estado != null ? 'badge-' + animal.estado.toString().toLowerCase() : ''}"
+                            style="padding: 0 12px; height: 26px; border-radius: 99px; font-weight: 800; font-size: 0.7rem; display: inline-flex; align-items: center; justify-content: center;"
+                            th:text="${animal.estado != null ? #messages.msg('enum.EstadoAnimal.' + animal.estado) : ''}">
+                            Disponible
+                        </span>
+                        <span th:if="${animal.urgencia}"
+                            style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; font-size: 0.7rem; border-radius: 99px; font-weight: 800; background: #fee2e2; color: #ef4444; border: 1.5px solid #fca5a5; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15); animation: pulse-badge 2s infinite ease-in-out;">
+                            <i data-lucide="flame"
+                                style="width: 12px; height: 12px; fill: #ef4444; stroke-width: 2.5;"></i>
+                            <span th:text="#{animal.auto.urgente}"></span>
+                        </span>
+                    </div>
+                    <h1 th:text="${animal.nombre}"
+                        style="margin: 0; font-size: 2.5rem; color: var(--text-main); font-weight: 800; line-height: 1.1;">
+                        Nombre</h1>
+                    <p
+                        style="margin: 8px 0 0; color: var(--text-muted); font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="tag" style="width: 18px;"></i>
+                        <span th:text="${(animal.raza ?: 'Mestizo') + ' • ' + #messages.msg('enum.Especie.' + animal.especie)}">Raza • Especie</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-grid" style="display: grid; grid-template-columns: 1fr 350px; gap: 30px; padding: 40px;">
+            <!-- Columna Izquierda: Información Detallada -->
+            <div class="profile-content-col" style="display: flex; flex-direction: column; gap: 30px;">
+
+                <!-- Banner de Alerta de Adopción Urgente -->
+                <div th:if="${animal.urgencia}" class="glass-card"
+                    style="background: linear-gradient(135deg, #fff5f5 0%, #ffe3e3 100%); border: 2px solid #feb2b2; padding: 22px; border-radius: 20px; display: flex; align-items: center; gap: 20px; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.05); position: relative; overflow: hidden; animation: pulse-border 2.5s infinite ease-in-out;">
+
+                    <div
+                        style="background: #ef4444; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);">
+                        <i data-lucide="alert-triangle" style="width: 24px; height: 24px;"></i>
+                    </div>
+
+                    <div style="flex-grow: 1; z-index: 2;">
+                        <h4
+                            style="margin: 0 0 5px 0; color: #991b1b; font-weight: 800; font-size: 1.1rem; letter-spacing: -0.01em; display: flex; align-items: center; gap: 6px;">
+                            <span th:text="#{animal.auto.llamamiento.de.adopcion.urgente}"></span>
+                        </h4>
+                        <p style="margin: 0; color: #c53030; font-size: 0.95rem; font-weight: 600; line-height: 1.5;">
+                            <span th:text="${animal.nombre}">Este animal</span> [[#{html.auto.necesita.urgentemente.una.familia.de}]]
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Stats Rápidos -->
+                <div class="glass-card"
+                    style="display: grid; grid-template-columns: repeat(4, 1fr); padding: 25px; text-align: center;">
+                    <div class="stat-item">
+                        <span
+                            style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;" th:text="#{generic.auto.edad}"></span>
+                        <strong style="font-size: 1.2rem; color: var(--primary);"
+                            th:text="${(animal.edad ?: 0) + ' años'}">2 años</strong>
+                    </div>
+                    <div class="stat-item"
+                        style="border-left: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <span
+                            style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;" th:text="#{generic.auto.sexo}"></span>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <i th:if="${animal.sexo != null}"
+                                th:data-lucide="${animal.sexo.toString() == 'MACHO' ? 'mars' : 'venus'}"
+                                th:style="${animal.sexo.toString() == 'MACHO' ? 'color: #3B82F6; width: 18px; height: 18px; stroke-width: 2.5;' : 'color: #EC4899; width: 18px; height: 18px; stroke-width: 2.5;'}"></i>
+                            <strong style="font-size: 1.2rem; color: var(--primary);"
+                                th:text="${animal.sexo != null ? #messages.msg('enum.Sexo.' + animal.sexo) : '-'}">Macho</strong>
+                        </div>
+                    </div>
+                    <div class="stat-item" style="border-left: 1px solid var(--border-color);">
+                        <span
+                            style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;" th:text="#{animal.auto.peso}"></span>
+                        <strong style="font-size: 1.2rem; color: var(--primary);"
+                            th:text="${(animal.peso ?: 0) + ' kg'}">15 kg</strong>
+                    </div>
+                    <div class="stat-item" style="border-left: 1px solid var(--border-color);">
+                        <span
+                            style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;" th:text="#{generic.auto.tamano}"></span>
+                        <strong style="font-size: 1.2rem; color: var(--primary);"
+                            th:text="#{enum.Tamano.__${animal.tamano}__}">MEDIANO</strong>
+                    </div>
+                </div>
+
+                <!-- Descripción -->
+                <div class="glass-card" style="padding: 30px;">
+                    <h3 style="margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="info" style="color: var(--primary);"></i>
+                        [[#{animal.auto.history.personality}]]
+                    </h3>
+                    <p th:text="${animal.descripcion}"
+                        style="line-height: 1.7; color: var(--text-main); font-size: 1.05rem;">
+                        Descripción del animal...
+                    </p>
+                    <div style="margin-top: 25px; display: flex; gap: 15px; flex-wrap: wrap;">
+                        <div class="data-pill"
+                            style="background: var(--bg-secondary); padding: 10px 20px; border-radius: 12px; display: flex; flex-direction: column;">
+                            <span style="font-size: 0.75rem; color: var(--text-muted);" th:text="#{animal.auto.nivel.de.energia}"></span>
+                            <div style="display: flex; gap: 4px; margin-top: 5px;">
+                                <div th:each="i : ${#numbers.sequence(1, 5)}"
+                                    th:style="'width:12px; height:12px; border-radius:50%; background:' + (${i <= (animal.nivelEnergia ?: 0)} ? 'var(--primary)' : 'var(--border-color)')">
+                                </div>
+                            </div>
+                        </div>
+                        <div th:if="${isAdmin}" class="data-pill"
+                            style="background: var(--bg-secondary); padding: 10px 20px; border-radius: 12px; display: flex; flex-direction: column;">
+                            <span style="font-size: 0.75rem; color: var(--text-muted);" th:text="#{animal.auto.id.de.chip}"></span>
+                            <strong th:text="${animal.chipId}" style="margin-top: 2px;">985100012345678</strong>
+                        </div>
+                        <div class="data-pill"
+                            style="background: var(--bg-secondary); padding: 10px 20px; border-radius: 12px; display: flex; flex-direction: column;">
+                            <span style="font-size: 0.75rem; color: var(--text-muted);" th:text="#{animal.auto.fecha.de.ingreso}"></span>
+                            <strong
+                                th:text="${animal.fechaIngreso != null ? animal.fechaIngreso.toString().substring(0,10) : '-'}"
+                                style="margin-top: 2px;">2024-01-15</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historial Médico (Solo ADMIN) -->
+                <div th:if="${isAdmin}" class="glass-card" style="padding: 30px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                        <h3 style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                            <i data-lucide="activity" style="color: var(--secondary);"></i>
+                            [[#{animal.auto.medical.history}]]
+                        </h3>
+                        <a th:hx-get="@{/web/historiales/nuevo(animalId=${animal.id})}" hx-target="#contenido-dinamico" hx-push-url="true" class="btn btn-icon"
+                            title="Añadir Registro">
+                            <i data-lucide="plus"></i>
+                        </a>
+                    </div>
+                    <div th:if="${#lists.isEmpty(historiales)}"
+                        style="text-align: center; padding: 40px; color: var(--text-muted); border: 2px dashed var(--border-color); border-radius: 15px;">
+                        <i data-lucide="clipboard-list"
+                            style="width: 40px; height: 40px; opacity: 0.3; margin-bottom: 10px;"></i>
+                        <p th:text="#{animal.auto.no.hay.registros.medicos.para.este.anima}"></p>
+                    </div>
+                    <div th:if="${!#lists.isEmpty(historiales)}" class="timeline"
+                        style="position: relative; padding-left: 30px; border-left: 2px solid var(--border-color); margin-left: 10px;">
+                        <div th:each="h : ${historiales}" class="timeline-item"
+                            style="margin-bottom: 25px; position: relative;">
+                            <div
+                                style="position: absolute; left: -39px; top: 5px; width: 16px; height: 16px; border-radius: 50%; background: var(--secondary); border: 4px solid var(--bg-main);">
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <strong
+                                        th:text="${h.descripcion != null ? #strings.abbreviate(h.descripcion, 40) : 'Consulta Médica'}"
+                                        style="color: var(--text-main);">Diagnóstico</strong>
+                                    <a th:hx-get="@{/web/historiales/{id}/detalle(id=${h.id})}"
+                                        hx-target="#contenido-dinamico" hx-push-url="true"
+                                        hx-swap="innerHTML show:window:top" class="btn-icon-sm"
+                                        title="Ver Informe Completo"
+                                        style="width: 24px; height: 24px; border-radius: 6px; background: rgba(var(--secondary-rgb), 0.1); color: var(--secondary); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                        <i data-lucide="eye" style="width: 14px;"></i>
+                                    </a>
+                                </div>
+                                <span th:text="${h.fecha != null ? h.fecha.toString().substring(0,10) : '-'}"
+                                    style="font-size: 0.85rem; color: var(--text-muted);">Fecha</span>
+                            </div>
+                            <p th:text="${h.tratamiento}"
+                                style="margin: 5px 0 0; font-size: 0.9rem; color: var(--text-muted);">Tratamiento...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Métricas y Adoptante -->
+            <div class="profile-sidebar-col" style="display: flex; flex-direction: column; gap: 30px;">
+
+                <!-- Métricas de Popularidad (Solo ADMIN) -->
+                <div th:if="${isAdmin}" class="glass-card"
+                    style="padding: 25px; background: linear-gradient(to bottom right, var(--bg-secondary), var(--bg-main));">
+                    <h4
+                        style="margin: 0 0 20px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);" th:text="#{animal.auto.popularidad}"></h4>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div
+                            style="width: 60px; height: 60px; border-radius: 15px; background: rgba(var(--secondary-rgb), 0.1); display: flex; align-items: center; justify-content: center;">
+                            <i data-lucide="eye" style="color: var(--secondary); width: 30px; height: 30px;"></i>
+                        </div>
+                        <div>
+                            <span
+                                style="display: block; font-size: 2rem; font-weight: 800; color: var(--text-main); line-height: 1;"
+                                th:text="${animal.visitas != null ? animal.visitas : 0}">0</span>
+                            <span style="font-size: 0.85rem; color: var(--text-muted);" th:text="#{animal.auto.visitas.al.perfil}"></span>
+                        </div>
+                    </div>
+                    <div
+                        style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between;">
+                        <div style="text-align: center;">
+                            <span
+                                style="display: block; font-size: 0.75rem; color: var(--text-muted);" th:text="#{animal.auto.solicitudes}"></span>
+                            <strong
+                                th:text="${animal.conteoSolicitudes != null ? animal.conteoSolicitudes : 0}">0</strong>
+                        </div>
+                        <div style="text-align: center;">
+                            <span style="display: block; font-size: 0.75rem; color: var(--text-muted);" th:text="#{animal.auto.favoritos}"></span>
+                            <strong
+                                style="color: #ec4899; display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 2px;">
+                                <i data-lucide="heart" style="width: 14px; fill: #ec4899;"></i>
+                                <span th:text="${favoritosCount != null ? favoritosCount : 0}">0</span>
+                            </strong>
+                        </div>
+                        <div style="text-align: center;">
+                            <span style="display: block; font-size: 0.75rem; color: var(--text-muted);" th:text="#{generic.auto.estado}"></span>
+                            <span class="badge-soon success" style="font-size: 0.65rem;" th:text="#{animal.auto.excelente}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información del Adoptante (Solo ADMIN) -->
+                <div th:if="${isAdmin and adoptante != null}" class="glass-card"
+                    style="padding: 25px; border: 2px solid var(--primary-light);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                        <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--primary);"></div>
+                        <h4
+                            style="margin: 0; font-size: 0.9rem; text-transform: uppercase; color: var(--primary); letter-spacing: 1px;" th:text="#{animal.auto.adoptado.por}"></h4>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div
+                            style="width: 50px; height: 50px; border-radius: 50%; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--primary);">
+                            <i data-lucide="user"></i>
+                        </div>
+                        <div>
+                            <a th:href="@{/web/personas/{id}(id=${adoptante.usuarioId})}"
+                                style="display: block; font-weight: 700; color: var(--text-main); text-decoration: none; font-size: 1.1rem; line-height: 1.2;">
+                                <span
+                                    th:text="${adoptante.nombre != null ? (adoptante.nombre + ' ' + (adoptante.apellido ?: '')) : 'Adoptante'}">Adoptante</span>
+                                <i data-lucide="external-link" style="width: 14px; margin-left: 4px; opacity: 0.5;"></i>
+                            </a>
+                            <span style="font-size: 0.85rem; color: var(--text-muted);"
+                                th:text="${'Desde ' + (adopcion.fechaAdopcion != null ? adopcion.fechaAdopcion.toString().substring(0,10) : '-')}">Desde
+                                2024-02-01</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px; background: var(--bg-secondary); padding: 15px; border-radius: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                            <i data-lucide="phone" style="width: 14px; color: var(--text-muted);"></i>
+                            <span style="font-size: 0.85rem;"
+                                th:text="${adoptante.telefono ?: 'Sin teléfono'}">Teléfono</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <i data-lucide="map-pin" style="width: 14px; color: var(--text-muted);"></i>
+                            <span style="font-size: 0.85rem;"
+                                th:text="${adoptante.direccion ?: 'Sin dirección'}">Dirección</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción Extra -->
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- 1. Botón para Administrador -->
+                    <a th:if="${isAdmin and (animal.estado == 'DISPONIBLE' or animal.estado == 'EN_TRATAMIENTO')}"
+                        th:hx-get="@{/web/solicitudes/nueva(animalId=${animal.id})}" hx-target="#contenido-dinamico"
+                        hx-push-url="true" class="btn btn-primary"
+                        style="width: 100%; justify-content: center; height: 56px; border-radius: 16px;">
+                        <i data-lucide="heart" style="width: 18px; margin-right: 8px;"></i>
+                        [[#{animal.auto.register.adoption}]]
+                    </a>
+
+                    <!-- 2. Flujo para Usuario Público / Adoptante (Solo si NO es Admin) -->
+                    <div th:if="${!isAdmin and (animal.estado == 'DISPONIBLE' or animal.estado == 'EN_TRATAMIENTO')}"
+                        style="width: 100%;">
+
+                        <!-- Caso A: Ya ha solicitado este animal -->
+                        <div th:if="${animalesSolicitadosIds.contains(animal.id)}"
+                            style="background: rgba(45, 157, 88, 0.1); color: #2d9d58; padding: 1.2rem; border-radius: 16px; border: 1px dashed #2d9d58; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center; margin-bottom: 1rem;">
+                            <i data-lucide="check-circle" style="width: 24px; height: 24px;"></i>
+                            <div style="font-weight: 700; font-size: 1rem;" th:text="#{animal.auto.solicitud.enviada}"></div>
+                            <p style="font-size: 0.85rem; margin: 0; opacity: 0.8;">[[#{html.auto.estamos.revisando.tu.inter.s}]]
+                                <span th:text="${animal.nombre}"></span>[[#{html.auto.pronto.contactaremos.contigo}]]
+                            </p>
+                        </div>
+
+                        <!-- Caso B: No ha solicitado aún -->
+                        <div th:if="${!animalesSolicitadosIds.contains(animal.id)}">
+
+                            <!-- No Autenticado -->
+                            <div th:if="${!isAuthenticated}">
+                                <a th:href="@{/web/solicitudes/publico/opciones(animalId=${animal.id})}"
+                                    class="btn btn-primary"
+                                    style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
+                                    <i data-lucide="heart"></i>
+                                    <span th:text="#{animal.auto.adopta.ahora}"></span>
+                                </a>
+                            </div>
+
+                            <!-- Autenticado (No Adoptante aún) -->
+                            <div th:if="${isAuthenticated and !isAdoptante}">
+                                <a th:href="@{/web/solicitudes/publico/convertir(animalId=${animal.id})}"
+                                    class="btn btn-primary"
+                                    style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
+                                    <i data-lucide="heart"></i>
+                                    <span th:text="#{animal.auto.quiero.adoptar}"></span>
+                                </a>
+                            </div>
+
+                            <!-- Autenticado (Ya es Adoptante) -->
+                            <div th:if="${isAuthenticated and isAdoptante}">
+                                <a th:href="@{/web/solicitudes/publico/directa/formulario(animalId=${animal.id})}"
+                                    class="btn btn-primary"
+                                    style="width: 100%; justify-content: center; height: 56px; font-size: 1.1rem; border-radius: 16px;">
+                                    <i data-lucide="heart-handshake"></i>
+                                    <span th:text="#{animal.auto.solicitar.adopcion}"></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="share-container" style="position: relative; width: 100%;">
+                        <button class="btn btn-secondary" style="width: 100%; justify-content: center;"
+                            th:data-nombre="${animal.nombre}"
+                            onclick="toggleShareMenu(event, this.getAttribute('data-nombre'))">
+                            <i data-lucide="share-2" style="width: 18px; margin-right: 8px;"></i>
+                            [[#{html.auto.compartir.perfil}]]
+                        </button>
+
+                        <!-- Menú de Compartir Premium -->
+                        <div id="share-dropdown-menu" class="glass-card"
+                            style="display: none; position: absolute; bottom: 100%; left: 0; width: 100%; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 16px; padding: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); z-index: 1000; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); flex-direction: column; gap: 8px;">
+
+                            <a id="share-wa" target="_blank" href="#" class="share-option-btn"
+                                style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.95rem; transition: all 0.2s ease;">
+                                <img src="/images/whatsapp.png" width="30" height="30"
+                                    style="width: 20px; height: 20px; object-fit: contain; flex-shrink: 0;"
+                                    alt="WhatsApp" />
+                                <span th:text="#{animal.auto.whatsapp}"></span>
+                            </a>
+
+                            <a id="share-fb" target="_blank" href="#" class="share-option-btn"
+                                style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.95rem; transition: all 0.2s ease;">
+                                <img src="/images/facebook-icon.png" width="20" height="20"
+                                    style="object-fit: contain; flex-shrink: 0;" alt="Facebook" />
+                                <span th:text="#{animal.auto.facebook}"></span>
+                            </a>
+
+                            <a id="share-x" target="_blank" href="#" class="share-option-btn"
+                                style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.95rem; transition: all 0.2s ease;">
+                                <img src="/images/x-con.png" width="20" height="20"
+                                    style="object-fit: contain; flex-shrink: 0;" alt="X" />
+                                <span th:text="#{animal.auto.x.twitter}"></span>
+                            </a>
+
+                            <a id="share-mail" target="_blank" href="#" class="share-option-btn"
+                                style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.95rem; transition: all 0.2s ease;">
+                                <i data-lucide="mail"
+                                    style="width: 20px; height: 20px; color: #EA4335; flex-shrink: 0;"></i>
+                                <span th:text="#{generic.auto.correo.electronico}"></span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

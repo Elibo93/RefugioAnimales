@@ -1,0 +1,40 @@
+<!-- Fragmento de Consentimiento de Cookies: Banner interactivo para la gestión de privacidad y cumplimiento de RGPD -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="cookie-consent" id="cookie-banner" class="cookie-consent-wrapper" style="display: none;">
+    <div class="cookie-consent-card">
+        <div class="cookie-header">
+            <div class="cookie-icon-wrapper">
+                <i data-lucide="cookie" class="cookie-icon"></i>
+            </div>
+            <div class="cookie-text">
+                <h3 th:text="#{generic.auto.tu.privacidad.nos.importa}"></h3>
+                <p th:text="#{generic.auto.utilizamos.cookies.propias.y.de.terceros}"></p>
+            </div>
+        </div>
+        
+        <div class="cookie-actions">
+            <button onclick="acceptCookies('all')" class="btn-cookie accept" th:text="#{generic.auto.aceptar.todas}"></button>
+            <button onclick="acceptCookies('necessary')" class="btn-cookie necessary" th:text="#{generic.auto.solo.necesarias}"></button>
+            <button onclick="toggleCookieSettings()" class="btn-cookie settings" th:text="#{generic.auto.configurar}"></button>
+        </div>
+        
+        <div class="cookie-footer">
+            <p>[[#{html.auto.para.m.s.informaci.n}]] <a href="/web/privacidad" th:text="#{generic.auto.politica.de.privacidad}"></a>.</p>
+        </div>
+    </div>
+
+
+
+
+
+</div>
+</body>
+
+</html>

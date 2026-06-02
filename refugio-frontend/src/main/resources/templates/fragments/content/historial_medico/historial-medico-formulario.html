@@ -1,0 +1,138 @@
+<!-- Vista de Formulario Médico: Registro técnico de visitas veterinarias y evoluciones clínicas -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <div th:fragment="content">
+        <!-- Cabecera Premium -->
+        <div class="page-header" style="text-align:center; margin-bottom: 3rem;">
+            <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: #fee2e2; color: #ef4444; border-radius: 20px; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm);">
+                <i data-lucide="stethoscope" style="width: 32px; height: 32px;"></i>
+            </div>
+            <h1 style="font-weight: 800; color: var(--text-main); font-size: 2.25rem; margin-bottom: 0.5rem; letter-spacing: -0.02em;">
+                <span th:text="${historial.id == null ? #messages.msg('historial.form.title') : #messages.msg('historial.modal.edit.title')}">
+                    Registro Médico
+                </span>
+            </h1>
+            <p style="color:var(--text-muted); font-size: 1.1rem;" th:text="#{historial.auto.documenta.la.visita.veterinaria.y.el.est}"></p>
+        </div>
+
+        <div style="max-width: 850px; margin: 0 auto; background: white; border-radius: 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; overflow: hidden;">
+            <form th:action="${historial.id == null ? '/web/historiales/nuevo' : '/web/historiales/' + historial.id + '/editar'}"
+                  method="post" style="padding: 3rem;">
+
+                <!-- SECCIÓN 1: ANIMAL Y VISITA -->
+                <div style="margin-bottom: 3rem;">
+                    <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; color: #ef4444; margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; font-weight: 800;">
+                        <i data-lucide="paw-print" style="width: 20px;"></i>
+                        [[#{html.auto.animal.y.visita}]]
+                    </h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                         <!-- Buscador de Animal (Estilo Adopción) -->
+                        <div style="grid-column: 1 / -1;">
+                            <div th:if="${historial.id == null}" style="position: relative;">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">
+                                    <i data-lucide="search" style="width: 18px; color: #ef4444;"></i>
+                                    [[#{html.auto.buscar.animal}]]
+                                </label>
+                                <div style="position: relative;">
+                                    <input type="text" id="animal-search" 
+                                            name="animal_q"
+                                            placeholder="Escribe el nombre del animal..." 
+                                            autocomplete="off"
+                                            hx-get="/web/animales/buscar"
+                                            hx-trigger="keyup changed delay:300ms, focus"
+                                            hx-target="#animal-suggestions"
+                                            style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; transition: all 0.3s; outline: none;">
+                                </div>
+                                <div id="animal-suggestions" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 100;"></div>
+                            </div>
+                            <!-- Input oculto de animalId, fuera del th:if para que siempre se envíe en POST -->
+                            <input type="hidden" name="animalId" id="animalId-input" required th:value="${historial.animalId}">
+
+                            <!-- Card de Animal Seleccionado -->
+                            <div id="selected-animal-card" 
+                                 th:style="${historial.id != null ? 'display: flex;' : 'display: none;'} + ' margin-top: 1rem; padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; align-items: center; gap: 1.25rem; box-shadow: var(--shadow-sm);'">
+                                <div style="width: 52px; height: 52px; border-radius: 12px; overflow: hidden; background: white; border: 1px solid #e2e8f0; flex-shrink: 0;">
+                                    <img id="selected-animal-img" th:src="${animalData != null ? animalData.foto : ''}" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                                <div style="flex: 1;">
+                                    <strong id="selected-animal-name" th:text="${animalData != null ? animalData.nombre : ''}" style="display: block; font-size: 1.1rem; color: var(--text-main);"></strong>
+                                    <span id="selected-animal-species" th:text="${animalData != null ? #messages.msg('enum.Especie.' + animalData.especie) : ''}" style="font-size: 0.85rem; color: #64748b;"></span>
+                                </div>
+                                <button type="button" onclick="clearAnimalSelection()" th:if="${historial.id == null}" style="background: #fee2e2; border: none; color: #ef4444; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                    <i data-lucide="x" style="width: 18px;"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Veterinario -->
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">
+                                <span th:text="#{historial.field.veterinario}">Veterinario responsable</span>
+                                <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                            </label>
+                            <input type="text" name="veterinario" th:value="${historial.veterinario}" placeholder="Nombre del profesional"
+                                   style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; transition: all 0.3s;">
+                        </div>
+
+                        <!-- Fecha -->
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{historial.auto.fecha.y.hora}"></label>
+                            <input type="datetime-local" name="fecha" required
+                                   th:value="${historial.fecha != null ? #strings.substring(historial.fecha.toString(), 0, 16) : #calendars.format(#calendars.createNow(), 'yyyy-MM-dd''T''HH:mm')}"
+                                   style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: DETALLES CLÍNICOS -->
+                <div style="padding-top: 2rem; border-top: 1px solid #f1f5f9;">
+                    <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; color: #ef4444; margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; font-weight: 800;">
+                        <i data-lucide="clipboard-list" style="width: 20px;"></i>
+                        [[#{html.auto.detalles.cl.nicos}]]
+                    </h2>
+
+                    <!-- Descripción -->
+                    <div style="margin-bottom: 2rem;">
+                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;" th:text="#{historial.field.descripcion}">Motivo [[#{html.auto.de}]] la consulta / Diagnóstico</label>
+                        <textarea name="descripcion" th:text="${historial.descripcion}" required 
+                                  placeholder="Describe los síntomas observados o el diagnóstico realizado..."
+                                  style="width: 100%; min-height: 120px; padding: 1.25rem; border-radius: 18px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; resize: vertical; transition: all 0.3s;"></textarea>
+                    </div>
+
+                    <!-- Tratamiento -->
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); font-size: 0.9rem;">
+                            <span th:text="#{historial.field.tratamiento}">Tratamiento prescrito</span>
+                            <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                        </label>
+                        <textarea name="tratamiento" th:text="${historial.tratamiento}" 
+                                  placeholder="Medicación, dosis, recomendaciones o próximas revisiones..."
+                                  style="width: 100%; min-height: 120px; padding: 1.25rem; border-radius: 18px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; resize: vertical; transition: all 0.3s;"></textarea>
+                    </div>
+                </div>
+
+                <!-- ACCIONES -->
+                <div class="form-actions" style="--btn-color: #ef4444; --btn-hover: #dc2626; --btn-shadow: rgba(239, 68, 68, 0.2);">
+                    <button type="button" class="btn-form-cancel" onclick="window.history.back()">
+                        <i data-lucide="x" style="width: 18px;"></i>
+                        <span th:text="#{generic.auto.cancelar}"></span>
+                    </button>
+                    <button type="submit" class="btn-form-submit">
+                        <i data-lucide="save" style="width: 20px;"></i>
+                        [[#{html.auto.guardar.registro}]]
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</body>
+
+</html>

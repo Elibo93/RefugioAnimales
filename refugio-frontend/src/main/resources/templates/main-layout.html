@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+
+<head th:replace="~{fragments/head :: head(#{app.name})}">
+    <title>Refugio</title>
+</head>
+
+<body class="bg-dots">
+    <div th:replace="~{fragments/sidebar :: sidebar(${currentUri})}"></div>
+    <header th:replace="~{fragments/header :: header(${currentUri}, ${currentUri != '/web/home' and currentUri != '/web/home/' and currentUri != '/'})}"></header>
+
+    <div id="toast-container" th:replace="~{fragments/toast :: toast}"></div>
+
+    <main id="contenido-dinamico" hx-history-elt style="padding-bottom: 60px;">
+        <div th:replace="~{${content} :: content}" th:text="#{generic.auto.contenido.principal}"></div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    <div id="modal-host"></div>
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    <div th:replace="~{fragments/cookie-consent :: cookie-consent}"></div>
+
+</body>
+
+</html>
+
+
+
+

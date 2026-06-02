@@ -1,0 +1,196 @@
+<!-- Vista de Formulario de Solicitud: Registro administrativo de nuevas peticiones de adopción con buscador de animal y usuario -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="content">
+        <!-- HEADER PREMIUM -->
+        <div class="page-header" style="text-align:center; margin-bottom: 3rem; animation: fadeInDown 0.5s ease-out;">
+            <div class="premium-modal-icon-wrapper" style="margin: 0 auto 1.5rem; width: 64px; height: 64px; background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); color: #ea580c; border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(234, 88, 12, 0.1);">
+                <i data-lucide="file-text" style="width: 32px; height: 32px;"></i>
+            </div>
+            <h1 class="page-title" style="font-size: 2.25rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.75rem;">
+                <span th:text="${solicitud.id == null ? #messages.msg('solicitud.form.title') : #messages.msg('solicitud.modal.edit.title')}">Nueva solicitud</span>
+            </h1>
+            <p style="color:var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto;" th:text="#{adopcion.auto.gestion.avanzada.de.solicitudes.de.adopc}"></p>
+        </div>
+
+        <div style="max-width: 800px; margin: 0 auto; padding-bottom: 5rem;">
+            <div class="card" style="padding: 2.5rem; border-radius: 24px; border: 1px solid var(--border); background: white; box-shadow: var(--shadow-xl);">
+                <form id="solicitudForm"
+                    th:action="${solicitud.id == null ? '/web/solicitudes/nueva' : '/web/solicitudes/' + solicitud.id + '/editar'}"
+                    method="post" th:object="${solicitud}">
+                    
+                    <!-- SECCIÓN 1: ANIMAL -->
+                    <div class="form-section" style="margin-bottom: 2.5rem;">
+                        <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="paw-print" style="width: 18px;"></i>
+                            [[#{html.auto.animal.para.adoptar}]]
+                        </h2>
+
+                        <!-- Vista Edición / Lectura -->
+                        <div th:if="${solicitud.id != null}" style="padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.25rem;">
+                            <div style="width: 56px; height: 56px; border-radius: 14px; overflow: hidden; background: white; border: 1px solid #e2e8f0; flex-shrink: 0;">
+                                <img th:if="${animalData != null and animalData.foto != null}" 
+                                     th:src="${animalData.foto}" 
+                                     style="width: 100%; height: 100%; object-fit: cover;">
+                                <div th:if="${animalData == null or animalData.foto == null}" 
+                                     style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #f1f5f9;">
+                                    <i data-lucide="paw-print" style="width: 24px; color: #94a3b8;"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 th:text="${animalData != null ? animalData.nombre : 'Animal'}" style="margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--text-main);"></h3>
+                                <span th:text="${animalData != null ? animalData.especie : ''}" style="font-size: 0.85rem; color: #64748b; font-weight: 500;"></span>
+                            </div>
+                            <input type="hidden" name="animalId" th:value="${solicitud.animalId}">
+                        </div>
+
+                        <!-- Vista Creación: Buscador -->
+                        <div th:if="${solicitud.id == null}" style="position: relative;">
+                            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">
+                                <i data-lucide="search" style="width: 18px; color: var(--primary);"></i>
+                                [[#{html.auto.buscar.animal}]]
+                            </label>
+                            <div style="position: relative;">
+                                <input type="text" id="animal-search" 
+                                        name="animal_q"
+                                        class="form-control"
+                                        placeholder="Nombre del animal..." 
+                                        autocomplete="off"
+                                        hx-get="/web/animales/buscar"
+                                        hx-trigger="keyup changed delay:300ms, focus"
+                                        hx-target="#animal-suggestions"
+                                        th:value="${animalData != null ? animalData.nombre : ''}"
+                                        style="width: 100%; height: 54px; padding-left: 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; transition: all 0.3s;">
+                                <input type="hidden" name="animalId" id="animalId-input" required th:value="${solicitud.animalId}">
+                            </div>
+                            <div id="animal-suggestions" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 100;"></div>
+                            
+                            <!-- Card de previsualización (Oculto inicialmente) -->
+                            <div id="selected-animal-card" 
+                                 th:style="${animalData != null ? 'display: flex; margin-top: 2rem; padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; align-items: center; gap: 1.25rem; box-shadow: var(--shadow-sm);' : 'display: none; margin-top: 2rem; padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; align-items: center; gap: 1.25rem; box-shadow: var(--shadow-sm);'}">
+                                <div style="width: 52px; height: 52px; border-radius: 12px; overflow: hidden; background: white; border: 1px solid #e2e8f0; flex-shrink: 0;">
+                                    <img id="selected-animal-img" th:src="${animalData != null and animalData.foto != null ? animalData.foto : '/images/placeholder-animal.png'}" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                                <div style="flex: 1;">
+                                    <strong id="selected-animal-name" style="display: block; font-size: 1.1rem; color: var(--text-main);" th:text="${animalData != null ? animalData.nombre : ''}"></strong>
+                                    <span id="selected-animal-species" style="font-size: 0.85rem; color: #64748b;" th:text="${animalData != null ? animalData.especie : ''}"></span>
+                                </div>
+                                <button type="button" onclick="clearAnimalSelection()" style="background: #fee2e2; border: none; color: #ef4444; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                    <i data-lucide="x" style="width: 18px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 2rem 0;">
+
+                    <!-- SECCIÓN 2: SOLICITANTE -->
+                    <div class="form-section" style="margin-bottom: 2.5rem;">
+                        <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="user" style="width: 18px;"></i>
+                            [[#{html.auto.informaci.n.del.solicitante}]]
+                        </h2>
+
+                        <!-- Vista Edición -->
+                        <div th:if="${solicitud.id != null}" style="padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.25rem;">
+                            <div style="background: white; color: var(--primary); width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0;">
+                                <i data-lucide="user" style="width: 24px;"></i>
+                            </div>
+                            <div>
+                                <h3 th:text="${nombreAdoptante}" style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--text-main);"></h3>
+                                <span style="font-size: 0.85rem; color: #64748b;" th:text="#{solicitud.role.adoptante}">Adoptante</span>
+                            </div>
+                            <input type="hidden" name="adoptanteId" th:value="${solicitud.adoptanteId}">
+                        </div>
+
+                        <!-- Vista Creación: Buscador -->
+                        <div th:if="${solicitud.id == null}" style="position: relative;">
+                            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">
+                                <i data-lucide="search" style="width: 18px; color: var(--primary);"></i>
+                                [[#{html.auto.buscar.persona.registrada}]]
+                            </label>
+                            <div style="position: relative;">
+                                <input type="text" id="user-search" 
+                                        name="q"
+                                        class="form-control"
+                                        placeholder="Nombre, email o ID..." 
+                                        th:value="${nombreAdoptante}"
+                                        autocomplete="off"
+                                        hx-get="/web/personas/buscar?context=solicitud"
+                                        hx-trigger="keyup changed delay:300ms, focus"
+                                        hx-target="#user-suggestions"
+                                        style="width: 100%; height: 54px; padding-left: 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; transition: all 0.3s;">
+                                <input type="hidden" name="adoptanteId" id="usuarioId-input" required th:value="${solicitud.adoptanteId}">
+                            </div>
+                            <div id="user-suggestions" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 100;"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <div class="form-group" sec:authorize="hasRole('ADMIN')">
+                            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                <i data-lucide="activity" style="width: 16px; color: #64748b;"></i>
+                                <span th:text="#{solicitud.field.estado}">Estado [[#{html.auto.de}]] la Solicitud</span>
+                            </label>
+                            <select name="estado" required class="form-control" style="border-radius: 12px; height: 48px; border: 2px solid #e2e8f0;">
+                                <option th:each="e : ${estados}" 
+                                        th:value="${e}" 
+                                        th:text="#{enum.EstadoSolicitud.__${e}__}"
+                                        th:selected="${e == solicitud.estado}"></option>
+                            </select>
+                        </div>
+                        <input type="hidden" name="estado"
+                            th:value="${solicitud.estado != null ? solicitud.estado : 'PENDIENTE'}"
+                            sec:authorize="!hasRole('ADMIN')">
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                <i data-lucide="message-circle" style="width: 16px; color: #64748b;"></i>
+                                <span th:text="#{solicitud.field.comentario}">Comentarios Adicionales</span>
+                                <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                            </label>
+                            <textarea name="comentario" class="form-control" 
+                                placeholder="Indique cualquier detalle relevante para la solicitud..."
+                                style="min-height: 120px; padding: 1rem; border-radius: 16px; border: 2px solid #e2e8f0; line-height: 1.6;"
+                                th:text="${solicitud.comentario}"></textarea>
+                        </div>
+
+                        <!-- Notas del Administrador (Creación y Edición) -->
+                        <div class="form-group" sec:authorize="hasRole('ADMIN')">
+                            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; font-weight: 600;">
+                                <i data-lucide="shield-check" style="width: 16px; color: #f97316;"></i>
+                                <span th:text="#{adopcion.auto.notas.internas.del.administrador.comenta}"></span>
+                                <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                            </label>
+                            <textarea name="comentarioAdmin" class="form-control" 
+                                th:placeholder="#{solicitud.auto.write.internal.notes}"
+                                style="min-height: 120px; padding: 1rem; border-radius: 16px; border: 2px solid #e2e8f0; line-height: 1.6;"
+                                th:text="${solicitud.comentarioAdmin}"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- ACCIONES -->
+                    <div class="form-actions">
+                        <button type="button" class="btn-form-cancel" onclick="window.history.back()">
+                            <i data-lucide="x" style="width: 18px;"></i>
+                            <span th:text="#{generic.auto.cancelar}"></span>
+                        </button>
+                        <button type="submit" class="btn-form-submit" id="btn-submit">
+                            <i data-lucide="save" style="width: 20px;"></i>
+                            <span id="btn-text" th:text="${solicitud.id == null ? #messages.msg('generic.btn.create') : #messages.msg('generic.btn.save')}">[[#{generic.auto.save}]]</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

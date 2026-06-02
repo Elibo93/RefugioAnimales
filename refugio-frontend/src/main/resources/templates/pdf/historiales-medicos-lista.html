@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{pdf/pdf-layout :: pdf-head-landscape(#{pdf.historiales.header})}"></th:block>
+    <style>
+        table { font-size: 10.0px; }
+        th { font-size: 9.5px; padding: 7px 9px; }
+        td { padding: 7px 9px; }
+    </style>
+</head>
+<body>
+    <div class="watermark" th:text="#{generic.auto.adoptify}"></div>
+    <div class="header-container">
+        <div class="logo-container">
+            <span class="logo-text">[[#{html.auto.adoptify}]]<span class="logo-dot">.</span></span>
+        </div>
+        <div class="meta-container">
+            <div class="doc-title" th:text="#{pdf.historiales.header}">Listado [[#{html.auto.de}]] Historiales Médicos</div>
+            <div class="doc-date" th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}">19/05/2026 09:00</div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+    <h1 th:text="#{pdf.historiales.header}">Listado [[#{html.auto.de}]] Historiales Médicos</h1>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 5%;" th:text="#{pdf.column.id}">ID</th>
+                <th style="width: 8%;" th:text="#{pdf.column.animalId}">ID Animal</th>
+                <th style="width: 12%;" th:text="#{adopcion.table.header.animal}">Animal</th>
+                <th style="width: 10%;" th:text="#{historial.table.header.fecha}">Fecha</th>
+                <th style="width: 15%;" th:text="#{historial.table.header.veterinario}">Veterinario</th>
+                <th style="width: 25%;" th:text="#{historial.field.descripcion}">Descripción</th>
+                <th style="width: 25%;" th:text="#{historial.field.tratamiento}">Tratamiento</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="h : ${historiales}">
+                <td th:text="${h.id}"></td>
+                <td th:text="${h.animalId}"></td>
+                <td th:text="${animalesMap != null ? animalesMap.get(h.animalId.toString()) : '-'}"></td>
+                <td th:text="${#temporals.format(h.fecha, 'dd/MM/yyyy')}"></td>
+                <td th:text="${h.veterinario}"></td>
+                <td th:text="${h.descripcion}"></td>
+                <td th:text="${h.tratamiento}"></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

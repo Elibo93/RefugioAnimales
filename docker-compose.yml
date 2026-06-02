@@ -1,39 +1,160 @@
+version: '3.8'
+
+networks:
+  refugio_net:
+    driver: bridge
+
 services:
-  db:
+  # ==========================================
+  # BASES DE DATOS
+  # ==========================================
+  db-auth:
     image: mysql:8.0
-    container_name: mysql_refugio
+    container_name: mysql_refugio_auth
     restart: always
-    # Fuerza al servidor a usar UTF-8
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
-      MYSQL_DATABASE: refugio_db
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ${DB_NAME_AUTH}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "3306:3306"
+      - "${DB_PORT_AUTH}:3306"
+    networks:
+      - refugio_net
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  adminer:
-    image: adminer
+  db-backend:
+    image: mysql:8.0
+    container_name: mysql_refugio_backend
     restart: always
-    ports:
-      - "8090:8080"
-
-  refugio-animales:
-    image: elisabethbargallo/refugio-animales:v1
-    container_name: refugio-animales-container
-    restart: always
-    ports:
-      - "8443:8443"
-    depends_on:
-      - db
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
-      # 1. Base de datos con comillas y parámetros extra
-      SPRING_DATASOURCE_URL: "jdbc:mysql://db:3306/refugio_db?allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci"
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
+      MYSQL_DATABASE: ${DB_NAME_BACKEND}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT_BACKEND}:3306"
+    networks:
+      - refugio_net
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-      # 2. Asegurar que los scripts SQL de inicio se lean bien
-      SPRING_SQL_INIT_ENCODING: UTF-8
+  # ==========================================
+  # SERVICE DISCOVERY (EUREKA)
+  # ==========================================
+  eureka-server:
+    image: srromer0/eureka-server:v1
+    container_name: eureka_server
+    ports:
+      - "8761:8761"
+    networks:
+      - refugio_net
+    restart: always
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:8761/actuator/health" ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
 
-      # 3. Forzar respuesta HTTP en UTF-8
-      SERVER_SERVLET_ENCODING_CHARSET: UTF-8
-      SERVER_SERVLET_ENCODING_FORCE: true
+  # ==========================================
+  # MICROSERVICIOS
+  # ==========================================
+  refugio-auth:
+    image: srromer0/refugio-auth:v1
+    container_name: refugio_auth
+    ports:
+      - "8083:8083"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+      # Sobrescribimos host y puerto para conectar dentro de la red Docker
+      DB_HOST: "db-auth"
+      DB_PORT_AUTH: "3306"
+      DB_NAME_AUTH: "${DB_NAME_AUTH}"
+      DB_USER: "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      JWT_SECRET: "${JWT_SECRET}"
+      JWT_EXPIRATION: "${JWT_EXPIRATION}"
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET}"
+      REFUGIO_INTERNAL_SECRET: "${REFUGIO_INTERNAL_SECRET}"
+    networks:
+      - refugio_net
+    depends_on:
+      db-auth:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    restart: always
+
+  refugio-backend:
+    image: srromer0/refugio-backend:v1
+    container_name: refugio_backend
+    ports:
+      - "8081:8081"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+      # Sobrescribimos host y puerto para conectar dentro de la red Docker
+      DB_HOST: "db-backend"
+      DB_PORT_BACKEND: "3306"
+      DB_NAME_BACKEND: "${DB_NAME_BACKEND}"
+      DB_USER: "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      JWT_SECRET: "${JWT_SECRET}"
+      JWT_EXPIRATION: "${JWT_EXPIRATION}"
+      REFUGIO_INTERNAL_SECRET: "${REFUGIO_INTERNAL_SECRET}"
+    volumes:
+      - ./refugio-backend/uploads:/uploads
+    networks:
+      - refugio_net
+    depends_on:
+      db-backend:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    restart: always
+
+  refugio-frontend:
+    image: srromer0/refugio-frontend:v1
+    container_name: refugio_frontend
+    ports:
+      - "8082:8082"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+      JWT_SECRET: "${JWT_SECRET}"
+      JWT_EXPIRATION: "${JWT_EXPIRATION}"
+      REFUGIO_INTERNAL_SECRET: "${REFUGIO_INTERNAL_SECRET}"
+    networks:
+      - refugio_net
+    depends_on:
+      eureka-server:
+        condition: service_started
+    restart: always
+
+  # ==========================================
+  # API GATEWAY
+  # ==========================================
+  api-gateway:
+    image: srromer0/api-gateway:v1
+    container_name: api_gateway
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+    networks:
+      - refugio_net
+    depends_on:
+      eureka-server:
+        condition: service_started
+      refugio-frontend:
+        condition: service_started
+      refugio-backend:
+        condition: service_started
+      refugio-auth:
+        condition: service_started
+    restart: always

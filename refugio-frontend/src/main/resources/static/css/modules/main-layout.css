@@ -1,0 +1,45 @@
+/* MAIN-LAYOUT */
+
+
+
+main {
+    flex: 1;
+    max-width: 1200px;
+    width: 100%;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    font-size: 1.875rem;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.025em;
+}
+
+.welcome-section {
+    margin-bottom: 3rem;
+    text-align: center;
+}
+
+.welcome-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.05em;
+}
+
+.welcome-subtitle {
+    font-size: 1.125rem;
+    color: var(--text-muted);
+}
+
+.text-primary {
+    color: var(--primary);
+}
+

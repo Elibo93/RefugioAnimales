@@ -1,0 +1,84 @@
+<!-- Fragmento de Pie de Página: Información de contacto, enlaces legales y presencia en redes sociales -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<footer th:fragment="footer" class="app-footer">
+        <div class="footer-glass-container">
+            <div class="footer-grid">
+                <!-- Columna 1: Marca y Misión -->
+                <div class="footer-col brand-col">
+                    <div class="footer-logo-wrapper">
+                        <img th:src="@{/images/logo-Refugio.png}" class="footer-logo" alt="Logo Refugio">
+                        <div class="footer-brand">
+                            <span class="footer-app-name" th:text="#{app.name}">Refugio</span>
+                            <span class="footer-app-subtitle" th:text="#{generic.auto.segunda.oportunidad}"></span>
+                        </div>
+                    </div>
+                    <p class="footer-mission" th:text="#{generic.auto.dedicados.a.rescatar.cuidar.y.encontrar}"></p>
+                    <div class="social-icons">
+                        <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="social-link instagram-link" title="Instagram">
+                            <img th:src="@{/images/instagram-icon.png}" alt="Instagram">
+                        </a>
+                        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="social-link facebook-link" title="Facebook">
+                            <img th:src="@{/images/facebook-icon.png}" alt="Facebook">
+                        </a>
+                        <a href="https://x.com" target="_blank" rel="noopener noreferrer" class="social-link x-link" title="X (Twitter)">
+                            <img th:src="@{/images/x-con.png}" alt="X">
+                        </a>
+                        <a href="https://wa.me/34912345678" target="_blank" rel="noopener noreferrer" class="social-link whatsapp-link" title="WhatsApp">
+                            <img th:src="@{/images/whatsapp.png}" alt="WhatsApp">
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Columna 2: Enlaces Rápidos -->
+                <div class="footer-col links-col">
+                    <h3 class="footer-title" th:text="#{generic.auto.explorar}"></h3>
+                    <ul class="footer-links">
+                        <li><a th:href="@{/web/animales}"><i data-lucide="dog"></i> [[#{html.auto.nuestros.animales}]]</a></li>
+                        <li><a th:href="@{/web/donaciones}"><i data-lucide="heart"></i> [[#{home.auto.donations}]]</a></li>
+                        <li><a th:href="@{/web/voluntarios/nuevo}"><i data-lucide="users"></i> [[#{html.auto.ser.voluntario}]]</a></li>
+                        <li><a th:href="@{/web/home}"><i data-lucide="home"></i> [[#{html.auto.inicio}]]</a></li>
+                    </ul>
+                </div>
+
+                <!-- Columna 3: Contacto -->
+                <div class="footer-col contact-col">
+                    <h3 class="footer-title" th:text="#{generic.auto.contacto}"></h3>
+                    <ul class="footer-contact-info">
+                        <li>
+                            <i data-lucide="map-pin"></i>
+                            <a href="#" onclick="openMapsSelector(event)" style="cursor: pointer;" th:text="#{generic.auto.calle.del.refugio.12.madrid.espana}"></a>
+                        </li>
+                        <li>
+                            <i data-lucide="mail"></i>
+                            <a href="mailto:info@refugio.es" th:text="#{generic.auto.inforefugioes}"></a>
+                        </li>
+                        <li>
+                            <i data-lucide="phone"></i>
+                            <a href="tel:+34912345678" th:text="#{generic.auto.34.912.345.678}"></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p th:utext="#{footer.copyright}"></p>
+                <div class="footer-legal">
+                    <a href="#" th:text="#{footer.privacy.policy}"></a>
+                    <a href="#" th:text="#{footer.terms.of.service}"></a>
+                </div>
+            </div>
+        </div>
+
+
+
+    </footer>
+</body>
+
+</html>

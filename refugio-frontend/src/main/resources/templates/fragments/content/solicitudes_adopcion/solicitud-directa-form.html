@@ -1,0 +1,83 @@
+<!-- Vista de Solicitud Directa: Formulario simplificado para usuarios ya registrados con perfil de adoptante verificado -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="content" class="container" style="max-width: 800px; margin: 4rem auto;">
+    <div class="glass-panel" style="padding: 3rem; border-radius: 32px;">
+        <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2.5rem;">
+            <div style="background: var(--primary-light); color: var(--primary); width: 64px; height: 64px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="heart" style="width: 32px; height: 32px;"></i>
+            </div>
+            <div>
+                <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;" th:text="#{solicitud.auto.finaliza.tu.adopcion}"></h1>
+                <p style="color: var(--text-muted); margin: 0;" th:text="#{solicitud.auto.ya.casi.estas.envia.la.solicitud.para.da}"></p>
+            </div>
+        </div>
+
+        <div class="glass-card" style="padding: 2rem; margin-bottom: 2.5rem; background: rgba(var(--primary-rgb), 0.02); border: 1px solid var(--primary-light);">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <img th:src="${animal.foto != null ? animal.foto : '/images/placeholder-animal.png'}" 
+                     style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">
+                <div>
+                    <span style="font-size: 0.8rem; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;" th:text="#{solicitud.auto.solicitud.para}"></span>
+                    <h3 style="margin: 0; font-weight: 800;" th:text="${animal.nombre}">Nombre del Animal</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ficha de Perfil del Adoptante -->
+        <div th:if="${perfilExistente}" style="padding: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
+            <div style="background: white; color: var(--primary); width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0;">
+                <i data-lucide="user" style="width: 28px;"></i>
+            </div>
+            <div>
+                <span style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600;" th:text="#{generic.auto.adoptante}"></span>
+                <h3 style="margin: 0; font-weight: 800; color: var(--text-main);" th:text="${nombre + ' ' + apellido}">Nombre Completo</h3>
+                <p style="margin: 4px 0 0; font-size: 0.8rem; color: var(--primary); font-weight: 500;">
+                    <i data-lucide="check-circle" style="width: 12px; vertical-align: middle; margin-right: 4px;"></i>
+                    [[#{html.auto.perfil.de.adoptante.verificado}]]
+                </p>
+            </div>
+        </div>
+
+        <form th:action="@{/web/solicitudes/publico/directa}" method="POST" class="form-grid">
+            <input type="hidden" name="animalId" th:value="${animal.id}">
+
+            <!-- Sección: La Adopción -->
+            <div style="grid-column: 1 / -1; margin: 1rem 0 1rem;">
+                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="message-square" style="width: 18px;"></i>
+                    <span th:text="#{solicitud.auto.informacion.para.el.refugio}"></span>
+                </h3>
+                <div style="height: 1px; background: rgba(0,0,0,0.05); margin-top: 0.5rem;"></div>
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label>
+                    <span>[[#{html.auto.por.qu.quieres.adoptar.a}]] <span th:text="${animal.nombre}"></span>?</span>
+                    <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                </label>
+                <textarea name="comentario" rows="4" placeholder="Cuéntanos un poco sobre por qué has elegido a este peludo..."></textarea>
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/web/home}" class="btn-form-cancel">
+                    <i data-lucide="x" style="width: 18px;"></i>
+                    <span th:text="#{generic.auto.cancelar}"></span>
+                </a>
+                <button type="submit" class="btn-form-submit">
+                    <i data-lucide="send"></i>
+                    <span th:text="#{solicitud.auto.enviar.solicitud}"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+
+</html>

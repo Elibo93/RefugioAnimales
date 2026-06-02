@@ -1,0 +1,634 @@
+/* TABLAS-MODERNAS */
+
+.table-wrapper {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    /* Allow horizontal scroll */
+}
+
+.actions-bar {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #F8FAFC;
+    border-bottom: 1px solid var(--border);
+}
+
+th {
+    text-align: left;
+    padding: 1rem 1.5rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-main);
+    font-size: 0.95rem;
+    position: relative;
+}
+
+table th:not(:last-child)::after,
+table td:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 25%;
+    height: 50%;
+    width: 1px;
+    background-color: var(--border);
+    opacity: 0.3;
+}
+
+table th {
+    position: relative;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+tbody tr:hover {
+    background-color: #F8FAFC;
+}
+
+/* Radio buttons interactivos para tareas — diseño personalizado */
+.status-radio {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #cbd5e1;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0;
+    vertical-align: middle;
+    flex-shrink: 0;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.status-radio::after {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: transparent;
+    transition: background 0.15s ease;
+}
+
+.status-radio:hover {
+    border-color: #94a3b8;
+    transform: scale(1.1);
+}
+
+/* Colores por estado */
+.status-radio.radio-pendiente:checked {
+    border-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.status-radio.radio-pendiente:checked::after {
+    background: #f59e0b;
+}
+
+.status-radio.radio-progreso:checked {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.status-radio.radio-progreso:checked::after {
+    background: #3b82f6;
+}
+
+.status-radio.radio-completada:checked {
+    border-color: #10b981;
+    background: #ecfdf5;
+}
+
+.status-radio.radio-completada:checked::after {
+    background: #10b981;
+}
+
+.status-radio.radio-cancelada:checked {
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+.status-radio.radio-cancelada:checked::after {
+    background: #ef4444;
+}
+
+.save-status-btn {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Botones Acción */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 8px rgba(37, 99, 235, 0.3);
+}
+
+.btn-secondary {
+    background: white;
+    border: 1px solid var(--border);
+    color: var(--text-main);
+}
+
+.btn-secondary:hover {
+    background: #F1F5F9;
+    border-color: #CBD5E1;
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.btn-icon:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.btn-icon.delete:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: var(--danger-bg);
+}
+
+
+
+/* ==========================================================================
+   ESTILOS PREMIUM PARA TABLAS ADMINISTRATIVAS (Refactorizados)
+   ========================================================================== */
+
+/* Contenedores y Barras */
+.admin-table-wrapper {
+    padding: 2.5rem 3rem;
+}
+
+.admin-actions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: nowrap;
+    margin-bottom: 2.5rem;
+    padding: 0 1.5rem;
+}
+
+/* Título e Iconos */
+.admin-title-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 0;
+}
+
+.admin-title-icon-box {
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.5rem;
+}
+
+.admin-title-icon-box i {
+    width: 32px;
+    height: 32px;
+    stroke-width: 2.5;
+}
+
+.admin-title-text {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.admin-title-desc {
+    margin: 2px 0 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* Búsqueda y Filtros */
+.admin-filters-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    justify-content: center;
+    max-width: 800px;
+}
+
+.admin-search-wrapper {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+}
+
+.admin-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    color: var(--text-muted);
+}
+
+.admin-search-input {
+    padding-left: 38px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-main);
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+.admin-search-input-small {
+    padding-left: 38px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-main);
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+.admin-search-input-medium {
+    padding-left: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-main);
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+.admin-filter-wrapper {
+    position: relative;
+    min-width: 180px;
+}
+
+.admin-filter-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    color: var(--text-muted);
+}
+
+.admin-filter-select {
+    padding-left: 35px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    width: 100%;
+}
+
+.admin-filter-select-medium {
+    padding-left: 35px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    width: 100%;
+}
+
+.admin-btn-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+}
+
+.admin-btn-clear-medium {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-muted);
+}
+
+/* Acciones y Exportación */
+.admin-actions-group {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+    margin-right: 0.5rem;
+}
+
+.admin-export-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+    padding: 0 4px;
+}
+
+.admin-export-btn:hover {
+    transform: scale(1.1);
+}
+
+.admin-export-img {
+    height: 48px;
+    width: 48px;
+    object-fit: contain;
+    color: transparent;
+}
+
+/* Estilos de Tabla Premium */
+.premium-list-container {
+    margin-top: 1.5rem;
+}
+
+.admin-list-header {
+    background: transparent;
+    padding: 0 1.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* ==========================================================================
+   MEJORAS PREMIUM (Rediseño de Lista de Animales)
+   ========================================================================== */
+
+/* Barra de Filtros Separada */
+.admin-filters-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    padding: 12px 20px;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    margin: 0 1.5rem 2rem 1.5rem;
+}
+
+.admin-filters-bar .admin-search-wrapper,
+.admin-filters-bar .admin-filter-wrapper {
+    margin: 0;
+}
+
+/* Tarjetas de Fila sin Borde */
+.premium-row-card.borderless {
+    border: 1px solid transparent;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    margin-bottom: 12px;
+}
+.premium-row-card.borderless:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    transform: translateY(-3px);
+    border-color: rgba(34, 197, 94, 0.3); /* Verde pastel muy sutil */
+}
+
+/* Badges Pastel Premium */
+.badge-pastel {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-block;
+}
+.badge-pastel.disponible {
+    background: #d1fae5;
+    color: #065f46;
+}
+.badge-pastel.adoptado {
+    background: #ede9fe;
+    color: #5b21b6;
+}
+.badge-pastel.reservado {
+    background: #fef3c7;
+    color: #92400e;
+}
+.badge-pastel.tratamiento, .badge-pastel.en_tratamiento, .badge-pastel.cuarentena {
+    background: #dbeafe;
+    color: #1e3a8a;
+}
+.badge-pastel.fallecido {
+    background: #fce7f3;
+    color: #9d174d;
+}
+
+/* Hover de Iconos de Acción */
+.btn-action-premium {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.btn-action-premium:hover {
+    background: #f1f5f9;
+    color: var(--text-main);
+}
+.btn-action-premium.view:hover {
+    background: #e0f2fe;
+    color: #0284c7;
+}
+.btn-action-premium.edit:hover {
+    background: #dcfce7;
+    color: #16a34a;
+}
+.btn-action-premium.delete:hover {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* ==========================================================================
+   SISTEMA DE CUADRÍCULA (GRID) PARA TABLAS MODERNAS
+   ========================================================================== */
+
+/* Contenedores Base */
+.premium-grid-row {
+    display: grid !important;
+    gap: 1.5rem;
+    align-items: center;
+    width: 100%;
+}
+
+.premium-grid-header {
+    background: transparent;
+    padding: 0 3rem 1rem;
+    display: grid !important;
+    gap: 1.5rem;
+    align-items: center;
+    width: 100%;
+}
+
+.premium-row-card.premium-grid-row {
+    padding: 1rem 3rem;
+    gap: 1.5rem;
+}
+
+/* Configuraciones de Columnas Específicas por Entidad */
+
+/* Animales: Foto (90px) | Nombre (1fr) | Edad (0.7fr) | Estado (1.3fr) | Acciones (120px) */
+.grid-cols-animales {
+    grid-template-columns: 90px 1fr 0.7fr 1.3fr 120px;
+}
+
+/* Personas: Detalles (1.5fr) | Rol (1fr) | Contacto (1.5fr) | Acciones (120px) */
+.grid-cols-personas {
+    grid-template-columns: 1.5fr 1fr 1.5fr 120px;
+}
+
+/* Voluntarios: Nombre (1.5fr) | Contacto (1.5fr) | Especialidad (1fr) | Disponibilidad (1fr) | Acciones (150px) */
+.grid-cols-voluntarios {
+    grid-template-columns: 1.5fr 1.5fr 1fr 1fr 150px;
+}
+
+/* Notificaciones: ID (80px) | Mensaje (2fr) | Fecha (1fr) | Estado (1fr) | Acciones (120px) */
+.grid-cols-notificaciones {
+    grid-template-columns: 80px 2fr 1fr 1fr 120px;
+}
+
+/* Donaciones: Donante (1.5fr) | Tipo (1fr) | Cantidad (1fr) | Fecha (1fr) | Descripción (2fr) */
+.grid-cols-donaciones {
+    grid-template-columns: 1.5fr 1fr 1fr 1fr 2fr;
+}
+
+/* Tareas (Admin): Desc (2.5fr) | Asignado (1.5fr) | Estado (1fr) | Prioridad (1fr) | Acciones (150px) */
+.grid-cols-tareas-admin {
+    grid-template-columns: 2.5fr 1.5fr 1fr 1fr 150px;
+}
+
+/* Tareas (Voluntario): Desc (2fr) | Prioridad (1fr) | Estado (2fr) | Acciones (150px) */
+.grid-cols-tareas-voluntario {
+    grid-template-columns: 2fr 1fr 2fr 150px;
+}
+
+/* Historiales Médicos: Animal (1.5fr) | Fecha (0.8fr) | Veterinario (2fr) | Acciones (120px) */
+.grid-cols-historiales {
+    grid-template-columns: 1.5fr 0.8fr 2fr 120px;
+}
+
+/* Adoptantes: Nombre (1.5fr) | Contacto (2fr) | Estado (1fr) | Acciones (120px) */
+.grid-cols-adoptantes {
+    grid-template-columns: 1.5fr 2fr 1fr 120px;
+}
+
+/* Adopciones: Foto (90px) | Detalles (1fr) | Estado (1fr) | Fecha (1fr) | Acciones (120px) */
+.grid-cols-adopciones {
+    grid-template-columns: 90px 1fr 1fr 1fr 120px;
+}
+
+/* Mis Adoptados (User): ID (80px) | Animal (1.5fr) | Fecha (1fr) | Estado (1fr) | Acciones (120px) */
+.grid-cols-mis-adoptados {
+    grid-template-columns: 80px 1.5fr 1fr 1fr 120px;
+}
+
+/* Utilidades de Alineación de Celdas */
+.cell-left {
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.cell-center {
+    justify-content: center;
+    text-align: center;
+}
+
+.cell-right {
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.cell-padded-left {
+    padding-left: 1.5rem;
+}

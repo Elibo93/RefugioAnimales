@@ -1,0 +1,615 @@
+<!-- Vista de Listado de Animales: Catálogo general y gestión administrativa de los animales del refugio -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <div th:fragment="content">
+        <div th:class="${isAdmin ? '' : 'animal-catalog-layout'}" style="margin-top: 1rem;">
+            <!-- 1. SIDEBAR PARA ADMINISTRADOR (DISEÑO SIMPLE DE GESTIÓN) -->
+
+            <!-- 2. SIDEBAR PARA USUARIOS (DISEÑO COMPACTO) -->
+            <aside th:if="${!isAdmin}" class="filter-sidebar"
+                style="width: 280px; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(15px); border-radius: 24px; padding: 1.4rem; border: 1px solid rgba(255, 255, 255, 0.3); height: fit-content; position: sticky; top: 2rem;">
+                <form method="get" action="/web/animales" hx-get="/web/animales" hx-target="#animal-results"
+                    hx-select="#animal-results" hx-push-url="true">
+
+                    <!-- BUSCADOR DE TEXTO LIBRE -->
+                    <div class="filter-group" style="margin-bottom: 1.2rem;">
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.7rem; font-weight: 600; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase;">
+                            <i data-lucide="search" style="width: 13px; color: var(--primary);"></i>
+                            <span th:text="#{animal.auto.busqueda}"></span>
+                        </label>
+                        <div style="position: relative;">
+                            <input type="text" name="q" th:value="${q}" placeholder="Ej: Luna, Pastor..."
+                                style="width: 100%; height: 42px; padding: 0 1rem 0 2.5rem; border-radius: 12px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; transition: all 0.3s ease; outline: none;"
+                                hx-get="/web/animales" hx-trigger="keyup changed delay:800ms" hx-vals='{"page": 1}'
+                                hx-include="closest form" hx-target="#animal-results" hx-select="#animal-results"
+                                hx-push-url="true"
+                                onfocus="this.style.borderColor='var(--primary)'; this.style.background='white';"
+                                onblur="this.style.borderColor='#f1f5f9'; this.style.background='#f8fafc';">
+                            <i data-lucide="search"
+                                style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 16px; color: #94a3b8; pointer-events: none;"></i>
+                        </div>
+                    </div>
+
+                    <!-- ESPECIE -->
+                    <div class="filter-group" style="margin-bottom: 1rem;">
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.7rem; font-weight: 600; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase;">
+                            <i data-lucide="dog" style="width: 13px; color: var(--primary);"></i>
+                            <span th:text="#{generic.auto.especie}"></span>
+                        </label>
+                        <div style="position: relative;">
+                            <select name="especie" hx-get="/web/animales" hx-trigger="change" hx-vals='{"page": 1}'
+                                hx-include="closest form" hx-target="#animal-results" hx-select="#animal-results"
+                                hx-push-url="true"
+                                style="width: 100%; height: 42px; padding: 0 2rem 0 1rem; border-radius: 12px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; font-weight: 500; color: var(--text-main); cursor: pointer; appearance: none; outline: none; transition: all 0.3s;">
+                                <option value="" th:selected="${selectedEspecie == null or selectedEspecie == ''}"
+                                    th:text="#{animal.auto.todas}"></option>
+                                <option th:each="e : ${especiesActivas}" th:value="${e}"
+                                    th:text="#{enum.Especie.__${e}__}" th:selected="${selectedEspecie == e}"></option>
+                            </select>
+                            <i data-lucide="chevron-down"
+                                style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); width: 16px; color: #94a3b8; pointer-events: none;"></i>
+                        </div>
+                    </div>
+
+                    <!-- TAMAÑO -->
+                    <div class="filter-group" style="margin-bottom: 1rem;">
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.7rem; font-weight: 600; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase;">
+                            <i data-lucide="maximize-2" style="width: 13px; color: var(--primary);"></i>
+                            <span th:text="#{generic.auto.tamano}"></span>
+                        </label>
+                        <div style="position: relative;">
+                            <select name="tamano" hx-get="/web/animales" hx-trigger="change" hx-target="#animal-results"
+                                hx-vals='{"page": 1}' hx-include="closest form" hx-select="#animal-results"
+                                hx-push-url="true"
+                                style="width: 100%; height: 42px; padding: 0 2rem 0 1rem; border-radius: 12px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; font-weight: 500; color: var(--text-main); cursor: pointer; appearance: none; outline: none; transition: all 0.3s;">
+                                <option value="" th:selected="${selectedTamano == null or selectedTamano == ''}"
+                                    th:text="#{generic.auto.cualquier.tamano}"></option>
+                                <option value="PEQUEÑO" th:selected="${selectedTamano == 'PEQUEÑO'}"
+                                    th:text="#{generic.auto.pequeno}"></option>
+                                <option value="MEDIANO" th:selected="${selectedTamano == 'MEDIANO'}"
+                                    th:text="#{generic.auto.mediano}"></option>
+                                <option value="GRANDE" th:selected="${selectedTamano == 'GRANDE'}"
+                                    th:text="#{generic.auto.grande}"></option>
+                                <option value="GIGANTE" th:selected="${selectedTamano == 'GIGANTE'}"
+                                    th:text="#{generic.auto.gigante}"></option>
+                            </select>
+                            <i data-lucide="chevron-down"
+                                style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); width: 16px; color: #94a3b8; pointer-events: none;"></i>
+                        </div>
+                    </div>
+
+                    <!-- EDAD (ESTILO CHIPS PREMIUM) -->
+                    <div class="filter-group" style="margin-bottom: 1.2rem;">
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; font-size: 0.7rem; font-weight: 600; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase;">
+                            <i data-lucide="calendar" style="width: 13px; color: var(--primary);"></i>
+                            <span th:text="#{generic.auto.edad}"></span>
+                        </label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <label th:each="e : ${ {'CACHORRO', 'JOVEN', 'ADULTO', 'SENIOR'} }"
+                                style="cursor: pointer; position: relative;">
+                                <input type="checkbox" name="edad" th:value="${e}"
+                                    th:checked="${selectedEdad != null and #lists.contains(selectedEdad, e)}"
+                                    hx-get="/web/animales" hx-trigger="change" hx-target="#animal-results"
+                                    hx-vals='{"page": 1}' hx-include="closest form" hx-push-url="true"
+                                    hx-select="#animal-results" style="display: none;">
+                                <span class="filter-chip-premium" th:text="#{enum.Edad.__${e}__}"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- URGENCIA (SWITCH PREMIUM) -->
+                    <div class="filter-group" style="margin-bottom: 1.2rem;">
+                        <label class="urgencia-card"
+                            style="display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1rem; border-radius: 16px; cursor: pointer; transition: all 0.3s; border: 2px solid transparent; background: #fef2f2;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div
+                                    style="background: white; padding: 6px; border-radius: 10px; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.1);">
+                                    <i data-lucide="flame" style="width: 14px; color: #ef4444;"></i>
+                                </div>
+                                <div style="font-size: 0.85rem; font-weight: 600; color: #991b1b;"
+                                    th:text="#{animal.auto.solo.urgentes}"></div>
+                            </div>
+                            <input type="checkbox" name="urgencia" value="true" th:checked="${selectedUrgencia}"
+                                hx-get="/web/animales" hx-trigger="change" hx-target="#animal-results"
+                                hx-vals='{"page": 1}' hx-include="closest form" hx-push-url="true"
+                                hx-select="#animal-results"
+                                style="width: 18px; height: 18px; cursor: pointer; accent-color: #ef4444;">
+                        </label>
+                    </div>
+
+                    <!-- FAVORITOS (HIDDEN, TRIGGERED BY LABEL EN EL HEADER) -->
+                    <input th:if="${isAuthenticated}" type="checkbox" id="favoritos-checkbox" name="favoritos"
+                        value="true" th:checked="${selectedFavoritos}" hx-get="/web/animales" hx-trigger="change"
+                        hx-vals='{"page": 1}' hx-include="closest form" hx-push-url="true" hx-target="#animal-results"
+                        hx-select="#animal-results" style="display: none;">
+                    <!-- BOTÓN LIMPIAR -->
+                    <div style="text-align: center; margin-bottom: 0.5rem;">
+                        <a th:href="@{/web/animales}"
+                            style="color: #94a3b8; text-decoration: none; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0.7rem; border-radius: 14px; transition: all 0.3s; background: #f8fafc;">
+                            <i data-lucide="rotate-ccw" style="width: 14px;"></i>
+                            <span th:text="#{animal.auto.limpiar.filtros}"></span>
+                        </a>
+                    </div>
+
+
+
+                    <!-- BOTÓN PDF (Solo para personal del refugio) -->
+                    <div sec:authorize="hasRole('ADMIN')"
+                        style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: center; gap: 12px;">
+                        <a th:href="@{/web/animales/pdf}" target="_blank" title="Exportar listado a PDF"
+                            class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="/images/pdf.png" alt="PDF" class="admin-export-img">
+                        </a>
+                        <a th:href="@{/web/animales/excel}" target="_blank" title="Exportar listado a Excel"
+                            class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="/images/excel.png" alt="Excel" class="admin-export-img">
+                        </a>
+                    </div>
+                </form>
+            </aside>
+
+            <!-- Main Content Area -->
+            <div class="main-content-area"
+                th:style="${isAdmin ? 'padding: 0; flex: 1;' : 'padding: 0 0 0 3rem; flex: 1;'}">
+
+                <!-- BANNER DE ENCUESTA (Solo si no es admin, está logueado y no tiene preferencias) -->
+                <div th:if="${isAuthenticated and !isAdmin and (hasPreferences == null or !hasPreferences)}"
+                    class="survey-invitation-banner fade-in"
+                    style="margin-bottom: 2.5rem; padding: 2rem; background: linear-gradient(135deg, #2d9d58 0%, #15803d 100%); border-radius: 28px; color: white; display: flex; align-items: center; justify-content: space-between; gap: 2rem; box-shadow: 0 20px 40px rgba(45, 157, 88, 0.25); position: relative; overflow: hidden;">
+
+                    <div style="position: absolute; right: -20px; top: -20px; opacity: 0.1;">
+                        <i data-lucide="sparkles" style="width: 150px; height: 150px;"></i>
+                    </div>
+
+                    <div style="flex: 1; position: relative; z-index: 2;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.5rem;">
+                            <span
+                                style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 99px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;"
+                                th:text="#{animal.auto.nuevo}"></span>
+                        </div>
+                        <h3 style="font-weight: 900; font-size: 1.5rem; margin: 0 0 0.5rem 0; letter-spacing: -0.02em;"
+                            th:text="#{animal.auto.buscas.a.tu.companero.ideal}"></h3>
+                        <p style="margin: 0; font-size: 0.95rem; opacity: 0.9; font-weight: 500; line-height: 1.5; max-width: 500px;"
+                            th:text="#{animal.auto.cuentanos.que.buscas.y.nuestro.sistema.i}"></p>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; z-index: 2;">
+                        <button hx-get="/web/preferencias/encuesta" hx-target="#contenido-dinamico" hx-push-url="true"
+                            class="btn"
+                            style="background: white; color: #15803d; font-weight: 800; padding: 0.9rem 1.8rem; border-radius: 16px; border: none; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);"
+                            onmouseover="this.style.transform='translateY(-2px)';"
+                            onmouseout="this.style.transform='translateY(0)';">
+                            <i data-lucide="check-circle" style="width: 18px;"></i>
+                            <span th:text="#{animal.auto.empezar.encuesta}"></span>
+                        </button>
+
+                        <button th:attr="onclick=|omitirEncuesta('${currentUserId}')|"
+                            style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); font-size: 0.8rem; font-weight: 700; padding: 0.6rem; border-radius: 12px; cursor: pointer; transition: all 0.3s; backdrop-filter: blur(5px);"
+                            th:text="#{animal.auto.no.me.interesa.por.ahora}"></button>
+                    </div>
+                </div>
+
+                <script th:inline="javascript">
+                    function omitirEncuesta(userId) {
+                        fetch('/web/preferencias/omitir', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ usuarioId: userId })
+                        }).then(() => {
+                            // Ocultamos el banner con una animación suave
+                            const banner = document.querySelector('.survey-invitation-banner');
+                            banner.style.transition = 'all 0.5s ease';
+                            banner.style.opacity = '0';
+                            banner.style.transform = 'translateY(-20px)';
+                            banner.style.marginBottom = '-150px'; // Colapsar el espacio
+                            setTimeout(() => banner.remove(), 500);
+                        });
+                    }
+                </script>
+
+                <div id="animal-list-container">
+                    <!-- 1. VISTA PREMIUM PARA ADMINISTRADOR -->
+                    <div th:if="${isAdmin}" class="table-wrapper" style="padding-top: 1.7rem;">
+                        <!-- BARRA DE ACCIONES SUPERIOR -->
+                        <!-- BARRA DE ACCIONES SUPERIOR -->
+                        <div class="actions-bar admin-actions-bar" style="border-bottom: none; margin-bottom: 1rem;">
+
+                            <!-- 1. TÍTULO E ICONO -->
+                            <div class="admin-title-container">
+                                <div class="admin-title-icon-box">
+                                    <i data-lucide="paw-print" style="width: 24px;"></i>
+                                </div>
+                                <div>
+                                    <h1 class="admin-title-text" th:text="#{animal.list.title.admin}">Gestión de
+                                        Animales</h1>
+                                    <p class="admin-title-desc" th:text="#{animal.auto.gestiona.catalogo}">Catálogo y
+                                        registros de animales</p>
+                                </div>
+                            </div>
+
+                            <!-- 3. ACCIONES Y EXPORTACIÓN (Movidas a la derecha) -->
+                            <div class="admin-actions-group">
+                                <a th:href="@{/web/animales/pdf}" target="_blank" title="Exportar listado a PDF"
+                                    class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'"
+                                    onmouseout="this.style.transform='scale(1)'">
+                                    <img src="/images/pdf.png" alt="PDF" class="admin-export-img">
+                                </a>
+                                <a th:href="@{/web/animales/excel}" target="_blank" title="Exportar listado a Excel"
+                                    class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'"
+                                    onmouseout="this.style.transform='scale(1)'">
+                                    <img src="/images/excel.png" alt="Excel" class="admin-export-img">
+                                </a>
+                                <a class="btn btn-primary" th:href="@{/web/animales/nuevo}">
+                                    <i data-lucide="plus" style="width:18px;"></i>
+                                    <span th:text="#{generic.link.create}">+ Nuevo</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- 2. FILTROS Y BÚSQUEDA (Barra separada) -->
+                        <div class="admin-filters-bar">
+                            <form id="animal-admin-form" onsubmit="return false;"
+                                style="display: flex; align-items: center; gap: 1rem; width: 100%;">
+                                <!-- Buscador -->
+                                <div style="flex: 3; position: relative;">
+                                    <i data-lucide="search" class="admin-search-icon"></i>
+                                    <input type="text" name="q" th:value="${q}" placeholder="Buscar nombre, raza, ID..."
+                                        hx-get="/web/animales" hx-trigger="keyup changed delay:800ms"
+                                        hx-target="#animal-admin-table-container" hx-vals='{"page": 1}'
+                                        hx-select="#animal-admin-table-container" hx-swap="outerHTML"
+                                        hx-include="#animal-admin-form" class="form-control admin-search-input-medium">
+                                </div>
+
+                                <!-- Filtro Especie -->
+                                <div style="flex: 1.2; position: relative; min-width: 140px;">
+                                    <i data-lucide="dog" class="admin-filter-icon"></i>
+                                    <select name="especie" hx-get="/web/animales" hx-trigger="change"
+                                        hx-vals='{"page": 1}' hx-target="#animal-admin-table-container"
+                                        hx-select="#animal-admin-table-container" hx-swap="outerHTML"
+                                        hx-include="#animal-admin-form" class="form-control admin-filter-select-medium">
+                                        <option value="" th:text="#{animal.filter.any}">Todas</option>
+                                        <option th:each="e : ${especiesActivas}" th:value="${e}"
+                                            th:text="#{enum.Especie.__${e}__}" th:selected="${selectedEspecie == e}">
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Filtro Tamaño -->
+                                <div style="flex: 1.2; position: relative; min-width: 140px;">
+                                    <i data-lucide="maximize-2" class="admin-filter-icon"></i>
+                                    <select name="tamano" hx-get="/web/animales" hx-trigger="change"
+                                        hx-vals='{"page": 1}' hx-target="#animal-admin-table-container"
+                                        hx-select="#animal-admin-table-container" hx-swap="outerHTML"
+                                        hx-include="#animal-admin-form" class="form-control admin-filter-select-medium">
+                                        <option value="" th:text="#{animal.filter.any}">Todos</option>
+                                        <option value="PEQUEÑO" th:selected="${selectedTamano == 'PEQUEÑO'}"
+                                            th:text="#{generic.auto.pequeno}"></option>
+                                        <option value="MEDIANO" th:selected="${selectedTamano == 'MEDIANO'}"
+                                            th:text="#{generic.auto.mediano}"></option>
+                                        <option value="GRANDE" th:selected="${selectedTamano == 'GRANDE'}"
+                                            th:text="#{generic.auto.grande}"></option>
+                                        <option value="GIGANTE" th:selected="${selectedTamano == 'GIGANTE'}"
+                                            th:text="#{generic.auto.gigante}"></option>
+                                    </select>
+                                </div>
+
+                                <!-- Botón Limpiar -->
+                                <a th:href="@{/web/animales}" hx-get="/web/animales" hx-target="#contenido-dinamico"
+                                    hx-push-url="true" class="btn-icon admin-btn-clear-medium" title="Limpiar Filtros">
+                                    <i data-lucide="rotate-ccw" style="width: 16px;"></i>
+                                </a>
+                            </form>
+                        </div>
+
+                        <div id="animal-admin-table-container">
+                            <div id="animal-admin-content">
+                                <!-- LISTA PREMIUM DE ANIMALES (ADMIN) -->
+                                <div class="premium-list-container" id="animal-grid-admin">
+                                    <!-- Encabezados -->
+                                    <div class="premium-grid-header grid-cols-animales admin-list-header">
+                                        <div class="cell-padded-left cell-left"
+                                            th:text="#{generic.auto.animal}">
+                                        </div>
+                                        <div class="cell-left"
+                                            th:text="#{animal.auto.nombre.raza}"></div>
+                                        <div class="cell-center" th:text="#{generic.auto.edad}"></div>
+                                        <div class="cell-center" th:text="#{generic.auto.estado}">
+                                        </div>
+                                        <div class="cell-center" th:text="#{generic.auto.acciones}">
+                                        </div>
+                                    </div>
+
+                                    <div class="list-body" style="display: flex; flex-direction: column; gap: 12px;">
+                                        <div th:each="a : ${animales}" class="premium-row-card borderless premium-grid-row grid-cols-animales"
+                                            th:id="'card-' + ${a.id()}">
+                                            <!-- Foto -->
+                                            <div class="row-cell cell-left">
+                                                <div style="position: relative; width: 55px; height: 55px; margin-left: 1.5rem;">
+                                                    <img th:src="${a.foto() != null ? a.foto() : '/images/placeholder-animal.png'}"
+                                                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+                                                </div>
+                                            </div>
+
+                                            <!-- ID + Nombre / Especie + Raza -->
+                                            <div class="row-cell cell-left">
+                                                <div style="overflow: hidden;">
+                                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                                        <span
+                                                            style="color: #94a3b8; font-weight: 700; font-size: 0.8rem;"
+                                                            th:text="${'#' + a.id()}"></span>
+                                                        <a th:href="@{/web/animales/{id}(id=${a.id()})}"
+                                                            style="font-weight: 800; color: var(--text-main); font-size: 1.05rem; text-decoration: none;"
+                                                            th:text="${a.nombre()}">Rocky</a>
+                                                        <i th:if="${a.sexo() == 'MACHO'}" data-lucide="mars"
+                                                            style="width: 16px; height: 16px; color: #60a5fa; stroke-width: 2.5;"
+                                                            title="Macho"></i>
+                                                        <i th:if="${a.sexo() == 'HEMBRA'}" data-lucide="venus"
+                                                            style="width: 16px; height: 16px; color: #f472b6; stroke-width: 2.5;"
+                                                            title="Hembra"></i>
+                                                    </div>
+                                                    <div
+                                                        style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+                                                        <i th:data-lucide="${a.especie() == 'PERRO' ? 'dog' : 'cat'}"
+                                                            style="width: 14px; color: #94a3b8;"></i>
+                                                        <span
+                                                            style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;"
+                                                            th:text="${(a.especie() != null ? #messages.msg('enum.Especie.' + a.especie()) : '') + ' • ' + (a.raza() ?: 'Raza desconocida')}">Perro
+                                                            • Pastor Alemán</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Edad -->
+                                            <div class="row-cell cell-center"
+                                                style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;"
+                                                th:text="${a.edad() != null ? a.edad() + ' años' : '-'}">2 años</div>
+
+                                            <!-- Estado -->
+                                            <div class="row-cell cell-center">
+                                                <span class="badge-pastel"
+                                                    th:classappend="${a.estado() != null ? a.estado().toString().toLowerCase() : ''}"
+                                                    th:text="${a.estado() != null ? #messages.msg('enum.EstadoAnimal.' + a.estado()) : ''}">Disponible</span>
+                                            </div>
+
+                                            <!-- Acciones -->
+                                            <div class="row-cell cell-center" style="gap: 10px;">
+                                                <a class="btn-action-premium view"
+                                                    th:href="@{/web/historiales(animalId=${a.id()})}"
+                                                    title="Historial Médico">
+                                                    <i data-lucide="stethoscope" style="width: 18px;"></i>
+                                                </a>
+                                                <a class="btn-action-premium edit"
+                                                    th:hx-get="@{/web/animales/{id}/editar(id=${a.id()})}"
+                                                    hx-target="#contenido-dinamico" hx-push-url="true" title="Editar">
+                                                    <i data-lucide="edit-2" style="width: 18px;"></i>
+                                                </a>
+                                                <button class="btn-action-premium delete"
+                                                    th:attr="hx-post=@{/web/animales/{id}/borrar(id=${a.id()})}, hx-target='#card-' + ${a.id()}"
+                                                    hx-swap="outerHTML swap:0.3s"
+                                                    th:hx-confirm="#{confirm.generic.eliminar}" title="Eliminar">
+                                                    <i data-lucide="trash-2" style="width: 18px;"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Empty State -->
+                                    <!-- Empty State -->
+                                </div>
+                            </div>
+
+                            <!-- Paginación Admin -->
+                            <div
+                                th:replace="~{fragments/pagination :: controls(pagination=${pagination}, target='#animal-admin-table-container', url='/web/animales')}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. VISTA DE TARJETAS (PARA VOLUNTARIOS, ADOPTANTES Y PÚBLICO) -->
+                    <div th:if="${!isAdmin}" id="animal-results">
+                        <!-- Cabecera de la sección pública con botón de Favoritos -->
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                            <h2 style="font-weight: 800; color: var(--text-main); margin: 0; font-size: 1.85rem; letter-spacing: -0.02em;"
+                                th:text="#{animal.auto.encuentra.a.tu.mejor.amigo}"></h2>
+
+                            <div th:if="${isAuthenticated}"
+                                style="background: white; padding: 0.3rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
+                                <label for="favoritos-checkbox"
+                                    style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 0.6rem 1.2rem; border-radius: 12px; transition: all 0.3s; margin: 0;"
+                                    th:styleappend="${selectedFavoritos} ? 'background: #fdf2f8; color: #be185d; border: 1px solid #fbcfe8;' : 'background: transparent; color: #64748b; border: 1px solid transparent;'">
+                                    <i data-lucide="heart"
+                                        th:style="${selectedFavoritos} ? 'fill: #ec4899; color: #ec4899; width: 18px;' : 'width: 18px;'"></i>
+                                    <span style="font-weight: 700; font-size: 0.9rem;"
+                                        th:text="${selectedFavoritos} ? #{animal.favoritos.btn.viendo} : #{animal.favoritos.btn.ver}">Ver
+                                        Mis Favoritos</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="animal-grid" id="animal-grid-cards">
+                            <th:block th:each="a : ${animales}">
+                                <div class="animal-card-glass glass-card animal-card-item">
+                                    <div class="card-img-container"
+                                        style="position: relative; aspect-ratio: 4/5; overflow: hidden;">
+                                        <img th:src="${a.foto() != null ? a.foto() : '/images/placeholder-animal.png'}"
+                                            style="width: 100%; height: 100%; object-fit: cover;">
+                                        <span class="animal-status-badge"
+                                            th:classappend="${a.estado() != null ? 'badge-' + a.estado().toString().toLowerCase() : ''}"
+                                            th:text="${a.estado() != null ? #messages.msg('enum.EstadoAnimal.' + a.estado()) : ''}">Disponible</span>
+
+                                        <!-- Badge de Solicitado -->
+                                        <div th:if="${animalesSolicitadosIds != null and animalesSolicitadosIds.contains(a.id())}"
+                                            style="position: absolute; top: 3.5rem; left: 1rem; background: #2d9d58; color: white; padding: 0.4rem 0.8rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10;">
+                                            <i data-lucide="check" style="width: 12px; height: 12px;"></i>
+                                            <span th:text="#{generic.auto.solicitado}"></span>
+                                        </div>
+
+                                        <!-- Badge de Alta Demanda -->
+                                        <div th:if="${a.conteoSolicitudes() != null && a.conteoSolicitudes() >= 3}"
+                                            style="position: absolute; bottom: 1rem; right: 1rem; background: #f59e0b; color: white; padding: 0.4rem 0.8rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10; border: 2px solid white;">
+                                            <i data-lucide="flame" style="width: 12px; height: 12px;"></i>
+                                            <span th:text="#{animal.auto.alta.demanda}"></span>
+                                        </div>
+
+                                        <!-- Botón Favorito (Top Right) -->
+                                        <div th:if="${isAuthenticated}"
+                                            style="position: absolute; top: 1rem; right: 1rem; z-index: 20;">
+                                            <button
+                                                th:if="${misFavoritosIds != null and misFavoritosIds.contains(a.id())}"
+                                                type="button" class="btn-favorito active"
+                                                th:attr="hx-post=@{/web/animales/{id}/favorito(id=${a.id()}, source='lista')}"
+                                                hx-swap="outerHTML">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                    viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2"
+                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    <path
+                                                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                                    </path>
+                                                </svg>
+                                            </button>
+                                            <button
+                                                th:unless="${misFavoritosIds != null and misFavoritosIds.contains(a.id())}"
+                                                type="button" class="btn-favorito"
+                                                th:attr="hx-post=@{/web/animales/{id}/favorito(id=${a.id()}, source='lista')}"
+                                                hx-swap="outerHTML">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path
+                                                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                                    </path>
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <!-- Hover Overlay con Botón -->
+                                        <div class="card-info-overlay">
+                                            <div style="text-align: center; width: 100%;">
+                                                <button th:attr="hx-get=@{/web/animales/{id}/detalle(id=${a.id()})}"
+                                                    hx-target="#modal-host" class="btn btn-primary"
+                                                    style="width: 80%; justify-content: center; margin-bottom: 1rem; border-radius: 50px; padding: 0.8rem;">
+                                                    <i data-lucide="info"></i>
+                                                    <span th:text="#{animal.auto.conoceme}"></span>
+                                                </button>
+                                                <div th:if="${isVoluntario}"
+                                                    style="display: flex; justify-content: center; gap: 10px;">
+                                                    <a th:href="@{/web/historiales(animalId=${a.id()})}"
+                                                        class="btn-icon" title="Historial Médico"
+                                                        style="background: rgba(16, 185, 129, 0.2); color: white;">
+                                                        <i data-lucide="stethoscope" style="width: 18px;"></i>
+                                                    </a>
+                                                    <a th:hx-get="@{/web/animales/{id}/editar(id=${a.id()})}"
+                                                        hx-target="#contenido-dinamico" hx-push-url="true"
+                                                        class="btn-icon" title="Editar"
+                                                        style="background: rgba(255,255,255,0.2); color: white;">
+                                                        <i data-lucide="edit-2" style="width: 18px;"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body-glass" style="padding: 1.2rem;">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <h3 class="animal-name" th:text="${a.nombre()}"
+                                                style="font-weight: 800; margin: 0; font-size: 1.1rem;">Nombre</h3>
+                                            <i th:if="${a.sexo() == 'MACHO'}" data-lucide="mars"
+                                                style="width: 15px; height: 15px; color: #3b82f6; stroke-width: 2.5;"
+                                                title="Macho"></i>
+                                            <i th:if="${a.sexo() == 'HEMBRA'}" data-lucide="venus"
+                                                style="width: 15px; height: 15px; color: #ec4899; stroke-width: 2.5;"
+                                                title="Hembra"></i>
+                                        </div>
+                                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0.2rem 0 0 0;"
+                                            th:text="${a.raza()}">Raza</p>
+                                    </div>
+                                </div>
+                            </th:block>
+                        </div>
+                        <!-- Empty State Público -->
+                        <div th:if="${#lists.isEmpty(animales)}"
+                            style="text-align:center; padding:5rem 2rem; background:white; border-radius:24px; border: 1px solid var(--border); margin-top: 1rem;">
+                            <i data-lucide="dog"
+                                style="width:48px; height:48px; margin-bottom:1rem; color: var(--text-muted); opacity: 0.3;"></i>
+                            <p style="color: var(--text-muted); font-weight: 600;"
+                                th:text="${selectedFavoritos} ? #{animal.favoritos.empty} : #{animal.search.empty}">
+                            </p>
+                        </div>
+
+                        <!-- Paginación Público -->
+                        <div
+                            th:replace="~{fragments/pagination :: controls(pagination=${pagination}, target='#animal-list-container', url='/web/animales')}">
+                        </div>
+                        <!-- Special Sections -->
+                        <section class="special-section" th:if="${!isAdmin and not #lists.isEmpty(animales)}"
+                            style="margin-top: 5rem; padding-top: 3rem; border-top: 1px solid rgba(0,0,0,0.05);">
+                            <h2
+                                style="font-weight: 800; margin-bottom: 2.5rem; color: var(--text-main); display: flex; align-items: center; gap: 0.75rem;">
+                                <i data-lucide="sparkles" style="color: var(--secondary);"></i>
+                                <span th:text="#{animal.auto.no.te.olvides.de}"></span>
+                            </h2>
+                            <div
+                                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+                                <!-- Card 1 -->
+                                <div class="special-card glass-card hover-lift"
+                                    style="padding: 2.5rem; cursor: pointer; transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.05); position: relative; background: white;"
+                                    hx-get="/web/animales?edad=SENIOR" hx-target="#contenido-dinamico"
+                                    hx-push-url="true" hx-swap="innerHTML show:top">
+                                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
+                                        <div
+                                            style="background: rgba(255, 140, 0, 0.1); padding: 0.85rem; border-radius: 14px;">
+                                            <i data-lucide="heart" style="color: #FF8C00;"></i>
+                                        </div>
+                                        <h4 style="color: #FF8C00; margin: 0; font-weight: 800; font-size: 1.15rem;"
+                                            th:text="#{animal.auto.symbol.5}"></h4>
+                                    </div>
+                                    <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.7;"
+                                        th:text="#{animal.auto.ellos.tambien.necesitan.amor.y.un.sofa.c}"></p>
+                                    <div
+                                        style="margin-top: 1.5rem; display: flex; align-items: center; gap: 0.5rem; color: #FF8C00; font-weight: 700; font-size: 0.9rem;">
+                                        <span th:text="#{animal.auto.ver.abuelitos}"></span>
+                                        <i data-lucide="arrow-right" style="width: 16px;"></i>
+                                    </div>
+                                </div>
+                                <!-- Card 2 -->
+                                <div class="special-card glass-card hover-lift"
+                                    style="padding: 2.5rem; cursor: pointer; transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.05); position: relative; background: white;"
+                                    hx-get="/web/animales?urgencia=true" hx-target="#contenido-dinamico"
+                                    hx-push-url="true" hx-swap="innerHTML show:top">
+                                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
+                                        <div
+                                            style="background: rgba(79, 70, 229, 0.1); padding: 0.85rem; border-radius: 14px;">
+                                            <i data-lucide="zap" style="color: #4F46E5;"></i>
+                                        </div>
+                                        <h4 style="color: #4F46E5; margin: 0; font-weight: 800; font-size: 1.15rem;"
+                                            th:text="#{animal.auto.symbol.6}"></h4>
+                                    </div>
+                                    <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.7;"
+                                        th:text="#{animal.auto.llevan.tiempo.con.nosotros.o.tienen.nece}"></p>
+                                    <div
+                                        style="margin-top: 1.5rem; display: flex; align-items: center; gap: 0.5rem; color: #4F46E5; font-weight: 700; font-size: 0.9rem;">
+                                        <span th:text="#{animal.auto.ver.urgentes}"></span>
+                                        <i data-lucide="arrow-right" style="width: 16px;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                    </div>
+                </div>
+            </div>
+</body>
+
+</html>

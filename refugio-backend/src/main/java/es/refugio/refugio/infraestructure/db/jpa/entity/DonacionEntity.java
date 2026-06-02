@@ -1,0 +1,51 @@
+package es.refugio.refugio.infraestructure.db.jpa.entity;
+
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Table(name = "donaciones")
+public class DonacionEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(name = "usuario_id", nullable = false)
+    private Integer usuarioId;
+
+    @Column(name = "objetivo_id")
+    private Integer objetivoId;
+
+    @Column(nullable = false, length = 50)
+    private String tipo;
+
+    @Column(nullable = false)
+    private Double cantidad;
+
+    @Column(nullable = false, length = 20)
+    private String frecuencia;
+
+    @Column(nullable = false, columnDefinition = "DATETIME")
+    private LocalDateTime fecha;
+
+    @Column(name = "proxima_fecha_pago", columnDefinition = "DATETIME")
+    private LocalDateTime proximaFechaPago;
+
+    @Column(length = 500)
+    private String descripcion;
+}

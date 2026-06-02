@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{pdf/pdf-layout :: pdf-head-landscape(#{pdf.adopciones.header})}"></th:block>
+</head>
+<body>
+    <div class="watermark" th:text="#{generic.auto.adoptify}"></div>
+    <div class="header-container">
+        <div class="logo-container">
+            <span class="logo-text">[[#{html.auto.adoptify}]]<span class="logo-dot">.</span></span>
+        </div>
+        <div class="meta-container">
+            <div class="doc-title" th:text="#{pdf.adopciones.header}">Listado [[#{html.auto.de}]] adopciones</div>
+            <div class="doc-date" th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}">19/05/2026 09:00</div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+    <h1 th:text="#{pdf.adopciones.header}">Listado [[#{html.auto.de}]] adopciones</h1>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 5%;" th:text="#{pdf.column.id}">ID</th>
+                <th style="width: 8%;" th:text="#{pdf.column.animalId}">ID Animal</th>
+                <th style="width: 15%;" th:text="#{adopcion.table.header.animal}">Animal</th>
+                <th style="width: 10%;" th:text="#{adoptante.field.usuarioId}">ID Adoptante</th>
+                <th style="width: 15%;" th:text="#{adopcion.table.header.persona}">Persona</th>
+                <th style="width: 10%;" th:text="#{pdf.column.solicitudId}">ID Solicitud</th>
+                <th style="width: 10%;" th:text="#{adopcion.table.header.date}">Fecha</th>
+                <th style="width: 8%;" th:text="#{pdf.column.status}">[[#{generic.auto.status}]]</th>
+                <th style="width: 19%;" th:text="#{pdf.column.contrato}">Contrato</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="i : ${adopciones}">
+                <td th:text="${i.id}"></td>
+                <td th:text="${i.animalId}"></td>
+                <td>
+                    <span th:text="${animalesMap != null ? animalesMap.get(i.animalId.toString()) : 'Animal #' + i.animalId}"></span>
+                </td>
+                <td th:text="${i.adoptanteId}"></td>
+                <td>
+                    <span th:text="${adoptanteNombres != null ? adoptanteNombres.get(i.adoptanteId.toString()) : 'Adoptante #' + i.adoptanteId}"></span>
+                </td>
+                <td th:text="${i.solicitudAdopcionId != null ? i.solicitudAdopcionId : '-'}"></td>
+                <td th:text="${i.fechaAdopcion != null} ? ${#temporals.format(i.fechaAdopcion, 'dd/MM/yyyy')} : '-'"></td>
+                <td>
+                    <span class="badge badge-success" th:text="#{enum.EstadoAdopcion.__${i.estado}__}"></span>
+                </td>
+                <td th:text="${i.contrato != null ? i.contrato : '-'}"></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!-- Fragmento de Scripts: Importación de librerías externas (HTMX, Lucide) y configuración de lógica global del cliente -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="scripts" th:remove="tag">
+    <!-- Librerías Externas -->
+    <script src="https://unpkg.com/lucide@latest" onload="if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales/es.global.min.js'></script>
+    
+    <!-- Scripts Estáticos (Lógica Principal) -->
+    <script th:inline="javascript">
+        window.refugioI18n = {
+            securityTitle: /*[[#{js.modal.security.title}]]*/ 'Verificación de Seguridad',
+            securityDesc: /*[[#{js.modal.security.desc}]]*/ 'Por seguridad, confirma tu identidad introduciendo tu contraseña actual.',
+            securityPlaceholder: /*[[#{js.modal.security.placeholder}]]*/ 'Tu contraseña actual',
+            btnVerify: /*[[#{js.modal.security.btn.verify}]]*/ 'Verificar ahora',
+            btnCancel: /*[[#{js.modal.security.btn.cancel}]]*/ 'Cancelar',
+            validating: /*[[#{js.modal.security.validating}]]*/ 'Validando...',
+            deniedTitle: /*[[#{js.modal.security.denied.title}]]*/ 'Acceso Denegado',
+            deniedDesc: /*[[#{js.modal.security.denied.desc}]]*/ 'La contraseña actual no es correcta.',
+            errorTitle: /*[[#{js.modal.security.error.title}]]*/ 'Error de Conexión',
+            errorDesc: /*[[#{js.modal.security.error.desc}]]*/ 'No se pudo contactar con el servicio de seguridad.',
+            btnUpdate: /*[[#{js.modal.security.btn.update}]]*/ 'Actualizar Contraseña',
+            errMismatch: /*[[#{js.modal.security.err.mismatch}]]*/ 'Las contraseñas no coinciden',
+            errLength: /*[[#{js.modal.security.err.length}]]*/ 'La contraseña debe tener al menos 6 caracteres',
+            saving: /*[[#{js.modal.security.saving}]]*/ 'Guardando...',
+            successTitle: /*[[#{js.modal.security.success.title}]]*/ '¡Seguridad actualizada!',
+            successDesc: /*[[#{js.modal.security.success.desc}]]*/ 'Tu contraseña ha sido cambiada correctamente.',
+            errServer: /*[[#{js.modal.security.err.server}]]*/ 'Error en el servidor',
+            errUpdate: /*[[#{js.modal.security.err.update}]]*/ 'Error al actualizar la contraseña',
+            errConnection: /*[[#{js.modal.security.err.connection}]]*/ 'Error de conexión con el servidor',
+            donacionImporte: /*[[#{js.donacion.importe}]]*/ 'Importe de la donación (€)',
+            donacionMensaje: /*[[#{js.donacion.mensaje}]]*/ 'Mensaje o dedicatoria (opcional)',
+            donacionPeso: /*[[#{js.donacion.peso}]]*/ 'Peso aproximado (Kg)',
+            donacionMarca: /*[[#{js.donacion.marca}]]*/ 'Marca y tipo de alimento',
+            donacionUnidades: /*[[#{js.donacion.unidades}]]*/ 'Unidades / Cajas',
+            donacionMedicamento: /*[[#{js.donacion.medicamento}]]*/ 'Nombre y uso del medicamento',
+            donacionCantidad: /*[[#{js.donacion.cantidad}]]*/ 'Cantidad / Unidades',
+            donacionMaterial: /*[[#{js.donacion.material}]]*/ 'Descripción del material',
+            donacionConfirmarMensual: /*[[#{js.donacion.confirmar.mensual}]]*/ 'Confirmar Donación Mensual',
+            donacionConfirmar: /*[[#{js.donacion.confirmar}]]*/ 'Confirmar Donación',
+            donacionPlaceholder15: /*[[#{js.donacion.placeholder.ej15}]]*/ 'Ej: 15',
+            donacionPlaceholder2: /*[[#{js.donacion.placeholder.ej2}]]*/ 'Ej: 2',
+            donacionPlaceholder5: /*[[#{js.donacion.placeholder.ej5}]]*/ 'Ej: 5',
+            mapTitle: /*[[#{js.map.title}]]*/ '¿Cómo deseas llegar?',
+            mapDesc: /*[[#{js.map.desc}]]*/ 'Selecciona tu aplicación favorita para ver la ubicación del refugio.',
+            btnExcellent: /*[[#{js.btn.excellent}]]*/ '¡Excelente!'
+        };
+    </script>
+    <script th:src="@{/js/modules/ui.js}"></script>
+    <script th:src="@{/js/modules/components.js}"></script>
+    <script th:src="@{/js/modules/forms.js}"></script>
+    <script th:src="@{/js/modules/main.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    
+    <script th:inline="javascript">
+        // --- CONFIGURACIÓN GLOBAL DE HTMX ---
+
+        // Integración de Token CSRF para peticiones HTMX
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]');
+            const csrfToken = document.querySelector('meta[name="_csrf"]');
+            if (csrfHeader && csrfToken && evt.detail.verb !== "get") {
+                const headerName = csrfHeader.getAttribute('content');
+                const token = csrfToken.getAttribute('content');
+                if (headerName && token) {
+                    evt.detail.headers[headerName] = token;
+                }
+            }
+        });
+
+        // Reinicialización de componentes tras actualizaciones de HTMX
+        document.body.addEventListener('htmx:afterSettle', (evt) => {
+            const target = evt.detail.target;
+            const targetId = target ? target.id : '';
+            const targetClass = target ? target.className : '';
+            
+            console.log(`DEBUG HTMX: afterSettle en #${targetId} .${targetClass}`);
+
+            // Bloquear scroll si hay un modal abierto
+            if (targetId === 'modal-host') {
+                if (target.innerHTML.trim() !== '') {
+                    document.body.classList.add('modal-open');
+                }
+            }
+
+            // Excluir explícitamente el badge de notificaciones y cualquier elemento dentro de él
+            const isNotification = targetId === 'notif-badge-container' || 
+                                 (target && typeof target.closest === 'function' && target.closest('#notif-badge-container')) ||
+                                 targetClass.includes('notification-badge');
+
+            if (typeof refreshDynamicComponents === 'function' && !isNotification) {
+                console.log("DEBUG HTMX: Ejecutando refreshDynamicComponents");
+                refreshDynamicComponents();
+            } else if (window.lucide && target) {
+                // Si es una actualización menor, solo refrescamos iconos DENTRO del elemento afectado
+                lucide.createIcons({
+                    attrs: { 'class': 'lucide' },
+                    nameAttr: 'data-lucide',
+                    root: target
+                });
+            }
+        });
+
+        // Manejar expiración de sesión (JWT inválido) en peticiones HTMX
+        document.body.addEventListener('htmx:beforeOnLoad', function(evt) {
+            if (evt.detail.xhr && evt.detail.xhr.responseURL) {
+                // Si la URL de respuesta es la página de login (HTMX siguió un 302) o si es 401/403
+                if (evt.detail.xhr.responseURL.includes('/login') || evt.detail.xhr.status === 401 || evt.detail.xhr.status === 403) {
+                    evt.preventDefault(); // Cancelar el swap
+                    // Redirigir a toda la página para evitar bucles anidados
+                    window.location.href = evt.detail.xhr.responseURL.includes('/login') ? evt.detail.xhr.responseURL : '/login';
+                }
+            }
+        });
+
+        // Gestión de estados de carga en formularios
+        document.addEventListener('submit', function (e) {
+            const form = e.target;
+            const btn = form.querySelector('[type="submit"]');
+            if (btn && !btn.hasAttribute('data-no-loading')) {
+                const btnText = btn.querySelector('.btn-text') || btn;
+                btn.disabled = true;
+                const loadingText = /*[[#{generic.btn.saving}]]*/ 'Guardando...';
+                if (btnText === btn) {
+                    btn.dataset.originalText = btn.textContent;
+                    btn.textContent = loadingText;
+                } else {
+                    btnText.dataset.originalText = btnText.textContent;
+                    btnText.textContent = loadingText;
+                }
+            }
+        });
+
+        // Listener para Toasts disparados desde el servidor (HX-Trigger)
+        document.body.addEventListener('showToast', function(evt) {
+            const message = evt.detail.message || evt.detail;
+            const type = evt.detail.type || 'success';
+            if (typeof showToast === 'function') {
+                showToast(message, type);
+            }
+        });
+
+        // Integración de SweetAlert2 con hx-confirm
+        document.body.addEventListener('htmx:confirm', function(evt) {
+            if (evt.target.hasAttribute('hx-confirm')) {
+                evt.preventDefault();
+                Swal.fire({
+                    title: /*[[#{sweetalert.title.seguro}]]*/ '¿Estás seguro?',
+                    text: evt.detail.question,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: /*[[#{sweetalert.btn.proceder}]]*/ 'Sí, proceder',
+                    cancelButtonText: /*[[#{sweetalert.btn.cancelar}]]*/ 'Cancelar',
+                    confirmButtonColor: '#15803d', // var(--primary)
+                    cancelButtonColor: '#be123c',  // var(--danger)
+                    background: '#ffffff',
+                    borderRadius: '24px',
+                    customClass: {
+                        popup: 'premium-swal-popup',
+                        title: 'premium-swal-title',
+                        confirmButton: 'btn-premium primary',
+                        cancelButton: 'btn-premium secondary'
+                    }
+                }).then(function(result) {
+                    if (result.isConfirmed) {
+                        evt.detail.issueRequest(true);
+                    }
+                });
+            }
+        });
+
+        // Celebración de Logros (Polling sutil para nuevos logros)
+        function checkNewAchievements() {
+            if (!document.hidden && typeof celebrateAchievement === 'function') {
+                fetch('/web/notificaciones/check-celebraciones')
+                    .then(response => {
+                        if (response.ok && response.headers.get('X-Celebrate')) {
+                            const rawTitle = response.headers.get('X-Celebrate-Title') || '¡Logro!';
+                            const rawMsg = response.headers.get('X-Celebrate-Msg') || '';
+                            const rawImg = response.headers.get('X-Celebrate-Img') || '';
+                            
+                            // Corregir codificación de espacios (+) a %20 para decodeURIComponent
+                            const title = decodeURIComponent(rawTitle.replace(/\+/g, '%20'));
+                            const msg = decodeURIComponent(rawMsg.replace(/\+/g, '%20'));
+                            const imgUrl = rawImg ? decodeURIComponent(rawImg.replace(/\+/g, '%20')) : null;
+                            
+                            celebrateAchievement(title, msg, imgUrl);
+                        }
+                    }).catch(() => {});
+            }
+        }
+
+        // Solo si está autenticado
+        if (document.querySelector('.notification-btn')) {
+            setInterval(checkNewAchievements, 45000); // Cada 45s revisamos
+            setTimeout(checkNewAchievements, 2000);   // Una vez al cargar
+        }
+
+        // Disparo de carga inicial
+        const initLucide = () => {
+            if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        };
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initLucide);
+        } else {
+            initLucide();
+        }
+    </script>
+</div>
+</body>
+
+</html>
