@@ -12,6 +12,9 @@ public class WebStorageConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // Obtenemos la ruta absoluta de la carpeta uploads
         String uploadPath = Paths.get("uploads/animales").toAbsolutePath().toUri().toString();
+        if (!uploadPath.endsWith("/")) {
+            uploadPath += "/";
+        }
         
         // Mapeamos la URL /api/v1/animales/images/** a la carpeta física
         registry.addResourceHandler("/api/v1/animales/images/**")
