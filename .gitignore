@@ -73,10 +73,7 @@ out/
 build/
 
 # ─── VS Code ─────────────────────────────────────────────────────────────────
-# Se ignoran los settings personales pero SE INCLUYEN launch.json y tasks.json
-.vscode/settings.json
-.vscode/extensions.json
-.vscode/*.code-snippets
+.vscode/
 
 # ─── Sistema Operativo (Windows) ─────────────────────────────────────────────
 Thumbs.db
