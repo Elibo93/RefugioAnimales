@@ -4,6 +4,7 @@ import es.refugio.frontend.web.dto.AdopcionRecord;
 import es.refugio.frontend.web.dto.AnimalRecord;
 import es.refugio.frontend.web.dto.PaginatedResponse;
 import es.refugio.frontend.web.dto.VoluntarioRecord;
+import es.refugio.frontend.web.dto.DonacionRecord;
 import es.refugio.frontend.web.enums.FragmentoContenido;
 import es.refugio.frontend.web.enums.ModelAttribute;
 import es.refugio.frontend.web.enums.ThymTemplates;
@@ -11,12 +12,14 @@ import es.refugio.frontend.service.AnimalService;
 import es.refugio.frontend.service.VoluntarioService;
 import es.refugio.frontend.service.AdopcionService;
 import es.refugio.frontend.service.UsuarioService;
+import es.refugio.frontend.service.DonacionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
+import java.time.LocalDateTime;
 
 /**
  * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Home.
@@ -33,6 +36,8 @@ public class HomeViewController {
     private final VoluntarioService voluntarioService;
     private final AdopcionService adopcionService;
     private final UsuarioService usuarioService;
+    private final DonacionService donacionService;
+    private final es.refugio.frontend.service.TareaService tareaService;
 
     @GetMapping
     public String home(Model model) {
@@ -54,6 +59,31 @@ public class HomeViewController {
         model.addAttribute("totalAnimales", paginatedAnimales.total());
         model.addAttribute("totalVoluntarios", paginatedVoluntarios.total());
         model.addAttribute("totalAdopciones", paginatedAdopciones.total());
+
+        // Calcular datos para las Alertas Críticas (Atención Requerida)
+        long animalesEnTratamientoCount = animales.stream()
+                .filter(a -> "EN_TRATAMIENTO".equals(a.estado()))
+                .count();
+        
+        long tareasVencidasCount = tareaService.fetchAllTareas().stream()
+                .filter(t -> t.fechaLimite() != null 
+                          && t.fechaLimite().isBefore(LocalDateTime.now()) 
+                          && !"COMPLETADA".equals(t.estado()) 
+                          && !"CANCELADA".equals(t.estado()))
+                .count();
+
+        model.addAttribute("animalesEnTratamientoCount", animalesEnTratamientoCount);
+        model.addAttribute("tareasVencidasCount", tareasVencidasCount);
+
+        // Calcular total de donaciones en el último mes (últimos 30 días) que sean de dinero
+        LocalDateTime haceUnMes = LocalDateTime.now().minusDays(30);
+        double totalDonacionesMes = donacionService.fetchAllDonaciones().stream()
+                .filter(d -> d.fecha() != null && d.fecha().isAfter(haceUnMes) && d.cantidad() != null && "DINERO".equals(d.tipo()))
+                .mapToDouble(DonacionRecord::cantidad)
+                .sum();
+        
+        // Redondear a 2 decimales para mostrarlo bien en la vista
+        model.addAttribute("totalDonacionesMes", Math.round(totalDonacionesMes * 100.0) / 100.0);
 
         // Top 3 animales más populares basados en visitas
         List<AnimalRecord> favoritos = animales.stream()

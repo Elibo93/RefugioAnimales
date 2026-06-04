@@ -72,7 +72,7 @@
                     <i data-lucide="heart"></i>
                 </div>
                 <div class="kpi-data">
-                    <h3 th:text="#{generic.auto.240}"></h3>
+                    <h3 th:text="${totalDonacionesMes != null ? totalDonacionesMes + '€' : '0€'}">240€</h3>
                     <p th:text="#{generic.auto.donaciones}"></p>
                     <span class="kpi-trend trend-up" th:text="#{generic.auto.este.mes}"></span>
                 </div>
@@ -124,19 +124,31 @@
                     <h2 class="section-title-v2" th:text="#{generic.auto.atencion.requerida}"></h2>
                 </div>
                 <div class="alerts-container">
-                    <a th:href="@{/web/historiales}" class="alert-item-glass critical interactive-alert">
+                    <!-- Mensaje si no hay alertas -->
+                    <div th:if="${animalesEnTratamientoCount == 0 and tareasVencidasCount == 0}" class="alert-item-glass success" style="background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.2); cursor: default;">
+                        <i data-lucide="check-circle" style="color: #22c55e;"></i>
+                        <div class="alert-content">
+                            <strong style="color: #14532d;">¡Todo en orden!</strong>
+                            <p style="color: #166534;">No hay alertas pendientes en este momento.</p>
+                        </div>
+                    </div>
+
+                    <!-- Alerta de animales enfermos/en tratamiento -->
+                    <a th:if="${animalesEnTratamientoCount > 0}" th:href="@{/web/historiales}" class="alert-item-glass critical interactive-alert">
                         <i data-lucide="alert-triangle"></i>
                         <div class="alert-content">
                             <strong th:text="#{generic.auto.salud.animal}"></strong>
-                            <p th:text="#{generic.auto.3.animales.requieren.revision.veterinari}"></p>
+                            <p th:text="${animalesEnTratamientoCount} + ' animales requieren revisión o están en tratamiento.'"></p>
                         </div>
                         <i data-lucide="chevron-right" class="alert-chevron"></i>
                     </a>
-                    <a th:href="@{/web/tareas}" class="alert-item-glass warning interactive-alert">
+
+                    <!-- Alerta de tareas vencidas -->
+                    <a th:if="${tareasVencidasCount > 0}" th:href="@{/web/tareas}" class="alert-item-glass warning interactive-alert">
                         <i data-lucide="clock"></i>
                         <div class="alert-content">
                             <strong th:text="#{generic.auto.tareas.vencidas}"></strong>
-                            <p th:text="#{generic.auto.hay.5.tareas.criticas.sin.completar.desd}"></p>
+                            <p th:text="'Hay ' + ${tareasVencidasCount} + ' tareas vencidas sin completar.'"></p>
                         </div>
                         <i data-lucide="chevron-right" class="alert-chevron"></i>
                     </a>
@@ -343,7 +355,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
                 <div class="story-visuals" style="position: relative; display: flex; gap: 1rem;">
                     <div style="flex: 1; border-radius: 20px; overflow: hidden; transform: rotate(-3deg); box-shadow: var(--shadow-lg);">
-                        <img src="https://images.unsplash.com/photo-1598133894008-61f7fdb8cc3a?auto=format&fit=crop&w=400&q=80" alt="Antes" style="width: 100%; height: 300px; object-fit: cover;">
+                        <img src="/images/balto_antes.png" alt="Antes" style="width: 100%; height: 300px; object-fit: cover;">
                         <div style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.6); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;" th:text="#{generic.auto.antes}"></div>
                     </div>
                     <div style="flex: 1; border-radius: 20px; overflow: hidden; transform: rotate(3deg); box-shadow: var(--shadow-lg); margin-top: 2rem;">

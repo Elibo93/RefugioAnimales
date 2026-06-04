@@ -226,6 +226,7 @@ aside.app-sidebar .sidebar-section-title .chevron-icon {
     border-radius: 16px;
     border: 1px solid var(--border);
     box-shadow: var(--shadow-sm);
+    overflow: hidden;
 }
 
 .avatar-large {
@@ -237,6 +238,13 @@ aside.app-sidebar .sidebar-section-title .chevron-icon {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .user-fullname {
@@ -244,6 +252,9 @@ aside.app-sidebar .sidebar-section-title .chevron-icon {
     font-weight: 700;
     font-size: 1rem;
     color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .sidebar-menu {

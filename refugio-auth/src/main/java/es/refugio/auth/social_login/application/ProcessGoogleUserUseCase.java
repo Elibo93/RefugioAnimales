@@ -25,8 +25,11 @@ public class ProcessGoogleUserUseCase {
                 .orElseGet(() -> {
                     log.info("Usuario con email {} no existe. Registrando automáticamente vía Google OAuth2.", email);
                     
-                    // Generar un username único a partir del email o nombre
-                    String cleanName = name != null ? name.replaceAll("\\s+", "_").toLowerCase() : "user";
+                    // Generar un username único a partir del primer nombre
+                    String cleanName = "user";
+                    if (name != null && !name.trim().isEmpty()) {
+                        cleanName = name.trim().split("\\s+")[0].toLowerCase();
+                    }
                     String uniqueUsername = cleanName + "_" + UUID.randomUUID().toString().substring(0, 6);
 
                     // Generar una contraseña temporal aleatoria encriptada ya que 'contrasena' no acepta nulos en base de datos
