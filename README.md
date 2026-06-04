@@ -14,7 +14,7 @@ Bienvenido a la plataforma de gestión de **Refugio de Animales**, una solución
 
 > [!IMPORTANT]
 > 🚀 **¿Quieres probar la aplicación rápidamente?**
-> Dirígete a nuestra **[Guía de Inicio Rápido y Pruebas (GUIA_DE_INICIO.md)](file:///home/srromer0/workspace/RefugioAnimales/GUIA_DE_INICIO.md)** para levantar el proyecto con un solo comando y acceder con los usuarios de prueba.
+> Dirígete a nuestra **[Guía de Inicio Rápido y Pruebas (GUIA_DE_INICIO.md)](GUIA_DE_INICIO.md)** para levantar el proyecto con un solo comando y acceder con los usuarios de prueba.
 
 ---
 
