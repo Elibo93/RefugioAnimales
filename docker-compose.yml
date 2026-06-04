@@ -1,5 +1,3 @@
-version: '3.8'
-
 networks:
   refugio_net:
     driver: bridge
