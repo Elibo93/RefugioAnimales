@@ -1,0 +1,57 @@
+<!-- Vista de Opciones de Solicitud: Pantalla de decisión para guiar al usuario entre login o registro previo a la adopción -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="content" class="container" style="max-width: 800px; margin: 4rem auto;">
+    <div class="glass-panel" style="padding: 3rem; text-align: center; border-radius: 32px;">
+        <div style="background: var(--primary-light); color: var(--primary); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
+            <i data-lucide="info" style="width: 40px; height: 40px;"></i>
+        </div>
+        
+        <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--text-main); margin-bottom: 1rem;">
+            [[#{html.auto.un.paso.m.s.para}]] <span th:text="${animal.nombre()}"></span>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto;" th:text="#{solicitud.auto.para.continuar.con.el.proceso.de.adopcio}"></p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            <!-- Opción: Ya tengo cuenta -->
+            <div class="hover-lift glass-card" style="padding: 2rem; border: 1px solid rgba(0,0,0,0.05); text-align: left; background: white;">
+                <h3 style="font-weight: 800; margin-bottom: 1rem;" th:text="#{solicitud.auto.ya.tengo.cuenta}"></h3>
+                <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 2rem;" th:text="#{solicitud.auto.inicia.sesion.para.usar.tus.datos.guarda}"></p>
+                <a th:href="@{/login(redirect='/web/solicitudes/publico/opciones?animalId=' + ${animal.id()})}" 
+                   class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                    <i data-lucide="log-in"></i>
+                    <span th:text="#{solicitud.auto.iniciar.sesion}"></span>
+                </a>
+            </div>
+
+            <!-- Opción: No tengo cuenta -->
+            <div class="hover-lift glass-card" style="padding: 2rem; border: 1px solid var(--primary-light); text-align: left; background: rgba(var(--primary-rgb), 0.02);">
+                <h3 style="font-weight: 800; margin-bottom: 1rem; color: var(--primary);" th:text="#{solicitud.auto.no.tengo.cuenta}"></h3>
+                <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 2rem;" th:text="#{solicitud.auto.crea.tu.cuenta.de.adoptante.y.envia.la.s}"></p>
+                <a th:href="@{/web/solicitudes/publico/registro-y-adopcion(animalId=${animal.id()})}" 
+                   class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    <i data-lucide="user-plus"></i>
+                    <span th:text="#{solicitud.auto.registrarse.y.adoptar}"></span>
+                </a>
+            </div>
+        </div>
+
+        <div style="margin-top: 3rem;">
+            <a th:href="@{/web/home}" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.5rem;" class="hover-underline">
+                <i data-lucide="arrow-left" style="width: 16px;"></i>
+                <span th:text="#{solicitud.auto.volver.al.inicio.1}"></span>
+            </a>
+        </div>
+    </div>
+</div>
+
+</div>
+</body>
+
+</html>

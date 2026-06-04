@@ -1,0 +1,611 @@
+package es.refugio.frontend.web;
+
+import org.springframework.context.i18n.LocaleContextHolder;
+import es.refugio.frontend.web.constants.WebRoutes;
+import es.refugio.frontend.web.dto.*;
+import es.refugio.frontend.web.enums.FragmentoContenido;
+import es.refugio.frontend.web.enums.ModelAttribute;
+import es.refugio.frontend.web.enums.ThymTemplates;
+import es.refugio.frontend.web.dto.VoluntarioRecord;
+import es.refugio.frontend.web.dto.UsuarioEncontradoRecord;
+import es.refugio.frontend.service.MessageService;
+import es.refugio.frontend.web.util.ErrorMessageExtractor;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
+import es.refugio.frontend.service.UsuarioService;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import org.xhtmlrenderer.pdf.ITextRenderer;
+import es.refugio.common.util.ExcelExportHelper;
+import java.io.OutputStream;
+import java.util.*;
+
+/**
+ * Controlador MVC que gestiona las vistas Thymeleaf y la navegación web para Usuario.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
+@Controller
+@RequiredArgsConstructor
+public class UsuarioViewController {
+
+    private static final Logger logger = LoggerFactory.getLogger(UsuarioViewController.class);
+
+    private final UsuarioService usuarioService;
+    private final TemplateEngine templateEngine;
+    private final MessageService messageService;
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(WebRoutes.PERSONAS_BASE)
+    public String listarPersonas(@RequestParam(required = false) String q,
+            @RequestParam(required = false) String rol,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            Model model, HttpServletRequest request) {
+
+        logger.info("Filtrando personas - Query: '{}', Rol: '{}', Page: {}, Size: {}", q, rol, page, size);
+
+        Map<String, Object> modelData = usuarioService.buildListarModelData(q, rol, page, size);
+        model.addAllAttributes(modelData);
+        model.addAttribute(ModelAttribute.Persona_LIST.getName(), modelData.get("personas"));
+        model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_VOLUNTARIO_ADOPTANTE", "ROLE_ADMIN"));
+        model.addAttribute("selectedRol", rol);
+        model.addAttribute("query", q);
+
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
+            return FragmentoContenido.Persona_LIST.getPath();
+        }
+
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_LIST.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(WebRoutes.PERSONAS_NUEVO)
+    public String crearPersonaForm(Model model, HttpServletRequest request) {
+        Map<String, Object> emptyPersona = new HashMap<>();
+        emptyPersona.put("id", null);
+        emptyPersona.put("username", null);
+        emptyPersona.put("email", null);
+        emptyPersona.put("nombre", null);
+        emptyPersona.put("apellido", null);
+        emptyPersona.put("telefono", null);
+        emptyPersona.put("dni", null);
+        emptyPersona.put("direccion", null);
+        emptyPersona.put("fechaNacimiento", null);
+        emptyPersona.put("rol", null);
+        model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), emptyPersona);
+        model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_VOLUNTARIO_ADOPTANTE", "ROLE_ADMIN"));
+
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
+            return FragmentoContenido.Persona_FORM.getPath() + " :: content";
+        }
+
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_FORM.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping(WebRoutes.PERSONAS_NUEVO)
+    public String procesarCreacion(@RequestParam String username,
+            @RequestParam String email,
+            @RequestParam String contrasena,
+            @RequestParam String rol,
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) String apellido,
+            @RequestParam(required = false) String dni,
+            @RequestParam(required = false) String telefono,
+            @RequestParam(required = false) String direccion,
+            @RequestParam(required = false) String fechaNacimiento,
+            RedirectAttributes redirectAttributes) {
+
+        Map<String, Object> userBody = new HashMap<>();
+        userBody.put("username", username);
+        userBody.put("email", email);
+        userBody.put("contrasena", contrasena);
+        userBody.put("rol", rol);
+
+        try {
+            Map<?, ?> createdUser = usuarioService.createUserAuth(userBody);
+            if (createdUser != null && createdUser.get("id") != null) {
+                Integer usuarioId = ((Number) createdUser.get("id")).intValue();
+
+                boolean hasLegalFields = (nombre != null && !nombre.trim().isEmpty()) ||
+                                         (apellido != null && !apellido.trim().isEmpty()) ||
+                                         (dni != null && !dni.trim().isEmpty()) ||
+                                         (telefono != null && !telefono.trim().isEmpty()) ||
+                                         (direccion != null && !direccion.trim().isEmpty()) ||
+                                         (fechaNacimiento != null && !fechaNacimiento.trim().isEmpty());
+
+                if (hasLegalFields) {
+                    // Crear PerfilLegal
+                    Map<String, Object> legalBody = new HashMap<>();
+                    legalBody.put("usuarioId", usuarioId);
+                    legalBody.put("nombre", nombre);
+                    legalBody.put("apellido", apellido);
+                    legalBody.put("dni", dni);
+                    legalBody.put("telefono", telefono);
+                    legalBody.put("direccion", direccion);
+                    legalBody.put("fechaNacimiento",
+                            (fechaNacimiento != null && !fechaNacimiento.isEmpty()) ? fechaNacimiento : "2000-01-01");
+
+                    usuarioService.createPerfilLegal(legalBody);
+                }
+            }
+            redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.usuario_creado"));
+        } catch (Exception e) {
+            logger.error("Error al crear usuario: " + ErrorMessageExtractor.extract(e));
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al crear usuario: " + ErrorMessageExtractor.extract(e));
+        }
+
+        return "redirect:" + WebRoutes.PERSONAS_BASE;
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
+    @GetMapping(WebRoutes.PERSONAS_EDITAR)
+    public String editarPersonaForm(@PathVariable Integer id, Model model, HttpServletRequest request) {
+        UsuarioRecord user = usuarioService.fetchUsuarioById(id);
+        Map<String, Object> persona = new HashMap<>();
+        // Preinicializar todas las claves a nulo para evitar excepciones SpEL
+        persona.put("id", null);
+        persona.put("email", null);
+        persona.put("username", null);
+        persona.put("rol", null);
+        persona.put("createdAt", null);
+        persona.put("nombre", null);
+        persona.put("apellido", null);
+        persona.put("telefono", null);
+        persona.put("dni", null);
+        persona.put("direccion", null);
+        persona.put("fechaNacimiento", null);
+
+        if (user != null) {
+            persona.put("id", user.id());
+            persona.put("email", user.email());
+            persona.put("username", user.username());
+            persona.put("rol", user.rol());
+            persona.put("createdAt", user.createdAt());
+        }
+
+        try {
+            PerfilLegalRecord legal = usuarioService.fetchPerfilLegalByUsuarioId(id);
+            if (legal != null) {
+                persona.put("nombre", legal.nombre());
+                persona.put("apellido", legal.apellido());
+                persona.put("telefono", legal.telefono());
+                persona.put("dni", legal.dni());
+                persona.put("direccion", legal.direccion());
+                persona.put("fechaNacimiento", legal.fechaNacimiento());
+            }
+        } catch (Exception ignored) {
+        }
+
+        model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), persona);
+        model.addAttribute("roles", List.of("ROLE_PUBLICO", "ROLE_VOLUNTARIO", "ROLE_ADOPTANTE", "ROLE_VOLUNTARIO_ADOPTANTE", "ROLE_ADMIN"));
+
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
+            return FragmentoContenido.Persona_FORM.getPath() + " :: content";
+        }
+
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_FORM.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
+    @PostMapping(WebRoutes.PERSONAS_EDITAR)
+    public String procesarEdicion(@PathVariable Integer id,
+            @RequestParam String nombre,
+            @RequestParam String apellido,
+            @RequestParam String email,
+            @RequestParam String username,
+            @RequestParam String telefono,
+            @RequestParam String dni,
+            @RequestParam String fechaNacimiento,
+            @RequestParam(required = false) String rol,
+            @RequestParam(required = false) String direccion,
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes) {
+
+        // 1. Actualizar en Auth
+        Map<String, Object> userBody = new HashMap<>();
+        userBody.put("email", email);
+        userBody.put("username", username);
+        
+        boolean isAdmin = request.isUserInRole("ROLE_ADMIN");
+        if (isAdmin && rol != null) {
+            userBody.put("rol", rol);
+        }
+        
+        usuarioService.updateUserAuth(id, userBody);
+
+        // 2. Actualizar PerfilLegal
+        boolean hasLegalFields = (nombre != null && !nombre.trim().isEmpty()) ||
+                                 (apellido != null && !apellido.trim().isEmpty()) ||
+                                 (dni != null && !dni.trim().isEmpty()) ||
+                                 (telefono != null && !telefono.trim().isEmpty()) ||
+                                 (direccion != null && !direccion.trim().isEmpty()) ||
+                                 (fechaNacimiento != null && !fechaNacimiento.trim().isEmpty());
+
+        boolean shouldUpdateLegal = hasLegalFields;
+        if (!shouldUpdateLegal) {
+            try {
+                PerfilLegalRecord legal = usuarioService.fetchPerfilLegalByUsuarioId(id);
+                if (legal != null) {
+                    shouldUpdateLegal = true;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        if (shouldUpdateLegal) {
+            Map<String, Object> legalBody = new HashMap<>();
+            legalBody.put("usuarioId", id);
+            legalBody.put("nombre", nombre);
+            legalBody.put("apellido", apellido);
+            legalBody.put("dni", dni);
+            legalBody.put("telefono", telefono);
+            legalBody.put("direccion", direccion);
+            legalBody.put("fechaNacimiento", fechaNacimiento);
+            usuarioService.createPerfilLegal(legalBody);
+        }
+
+        redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.perfil_actualizado"));
+        
+        return "redirect:/web/personas/" + id;
+    }
+
+    @PostMapping(WebRoutes.PERSONAS_DETALLE + "/verificar-password")
+    @ResponseBody
+    public ResponseEntity<?> verificarPassword(@PathVariable Integer id, @RequestParam String password) {
+        try {
+            return (ResponseEntity<Map>) usuarioService.verificarPassword(id, password);
+        } catch (HttpClientErrorException.Forbidden e) {
+            logger.warn("Acceso denegado al verificar password para ID {}: {}", id, e.getResponseBodyAsString());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Contraseña actual incorrecta o falta de permisos"));
+        } catch (Exception e) {
+            logger.error("Error al verificar contraseña para usuario {}: {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error al verificar la contraseña"));
+        }
+    }
+
+    @PostMapping(WebRoutes.PERSONAS_DETALLE + "/cambiar-password")
+    @ResponseBody
+    public ResponseEntity<?> cambiarPassword(@PathVariable Integer id, @RequestParam String newPassword) {
+        try {
+            Map<String, String> body = new HashMap<>();
+            body.put("newPassword", newPassword);
+            
+            usuarioService.cambiarPassword(id, body);
+            
+            return ResponseEntity.ok(Map.of("message", "Contraseña actualizada"));
+        } catch (Exception e) {
+            logger.error("Error al cambiar contraseña para usuario {}: {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error al conectar con el servicio de autenticación"));
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping(WebRoutes.PERSONAS_ELIMINAR)
+    public String borrar(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            logger.info("Iniciando borrado coordinado para usuario ID: {}", id);
+
+            try {
+                usuarioService.deletePerfilLegal(id);
+                logger.info("PerfilLegal eliminado con éxito para usuario {}", id);
+            } catch (Exception e) {
+                logger.warn("No se pudo eliminar el PerfilLegal del usuario {} o no existía. Continuando...", id);
+            }
+
+            usuarioService.deleteUsuarioAuth(id);
+            logger.info("Usuario ID {} eliminado con éxito de Auth", id);
+
+            redirectAttributes.addFlashAttribute("successMessage", messageService.getMessage("toast.success.usuario_eliminado"));
+        } catch (Exception e) {
+            logger.error("Error crítico al borrar usuario {}: {}", id, ErrorMessageExtractor.extract(e));
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al borrar usuario: " + ErrorMessageExtractor.extract(e));
+        }
+        return "redirect:" + WebRoutes.PERSONAS_BASE;
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
+    @GetMapping(WebRoutes.PERSONAS_DETALLE)
+    public String verDetalle(@PathVariable Integer id, Model model, HttpServletRequest request) {
+        model.addAttribute("tareas", new ArrayList<>());
+        model.addAttribute("vinculosAnimales", new ArrayList<>());
+        model.addAttribute("animalNames", new HashMap<>());
+
+        UsuarioRecord userAuth = usuarioService.fetchUsuarioById(id);
+        Map<String, Object> persona = new HashMap<>();
+        // Preinicializar todas las claves a nulo para evitar excepciones SpEL
+        persona.put("id", null);
+        persona.put("email", null);
+        persona.put("username", null);
+        persona.put("rol", null);
+        persona.put("createdAt", null);
+        persona.put("nombre", null);
+        persona.put("apellido", null);
+        persona.put("telefono", null);
+        persona.put("dni", null);
+        persona.put("direccion", null);
+        persona.put("fechaNacimiento", null);
+
+        if (userAuth != null) {
+            persona.put("id", userAuth.id());
+            persona.put("email", userAuth.email());
+            persona.put("username", userAuth.username());
+            persona.put("rol", userAuth.rol());
+            persona.put("createdAt", userAuth.createdAt());
+        }
+
+        try {
+            PerfilLegalRecord legal = usuarioService.fetchPerfilLegalByUsuarioId(id);
+            if (legal != null) {
+                persona.put("nombre", legal.nombre());
+                persona.put("apellido", legal.apellido());
+                persona.put("telefono", legal.telefono());
+                persona.put("dni", legal.dni());
+                persona.put("direccion", legal.direccion());
+                persona.put("fechaNacimiento", legal.fechaNacimiento());
+            }
+        } catch (Exception ignored) {
+        }
+
+        model.addAttribute(ModelAttribute.SINGLE_Persona.getName(), persona);
+
+        // Obtener información de Adoptante y enlaces de animales
+        try {
+            AdoptanteRecord adoptante = usuarioService.fetchAdoptanteByUsuarioId(id);
+            model.addAttribute("adoptante", adoptante);
+            if (adoptante != null) {
+                int aId = adoptante.id();
+
+                List<SolicitudAdopcionRecord> solicitudes = usuarioService.fetchSolicitudesAdopcionByAdoptanteId(aId);
+                List<AdopcionRecord> adopciones = usuarioService.fetchAdopcionesByAdoptanteId(aId);
+
+                List<Map<String, Object>> vinculos = new ArrayList<>();
+                Map<String, String> animalNames = new HashMap<>();
+
+                for (SolicitudAdopcionRecord s : solicitudes) {
+                    Map<String, Object> v = new HashMap<>();
+                    v.put("id", s.id());
+                    v.put("animalId", s.animalId());
+                    v.put("tipoVinculo", "SOLICITUD");
+                    v.put("estadoVinculo", s.estado());
+                    v.put("fechaVinculo", s.fecha());
+                    vinculos.add(v);
+                    fetchAnimalName(s.animalId(), animalNames);
+                }
+                for (AdopcionRecord ad : adopciones) {
+                    Map<String, Object> v = new HashMap<>();
+                    v.put("id", ad.id());
+                    v.put("animalId", ad.animalId());
+                    v.put("tipoVinculo", "ADOPCIÓN");
+                    v.put("estadoVinculo", "FINALIZADA");
+                    v.put("fechaVinculo", ad.fechaAdopcion());
+                    vinculos.add(v);
+                    fetchAnimalName(ad.animalId(), animalNames);
+                }
+                model.addAttribute("vinculosAnimales", vinculos);
+                model.addAttribute("animalNames", animalNames);
+            }
+        } catch (Exception ignored) {
+        }
+
+        // Obtener información de Voluntario
+        try {
+            VoluntarioRecord voluntario = usuarioService.fetchVoluntarioByUsuarioId(id);
+            model.addAttribute("voluntario", voluntario);
+
+            if (voluntario != null) {
+                Integer vId = voluntario.id();
+                if (vId != null) {
+                    List<TareaRecord> todasTareas = usuarioService.fetchAllTareas();
+                    List<TareaRecord> misTareas = todasTareas.stream()
+                            .filter(t -> t.voluntarioIds() != null && t.voluntarioIds().contains(vId))
+                            .toList();
+                    model.addAttribute("tareas", misTareas);
+                    
+                    try {
+                        List<Map<String, Object>> disponibilidades = usuarioService.fetchDisponibilidades(vId);
+                        model.addAttribute("disponibilidades", disponibilidades);
+                    } catch (Exception e) {
+                        model.addAttribute("disponibilidades", new ArrayList<>());
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
+        // Gamificación
+        try {
+            model.addAttribute("metricas", usuarioService.fetchMetricasGamificacion(id));
+            model.addAttribute("logrosUsuario", usuarioService.fetchLogrosUsuario(id));
+            model.addAttribute("todosLosLogros", usuarioService.fetchTodosLosLogros());
+        } catch (Exception e) {
+            logger.warn("Error al cargar datos de gamificación para usuario {}: {}", id, e.getMessage());
+        }
+
+        if ("true".equals(request.getHeader("HX-Request")) && !"true".equals(request.getHeader("HX-History-Restore-Request"))) {
+            return FragmentoContenido.Persona_DETALLE.getPath() + " :: content";
+        }
+
+        model.addAttribute(ModelAttribute.FRAGMENTO_CONTENIDO.getName(), FragmentoContenido.Persona_DETALLE.getPath());
+        return ThymTemplates.MAIN_LAYOUT.getPath();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(WebRoutes.PERSONAS_PDF)
+    public void exportarPDF(HttpServletResponse response, @RequestParam(required = false) String rol) throws Exception {
+        List<UsuarioRecord> personasAuth = usuarioService.fetchAllUsuarios();
+        List<PerfilLegalRecord> perfilesLegales = usuarioService.fetchAllPerfilesLegales();
+
+        Map<Integer, PerfilLegalRecord> perfilesMap = new HashMap<>();
+        for (PerfilLegalRecord p : perfilesLegales) {
+            if (p.usuarioId() != null) {
+                perfilesMap.put(p.usuarioId(), p);
+            }
+        }
+
+        List<PersonaCompletaRecord> personasCompletas = new ArrayList<>();
+        for (UsuarioRecord u : personasAuth) {
+            if (rol != null && !rol.isEmpty() && !"ALL".equals(rol)) {
+                if (!String.valueOf(u.rol()).equals(rol))
+                    continue;
+            }
+
+            PerfilLegalRecord perfil = perfilesMap.get(u.id());
+
+            String nombre = perfil != null ? perfil.nombre() : "";
+            String apellido = perfil != null ? perfil.apellido() : "";
+            String dni = perfil != null ? perfil.dni() : "";
+            String telefono = perfil != null ? perfil.telefono() : "";
+            String direccion = perfil != null ? perfil.direccion() : "";
+            String fechaNacimiento = perfil != null ? perfil.fechaNacimiento() : "";
+
+            PersonaCompletaRecord persona = new PersonaCompletaRecord(
+                    u.id(),
+                    u.email(),
+                    u.username(),
+                    u.rol(),
+                    nombre,
+                    apellido,
+                    dni,
+                    telefono,
+                    direccion,
+                    fechaNacimiento
+            );
+
+            personasCompletas.add(persona);
+        }
+
+        Context context = new Context(LocaleContextHolder.getLocale());
+        context.setVariable("personas", personasCompletas);
+        String html = templateEngine.process(ThymTemplates.Persona_LIST_PDF.getPath(), context);
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=usuarios.pdf");
+        OutputStream out = response.getOutputStream();
+        ITextRenderer renderer = new ITextRenderer();
+        renderer.setDocumentFromString(html);
+        renderer.layout();
+        renderer.createPDF(out);
+        out.close();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(WebRoutes.PERSONAS_EXCEL)
+    public void exportarExcel(HttpServletResponse response, @RequestParam(required = false) String rol) throws Exception {
+        List<UsuarioRecord> personasAuth = usuarioService.fetchAllUsuarios();
+        List<PerfilLegalRecord> perfilesLegales = usuarioService.fetchAllPerfilesLegales();
+
+        Map<Integer, PerfilLegalRecord> perfilesMap = new HashMap<>();
+        for (PerfilLegalRecord p : perfilesLegales) {
+            if (p.usuarioId() != null) {
+                perfilesMap.put(p.usuarioId(), p);
+            }
+        }
+
+        List<PersonaCompletaRecord> personasCompletas = new ArrayList<>();
+        for (UsuarioRecord u : personasAuth) {
+            if (rol != null && !rol.isEmpty() && !"ALL".equals(rol)) {
+                if (!String.valueOf(u.rol()).equals(rol))
+                    continue;
+            }
+
+            PerfilLegalRecord perfil = perfilesMap.get(u.id());
+
+            String nombre = perfil != null ? perfil.nombre() : "";
+            String apellido = perfil != null ? perfil.apellido() : "";
+            String dni = perfil != null ? perfil.dni() : "";
+            String telefono = perfil != null ? perfil.telefono() : "";
+            String direccion = perfil != null ? perfil.direccion() : "";
+            String fechaNacimiento = perfil != null ? perfil.fechaNacimiento() : "";
+
+            personasCompletas.add(new PersonaCompletaRecord(
+                    u.id(),
+                    u.email(),
+                    u.username(),
+                    u.rol(),
+                    nombre,
+                    apellido,
+                    dni,
+                    telefono,
+                    direccion,
+                    fechaNacimiento
+            ));
+        }
+
+        byte[] excelBytes = ExcelExportHelper.exportToExcel(
+            "Usuarios",
+            List.of("ID", "Username", "Email", "Nombre", "Apellido", "Teléfono", "DNI", "Rol", "Dirección", "Fecha Nacimiento"),
+            personasCompletas,
+            List.of(
+                PersonaCompletaRecord::id,
+                PersonaCompletaRecord::username,
+                PersonaCompletaRecord::email,
+                PersonaCompletaRecord::nombre,
+                PersonaCompletaRecord::apellido,
+                PersonaCompletaRecord::telefono,
+                PersonaCompletaRecord::dni,
+                PersonaCompletaRecord::rol,
+                p -> p.direccion() != null ? p.direccion() : "-",
+                p -> p.fechaNacimiento() != null ? p.fechaNacimiento() : "-"
+            )
+        );
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=usuarios.xlsx");
+        try (OutputStream out = response.getOutputStream()) {
+            out.write(excelBytes);
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(WebRoutes.PERSONAS_BUSCAR)
+    public String buscarUsuarios(
+            @RequestParam(required = false, defaultValue = "") String q,
+            @RequestParam(required = false) String context,
+            Model model) {
+
+        if (q.trim().isEmpty()) {
+            model.addAttribute("usuariosEncontrados", List.of());
+            return FragmentoContenido.USUARIO_SUGERENCIAS.getPath() + " :: suggestions";
+        }
+
+        List<UsuarioEncontradoRecord> encontrados = usuarioService.buildBuscarSugerenciasModelData(q, context);
+        logger.info("buscarUsuarios - Found {} matched users", encontrados.size());
+        model.addAttribute("usuariosEncontrados", encontrados);
+        model.addAttribute("context", context);
+        return FragmentoContenido.USUARIO_SUGERENCIAS.getPath() + " :: suggestions";
+    }
+
+    private void fetchAnimalName(Object animalId, Map<String, String> names) {
+        if (animalId == null)
+            return;
+        String idStr = String.valueOf(animalId);
+        if (names.containsKey(idStr))
+            return;
+
+        try {
+            AnimalRecord animal = usuarioService.fetchAnimalById(Integer.parseInt(idStr));
+            if (animal != null) {
+                names.put(String.valueOf(animal.id()), animal.nombre());
+            }
+        } catch (Exception e) {
+            names.put(idStr, "Animal #" + idStr);
+        }
+    }
+}

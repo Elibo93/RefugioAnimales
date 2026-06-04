@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Contrato de Adopción</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 1.5cm 1.8cm 1.5cm 1.8cm;
+
+            @top-right {
+                content: "Adoptify - Contrato Oficial de Adopción";
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                font-size: 8.5px;
+                color: #9ca3af;
+                font-weight: 500;
+            }
+
+            @bottom-right {
+                content: "Página " counter(page) " de " counter(pages);
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                font-size: 8.5px;
+                color: #9ca3af;
+            }
+
+            @bottom-left {
+                content: "Documento oficial Adoptify • Carácter vinculante";
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                font-size: 8.5px;
+                color: #9ca3af;
+            }
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #1f2937;
+            margin: 0;
+            padding: 0 0 100px 0;
+            line-height: 1.45;
+            font-size: 10px;
+        }
+
+        .watermark {
+            position: fixed;
+            top: 35%;
+            left: 5%;
+            width: 90%;
+            text-align: center;
+            font-size: 96px;
+            font-weight: bold;
+            color: #f8fafc;
+            z-index: -1000;
+            transform: rotate(-30deg);
+            -webkit-transform: rotate(-30deg);
+            -fs-transform: rotate(-30deg);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            letter-spacing: 12px;
+            opacity: 0.6;
+        }
+
+        .header-container {
+            border-bottom: 3px solid #059669;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .logo-container {
+            float: left;
+            width: 25%;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 800;
+            color: #059669;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-dot {
+            color: #10b981;
+        }
+
+        .meta-container {
+            float: right;
+            text-align: right;
+            margin-top: 5px;
+            width: 70%;
+        }
+
+        .doc-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #111827;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .doc-subtitle {
+            font-size: 9.5px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .clear {
+            clear: both;
+        }
+
+        h2 {
+            font-size: 12px;
+            color: #059669;
+            margin-top: 15px;
+            margin-bottom: 6px;
+            font-weight: 700;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 3px;
+            text-transform: uppercase;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+        }
+
+        .data-table td {
+            padding: 4px 6px;
+            vertical-align: top;
+            border: none;
+        }
+
+        .label {
+            font-weight: 700;
+            color: #4b5563;
+            width: 30%;
+        }
+
+        .value {
+            color: #1f2937;
+            width: 70%;
+        }
+
+        .clauses {
+            text-align: justify;
+            color: #4b5563;
+            margin-top: 5px;
+        }
+
+        .clause-item {
+            margin-bottom: 5px;
+            padding-left: 10px;
+            position: relative;
+        }
+
+        .clause-title {
+            font-weight: 700;
+            color: #374151;
+        }
+
+        .footer-text {
+            margin-top: 15px;
+            font-size: 9.5px;
+            color: #4b5563;
+            line-height: 1.4;
+        }
+
+        .signatures-container {
+            position: absolute;
+            bottom: -130px;
+            left: 0;
+            width: 100%;
+        }
+
+        .signatures-table {
+            width: 100%;
+            margin-top: 0;
+            border-collapse: collapse;
+        }
+
+        .signature-cell {
+            width: 45%;
+            border-top: 1px dashed #9ca3af;
+            text-align: center;
+            padding-top: 10px;
+            vertical-align: top;
+            color: #4b5563;
+            font-size: 9.5px;
+        }
+
+        .spacer-cell {
+            width: 10%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="watermark">ADOPTIFY</div>
+    <div class="header-container">
+        <div class="logo-container">
+            <img th:if="${logoBase64 != null}" th:src="${logoBase64}" alt="Logo" height="100"
+                style="margin-top: 5px;" />
+            <span th:unless="${logoBase64 != null}" class="logo-text">Adoptify<span class="logo-dot">.</span></span>
+        </div>
+        <div class="meta-container">
+            <div class="doc-title">Contrato de Adopción Responsable</div>
+            <div class="doc-subtitle">Refugio de Animales - Huellas de Esperanza</div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+    <h2>1. Datos del Adoptante</h2>
+    <table class="data-table">
+        <tr>
+            <td class="label">Nombre Completo:</td>
+            <td class="value" th:text="${adoptanteNombre + ' ' + adoptanteApellido}">Juan Pérez</td>
+        </tr>
+        <tr>
+            <td class="label">DNI / NIE:</td>
+            <td class="value" th:text="${adoptanteDni}">12345678Z</td>
+        </tr>
+        <tr>
+            <td class="label">Teléfono:</td>
+            <td class="value" th:text="${adoptanteTelefono}">600 000 000</td>
+        </tr>
+        <tr>
+            <td class="label">Dirección:</td>
+            <td class="value" th:text="${adoptanteDireccion}">Calle Falsa 123, Madrid</td>
+        </tr>
+    </table>
+
+    <h2>2. Datos del Animal</h2>
+    <table class="data-table">
+        <tr>
+            <td class="label">Nombre del Animal:</td>
+            <td class="value" th:text="${animalNombre}">Balto</td>
+        </tr>
+        <tr>
+            <td class="label">Especie / Raza:</td>
+            <td class="value"
+                th:text="${animalEspecie == 'OTRO' ? animalEspeciePersonalizada : animalEspecie} + ' / ' + ${animalRaza}">
+                Perro / Husky</td>
+        </tr>
+        <tr>
+            <td class="label">Código Chip:</td>
+            <td class="value" th:text="${animalChip}">123456789789456</td>
+        </tr>
+        <tr>
+            <td class="label">Edad Aproximada:</td>
+            <td class="value" th:text="${animalEdad != null ? animalEdad + ' años' : '-'}">2 años</td>
+        </tr>
+        <tr>
+            <td class="label">Sexo:</td>
+            <td class="value" th:text="${animalSexo}">Macho</td>
+        </tr>
+        <tr>
+            <td class="label">Tamaño:</td>
+            <td class="value" th:text="${animalTamano}">Mediano</td>
+        </tr>
+        <tr>
+            <td class="label">Peso:</td>
+            <td class="value"
+                th:text="${animalPeso != null ? (animalPeso.toString().toLowerCase().contains('kg') ? animalPeso : animalPeso + ' kg') : '-'}">
+                20 kg</td>
+        </tr>
+    </table>
+
+    <h2>3. Cláusulas de Compromiso</h2>
+    <div class="clauses">
+        <div class="clause-item">
+            <span class="clause-title">Primera:</span> El adoptante se compromete a cuidar del animal, proporcionándole
+            alimento, cobijo adecuado y atención veterinaria preventiva y curativa necesaria.
+        </div>
+        <div class="clause-item">
+            <span class="clause-title">Segunda:</span> Queda terminantemente prohibido el maltrato físico o psicológico,
+            el abandono, la cesión no autorizada, o la venta del animal adoptado.
+        </div>
+        <div class="clause-item">
+            <span class="clause-title">Tercera:</span> El refugio se reserva el derecho de realizar visitas de
+            seguimiento programadas o aleatorias para comprobar el bienestar general y de adaptación del animal.
+        </div>
+        <div class="clause-item">
+            <span class="clause-title">Cuarta:</span> En caso de no poder seguir haciéndose cargo del animal, el
+            adoptante deberá contactar de inmediato con el refugio, quien coordinará el retorno del animal de forma
+            prioritaria.
+        </div>
+        <div class="clause-item">
+            <span class="clause-title">Quinta:</span> El adoptante asume toda la responsabilidad civil y penal derivada
+            de la tenencia del animal, eximiendo a Adoptify de cualquier responsabilidad por daños materiales o
+            personales a terceros.
+        </div>
+        <div class="clause-item">
+            <span class="clause-title">Sexta:</span> En cumplimiento de la normativa de protección de datos, Adoptify
+            garantiza que los datos personales del adoptante se tratarán de forma confidencial y exclusiva para la
+            gestión del registro de adopciones, conforme a la LOPD.
+        </div>
+    </div>
+
+    <div class="footer-text">
+        En cumplimiento con la normativa de protección animal vigente, ambas partes firman de mutuo acuerdo el presente
+        contrato vinculante con fecha: <strong th:text="${fechaActual}">10/05/2026</strong>
+    </div>
+
+    <div class="signatures-container">
+        <table class="signatures-table">
+            <tr>
+                <td class="signature-cell">
+                    <strong>Firma del Adoptante</strong><br />
+                    DNI / NIE: <span th:text="${adoptanteDni}"></span>
+                </td>
+                <td class="spacer-cell"></td>
+                <td class="signature-cell">
+                    <strong>Firma por Adoptify</strong><br />
+                    Representante Legal / Administrativo
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</html>

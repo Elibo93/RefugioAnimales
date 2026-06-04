@@ -1,0 +1,48 @@
+package es.refugio.refugio.application.usecase.animal;
+
+import es.refugio.refugio.application.command.animal.EditAnimalCommand;
+import es.refugio.refugio.domain.error.AnimalNotFoundException;
+import es.refugio.refugio.domain.model.animal.Animal;
+import es.refugio.refugio.domain.model.animal.AnimalId;
+import es.refugio.refugio.domain.model.animal.enums.Especie;
+import es.refugio.refugio.domain.model.animal.enums.EstadoAnimal;
+import es.refugio.refugio.domain.model.animal.enums.Tamano;
+import es.refugio.refugio.domain.repository.AnimalRepository;
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
+/**
+ * Caso de uso que encapsula la lógica de negocio de la aplicación para Edit Animal.
+ *
+ * @author Elisabeth
+ * @author Diego
+ */
+public class EditAnimalUseCase {
+
+    private final AnimalRepository animalRepository;
+
+    public Animal update(EditAnimalCommand command) {
+        return animalRepository.getById(command.id())
+                .map(t -> {
+                    t.setNombre(command.nombre());
+                    t.setEspecie(Especie.valueOf(command.especie().toUpperCase()));
+                    t.setEspeciePersonalizada(command.especiePersonalizada());
+                    t.setChipId(command.chipId());
+                    t.setEstado(EstadoAnimal.valueOf(command.estado().toUpperCase()));
+                    t.setEdad(command.edad());
+                    t.setTamano(Tamano.valueOf(command.tamano().toUpperCase()));
+                    t.setDescripcion(command.descripcion());
+                    t.setFoto(command.foto());
+                    t.setPeso(command.peso());
+                    t.setNivelEnergia(command.nivelEnergia());
+                    t.setUrgencia(command.urgencia());
+
+                    return animalRepository.save(t);
+                })
+                .orElseThrow(() -> new AnimalNotFoundException(command.id().getValue()));
+    }
+
+    public void incrementarVisitas(AnimalId id) {
+        animalRepository.incrementarVisitas(id);
+    }
+}

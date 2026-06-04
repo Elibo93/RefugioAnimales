@@ -1,0 +1,274 @@
+<!-- Vista de Formulario de Voluntario: Gestión de altas y edición de perfiles de voluntariado con asignación de especialidades -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="content">
+        <!-- HEADER PREMIUM -->
+        <div class="page-header" style="text-align:center; margin-bottom: 3rem; animation: fadeInDown 0.5s ease-out;">
+            <div style="margin: 0 auto 1.5rem; width: 64px; height: 64px; background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%); color: #0891b2; border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(8, 145, 178, 0.1);">
+                <i data-lucide="heart" style="width: 32px; height: 32px;"></i>
+            </div>
+            <h1 class="page-title" style="font-size: 2.25rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.75rem;">
+                <span th:text="${voluntario.id == null ? (!isAuthenticated ? 'Únete al Equipo' : #messages.msg('voluntario.form.title')) : #messages.msg('voluntario.modal.edit.title')}">Registrar voluntario</span>
+            </h1>
+            <p style="color:var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto;"
+                th:text="${voluntario.id == null ? (!isAuthenticated ? 'Regístrate y ayúdanos a cambiar el destino de nuestros animales' : #messages.msg('voluntario.form.subtitle.create')) : #messages.msg('voluntario.form.subtitle.edit')}">
+                Añada un nuevo voluntario al equipo
+            </p>
+        </div>
+
+        <div style="max-width: 850px; margin: 0 auto; padding-bottom: 5rem;">
+            <!-- CASO: YA EXISTE UNA SOLICITUD (VISTA PREMIUM DE ESTADO) -->
+            <div th:if="${voluntarioExistente != null and voluntario.id == null}" class="card" 
+                 style="padding: 4rem 3rem; border-radius: 32px; border: 1px solid var(--border); background: white; box-shadow: var(--shadow-xl); text-align: center; animation: fadeInUp 0.6s ease-out;">
+                
+                <div th:with="estado=${voluntarioExistente.estado}" style="margin-bottom: 2rem;">
+                    <!-- ICONOS SEGÚN ESTADO -->
+                    <div th:if="${estado == 'PENDIENTE'}" style="margin: 0 auto 2rem; width: 80px; height: 80px; background: #fff7ed; color: #ea580c; border-radius: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(234, 88, 12, 0.1);">
+                        <i data-lucide="clock" style="width: 40px; height: 40px;"></i>
+                    </div>
+                    <div th:if="${estado == 'APROBADO'}" style="margin: 0 auto 2rem; width: 80px; height: 80px; background: #f0fdf4; color: #166534; border-radius: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(22, 101, 52, 0.1);">
+                        <i data-lucide="shield-check" style="width: 40px; height: 40px;"></i>
+                    </div>
+                    <div th:if="${estado == 'RECHAZADO'}" style="margin: 0 auto 2rem; width: 80px; height: 80px; background: #fef2f2; color: #991b1b; border-radius: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(153, 27, 27, 0.1);">
+                        <i data-lucide="alert-octagon" style="width: 40px; height: 40px;"></i>
+                    </div>
+
+                    <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--text-main); margin-bottom: 1rem;" 
+                        th:text="${estado == 'PENDIENTE' ? #messages.msg('voluntario.estado.pendiente.title') : (estado == 'APROBADO' ? #messages.msg('voluntario.estado.aprobado.title') : #messages.msg('voluntario.estado.rechazado.title'))}">
+                        Estado [[#{html.auto.de}]] Solicitud
+                    </h2>
+                    
+                    <p style="color:var(--text-muted); font-size: 1.1rem; max-width: 500px; margin: 0 auto 2.5rem; line-height: 1.6;"
+                       th:text="${estado == 'PENDIENTE' ? #messages.msg('voluntario.estado.pendiente.msg') : (estado == 'APROBADO' ? #messages.msg('voluntario.estado.aprobado.msg') : #messages.msg('voluntario.estado.rechazado.msg'))}">
+                        Mensaje [[#{html.auto.de}]] estado
+                    </p>
+
+                    <div style="display: flex; gap: 1rem; justify-content: center;">
+                        <a href="/" class="btn" style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: #64748b; background: #f1f5f9; text-decoration: none; transition: all 0.3s;" th:text="#{voluntario.auto.volver.al.inicio}"></a>
+                        <a th:if="${estado == 'APROBADO'}" href="/web/tareas" class="btn" style="padding: 1rem 2rem; border-radius: 16px; font-weight: 700; color: white; background: #0891b2; text-decoration: none; transition: all 0.3s; box-shadow: 0 4px 6px -1px rgba(8, 145, 178, 0.2);" th:text="#{voluntario.auto.ver.mis.tareas}"></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORMULARIO (SOLO SI NO HAY REGISTRO PREVIO) -->
+            <div th:if="${voluntarioExistente == null or voluntario.id != null}" class="card" 
+                 style="padding: 3rem; border-radius: 32px; border: 1px solid var(--border); background: white; box-shadow: var(--shadow-xl);">
+                <form id="volunteerForm"
+                    th:action="${voluntario.id == null ? '/web/voluntarios/nuevo' : '/web/voluntarios/' + voluntario.id + '/editar'}"
+                    method="post">
+                    
+                    <input type="hidden" name="usuarioId" th:value="${voluntario.usuarioId}">
+
+                    <!-- SECCIÓN 1: IDENTIFICACIÓN -->
+                    <div class="form-section" style="margin-bottom: 3.5rem;">
+                        <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; color: #0891b2; margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; font-weight: 800;">
+                            <i data-lucide="user-check" style="width: 20px;"></i>
+                            [[#{html.auto.identidad.del.voluntario}]]
+                        </h2>
+
+                        <!-- CASO A: Invitado O Usuario logueado sin PerfilLegal (Registro de identidad) -->
+                        <div th:if="${voluntario.id == null and (!isAuthenticated or (!isAdmin and !perfilLegalExists) or (isAdmin and targetUserId != null and !perfilLegalExists))}">
+                            <!-- ID del usuario si ya está autenticado pero le falta el perfil -->
+                            <input type="hidden" name="idUsuario" th:if="${isAuthenticated}" th:value="${targetUserId != null ? targetUserId : currentUserId}">
+
+                            <div th:if="${!isAuthenticated}" style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start;">
+                                <i data-lucide="info" style="color: #0284c7; width: 22px;"></i>
+                                <p style="margin: 0; font-size: 0.95rem; color: #0369a1; line-height: 1.6;" th:text="#{voluntario.auto.al.enviar.este.formulario.se.creara.tu.c}"></p>
+                            </div>
+                            <div th:if="${isAuthenticated and !isAdmin and !perfilLegalExists}" style="background: #fff7ed; border: 1px solid #ffedd5; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start;">
+                                <i data-lucide="alert-circle" style="color: #ea580c; width: 22px;"></i>
+                                <p style="margin: 0; font-size: 0.95rem; color: #9a3412; line-height: 1.6;" th:text="#{voluntario.auto.necesitamos.completar.tu.informacion.leg}"></p>
+                            </div>
+
+                            <!-- Target User Info Card para Admin cuando no hay Perfil Legal -->
+                            <div th:if="${isAdmin and targetUserId != null and !perfilLegalExists}" style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.25rem; align-items: flex-start; position: relative;">
+                                <a th:href="@{/web/voluntarios/nuevo}" style="position: absolute; top: 1rem; right: 1rem; color: #0284c7; background: transparent; border: none; cursor: pointer; padding: 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s;" onmouseover="this.style.background='#e0f2fe'" onmouseout="this.style.background='transparent'" title="Quitar selección">
+                                    <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+                                </a>
+                                <div style="background: white; color: #0284c7; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid #bae6fd; flex-shrink: 0;">
+                                    <i data-lucide="user" style="width: 20px;"></i>
+                                </div>
+                                <div>
+                                    <p style="margin: 0 0 0.25rem 0; font-size: 0.85rem; color: #0284c7; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Usuario seleccionado</p>
+                                    <p style="margin: 0; font-size: 1rem; color: #0369a1; font-weight: 600;" th:text="${targetUserUsername + ' (' + targetUserEmail + ')'}"></p>
+                                    <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #0c4a6e;">Este usuario aún no tiene un perfil legal. Por favor, rellena los datos a continuación para completarlo antes de darlo de alta.</p>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem;">
+                                <!-- Columna 1: Cuenta de Usuario -->
+                                <div>
+                                    <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-main);">
+                                        <i data-lucide="user"></i> [[#{html.auto.datos.de.la.cuenta}]]
+                                    </h2>
+
+                                    <div class="form-group" th:if="${!isAuthenticated}">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.nombre.de.usuario}">Nombre de usuario</label>
+                                        <input type="text" name="username" required placeholder="Ej: voluntario123" th:value="${form_username}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.nombre}"></label>
+                                        <input type="text" name="nombre" required placeholder="Ej: Juan" th:value="${form_nombre}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.apellidos.1}"></label>
+                                        <input type="text" name="apellido" required placeholder="Ej: Pérez García" th:value="${form_apellido}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                    <div class="form-group" th:if="${!isAuthenticated}">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.email}"></label>
+                                        <input type="email" name="email" required placeholder="tu@email.com" th:value="${form_email}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                    <div class="form-group" th:if="${!isAuthenticated}">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.contrasena}"></label>
+                                        <input type="password" name="contrasena" required th:placeholder="#{generic.auto.password.help}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                </div>
+                                
+                                <!-- Columna 2: Datos del Voluntario -->
+                                <div>
+                                    <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-main);">
+                                        <i data-lucide="home"></i> Datos de Voluntario
+                                    </h2>
+
+                                    <div class="form-group">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{voluntario.auto.dni}"></label>
+                                        <input type="text" name="dni" required placeholder="12345678X" th:value="${form_dni}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">
+                                            <span th:text="#{generic.auto.direccion}"></span>
+                                            <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                                        </label>
+                                        <input type="text" name="direccion" placeholder="Calle, número, piso..." th:value="${form_direccion}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.fecha.de.nacimiento}"></label>
+                                        <input type="date" name="fechaNacimiento" required th:value="${form_fechaNacimiento}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.telefono}"></label>
+                                        <input type="text" name="telefono" required placeholder="Ej: 600000000" th:value="${form_telefono}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CASO B: Admin creando voluntario (Buscador) -->
+                        <div th:if="${isAdmin and voluntario.id == null and targetUserId == null}" class="form-group">
+                            <div style="position: relative;">
+                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{voluntario.auto.buscar.usuario.existente}"></label>
+                                <input type="text" id="user-search" name="q" placeholder="Nombre, email o ID..." autocomplete="off"
+                                       hx-get="/web/personas/buscar?context=voluntario" hx-trigger="keyup changed delay:300ms" hx-target="#user-suggestions"
+                                       style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                <input type="hidden" name="idUsuario" id="usuarioId-input" required>
+                                <div id="user-suggestions" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 100;"></div>
+                            </div>
+                        </div>
+
+                        <!-- CASO C: Edición o Usuario Logueado con PerfilLegal (Solo lectura/confirmación) -->
+                        <div th:if="${voluntario.id != null or (voluntario.id == null and !isAdmin and perfilLegalExists) or (voluntario.id == null and isAdmin and targetUserId != null and perfilLegalExists)}" class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                             <div style="grid-column: span 2; padding: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.5rem; position: relative;">
+                                <a th:if="${voluntario.id == null and isAdmin and targetUserId != null}" th:href="@{/web/voluntarios/nuevo}" style="position: absolute; top: 1rem; right: 1rem; color: #64748b; background: transparent; border: none; cursor: pointer; padding: 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'" title="Quitar selección">
+                                    <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+                                </a>
+                                <div style="background: white; color: #0891b2; width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0;">
+                                    <i data-lucide="user" style="width: 28px;"></i>
+                                </div>
+                                <div>
+                                    <span style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600;" th:text="${voluntario.id != null ? 'Editando Voluntario' : (isAdmin and targetUserId != null ? 'Identidad Confirmada' : 'Tu Perfil')}">Perfil</span>
+                                    <h3 style="margin: 0; font-weight: 800; color: var(--text-main);" th:text="${nombreCompleto ?: currentUserName}">Nombre</h3>
+                                    <p th:if="${perfilExistente and voluntario.id == null}" style="margin: 4px 0 0; font-size: 0.8rem; color: #0891b2; font-weight: 500;">
+                                        <i data-lucide="check-circle" style="width: 12px; vertical-align: middle; margin-right: 4px;"></i>
+                                        [[#{html.auto.informaci.n.legal.confirmada}]]
+                                    </p>
+                                </div>
+                            </div>
+                            
+                             <!-- Datos legales ocultos (para preservarlos sin mostrarlos) -->
+
+                             <!-- ID del usuario y datos legales ocultos (para preservarlos sin mostrarlos) -->
+                             <input type="hidden" name="idUsuario" th:if="${voluntario.id == null}" th:value="${targetUserId != null ? targetUserId : currentUserId}">
+                             <input type="hidden" name="nombre" th:value="${userNombre}">
+                             <input type="hidden" name="apellido" th:value="${userApellido}">
+                             <input type="hidden" name="email" th:value="${userEmail}">
+                             <input type="hidden" name="dni" th:value="${userDni}">
+                             <input type="hidden" name="telefono" th:value="${userPhone}">
+                             <input type="hidden" name="direccion" th:value="${userDireccion}">
+                             <input type="hidden" name="fechaNacimiento" th:value="${userFechaNacimiento}">
+                        </div>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 3rem 0;">
+
+                    <!-- SECCIÓN 2: DETALLES DEL VOLUNTARIADO -->
+                    <div class="form-section">
+                        <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; color: #0891b2; margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; font-weight: 800;">
+                            <i data-lucide="clipboard-list" style="width: 20px;"></i>
+                            [[#{html.auto.detalles.del.compromiso}]]
+                        </h2>
+
+                        <div class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                            <!-- Teléfono y Fecha Nacimiento: Solo se piden aquí si es EDICIÓN por ADMIN, ya que arriba no aparecen -->
+                            <th:block th:if="${voluntario.id != null and isAdmin}">
+                                <div class="form-group">
+                                    <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.telefono}"></label>
+                                    <input type="text" name="telefono" th:value="${userPhone ?: voluntario.telefono}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                </div>
+                                <div class="form-group">
+                                    <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">
+                                        <span th:text="#{generic.auto.direccion}"></span>
+                                        <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                                    </label>
+                                    <input type="text" name="direccion" th:value="${userDireccion ?: voluntario.direccion}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                                </div>
+                            </th:block>
+
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{voluntario.auto.area.de.interes}"></label>
+                                <select id="especialidadSelect" name="especialidad" required onchange="handleEspecialidadChange()"
+                                        style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0; appearance: none; background: white url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') no-repeat right 1.25rem center/1.2rem;">
+                                    <option value="" th:text="#{voluntario.auto.seleccione}"></option>
+                                    <option value="PASEO" th:selected="${voluntario.especialidad == 'PASEO'}" th:text="#{voluntario.auto.paseador.de.perros}"></option>
+                                    <option value="LIMPIEZA" th:selected="${voluntario.especialidad == 'LIMPIEZA'}" th:text="#{voluntario.auto.limpieza.de.instalaciones}"></option>
+                                    <option value="ADMINISTRATIVO" th:selected="${voluntario.especialidad == 'ADMINISTRATIVO'}" th:text="#{voluntario.auto.apoyo.administrativo}"></option>
+                                    <option value="REDES" th:selected="${voluntario.especialidad == 'REDES'}" th:text="#{voluntario.auto.redes.sociales.y.fotos}"></option>
+                                    <option value="OTRA" th:selected="${voluntario.especialidad != null and !#lists.contains({'PASEO','LIMPIEZA','ADMINISTRATIVO','REDES'}, voluntario.especialidad)}" th:text="#{generic.auto.otra}"></option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="especialidadCustomGroup" style="display:none; margin-top: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{voluntario.auto.especifique}"></label>
+                            <input type="text" id="especialidadCustomInput" th:value="${voluntario.especialidad}" style="width: 100%; height: 54px; padding: 0 1.25rem; border-radius: 14px; border: 2px solid #e2e8f0;">
+                        </div>
+
+                        <div class="form-group" style="margin-top: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);" th:text="#{voluntario.auto.disponibilidad}"></label>
+                            <textarea name="disponibilidad" required th:text="${voluntario.disponibilidad}" style="width: 100%; min-height: 120px; padding: 1.25rem; border-radius: 18px; border: 2px solid #e2e8f0; line-height: 1.6;"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- ACCIONES -->
+                    <div class="form-actions" style="--btn-color: #0891b2; --btn-hover: #0e7490; --btn-shadow: rgba(8, 145, 178, 0.2);">
+                        <button type="button" class="btn-form-cancel" onclick="window.history.back()">
+                            <i data-lucide="x" style="width: 18px;"></i>
+                            <span th:text="#{generic.auto.cancelar}"></span>
+                        </button>
+                        <button type="submit" class="btn-form-submit">
+                            <span th:text="${voluntario.id == null ? #messages.msg('voluntario.btn.enviar_solicitud') : #messages.msg('voluntario.btn.guardar_cambios')}">Enviar</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,18 @@
+/* =============================================
+   AUTH (Login + Registro)
+   Extraído de: login.html, registro.html
+   ============================================= */
+
+.fade-in-up {
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Nota: @keyframes fadeInUp ya está definido en admin-dashboard-home.css
+   con la misma definición (translateY(30px)). No se duplica aquí. */
+
+/* Acotado a .glass-card para no afectar otros formularios del sistema */
+.glass-card input:focus {
+    border-color: var(--primary) !important;
+    background: white !important;
+    box-shadow: 0 0 0 4px var(--primary-light) !important;
+}

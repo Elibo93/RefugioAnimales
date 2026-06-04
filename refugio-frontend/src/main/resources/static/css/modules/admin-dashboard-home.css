@@ -1,0 +1,444 @@
+/* 6-ADMIN-DASHBOARD-HOME */
+
+.admin-hero {
+    margin: 2rem 0;
+    padding: 3rem 2rem;
+    background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%);
+    color: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.admin-welcome-card {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3.5rem;
+    border-radius: 40px;
+    text-align: left;
+    color: var(--text-main) !important;
+    /* Texto oscuro sobre el cristal blanco */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+.admin-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    letter-spacing: -0.04em;
+    color: var(--text-main);
+}
+
+.admin-subtitle {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    max-width: 800px;
+}
+
+.badge-admin {
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 99px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.kpi-card {
+    padding: 2rem;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.kpi-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.kpi-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.kpi-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.quick-actions-admin {
+    margin-bottom: 4rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    color: var(--text-main);
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2.5rem;
+    border-radius: 24px;
+    text-decoration: none;
+    color: var(--text-main);
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.action-btn i {
+    font-size: 2rem;
+    color: var(--primary);
+}
+
+.action-btn:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.action-btn:hover i {
+    color: white;
+}
+
+/* Barra de búsqueda flotante */
+.search-bar-floating {
+    position: relative;
+    z-index: 20;
+    margin-top: -60px;
+    background: white;
+    padding: 1rem 2rem;
+    border-radius: 9999px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid var(--border);
+}
+
+.search-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.search-field label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+}
+
+.search-field select {
+    border: none;
+    padding: 0;
+    font-weight: 400;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.btn-search {
+    background: var(--primary);
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-search:hover {
+    transform: rotate(90deg) scale(1.1);
+    background: var(--primary-hover);
+}
+
+/* Contador de impacto */
+.impact-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    padding: 4rem 1.5rem;
+    background: white;
+    border-radius: 24px;
+    margin: 4rem 0;
+    box-shadow: var(--shadow);
+}
+
+.impact-item {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.impact-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.impact-number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.impact-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+/* Happy Endings Carousel */
+.stories-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.story-card {
+    background: white;
+    border-radius: 24px;
+    padding: 2rem;
+    display: none;
+    gap: 2rem;
+    align-items: center;
+    box-shadow: var(--shadow);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.story-img {
+    width: 250px;
+    height: 250px;
+    border-radius: 20px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.story-quote {
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--text-main);
+    margin-bottom: 1rem;
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.story-quote::before {
+    content: '"';
+    position: absolute;
+    left: 0;
+    top: -10px;
+    font-size: 3rem;
+    color: var(--color-adopt);
+    opacity: 0.3;
+}
+
+.story-author {
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.story-card.active {
+    animation: fadeInUp 0.5s ease-out forwards;
+    display: flex !important;
+}
+
+.carousel-control {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    color: var(--primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.carousel-control:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: var(--shadow-lg);
+}
+
+.carousel-control.prev {
+    left: -10px;
+}
+
+.carousel-control.next {
+    right: -10px;
+}
+
+@media (max-width: 768px) {
+    .carousel-wrapper {
+        padding: 0 10px !important;
+    }
+
+    .carousel-control {
+        width: 40px;
+        height: 40px;
+    }
+
+    .carousel-control.prev {
+        left: 0;
+    }
+
+    .carousel-control.next {
+        right: 0;
+    }
+}
+
+
+/* Botones de acción rápidos en Grid */
+.btn-edit-small,
+.btn-delete-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-edit-small {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3B82F6;
+}
+
+.btn-edit-small:hover {
+    background: #3B82F6;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-view-small {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8B5CF6;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-view-small:hover {
+    background: #8B5CF6;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-delete-small {
+
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+}
+
+.btn-delete-small:hover {
+    background: #EF4444;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-edit-small i,
+.btn-delete-small i {
+    width: 16px;
+    height: 16px;
+}
+
+/* Estilos para campos de Solo Lectura */
+.readonly-group label {
+    color: var(--text-muted) !important;
+}
+
+.readonly-group input,
+.readonly-group select {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    color: var(--text-muted) !important;
+    cursor: not-allowed !important;
+    pointer-events: none;
+    /* Evita cualquier interacción */
+}
+
+.readonly-group input:focus,
+.readonly-group select:focus {
+    box-shadow: none !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{pdf/pdf-layout :: pdf-head-landscape(#{pdf.voluntarios.header})}"></th:block>
+    <style>
+        table { font-size: 8.0px; }
+        th { font-size: 7.5px; padding: 5px 6px; }
+        td { padding: 5px 6px; }
+    </style>
+</head>
+<body>
+    <div class="watermark" th:text="#{generic.auto.adoptify}"></div>
+    <div class="header-container">
+        <div class="logo-container">
+            <span class="logo-text">[[#{html.auto.adoptify}]]<span class="logo-dot">.</span></span>
+        </div>
+        <div class="meta-container">
+            <div class="doc-title" th:text="#{pdf.voluntarios.header}">Listado oficial [[#{html.auto.de}]] voluntarios</div>
+            <div class="doc-date" th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}">19/05/2026 09:00</div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+    <h1 th:text="#{pdf.voluntarios.header}">Listado oficial [[#{html.auto.de}]] voluntarios</h1>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 3%;" th:text="#{pdf.column.id}">ID</th>
+                <th style="width: 7%;" th:text="#{adoptante.field.usuarioId}">ID Usuario</th>
+                <th style="width: 8%;" th:text="#{pdf.column.username}">Username</th>
+                <th style="width: 11%;" th:text="#{pdf.column.email}">[[#{generic.auto.email}]]</th>
+                <th style="width: 9%;" th:text="#{pdf.column.name}">Nombre</th>
+                <th style="width: 9%;" th:text="#{pdf.column.surname}">Apellido</th>
+                <th style="width: 8%;" th:text="#{pdf.column.dni}">DNI</th>
+                <th style="width: 8%;" th:text="#{pdf.column.phone}">Teléfono</th>
+                <th style="width: 11%;" th:text="#{pdf.column.address}">Dirección</th>
+                <th style="width: 7%;" th:text="#{pdf.column.birthdate}">F. Nacimiento</th>
+                <th style="width: 8%;" th:text="#{pdf.column.specialty}">Especialidad</th>
+                <th style="width: 7%;" th:text="#{pdf.column.availability}">Disponibilidad</th>
+                <th style="width: 4%;" th:text="#{pdf.column.status}">[[#{generic.auto.status}]]</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="p : ${voluntarios}" th:with="pl=${perfilesMap != null ? perfilesMap['' + p.usuarioId] : null}, u=${usuariosMap != null ? usuariosMap['' + p.usuarioId] : null}">
+                <td th:text="${p.id}"></td>
+                <td th:text="${p.usuarioId}"></td>
+                <td th:text="${u != null ? u.username : '-'}"></td>
+                <td th:text="${u != null ? u.email : '-'}"></td>
+                <td th:text="${pl != null ? pl.nombre : '-'}"></td>
+                <td th:text="${pl != null ? pl.apellido : ''}"></td>
+                <td th:text="${pl != null ? pl.dni : '-'}"></td>
+                <td th:text="${pl != null ? pl.telefono : '-'}"></td>
+                <td th:text="${pl != null ? pl.direccion : '-'}"></td>
+                <td th:text="${pl != null ? pl.fechaNacimiento : '-'}"></td>
+                <td th:text="${p.especialidad != null ? (#messages.msgOrNull('enum.EspecialidadVoluntario.' + p.especialidad) ?: #strings.capitalize(#strings.toLowerCase(p.especialidad))) : 'General'}"></td>
+                <td th:text="${p.disponibilidad != null ? p.disponibilidad : '-'}"></td>
+                <td>
+                    <span class="badge" 
+                          th:classappend="${p.estado == 'APROBADO' ? 'badge-success' : (p.estado == 'RECHAZADO' ? 'badge-danger' : 'badge-warning')}"
+                          th:text="#{enum.EstadoVoluntario.__${p.estado}__}"></span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!-- Vista de Listado de Personas: Gestión administrativa de usuarios con filtros de búsqueda y rol -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="content">
+
+        <div class="table-wrapper" style="padding-top: 1.7rem;">
+            <!-- BARRA DE ACCIONES SUPERIOR -->
+            <div class="actions-bar admin-actions-bar" style="border-bottom: none; margin-bottom: 1rem;">
+                
+                <!-- 1. TÍTULO E ICONO -->
+                <div class="admin-title-container">
+                    <div class="admin-title-icon-box">
+                        <i data-lucide="users" style="width: 24px;"></i>
+                    </div>
+                    <div>
+                        <h1 class="admin-title-text" th:text="#{persona.list.title}">Personas</h1>
+                        <p class="admin-title-desc" th:text="#{persona.auto.gestiona.usuarios}">Gestión de usuarios y accesos</p>
+                    </div>
+                </div>
+
+                <!-- 3. ACCIONES Y EXPORTACIÓN (Movidas a la derecha) -->
+
+                <!-- 3. ACCIONES Y EXPORTACIÓN -->
+                <div class="admin-actions-group">
+                    <a th:href="@{/web/personas/pdf(rol=${selectedRol})}" target="_blank" title="Exportar listado a PDF" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/pdf.png" alt="PDF" class="admin-export-img">
+                    </a>
+                    <a th:href="@{/web/personas/excel(rol=${selectedRol})}" target="_blank" title="Exportar listado a Excel" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/excel.png" alt="Excel" class="admin-export-img">
+                    </a>
+                    <a class="btn btn-primary" th:href="@{/web/personas/nuevo}">
+                        <i data-lucide="plus" style="width:18px;"></i>
+                        <span th:text="#{generic.link.create}">+ Nuevo persona</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. FILTROS Y BÚSQUEDA (Barra separada) -->
+            <div class="admin-filters-bar">
+                <form id="personas-admin-form" onsubmit="return false;"
+                    style="display: flex; align-items: center; gap: 1rem; width: 100%;">
+                    
+                    <!-- Buscador -->
+                    <div style="flex: 3; position: relative;">
+                        <i data-lucide="search" class="admin-search-icon"></i>
+                        <input type="text" id="personas-search-input" name="q" th:value="${query}" placeholder="Buscar por nombre, usuario, email..."
+                            hx-get="/web/personas" hx-trigger="keyup changed delay:800ms"
+                            hx-target="#personas-results-container" hx-vals='{"page": 1}'
+                            hx-select="#personas-results-container" hx-swap="outerHTML"
+                            hx-include="#personas-role-select" class="form-control admin-search-input-medium">
+                    </div>
+
+                    <!-- Filtro Rol -->
+                    <div style="flex: 1.2; position: relative; min-width: 140px;">
+                        <i data-lucide="filter" class="admin-filter-icon"></i>
+                        <select id="personas-role-select" name="rol" hx-get="/web/personas" hx-trigger="change"
+                            hx-vals='{"page": 1}' hx-target="#personas-results-container"
+                            hx-select="#personas-results-container" hx-swap="outerHTML"
+                            hx-include="#personas-search-input" class="form-control admin-filter-select-medium">
+                            <option value="ALL" th:selected="${selectedRol == 'ALL' or selectedRol == null}" th:text="#{persona.auto.todos.los.roles}"></option>
+                            <option value="ROLE_PUBLICO" th:selected="${selectedRol == 'ROLE_PUBLICO'}" th:text="#{persona.auto.simpatizantes}"></option>
+                            <option value="ROLE_VOLUNTARIO" th:selected="${selectedRol == 'ROLE_VOLUNTARIO'}" th:text="#{home.auto.voluntarios}"></option>
+                            <option value="ROLE_ADOPTANTE" th:selected="${selectedRol == 'ROLE_ADOPTANTE'}" th:text="#{home.auto.adoptantes}"></option>
+                            <option value="ROLE_VOLUNTARIO_ADOPTANTE" th:selected="${selectedRol == 'ROLE_VOLUNTARIO_ADOPTANTE'}" th:text="#{enum.Rol.ROLE_VOLUNTARIO_ADOPTANTE}"></option>
+                            <option value="ROLE_ADMIN" th:selected="${selectedRol == 'ROLE_ADMIN'}" th:text="#{persona.auto.administradores}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Botón Limpiar -->
+                    <a th:href="@{/web/personas}" class="btn-icon admin-btn-clear-medium" title="Limpiar Filtros">
+                        <i data-lucide="rotate-ccw" style="width: 16px;"></i>
+                    </a>
+                </form>
+            </div>
+
+            <!-- LISTA PREMIUM DE PERSONAS -->
+            <div class="premium-list-container">
+                <!-- Encabezados -->
+                <div th:if="${not #lists.isEmpty(personas)}" class="premium-grid-header grid-cols-personas admin-list-header">
+                    <div class="cell-padded-left cell-left" th:text="#{generic.auto.nombre.completo}"></div>
+                    <div class="cell-center" th:text="#{persona.auto.rol.de.sistema}"></div>
+                    <div class="cell-center" th:text="#{persona.auto.datos.de.contacto}"></div>
+                    <div class="cell-center" th:text="#{generic.auto.acciones}"></div>
+                </div>
+
+                <div id="personas-results-container">
+                <div class="list-body" th:fragment="list-body" style="display: flex; flex-direction: column; gap: 12px; margin-top: 1rem;">
+                    <!-- Mensaje si no hay resultados -->
+                    <div th:if="${#lists.isEmpty(personas)}" 
+                          style="background: white; padding: 4rem 2rem; border-radius: 16px; border: 1px dashed var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; text-align: center;">
+                        <div style="background: var(--bg-main); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i data-lucide="search-x" style="width: 32px; color: var(--text-muted);"></i>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; color: var(--text-main); font-weight: 700;" th:text="#{persona.auto.no.se.encontraron.personas}"></h3>
+                            <p style="margin: 5px 0 0; color: var(--text-muted); font-size: 0.9rem;" th:text="#{persona.auto.prueba.con.otros.terminos.de.busqueda.o}"></p>
+                        </div>
+                        <a th:href="@{/web/personas}" 
+                           hx-get="/web/personas" 
+                           hx-target="#personas-results-container"
+                           hx-select="#personas-results-container"
+                           hx-swap="outerHTML"
+                           class="btn-premium secondary" style="height: 40px; padding: 0 1.5rem;" th:text="#{generic.auto.ver.todos}"></a>
+                    </div>
+
+                    <div th:each="a : ${personas}" class="premium-row-card borderless premium-grid-row grid-cols-personas" th:id="'row-' + ${a.id}">
+                        <!-- 1. Detalles (Icono + ID + Nombre + Usuario) -->
+                        <div class="row-cell cell-left">
+                            <div style="display: flex; align-items: center; gap: 16px; margin-left: 1rem;">
+                                <!-- Icono -->
+                                <div class="task-icon-box"
+                                    th:styleappend="'background: ' + (${a.rol.toString().contains('ADMIN') ? '#fee2e2' : (a.rol.toString().contains('VOLUNTARIO_ADOPTANTE') ? '#fef3c7' : (a.rol.toString().contains('VOLUNTARIO') ? '#e0f2fe' : (a.rol.toString().contains('ADOPTANTE') ? '#f3e8ff' : (a.rol.toString().contains('PUBLICO') ? '#dcfce7' : '#f1f5f9'))))})">
+                                    <i th:data-lucide="${a.rol.toString().contains('ADMIN') ? 'shield' : (a.rol.toString().contains('VOLUNTARIO_ADOPTANTE') ? 'star' : (a.rol.toString().contains('VOLUNTARIO') ? 'clipboard-list' : (a.rol.toString().contains('ADOPTANTE') ? 'heart' : (a.rol.toString().contains('PUBLICO') ? 'user' : 'user'))))}"
+                                        th:style="'width: 20px; color: ' + (${a.rol.toString().contains('ADMIN') ? '#ef4444' : (a.rol.toString().contains('VOLUNTARIO_ADOPTANTE') ? '#d97706' : (a.rol.toString().contains('VOLUNTARIO') ? '#0ea5e9' : (a.rol.toString().contains('ADOPTANTE') ? '#a855f7' : (a.rol.toString().contains('PUBLICO') ? '#22c55e' : '#64748b'))))})"></i>
+                                </div>
+                                
+                                <!-- Textos -->
+                                <div style="overflow: hidden;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="color: #94a3b8; font-weight: 700; font-size: 0.8rem;" th:text="${'#' + a.id}"></span>
+                                        <a th:href="@{/web/personas/{id}(id=${a.id})}"
+                                            style="font-weight: 800; color: var(--text-main); font-size: 1.05rem; text-decoration: none;"
+                                            th:text="${a.nombre != null && !#strings.isEmpty(a.nombre) ? (a.nombre + ' ' + (a.apellido ?: '')) : a.username}">Juan Pérez</a>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+                                        <i data-lucide="at-sign" style="width: 14px; color: var(--text-muted); stroke-width: 2.5;"></i>
+                                        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;"
+                                            th:text="${a.username}">juanp</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rol -->
+                        <div class="row-cell cell-center">
+                            <span class="badge-premium"
+                                th:classappend="${a.rol.toString().contains('ADMIN') ? 'danger' : (a.rol.toString().contains('VOLUNTARIO_ADOPTANTE') ? 'warning' : (a.rol.toString().contains('VOLUNTARIO') ? 'info' : (a.rol.toString().contains('ADOPTANTE') ? 'primary' : 'success')))}"
+                                th:text="${#messages.msg('enum.Rol.' + a.rol.toString())}">Rol</span>
+                        </div>
+
+                        <!-- Contacto -->
+                        <div class="row-cell cell-center"
+                            style="flex-direction: column; gap: 2px;">
+                            <div
+                                style="display: flex; align-items: center; gap: 6px; color: var(--text-main); font-weight: 600; font-size: 0.9rem;">
+                                <i data-lucide="mail" style="width: 14px; color: var(--text-muted);"></i>
+                                <span th:text="${a.email}">juan@mail.com</span>
+                            </div>
+                            <div
+                                style="display: flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 0.8rem;">
+                                <i data-lucide="phone" style="width: 12px;"></i>
+                                <span
+                                    th:text="${a.telefono != null ? a.telefono : 'Sin teléfono'}">600...</span>
+                            </div>
+                        </div>
+
+                        <!-- Acciones -->
+                        <div class="row-cell cell-center" style="gap: 12px;">
+                            <a class="btn-action-premium edit" th:href="@{/web/personas/{id}/editar(id=${a.id})}"
+                                title="Editar">
+                                <i data-lucide="edit-2" style="width: 18px;"></i>
+                            </a>
+                            <button class="btn-action-premium delete" th:hx-post="@{/web/personas/{id}/borrar(id=${a.id})}"
+                                th:hx-target="'#row-' + ${a.id}" hx-swap="outerHTML swap:0.3s"
+                                th:hx-confirm="#{confirm.persona.eliminar}">
+                                <i data-lucide="trash-2" style="width: 18px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Paginación Premium -->
+                <div th:replace="~{fragments/pagination :: controls(pagination=${pagination}, target='#personas-results-container', url='/web/personas')}" style="margin-top: 1.5rem;"></div>
+            </div>
+
+            </div>
+        </div>
+    </div>
+
+    </div>
+</body>
+
+</html>

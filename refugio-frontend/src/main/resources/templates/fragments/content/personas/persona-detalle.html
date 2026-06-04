@@ -1,0 +1,638 @@
+<!-- Vista de Detalle de Persona: Perfil completo del usuario con datos legales, actividad y vínculos operativos -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="content" class="fade-in" style="max-width: 1100px; margin: 0 auto; padding: 20px;">
+    
+    <!-- HEADER PREMIUM: IDENTIDAD VISUAL -->
+    <div class="profile-header-card" style="background: white; border-radius: 32px; overflow: hidden; box-shadow: var(--shadow-lg); margin-bottom: 2rem; border: 1px solid var(--border);">
+        <div style="height: 160px; background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%); position: relative;">
+            <!-- Decoración sutil -->
+            <div style="position: absolute; right: -50px; top: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
+            <div style="position: absolute; left: 10%; bottom: -10px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 20px; transform: rotate(15deg);"></div>
+        </div>
+        
+        <div style="padding: 0 40px 40px; position: relative;">
+            <div style="display: flex; align-items: flex-end; gap: 30px; margin-top: -80px;">
+                <!-- Avatar Dinámico -->
+                <div style="width: 160px; height: 160px; border-radius: 40px; background: white; padding: 8px; box-shadow: var(--shadow-lg);">
+                    <div style="width: 100%; height: 100%; border-radius: 32px; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-size: 4rem; font-weight: 800; color: var(--primary);">
+                        <span th:text="${(persona.nombre != null and !persona.nombre.isEmpty()) ? persona.nombre.substring(0,1).toUpperCase() : (persona.username != null and !persona.username.isEmpty() ? persona.username.substring(0,1).toUpperCase() : '?')}">U</span>
+                    </div>
+                </div>
+                
+                               <!-- Info del Usuario -->
+                <div style="flex: 1; padding-top: 15px;">
+                    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 8px;">
+                        <h1 th:text="${(persona.nombre != null and !persona.nombre.isEmpty()) ? (persona.nombre + ' ' + (persona.apellido ?: '')) : (persona.username ?: 'Usuario Desconocido')}" 
+                            style="margin: 0; font-size: 2.2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em;">Nombre Completo</h1>
+                        <span class="badge-premium" 
+                              th:if="${persona.rol != null}"
+                              th:classappend="${persona.rol.toString().contains('ADMIN') ? 'danger' : (persona.rol.toString().contains('VOLUNTARIO_ADOPTANTE') ? 'warning' : (persona.rol.toString().contains('VOLUNTARIO') ? 'info' : (persona.rol.toString().contains('ADOPTANTE') ? 'primary' : 'success')))}"
+                              th:text="${#messages.msg('enum.Rol.' + persona.rol.toString())}">Rol</span>
+                        <span class="badge-premium" 
+                              th:if="${persona.rol == null}"
+                              th:text="'Rol Desconocido'">Rol</span>
+                        <!-- Mini Vitrina de Estatus (Solo si hay logros) -->
+                        <div th:if="${logrosUsuario != null and !logrosUsuario.isEmpty()}" 
+                             style="display: flex; align-items: center; gap: -8px; margin-left: 5px; padding: 6px 14px; background: #f8fafc; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <th:block th:each="lu, iter : ${logrosUsuario}" th:if="${iter.index < 3}">
+                                <th:block th:each="logroInfo : ${todosLosLogros}">
+                                    <a th:if="${logroInfo.id == lu.logroId}" 
+                                       href="#seccion-logros"
+                                       th:title="${logroInfo.nombre + ' (' + logroInfo.rareza + ')&#10;' + logroInfo.descripcion}"
+                                       th:with="zIndex=${3 - iter.index}"
+                                       th:style="'width: 32px; height: 32px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid var(--border); margin-left: -10px; position: relative; z-index: ' + ${zIndex} + '; text-decoration: none; transition: transform 0.2s ease, z-index 0s; cursor: pointer;'"
+                                       onmouseover="this.style.transform='scale(1.15) translateY(-2px)'; this.style.zIndex='10'"
+                                       th:onmouseout="|this.style.transform=''; this.style.zIndex='${zIndex}';|"
+                                       th:switch="${logroInfo.codigo}">
+                                        <img th:case="'VOL_PRINCIPIANTE'" th:src="@{/images/logros/primeros-pasos.png}" style="width: 20px; height: 20px; object-fit: contain;">
+                                        <img th:case="'VOL_COMPROMISO_ALTO'" th:src="@{/images/logros/compromiso-firme.png}" style="width: 20px; height: 20px; object-fit: contain;">
+                                        <img th:case="'VOL_LEYENDA'" th:src="@{/images/logros/leyenda-refugio.png}" style="width: 20px; height: 20px; object-fit: contain;">
+                                        <img th:case="'DON_GENEROSO'" th:src="@{/images/logros/corazon-generoso.png}" style="width: 20px; height: 20px; object-fit: contain;">
+                                        <img th:case="'DON_MECENAS'" th:src="@{/images/logros/mecenas-huellas.png}" style="width: 20px; height: 20px; object-fit: contain;">
+                                        <img th:case="'DON_ANGEL'" th:src="@{/images/logros/angel-guardian.png}" style="width: 20px; height: 20px; object-fit: contain;">
+                                        <img th:case="*" th:src="@{/images/logros/placeholder.png}" style="width: 20px; height: 20px; object-fit: contain;">
+                                    </a>
+                                </th:block>
+                            </th:block>
+                            <a href="#seccion-logros" 
+                               style="font-size: 0.75rem; font-weight: 800; color: var(--primary); margin-left: 12px; text-decoration: none; transition: transform 0.2s; cursor: pointer;" 
+                               th:if="${logrosUsuario.size() > 3}"
+                               th:text="${'+' + (logrosUsuario.size() - 3)}"
+                               title="Ver todos los logros"
+                               onmouseover="this.style.transform='scale(1.15)'"
+                               onmouseout="this.style.transform=''"></a>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin: 0; display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="at-sign" style="width: 18px;"></i>
+                        <span th:text="${persona.username}">@usuario</span>
+                    </p>
+                </div>
+
+                <div style="padding-bottom: 15px;">
+                    <a th:href="@{/web/personas/{id}/editar(id=${persona.id})}" class="btn btn-primary" style="display: flex; align-items: center; gap: 8px; border-radius: 14px;">
+                        <i data-lucide="edit-3" style="width: 18px;"></i>
+                        [[#{html.auto.editar.perfil}]]
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <!-- GRID DE INFORMACIÓN -->
+    <div style="display: grid; grid-template-columns: 1fr 1.8fr; gap: 2rem;">
+        
+        <!-- COLUMNA IZQUIERDA: DATOS DE CONTACTO Y CUENTA -->
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+            
+            <!-- Bloque: Seguridad y Cuenta -->
+            <div class="glass-card" style="background: white; padding: 30px; border-radius: 24px; border: 1px solid var(--border); position: relative; overflow: hidden;">
+                <!-- Decoración de fondo sutil -->
+                <div style="position: absolute; right: -20px; top: -20px; width: 80px; height: 80px; background: var(--primary-light); border-radius: 50%; opacity: 0.3; z-index: 0;"></div>
+                
+                <div style="position: relative; z-index: 1;">
+                    <h3 style="font-size: 0.9rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 25px; display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="shield-check" style="width: 18px; color: var(--primary);"></i>
+                        [[#{persona.auto.account.security}]]
+                    </h3>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div>
+                            <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;" th:text="#{generic.auto.correo.electronico}"></span>
+                            <div style="display: flex; align-items: center; gap: 10px; color: var(--text-main); font-weight: 600;">
+                                <i data-lucide="mail" style="width: 16px; opacity: 0.6;"></i>
+                                <span th:text="${persona.email}">email@ejemplo.com</span>
+                            </div>
+                        </div>
+
+                        <div th:if="${currentUserId == persona.id}" 
+                             style="background: var(--bg-body); padding: 20px; border-radius: 20px; border: 1px solid var(--border);">
+                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 12px;">
+                                <div style="width: 40px; height: 40px; border-radius: 12px; background: white; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm);">
+                                    <i data-lucide="key-round" style="width: 20px; color: var(--primary);"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--text-main);" th:text="#{generic.auto.contrasena}"></h4>
+                                    <p style="margin: 0; font-size: 0.8rem; color: var(--text-muted);" th:text="#{persona.auto.protege.tu.acceso.al.sistema}"></p>
+                                </div>
+                            </div>
+                            <button type="button" th:attr="data-user-id=${persona.id}" onclick="verifyPasswordGate(this)" class="btn btn-outline" 
+                                    style="width: 100%; border-radius: 12px; font-size: 0.85rem; font-weight: 700; background: white; border: 2px solid var(--primary-light); color: var(--primary); padding: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;">
+                                <i data-lucide="refresh-cw" style="width: 14px;"></i>
+                                [[#{persona.auto.change.password}]]
+                            </button>
+                        </div>
+
+                        <div>
+                            <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;" th:text="#{persona.auto.fecha.de.registro}"></span>
+                            <div style="display: flex; align-items: center; gap: 10px; color: var(--text-main); font-weight: 600;">
+                                <i data-lucide="calendar-plus" style="width: 16px; opacity: 0.6;"></i>
+                                <span th:text="${persona.createdAt != null ? persona.createdAt.toString().substring(0,10) : 'No disponible'}">2024-01-01</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloque: Información Legal -->
+            <div class="glass-card" style="background: white; padding: 30px; border-radius: 24px; border: 1px solid var(--border);">
+                <h3 style="font-size: 0.9rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <i data-lucide="file-text" style="width: 18px; color: var(--primary);"></i>
+                    [[#{persona.auto.legal.profile}]]
+                </h3>
+                
+                <div th:if="${persona.dni == null}" style="text-align: center; padding: 10px; background: var(--bg-body); border-radius: 12px; border: 1px dashed var(--border);">
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;" th:text="#{persona.auto.perfil.legal.no.completado}"></p>
+                </div>
+
+                <div th:if="${persona.dni != null}" style="display: flex; flex-direction: column; gap: 20px;">
+                    <div>
+                        <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;" th:text="#{persona.auto.dni.documento}"></span>
+                        <span style="color: var(--text-main); font-weight: 700; font-size: 1.1rem;" th:text="${persona.dni}">12345678X</span>
+                    </div>
+                    <div>
+                        <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;" th:text="#{persona.auto.direccion.residencia}"></span>
+                        <span style="color: var(--text-main); font-weight: 500; font-size: 0.95rem; line-height: 1.4;" th:text="${persona.direccion ?: 'No especificada'}">Madrid, España</span>
+                    </div>
+                    <div>
+                        <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;" th:text="#{generic.auto.fecha.de.nacimiento}"></span>
+                        <div style="display: flex; align-items: center; gap: 10px; color: var(--text-main); font-weight: 600;">
+                            <i data-lucide="cake" style="width: 16px; opacity: 0.6;"></i>
+                            <span th:text="${persona.fechaNacimiento ?: 'No proporcionada'}">2000-01-01</span>
+                        </div>
+                    </div>
+                    <div th:if="${persona.telefono != null and !persona.telefono.isEmpty() and persona.telefono != '000000000'}">
+                        <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;" th:text="#{generic.auto.telefono}"></span>
+                        <div style="display: flex; align-items: center; gap: 10px; color: var(--text-main); font-weight: 600;">
+                            <i data-lucide="phone" style="width: 16px; opacity: 0.6;"></i>
+                            <span th:text="${persona.telefono}">123456789</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: ACTIVIDAD Y VÍNCULOS / PANEL ADMIN -->
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+            
+            <!-- PANEL DE GESTIÓN ADMINISTRATIVA (Solo para el Admin en su propio perfil) -->
+            <div th:if="${isAdmin and currentUserId == persona.id}" class="glass-card" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); padding: 35px; border-radius: 32px; border: 1px solid var(--primary-light); box-shadow: var(--shadow-md);">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
+                    <div style="width: 50px; height: 50px; border-radius: 16px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 8px 16px rgba(79, 70, 229, 0.2);">
+                        <i data-lucide="layout-dashboard" style="width: 24px;"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.4rem; font-weight: 800; color: var(--text-main);" th:text="#{persona.auto.centro.de.control}"></h3>
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);" th:text="#{persona.auto.resumen.de.gestion.y.accesos.rapidos}"></p>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 30px;">
+                    <!-- Card Pendientes Adopción -->
+                    <a th:href="@{/web/solicitudes}" style="text-decoration: none; transition: transform 0.2s;">
+                        <div style="padding: 20px; border-radius: 24px; background: #fef2f2; border: 1px solid #fee2e2; display: flex; flex-direction: column; gap: 10px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <i data-lucide="heart" style="color: #ef4444; width: 20px;"></i>
+                                <span style="font-size: 1.5rem; font-weight: 800; color: #b91c1c;" th:text="${pendingAdoptionsCount ?: 0}">0</span>
+                            </div>
+                            <span style="font-size: 0.85rem; font-weight: 700; color: #991b1b;" th:text="#{persona.auto.adopciones.pendientes}"></span>
+                        </div>
+                    </a>
+
+                    <!-- Card Pendientes Voluntarios -->
+                    <a th:href="@{/web/voluntarios}" style="text-decoration: none; transition: transform 0.2s;">
+                        <div style="padding: 20px; border-radius: 24px; background: #f0fdf4; border: 1px solid #dcfce7; display: flex; flex-direction: column; gap: 10px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <i data-lucide="users" style="color: #22c55e; width: 20px;"></i>
+                                <span style="font-size: 1.5rem; font-weight: 800; color: #15803d;" th:text="${pendingVolunteersCount ?: 0}">0</span>
+                            </div>
+                            <span style="font-size: 0.85rem; font-weight: 700; color: #166534;" th:text="#{persona.auto.nuevos.voluntarios}"></span>
+                        </div>
+                    </a>
+                </div>
+
+                <h4 style="font-size: 0.8rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 15px;" th:text="#{persona.auto.acciones.frecuentes}"></h4>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a th:href="@{/web/animales/nuevo}" class="btn btn-outline" style="justify-content: flex-start; gap: 12px; padding: 15px 20px; border-radius: 16px; border-color: var(--border);">
+                        <i data-lucide="plus-circle" style="width: 18px; color: var(--primary);"></i>
+                        [[#{persona.auto.new.animal}]]
+                    </a>
+                    <a th:href="@{/web/donaciones}" class="btn btn-outline" style="justify-content: flex-start; gap: 12px; padding: 15px 20px; border-radius: 16px; border-color: var(--border);">
+                        <i data-lucide="euro" style="width: 18px; color: #10b981;"></i>
+                        [[#{persona.auto.manage.donations}]]
+                    </a>
+                    <a th:href="@{/web/personas}" class="btn btn-outline" style="justify-content: flex-start; gap: 12px; padding: 15px 20px; border-radius: 16px; border-color: var(--border);">
+                        <i data-lucide="shield" style="width: 18px; color: #f59e0b;"></i>
+                        [[#{persona.auto.manage.roles}]]
+                    </a>
+                </div>
+            </div>
+
+            <!-- SECCIÓN VOLUNTARIADO -->
+            <div th:if="${voluntario != null and voluntario.estado() == 'APROBADO'}" class="glass-card" style="background: white; padding: 35px; border-radius: 24px; border: 1px solid var(--border);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px;">
+                    <h3 style="margin: 0; display: flex; align-items: center; gap: 12px; color: var(--primary); font-size: 1.3rem; font-weight: 800;">
+                        <i data-lucide="heart-handshake" style="width: 24px;"></i>
+                        [[#{persona.auto.volunteering.activity}]]
+                    </h3>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="text-align: right;">
+                            <span style="display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;" th:text="#{persona.auto.disp.preferente}"></span>
+                            <span style="color: var(--primary); font-weight: 700;" th:text="${voluntario.disponibilidad() ?: 'No definida'}">Fines [[#{html.auto.de}]] semana</span>
+                        </div>
+                        <a th:href="@{/web/voluntarios/{id}/editar(id=${voluntario.id()})}"
+                           class="btn btn-outline" style="border-radius: 12px; padding: 6px 14px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; border-color: var(--border); color: var(--text-muted); cursor: pointer; background: white; text-decoration: none;"
+                           title="Editar detalles del voluntario">
+                            <i data-lucide="edit-2" style="width: 12px;"></i>
+                            [[#{generic.auto.edit}]]
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ALERTA: FALTAN DATOS DE DISPONIBILIDAD -->
+                <div th:if="${#lists.isEmpty(disponibilidades)}" style="margin-bottom: 25px; padding: 15px 20px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; animation: fadeInUp 0.5s ease;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="background: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);">
+                            <i data-lucide="alert-triangle" style="color: #d97706; width: 20px;"></i>
+                        </div>
+                        <div>
+                            <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #92400e;" th:text="#{persona.auto.calendario.vacio}"></h4>
+                            <p th:if="${currentUserId == persona.id}" style="margin: 0; font-size: 0.85rem; color: #b45309;" th:text="#{persona.auto.el.administrador.necesita.saber.que.dias}"></p>
+                            <p th:if="${currentUserId != persona.id}" style="margin: 0; font-size: 0.85rem; color: #b45309;" th:text="#{persona.auto.este.voluntario.aun.no.ha.configurado.su}"></p>
+                        </div>
+                    </div>
+                    <button th:if="${currentUserId == persona.id}" onclick="document.getElementById('modal-disponibilidad').style.display='flex'" class="btn-primary" style="background: #f59e0b; border: none; font-size: 0.8rem; padding: 8px 16px; border-radius: 10px; color: white; cursor: pointer; font-weight: 700; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2);" th:text="#{persona.auto.configurar.ahora}"></button>
+                </div>
+
+                <!-- SECCIÓN DISPONIBILIDAD -->
+                <div style="margin-bottom: 25px; padding: 20px; border: 1px solid var(--border); border-radius: 16px; background: var(--bg-body);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h4 style="font-size: 0.9rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="calendar-days" style="width: 18px; color: var(--primary);"></i> [[#{persona.auto.availability.calendar}]]
+                        </h4>
+                        <button th:if="${currentUserId == persona.id}" onclick="abrirModalDisponibilidad()" class="btn-outline" title="Añadir Día" style="background: white; padding: 6px 12px; border-radius: 10px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                            <i data-lucide="plus" style="width: 14px; color: var(--primary);"></i> [[#{generic.auto.add}]]
+                        </button>
+                    </div>
+                    
+                    <!-- CONTENEDOR DEL CALENDARIO DE DISPONIBILIDAD -->
+                    <div id="disp-calendar" style="min-height: 400px; background: white; padding: 15px; border-radius: 12px; border: 1px solid var(--border);"></div>
+                </div>
+
+                <div style="margin-bottom: 20px;" th:with="v_id=${voluntario.id()}">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                        <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin: 0;" th:text="#{persona.auto.ultimas.tareas.asignadas}"></h4>
+                    </div>
+                    
+                    <div th:if="${#lists.isEmpty(tareas)}" style="padding: 30px; text-align: center; background: var(--bg-body); border-radius: 16px; border: 1px dashed var(--border);">
+                        <p style="color: var(--text-muted); margin: 0;" th:text="#{persona.auto.sin.tareas.registradas.recientemente}"></p>
+                    </div>
+
+                    <div th:if="${!#lists.isEmpty(tareas)}" style="display: flex; flex-direction: column; gap: 12px;">
+                        <a th:each="t : ${tareas}" th:if="${t != null}" 
+                           th:href="@{/web/tareas(voluntarioIdFiltro=${v_id})}"
+                           class="premium-row-card" 
+                           style="padding: 15px; background: var(--bg-body); border: 1px solid var(--border); border-radius: 16px; text-decoration: none; color: inherit; display: block; transition: all 0.2s; cursor: pointer;"
+                           onmouseover="this.style.transform='scale(1.02)'; this.style.borderColor='var(--primary-light)'; this.style.boxShadow='var(--shadow-sm)';"
+                           onmouseout="this.style.transform='scale(1)'; this.style.borderColor='var(--border)'; this.style.boxShadow='none';">
+                            <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
+                                <div class="task-icon-box" style="background: white; border: 1px solid var(--border);">
+                                    <i data-lucide="clipboard-list" style="width: 18px; color: var(--primary);"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <span style="display: block; font-weight: 700; color: var(--text-main); font-size: 0.95rem;" th:text="${t.descripcion() ?: 'Sin descripción'}">Tarea</span>
+                                    <span style="font-size: 0.8rem; color: var(--text-muted);" 
+                                          th:with="fLimit=${t.fechaLimite()}"
+                                          th:text="${fLimit != null ? 'Límite: ' + (fLimit.toString().length() >= 10 ? fLimit.toString().substring(0,10) : fLimit) : 'Sin fecha'}">2024-01-01</span>
+                                </div>
+                                <span class="badge-premium" 
+                                      th:with="est=${t.estado()}"
+                                      th:classappend="${est == 'COMPLETADA' or est == 'FINALIZADA' ? 'success' : 
+                                                      (est == 'CANCELADA' or est == 'RECHAZADA' ? 'danger' : 
+                                                      (est == 'EN_PROCESO' or est == 'ACEPTADA' ? 'info' : 
+                                                      (est == 'PROPUESTA' ? 'primary' : 'warning')))}"
+                                      th:text="${est != null ? #messages.msg('enum.EstadoTarea.' + est) : #messages.msg('enum.EstadoTarea.PENDIENTE')}">Pendiente</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SOLICITUD DE VOLUNTARIADO PENDIENTE -->
+            <div th:if="${voluntario != null and voluntario.estado() == 'PENDIENTE'}" 
+                 class="glass-card" 
+                 style="background: linear-gradient(135deg, #fffbeb 0%, #fffbeb 100%); padding: 35px; border-radius: 24px; border: 1.5px dashed #f59e0b; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 20px;">
+                
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 50px; height: 50px; border-radius: 16px; background: #fef3c7; display: flex; align-items: center; justify-content: center; color: #d97706; flex-shrink: 0;">
+                        <i data-lucide="clock" style="width: 24px; height: 24px; animation: spin-slow 3s linear infinite;"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #92400e;" th:text="#{persona.auto.solicitud.de.voluntariado.en.revision}"></h3>
+                        <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #d97706; background: rgba(217, 119, 6, 0.1); padding: 3px 8px; border-radius: 8px; display: inline-block; margin-top: 4px;" th:text="#{persona.auto.pendiente.de.aprobacion}"></span>
+                    </div>
+                </div>
+
+
+
+
+                <!-- Vista para el Candidato (Propietario del perfil) -->
+                <div th:if="${currentUserId == persona.id}" style="color: #78350f; font-size: 0.95rem; line-height: 1.6;">
+                    <p style="margin: 0;" th:text="#{persona.auto.muchas.gracias.por.tu.interes.en.unirte}"></p>
+                    <div style="margin-top: 15px; padding: 12px 16px; background: white; border-radius: 12px; border: 1px solid #fef3c7; display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #92400e; font-weight: 600;" th:text="#{persona.auto.disponibilidad.1}"></span>
+                            <span style="font-weight: 700; color: #78350f;" th:text="${voluntario.disponibilidad() ?: 'No definida'}">Tardes</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;" th:if="${voluntario.especialidad() != null}">
+                            <span style="color: #92400e; font-weight: 600;" th:text="#{persona.auto.area.de.interes.1}"></span>
+                            <span style="font-weight: 700; color: #78350f;" th:text="${voluntario.especialidad()}">Veterinaria</span>
+                        </div>
+                    </div>
+                    <p style="margin: 15px 0 0; font-size: 0.85rem; color: #b45309; font-weight: 500;" th:text="#{persona.auto.te.enviaremos.un.correo.electronico.de.c}"></p>
+                </div>
+
+                <!-- Vista para el Administrador -->
+                <div th:if="${isAdmin and currentUserId != persona.id}" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="color: #78350f; font-size: 0.95rem; line-height: 1.5;">
+                        <p style="margin: 0;" th:text="#{persona.auto.este.usuario.ha.solicitado.unirse.al.equ}"></p>
+                    </div>
+
+                    <div style="padding: 12px 16px; background: white; border-radius: 12px; border: 1px solid #fef3c7; display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #92400e; font-weight: 600;" th:text="#{persona.auto.disponibilidad.1}"></span>
+                            <span style="font-weight: 700; color: #78350f;" th:text="${voluntario.disponibilidad() ?: 'No definida'}">Tardes</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;" th:if="${voluntario.especialidad() != null}">
+                            <span style="color: #92400e; font-weight: 600;" th:text="#{persona.auto.area.de.interes.1}"></span>
+                            <span style="font-weight: 700; color: #78350f;" th:text="${voluntario.especialidad()}">Veterinaria</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; margin-top: 5px;">
+                        <button class="btn btn-primary" 
+                                style="flex: 1; height: 46px; background: #10b981; border: none; font-weight: 700; border-radius: 12px; font-size: 0.9rem; color: white;"
+                                th:hx-post="'/web/voluntarios/' + ${voluntario.id()} + '/aprobar'"
+                                hx-swap="none"
+                                th:hx-confirm="#{confirm.voluntario.aprobar.corto}"
+                                hx-on::after-request="window.location.reload();">
+                            <i data-lucide="user-check" style="width: 16px; margin-right: 6px;"></i>
+                            [[#{html.auto.aprobar}]]
+                        </button>
+                        <button class="btn btn-outline" 
+                                style="flex: 1; height: 46px; border: 1.5px solid #ef4444; color: #ef4444; font-weight: 700; border-radius: 12px; font-size: 0.9rem; background: white;"
+                                th:hx-post="'/web/voluntarios/' + ${voluntario.id()} + '/rechazar'"
+                                hx-swap="none; margin-top: 0;"
+                                th:hx-confirm="#{confirm.voluntario.rechazar.corto}"
+                                hx-on::after-request="window.location.reload();">
+                            <i data-lucide="user-x" style="width: 16px; margin-right: 6px;"></i>
+                            [[#{solicitud.auto.decline.request}]]
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SOLICITUD DE VOLUNTARIADO RECHAZADA -->
+            <div th:if="${voluntario != null and voluntario.estado() == 'RECHAZADO'}" 
+                 class="glass-card" 
+                 style="background: linear-gradient(135deg, #fef2f2 0%, #fef2f2 100%); padding: 35px; border-radius: 24px; border: 1.5px dashed #f87171; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 15px;">
+                
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 50px; height: 50px; border-radius: 16px; background: #fee2e2; display: flex; align-items: center; justify-content: center; color: #ef4444; flex-shrink: 0;">
+                        <i data-lucide="user-x" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #991b1b;" th:text="#{persona.auto.solicitud.de.voluntariado.rechazada}"></h3>
+                        <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 3px 8px; border-radius: 8px; display: inline-block; margin-top: 4px;" th:text="#{persona.auto.no.admitido}"></span>
+                    </div>
+                </div>
+
+                <div style="color: #991b1b; font-size: 0.95rem; line-height: 1.6;">
+                    <p style="margin: 0;" th:if="${currentUserId == persona.id}" th:text="#{persona.auto.lamentamos.informarte.que.tu.solicitud.p}"></p>
+                    <p style="margin: 0;" th:unless="${currentUserId == persona.id}" th:text="#{persona.auto.la.solicitud.de.voluntariado.de.este.usu}"></p>
+                </div>
+            </div>
+
+            <!-- SECCIÓN ADOPCIONES Y SOLICITUDES -->
+            <div th:if="${adoptante != null}" class="glass-card" style="background: white; padding: 35px; border-radius: 24px; border: 1px solid var(--border);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px;">
+                    <h3 style="margin: 0; display: flex; align-items: center; gap: 12px; color: #7e22ce; font-size: 1.3rem; font-weight: 800;">
+                        <i data-lucide="dog" style="width: 24px;"></i>
+                        [[#{persona.auto.adoption.history}]]
+                    </h3>
+                </div>
+
+                <div th:if="${#lists.isEmpty(vinculosAnimales)}" style="padding: 30px; text-align: center; background: var(--bg-body); border-radius: 16px; border: 1px dashed var(--border);">
+                    <p style="color: var(--text-muted); margin: 0;" th:text="#{persona.auto.no.se.han.encontrado.registros.de.adopci}"></p>
+                </div>
+
+                <div th:if="${!#lists.isEmpty(vinculosAnimales)}" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div th:each="v : ${vinculosAnimales}" class="premium-row-card" style="padding: 15px; background: var(--bg-body); border: 1px solid var(--border); border-radius: 16px;">
+                        <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
+                            <div class="task-icon-box" style="background: white; border: 1px solid var(--border); width: 45px; height: 45px;">
+                                <i th:data-lucide="${v.tipoVinculo == 'ADOPCIÓN' ? 'award' : 'file-search'}" 
+                                   th:style="'width: 20px; color: ' + (${v.tipoVinculo == 'ADOPCIÓN' ? '#7e22ce' : '#ea580c'})"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <a th:href="${v.tipoVinculo == 'SOLICITUD'} ? @{/web/solicitudes/{id}/detalle(id=${v.id})} : @{/web/animales/{id}(id=${v.animalId})}" 
+                                       style="font-weight: 800; color: var(--text-main); font-size: 1.05rem; text-decoration: none;"
+                                       th:text="${animalNames != null ? animalNames['' + v.animalId] : 'Animal #' + v.animalId}">Nombre Animal</a>
+                                    <span style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 6px; background: #f3f4f6; color: #6b7280;" 
+                                          th:text="${v.tipoVinculo}">SOLICITUD</span>
+                                </div>
+                                <span style="font-size: 0.8rem; color: var(--text-muted);" 
+                                      th:text="${v.fechaVinculo != null ? v.fechaVinculo.toString().substring(0,10) : 'Fecha pendiente'}">2024-01-01</span>
+                            </div>
+                            <span class="badge-premium" 
+                                  th:classappend="${v.estadoVinculo == 'ADOPTADO' or v.estadoVinculo == 'APROBADA' or v.estadoVinculo == 'FINALIZADA' ? 'success' : (v.estadoVinculo == 'RECHAZADA' ? 'danger' : 'warning')}" 
+                                  th:text="${v.estadoVinculo != null ? #messages.msg('enum.EstadoVinculo.' + v.estadoVinculo) : #messages.msg('enum.EstadoVinculo.PENDIENTE')}">[[#{generic.auto.status}]]</span>
+                            <a th:href="${v.tipoVinculo == 'SOLICITUD'} ? @{/web/solicitudes/{id}/detalle(id=${v.id})} : @{/web/animales/{id}(id=${v.animalId})}" class="btn-icon">
+                                <i data-lucide="arrow-right" style="width: 16px;"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vista PUBLICO: el propio usuario aún no tiene rol operativo -->
+            <div th:if="${adoptante == null and voluntario == null and !isAdmin and isPublico}"
+                 style="text-align: center; padding: 48px 40px; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border-radius: 32px; border: 1.5px solid #86efac; margin-bottom: 2rem;">
+                <div style="width: 72px; height: 72px; border-radius: 24px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 10px 20px -5px rgba(34, 197, 94, 0.35);">
+                    <i data-lucide="sparkles" style="width: 32px; color: white;"></i>
+                </div>
+                <h3 style="font-weight: 800; color: #15803d; margin-bottom: 10px; font-size: 1.4rem;" th:text="#{persona.auto.quieres.formar.parte.del.refugio}"></h3>
+                <p style="color: #4b5563; max-width: 420px; margin: 0 auto 30px; font-size: 0.97rem; line-height: 1.65;" th:text="#{persona.auto.tienes.una.cuenta.pero.aun.no.tienes.un}"></p>
+                <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+                    <a th:href="@{/web/animales}" 
+                       style="display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; border-radius: 18px; font-weight: 800; font-size: 0.95rem; text-decoration: none; box-shadow: 0 8px 15px -4px rgba(34, 197, 94, 0.4); transition: all 0.2s;">
+                        <i data-lucide="heart" style="width: 18px;"></i>
+                        [[#{html.auto.quiero.adoptar}]]
+                    </a>
+                    <a th:href="@{/web/voluntarios/nuevo}" 
+                       style="display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; background: white; color: #15803d; border: 2px solid #86efac; border-radius: 18px; font-weight: 800; font-size: 0.95rem; text-decoration: none; box-shadow: 0 4px 10px -2px rgba(34, 197, 94, 0.15); transition: all 0.2s;">
+                        <i data-lucide="shield-check" style="width: 18px;"></i>
+                        [[#{html.auto.ser.voluntario}]]
+                    </a>
+                </div>
+            </div>
+
+
+            <!-- SECCIÓN: Acciones para perfiles incompletos -->
+
+            <!-- Vista ADMIN: registrar a otro usuario como adoptante/voluntario (No mostrar si es su propio perfil) -->
+            <div th:if="${adoptante == null and voluntario == null and isAdmin and currentUserId != persona.id}"
+                 style="text-align: center; padding: 40px; background: var(--primary-light); border-radius: 32px; border: 2px dashed var(--primary); opacity: 0.8;">
+                <div style="width: 70px; height: 70px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: var(--shadow-md);">
+                    <i data-lucide="user-plus" style="width: 30px; color: var(--primary);"></i>
+                </div>
+                <h3 style="font-weight: 800; color: var(--primary); margin-bottom: 10px;" th:text="#{persona.auto.perfil.operativo.pendiente}"></h3>
+                <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto 25px; font-size: 0.95rem;" th:text="#{persona.auto.este.usuario.currently.solo.tiene.una.cu}"></p>
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <a th:href="@{/web/adoptantes/nuevo(usuarioId=${persona.id})}" class="btn btn-primary" style="padding: 10px 20px;">
+                        <i data-lucide="heart" style="width: 16px; margin-right: 8px;"></i>
+                        [[#{persona.auto.register.adopter}]]
+                    </a>
+                    <a th:href="@{/web/voluntarios/nuevo(usuarioId=${persona.id})}" class="btn btn-secondary" style="padding: 10px 20px;">
+                        <i data-lucide="shield-check" style="width: 16px; margin-right: 8px;"></i>
+                        [[#{html.auto.alta.voluntario}]]
+                    </a>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+    
+    <!-- MODAL CAMBIO DE CONTRASEÑA: RE-DISEÑADO Y CENTRADO -->
+    <div id="passwordModal" class="modal-overlay" style="display:none; position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px;">
+        <div class="modal-content fade-in-up" style="background: white; width: 100%; max-width: 440px; border-radius: 32px; padding: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); position: relative; border: 1px solid rgba(255,255,255,0.1);">
+            
+            <button onclick="closePasswordModal()" style="position: absolute; right: 25px; top: 25px; background: var(--bg-body); border: none; cursor: pointer; color: var(--text-muted); width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                <i data-lucide="x" style="width: 20px;"></i>
+            </button>
+            
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div style="width: 70px; height: 70px; background: linear-gradient(135deg, var(--primary-light) 0%, #e0e7ff 100%); color: var(--primary); border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: inset 0 2px 4px rgba(255,255,255,0.3);">
+                    <i data-lucide="lock" style="width: 32px;"></i>
+                </div>
+                <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--text-main); margin: 0; letter-spacing: -0.02em;" th:text="#{persona.auto.seguridad}"></h2>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 10px; line-height: 1.5;" th:text="#{persona.auto.introduce.tu.nueva.contrasena.para.actua}"></p>
+            </div>
+
+            <form id="passwordForm" th:attr="data-user-id=${persona.id}" onsubmit="handlePasswordUpdatePremium(event)" style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="form-group">
+                    <label style="display: block; font-size: 0.8rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; margin-left: 4px;" th:text="#{persona.auto.nueva.contrasena}"></label>
+                    <div style="position: relative;">
+                        <i data-lucide="key-round" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; color: var(--text-muted); opacity: 0.5;"></i>
+                        <input type="password" id="newPassword" required 
+                               style="width: 100%; height: 56px; border-radius: 16px; border: 2px solid var(--border); padding: 0 48px 0 48px; font-size: 1rem; transition: all 0.2s; background: var(--bg-body);"
+                               th:placeholder="#{generic.auto.password.help}">
+                        <button type="button" onclick="togglePasswordVisibility('newPassword', this)" 
+                                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 8px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            <i data-lucide="eye" style="width: 20px;"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label style="display: block; font-size: 0.8rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; margin-left: 4px;" th:text="#{persona.auto.confirmar.contrasena}"></label>
+                    <div style="position: relative;">
+                        <i data-lucide="shield-check" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; color: var(--text-muted); opacity: 0.5;"></i>
+                        <input type="password" id="confirmPassword" required 
+                               style="width: 100%; height: 56px; border-radius: 16px; border: 2px solid var(--border); padding: 0 48px 0 48px; font-size: 1rem; transition: all 0.2s; background: var(--bg-body);"
+                               th:placeholder="#{generic.auto.password.repeat}">
+                        <button type="button" onclick="togglePasswordVisibility('confirmPassword', this)" 
+                                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 8px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            <i data-lucide="eye" style="width: 20px;"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="passwordError" style="display: none; background: #fff1f2; color: #e11d48; padding: 16px; border-radius: 16px; font-size: 0.9rem; text-align: center; font-weight: 700; border: 1px solid #fda4af;" th:text="#{persona.auto.las.contrasenas.no.coinciden}"></div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; height: 56px; font-weight: 800; font-size: 1.05rem; border-radius: 18px; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);">
+                    <i data-lucide="check-circle" style="width: 20px;"></i>
+                    [[#{html.auto.actualizar.contrase.a}]]
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DISPONIBILIDAD -->
+    <div th:if="${voluntario != null}" id="modal-disponibilidad" class="modal-overlay" style="display:none; position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px;">
+        <div class="modal-content fade-in-up" style="background: white; width: 100%; max-width: 400px; border-radius: 24px; padding: 30px; position: relative; border: 1px solid var(--border);">
+            <button type="button" onclick="document.getElementById('modal-disponibilidad').style.display='none'" style="position: absolute; right: 20px; top: 20px; background: var(--bg-body); border: none; cursor: pointer; color: var(--text-muted); width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="x" style="width: 18px;"></i>
+            </button>
+            
+            <div style="text-align: center; margin-bottom: 25px;">
+                <div style="width: 60px; height: 60px; background: #e0e7ff; color: var(--primary); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                    <i data-lucide="calendar-plus" style="width: 28px;"></i>
+                </div>
+                <h3 style="margin: 0 0 5px; font-weight: 800; font-size: 1.25rem; color: var(--text-main);" th:text="#{persona.auto.indicar.disponibilidad}"></h3>
+                <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);" th:text="#{persona.auto.selecciona.la.fecha.y.tu.estado.para.ese}"></p>
+            </div>
+            
+            <form th:id="'form-disponibilidad'" th:attr="data-vid=${voluntario.id()}" onsubmit="guardarDisponibilidad(event, this)" style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;" th:text="#{generic.auto.fecha}"></label>
+                    <input type="date" id="input-fecha" name="fecha" required style="width: 100%; height: 46px; border-radius: 12px; border: 2px solid var(--border); padding: 0 15px; font-size: 0.95rem; background: var(--bg-body);">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;" th:text="#{persona.auto.turno}"></label>
+                    <select name="turno" required style="width: 100%; height: 46px; border-radius: 12px; border: 2px solid var(--border); padding: 0 15px; font-size: 0.95rem; background: var(--bg-body); cursor: pointer;">
+                        <option value="MANANA" th:text="#{persona.auto.manana}"></option>
+                        <option value="TARDE" th:text="#{persona.auto.tarde}"></option>
+                        <option value="NOCHE" th:text="#{persona.auto.noche}"></option>
+                        <option value="TODO_EL_DIA" th:text="#{persona.auto.todo.el.dia}"></option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;" th:text="#{generic.auto.estado}"></label>
+                    <select name="estado" required style="width: 100%; height: 46px; border-radius: 12px; border: 2px solid var(--border); padding: 0 15px; font-size: 0.95rem; background: var(--bg-body); cursor: pointer;">
+                        <option value="DISPONIBLE" th:text="#{persona.auto.disponible}"></option>
+                        <option value="PENDIENTE" th:text="#{persona.auto.pendiente.dudoso}"></option>
+                        <option value="NO_DISPONIBLE" th:text="#{persona.auto.no.disponible}"></option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1; height: 46px; border-radius: 12px; font-weight: 800; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i data-lucide="save" style="width: 18px;"></i> [[#{persona.auto.save.day}]]
+                    </button>
+                    <button type="button" id="btn-eliminar-disp" onclick="eliminarDisponibilidad(this)" class="btn btn-danger" style="display: none; width: 46px; height: 46px; border-radius: 12px; align-items: center; justify-content: center; background: #ef4444; border: none; color: white; cursor: pointer;">
+                        <i data-lucide="trash-2" width="24" height="24" style="width: 24px !important; height: 24px !important; min-width: 24px !important; min-height: 24px !important; flex-shrink: 0;"></i>
+                    </button>
+                </div>
+            </form>
+            
+            <!-- SCRIPTS DE CALENDARIO Y MODAL -->
+
+            <script th:inline="javascript">
+                window.isOwner = /*[[${currentUserId == persona.id}]]*/ false;
+                window.disponibilidades = /*[[${disponibilidades}]]*/ [];
+            </script>
+        </div>
+    </div>
+
+
+
+
+    <!-- VITRINA DE HONOR: SECCIÓN INFERIOR PREMIUM -->
+    <div th:if="${!persona.rol.toString().contains('ADMIN')}" 
+         style="margin-top: 4rem; border-top: 1px solid var(--border); padding-top: 4rem;">
+        <div th:replace="~{fragments/content/gamificacion/gamificacion-perfil :: perfil}"></div>
+    </div>
+
+</div>
+</body>
+
+</html>

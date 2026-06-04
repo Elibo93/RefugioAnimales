@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="pdf-head(title)">
+    <meta charset="UTF-8" />
+    <title th:text="${title}">[[#{html.auto.adoptify}]]</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 1.6cm 1.6cm 1.8cm 1.6cm;
+            @top-right {
+                content: "Adoptify - Gestión de Refugio";
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                font-size: 8px;
+                color: #9ca3af;
+                font-weight: 500;
+            }
+            @bottom-right {
+                content: "Página " counter(page) " de " counter(pages);
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                font-size: 8px;
+                color: #9ca3af;
+            }
+            @bottom-left {
+                content: "Documento oficial Adoptify • Generado automáticamente";
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                font-size: 8px;
+                color: #9ca3af;
+            }
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #1f2937;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+
+        .watermark {
+            position: fixed;
+            top: 35%;
+            left: 5%;
+            width: 90%;
+            text-align: center;
+            font-size: 96px;
+            font-weight: bold;
+            color: #f3f4f6;
+            z-index: -1000;
+            transform: rotate(-35deg);
+            -webkit-transform: rotate(-35deg);
+            -fs-transform: rotate(-35deg);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            letter-spacing: 12px;
+            opacity: 0.7;
+        }
+
+        .header-container {
+            border-bottom: 3px solid #059669;
+            padding-bottom: 12px;
+            margin-bottom: 25px;
+        }
+
+        .logo-container {
+            float: left;
+        }
+
+        .logo-text {
+            font-size: 26px;
+            font-weight: 800;
+            color: #059669;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-dot {
+            color: #10b981;
+        }
+
+        .meta-container {
+            float: right;
+            text-align: right;
+            margin-top: 6px;
+        }
+
+        .doc-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: #4b5563;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .doc-date {
+            font-size: 10px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        .clear {
+            clear: both;
+        }
+
+        h1 {
+            font-size: 20px;
+            color: #111827;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            margin-bottom: 20px;
+            font-size: 11px;
+        }
+
+        th {
+            background-color: #f9fafb;
+            color: #374151;
+            font-weight: 700;
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 2px solid #e5e7eb;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 10px;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #4b5563;
+            word-wrap: break-word;
+            word-break: break-all;
+            white-space: normal;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 9999px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .badge-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-info {
+            background-color: #e0f2fe;
+            color: #075985;
+        }
+
+        .badge-default {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+    </style>
+</th:block>
+<th:block th:fragment="pdf-head-landscape(title)">
+    <meta charset="UTF-8" />
+    <title th:text="${title}">[[#{html.auto.adoptify}]]</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1.0cm 1.0cm 1.2cm 1.0cm;
+            @top-right {
+                content: "Adoptify - Gestión de Refugio";
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                font-size: 8px;
+                color: #9ca3af;
+                font-weight: 500;
+            }
+            @bottom-right {
+                content: "Página " counter(page) " de " counter(pages);
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                font-size: 8px;
+                color: #9ca3af;
+            }
+            @bottom-left {
+                content: "Documento oficial Adoptify • Generado automáticamente";
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                font-size: 8px;
+                color: #9ca3af;
+            }
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #1f2937;
+            margin: 0;
+            padding: 0;
+            line-height: 1.4;
+        }
+
+        .watermark {
+            position: fixed;
+            top: 35%;
+            left: 5%;
+            width: 90%;
+            text-align: center;
+            font-size: 96px;
+            font-weight: bold;
+            color: #f3f4f6;
+            z-index: -1000;
+            transform: rotate(-25deg);
+            -webkit-transform: rotate(-25deg);
+            -fs-transform: rotate(-25deg);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            letter-spacing: 12px;
+            opacity: 0.7;
+        }
+
+        .header-container {
+            border-bottom: 3px solid #059669;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+
+        .logo-container {
+            float: left;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: 800;
+            color: #059669;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-dot {
+            color: #10b981;
+        }
+
+        .meta-container {
+            float: right;
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        .doc-title {
+            font-size: 10px;
+            font-weight: bold;
+            color: #4b5563;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .doc-date {
+            font-size: 9px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        .clear {
+            clear: both;
+        }
+
+        h1 {
+            font-size: 16px;
+            color: #111827;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            font-size: 9px; /* Default landscape font size - readable */
+            table-layout: auto;
+        }
+
+        th {
+            background-color: #f9fafb;
+            color: #374151;
+            font-weight: 700;
+            padding: 6px 8px;
+            text-align: left;
+            border-bottom: 2px solid #e5e7eb;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 8px;
+        }
+
+        td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #4b5563;
+            word-wrap: break-word;
+            word-break: break-all;
+            white-space: normal;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 5px;
+            border-radius: 9999px;
+            font-size: 7px;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .badge-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-info {
+            background-color: #e0f2fe;
+            color: #075985;
+        }
+
+        .badge-default {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+    </style>
+</th:block>
+<body>
+</body>
+</html>

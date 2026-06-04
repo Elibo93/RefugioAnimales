@@ -1,0 +1,85 @@
+<!-- Fragmento de Navegación Superior: Barra de herramientas con acceso a notificaciones, buscador y control de sidebar -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <header th:fragment="header(currentPage, showBack)" class="app-header-wrapper">
+        <div class="header-banner"></div>
+        <div class="header-container">
+            <div class="header-left">
+                <!-- Sidebar Toggle Button (Now on the left) -->
+                <button id="open-sidebar" class="sidebar-toggle-btn" title="Menú de usuario">
+                    <!-- Inline SVG for Menu/User -->
+                    <svg th:if="${!isAuthenticated}" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                    <svg th:if="${isAuthenticated}" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+
+                    <!-- Inline SVG for Chevron -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="toggle-arrow">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+
+                <a th:if="${showBack}" href="javascript:history.back()" class="back-link" title="Volver">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="back-arrow">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </a>
+
+                <!-- Brand Pill for visibility -->
+                <a th:href="@{/web/home}" class="app-brand-pill" style="text-decoration: none; color: inherit;">
+                    <img th:src="@{/images/logo-refugio-sin-fondo.png}" class="app-logo">
+                    <div class="app-brand">
+                        <span class="app-name" th:text="#{app.name}">Refugio</span>
+                        <span class="app-subtitle" th:text="#{app.subtitle}">Gestión</span>
+                    </div>
+                </a>
+            </div>
+            <div class="header-right">
+                <div th:if="${isAuthenticated}" class="header-actions"
+                    style="display: flex; align-items: center; gap: 1rem;">
+                    <!-- Notification Bell -->
+                    <a th:href="@{/web/notificaciones}" class="notification-btn" title="Notificaciones"
+                        style="position: relative; width: 44px; height: 44px; border-radius: 14px; background: white; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; color: #64748b; transition: all 0.2s; text-decoration: none;">
+                        <!-- SVG Directo de Campana (Lucide style) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-bell">
+                            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                        </svg>
+
+                        <!-- Badge dinámico con HTMX Polling cada 30 segundos y trigger por evento -->
+                        <div id="notif-badge-container" hx-get="/web/notificaciones/count"
+                            hx-trigger="load, every 30s, notificacionLeida from:body"
+                            style="position: absolute; top: -5px; right: -5px;">
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+
+        </div>
+    </header>
+</body>
+
+</html>

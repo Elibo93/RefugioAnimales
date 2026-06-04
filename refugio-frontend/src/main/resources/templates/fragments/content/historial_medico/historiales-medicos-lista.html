@@ -1,0 +1,145 @@
+<!-- Vista de Listado de Historiales: Gestión centralizada de toda la documentación clínica del refugio -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="content">
+        <div class="table-wrapper" style="padding-top: 1.7rem;">
+            <!-- BARRA DE ACCIONES SUPERIOR -->
+            <div class="actions-bar admin-actions-bar" style="border-bottom: none; margin-bottom: 1rem;">
+                
+                <!-- 1. TÍTULO E ICONO -->
+                <div class="admin-title-container">
+                    <div class="admin-title-icon-box">
+                        <i data-lucide="stethoscope" style="width: 24px;"></i>
+                    </div>
+                    <div>
+                        <h1 class="admin-title-text" th:text="#{historial.list.title}">Historiales Médicos</h1>
+                        <p class="admin-title-desc" th:text="#{historial.auto.documentacion.clinica}">Documentación clínica del refugio</p>
+                    </div>
+                </div>
+
+                <!-- 2. FILTROS Y BÚSQUEDA (Centrados) -->
+                <div class="admin-filters-container">
+                    <!-- Espacio para futuros filtros -->
+                </div>
+
+                <!-- 3. ACCIONES Y EXPORTACIÓN -->
+                <div class="admin-actions-group">
+                    <a th:href="@{/web/historiales/pdf}" target="_blank" title="Exportar listado a PDF" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/pdf.png" alt="PDF" class="admin-export-img">
+                    </a>
+                    <a th:href="@{/web/historiales/excel}" target="_blank" title="Exportar listado a Excel" class="admin-export-btn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="/images/excel.png" alt="Excel" class="admin-export-img">
+                    </a>
+                    <a class="btn btn-primary" th:href="@{/web/historiales/nuevo}">
+                        <i data-lucide="plus" style="width:18px;"></i>
+                        <span th:text="#{generic.link.create}">+ Nuevo historial</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. FILTROS Y BÚSQUEDA (Barra separada tipo premium) -->
+            <div class="admin-filters-bar">
+                <form id="historial-admin-form" onsubmit="return false;"
+                    style="display: flex; align-items: center; gap: 1rem; width: 100%;">
+                    
+                    <!-- Buscador -->
+                    <div style="flex: 3; position: relative;">
+                        <i data-lucide="search" class="admin-search-icon"></i>
+                        <input type="text" name="q" th:value="${q}" placeholder="Buscar por animal (nombre, chip, ID)..."
+                            hx-get="/web/historiales" hx-trigger="keyup changed delay:800ms"
+                            hx-target="#historial-results-container" hx-vals='{"page": 1}'
+                            hx-select="#historial-results-container" hx-swap="outerHTML"
+                            hx-include="#historial-admin-form" class="form-control admin-search-input-medium">
+                    </div>
+
+                    <!-- Botón Limpiar -->
+                    <a th:href="@{/web/historiales}" hx-get="/web/historiales" hx-target="#contenido-dinamico" hx-push-url="true"
+                       class="btn-icon admin-btn-clear-medium" title="Limpiar Filtros">
+                        <i data-lucide="rotate-ccw" style="width: 16px;"></i>
+                    </a>
+                </form>
+            </div>
+
+            <!-- LISTA PREMIUM DE HISTORIALES MÉDICOS -->
+            <div id="historial-results-container" class="premium-list-container">
+                <div th:fragment="list-body">
+                <div class="premium-grid-header grid-cols-historiales admin-list-header">
+                    <div class="cell-left" style="padding-left: 1rem;" th:text="#{generic.auto.animal}"></div>
+                    <div class="cell-left" th:text="#{historial.auto.fecha.consulta}"></div>
+                    <div class="cell-center" th:text="#{historial.auto.veterinario.especialista}"></div>
+                    <div class="cell-center" style="padding-right: 1rem;" th:text="#{generic.auto.acciones}"></div>
+                </div>
+
+                <div class="list-body" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div th:each="h : ${historiales}" class="premium-row-card borderless premium-grid-row grid-cols-historiales" th:id="'row-' + ${h.id()}">
+                        <div class="row-cell cell-left" style="padding-left: 1rem;"
+                             th:with="a=${h.animalId() != null and animalesMap != null ? animalesMap[h.animalId()] : null}">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="task-icon-box" style="background: #f1f5f9; overflow: hidden; border: 1px solid var(--border);">
+                                    <img th:if="${a != null and a.foto() != null}" th:src="${a.foto()}" 
+                                         style="width: 100%; height: 100%; object-fit: cover;" 
+                                         alt="Animal">
+                                    <i th:if="${a == null or a.foto() == null}" data-lucide="stethoscope" style="width: 18px; color: #10b981;"></i>
+                                </div>
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="color: #94a3b8; font-weight: 700; font-size: 0.8rem;" th:text="${'#' + h.id()}"></span>
+                                        <a th:if="${a != null}" 
+                                           th:hx-get="@{/web/animales/{id}(id=${a.id()})}"
+                                           hx-target="#contenido-dinamico" hx-push-url="true" hx-swap="innerHTML show:window:top"
+                                           style="font-weight: 800; color: var(--primary); text-decoration: none; cursor: pointer; transition: opacity 0.2s;"
+                                           onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'"
+                                           th:text="${a.nombre()}">Animal</a>
+                                    </div>
+                                    <div th:if="${a == null}" style="font-weight: 800; color: var(--text-muted);" th:text="#{historial.auto.desconocido}"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row-cell cell-left" style="font-weight: 600; color: var(--text-muted);"
+                             th:text="${h.fecha() != null ? h.fecha().toString().substring(0, 10) : '-'}">01/01/24</div>
+
+                        <div class="row-cell cell-center">
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; color: var(--text-main);">
+                                <i data-lucide="user-plus" style="width: 14px; color: var(--text-muted);"></i>
+                                <span th:text="${h.veterinario()}">Dr. Smith</span>
+                            </div>
+                        </div>
+
+                        <div class="row-cell cell-center" style="gap: 12px; padding-right: 1rem;">
+                            <button class="btn-action-premium view" th:hx-get="@{/web/historiales/{id}/detalle(id=${h.id()})}" 
+                                    hx-target="#contenido-dinamico" hx-push-url="true" hx-swap="innerHTML show:window:top" title="Ver Informe">
+                                <i data-lucide="eye" style="width: 18px;"></i>
+                            </button>
+                            <a class="btn-action-premium edit" th:hx-get="@{/web/historiales/{id}/editar(id=${h.id()})}" hx-target="#contenido-dinamico" hx-push-url="true" title="Editar">
+                                <i data-lucide="edit-2" style="width: 18px;"></i>
+                            </a>
+                            <button class="btn-action-premium delete" th:hx-post="@{/web/historiales/{id}/borrar(id=${h.id()})}" th:hx-target="'#row-' + ${h.id()}" hx-swap="outerHTML swap:0.3s" th:hx-confirm="#{confirm.generic.eliminar}">
+                                <i data-lucide="trash-2" style="width: 18px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(historiales)}" style="text-align:center; padding:5rem; background:white; border-radius:24px; border:1px solid var(--border); margin-top: 1rem;">
+                    <i data-lucide="stethoscope" style="width:48px; height:48px; margin-bottom:1rem; color: var(--text-muted); opacity: 0.3;"></i>
+                    <p style="color: var(--text-muted); font-weight: 600;" th:text="#{historial.list.empty}">No hay historiales médicos registrados.</p>
+                </div>
+                </div>
+
+                <!-- Paginación -->
+                <div th:replace="~{fragments/pagination :: controls(pagination=${pagination}, url='/web/historiales', target='#historial-results-container')}"></div>
+
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

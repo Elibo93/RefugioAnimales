@@ -1,0 +1,182 @@
+<!-- Vista de Conversión de Perfil: Proceso de mejora de cuenta de público a adoptante mediante la aportación de datos legales -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="content" class="container" style="max-width: 800px; margin: 4rem auto;">
+    <div class="glass-panel" style="padding: 3rem; border-radius: 32px;">
+        <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2.5rem;">
+            <div
+                style="background: var(--primary-light); color: var(--primary); width: 64px; height: 64px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="user-check" style="width: 32px; height: 32px;"></i>
+            </div>
+            <div>
+                <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;" th:text="#{solicitud.auto.completa}"></h1>
+                <p style="color: var(--text-muted); margin: 0;" th:text="#{solicitud.auto.ya.casi.estas.solo.necesitamos.unos.dato}"></p>
+            </div>
+        </div>
+
+        <div class="glass-card"
+            style="padding: 2rem; margin-bottom: 2.5rem; background: rgba(var(--primary-rgb), 0.02); border: 1px solid var(--primary-light);">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <img th:src="${animal.foto != null ? animal.foto : '/images/placeholder-animal.png'}"
+                    style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">
+                <div>
+                    <span
+                        style="font-size: 0.8rem; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;" th:text="#{solicitud.auto.solicitud}"></span>
+                    <h3 style="margin: 0; font-weight: 800;" th:text="${animal.nombre}">Nombre del Animal</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensaje de Error -->
+        <div th:if="${errorMessage}" class="alert alert-danger"
+            style="margin-bottom: 2rem; padding: 1.25rem; border-radius: 20px; border: 1px solid #fee2e2; background: #fef2f2; color: #991b1b; display: flex; align-items: center; gap: 1rem; animation: slideIn 0.3s ease-out;">
+            <i data-lucide="alert-circle" style="width: 24px; height: 24px;"></i>
+            <span th:text="${errorMessage}" style="font-weight: 500;">Ocurrió un error al procesar la solicitud.</span>
+        </div>
+
+        <form th:action="@{/web/solicitudes/publico/convertir}" method="POST" class="form-grid">
+            <input type="hidden" name="animalId" th:value="${animal.id}">
+
+            <!-- Sección: Datos Personales -->
+            <div style="grid-column: 1 / -1; margin-bottom: 1rem;">
+                <h3
+                    style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="user" style="width: 18px;"></i>
+                    <span th:text="#{solicitud.auto.informacion.del.adoptante}"></span>
+                </h3>
+                <p th:if="${perfilExistente}"
+                    style="margin: 4px 0 0; font-size: 0.85rem; color: var(--primary); font-weight: 500;">
+                    <i data-lucide="info" style="width: 14px; vertical-align: middle; margin-right: 4px;"></i>
+                    [[#{html.auto.revise.su.informaci.n.legal}]]
+                </p>
+                <div style="height: 1px; background: rgba(0,0,0,0.05); margin-top: 0.5rem;"></div>
+            </div>
+
+            <!-- Ficha de Perfil (Si ya existe) -->
+            <div th:if="${perfilExistente}"
+                style="grid-column: span 2; padding: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
+                <div
+                    style="background: white; color: var(--primary); width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0;">
+                    <i data-lucide="user" style="width: 28px;"></i>
+                </div>
+                <div>
+                    <span style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600;" th:text="#{solicitud.auto.tu.perfil}"></span>
+                    <h3 style="margin: 0; font-weight: 800; color: var(--text-main);" th:text="|${nombre} ${apellido}|">
+                        Nombre Completo</h3>
+                    <p style="margin: 4px 0 0; font-size: 0.8rem; color: var(--primary); font-weight: 500;">
+                        <i data-lucide="check-circle"
+                            style="width: 12px; vertical-align: middle; margin-right: 4px;"></i>
+                        [[#{html.auto.informaci.n.legal.confirmada}]]
+                    </p>
+                </div>
+                <!-- Campos ocultos para que el POST reciba los datos necesarios -->
+                <input type="hidden" name="nombre" th:value="${nombre}">
+                <input type="hidden" name="apellido" th:value="${apellido}">
+                <input type="hidden" name="dni" th:value="${dni}">
+                <input type="hidden" name="telefono" th:value="${telefono}">
+                <input type="hidden" name="direccion" th:value="${direccion}">
+                <input type="hidden" name="fechaNacimiento" th:value="${fechaNacimiento}">
+            </div>
+
+            <th:block th:unless="${perfilExistente}">
+                <!-- Nombre -->
+                <div class="form-group">
+                    <label th:text="#{generic.auto.nombre}"></label>
+                    <div class="input-with-icon">
+                        <i data-lucide="user"></i>
+                        <input type="text" name="nombre" th:value="${nombre}" placeholder="Tu nombre" required>
+                    </div>
+                </div>
+
+                <!-- Apellido -->
+                <div class="form-group">
+                    <label th:text="#{solicitud.auto.apellido}"></label>
+                    <div class="input-with-icon">
+                        <i data-lucide="user"></i>
+                        <input type="text" name="apellido" th:value="${apellido}" placeholder="Tus apellidos" required>
+                    </div>
+                </div>
+
+                <!-- Teléfono -->
+                <div class="form-group">
+                    <label th:text="#{generic.auto.telefono}"></label>
+                    <div class="input-with-icon">
+                        <i data-lucide="phone"></i>
+                        <input type="tel" name="telefono" th:value="${telefono}" placeholder="+34 XXX XX XX XX"
+                            required>
+                    </div>
+                </div>
+
+                <!-- DNI -->
+                <div class="form-group">
+                    <label th:text="#{generic.auto.dni.nie}"></label>
+                    <div class="input-with-icon">
+                        <i data-lucide="id-card"></i>
+                        <input type="text" name="dni" th:value="${dni}" placeholder="12345678X" required>
+                    </div>
+                </div>
+
+                <!-- Fecha de Nacimiento -->
+                <div class="form-group">
+                    <label th:text="#{generic.auto.fecha.de.nacimiento}"></label>
+                    <div class="input-with-icon">
+                        <i data-lucide="calendar"></i>
+                        <input type="date" name="fechaNacimiento" th:value="${fechaNacimiento}" required>
+                    </div>
+                </div>
+
+                <!-- Dirección -->
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>
+                        <span th:text="#{solicitud.auto.direccion.completa.1}"></span>
+                        <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                    </label>
+                    <div class="input-with-icon">
+                        <i data-lucide="map-pin"></i>
+                        <input type="text" name="direccion" th:value="${direccion}"
+                            placeholder="Calle, Número, Piso, Ciudad...">
+                    </div>
+                </div>
+            </th:block>
+
+            <!-- Sección: La Adopción -->
+            <div style="grid-column: 1 / -1; margin: 2rem 0 1rem;">
+                <h3
+                    style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="heart" style="width: 18px;"></i>
+                    <span th:text="#{solicitud.auto.sobre.la.adopcion}"></span>
+                </h3>
+                <div style="height: 1px; background: rgba(0,0,0,0.05); margin-top: 0.5rem;"></div>
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label>
+                    <span>[[#{html.auto.por.qu.quieres.adoptar.a}]] <span th:text="${animal.nombre}"></span>?</span>
+                    <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                </label>
+                <textarea name="comentario" rows="4" th:text="${comentario}"
+                    placeholder="Cuéntanos un poco sobre tu hogar y por qué has elegido a este peludo..."></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-form-cancel" onclick="window.history.back()">
+                    <i data-lucide="x" style="width: 18px;"></i>
+                    <span th:text="#{generic.auto.cancelar}"></span>
+                </button>
+                <button type="submit" class="btn-form-submit">
+                    <i data-lucide="send"></i>
+                    <span th:text="#{solicitud.auto.enviar.solicitud}"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+
+</html>

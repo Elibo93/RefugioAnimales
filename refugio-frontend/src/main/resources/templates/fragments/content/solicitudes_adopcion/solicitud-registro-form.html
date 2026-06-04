@@ -1,0 +1,126 @@
+<!-- Vista de Registro y Solicitud: Formulario dual que permite el alta de usuario y la petición de adopción en un único flujo -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="content">
+        <div class="page-header" style="text-align: center; margin-bottom: 3rem;">
+            <h1 class="page-title" th:text="#{solicitud.auto.unete.a.nuestra.familia.y.adopta}"></h1>
+            <p style="color: var(--text-muted);">[[#{html.auto.completa.tus.datos.para.crear}]] <strong th:text="${animal.nombre}"></strong></p>
+        </div>
+
+        <div class="card glass-panel" style="max-width: 900px; margin: 0 auto; padding: 2.5rem; border-radius: 32px;">
+            <form th:action="@{/web/solicitudes/publico/registro-y-adopcion}" method="POST">
+                
+                <!-- Mensaje de Error -->
+                <div th:if="${errorMessage}" style="background-color: #fee2e2; color: #dc2626; padding: 1rem; border-radius: 16px; font-weight: 600; text-align: center; margin-bottom: 2rem; border: 1px solid #fecaca;">
+                    <i data-lucide="alert-circle" style="width: 18px; height: 18px; vertical-align: middle; margin-right: 8px;"></i>
+                    <span th:text="${errorMessage}"></span>
+                </div>
+
+                <!-- Animal Info (Mini Card) -->
+                <div style="display: flex; align-items: center; gap: 1.5rem; background: rgba(255,255,255,0.4); padding: 1rem; border-radius: 20px; margin-bottom: 2.5rem; border: 1px solid var(--border);">
+                    <img th:src="${animal.foto != null ? animal.foto : '/images/placeholder-animal.png'}" 
+                         style="width: 80px; height: 80px; border-radius: 16px; object-fit: cover;" alt="Animal">
+                    <div>
+                        <h3 style="margin: 0; font-weight: 800;" th:text="${animal.nombre}">Nombre</h3>
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);" th:text="${animal.raza}">Raza</p>
+                    </div>
+                </div>
+
+                <input type="hidden" name="animalId" th:value="${animal.id}">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    
+                    <!-- Columna 1: Cuenta de Usuario -->
+                    <div class="form-section">
+                        <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i data-lucide="user"></i> [[#{html.auto.datos.de.la.cuenta}]]
+                        </h2>
+                        
+                        <div class="form-group">
+                            <label th:text="#{generic.auto.nombre.de.usuario}"></label>
+                            <input type="text" name="userName" required placeholder="Ej: pedro_88" th:value="${userName}">
+                        </div>
+
+                        <div class="form-group">
+                            <label th:text="#{generic.auto.nombre}"></label>
+                            <input type="text" name="nombre" required placeholder="Tu nombre" th:value="${nombre}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label th:text="#{solicitud.auto.apellido}"></label>
+                            <input type="text" name="apellido" required placeholder="Tus apellidos" th:value="${apellido}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label th:text="#{generic.auto.email}"></label>
+                            <input type="email" name="email" required placeholder="ejemplo@correo.com" th:value="${email}">
+                        </div>
+
+                        <div class="form-group">
+                            <label th:text="#{generic.auto.contrasena}"></label>
+                            <input type="password" name="password" required placeholder="Min. 8 caracteres">
+                        </div>
+
+                        <div class="form-group">
+                            <label th:text="#{generic.auto.telefono}"></label>
+                            <input type="tel" name="telefono" required placeholder="+34 XXX XX XX XX" th:value="${telefono}">
+                        </div>
+                    </div>
+
+                    <!-- Columna 2: [[#{html.auto.datos.de.adoptante}]] -->
+                    <div class="form-section">
+                        <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i data-lucide="home"></i> [[#{html.auto.datos.de.adoptante}]]
+                        </h2>
+
+                        <div class="form-group">
+                            <label th:text="#{generic.auto.dni.nie}"></label>
+                            <input type="text" name="dni" required placeholder="12345678X" th:value="${dni}">
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <span th:text="#{solicitud.auto.direccion.completa}"></span>
+                                <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                            </label>
+                            <input type="text" name="direccion" placeholder="Calle, Número, Ciudad, CP" th:value="${direccion}">
+                        </div>
+
+                        <div class="form-group">
+                            <label th:text="#{generic.auto.fecha.de.nacimiento}"></label>
+                            <input type="date" name="fechaNacimiento" required th:value="${fechaNacimiento}">
+                        </div>
+
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label>
+                                <span>[[#{html.auto.por.qu.quieres.adoptar.a}]] <span th:text="${animal.nombre}"></span>?</span>
+                                <span th:text="#{form.field.opcional}" style="color: var(--text-muted); font-size: 0.85em; font-weight: normal; margin-left: 4px;"></span>
+                            </label>
+                            <textarea name="comentario" rows="4" placeholder="Cuéntanos un poco sobre el futuro hogar del animal..." th:text="${comentario}"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a th:href="@{/web/animales}" class="btn-form-cancel">
+                        <i data-lucide="x" style="width: 18px;"></i>
+                        <span th:text="#{generic.auto.cancelar}"></span>
+                    </a>
+                    <button type="submit" class="btn-form-submit">
+                        <i data-lucide="heart" style="width: 20px; height: 20px;"></i>
+                        [[#{html.auto.enviar.solicitud.y.registrarme}]]
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+    </div>
+</body>
+
+</html>

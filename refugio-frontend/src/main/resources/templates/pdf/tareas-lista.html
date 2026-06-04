@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{pdf/pdf-layout :: pdf-head-landscape(#{pdf.tareas.header})}"></th:block>
+</head>
+<body>
+    <div class="watermark" th:text="#{generic.auto.adoptify}"></div>
+    <div class="header-container">
+        <div class="logo-container">
+            <span class="logo-text">[[#{html.auto.adoptify}]]<span class="logo-dot">.</span></span>
+        </div>
+        <div class="meta-container">
+            <div class="doc-title" th:text="#{pdf.tareas.header}">Listado [[#{html.auto.de}]] Tareas</div>
+            <div class="doc-date" th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}">19/05/2026 09:00</div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+    <h1 th:text="#{pdf.tareas.header}">Listado [[#{html.auto.de}]] Tareas</h1>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 4%;" th:text="#{pdf.column.id}">ID</th>
+                <th style="width: 20%;" th:text="#{tarea.table.header.descripcion}">Descripción</th>
+                <th style="width: 8%;" th:text="#{pdf.column.priority}">Prioridad</th>
+                <th style="width: 10%;" th:text="#{tarea.table.header.estado}">[[#{generic.auto.status}]]</th>
+                <th style="width: 18%;" th:text="#{pdf.column.volunteers}">Voluntarios asignados</th>
+                <th style="width: 11%;" th:text="#{tarea.table.header.fecha}">Fecha</th>
+                <th style="width: 11%;" th:text="#{pdf.column.deadline}">Fecha Límite</th>
+                <th style="width: 18%;" th:text="#{pdf.column.instructions}">Instrucciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="t : ${tareas}">
+                <td th:text="${t.id}"></td>
+                <td th:text="${t.descripcion}"></td>
+                <td>
+                    <span class="badge" th:classappend="${t.prioridad == 'ALTA' ? 'badge-danger' : (t.prioridad == 'MEDIA' ? 'badge-warning' : 'badge-info')}" th:text="#{enum.PrioridadObjetivo.__${t.prioridad}__}"></span>
+                </td>
+                <td>
+                    <span class="badge" th:classappend="${t.estado == 'COMPLETADA' ? 'badge-success' : 'badge-warning'}" th:text="#{enum.EstadoTarea.__${t.estado}__}"></span>
+                </td>
+                <td>
+                    <ul style="margin: 0; padding-left: 12px;" th:if="${t.voluntarioIds != null and !t.voluntarioIds.isEmpty()}">
+                        <li th:each="vId : ${t.voluntarioIds}">
+                            <span th:text="'#' + ${vId} + ' - ' + ${voluntarioNombres != null ? voluntarioNombres.get(vId.toString()) : ''}"></span>
+                        </li>
+                    </ul>
+                    <span th:if="${t.voluntarioIds == null or t.voluntarioIds.isEmpty()}">-</span>
+                </td>
+                <td th:text="${#temporals.format(t.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+                <td th:text="${t.fechaLimite != null} ? ${#temporals.format(t.fechaLimite, 'dd/MM/yyyy HH:mm')} : '-'"></td>
+                <td th:text="${t.instrucciones != null ? t.instrucciones : '-'}"></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

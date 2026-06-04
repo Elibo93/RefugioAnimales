@@ -1,0 +1,35 @@
+<!-- fragment for voluntario-disponibilidad-modal -->
+<th:block th:fragment="modal">
+    <div id="disponibilidad-modal-backdrop" class="modal-backdrop" 
+         style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1040; display: flex; align-items: center; justify-content: center;"
+         onclick="closeDisponibilidadModal(event)">
+        <div class="modal-content" 
+             style="background: var(--bg-body); width: 90%; max-width: 800px; border-radius: 12px; box-shadow: var(--shadow-lg); overflow: hidden; animation: modalFadeIn 0.3s ease-out;"
+             onclick="event.stopPropagation()">
+            <div class="modal-header" style="padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--bg-body);">
+                <h3 style="margin: 0; display: flex; align-items: center; gap: 10px; color: var(--text-primary);">
+                    <i data-lucide="calendar" style="color: var(--primary);"></i>
+                    [[#{html.auto.disponibilidad}]] <span th:text="${voluntarioNombre}">Voluntario</span>
+                </h3>
+                <button class="btn-icon" onclick="closeDisponibilidadModal()" style="border: none; background: transparent; cursor: pointer; color: var(--text-secondary);">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <div id="disponibilidad-calendar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inject the disponibilidades data as a JSON script -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var disponibilidadesData = /*[[${disponibilidades}]]*/ [];
+        /*]]>*/
+
+        // Inicializar el calendario usando la función global de scripts.js
+        if (typeof initDisponibilidadCalendar === 'function') {
+            initDisponibilidadCalendar(disponibilidadesData);
+        }
+    </script>
+</th:block>

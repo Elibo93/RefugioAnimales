@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div th:fragment="content">
+<div class="header-section" style="margin-bottom: 2rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <a th:href="@{/web/tareas}" 
+                       hx-get="/web/tareas" 
+                       hx-target="#contenido-dinamico" 
+                       hx-replace-url="true"
+                      
+                       style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.9rem; text-decoration: none; margin-bottom: 0.5rem; font-weight: 600;">
+                        <i data-lucide="arrow-left" style="width: 16px;"></i>
+                        [[#{html.auto.volver.a.tareas}]]
+                    </a>
+                    <h2 class="user-name page" style="margin: 0;" th:text="#{tarea.auto.historial.de.tarea}"></h2>
+                    <p style="color: var(--text-muted); margin: 5px 0 0; font-size: 0.95rem;">
+                        [[#{html.auto.trazabilidad.de.cambios.para}]] <strong style="color: var(--primary);" th:text="${tarea.descripcion}">Tarea</strong>
+                    </p>
+                </div>
+                
+                <div class="task-info-badge" style="background: white; padding: 12px 20px; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 12px;">
+                    <div style="background: var(--bg-main); width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <i data-lucide="activity" style="color: var(--primary); width: 20px;"></i>
+                    </div>
+                    <div>
+                        <span style="display: block; font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase;" th:text="#{tarea.auto.estado.actual}"></span>
+                        <span style="font-weight: 800; color: var(--text-main);" th:text="${#strings.replace(tarea.estado, '_', ' ')}">PENDIENTE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline-container">
+            <!-- Si no hay historial -->
+            <div th:if="${#lists.isEmpty(historial)}" 
+                 style="text-align: center; padding: 3rem; background: white; border-radius: 20px; border: 1px dashed var(--border);">
+                <i data-lucide="history" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 1rem; opacity: 0.5;"></i>
+                <h3 style="color: var(--text-main); font-weight: 700;" th:text="#{tarea.auto.sin.registros.de.actividad}"></h3>
+                <p style="color: var(--text-muted);" th:text="#{tarea.auto.esta.tarea.aun.no.ha.tenido.cambios.regi}"></p>
+            </div>
+
+            <!-- Items del Historial -->
+            <div th:each="h : ${historial}" class="timeline-item">
+                <div class="timeline-date">
+                    <span th:text="${#temporals.format(h.fechaCambio, 'dd MMM')}">12 May</span><br>
+                    <span style="font-weight: 400; opacity: 0.7;" th:text="${#temporals.format(h.fechaCambio, 'HH:mm')}">14:30</span>
+                </div>
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="status-change">
+                        <th:block th:if="${h.estadoAnterior != null}">
+                            <span class="status-pill prev" th:text="${#strings.replace(h.estadoAnterior, '_', ' ')}">ESTADO_ANT</span>
+                            <i data-lucide="chevrons-right" style="width: 14px; color: var(--text-muted);"></i>
+                        </th:block>
+                        <span class="status-pill new" th:classappend="${h.estadoNuevo}" th:text="${#strings.replace(h.estadoNuevo, '_', ' ')}">ESTADO_NUEVO</span>
+                    </div>
+                    
+                    <div class="timeline-user">
+                        <i data-lucide="user" style="width: 14px; color: var(--primary);"></i>
+                        <span th:text="${h.usuarioNombre}">Juan Pérez</span>
+                        <span th:if="${h.estadoAnterior == null}" style="font-size: 0.75rem; font-weight: 400; color: var(--text-muted);" th:text="#{tarea.auto.creador.de.la.tarea}"></span>
+                    </div>
+
+                    <div th:if="${h.observaciones != null and !h.observaciones.isEmpty()}" class="timeline-obs">
+                        <span th:text="'&quot;' + ${h.observaciones} + '&quot;'">"Observaciones..."</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,451 @@
+<!-- Vista de Inicio: Dashboard administrativo y catálogo principal de animales para los usuarios -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<div th:fragment="content">
+    <!-- 1. VISTA ADMINISTRADOR (PREMIUM) -->
+    <div th:if="${isAdmin}">
+        <!-- 1. HERO ADMINISTRATIVO PREMIUM -->
+        <section class="admin-hero-premium">
+            <div class="admin-welcome-content">
+                <div class="admin-badge-pill">
+                    <span class="pulse-dot"></span>
+                    [[#{home.auto.active.os}]]
+                </div>
+                <h1 class="admin-main-title">[[#{home.auto.control.center}]] <span class="gradient-text" th:text="#{generic.auto.refugio}"></span></h1>
+                <p class="admin-main-subtitle" th:text="#{home.auto.supervising.happiness(${totalAnimales != null ? totalAnimales : 0}, ${totalVoluntarios != null ? totalVoluntarios : 0})}">Supervisando la felicidad [[#{html.auto.de}]] 0 amigos y la gestión [[#{html.auto.de}]] 0 voluntarios.</p>
+            </div>
+            <div class="admin-hero-stats">
+                <div class="mini-stat-glass">
+                    <span class="stat-label" th:text="#{generic.auto.pendientes.adopcion}"></span>
+                    <span class="stat-value" th:text="${pendingAdoptionsCount != null ? pendingAdoptionsCount : 0}">0</span>
+                </div>
+                <div class="mini-stat-glass">
+                    <span class="stat-label" th:text="#{generic.auto.tareas.de.hoy}"></span>
+                    <span class="stat-value">8</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- KPI Grid Rediseñado -->
+        <section class="kpi-grid-premium">
+            <a th:href="@{/web/animales}" class="kpi-card-v2 glass-card-hover">
+                <div class="kpi-icon-wrapper icon-bg-blue">
+                    <i data-lucide="dog"></i>
+                </div>
+                <div class="kpi-data">
+                    <h3 th:text="${totalAnimales != null ? totalAnimales : 0}">0</h3>
+                    <p th:text="#{generic.auto.residentes}"></p>
+                    <span class="kpi-trend trend-up"><i data-lucide="trending-up"></i> [[#{html.auto.2.hoy}]]</span>
+                </div>
+            </a>
+            
+            <a th:href="@{/web/adopciones}" class="kpi-card-v2 glass-card-hover">
+                <div class="kpi-icon-wrapper icon-bg-green">
+                    <i data-lucide="award"></i>
+                </div>
+                <div class="kpi-data">
+                    <h3 th:text="${totalAdopciones != null ? totalAdopciones : 0}">0</h3>
+                    <p th:text="#{generic.auto.adopciones}"></p>
+                    <span class="kpi-trend text-muted" th:text="#{generic.auto.total.historico}"></span>
+                </div>
+            </a>
+
+            <a th:href="@{/web/voluntarios}" class="kpi-card-v2 glass-card-hover">
+                <div class="kpi-icon-wrapper icon-bg-orange">
+                    <i data-lucide="users"></i>
+                </div>
+                <div class="kpi-data">
+                    <h3 th:text="${totalVoluntarios != null ? totalVoluntarios : 0}">0</h3>
+                    <p th:text="#{home.auto.voluntarios}"></p>
+                    <span class="kpi-trend trend-neutral" th:text="#{generic.auto.equipo.activo}"></span>
+                </div>
+            </a>
+
+            <a th:href="@{/web/donaciones}" class="kpi-card-v2 glass-card-hover">
+                <div class="kpi-icon-wrapper icon-bg-purple">
+                    <i data-lucide="heart"></i>
+                </div>
+                <div class="kpi-data">
+                    <h3 th:text="${totalDonacionesMes != null ? totalDonacionesMes + '€' : '0€'}">240€</h3>
+                    <p th:text="#{generic.auto.donaciones}"></p>
+                    <span class="kpi-trend trend-up" th:text="#{generic.auto.este.mes}"></span>
+                </div>
+            </a>
+        </section>
+
+        <!-- Fila de Contenido Mixto -->
+        <div class="admin-dashboard-row">
+            <!-- Columna: Acciones Rápidas -->
+            <section class="admin-section-column">
+                <div class="section-header-flex">
+                    <h2 class="section-title-v2" th:text="#{generic.auto.acciones.prioritarias}"></h2>
+                </div>
+                <div class="actions-grid-v2">
+                    <a th:href="@{/web/animales/nuevo}" class="action-card-premium">
+                        <div class="action-icon"><i data-lucide="plus-square"></i></div>
+                        <div class="action-info">
+                            <h4 th:text="#{generic.auto.nuevo.ingreso}"></h4>
+                            <p th:text="#{generic.auto.registrar.animal.rescatado}"></p>
+                        </div>
+                    </a>
+                    <a th:href="@{/web/voluntarios/pendientes}" class="action-card-premium">
+                        <div class="action-icon"><i data-lucide="user-plus"></i></div>
+                        <div class="action-info">
+                            <h4 th:text="#{generic.auto.validar.voluntarios}"></h4>
+                            <p th:text="${pendingVolunteersCount != null ? pendingVolunteersCount + ' candidatos' : 'Aprobar o rechazar'}">[[#{html.auto.aprobar}]] o rechazar</p>
+                        </div>
+                    </a>
+                    <a th:href="@{/web/solicitudes}" class="action-card-premium">
+                        <div class="action-icon"><i data-lucide="file-check"></i></div>
+                        <div class="action-info">
+                            <h4 th:text="#{generic.auto.validar.adopciones}"></h4>
+                            <p th:text="${pendingAdoptionsCount != null ? pendingAdoptionsCount + ' pendientes' : 'Revisar solicitudes'}">Revisar solicitudes</p>
+                        </div>
+                    </a>
+                    <a th:href="@{/web/voluntarios}" class="action-card-premium">
+                        <div class="action-icon"><i data-lucide="calendar-plus"></i></div>
+                        <div class="action-info">
+                            <h4 th:text="#{generic.auto.organizar.turnos}"></h4>
+                            <p th:text="#{generic.auto.asignar.tareas.al.personal}"></p>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Columna: Alertas Críticas -->
+            <section class="admin-section-column">
+                <div class="section-header-flex">
+                    <h2 class="section-title-v2" th:text="#{generic.auto.atencion.requerida}"></h2>
+                </div>
+                <div class="alerts-container">
+                    <!-- Mensaje si no hay alertas -->
+                    <div th:if="${animalesEnTratamientoCount == 0 and tareasVencidasCount == 0}" class="alert-item-glass success" style="background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.2); cursor: default;">
+                        <i data-lucide="check-circle" style="color: #22c55e;"></i>
+                        <div class="alert-content">
+                            <strong style="color: #14532d;">¡Todo en orden!</strong>
+                            <p style="color: #166534;">No hay alertas pendientes en este momento.</p>
+                        </div>
+                    </div>
+
+                    <!-- Alerta de animales enfermos/en tratamiento -->
+                    <a th:if="${animalesEnTratamientoCount > 0}" th:href="@{/web/historiales}" class="alert-item-glass critical interactive-alert">
+                        <i data-lucide="alert-triangle"></i>
+                        <div class="alert-content">
+                            <strong th:text="#{generic.auto.salud.animal}"></strong>
+                            <p th:text="${animalesEnTratamientoCount} + ' animales requieren revisión o están en tratamiento.'"></p>
+                        </div>
+                        <i data-lucide="chevron-right" class="alert-chevron"></i>
+                    </a>
+
+                    <!-- Alerta de tareas vencidas -->
+                    <a th:if="${tareasVencidasCount > 0}" th:href="@{/web/tareas}" class="alert-item-glass warning interactive-alert">
+                        <i data-lucide="clock"></i>
+                        <div class="alert-content">
+                            <strong th:text="#{generic.auto.tareas.vencidas}"></strong>
+                            <p th:text="'Hay ' + ${tareasVencidasCount} + ' tareas vencidas sin completar.'"></p>
+                        </div>
+                        <i data-lucide="chevron-right" class="alert-chevron"></i>
+                    </a>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- 2. VISTA PARA EL RESTO (ADOPTANTES, VOLUNTARIOS Y PÚBLICO) -->
+    <div th:if="${!isAdmin}">
+        <!-- 1. Hero Section -->
+        <section class="home-hero" style="margin-top: 0; position: relative; flex-direction: column;">
+            <div class="hero-card-with-bg" style="overflow: visible; margin-bottom: 2rem;">
+                <h1 class="hero-title" th:if="${!isAuthenticated}">[[#{html.auto.no.puedes.comprar.el.amor}]] <br> [[#{html.auto.pero.puedes.adoptarlo}]]</h1>
+                <h1 class="hero-title" th:if="${isAuthenticated}">[[#{html.auto.hola}]] <span th:text="${currentUserName}">Usuario</span> <br> [[#{html.auto.bienvenido.de.nuevo}]]</h1>
+                
+                <!-- Mensaje de éxito tras acciones (ej. enviar formulario de voluntario) -->
+                <div th:if="${successMessage}" class="glass-panel" style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); padding: 1rem 1.5rem; border-radius: 16px; margin: 1.5rem 0; display: flex; align-items: center; gap: 12px; animation: slideDown 0.5s ease-out;">
+                    <i data-lucide="check-circle" style="color: #22c55e; width: 24px; height: 24px;"></i>
+                    <span style="color: #14532d; font-weight: 600; font-size: 1.1rem;" th:text="${successMessage}">Mensaje [[#{html.auto.de}]] éxito</span>
+                </div>
+                
+                <div class="hero-ctas" style="margin-bottom: 4rem;">
+                    <a th:href="@{/web/animales}" class="btn-hero btn-hero-primary">
+                        <i data-lucide="heart"></i>
+                        [[#{html.auto.conoce.a.nuestros.amigos}]]
+                    </a>
+                    <a th:if="${!isAuthenticated or isPublico}" th:href="@{/web/voluntarios/nuevo}" class="btn-hero btn-hero-secondary">
+                        <i data-lucide="users"></i>
+                        [[#{html.auto.quiero.ser.voluntario}]]
+                    </a>
+                    <a th:if="${isVoluntario}" th:href="@{/web/tareas}" class="btn-hero btn-hero-secondary">
+                        <i data-lucide="check-square"></i>
+                        [[#{home.auto.my.tasks}]]
+                    </a>
+                    <a th:if="${isAdoptante}" th:href="@{/web/solicitudes/mis-adoptados}" class="btn-hero btn-hero-secondary">
+                        <i data-lucide="file-text"></i>
+                        [[#{home.auto.my.adopted}]]
+                    </a>
+                </div>
+            </div>
+
+            <!-- Barra de búsqueda flotante -->
+            <div class="hero-search-container" style="bottom: 0.5rem;">
+                <form th:action="@{/web/animales}" method="GET" class="search-bar-glass" style="width: 100%;">
+                    <div class="search-field">
+                        <label th:text="#{generic.auto.especie.1}"></label>
+                        <select name="especie">
+                            <option value="" th:text="#{generic.auto.cualquier.especie}"></option>
+                            <option th:each="e : ${especiesActivas}" th:value="${e}" th:text="#{enum.Especie.__${e}__}"></option>
+                        </select>
+                    </div>
+                    <div class="field-divider"></div>
+                    <div class="search-field">
+                        <label th:text="#{generic.auto.tamano.1}"></label>
+                        <select name="tamano">
+                            <option value="" th:text="#{generic.auto.cualquier.tamano}"></option>
+                            <option value="PEQUEÑO" th:text="#{generic.auto.pequeno}"></option>
+                            <option value="MEDIANO" th:text="#{generic.auto.mediano}"></option>
+                            <option value="GRANDE" th:text="#{generic.auto.grande}"></option>
+                        </select>
+                    </div>
+                    <div class="field-divider"></div>
+                    <div class="search-field">
+                        <label th:text="#{generic.auto.edad.1}"></label>
+                        <select name="edad">
+                            <option value="" th:text="#{generic.auto.cualquier.edad}"></option>
+                            <option value="CACHORRO" th:text="#{generic.auto.cachorro}"></option>
+                            <option value="JOVEN" th:text="#{generic.auto.joven}"></option>
+                            <option value="ADULTO" th:text="#{generic.auto.adulto}"></option>
+                            <option value="SENIOR" th:text="#{generic.auto.senior}"></option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-search-circle" style="margin-left: auto;">
+                        <i data-lucide="search"></i>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <div class="stats-panel-container">
+            <div class="stats-card-main glass-panel">
+                <div class="stat-item-landing">
+                    <div class="stat-icon-premium"><i data-lucide="home"></i></div>
+                    <div class="stat-number" th:text="#{generic.auto.500}"></div>
+                    <div class="stat-desc" th:text="#{generic.auto.hogares.encontrados}"></div>
+                </div>
+                <div class="stat-item-landing">
+                    <div class="stat-icon-premium"><i data-lucide="paw-print"></i></div>
+                    <div class="stat-number" th:text="${animales != null ? #lists.size(animales) : 35}">35</div>
+                    <div class="stat-desc" th:text="#{generic.auto.esperando.hoy}"></div>
+                </div>
+                <div class="stat-item-landing">
+                    <div class="stat-icon-premium"><i data-lucide="heart"></i></div>
+                    <div class="stat-number" th:text="#{generic.auto.120}"></div>
+                    <div class="stat-desc" th:text="#{generic.auto.voluntarios.activos}"></div>
+                </div>
+                <div class="stat-item-landing">
+                    <div class="stat-icon-premium"><i data-lucide="utensils"></i></div>
+                    <div class="stat-number" th:text="#{generic.auto.2t}"></div>
+                    <div class="stat-desc" th:text="#{generic.auto.comida.donada}"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Favoritos de la Semana -->
+        <section class="page-header" style="text-align: center; margin-bottom: 3rem; margin-top: 4rem;">
+            <h2 class="page-title" th:text="#{generic.auto.favoritos.de.la.semana}"></h2>
+            <p style="color: var(--text-muted);" th:text="#{generic.auto.los.animales.mas.populares.que.buscan.un}"></p>
+        </section>
+
+        <div class="animal-grid">
+            <th:block th:each="a : ${favoritos}">
+                <div class="animal-card-glass glass-card" style="position: relative; overflow: hidden; border-radius: 24px; transition: transform 0.3s ease;">
+                    <div class="card-img-container" style="position: relative; aspect-ratio: 4/5; overflow: hidden;">
+                        <img th:src="${a.foto() != null ? a.foto() : '/images/placeholder-animal.png'}" alt="Animal"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+
+                        <span class="animal-status-badge"
+                            th:classappend="${a.estado() != null ? 'badge-' + a.estado().toString().toLowerCase() : 'badge-disponible'}"
+                            th:text="${a.estado() != null ? #messages.msg('enum.EstadoAnimal.' + a.estado()) : #messages.msg('enum.EstadoAnimal.DISPONIBLE')}">
+                            Disponible
+                        </span>
+
+                        <!-- Badge de Solicitado -->
+                        <div th:if="${animalesSolicitadosIds != null and animalesSolicitadosIds.contains(a.id())}" 
+                             style="position: absolute; top: 3.5rem; left: 1rem; background: #2d9d58; color: white; padding: 0.4rem 0.8rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10;">
+                            <i data-lucide="check" style="width: 12px; height: 12px;"></i>
+                            <span th:text="#{generic.auto.solicitado}"></span>
+                        </div>
+
+                        <div class="card-info-overlay">
+                            <div style="text-align: center; width: 100%;">
+                                <button class="btn btn-primary" style="width: 80%; justify-content: center; border-radius: 50px; padding: 0.8rem;"
+                                    th:attr="hx-get=@{/web/animales/{id}/detalle(id=${a.id()})}"
+                                    hx-target="#modal-host" hx-swap="outerHTML">
+                                    <i data-lucide="heart"></i>
+                                    <span th:text="#{animal.button.view.profile}">Conóceme</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body-glass" style="padding: 1.2rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 class="animal-name" th:text="${a.nombre()}" style="font-weight: 800; margin: 0; font-size: 1.1rem;">Nombre</h3>
+                            <i th:if="${a.sexo() != null}" th:data-lucide="${a.sexo().toString() == 'MACHO' ? 'mars' : 'venus'}"
+                                th:style="${a.sexo().toString() == 'MACHO' ? 'color: #3B82F6' : 'color: #EC4899'}"></i>
+                        </div>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0.2rem 0 0 0;" th:text="${a.raza()}">Raza</p>
+                    </div>
+                </div>
+            </th:block>
+
+            <div th:if="${#lists.isEmpty(favoritos)}" class="glass-card" style="grid-column: 1/-1; padding: 4rem; text-align: center;">
+                <p th:text="#{generic.auto.buscando.a.los.mas.populares}"></p>
+            </div>
+        </div>
+
+        <!-- 5. Historias con Final Feliz (Carousel) -->
+        <section style="margin: 6rem 0; position: relative;">
+            <div class="stories-header">
+                <h2 class="page-title" th:text="#{generic.auto.historias.con.final.feliz}"></h2>
+            </div>
+
+            <div class="carousel-wrapper" style="position: relative; max-width: 1000px; margin: 0 auto; padding: 0 50px;">
+                <button class="carousel-control prev" onclick="moveCarousel(-1)" aria-label="Anterior">
+                    <i data-lucide="chevron-left"></i>
+                </button>
+                <button class="carousel-control next" onclick="moveCarousel(1)" aria-label="Siguiente">
+                    <i data-lucide="chevron-right"></i>
+                </button>
+
+                <div id="story-carousel" class="story-carousel">
+                    <div class="story-card active">
+                        <img src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=600&q=80" class="story-img" alt="Final Feliz">
+                        <div class="story-text">
+                            <p class="story-quote" th:text="#{generic.auto.luna.llego.asustada.y.ahora.es.la.reina}"></p>
+                            <p class="story-author" th:text="#{generic.auto.familia.perez}"></p>
+                        </div>
+                    </div>
+
+                    <div class="story-card" style="display: none;">
+                        <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=600&q=80" class="story-img" alt="Final Feliz">
+                        <div class="story-text">
+                            <p class="story-quote" th:text="#{generic.auto.rocky.ha.encontrado.su.hogar.definitivo}"></p>
+                            <p class="story-author" th:text="#{generic.auto.juan.y.marta}"></p>
+                        </div>
+                    </div>
+
+                    <div class="story-card" style="display: none;">
+                        <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=600&q=80" class="story-img" alt="Mila">
+                        <div class="story-text">
+                            <p class="story-quote" th:text="#{generic.auto.mila.era.una.perrita.muy.miedosa.pero.co}"></p>
+                            <p class="story-author" th:text="#{generic.auto.familia.garcia}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NUEVO 6. Caso de Éxito Destacado (De la Calle al Hogar) -->
+        <section class="success-story-highlight glass-panel" style="margin: 6rem 2rem; padding: 4rem; border-radius: 40px; background: linear-gradient(135deg, var(--primary-light), white);">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
+                <div class="story-visuals" style="position: relative; display: flex; gap: 1rem;">
+                    <div style="flex: 1; border-radius: 20px; overflow: hidden; transform: rotate(-3deg); box-shadow: var(--shadow-lg);">
+                        <img src="/images/balto_antes.png" alt="Antes" style="width: 100%; height: 300px; object-fit: cover;">
+                        <div style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.6); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;" th:text="#{generic.auto.antes}"></div>
+                    </div>
+                    <div style="flex: 1; border-radius: 20px; overflow: hidden; transform: rotate(3deg); box-shadow: var(--shadow-lg); margin-top: 2rem;">
+                        <img src="https://images.unsplash.com/photo-1534361960057-19889db9621e?auto=format&fit=crop&w=400&q=80" alt="Después" style="width: 100%; height: 300px; object-fit: cover;">
+                        <div style="position: absolute; bottom: 10px; right: 10px; background: var(--success); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;" th:text="#{generic.auto.ahora}"></div>
+                    </div>
+                </div>
+                <div class="story-content">
+                    <span style="color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8rem;" th:text="#{generic.auto.historia.del.mes}"></span>
+                    <h2 style="font-size: 2.5rem; font-weight: 800; margin: 1rem 0; color: var(--text-main);" th:text="#{generic.auto.el.gran.cambio.de.balto}"></h2>
+                    <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 2rem;" th:text="#{generic.auto.balto.fue.rescatado.de.una.carretera.en}"></p>
+                    <div style="display: flex; gap: 2rem; margin-top: 2rem;">
+                        <div>
+                            <span style="display: block; font-size: 1.5rem; font-weight: 800; color: var(--primary);" th:text="#{generic.auto.124}"></span>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);" th:text="#{generic.auto.dias.en.espera}"></span>
+                        </div>
+                        <div style="width: 1px; background: var(--border);"></div>
+                        <div>
+                            <span style="display: block; font-size: 1.5rem; font-weight: 800; color: var(--primary);">0</span>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);" th:text="#{generic.auto.miedos.restantes}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NUEVO 7. Sección de Comentarios / Testimonios -->
+        <section class="testimonial-section" style="margin-bottom: 0;">
+            <div style="text-align: center; margin-bottom: 4rem;">
+                <h2 class="page-title" th:text="#{generic.auto.lo.que.dicen.nuestras.familias}"></h2>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; padding: 0 2rem;">
+                <div class="glass-card" style="padding: 2rem; border-radius: 24px;">
+                    <div style="display: flex; gap: 4px; color: #F59E0B; margin-bottom: 1rem;">
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                    </div>
+                    <p style="font-style: italic; color: var(--text-main); margin-bottom: 1.5rem;" th:text="#{generic.auto.el.proceso.de.adopcion.fue.impecable.se}"></p>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <img src="https://i.pravatar.cc/150?u=1" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%;">
+                        <div>
+                            <span style="display: block; font-weight: 700; font-size: 0.9rem;" th:text="#{generic.auto.maria.torres}"></span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);" th:text="#{generic.auto.adopto.a.toby}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="padding: 2rem; border-radius: 24px;">
+                    <div style="display: flex; gap: 4px; color: #F59E0B; margin-bottom: 1rem;">
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                    </div>
+                    <p style="font-style: italic; color: var(--text-main); margin-bottom: 1.5rem;" th:text="#{generic.auto.ser.voluntario.aqui.me.ha.cambiado.la.vi}"></p>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <img src="https://i.pravatar.cc/150?u=2" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%;">
+                        <div>
+                            <span style="display: block; font-weight: 700; font-size: 0.9rem;" th:text="#{generic.auto.roberto.sanz}"></span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);" th:text="#{generic.auto.voluntario.desde.2022}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="padding: 2rem; border-radius: 24px;">
+                    <div style="display: flex; gap: 4px; color: #F59E0B; margin-bottom: 1rem;">
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                        <i data-lucide="star" style="width: 16px; fill: #F59E0B;"></i>
+                    </div>
+                    <p style="font-style: italic; color: var(--text-main); margin-bottom: 1.5rem;" th:text="#{generic.auto.donar.es.facil.y.ves.el.impacto.real.rec}"></p>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <img src="https://i.pravatar.cc/150?u=3" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%;">
+                        <div>
+                            <span style="display: block; font-weight: 700; font-size: 0.9rem;" th:text="#{generic.auto.elena.ruiz}"></span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);" th:text="#{generic.auto.donante.recurrente}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+</div>
+</body>
+
+</html>

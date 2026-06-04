@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{pdf/pdf-layout :: pdf-head-landscape(#{pdf.donaciones.header})}"></th:block>
+</head>
+<body>
+    <div class="watermark" th:text="#{generic.auto.adoptify}"></div>
+    <div class="header-container">
+        <div class="logo-container">
+            <span class="logo-text">[[#{html.auto.adoptify}]]<span class="logo-dot">.</span></span>
+        </div>
+        <div class="meta-container">
+            <div class="doc-title" th:text="#{pdf.donaciones.header}">Listado [[#{html.auto.de}]] Donaciones Recibidas</div>
+            <div class="doc-date" th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}">19/05/2026 09:00</div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+    <h1 th:text="#{pdf.donaciones.header}">Listado [[#{html.auto.de}]] Donaciones Recibidas</h1>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 4%;" th:text="#{pdf.column.id}">ID</th>
+                <th style="width: 8%;" th:text="#{adoptante.field.usuarioId}">ID Usuario</th>
+                <th style="width: 16%;" th:text="#{pdf.column.donor}">Donante</th>
+                <th style="width: 8%;" th:text="#{pdf.column.objective}">ID Objetivo</th>
+                <th style="width: 8%;" th:text="#{pdf.column.quantity}">Cantidad</th>
+                <th style="width: 8%;" th:text="#{donacion.table.header.tipo}">Tipo</th>
+                <th style="width: 12%;" th:text="#{donacion.field.frecuencia}">Frecuencia</th>
+                <th style="width: 11%;" th:text="#{donacion.table.header.fecha}">Fecha</th>
+                <th style="width: 11%;" th:text="#{donacion.next_payment}">Próximo Pago</th>
+                <th style="width: 14%;" th:text="#{pdf.column.description}">Descripción</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="d : ${donaciones}">
+                <td th:text="${d.id}"></td>
+                <td th:text="${d.usuarioId}"></td>
+                <td th:text="${usuariosMap != null and usuariosMap.containsKey(d.usuarioId.toString()) ? usuariosMap.get(d.usuarioId.toString()).email : 'Anónimo'}"></td>
+                <td th:text="${d.objetivoId != null ? d.objetivoId : '-'}"></td>
+                <td th:text="${d.cantidad != null ? #numbers.formatDecimal(d.cantidad, 1, 2) + ' €' : '-'}"></td>
+                <td th:text="#{enum.TipoDonacion.__${d.tipo}__}"></td>
+                <td th:text="#{enum.FrecuenciaDonacion.__${d.frecuencia}__}"></td>
+                <td th:text="${d.fecha != null ? #temporals.format(d.fecha, 'dd/MM/yyyy HH:mm') : '-'}"></td>
+                <td th:text="${d.proximaFechaPago != null ? #temporals.format(d.proximaFechaPago, 'dd/MM/yyyy') : '-'}"></td>
+                <td th:text="${d.descripcion != null ? d.descripcion : '-'}"></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
