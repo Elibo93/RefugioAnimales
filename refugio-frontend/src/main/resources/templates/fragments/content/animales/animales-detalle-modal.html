@@ -10,11 +10,20 @@
 <div id="modal-host" th:fragment="detalle">
     <div class="modal-glass-backdrop" onclick="closeModal()">
         <div class="modal-glass-content glass-card" onclick="event.stopPropagation()">
-            <!-- Botón de Cierre -->
-            <button onclick="closeModal()"
-                style="position: absolute; top: 1.5rem; right: 1.5rem; background: rgba(255,255,255,0.5); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; z-index: 100; display: flex; align-items: center; justify-content: center;">
-                <i data-lucide="x" style="width: 20px; height: 20px;"></i>
-            </button>
+            <!-- Botones Superiores (Perfil y Cerrar) -->
+            <div style="position: absolute; top: 1.5rem; right: 1.5rem; display: flex; gap: 0.5rem; z-index: 100;">
+                <a th:href="@{/web/animales/{id}(id=${animal.id()})}" 
+                   title="Ver perfil completo"
+                   style="background: rgba(255,255,255,0.7); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; color: var(--text-main); transition: all 0.2s;"
+                   onmouseover="this.style.background='white'" onmouseout="this.style.background='rgba(255,255,255,0.7)'">
+                    <i data-lucide="external-link" style="width: 18px; height: 18px;"></i>
+                </a>
+                <button onclick="closeModal()"
+                    style="background: rgba(255,255,255,0.7); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
+                    onmouseover="this.style.background='white'" onmouseout="this.style.background='rgba(255,255,255,0.7)'">
+                    <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+                </button>
+            </div>
 
             <!-- Galería / Imagen -->
             <div class="modal-gallery">
