@@ -109,7 +109,7 @@ services:
       JWT_EXPIRATION: "${JWT_EXPIRATION}"
       REFUGIO_INTERNAL_SECRET: "${REFUGIO_INTERNAL_SECRET}"
     volumes:
-      - uploads_data:/uploads
+      - ./refugio-backend/uploads:/uploads
     networks:
       - refugio_net
     depends_on:
