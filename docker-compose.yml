@@ -2,6 +2,9 @@ networks:
   refugio_net:
     driver: bridge
 
+volumes:
+  uploads_data:
+
 services:
   # ==========================================
   # BASES DE DATOS
@@ -106,7 +109,7 @@ services:
       JWT_EXPIRATION: "${JWT_EXPIRATION}"
       REFUGIO_INTERNAL_SECRET: "${REFUGIO_INTERNAL_SECRET}"
     volumes:
-      - ./refugio-backend/uploads:/uploads
+      - uploads_data:/uploads
     networks:
       - refugio_net
     depends_on:
